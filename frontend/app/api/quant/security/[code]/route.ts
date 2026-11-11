@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-export async function GET(_req: NextRequest, { params }: { params: { code: string } }) {
+export async function GET(_req: NextRequest, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const symbol = params.code.toUpperCase();
   const supabase = createClient();
   const { data: scores } = await supabase.from('quant_model_scores').select('*').eq('security_id', symbol).order('score_date',{ascending:false}).limit(5);

@@ -32,7 +32,8 @@ function filtrer(etats: EtatValeur[], f: Filtre): EtatValeur[] {
     (f.etat === 'tous' || e.etat === 'au_dessus' || e.etat === 'en_dessous'));
 }
 
-export default async function CeMoisCiPage({ searchParams }: { searchParams?: { regularite?: string; etat?: string } }) {
+export default async function CeMoisCiPage(props: { searchParams?: Promise<{ regularite?: string; etat?: string }> }) {
+  const searchParams = await props.searchParams;
   const gate = await canAccess('saisonnalite');
   const premium = gate.allowed;
   const [etats, bilans] = await Promise.all([lireEtats().catch(() => []), lireBilans().catch(() => [])]);

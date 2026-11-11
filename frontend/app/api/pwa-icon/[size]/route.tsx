@@ -7,7 +7,8 @@ export const runtime = 'edge';
 
 const ALLOWED = new Set([192, 512]);
 
-export function GET(_req: Request, { params }: { params: { size: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ size: string }> }) {
+  const params = await props.params;
   const n = Number(params.size);
   const size = ALLOWED.has(n) ? n : 512;
   return new ImageResponse(<BrandIcon size={size} />, { width: size, height: size });

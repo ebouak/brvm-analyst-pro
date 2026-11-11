@@ -21,7 +21,7 @@ export async function recordAuthEvent(entry: {
   email?: string | null;
 }): Promise<void> {
   try {
-    const h = headers();
+    const h = await headers();
     const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null;
     const ua = h.get('user-agent') ?? null;
 

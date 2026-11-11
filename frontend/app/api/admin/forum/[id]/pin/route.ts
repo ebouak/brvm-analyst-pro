@@ -28,10 +28,8 @@ interface RouteParams {
   id: string;
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: RouteParams }
-) {
+export async function POST(req: Request, props: { params: Promise<RouteParams> }) {
+  const params = await props.params;
   const postId = params.id;
 
   // Admin permission check

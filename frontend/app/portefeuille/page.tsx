@@ -144,11 +144,12 @@ async function getData(activeWlId?: string) {
   return { email: user.email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList };
 }
 
-export default async function PortefeuillePage({
-  searchParams,
-}: {
-  searchParams?: { wl?: string };
-}) {
+export default async function PortefeuillePage(
+  props: {
+    searchParams?: Promise<{ wl?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList } = await getData(searchParams?.wl);
 
   // Liquidités stockées comme position spéciale ; séparées des actions.

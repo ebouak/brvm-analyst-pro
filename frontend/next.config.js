@@ -9,12 +9,13 @@ const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // Retire l'en-tête de fingerprinting `X-Powered-By: Next.js`.
   poweredByHeader: false,
+  // Next 15 : sorti d'`experimental` (anciennement serverComponentsExternalPackages).
+  serverExternalPackages: ['@react-pdf/renderer', 'docx'],
   experimental: {
-    serverComponentsExternalPackages: ['@react-pdf/renderer', 'docx'],
     // Permet l'upload de PDF/images via Server Action (défaut 1 Mo trop bas).
     serverActions: { bodySizeLimit: '10mb' },
-    // Active instrumentation.ts (init Sentry serveur/edge) sous Next 14.
-    instrumentationHook: true,
+    // instrumentation.ts (init Sentry) est chargé par défaut depuis Next 15 :
+    // l'ancien drapeau instrumentationHook a été retiré.
     // NB : `staleTimes` retiré — suspecté de casser la navigation par <Link>
     // depuis la page d'entrée /dashboard (test e2e). À réévaluer plus tard.
   },

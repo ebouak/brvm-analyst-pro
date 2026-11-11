@@ -40,7 +40,7 @@ function useIsMd(): boolean | null {
 }
 
 /** Largeur réelle d'un conteneur (px), `null` avant la première mesure. */
-function useLargeur<T extends HTMLElement>(): [RefObject<T>, number | null] {
+function useLargeur<T extends HTMLElement>(): [RefObject<T | null>, number | null] {
   const ref = useRef<T>(null);
   const [largeur, setLargeur] = useState<number | null>(null);
   useEffect(() => {

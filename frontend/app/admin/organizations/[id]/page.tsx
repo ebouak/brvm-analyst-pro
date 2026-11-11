@@ -10,7 +10,8 @@ import { OrgSubscriptionPanel } from '../OrgSubscriptionPanel';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Organisation — Administration' };
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('users.read');
   const org = await loadOrganization(params.id);
   if (!org) notFound();

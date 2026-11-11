@@ -7,11 +7,12 @@ const CRITERES: CritereClassement[] = [
   'marge_nette', 'taux_rotation', 'reserve', 'per', 'pbr',
 ];
 
-export default async function ClassementsPage({
-  searchParams,
-}: {
-  searchParams: { critere?: string };
-}) {
+export default async function ClassementsPage(
+  props: {
+    searchParams: Promise<{ critere?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const critereInit = (CRITERES.includes(searchParams.critere as CritereClassement)
     ? searchParams.critere
     : 'performance') as CritereClassement;

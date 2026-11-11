@@ -39,7 +39,8 @@ async function trouver(slug: string) {
   return { sgi, frais: frais.find((f) => f.sgiNom === sgi.nom) ?? null, stats };
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const r = await trouver(params.slug);
   if (!r) return { title: 'SGI introuvable' };
   const { sgi, frais } = r;
@@ -211,7 +212,8 @@ function CoutEstime({ f, slug }: { f: SgiFrais; slug: string }) {
 
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
-export default async function FicheSgiPage({ params }: { params: { slug: string } }) {
+export default async function FicheSgiPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const r = await trouver(params.slug);
   if (!r) notFound();
   const { sgi, frais, stats } = r;

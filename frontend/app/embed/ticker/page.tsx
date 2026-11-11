@@ -13,11 +13,12 @@ export const metadata: Metadata = {
   robots: { index: false }, // widget : pas de page d'index concurrente du site
 };
 
-export default async function EmbedTickerPage({
-  searchParams,
-}: {
-  searchParams: { theme?: string; lang?: string; codes?: string };
-}) {
+export default async function EmbedTickerPage(
+  props: {
+    searchParams: Promise<{ theme?: string; lang?: string; codes?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const theme = parseTheme(searchParams.theme);
   const lang = parseLang(searchParams.lang);
   const codes = parseCodes(searchParams.codes);

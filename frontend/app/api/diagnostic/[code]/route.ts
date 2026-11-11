@@ -22,7 +22,8 @@ export const maxDuration = 300;
 
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
 
-export async function POST(req: Request, { params }: { params: { code: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const supa = createServerClient();
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });

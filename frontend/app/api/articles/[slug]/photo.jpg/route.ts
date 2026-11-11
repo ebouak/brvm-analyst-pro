@@ -17,7 +17,8 @@ export const runtime = 'nodejs';
  * 2026-10-29, « Invalid URL »). La route Edge applique déjà la RLS : un
  * brouillon y renvoie 404, et ici aussi.
  */
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const origine = new URL(req.url).origin;
   const r = await fetch(`${origine}/api/articles/${encodeURIComponent(params.slug)}/image?format=carre`, {
     signal: AbortSignal.timeout(30_000),

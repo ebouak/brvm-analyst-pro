@@ -24,10 +24,11 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Scanner technique' };
 
 interface PageProps {
-  searchParams: Record<string, string | undefined>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }
 
-export default async function ScannerPage({ searchParams }: PageProps) {
+export default async function ScannerPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const criteria = parseCriteriaFromSearchParams(searchParams);
   const filtersActive = hasAnyCriteria(criteria);
 

@@ -9,7 +9,8 @@ import { depsLectureSupabase } from '@/lib/qa/depsSupabase';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const g = await requireAdminApi('qa.read');
   if ('error' in g) return g.error;
   try {

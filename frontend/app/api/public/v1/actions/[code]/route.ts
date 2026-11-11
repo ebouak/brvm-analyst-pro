@@ -11,7 +11,8 @@ export async function OPTIONS() {
   return apiOptions();
 }
 
-export async function GET(req: Request, { params }: { params: { code: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const auth = await requireApiClient(req);
   if ('response' in auth) return auth.response;
   const code = params.code.toUpperCase();

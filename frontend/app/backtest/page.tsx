@@ -71,21 +71,22 @@ interface Instrument {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     code?: string;
     period?: string;
     dateFrom?: string;
     dateTo?: string;
     fees?: string;
     slippage?: string;
-  };
+  }>;
 }
 
 /* ── Shared input/select class ──────────────────────────────────────────── */
 const inputCls =
   'bg-bg border border-border rounded-lg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:outline-none focus:border-gold/50 transition-colors duration-200';
 
-export default async function BacktestPage({ searchParams }: PageProps) {
+export default async function BacktestPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
   // La page ne decide rien : elle demande.
   const gate = await canAccess('backtest');

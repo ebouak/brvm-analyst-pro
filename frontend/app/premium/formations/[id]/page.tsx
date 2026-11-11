@@ -17,7 +17,8 @@ function embedUrl(url: string): string | null {
   return null;
 }
 
-export default async function FormationDetailPage({ params }: { params: { id: string } }) {
+export default async function FormationDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // L'accès Premium est déjà garanti par le middleware (/premium/*).
   const f = await getFormationFull(params.id).catch(() => null);
   if (!f) notFound();

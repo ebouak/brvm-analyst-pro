@@ -9,7 +9,7 @@ import { fmtNumber } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
 const fFCFA = (n: number | null | undefined) => (n != null ? `${Math.round(n).toLocaleString('fr-FR')} FCFA` : '—');
 const fPct = (n: number | null | undefined, d = 1) => (n != null ? `${n >= 0 ? '+' : '−'}${fmtNumber(Math.abs(n) * 100, d)} %` : '—');
@@ -19,7 +19,8 @@ const STANCE_LABEL: Record<string, string> = {
   decote: 'Décote estimée', surcote: 'Surcote estimée', proche: 'Proche de la juste-valeur', indisponible: 'Valorisation indisponible',
 };
 
-export default async function RapportPage({ params }: Props) {
+export default async function RapportPage(props: Props) {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createClient();
 

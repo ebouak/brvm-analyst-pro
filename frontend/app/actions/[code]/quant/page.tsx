@@ -33,7 +33,8 @@ type Ligne = {
   penalties_json: unknown; calculation_notes: unknown; score_date: string; rank_global: number | null;
 };
 
-export default async function QuantSecurityPage({ params }: { params: { code: string } }) {
+export default async function QuantSecurityPage(props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const symbol = params.code.toUpperCase();
   const supabase = createPublicClient();
   const { data: inst } = await supabase.from('brvm_instruments').select('code,designation,secteur,famille_comptable').eq('code', symbol).maybeSingle();

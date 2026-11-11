@@ -15,7 +15,8 @@ export const dynamic = 'force-dynamic';
  * Relecture d'un article AVANT publication : la RLS le cache au public tant
  * qu'il n'est pas publié, la page le lit donc côté serveur (content.publish).
  */
-export default async function RelireArticlePage({ params }: { params: { id: string } }) {
+export default async function RelireArticlePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('content.publish');
   const { data } = await getServiceClient()
     .from('articles')

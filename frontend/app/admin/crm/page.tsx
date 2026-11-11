@@ -48,7 +48,8 @@ function href(sp: Sp, maj: Partial<Sp>): string {
   return s ? `/admin/crm?${s}` : '/admin/crm';
 }
 
-export default async function Page({ searchParams }: { searchParams: Sp }) {
+export default async function Page(props: { searchParams: Promise<Sp> }) {
+  const searchParams = await props.searchParams;
   const ctx = await requirePermission('crm.read');
   const vueActive: Vue = (VUES as readonly string[]).includes(searchParams.vue ?? '') ? (searchParams.vue as Vue) : 'a_traiter';
   const niveau = (NIVEAUX as readonly string[]).includes(searchParams.niveau ?? '') ? (searchParams.niveau as Niveau | 'tous') : 'tous';

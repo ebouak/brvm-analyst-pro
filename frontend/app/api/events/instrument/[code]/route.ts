@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET(_req: Request, { params }: { params: { code: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const supabase = createClient();
   const code = decodeURIComponent(params.code);
   const { data, error } = await supabase

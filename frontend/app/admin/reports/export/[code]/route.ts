@@ -5,7 +5,8 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 export const dynamic = 'force-dynamic';
 
 /** Export Markdown du diagnostic d'une action (admin, content.read). */
-export async function GET(_req: Request, { params }: { params: { code: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   await requirePermission('content.read');
   const { data } = await getServiceClient()
     .from('diagnostic_reports')

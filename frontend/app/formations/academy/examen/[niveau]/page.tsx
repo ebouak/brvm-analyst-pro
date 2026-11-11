@@ -6,7 +6,8 @@ import ExamRunner from '@/components/academy/ExamRunner';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ExamenPage({ params }: { params: { niveau: string } }) {
+export default async function ExamenPage(props: { params: Promise<{ niveau: string }> }) {
+  const params = await props.params;
   if (!isNiveau(params.niveau)) redirect('/formations/academy');
   // Abonnement premium OU niveau acheté à l'unité (Chariow).
   const gate = await peutSuivreNiveau(params.niveau);

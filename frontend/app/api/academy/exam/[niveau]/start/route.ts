@@ -8,7 +8,8 @@ import { loadBank, niveauLessonsDone, isNiveau } from '@/lib/academy/examServer'
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(_req: NextRequest, { params }: { params: { niveau: string } }) {
+export async function POST(_req: NextRequest, props: { params: Promise<{ niveau: string }> }) {
+  const params = await props.params;
   const niveau = params.niveau;
   if (!isNiveau(niveau)) return NextResponse.json({ error: 'Niveau inconnu' }, { status: 404 });
 

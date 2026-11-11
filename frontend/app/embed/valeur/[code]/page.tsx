@@ -51,11 +51,12 @@ async function loadValeur(codeRaw: string): Promise<Valeur | null> {
 }
 
 /** Titre et OG dynamiques : un widget partagé dans Slack/X affiche un aperçu réel. */
-export async function generateMetadata({
-  params,
-}: {
-  params: { code: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ code: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const v = await loadValeur(params.code);
   // `absolute` : sans lui, le template du layout racine suffixe « | WESTBOURSE »
   // et le titre se lit « … · WESTBOURSE | WESTBOURSE ».
@@ -75,13 +76,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function EmbedValeurPage({
-  params,
-  searchParams,
-}: {
-  params: { code: string };
-  searchParams: { theme?: string; lang?: string };
-}) {
+export default async function EmbedValeurPage(
+  props: {
+    params: Promise<{ code: string }>;
+    searchParams: Promise<{ theme?: string; lang?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const theme = parseTheme(searchParams.theme);
   const lang = parseLang(searchParams.lang);
   const v = await loadValeur(params.code);

@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { IconeFlux } from '@/lib/academy/types';
 
 /**
@@ -5,7 +6,7 @@ import type { IconeFlux } from '@/lib/academy/types';
  * Dessinés ici, en SVG inline : aucune dépendance, couleur héritée
  * (`currentColor`), purement décoratifs (le titre de l'étape porte le sens).
  */
-const TRACES: Record<IconeFlux, JSX.Element> = {
+const TRACES: Record<IconeFlux, React.JSX.Element> = {
   entreprise: (
     <>
       <path d="M4 21V6l7-3v18" />

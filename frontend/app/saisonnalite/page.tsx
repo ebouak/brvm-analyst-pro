@@ -16,7 +16,8 @@ import { LigneSource } from '@/components/marche/LigneSource';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Saisonnalité' };
 
-export default async function SaisonnalitePage({ searchParams }: { searchParams?: { code?: string } }) {
+export default async function SaisonnalitePage(props: { searchParams?: Promise<{ code?: string }> }) {
+  const searchParams = await props.searchParams;
   // Niveau requis LU EN BASE. En cas de refus on n'affiche pas une porte fermée :
   // on bascule en APERÇU (mois en cours seulement), l'essai limité demandé.
   const gate = await canAccess('saisonnalite');

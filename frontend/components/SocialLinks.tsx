@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { SVGProps } from 'react';
 
 /**
@@ -15,7 +16,7 @@ import type { SVGProps } from 'react';
 const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '33743657271').replace(/\D/g, '');
 const WHATSAPP_PREREMPLI = encodeURIComponent('Bonjour WESTBOURSE, ');
 
-type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element };
+type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) => React.JSX.Element };
 
 const PROFILS: { label: string; href: string | null; Icon: Social['Icon'] }[] = [
   { label: 'TikTok', href: 'https://www.tiktok.com/@westbourse7', Icon: TikTokIcon },

@@ -6,7 +6,8 @@ import ReportSummaryCard from '@/components/ReportSummaryCard';
 
 export const dynamic = 'force-dynamic';
 
-export default async function EventReportPage({ params }: { params: { id: string } }) {
+export default async function EventReportPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = createClient();
   const report = await buildEventReport(supabase, params.id, 5);
 

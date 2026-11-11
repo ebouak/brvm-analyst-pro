@@ -16,7 +16,8 @@ const nf = new Intl.NumberFormat('fr-FR');
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const loaded = await loadCitablePage(params.slug);
   if (!loaded) return { title: 'Analyse introuvable' };
   const { page } = loaded;
@@ -34,7 +35,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const loaded = await loadCitablePage(params.slug);
   if (!loaded) notFound();
 

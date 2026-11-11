@@ -37,7 +37,8 @@ function Tab({ cols, lignes }: { cols: string[]; lignes: ReactNode[][] }) {
 }
 function avec<T>(b: Bloc<T>, rendu: (d: T) => ReactNode): ReactNode { return b.ok ? rendu(b.data) : <Indispo />; }
 
-export default async function Page({ searchParams }: { searchParams: { periode?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ periode?: string }> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('crm.read');
   const periode: Periode = estPeriode(searchParams.periode) && (PERIODES_PAGE as readonly string[]).includes(searchParams.periode) ? searchParams.periode : '30j';
   const b = bornesPeriode(periode, new Date());

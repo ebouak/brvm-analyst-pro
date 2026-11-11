@@ -21,7 +21,8 @@ function memeState(a: string | null | undefined, b: string | null | undefined): 
  * `social_tokens` (service_role). Les jetons ne passent jamais par le
  * navigateur ni par un journal ; l'audit ne garde que le réseau et le compte.
  */
-export async function GET(req: NextRequest, { params }: { params: { reseau: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ reseau: string }> }) {
+  const params = await props.params;
   const ctx = await requirePermission('content.publish');
   const r = params.reseau;
   if (!estReseau(r)) return NextResponse.json({ erreur: 'Réseau inconnu.' }, { status: 404 });

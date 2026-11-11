@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { buildInstrumentReport } from '@/lib/reports';
 import type { Period } from '@/lib/types';
 
-export async function GET(req: NextRequest, { params }: { params: { code: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const period = (req.nextUrl.searchParams.get('period') ?? '3M') as Period;
   const supabase = createClient();
   const report = await buildInstrumentReport(supabase, decodeURIComponent(params.code), period);

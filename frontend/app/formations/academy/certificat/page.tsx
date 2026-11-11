@@ -5,7 +5,8 @@ import CertificateActions from '@/components/academy/CertificateActions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CertificatPage({ searchParams }: { searchParams: { niveau?: string } }) {
+export default async function CertificatPage(props: { searchParams: Promise<{ niveau?: string }> }) {
+  const searchParams = await props.searchParams;
   const niveau = searchParams.niveau ?? '';
   if (!isNiveau(niveau)) redirect('/formations/academy');
   const db = createClient();

@@ -126,7 +126,8 @@ import {
  * Le suffixe « | WESTBOURSE » est ajouté par le gabarit du layout — ne pas le
  * remettre ici, sous peine de le voir apparaître deux fois (bug corrigé).
  */
-export async function generateMetadata({ params }: { params: { code: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ code: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const sb = createPublicClient();
 
@@ -263,13 +264,14 @@ async function getData(code: string, fromDate?: string) {
   };
 }
 
-export default async function InstrumentPage({
-  params,
-  searchParams,
-}: {
-  params: { code: string };
-  searchParams: { from?: string; rubrique?: string | string[] };
-}) {
+export default async function InstrumentPage(
+  props: {
+    params: Promise<{ code: string }>;
+    searchParams: Promise<{ from?: string; rubrique?: string | string[] }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
 
   // Indicateurs techniques (RSI, MACD, moyennes mobiles, lecture, explication IA).
