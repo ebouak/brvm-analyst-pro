@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import FilAriane from '@/components/nav/FilAriane';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
@@ -59,6 +60,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
       </header>
 
       <main className="mx-auto max-w-4xl space-y-8 px-6 py-10">
+        <FilAriane variante="public" libelle={page.title} />
         <SectionHeader title={page.title} subtitle={page.question} />
 
         {/* Auteur + fraîcheur : les signaux de confiance que les moteurs valorisent. */}

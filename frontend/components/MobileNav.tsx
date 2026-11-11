@@ -4,7 +4,7 @@ import { Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
+import { NAV_GROUPS, MENU_COMPTE, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
 import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
@@ -13,7 +13,8 @@ const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
 /**
  * Navigation mobile (md:hidden) : barre supérieure + tiroir plein écran.
- * Réutilise NAV_GROUPS (même architecture que la sidebar desktop).
+ * Réutilise NAV_GROUPS (même registre que la sidebar desktop : six rubriques)
+ * et le menu du compte.
  */
 export default function MobileNav({
   isPremium = false,
@@ -24,7 +25,8 @@ export default function MobileNav({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
+  const groups = NAV_GROUPS;
+  const compte = [...MENU_COMPTE, ...(isAdmin ? [{ href: '/admin', label: 'Administration' }] : [])];
 
   // Ferme le tiroir à chaque navigation + bloque le scroll quand ouvert.
   useEffect(() => {
@@ -88,13 +90,7 @@ export default function MobileNav({
           <div className="space-y-6">
             {groups.map((group) => (
               <div key={group.label}>
-                <p className="overline mb-2 px-1 text-[11px] text-faint">
-                  {group.label === 'Premium' ? (
-                    <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
-                  ) : (
-                    group.label
-                  )}
-                </p>
+                <p className="overline mb-2 px-1 text-[11px] text-faint">{group.label}</p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const active = isNavItemActive(item.href, pathname);
@@ -125,6 +121,29 @@ export default function MobileNav({
                 </div>
               </div>
             ))}
+            {/* Menu du compte : même liste que l'avatar de la sidebar. */}
+            <div>
+              <p className="overline mb-2 px-1 text-[11px] text-faint">Mon compte</p>
+              <div className="space-y-0.5">
+                {compte.map((item) => {
+                  // Correspondance exacte : « Données personnelles » est le parent
+                  // des pages du compte et s'allumerait avec elles.
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex items-center rounded-lg px-3 py-2.5 text-[15px] ${EASE} ${
+                        active ? 'bg-gold/[0.10] text-gold font-medium' : 'text-muted active:bg-white/[0.04]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </nav>
       </div>

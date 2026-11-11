@@ -26,7 +26,7 @@ export default async function SessionsPage() {
   const sessions = await listerSessionsAVenir();
 
   return (
-    <PublicShell>
+    <PublicShell fil={false}>
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
         <SectionHeader
           title="Se former en direct, avec un formateur"
