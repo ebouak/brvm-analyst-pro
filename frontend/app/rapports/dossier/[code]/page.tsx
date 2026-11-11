@@ -179,7 +179,12 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
     svc && url
       ? (await chargerContexteQuant(createSbAdmin(url, svc, { auth: { persistSession: false } }), params.code.toUpperCase())).medianes
       : null;
-  const d = await buildDossier(sb, params.code, { medianes });
+  /* Le worker d'impression n'a pas de session : sans le client serveur, le
+     signal (signals_daily, fermé à l'anonyme depuis F-04) sortirait vide en
+     silence. La page elle-même reste derrière le middleware (session ou
+     secret d'impression) : ce client ne sert qu'à lire. */
+  const sbLecture = svc && url ? createSbAdmin(url, svc, { auth: { persistSession: false } }) : sb;
+  const d = await buildDossier(sbLecture, params.code, { medianes });
   if (!d) notFound();
 
   const n = construireNarratif(d);

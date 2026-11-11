@@ -136,7 +136,7 @@ export function TableauResultatCout({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className="relative overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead className="bg-surface text-xs text-muted">
             <tr>

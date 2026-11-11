@@ -1,10 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { canAccess } from '@/lib/server/featureAccess';
 import type { ActionDaily, IndiceDaily, MarketEvent } from '@/lib/types';
 
 // GET /api/reports/market/daily?date=YYYY-MM-DD
 export async function GET(req: NextRequest) {
   const supabase = createClient();
+  // F-04 : la route renvoyait signals_daily complet à n'importe qui.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'auth required' }, { status: 401 });
+  const gateSignaux = await canAccess('signaux');
   let date = req.nextUrl.searchParams.get('date');
   if (!date) {
     const { data } = await supabase.from('brvm_actions_daily')
@@ -17,7 +22,9 @@ export async function GET(req: NextRequest) {
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', date),
     supabase.from('brvm_indices_daily').select('*').eq('date_marche', date),
     supabase.from('market_events').select('*').eq('event_date', date).order('importance_level', { ascending: false }),
-    supabase.from('signals_daily').select('*').eq('date_marche', date),
+    gateSignaux.allowed
+      ? supabase.from('signals_daily').select('*').eq('date_marche', date)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const acts = (actions ?? []) as ActionDaily[];
