@@ -40,3 +40,10 @@ describe('fromDeRetour', () => {
     expect(fromDeRetour('/account/plan')).toBeNull();
   });
 });
+
+describe('assainissement : cas limites', () => {
+  const cas = ['/' + String.fromCharCode(92) + 'evil', '/' + String.fromCharCode(10) + '/evil.com', '/' + String.fromCharCode(0) + 'x', 'evil.com', ''];
+  it.each(cas)('fromSur rejette %j', (v) => {
+    expect(fromSur(v)).toBeNull();
+  });
+});
