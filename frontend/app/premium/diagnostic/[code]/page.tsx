@@ -65,6 +65,7 @@ export default async function DiagnosticPage(props: Props) {
             établissent et n&apos;établissent pas. Actualisée chaque semaine. Information générale, sans
             recommandation d&apos;achat ou de vente : ce rapport ne constitue pas un conseil en investissement.
           </p>
+          <p className="mt-2 text-xs text-faint">Analyse rédigée par une IA à partir des comptes publiés.</p>
         </div>
 
         <DiagnosticClient

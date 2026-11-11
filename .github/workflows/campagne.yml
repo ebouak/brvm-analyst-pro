@@ -63,7 +63,7 @@ jobs:
 
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Annoncer le mode avant tout envoi
         run: |

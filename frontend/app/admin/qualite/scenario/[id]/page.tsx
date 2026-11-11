@@ -79,7 +79,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       {historique.length > 1 && (
         <section aria-labelledby="historique" className="space-y-3">
           <h2 id="historique" className="font-display text-lg text-ivory">Ce scénario sur les dernières exécutions</h2>
-          <PremiumPanel className="overflow-x-auto p-0">
+          <PremiumPanel className="relative overflow-x-auto p-0">
             <table className="w-full text-sm">
               <caption className="sr-only">Historique du scénario</caption>
               <thead>

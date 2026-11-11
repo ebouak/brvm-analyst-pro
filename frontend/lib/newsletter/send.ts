@@ -10,6 +10,7 @@
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendBatch } from '@/lib/server/email';
 import { siteUrl } from '@/lib/email/templates';
+import { UNSUB_PLACEHOLDER, entetesDesabonnement, lienPourDestinataire } from './unsubscribe';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,18 +41,25 @@ export interface NewsletterPayload {
  *
  * Retourne une liste dédupliquée (Set).
  */
-export async function getRecipients(topic: NewsletterTopic): Promise<string[]> {
-  const db = getServiceClient();
-  const emails = new Set<string>();
+export interface Recipient {
+  email: string;
+  /** `newsletter_subscribers.confirm_token` ; null pour un compte sans ligne d'abonné. */
+  token: string | null;
+}
 
-  // Source 1 : abonnés confirmés (liste publique directe)
+export async function getRecipients(topic: NewsletterTopic): Promise<Recipient[]> {
+  const db = getServiceClient();
+  const byEmail = new Map<string, Recipient>();
+
+  // Source 1 : abonnés confirmés (liste publique directe) — porteurs d'un jeton.
   const { data: subs } = await db
     .from('newsletter_subscribers')
-    .select('email')
+    .select('email, confirm_token')
     .eq('confirmed', true);
   for (const row of subs ?? []) {
     if (row.email && typeof row.email === 'string') {
-      emails.add(row.email.toLowerCase().trim());
+      const email = row.email.toLowerCase().trim();
+      byEmail.set(email, { email, token: typeof row.confirm_token === 'string' ? row.confirm_token : null });
     }
   }
 
@@ -69,12 +77,13 @@ export async function getRecipients(topic: NewsletterTopic): Promise<string[]> {
       .in('id', userIds);
     for (const p of profiles ?? []) {
       if (p.email && typeof p.email === 'string') {
-        emails.add(p.email.toLowerCase().trim());
+        const email = p.email.toLowerCase().trim();
+        if (!byEmail.has(email)) byEmail.set(email, { email, token: null });
       }
     }
   }
 
-  return [...emails];
+  return [...byEmail.values()];
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +189,7 @@ export function buildWeeklyHtml(params: {
  */
 export async function sendNewsletter(
   payload: NewsletterPayload,
-  recipients: string[],
+  recipients: Recipient[],
 ): Promise<number> {
   if (recipients.length === 0) return 0;
 
@@ -189,16 +198,22 @@ export async function sendNewsletter(
     console.log(
       `[newsletter:send] RESEND_API_KEY absent — simulation. Sujet: "${payload.subject}"`,
       `Destinataires (${recipients.length}):`,
-      recipients,
+      recipients.map((r) => r.email),
     );
     return recipients.length;
   }
 
-  const messages = recipients.map((email) => ({
-    to: email,
-    subject: payload.subject,
-    html: payload.htmlBody,
-  }));
+  // Un lien (et des en-têtes List-Unsubscribe) PAR destinataire.
+  const base = siteUrl();
+  const messages = recipients.map((r) => {
+    const lien = lienPourDestinataire(base, r.token);
+    return {
+      to: r.email,
+      subject: payload.subject,
+      html: payload.htmlBody.split(UNSUB_PLACEHOLDER).join(lien.url),
+      headers: entetesDesabonnement(lien.url, lien.unClic),
+    };
+  });
 
   const result = await sendBatch(messages);
   if (!result.ok && result.sent < recipients.length) {

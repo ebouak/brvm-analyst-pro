@@ -40,7 +40,7 @@ export default async function Page() {
       {rows.length === 0 ? (
         <EmptyStatePremium title="Aucune organisation" hint="Créez un compte entreprise pour regrouper des membres sous un abonnement." />
       ) : (
-        <PremiumPanel className="overflow-x-auto">
+        <PremiumPanel className="relative overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted">

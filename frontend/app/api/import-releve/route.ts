@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Requête invalide (mode requis)' }, { status: 400 });
   }
   const ip = getClientIp(request);
-  const { allowed } = await checkRateLimit({ route: 'import-releve', ip, maxHits: 10, windowSeconds: 3600 });
+  const { allowed } = await checkRateLimit({ route: 'import-releve', ip, maxHits: 10, windowSeconds: 3600, failClosed: true });
   if (!allowed) {
     return NextResponse.json({ error: 'Trop d’analyses — réessayez dans une heure' }, { status: 429 });
   }

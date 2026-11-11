@@ -27,7 +27,7 @@ jobs:
 
       - name: Install scraper dependencies
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Auto-open positions from today's signals
         working-directory: scraper

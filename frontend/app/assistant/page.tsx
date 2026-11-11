@@ -1,3 +1,4 @@
+import MentionIA from '@/components/legal/MentionIA';
 import { ChatInterface } from '@/components/assistant/ChatInterface';
 import { SectionHeader, StatPill, PremiumPanel } from '@/components/ui/premium';
 
@@ -47,6 +48,7 @@ export default async function AssistantPage({ searchParams }: Props) {
         Cet outil est une aide à l&apos;analyse. Il ne constitue pas un conseil en investissement.
         Les informations produites sont dérivées des données de marché BRVM et ne garantissent pas les performances futures.
       </p>
+      <MentionIA className="text-center" />
     </div>
   );
 }

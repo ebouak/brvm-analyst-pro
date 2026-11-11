@@ -1,3 +1,4 @@
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -20,9 +21,8 @@ const GITHUB_REPO = 'ebouak/brvm-analyst-pro';
 const WORKFLOW_FILE = 'intraday.yml';
 
 function checkAuth(request: NextRequest): NextResponse | null {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
   const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
-  if (!token || !expectedToken || token !== expectedToken) {
+  if (!cronAutorise(request, expectedToken)) {
     return NextResponse.json(
       { error: 'Unauthorized. Provide valid CRON_SECRET.' },
       { status: 401 }

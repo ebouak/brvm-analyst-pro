@@ -3,6 +3,7 @@ import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import SignalPerformance from '@/components/SignalPerformance';
 import { getBacktestStats, getRecentRealBuySignals } from '@/lib/signals/backtest';
 import { ArrowRight } from 'lucide-react';
+import { DISCLAIMER_COURT } from '@/lib/legal/disclaimer';
 
 function dateCourte(iso: string | null | undefined): string {
   if (!iso) return '—';
@@ -284,8 +285,7 @@ export default async function SignauxPage() {
         </div>
 
         <div className="border-t border-border/40 pt-3 text-xs text-faint italic leading-relaxed">
-          Les signaux sont calculés à partir d'indicateurs techniques et ne constituent
-          pas un conseil en investissement. Consultez un conseiller agréé COSUMAF avant toute décision.
+          Les signaux sont calculés à partir d'indicateurs techniques. {DISCLAIMER_COURT}
         </div>
       </div>
     </div>

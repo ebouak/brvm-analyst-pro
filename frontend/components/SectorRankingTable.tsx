@@ -67,7 +67,7 @@ export default function SectorRankingTable({ perfs }: Props) {
         tabIndex={0}
         role="region"
         aria-label="Performance des secteurs, défilement horizontal"
-        className="overflow-x-auto rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="relative overflow-x-auto rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <table className="w-full text-sm">
           <caption className="sr-only">

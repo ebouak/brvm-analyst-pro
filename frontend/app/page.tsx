@@ -33,7 +33,7 @@ export const revalidate = 300;
 export const metadata = {
   title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
   description:
-    'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
+    'Cours BRVM environ toutes les 15 minutes en séance, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
 };
 
 
@@ -73,7 +73,7 @@ export default async function Landing() {
   const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
   const conf = sig?.confiance == null ? null : Math.round(Number(sig.confiance) * (Number(sig.confiance) <= 1 ? 100 : 1));
   const FAITS: (Fait | null)[] = [
-    d.nbActions > 0 ? { libelle: 'Collecte de la dernière séance', valeur: `${d.nbActions} sociétés · ${d.hausses} hausses · ${d.baisses} baisses`, detail: `Cours relevés sur brvm.org${dateLabel ? ` pour la séance du ${dateLabel}` : ''}${depuis ? `, dernière collecte ${depuis}` : ''}. Toutes les 15 minutes en séance.`, href: '/societes', hrefLabel: 'Voir les sociétés' } : null,
+    d.nbActions > 0 ? { libelle: 'Collecte de la dernière séance', valeur: `${d.nbActions} sociétés · ${d.hausses} hausses · ${d.baisses} baisses`, detail: `Cours relevés sur brvm.org${dateLabel ? ` pour la séance du ${dateLabel}` : ''}${depuis ? `, dernière collecte ${depuis}` : ''}. Environ toutes les 15 minutes en séance.`, href: '/societes', hrefLabel: 'Voir les sociétés' } : null,
     d.plusEchangee ? { libelle: 'Valeur la plus échangée', valeur: `${d.plusEchangee.code} · ${fmtFcfa(d.plusEchangee.valeur)}`, detail: 'Volumes, RSI, MACD et fondamentaux sont recalculés à chaque séance sur la fiche de chaque société.', href: `/societes/${d.plusEchangee.code}`, hrefLabel: 'Ouvrir la fiche' } : null,
     d.topNote?.grade ? { libelle: 'Meilleure note du jour', valeur: `${d.topNote.grade} · ${d.topNote.code}${d.topNote.nom ? ` · ${d.topNote.nom}` : ''}`, detail: 'Une note de A à F recalculée chaque séance à partir de signaux vérifiables (tendance, volume, RSI, liquidité) avec le poids de chacun.', href: `/societes/${d.topNote.code}`, hrefLabel: 'Voir la note' } : null,
     sig ? { libelle: `Signal du ${fmtDateFR(sig.date_marche)} · ${sig.code}`, valeur: `${libelleSignal(sig.signal)}${conf != null ? ` · complétude des données ${conf} %` : ''}`, detail: sig.signal === 'HOLD' ? 'Neutre signifie que rien n’est net : le moteur s’abstient plutôt que de fabriquer une recommandation. Ce n’est pas un conseil en investissement.' : 'Un signal n’est émis que lorsque plusieurs sous-scores concordent. Ce n’est pas un conseil en investissement.', href: '/signaux', hrefLabel: 'Tous les signaux' } : null,
@@ -92,7 +92,7 @@ export default async function Landing() {
           <section className="hc" aria-labelledby="h1">
             <div>
               <h1 id="h1">Les {NB_SOCIETES_COTEES} valeurs de la BRVM, chiffre par chiffre, source à l&apos;appui.</h1>
-              <p className="lead">Cours toutes les 15 minutes en séance, note de A à F par action, fondamentaux, dossiers et simulateur. Chaque chiffre porte sa source, sa date et son heure.</p>
+              <p className="lead">Cours environ toutes les 15 minutes en séance, note de A à F par action, fondamentaux, dossiers et simulateur. Chaque chiffre porte sa source, sa date et son heure.</p>
               <div className="cta">
                 <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit</Link>
                 <Link href="/societes" className="btn btn-ghost">Explorer les sociétés</Link>

@@ -49,7 +49,7 @@ jobs:
 
       - name: Install deps
         id: deps
-        run: npm install
+        run: npm ci
       - name: Install Playwright browser
         id: navigateur
         run: npx playwright install chromium --with-deps
