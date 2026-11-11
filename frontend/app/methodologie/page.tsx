@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { DISCLAIMER_METHODOLOGIE } from '@/lib/legal/disclaimer';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 
 export const metadata = { title: 'Méthodologie' };
@@ -174,16 +175,9 @@ export default function MethodologiePage() {
       <div className="rounded-panel border border-warn/20 bg-warn/[0.03] px-5 py-4 shadow-card space-y-2">
         <div className="flex items-center gap-2">
           <AlertTriangle aria-hidden className="h-3.5 w-3.5 text-warn" />
-          <h3 className="text-sm font-medium text-warn">Avertissement légal · COSUMAF</h3>
+          <h3 className="text-sm font-medium text-warn">Avertissement légal</h3>
         </div>
-        <p className="text-xs text-faint leading-relaxed">
-          Les données, analyses, signaux et résultats de backtesting fournis par WESTBOURSE sont à titre{' '}
-          <span className="text-muted font-medium">informatif uniquement</span> et ne constituent pas un conseil en
-          investissement au sens de la réglementation COSUMAF (Commission de Surveillance du Marché Financier de
-          l&apos;Afrique Centrale) ni de l&apos;UMOA. Les performances passées ne préjugent pas des performances
-          futures. Tout investissement sur le marché financier comporte des risques, y compris la perte du capital
-          investi. Consultez un conseiller en investissement agréé avant toute décision.
-        </p>
+        <p className="text-xs text-faint leading-relaxed">{DISCLAIMER_METHODOLOGIE}</p>
       </div>
 
     </div>
