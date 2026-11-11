@@ -72,13 +72,13 @@ describe('profil', () => {
 describe('ordres de la spec §3', () => {
   it('actif : portefeuille, agenda, publications, état, séance…', () => {
     expect(ORDRE_ACTIF).toEqual([
-      'portefeuille', 'agenda', 'publications', 'etat', 'comprendre', 'seance',
+      'portefeuille', 'agenda', 'publications', 'etat', 'comprendre', 'lecture', 'seance',
       'liquidite', 'signaux', 'secteurs', 'indices', 'actus',
     ]);
   });
   it('débutant : état, comprendre, séance, agenda, publications, portefeuille…', () => {
     expect(ORDRE_DEBUTANT).toEqual([
-      'etat', 'comprendre', 'seance', 'agenda', 'publications', 'portefeuille',
+      'etat', 'comprendre', 'lecture', 'seance', 'agenda', 'publications', 'portefeuille',
       'signaux', 'secteurs', 'indices', 'liquidite', 'actus',
     ]);
   });
