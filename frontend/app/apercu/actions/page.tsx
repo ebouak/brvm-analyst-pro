@@ -1,4 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public';
+import { signauxPublicsDeLaSeance, type LigneSignalPublic } from '@/lib/signals/publics';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
@@ -16,7 +17,8 @@ async function getData() {
   if (!lastDate) return { lastDate: null, actions: [] as ActionDaily[], signals: {} as Record<string, SignalDaily>, sparklines: {} as Record<string, number[]> };
   const [{ data: actions }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
-    supabase.from('signals_daily').select('*').eq('date_marche', lastDate),
+    // Note publique seule (F-04) : la fonction bornée, jamais la table.
+    supabase.rpc('signaux_publics'),
     supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
   const sectorByCode = brvmSectors as Record<string, string>;
@@ -24,7 +26,7 @@ async function getData() {
   for (const i of (instruments ?? []) as { code: string; secteur: string | null; pays: string | null }[]) instrMap[i.code] = { secteur: i.secteur, pays: i.pays };
   const enriched = ((actions ?? []) as ActionDaily[]).map((a) => ({ ...a, secteur: sectorByCode[a.code] ?? instrMap[a.code]?.secteur ?? a.secteur ?? null, pays: instrMap[a.code]?.pays ?? a.pays ?? null }));
   const sigMap: Record<string, SignalDaily> = {};
-  for (const s of (signals ?? []) as SignalDaily[]) sigMap[s.code] = s;
+  for (const s of signauxPublicsDeLaSeance((signals ?? []) as LigneSignalPublic[], lastDate)) sigMap[s.code] = s;
   const sparklines: Record<string, number[]> = {};
   const since = new Date(lastDate); since.setDate(since.getDate() - 50);
   const sinceIso = since.toISOString().slice(0, 10);

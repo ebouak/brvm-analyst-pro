@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import SimulatorClient from '@/components/public/SimulatorClient';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
@@ -69,6 +70,11 @@ export default async function SimulatorCodePage(props: PageProps) {
           </h1>
         </div>
         <SimulatorClient companies={instruments ?? []} initialCode={code} />
+        <EtMaintenant suites={[
+                { href: `/societes/${code}`, titre: 'La fiche de la société', detail: 'Cours, dividendes et fondamentaux.' },
+                { href: '/simulateur', titre: 'Une autre société', detail: 'Refaire la simulation sur un autre titre.' },
+                { href: '/societes', titre: 'Toutes les sociétés', detail: 'Les valeurs cotées à la BRVM.' },
+              ]} />
       </div>
     </PublicShell>
   );

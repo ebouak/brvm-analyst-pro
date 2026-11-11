@@ -1,5 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const metadata = { title: 'Méthodologie' };
 
@@ -186,6 +187,11 @@ export default function MethodologiePage() {
         </p>
       </div>
 
+      <EtMaintenant suites={[
+        { href: '/signaux', titre: 'Les signaux', detail: 'Voir la méthode à l’œuvre sur la séance.' },
+        { href: '/formations', titre: 'Se former', detail: 'Les parcours pour comprendre les notions.' },
+        { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
+      ]} />
     </div>
   );
 }

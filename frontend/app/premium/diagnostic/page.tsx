@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { fmtDateCourte } from '@/lib/format';
 import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
+
+export const metadata: Metadata = { title: 'Diagnostic' };
 
 export default async function DiagnosticIndexPage() {
   const supa = createClient();
@@ -26,7 +29,7 @@ export default async function DiagnosticIndexPage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Dossier d’analyse</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Diagnostic</h1>
           <p className="text-sm text-muted mt-1">
             Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
             garde-fous de plausibilité. Disponible pour chaque action de la cote BRVM.

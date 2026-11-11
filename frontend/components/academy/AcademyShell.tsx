@@ -20,11 +20,14 @@ export default function AcademyShell({
   data,
   initialLesson,
   videos = [],
+  niveau = null,
 }: {
   data: LearnData;
   initialLesson: number;
   /** Numéros (1-indexés) des leçons qui ont une version vidéo. */
   videos?: number[];
+  /** Niveau du cours : quand toutes ses leçons sont terminées, l'examen est proposé. */
+  niveau?: string | null;
 }) {
   const lessons = data.content.lessons;
   const clamp = useCallback(
@@ -208,6 +211,14 @@ export default function AcademyShell({
                 className="rounded-lg border border-border px-4 py-2 text-sm text-muted transition hover:border-accent/40 hover:text-white">
                 Leçon suivante →
               </button>
+            )}
+            {niveau && p.pct === 100 && (
+              <Link
+                href={`/formations/academy/examen/${niveau}`}
+                className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm font-medium text-gold transition hover:bg-gold/20"
+              >
+                Passer l’examen →
+              </Link>
             )}
             <span className="ml-auto hidden text-[11px] text-faint sm:block">← / → au clavier</span>
           </div>

@@ -1,3 +1,4 @@
+import { urlConnexion } from '@/lib/auth/urlsAcces';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { isNiveau } from '@/lib/academy/examServer';
@@ -11,7 +12,7 @@ export default async function CertificatPage(props: { searchParams: Promise<{ ni
   if (!isNiveau(niveau)) redirect('/formations/academy');
   const db = createClient();
   const { data: { user } } = await db.auth.getUser();
-  if (!user) redirect('/login?next=/formations/academy');
+  if (!user) redirect(urlConnexion('/formations/academy/certificat', `?niveau=${niveau}`));
   const { data: profile } = await db.from('profiles').select('display_name').eq('id', user.id).maybeSingle();
   const defaultName = (profile as { display_name?: string } | null)?.display_name ?? '';
 

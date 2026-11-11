@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
 import { SectionHeader, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
+import LienMesInscriptions from '@/components/formations/LienMesInscriptions';
 import { listerSessionsAVenir } from '@/lib/formations/sessions';
 
 export const revalidate = 300;
@@ -25,12 +26,13 @@ export default async function SessionsPage() {
   const sessions = await listerSessionsAVenir();
 
   return (
-    <PublicShell>
+    <PublicShell fil={false}>
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
         <SectionHeader
           title="Se former en direct, avec un formateur"
           subtitle="Des sessions à date fixe, en petit groupe. Le parcours Academy, inclus dans l’abonnement Premium, sert de préparation."
         />
+        <LienMesInscriptions />
         {sessions.length === 0 ? (
           <EmptyStatePremium
             title="Aucune session programmée"

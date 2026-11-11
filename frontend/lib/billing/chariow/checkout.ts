@@ -1,4 +1,5 @@
 import { NIVEAUX } from '@/lib/academy/types';
+import { fromSur } from '@/lib/auth/urlsAcces';
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { prixDuCycle } from '@/lib/billing/dates';
@@ -123,7 +124,10 @@ export async function demarrerAchat(args: {
       last_name: corps.lastName,
       phone: { number: corps.phone.number, country_code: corps.phone.countryCode },
       // Simple retour visuel : cette page n'accorde JAMAIS rien.
-      redirect_url: `${urlApp()}/paiement/succes?txn=${transactionId}`,
+      // `from` : page d'où l'achat est parti, assainie (chemin interne seulement).
+      redirect_url: `${urlApp()}/paiement/succes?txn=${transactionId}${
+        fromSur(corps.from) ? `&from=${encodeURIComponent(fromSur(corps.from)!)}` : ''
+      }`,
       custom_metadata: { txn: transactionId, code: produit.productCode },
       ...(ip ? { customer_ip: ip } : {}),
     });

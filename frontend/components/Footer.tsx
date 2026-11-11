@@ -4,6 +4,8 @@ import { FINANCIAL_DISCLAIMER } from '@/lib/legal/disclaimer';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { SocialLinks } from '@/components/SocialLinks';
 import InstallPwaButton from '@/components/InstallPwaButton';
+import { Lock } from 'lucide-react';
+import { isPublicPath } from '@/lib/auth/cheminsPublics';
 
 /**
  * Colonnes du footer. Chaque `href` pointe vers une route vérifiée existante
@@ -65,6 +67,13 @@ function FooterLink({ href, label }: { href: string; label: string }) {
       className="group/link relative inline-flex w-fit items-center text-[#fff]/75 transition-all duration-200 hover:translate-x-0.5 hover:text-[#fff] focus:outline-none focus-visible:text-[#fff]"
     >
       {label}
+      {/* Page qui exige un compte : dit avant le clic, pas après la redirection. */}
+      {!isPublicPath(href.split('?')[0]) && (
+        <>
+          <Lock aria-hidden className="ml-1.5 h-3 w-3 shrink-0 text-[#fff]/45" />
+          <span className="sr-only"> (compte requis)</span>
+        </>
+      )}
       <span className="pointer-events-none absolute -bottom-0.5 left-0 h-px w-0 bg-gradient-to-r from-[#56d7fd] to-transparent transition-all duration-300 ease-out group-hover/link:w-full" />
     </Link>
   );
@@ -177,7 +186,10 @@ export default function Footer() {
           <p className="mt-3 text-[11px] leading-snug text-[#fff]/45">
             Publications des émetteurs et données de marché officielles.
           </p>
-          <ul className="mt-4 space-y-2">
+          <p className="mt-4 text-[11px] leading-snug text-[#fff]/45">
+            Le cadenas signale une page réservée aux comptes (gratuit).
+          </p>
+          <ul className="mt-2 space-y-2">
             <li><FooterLink href="/login" label="Connexion" /></li>
             <li><FooterLink href="/signup" label="Créer un compte" /></li>
           </ul>

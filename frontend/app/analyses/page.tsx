@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import FilAriane from '@/components/nav/FilAriane';
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
@@ -36,6 +37,7 @@ export default async function AnalysesIndex() {
       </header>
 
       <main className="mx-auto max-w-4xl space-y-6 px-6 py-10">
+        <FilAriane variante="public" />
         <SectionHeader
           title="Analyses BRVM"
           subtitle="Sourcées, datées, reproductibles. Une question, une réponse, la méthode."
