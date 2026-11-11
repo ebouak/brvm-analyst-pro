@@ -13,7 +13,14 @@ export default async function ExamenPage(props: { params: Promise<{ niveau: stri
   const gate = await peutSuivreNiveau(params.niveau);
   if (!gate.allowed) {
     const required = gate.acces.abonnement.required;
-    return <AccessGate required={required === 'free' ? 'premium' : required} feature="Les examens de l’Academy" hint="Validez vos acquis et obtenez un certificat." />;
+    return (
+      <>
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
+          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Examen de l’Academy</h1>
+        </div>
+        <AccessGate required={required === 'free' ? 'premium' : required} feature="Les examens de l’Academy" hint="Validez vos acquis et obtenez un certificat." />
+      </>
+    );
   }
   return <ExamRunner niveau={params.niveau} />;
 }

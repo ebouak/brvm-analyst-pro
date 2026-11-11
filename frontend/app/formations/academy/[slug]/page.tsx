@@ -71,5 +71,5 @@ export default async function AcademyCoursePage(
   const n = Number.parseInt(searchParams.lecon ?? '1', 10);
   const initialLesson = Number.isFinite(n) ? n - 1 : 0;
 
-  return <AcademyShell data={data} initialLesson={initialLesson} videos={videos} />;
+  return <AcademyShell data={data} initialLesson={initialLesson} videos={videos} niveau={card.niveau ?? null} />;
 }

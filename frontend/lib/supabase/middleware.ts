@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -104,10 +105,11 @@ export async function updateSession(request: NextRequest) {
   // (avec ?next pour revenir après connexion). Les pages publiques restent
   // indexables ; l'app interactive exige un compte.
   if (!user && !isPublicPath(request.nextUrl.pathname) && !isRenderAuthorized(request)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    // `next` = chemin + query d'origine ; la query n'est pas recopiée sur /login
+    // (elle y serait lue comme paramètres de connexion et perdue après).
+    return NextResponse.redirect(
+      new URL(urlConnexion(request.nextUrl.pathname, request.nextUrl.search), request.url),
+    );
   }
 
   // Gating /premium/* : vérifie is_premium sauf super admin
@@ -115,9 +117,9 @@ export async function updateSession(request: NextRequest) {
       !request.nextUrl.pathname.startsWith('/premium/upgrade')) {
 
     if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(
+        new URL(urlConnexion(request.nextUrl.pathname, request.nextUrl.search), request.url),
+      );
     }
 
     // Super admin bypass
@@ -129,9 +131,11 @@ export async function updateSession(request: NextRequest) {
         .single();
 
       if (!profile?.is_premium) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/premium/upgrade';
-        return NextResponse.redirect(url);
+        // `from` = page demandée (chemin + query), pour que la porte sache d'où
+        // l'on vient et puisse y ramener après l'abonnement.
+        return NextResponse.redirect(
+          new URL(urlPortePremium(request.nextUrl.pathname, request.nextUrl.search), request.url),
+        );
       }
     }
   }

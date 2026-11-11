@@ -38,7 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/actualites', label: 'Actualités et veille' },
       { href: '/brief', label: 'Brief quotidien' },
-      { href: '/analyses/hebdo', label: 'Analyse hebdo (actions)' },
+      { href: '/analyses/hebdo', label: 'Valeurs de la semaine' },
     ],
   },
   {
@@ -134,16 +134,14 @@ export const PALETTE_EXTRA: NavItem[] = [
   { href: '/premium/classements', label: 'Classements', premium: true },
   { href: '/premium/anomalies', label: 'Anomalies', premium: true },
   { href: '/premium/correlations', label: 'Corrélations', premium: true },
-  { href: '/premium/comparateur', label: 'Comparateur de titres', premium: true },
+  { href: '/premium/comparateur', label: "Classes d'actifs : rendement et risque", premium: true },
   { href: '/classement', label: 'Classement des portefeuilles virtuels' },
   { href: '/actions/compare', label: 'Comparer des actions' },
   { href: '/dashboard/reports', label: 'Rapports et événements' },
   { href: '/dashboard/reports/events', label: 'Événements de marché' },
   { href: '/dividendes/calendrier', label: 'Calendrier des dividendes' },
   { href: '/simulateur-budget', label: 'Simulateur budget' },
-  { href: '/fiscalite', label: 'Fiscalité des dividendes (IRVM)' },
   { href: '/analyses', label: 'Analyses BRVM (dividende, comparatifs)' },
-  { href: '/rendement-vrai', label: 'Rendement réel (dividendes et inflation)' },
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/debutant', label: 'Guide débutant' },
   { href: '/pricing', label: 'Tarifs' },
@@ -155,4 +153,22 @@ export function isNavItemActive(href: string, pathname: string): boolean {
   // sous-pages /admin/cles-api, etc., et « /dashboard » sur /dashboard/*).
   if (href === '/dashboard' || href === '/admin' || href === '/conseiller') return pathname === href;
   return pathname.startsWith(href);
+}
+
+/**
+ * Libellé de la page demandée, tiré du registre de navigation (menu puis liste
+ * secondaire). Correspondance exacte d'abord, puis préfixe le plus long ; `null`
+ * si la page n'y figure pas (l'appelant écrit alors un texte générique).
+ * La query est ignorée.
+ */
+export function libellePage(chemin: string | null | undefined): string | null {
+  if (!chemin) return null;
+  const path = chemin.split(/[?#]/)[0];
+  const tous = [...NAV_GROUPS.filter((g) => !g.adminOnly).flatMap((g) => g.items), ...PALETTE_EXTRA];
+  const exact = tous.find((i) => i.href === path);
+  if (exact) return exact.label;
+  const prefixes = tous
+    .filter((i) => i.href !== '/' && path.startsWith(`${i.href}/`))
+    .sort((a, b) => b.href.length - a.href.length);
+  return prefixes[0]?.label ?? null;
 }

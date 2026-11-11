@@ -87,7 +87,7 @@ export default function Sidebar({
                   return (
                     <Link
                       key={item.href}
-                      href="/premium/upgrade"
+                      href={`/premium/upgrade?from=${encodeURIComponent(item.href)}`}
                       className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-faint hover:text-gold hover:bg-gold/[0.06] ${EASE}`}
                     >
                       {item.label}

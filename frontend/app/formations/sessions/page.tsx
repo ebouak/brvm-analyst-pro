@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
 import { SectionHeader, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
+import LienMesInscriptions from '@/components/formations/LienMesInscriptions';
 import { listerSessionsAVenir } from '@/lib/formations/sessions';
 
 export const revalidate = 300;
@@ -31,6 +32,7 @@ export default async function SessionsPage() {
           title="Se former en direct, avec un formateur"
           subtitle="Des sessions à date fixe, en petit groupe. Le parcours Academy, inclus dans l’abonnement Premium, sert de préparation."
         />
+        <LienMesInscriptions />
         {sessions.length === 0 ? (
           <EmptyStatePremium
             title="Aucune session programmée"
