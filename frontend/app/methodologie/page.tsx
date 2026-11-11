@@ -187,6 +187,11 @@ export default function MethodologiePage() {
         </p>
       </div>
 
+      <EtMaintenant suites={[
+        { href: '/signaux', titre: 'Les signaux', detail: 'Voir la méthode à l’œuvre sur la séance.' },
+        { href: '/formations', titre: 'Se former', detail: 'Les parcours pour comprendre les notions.' },
+        { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
+      ]} />
     </div>
   );
 }
@@ -253,11 +258,6 @@ function SignalThreshold({
         <p className="text-xs font-semibold">{signal}</p>
         <p className="tabular text-xs text-faint">{condition}</p>
       </div>
-      <EtMaintenant suites={[
-              { href: '/signaux', titre: 'Les signaux', detail: 'Voir la méthode à l’œuvre sur la séance.' },
-              { href: '/formations', titre: 'Se former', detail: 'Les parcours pour comprendre les notions.' },
-              { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
-            ]} />
     </div>
   );
 }
