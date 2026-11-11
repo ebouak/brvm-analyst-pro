@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getClassement, type CritereClassement } from '@/lib/premium/classements';
 import { ClassementsTable } from '@/components/premium/ClassementsTable';
 import { SectionHeader, StatPill, PremiumPanel, MetricCard, EmptyStatePremium } from '@/components/ui/premium';
@@ -6,6 +7,8 @@ const CRITERES: CritereClassement[] = [
   'performance', 'liquidite', 'volatilite', 'valeur_echangee',
   'marge_nette', 'taux_rotation', 'reserve', 'per', 'pbr',
 ];
+
+export const metadata: Metadata = { title: 'Palmarès des actions' };
 
 export default async function ClassementsPage(
   props: {
@@ -31,7 +34,7 @@ export default async function ClassementsPage(
 
       {/* Header */}
       <SectionHeader
-        title="Classements des actions BRVM"
+        title="Palmarès des actions BRVM"
         subtitle="Palmarès de toutes les sociétés cotées selon la performance, la liquidité, la valorisation et les fondamentaux."
         actions={<StatPill tone="gold">Premium</StatPill>}
       />

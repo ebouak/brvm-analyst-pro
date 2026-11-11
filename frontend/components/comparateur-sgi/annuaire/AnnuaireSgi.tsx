@@ -383,7 +383,7 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
           ))}
         </div>
       ) : list.length > 0 ? (
-        <div className="mt-4 overflow-x-auto rounded-panel border border-border bg-surface">
+        <div className="mt-4 relative overflow-x-auto rounded-panel border border-border bg-surface">
           <table className="w-full min-w-[640px] text-sm">
             <caption className="sr-only">Annuaire des SGI en liste</caption>
             <thead>

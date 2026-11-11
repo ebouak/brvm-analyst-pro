@@ -6,6 +6,7 @@ import { PaperLeaderboard } from '@/components/PaperLeaderboard';
 import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account } from '@/lib/paper-trading/types';
 import { phCapture } from '@/lib/analytics/posthogClient';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 const PRESET_CAPITALS = [
   { label: '5M FCFA', value: 5_000_000 },
@@ -152,6 +153,11 @@ export default function PaperTradingPage() {
         <div className="mt-8">
           <PaperLeaderboard withControls={Boolean(account && account !== 'loading')} />
         </div>
+        <EtMaintenant suites={[
+                { href: '/classement', titre: 'Classement des portefeuilles virtuels', detail: 'Se comparer aux autres membres, sous alias.' },
+                { href: '/portefeuille', titre: 'Mon portefeuille réel', detail: 'Passer du fictif à vos positions réelles.' },
+                { href: '/formations', titre: 'Se former', detail: 'Les parcours pour apprendre à investir.' },
+              ]} />
       </div>
     </div>
   );

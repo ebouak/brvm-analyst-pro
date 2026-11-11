@@ -1,6 +1,7 @@
 import { getAssetComparison } from '@/lib/compare/server';
 import AssetComparisonChart from '@/components/premium/AssetComparisonChart';
 import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const revalidate = 3600;
 export const metadata = { title: 'Comparateur multi-actifs' };
@@ -63,6 +64,11 @@ export default async function ComparateurPage() {
           </p>
         </>
       )}
+      <EtMaintenant suites={[
+              { href: '/obligations', titre: 'Les obligations', detail: 'Le marché obligataire.' },
+              { href: '/dividendes', titre: 'Dividendes', detail: 'Les rendements des sociétés distributrices.' },
+              { href: '/premium/outils', titre: 'Outils Pro', detail: 'Les autres outils d’analyse.' },
+            ]} />
     </div>
   );
 }

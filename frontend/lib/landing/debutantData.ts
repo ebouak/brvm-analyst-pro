@@ -10,6 +10,7 @@
  * page l'affiche comme telle.
  */
 import { unstable_cache } from 'next/cache';
+import type { LigneSignalPublic } from '@/lib/signals/publics';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getLastMarketDate } from '@/lib/marketDate';
 import { computeRatios } from '@/lib/fundamentals';
@@ -78,7 +79,8 @@ async function load(): Promise<DebutantData> {
     db.from('brvm_actions_daily').select('code, cours_jour, variation_pct, valeur_echangee').eq('date_marche', dateMarche),
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('fundamentals').select('code, year, revenue, net_income, equity, debt'),
-    db.from('signals_daily').select('code, score_total, confiance').eq('date_marche', dateMarche),
+    // Note publique seule (F-04).
+    db.rpc('signaux_publics').eq('date_marche', dateMarche),
     db.from('dividends').select('code, montant, exercice, ex_date, payment_date').gt('montant', 0).order('exercice', { ascending: false }),
     db.from('brvm_actions_daily').select('code, date_marche, cours_jour').eq('code', VEDETTE).gte('date_marche', from3).order('date_marche', { ascending: true }),
   ]);
@@ -106,7 +108,7 @@ async function load(): Promise<DebutantData> {
     const mieux = !prev || (r.exercice ?? -1) > (prev.exercice ?? -1) || ((r.exercice ?? -1) === (prev.exercice ?? -1) && !!r.payment_date && !prev.datee);
     if (mieux) declares.set(r.code, { montant: r.montant, exercice: r.exercice, datee: !!r.payment_date });
   }
-  const sig = new Map((sigRes.data ?? []).map((s) => [String(s.code), { score: s.score_total == null ? null : Number(s.score_total), conf: s.confiance == null ? null : Number(s.confiance) }]));
+  const sig = new Map(((sigRes.data ?? []) as LigneSignalPublic[]).map((s) => [String(s.code), { score: s.score_total == null ? null : Number(s.score_total), conf: s.confiance == null ? null : Number(s.confiance) }]));
 
   const fiche = (code: string, spark: string | null): FicheDebutant => {
     const c = cours.get(code);

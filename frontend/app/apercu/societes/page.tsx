@@ -11,7 +11,8 @@ async function getCompanies(): Promise<{ companies: CompanyCard[]; asOf: string 
   const [{ data: instruments }, { data: lastQuotes }, { data: signals }] = await Promise.all([
     supabase.from('brvm_instruments').select('code, designation, secteur, pays').eq('type', 'action').eq('actif', true).order('code'),
     supabase.from('brvm_actions_daily').select('code, cours_jour, variation_pct, date_marche').order('date_marche', { ascending: false }).limit(200),
-    supabase.from('signals_daily').select('code, score_total, confiance, date_marche').order('date_marche', { ascending: false }).limit(200),
+    // Note publique seule (F-04).
+    supabase.rpc('signaux_publics'),
   ]);
   const quoteByCode = new Map<string, { cours_jour: number | null; variation_pct: number | null; date_marche: string }>();
   for (const q of lastQuotes ?? []) if (!quoteByCode.has(q.code)) quoteByCode.set(q.code, q as never);

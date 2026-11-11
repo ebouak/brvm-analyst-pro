@@ -21,6 +21,8 @@ const PORTES = [
   { href: '/societes', titre: 'Les sociétés', detail: `Les ${NB_SOCIETES_COTEES} valeurs suivies et leurs fiches.` },
   { href: '/brief', titre: 'Le brief du jour', detail: 'La séance résumée chaque soir.' },
   { href: '/actualites', titre: 'Actualités', detail: "L'actualité BRVM et UEMOA." },
+  { href: '/formations', titre: 'Se former', detail: 'Les parcours pour apprendre à investir.' },
+  { href: '/pricing', titre: 'Les offres', detail: 'Ce que comprend chaque formule.' },
 ];
 
 export default function NotFound() {
@@ -34,7 +36,16 @@ export default function NotFound() {
         voici par où reprendre.
       </p>
 
-      <ul className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-2">
+      {/* Le paramètre `q` n'existe pas sur /societes : lien, pas de formulaire
+          qui ferait croire à une recherche. */}
+      <p className="mt-6 text-sm text-muted">
+        Vous cherchez une société&nbsp;?{' '}
+        <Link href="/societes" className="font-semibold text-accent-ink underline underline-offset-2">
+          Parcourir et rechercher parmi les {NB_SOCIETES_COTEES} valeurs
+        </Link>
+      </p>
+
+      <ul className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-2">
         {PORTES.map((p) => (
           <li key={p.href} className="bg-surface">
             <Link
