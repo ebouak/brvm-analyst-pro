@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: '%s | WESTBOURSE',
   },
   description:
-    "Plateforme d'analyse BRVM : cours toutes les 15 min, notation A–F sur les actions, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit.",
+    "Plateforme d'analyse BRVM : cours environ toutes les 15 minutes en séance, notation A–F sur les actions, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit.",
   keywords: [
     'BRVM', 'bourse BRVM', 'cours BRVM', 'investir BRVM', 'BRVM en direct',
     'actions UEMOA', 'bourse UEMOA', 'investissement Afrique de l’Ouest',
@@ -79,14 +79,14 @@ export const metadata: Metadata = {
     siteName: 'WESTBOURSE',
     title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
     description:
-      'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
+      'Cours BRVM environ toutes les 15 minutes en séance, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
     // og:image généré automatiquement par app/opengraph-image.tsx (1200×630).
   },
   twitter: {
     card: 'summary_large_image',
     title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
     description:
-      'Cours BRVM toutes les 15 min, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
+      'Cours BRVM environ toutes les 15 minutes en séance, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
     // twitter:image = fallback sur og:image (généré par opengraph-image.tsx).
   },
   alternates: {
@@ -168,7 +168,7 @@ const jsonLd = {
       browserRequirements: 'Requires JavaScript. Requires HTML5.',
       inLanguage: 'fr',
       description:
-        "Cours BRVM toutes les 15 minutes, notation A–F, fondamentaux vérifiés, rendement réel après impôt et inflation, comparateur de SGI et brief quotidien.",
+        "Cours BRVM environ toutes les 15 minutes en séance, notation A–F, fondamentaux vérifiés, rendement réel après impôt et inflation, comparateur de SGI et brief quotidien.",
       offers: {
         '@type': 'Offer',
         price: '0',
