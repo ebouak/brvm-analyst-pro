@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getValuation } from '@/lib/valuation/server';
 import { getScoring } from '@/lib/scoring/server';
 import { libelleSignal } from '@/lib/signalLabel';
+import { canAccess } from '@/lib/server/featureAccess';
+import { versSignalPublic, type LigneSignalPublic } from '@/lib/signals/publics';
 import PrintTrigger from '@/components/financials/PrintTrigger';
 import type { SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
@@ -24,9 +26,14 @@ export default async function RapportPage(props: Props) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createClient();
 
+  // Page publique (préfixe /actions). Le signal complet (avec sa lecture) est
+  // réservé à `signaux` ; sinon la note publique seule, comme /societes (F-04).
+  const gateSignaux = await canAccess('signaux');
   const [{ data: instr }, { data: sigRows }, valuation, scoring] = await Promise.all([
     supabase.from('brvm_instruments').select('designation, secteur, pays').eq('code', code).maybeSingle(),
-    supabase.from('signals_daily').select('*').eq('code', code).order('date_marche', { ascending: false }).limit(1),
+    gateSignaux.allowed
+      ? supabase.from('signals_daily').select('*').eq('code', code).order('date_marche', { ascending: false }).limit(1)
+      : supabase.rpc('signaux_publics', { p_code: code }),
     getValuation(code).catch(() => null),
     getScoring(code).catch(() => null),
   ]);
@@ -35,7 +42,12 @@ export default async function RapportPage(props: Props) {
 
   const designation = (instr as { designation?: string } | null)?.designation ?? code;
   const secteur = (instr as { secteur?: string } | null)?.secteur ?? '';
-  const signal = (sigRows?.[0] ?? null) as SignalDaily | null;
+  const ligneSig = (sigRows?.[0] ?? null) as (SignalDaily | LigneSignalPublic) | null;
+  const signal: SignalDaily | null = !ligneSig
+    ? null
+    : gateSignaux.allowed
+      ? (ligneSig as SignalDaily)
+      : versSignalPublic(ligneSig as LigneSignalPublic);
   const m = valuation?.metrics ?? null;
   const fv = valuation?.fairValue ?? null;
   const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });

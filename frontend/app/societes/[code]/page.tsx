@@ -42,12 +42,8 @@ async function getCompany(code: string) {
         .eq('code', code)
         .order('date_marche', { ascending: false })
         .limit(260),
-      supabase
-        .from('signals_daily')
-        .select('score_total, confiance, signal, date_marche')
-        .eq('code', code)
-        .order('date_marche', { ascending: false })
-        .limit(1),
+      // Client sans session : dernière note par la fonction bornée (F-04).
+      supabase.rpc('signaux_publics', { p_code: code }).select('score_total, confiance, signal, date_marche'),
       supabase
         .from('fundamentals')
         .select('year, revenue, net_income, equity, cash, debt, bfr, is_manual, source_file')

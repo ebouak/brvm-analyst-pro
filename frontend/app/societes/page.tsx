@@ -36,11 +36,9 @@ async function getCompanies(): Promise<{ companies: CompanyCard[]; dateSeance: s
       // sans cotation sur cette fenêtre s'affiche « — » : c'est voulu, on ne
       // va pas chercher un cours plus ancien pour combler la case.
       .limit(200),
-    supabase
-      .from('signals_daily')
-      .select('code, score_total, confiance, date_marche')
-      .order('date_marche', { ascending: false })
-      .limit(200),
+    // Page publique : la dernière note par valeur, par la fonction bornée
+    // (F-04). La table elle-même n'est plus lisible sans session.
+    supabase.rpc('signaux_publics').select('code, score_total, confiance, date_marche'),
   ]);
 
   // Dernière cotation / dernier signal par code (requêtes triées par date desc)
