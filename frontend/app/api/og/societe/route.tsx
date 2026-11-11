@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         .order('date_marche', { ascending: false })
         .limit(30),
       // Note publique seule (F-04).
-      supabase.rpc('signaux_publics', { p_code: code }).select('score_total, confiance'),
+      supabase.rpc('signaux_publics', { p_code: code }),
     ]);
     if (instr?.designation) {
       designation = instr.designation;

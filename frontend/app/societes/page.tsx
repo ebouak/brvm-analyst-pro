@@ -38,7 +38,7 @@ async function getCompanies(): Promise<{ companies: CompanyCard[]; dateSeance: s
       .limit(200),
     // Page publique : la dernière note par valeur, par la fonction bornée
     // (F-04). La table elle-même n'est plus lisible sans session.
-    supabase.rpc('signaux_publics').select('code, score_total, confiance, date_marche'),
+    supabase.rpc('signaux_publics'),
   ]);
 
   // Dernière cotation / dernier signal par code (requêtes triées par date desc)

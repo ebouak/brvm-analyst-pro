@@ -79,7 +79,7 @@ async function load(): Promise<DebutantData> {
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('fundamentals').select('code, year, revenue, net_income, equity, debt'),
     // Note publique seule (F-04).
-    db.rpc('signaux_publics').select('code, score_total, confiance').eq('date_marche', dateMarche),
+    db.rpc('signaux_publics').eq('date_marche', dateMarche),
     db.from('dividends').select('code, montant, exercice, ex_date, payment_date').gt('montant', 0).order('exercice', { ascending: false }),
     db.from('brvm_actions_daily').select('code, date_marche, cours_jour').eq('code', VEDETTE).gte('date_marche', from3).order('date_marche', { ascending: true }),
   ]);

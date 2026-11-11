@@ -43,7 +43,7 @@ async function getCompany(code: string) {
         .order('date_marche', { ascending: false })
         .limit(260),
       // Client sans session : dernière note par la fonction bornée (F-04).
-      supabase.rpc('signaux_publics', { p_code: code }).select('score_total, confiance, signal, date_marche'),
+      supabase.rpc('signaux_publics', { p_code: code }),
       supabase
         .from('fundamentals')
         .select('year, revenue, net_income, equity, cash, debt, bfr, is_manual, source_file')
