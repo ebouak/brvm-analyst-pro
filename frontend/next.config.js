@@ -27,6 +27,10 @@ const nextConfig = {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
       { source: '/premium/backtesting', destination: '/backtest', permanent: true },
+      // Seconde version du tableau de bord retirée le 2026-11-11 : ses deux apports
+      // (verdict à règle affichée, cote sur un axe unique) sont repris dans
+      // /dashboard, bloc « Lecture de la séance ».
+      { source: '/dashboard/v2', destination: '/dashboard', permanent: true },
       // /rendement-reel fusionné dans /rendement-vrai (vue « cours seul · réel »).
       // 308 edge — les query params entrants (code, annees) sont conservés et
       // fusionnés avec mode=reel. Consolide le SEO des deux anciennes URL.

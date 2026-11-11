@@ -81,7 +81,7 @@ export function LoginMarketBar({ asOf, ticks, candles }: { asOf: string | null; 
   const doubled = [...ticks, ...ticks];
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col overflow-hidden">
       {/* Ticker des cours du jour */}
       <div
         className="overflow-hidden border-b border-white/5 bg-black/40 py-2 backdrop-blur-sm"

@@ -1,7 +1,7 @@
 /** Registre des widgets du dashboard + résolution du layout utilisateur (pur). */
 
 export type WidgetKey =
-  | 'etat' | 'comprendre' | 'seance' | 'agenda' | 'publications' | 'portefeuille'
+  | 'etat' | 'comprendre' | 'lecture' | 'seance' | 'agenda' | 'publications' | 'portefeuille'
   | 'signaux' | 'secteurs' | 'indices' | 'liquidite' | 'actus';
 
 export interface WidgetMeta { key: WidgetKey; label: string; desc: string }
@@ -10,6 +10,7 @@ export interface WidgetMeta { key: WidgetKey; label: string; desc: string }
 export const WIDGETS: WidgetMeta[] = [
   { key: 'etat', label: 'Récit de séance', desc: 'La séance racontée : titre, chapô, six mesures' },
   { key: 'comprendre', label: 'Comprendre la séance', desc: 'La séance en constats simples' },
+  { key: 'lecture', label: 'Lecture de la séance', desc: 'Verdict et sa règle, la séance pesée trois fois, toute la cote sur un axe' },
   { key: 'seance', label: 'Séance du jour', desc: 'Trajectoire des indices et moteur de signaux' },
   { key: 'agenda', label: 'Agenda', desc: 'Dividendes et jours fermés des 30 prochains jours' },
   { key: 'publications', label: 'Publications', desc: 'Documents des émetteurs, 7 derniers jours' },
@@ -34,7 +35,7 @@ export const ORDRE_DEBUTANT: WidgetKey[] = WIDGETS.map((w) => w.key);
 
 /** Actif : ce qui le concerne d'abord (spec §3). `comprendre` y figure mais masqué par défaut. */
 export const ORDRE_ACTIF: WidgetKey[] = [
-  'portefeuille', 'agenda', 'publications', 'etat', 'comprendre', 'seance',
+  'portefeuille', 'agenda', 'publications', 'etat', 'comprendre', 'lecture', 'seance',
   'liquidite', 'signaux', 'secteurs', 'indices', 'actus',
 ];
 
@@ -79,7 +80,7 @@ export function resolveLayout(saved: DashboardLayout | null | undefined, profil:
 export type Largeur = 'pleine' | 'demi' | 'tiers';
 
 export const LARGEUR: Record<WidgetKey, Largeur> = {
-  portefeuille: 'pleine', etat: 'pleine', comprendre: 'pleine', seance: 'pleine', indices: 'pleine',
+  portefeuille: 'pleine', etat: 'pleine', comprendre: 'pleine', lecture: 'pleine', seance: 'pleine', indices: 'pleine',
   agenda: 'demi', publications: 'demi', liquidite: 'demi',
   signaux: 'pleine', secteurs: 'tiers', actus: 'pleine',
 };
