@@ -120,9 +120,9 @@ export function MetricCard({
 /* ── SignalBadge : pastille BUY/HOLD/SELL statutaire ─────────────────────── */
 export function SignalBadge({ signal }: { signal: 'BUY' | 'HOLD' | 'SELL' | string }) {
   const map: Record<string, { cls: string; label: string }> = {
-    BUY: { cls: 'border-up/30 bg-up/5 text-up', label: 'Achat' },
-    SELL: { cls: 'border-down/30 bg-down/5 text-down', label: 'Vente' },
-    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'Attente' },
+    BUY: { cls: 'border-up/30 bg-up/5 text-up', label: 'Signal haussier' },
+    SELL: { cls: 'border-down/30 bg-down/5 text-down', label: 'Signal baissier' },
+    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'Neutre' },
   };
   const m = map[signal] ?? { cls: 'border-border bg-elevated text-muted', label: libelleSignal(signal) };
   return (

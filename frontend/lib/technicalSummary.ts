@@ -189,7 +189,7 @@ export interface TechnicalVerdict {
 }
 
 /**
- * Dérive un verdict global (Vente forte … Achat fort) à partir du décompte des
+ * Dérive une orientation globale (Très baissier … Très haussier) à partir du décompte des
  * signaux. Score = (haussiers - baissiers) / total des signaux valides, borné
  * à [-1, 1]. Honnête : si aucun signal valide, verdict neutre, aiguille au centre.
  */
@@ -202,11 +202,11 @@ export function technicalVerdict(
 
   let tone: VerdictTone;
   let label: string;
-  if (score <= -0.5) { tone = 'strong-sell'; label = 'Vente forte'; }
-  else if (score < -0.15) { tone = 'sell'; label = 'Vente'; }
+  if (score <= -0.5) { tone = 'strong-sell'; label = 'Très baissier'; }
+  else if (score < -0.15) { tone = 'sell'; label = 'Baissier'; }
   else if (score <= 0.15) { tone = 'neutral'; label = 'Neutre'; }
-  else if (score < 0.5) { tone = 'buy'; label = 'Achat'; }
-  else { tone = 'strong-buy'; label = 'Achat fort'; }
+  else if (score < 0.5) { tone = 'buy'; label = 'Haussier'; }
+  else { tone = 'strong-buy'; label = 'Très haussier'; }
 
   return { label, tone, position, score };
 }

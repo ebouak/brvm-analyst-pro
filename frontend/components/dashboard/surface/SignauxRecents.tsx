@@ -5,7 +5,7 @@ import { TeteBloc } from './Grille';
 
 const note = (x: number) => x.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' });
 
-const LIB: Record<string, string> = { BUY: 'Achat', SELL: 'Vente', HOLD: 'Attente' };
+const LIB: Record<string, string> = { BUY: 'Haussier', SELL: 'Baissier', HOLD: 'Neutre' };
 
 /** Signaux récents (premium) au style de la surface ; un libellé et un lien vers l'explication, pas d'incitation. */
 export default function SignauxRecents({ signaux, notes = [] }: { signaux: SignalDaily[]; notes?: NoteSeance[] }) {

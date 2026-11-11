@@ -61,7 +61,7 @@ export default function TechnicalGauge({ result }: { result: TechnicalSummaryRes
   return (
     <div className="flex flex-col items-center">
       <svg viewBox="0 0 200 124" className="w-full max-w-[300px]" role="img"
-        aria-label={`Verdict analyse technique : ${verdict.label}`}>
+        aria-label={`Orientation des indicateurs techniques : ${verdict.label}`}>
         {/* Arcs colorés */}
         {ZONES.map((z) => (
           <path
@@ -93,23 +93,23 @@ export default function TechnicalGauge({ result }: { result: TechnicalSummaryRes
 
       {/* Bornes */}
       <div className="w-full max-w-[300px] flex justify-between -mt-1 px-1 text-xs text-faint">
-        <span>Vente forte</span>
-        <span>Achat fort</span>
+        <span>Très baissier</span>
+        <span>Très haussier</span>
       </div>
 
-      {/* Décompte Vente / Neutre / Achat */}
+      {/* Décompte baissiers / neutres / haussiers */}
       <div className="mt-3 grid grid-cols-3 gap-2 w-full max-w-[300px] text-center">
         <div>
           <div className="text-down font-mono tabular text-lg font-semibold">{bearCount}</div>
-          <div className="text-xs text-muted">Vente</div>
+          <div className="text-xs text-muted">Baissiers</div>
         </div>
         <div>
           <div className="text-muted font-mono tabular text-lg font-semibold">{neutCount}</div>
-          <div className="text-xs text-muted">Neutre</div>
+          <div className="text-xs text-muted">Neutres</div>
         </div>
         <div>
           <div className="text-up font-mono tabular text-lg font-semibold">{bullCount}</div>
-          <div className="text-xs text-muted">Achat</div>
+          <div className="text-xs text-muted">Haussiers</div>
         </div>
       </div>
     </div>

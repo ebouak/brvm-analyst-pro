@@ -236,15 +236,15 @@ export default async function ScannerPage(props: PageProps) {
             Zone surachetée
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium">ACHAT</span>
-            Signal haussier confirmé
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium">Haussier</span>
+            Indicateurs orientés à la hausse
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-down/15 text-down font-medium">VENTE</span>
-            Signal baissier confirmé
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-down/15 text-down font-medium">Baissier</span>
+            Indicateurs orientés à la baisse
           </span>
           <span className="text-faint">
-            Score : sous-score agrégé · Confiance entre parenthèses
+            Score : sous-score agrégé · Complétude des données entre parenthèses
           </span>
         </div>
       </div>

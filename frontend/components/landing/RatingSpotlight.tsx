@@ -66,7 +66,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
           </div>
           <SubscoreBars signal={signal} />
           <p className="mt-4 text-[11px] text-faint">
-            {libelleSignal(signal.signal)} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
+            {libelleSignal(signal.signal)} · complétude des données {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
           </p>
         </div>
       </div>

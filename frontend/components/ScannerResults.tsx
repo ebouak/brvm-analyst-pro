@@ -19,7 +19,7 @@ const SCANNER_CSV_COLUMNS: CsvColumn<ScanRow>[] = [
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
   { header: 'Signal', accessor: (r) => r.signal ?? '' },
   { header: 'Score', accessor: (r) => r.score ?? '' },
-  { header: 'Confiance %', accessor: (r) => r.confiance ?? '' },
+  { header: 'Complétude des données %', accessor: (r) => r.confiance ?? '' },
 ];
 
 type SortKey = keyof Pick<
@@ -34,15 +34,15 @@ interface Props {
 function signalBadge(signal: ScanRow['signal']) {
   if (signal === 'BUY')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">Achat</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">Haussier</span>
     );
   if (signal === 'SELL')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">Vente</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">Baissier</span>
     );
   if (signal === 'HOLD')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">Attente</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">Neutre</span>
     );
   return <span className="text-muted">—</span>;
 }

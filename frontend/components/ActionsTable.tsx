@@ -41,10 +41,10 @@ const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
 
 /** Ce que mesure la confiance (docs/SCORING.md : 0,5 complétude + 0,3 historique + 0,2 netteté). */
 const CONFIANCE_AIDE =
-  "Confiance du modèle : part de données disponibles et d'historique derrière le score (50 % complétude des entrées, 30 % richesse de l'historique, 20 % netteté du score). Ce n'est pas une probabilité de gain.";
-const NOTE_AIDE = 'Note BRVM A–F, dérivée du score quantitatif. NR (non noté) quand la confiance du modèle est trop faible.';
+  "Complétude des données : part de données disponibles et d'historique derrière le score (50 % complétude des entrées, 30 % richesse de l'historique, 20 % netteté du score). Ce n'est pas une probabilité de gain.";
+const NOTE_AIDE = 'Note BRVM A–F, dérivée du score quantitatif. NR (non noté) quand la complétude des données est trop faible.';
 
-const LIBELLE_SIGNAL: Record<string, string> = { BUY: 'achat', HOLD: 'attente', SELL: 'vente' };
+const LIBELLE_SIGNAL: Record<string, string> = { BUY: 'haussier', HOLD: 'neutre', SELL: 'baissier' };
 
 function fmtConfiance(c: number | null | undefined): string {
   return c == null ? '—' : `${Math.round(c * 100)} %`;
@@ -358,7 +358,7 @@ export default function ActionsTable({
                   <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
                   {sig?.signal && (
                     <div className="text-[11px] text-muted leading-tight mt-0.5" title={CONFIANCE_AIDE}>
-                      Signal : {LIBELLE_SIGNAL[sig.signal]} · Confiance du modèle : <span className="tabular">{fmtConfiance(sig.confiance)}</span>
+                      Signal : {LIBELLE_SIGNAL[sig.signal]} · Complétude des données : <span className="tabular">{fmtConfiance(sig.confiance)}</span>
                     </div>
                   )}
                 </div>
@@ -400,7 +400,7 @@ export default function ActionsTable({
                     Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
                   </th>
                   <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap" title={CONFIANCE_AIDE}>
-                    Confiance du modèle
+                    Complétude des données
                   </th>
                 </>
               )}
