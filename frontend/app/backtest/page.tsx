@@ -21,6 +21,7 @@ import {
   StatPill,
   Eyebrow,
 } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
@@ -486,6 +487,11 @@ export default async function BacktestPage(props: PageProps) {
           </div>
         </>
       )}
+      <EtMaintenant suites={[
+              { href: '/signaux', titre: 'Les signaux', detail: 'Les signaux du jour et leur explication.' },
+              { href: '/screener', titre: 'Filtrer le marché', detail: 'Trouver des valeurs par critères.' },
+              { href: '/journal', titre: 'Mon journal', detail: 'Noter une thèse et la suivre.' },
+            ]} />
     </div>
   );
 }

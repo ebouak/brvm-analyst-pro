@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import FilAriane from '@/components/nav/FilAriane';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { fmtDateCourte } from '@/lib/format';
@@ -24,6 +25,7 @@ export default async function HebdoIndexPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
+      <FilAriane variante="public" className="mb-6" />
       <EnTeteCote
         titre="Analyses hebdomadaires"
         description="Chaque samedi, les valeurs de la BRVM qui ont le plus bougé dans la semaine, en hausse comme en baisse, lues sur leurs cours et leur RSI."

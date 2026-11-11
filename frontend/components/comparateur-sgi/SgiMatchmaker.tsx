@@ -380,7 +380,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                 {showAll ? 'Masquer' : `Voir le classement complet (${matches.length} SGI)`}
               </button>
               {showAll && (
-                <div className="mt-3 overflow-x-auto">
+                <div className="mt-3 relative overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-left">

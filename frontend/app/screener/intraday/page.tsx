@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import IntraDayPatternsTable from '@/components/screener/IntraDayPatternsTable';
 import { canAccess } from '@/lib/server/featureAccess';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,11 @@ export default async function IntraDayScreenerPage() {
           </p>
         </div>
       </div>
+      <EtMaintenant suites={[
+              { href: '/screener', titre: 'Screener', detail: 'Filtrer par critères simples.' },
+              { href: '/scanner', titre: 'Scanner technique', detail: 'RSI, MACD et moyennes mobiles.' },
+              { href: '/actions', titre: 'Le marché', detail: 'Toutes les valeurs cotées.' },
+            ]} />
     </div>
   );
 }

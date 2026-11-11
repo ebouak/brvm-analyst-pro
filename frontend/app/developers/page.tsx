@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import FilAriane from '@/components/nav/FilAriane';
 import ApiAccessForm from '@/components/developers/ApiAccessForm';
 
 // Le formulaire de demande de clé est un composant client : la page ne peut plus
@@ -74,6 +75,7 @@ export default function DevelopersPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+        <FilAriane variante="public" />
         <div>
           <h1 className="font-display text-3xl text-white">API BRVM</h1>
           <p className="mt-3 max-w-2xl text-muted leading-relaxed">

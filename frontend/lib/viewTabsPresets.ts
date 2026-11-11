@@ -10,7 +10,7 @@ import type { ViewTab } from '@/components/ViewTabs';
 export const INTEL_TABS: ViewTab[] = [
   { href: '/actualites', label: 'Actualités' },
   { href: '/veille', label: 'Veille Intelligence' },
-  { href: '/weekly', label: 'Analyses hebdo' },
+  { href: '/weekly', label: 'Matières premières' },
 ];
 
 /** Espace Fondamentaux : ratios + notations des émetteurs. */

@@ -1,3 +1,7 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { urlFormules } from '@/lib/auth/urlsAcces';
 import Link from 'next/link';
 import { LienSuivi } from '@/components/analytics/LienSuivi';
 
@@ -20,13 +24,18 @@ export function SectionLock({
   titre,
   pitch,
   suivi,
+  from,
 }: {
   required: 'premium' | 'pro' | 'disabled';
   titre: string;
   pitch: string;
   /** Propriétés de l'événement `fiche_verrou_clic` ; absent = aucun suivi. */
   suivi?: Record<string, unknown>;
+  /** Page à retrouver après l'abonnement ; par défaut la page courante. */
+  from?: string;
 }) {
+  const pathname = usePathname();
+  const hrefFormules = urlFormules(from ?? pathname);
   // Kill switch : proposer un abonnement serait mensonger — payer ne débloque rien.
   if (required === 'disabled') {
     return (
@@ -58,11 +67,11 @@ export function SectionLock({
         </div>
       </div>
       {suivi ? (
-        <LienSuivi href="/account/plan" evenement="fiche_verrou_clic" proprietes={suivi} className={BOUTON}>
+        <LienSuivi href={hrefFormules} evenement="fiche_verrou_clic" proprietes={suivi} className={BOUTON}>
           Débloquer
         </LienSuivi>
       ) : (
-        <Link href="/account/plan" className={BOUTON}>
+        <Link href={hrefFormules} className={BOUTON}>
           Débloquer
         </Link>
       )}

@@ -3,6 +3,7 @@ import { loadTheses } from '@/lib/journal/queries';
 import { computeBilan } from '@/lib/journal/bilan';
 import { fmtDateCourte } from '@/lib/format';
 import CloturerButton from '@/components/journal/CloturerButton';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Journal de décision' };
@@ -110,6 +111,11 @@ export default async function JournalPage() {
           </section>
         )}
       </div>
+      <EtMaintenant suites={[
+              { href: '/portefeuille', titre: 'Mon portefeuille', detail: 'Les positions ouvertes et leur résultat.' },
+              { href: '/signaux', titre: 'Les signaux', detail: 'Où le moteur voit une opportunité, avec ses raisons.' },
+              { href: '/actions', titre: 'Le marché', detail: 'Les valeurs cotées à la BRVM.' },
+            ]} />
     </div>
   );
 }

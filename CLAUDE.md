@@ -1490,6 +1490,28 @@ Refonte par le skill `unslop`, sans changer l'ordre du fond : tests purs
 - **Fraîcheur** : aucune vidéo figée sur le site ; tout est rendu chaque soir
   par `video-seance.yml` sous le verrou de publiabilité existant.
 
+### Ajouts (passage 2026-11-11) — Audit F-04 : tables d'analyse lisibles à la clé publique
+
+PR #232, migrations `0212` et `0213` **appliquées**. Avis Fable suivi (expansion puis
+contraction, fonction bornée plutôt que vue SECURITY DEFINER).
+
+- **`public.signaux_publics(p_code)`** (0212) : dernière séance par valeur, cinq
+  colonnes (code, date, signal, score, confiance). Les pages servies SANS session
+  (`createPublicClient` : `/societes`, OG, landing, `/apercu`) la lisent. Avertissement
+  advisors `anon_security_definer_function_executable` attendu : publique par conception.
+- **Décision produit (option A)** : `signaux`, `actions_metrics`,
+  `indicateurs_techniques`, `screener_intraday`, `backtest` sont « free » depuis le
+  2026-07-15, et ⚠️ **`canAccess` accorde « free » à TOUT visiteur, anonyme compris**.
+  Leurs tables restent donc publiques ; seule `advisor_history` (Premium, sans lecteur)
+  est fermée (0213). **Si un de ces flags repasse en « premium », sa table devient une
+  fuite par l'API REST** : la fermer alors, après avoir basculé ses lecteurs anonymes.
+- **Fuites de code corrigées** (indépendantes de la RLS) : `/apercu/actions` et
+  `/apercu/signaux` affichaient les colonnes calculées sans contrôle ;
+  `/api/reports/market/daily` renvoyait les signaux sans session ; `/api/metrics`
+  comptait à la clé publique.
+- `/rapports/dossier/[code]` lit avec le client serveur : le worker d'impression n'a
+  pas de session, et une table fermée lui rendrait `[]` en silence.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

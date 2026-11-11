@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, Lock } from 'lucide-react';
+import { ChevronDown, Lock, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -8,6 +8,7 @@ import BeginnerToggle from '@/components/BeginnerToggle';
 import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import UserAvatarMenu from '@/components/profile/UserAvatarMenu';
+import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 const COLLAPSE_KEY = 'wb_nav_collapsed';
@@ -20,7 +21,7 @@ export default function Sidebar({
   isAdmin?: boolean;
 }) {
   const pathname = usePathname();
-  const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
+  const groups = NAV_GROUPS;
 
   // Groupes repliés (persistés). Un groupe contenant la route active est forcé ouvert.
   const [collapsed, setCollapsed] = useState<Record<string, boolean> | null>(null);
@@ -53,6 +54,20 @@ export default function Sidebar({
           </div>
         </div>
       </div>
+      {/* Recherche visible (P2-1) : la palette existait, mais seul qui connaissait
+          le raccourci la trouvait sur ordinateur. */}
+      <div className="px-3 pb-3">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event(OPEN_PALETTE_EVENT))}
+          aria-keyshortcuts="Control+K"
+          className={`flex w-full items-center gap-2 rounded-lg border border-border bg-bg/60 px-3 py-2 text-sm text-muted hover:border-border-strong hover:text-ivory ${EASE}`}
+        >
+          <Search size={14} aria-hidden />
+          Rechercher
+          <kbd className="ml-auto rounded border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">Ctrl K</kbd>
+        </button>
+      </div>
       <div className="mx-4 h-px bg-gold-line opacity-60" />
 
       {/* Navigation */}
@@ -68,13 +83,7 @@ export default function Sidebar({
               aria-expanded={isOpen ? 'true' : 'false'}
               className={`group/h flex w-full items-center justify-between px-2 mb-1.5 ${EASE} ${hasActive ? 'cursor-default' : 'cursor-pointer hover:text-muted'}`}
             >
-              <span className="overline text-[11px] text-faint">
-                {group.label === 'Premium' ? (
-                  <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
-                ) : (
-                  group.label
-                )}
-              </span>
+              <span className="overline text-[11px] text-faint">{group.label}</span>
               {!hasActive && (
                 <ChevronDown size={13} strokeWidth={2} aria-hidden className={`text-faint ${EASE} ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
               )}
@@ -87,7 +96,7 @@ export default function Sidebar({
                   return (
                     <Link
                       key={item.href}
-                      href="/premium/upgrade"
+                      href={`/premium/upgrade?from=${encodeURIComponent(item.href)}`}
                       className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-faint hover:text-gold hover:bg-gold/[0.06] ${EASE}`}
                     >
                       {item.label}
@@ -129,15 +138,11 @@ export default function Sidebar({
 
       {/* Pied */}
       <div className="px-4 py-3.5 border-t border-border space-y-3">
-        {/* Menu utilisateur (avatar + badge + déconnexion) */}
-        <UserAvatarMenu />
-        <div className="flex justify-center gap-4 text-[11px]">
-          <Link href="/methodologie" className="text-faint hover:text-muted transition-colors">
-            Méthodologie
-          </Link>
-          <Link href="/parametres/compte" className="text-faint hover:text-muted transition-colors">
-            Paramètres
-          </Link>
+        {/* Menu du compte (avatar) : abonnement, facturation, sécurité, profil,
+            achats, formations, données personnelles ; Admin pour le super-admin. */}
+        <div className="flex items-center gap-2">
+          <UserAvatarMenu isAdmin={isAdmin} />
+          <span className="text-xs text-faint">Mon compte</span>
         </div>
         <div className="flex justify-center">
           <BeginnerToggle />

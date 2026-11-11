@@ -1,3 +1,7 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { urlFormules } from '@/lib/auth/urlsAcces';
 import { EmptyStatePremium } from '@/components/ui/premium';
 
 /**
@@ -11,13 +15,17 @@ export function AccessGate({
   required,
   feature,
   hint,
+  from,
 }: {
   /** Niveau exigé, TEL QUE LU EN BASE (feature_flags) — jamais décidé par le code. */
   required: 'premium' | 'pro' | 'disabled';
   /** Nom de la fonctionnalité, ex. « Le Conseiller ». */
   feature: string;
   hint?: string;
+  /** Page à retrouver après l'abonnement ; par défaut la page courante. */
+  from?: string;
 }) {
+  const pathname = usePathname();
   // Kill switch : la fonctionnalité est coupée pour tout le monde, abonnés compris.
   // Proposer un abonnement ici serait mensonger — payer ne débloquerait rien.
   if (required === 'disabled') {
@@ -42,7 +50,7 @@ export function AccessGate({
           hint ??
           `Cette fonctionnalité est incluse dans l'abonnement ${label}. Débloquez-la en quelques minutes.`
         }
-        action={{ href: '/account/plan', label: `Passer à ${label}` }}
+        action={{ href: urlFormules(from ?? pathname), label: `Passer à ${label}` }}
       />
     </div>
   );

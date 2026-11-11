@@ -6,10 +6,17 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import UserAvatar from './UserAvatar';
 import { phReset } from '@/lib/analytics/posthogClient';
+import { MENU_COMPTE } from '@/lib/nav';
 
 interface Me { email: string; displayName: string; avatarUrl: string | null; isPremium: boolean }
 
-export default function UserAvatarMenu() {
+/**
+ * Menu du compte (refonte de navigation, lot 4) : abonnement, facturation,
+ * sécurité, profil, achats, formations, données personnelles et formules, lus
+ * dans le registre (MENU_COMPTE). L'entrée Admin n'apparaît que pour le
+ * super-admin (`isAdmin`, calculé côté serveur dans app/layout.tsx).
+ */
+export default function UserAvatarMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   const [me, setMe] = useState<Me | null>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
@@ -56,7 +63,7 @@ export default function UserAvatarMenu() {
   return (
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
-        aria-label="Menu utilisateur" aria-haspopup="true" aria-expanded={open}
+        aria-label="Menu du compte" aria-haspopup="true" aria-expanded={open}
         className="flex items-center gap-2 rounded-full transition hover:ring-2 hover:ring-accent/30">
         <UserAvatar src={me.avatarUrl} name={me.displayName} size="sm" />
       </button>
@@ -74,11 +81,7 @@ export default function UserAvatarMenu() {
             </span>
           </div>
           <div className="py-1 text-sm">
-            {[
-              { href: '/profil', label: 'Mon profil' },
-              { href: '/portefeuille', label: 'Mon portefeuille' },
-              { href: '/parametres/compte', label: 'Paramètres' },
-            ].map((it) => (
+            {[...MENU_COMPTE, ...(isAdmin ? [{ href: '/admin', label: 'Administration' }] : [])].map((it) => (
               <Link key={it.href} href={it.href} onClick={() => setOpen(false)}
                 className="block px-4 py-2 text-muted hover:bg-white/[0.04] hover:text-white transition">
                 {it.label}
