@@ -74,7 +74,6 @@ export const REGISTRE: EntreeNav[] = [
   // ── Aujourd'hui ────────────────────────────────────────────────────────────
   { chemin: '/dashboard', libelle: 'Tableau de bord', rubrique: 'aujourdhui', statut: 'menu' },
   { chemin: '/dashboard/personnaliser', libelle: 'Personnaliser', rubrique: 'aujourdhui', parent: '/dashboard', statut: 'secondaire', raison: 'réglage, lié depuis le tableau de bord' },
-  { chemin: '/dashboard/v2', libelle: 'Tableau de bord v2', rubrique: 'aujourdhui', parent: '/dashboard', statut: 'essai', raison: 'seconde version, décision produit en attente (spec §7)' },
   { chemin: '/brief', libelle: 'Brief de séance', rubrique: 'aujourdhui', statut: 'menu' },
   { chemin: '/brief/[date]', libelle: 'Brief de séance', rubrique: 'aujourdhui', parent: '/brief', statut: 'public', raison: 'brief daté (SEO)', libelleParam: true },
   { chemin: '/actualites', libelle: 'Actualités', rubrique: 'aujourdhui', statut: 'menu' },
@@ -128,7 +127,6 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/analyse/combined-alpha', libelle: 'Combined Alpha', rubrique: 'idee', statut: 'menu' },
   { chemin: '/backtest', libelle: 'Backtest', rubrique: 'idee', statut: 'menu' },
   { chemin: '/backtests/demo', libelle: 'Infographie de backtest', rubrique: 'idee', parent: '/backtest', statut: 'interne', raison: 'support du test e2e/animated.spec.ts' },
-  { chemin: '/premium/backtesting', libelle: 'Backtest (ancienne adresse)', rubrique: 'idee', parent: '/backtest', statut: 'interne', raison: 'jamais servie : redirigée en 308 vers /backtest, fichier supprimé au lot 2' },
   { chemin: '/premium/outils', libelle: 'Outils Pro', rubrique: 'idee', statut: 'menu', premium: true },
   { chemin: '/premium/anomalies', libelle: 'Anomalies de marché', rubrique: 'idee', parent: '/premium/outils', statut: 'secondaire', raison: 'outil du hub Outils Pro', premium: true },
   { chemin: '/premium/correlations', libelle: 'Corrélations avec les matières premières', rubrique: 'idee', parent: '/premium/outils', statut: 'secondaire', raison: 'outil du hub Outils Pro', premium: true },
