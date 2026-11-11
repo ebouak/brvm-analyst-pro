@@ -115,7 +115,7 @@ export default function BienvenuePicker({ actions }: { actions: WelcomeAction[] 
 
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
-              href={`/societes/${selected.code}`}
+              href={`/actions/${selected.code}`}
               className="landing-hero-cta inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
             >
               Voir la fiche complète <span aria-hidden>→</span>

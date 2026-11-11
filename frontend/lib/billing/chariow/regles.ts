@@ -176,6 +176,8 @@ export const corpsCheckout = z
     productCode: z.string().regex(/^[a-z0-9:_-]{3,60}$/),
     firstName: z.string().trim().min(1).max(50),
     lastName: z.string().trim().min(1).max(50),
+    // Page à retrouver après le paiement : re-assainie côté serveur (fromSur).
+    from: z.string().max(300).optional(),
     phone: z
       .object({
         number: z.string().regex(/^\d{6,15}$/, 'Numéro : chiffres uniquement'),

@@ -15,7 +15,7 @@ type Etat = 'attente' | 'paid' | 'failed' | 'inconnu' | 'delai';
 const ESSAIS = 20;
 const INTERVALLE_MS = 3000;
 
-export default function SuiviPaiement({ txn }: { txn: string }) {
+export default function SuiviPaiement({ txn, from = null }: { txn: string; from?: string | null }) {
   const [etat, setEtat] = useState<Etat>('attente');
   const [objet, setObjet] = useState<string | null>(null);
 
@@ -76,6 +76,11 @@ export default function SuiviPaiement({ txn }: { txn: string }) {
           >
             {destination.label} →
           </Link>
+          {from && (
+            <Link href={from} className="mt-3 block text-sm text-accent underline">
+              Revenir à la page demandée
+            </Link>
+          )}
         </>
       )}
       {etat === 'failed' && (

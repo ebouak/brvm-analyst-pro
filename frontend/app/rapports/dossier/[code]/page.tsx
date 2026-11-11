@@ -9,6 +9,8 @@ import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
 import { perAffichable, distributionAffichable, horsExploitation, dividendeCourant, evolutionResultat } from '@/lib/fiche/affichage';
+import Link from 'next/link';
+import { documentsFiche } from '@/components/sousPage/SousPageNav';
 import ImprimerDossier from './ImprimerDossier';
 import './dossier.css';
 
@@ -177,7 +179,12 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
     svc && url
       ? (await chargerContexteQuant(createSbAdmin(url, svc, { auth: { persistSession: false } }), params.code.toUpperCase())).medianes
       : null;
-  const d = await buildDossier(sb, params.code, { medianes });
+  /* Le worker d'impression n'a pas de session : sans le client serveur, le
+     signal (signals_daily, fermé à l'anonyme depuis F-04) sortirait vide en
+     silence. La page elle-même reste derrière le middleware (session ou
+     secret d'impression) : ce client ne sert qu'à lire. */
+  const sbLecture = svc && url ? createSbAdmin(url, svc, { auth: { persistSession: false } }) : sb;
+  const d = await buildDossier(sbLecture, params.code, { medianes });
   if (!d) notFound();
 
   const n = construireNarratif(d);
@@ -209,6 +216,17 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           <span>Dossier incohérent, non imprimable : {anomalies.join(' ')}</span>
         </div>
       )}
+      {/* Écran seulement : retire de la feuille imprimée (display:none en print). */}
+      <nav className="dv-actions dv-nav print:hidden" aria-label="Documents de la fiche">
+        <Link href={`/actions/${id.code}`}>‹ Retour à la fiche {id.code}</Link>
+        <span className="dv-nav-liens">
+          {documentsFiche(id.code)
+            .filter((d) => !d.href.startsWith('/rapports/dossier/'))
+            .map((d) => (
+              <Link key={d.href} href={d.href}>{d.label}</Link>
+            ))}
+        </span>
+      </nav>
       <div className="dv-actions">
         <span>
           {TOTAL_PANNEAUX} panneaux sur {TOTAL_FEUILLES} feuilles A4 : chaque chiffre est lu en base ou calculé, aucun n&apos;est rédigé.

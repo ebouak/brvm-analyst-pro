@@ -285,7 +285,7 @@ function Classement({ lignes }: { lignes: LigneClassement[] }) {
       }
     >
       <p className="-mt-2 mb-4 text-[12.5px] text-muted">Top {lignes.length} sur le scénario de référence ({SCENARIO_TXT})</p>
-      <div tabIndex={0} role="region" aria-label="Classement des SGI les moins chères, défilement horizontal" className="overflow-x-auto rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+      <div tabIndex={0} role="region" aria-label="Classement des SGI les moins chères, défilement horizontal" className="relative overflow-x-auto rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
         <table className="w-full min-w-[560px] text-sm">
           <caption className="sr-only">Les SGI les moins chères sur le scénario de référence</caption>
           <thead>

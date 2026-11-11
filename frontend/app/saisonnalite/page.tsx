@@ -147,7 +147,7 @@ export default async function SaisonnalitePage(props: { searchParams?: Promise<{
           inachevé, les mois sans échange, les reprises et les variations non expliquées sont exclus. La fiabilité de chaque
           mois est calculée : la plupart des régularités par valeur ne se distinguent pas du hasard et ne se sont pas
           répétées l’année suivante. Ce n’est pas un conseil en investissement.{' '}
-          <Link href="/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
+          <Link href="/premium/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
         </LigneSource>
       </section>
     </div>

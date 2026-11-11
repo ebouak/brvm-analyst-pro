@@ -3,6 +3,7 @@
 import { useId, useState } from 'react';
 import Link from 'next/link';
 import { prixAffiche } from '@/lib/billing/chariow/format';
+import { fromDeRetour } from '@/lib/auth/urlsAcces';
 
 /**
  * Bouton d'achat Chariow : déplie un court formulaire (prénom, nom,
@@ -42,7 +43,7 @@ export default function AchatChariow({
   montant: number;
   devise: string;
   connecte: boolean;
-  /** Page où revenir après connexion. */
+  /** Page où revenir après connexion ; son `?from=` éventuel suit jusqu'au retour de paiement. */
   retour: string;
   cta?: string;
 }) {
@@ -75,6 +76,8 @@ export default function AchatChariow({
           productCode,
           firstName: String(f.get('prenom') ?? ''),
           lastName: String(f.get('nom') ?? ''),
+          // Le `retour` de la page d'offres porte `?from=` : on le transmet au paiement.
+          ...(fromDeRetour(retour) ? { from: fromDeRetour(retour) } : {}),
           phone: { number: String(f.get('telephone') ?? ''), countryCode: String(f.get('pays') ?? 'CI') },
         }),
       });

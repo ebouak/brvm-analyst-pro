@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { DISCLAIMER_METHODOLOGIE } from '@/lib/legal/disclaimer';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const metadata = { title: 'Méthodologie' };
 
@@ -180,6 +181,11 @@ export default function MethodologiePage() {
         <p className="text-xs text-faint leading-relaxed">{DISCLAIMER_METHODOLOGIE}</p>
       </div>
 
+      <EtMaintenant suites={[
+        { href: '/signaux', titre: 'Les signaux', detail: 'Voir la méthode à l’œuvre sur la séance.' },
+        { href: '/formations', titre: 'Se former', detail: 'Les parcours pour comprendre les notions.' },
+        { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
+      ]} />
     </div>
   );
 }

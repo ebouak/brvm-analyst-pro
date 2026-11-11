@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { readPdf } from '@/lib/import/pdfClient';
 import { readJsonResponse } from '@/lib/import/fetchJson';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 import PdfDropzone from '@/components/import/PdfDropzone';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import type { ReleveExtraction, ReleveGuard } from '@/lib/import/releveSchema';
@@ -266,6 +267,15 @@ export default function ImportRelevePage() {
             </Link>
           </div>
         </PremiumPanel>
+      )}
+
+      {status === 'done' && result && (
+        <EtMaintenant
+          suites={[
+            { href: '/portefeuille', titre: 'Mon portefeuille', detail: 'Les positions importées et leur résultat.' },
+            { href: '/journal', titre: 'Mon journal', detail: 'Noter une thèse sur une position.' },
+          ]}
+        />
       )}
     </div>
   );

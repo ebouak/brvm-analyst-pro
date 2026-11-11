@@ -1,5 +1,6 @@
 import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
+import { createClient } from '@/lib/supabase/server';
 
 export interface BacktestStats {
   n: number;
@@ -58,7 +59,9 @@ export interface RecentRealSignal {
  * puisque le signal peut être récent).
  */
 export async function getRecentRealBuySignals(limit = 10): Promise<RecentRealSignal[]> {
-  const supabase = createPublicClient();
+  // Avec la session (F-04) : signals_daily n'est plus lisible sans compte.
+  // Seul appelant : /signaux, derrière canAccess('signaux').
+  const supabase = createClient();
 
   const { data: sigs } = await supabase
     .from('signals_daily')

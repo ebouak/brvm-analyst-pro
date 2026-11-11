@@ -4,6 +4,6 @@ import type { ViewTab } from '@/components/ViewTabs';
 export const REPORT_TABS: ViewTab[] = [
   { href: '/reports', label: 'Générer un rapport' },
   { href: '/dashboard/reports', label: 'Rapports & événements' },
-  { href: '/rapports/builder', label: 'Constructeur' },
-  { href: '/premium/reports', label: 'Mensuels', premium: true },
+  { href: '/rapports/builder', label: 'Rapport sur mesure' },
+  { href: '/premium/reports', label: 'Rapports mensuels', premium: true },
 ];

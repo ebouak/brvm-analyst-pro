@@ -402,7 +402,7 @@ function Tableau({ colonnes, meilleure, scenario }: { colonnes: Colonne[]; meill
   return (
     <>
       {/* Tablette et bureau : colonnes côte à côte */}
-      <div className="hidden overflow-x-auto rounded-panel border border-border bg-surface md:block">
+      <div className="hidden relative overflow-x-auto rounded-panel border border-border bg-surface md:block">
         <table className="w-full min-w-[640px] table-fixed text-sm">
           <caption className="sr-only">Comparaison des SGI sélectionnées pour votre scénario</caption>
           <thead>

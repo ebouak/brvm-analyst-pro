@@ -128,6 +128,12 @@ export default async function MesAchatsPage() {
         )}
       </section>
 
+      <p className="text-sm">
+        <Link href="/account/formations" className="text-accent underline">
+          Mes inscriptions aux sessions en direct
+        </Link>
+      </p>
+
       <p className="text-xs text-muted">
         Les reçus de paiement sont émis par Chariow et envoyés à l’adresse de votre compte.
       </p>

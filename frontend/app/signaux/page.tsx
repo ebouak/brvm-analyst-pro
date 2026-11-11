@@ -1,4 +1,4 @@
-import { createPublicClient } from '@/lib/supabase/public';
+import { createClient } from '@/lib/supabase/server';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import SignalPerformance from '@/components/SignalPerformance';
 import { getBacktestStats, getRecentRealBuySignals } from '@/lib/signals/backtest';
@@ -31,7 +31,9 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Signaux' };
 
 async function getData() {
-  const supabase = createPublicClient();
+  // Avec la session (F-04) : signals_daily n'est plus lisible sans compte.
+  // La page est entièrement derrière canAccess('signaux').
+  const supabase = createClient();
 
   const { data: lastRow } = await supabase
     .from('signals_daily')

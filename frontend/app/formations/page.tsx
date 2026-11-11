@@ -85,6 +85,7 @@ export default async function FormationsPage() {
     return (
       <>
         <div className="mx-auto w-full max-w-3xl space-y-4 px-4 pt-6 sm:px-6">
+          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formations et conférences</h1>
           <Lecon0Carte />
           <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations" />
         </div>

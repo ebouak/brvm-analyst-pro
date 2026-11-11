@@ -14,7 +14,7 @@ import { AccessGate } from '@/components/premium/AccessGate';
 
 // Garde par utilisateur : rendu dynamique.
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Analyse fondamentale' };
+export const metadata = { title: 'Fondamentaux' };
 
 async function getData(): Promise<ScreenerRow[]> {
   const sb = createPublicClient();
@@ -73,7 +73,7 @@ export default async function FondamentauxPage() {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <SectionHeader
-        title="Analyse fondamentale"
+        title="Fondamentaux"
         subtitle="PER, P/B, ROE, marge nette et rendement du dividende pour les actions cotées. Triez et filtrez par secteur."
       />
       <ViewTabs tabs={FONDA_TABS} current="/fondamentaux" />

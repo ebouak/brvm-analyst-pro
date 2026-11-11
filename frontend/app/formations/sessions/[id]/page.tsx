@@ -25,7 +25,7 @@ export default async function SessionPage(props: { params: Promise<{ id: string 
   const ouverte = placeDisponible(s as unknown as SessionTarif);
 
   return (
-    <PublicShell>
+    <PublicShell fil={false}>
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <SectionHeader
           title={s.titre}
