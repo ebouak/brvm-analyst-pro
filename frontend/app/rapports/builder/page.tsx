@@ -1,6 +1,7 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
 import ReportBuilderForm from '@/components/reports/ReportBuilderForm';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Constructeur de rapport' };
@@ -33,6 +34,11 @@ export default async function ReportBuilderPage() {
       ) : (
         <ReportBuilderForm instruments={instruments} sectors={sectors} />
       )}
+      <EtMaintenant suites={[
+              { href: '/reports', titre: 'Générer un rapport', detail: 'Les rapports prêts à l’emploi.' },
+              { href: '/dashboard/reports', titre: 'Rapports sauvegardés', detail: 'Retrouver les rapports déjà produits.' },
+              { href: '/actions', titre: 'Choisir une valeur', detail: 'Partir de la fiche d’une société.' },
+            ]} />
     </div>
   );
 }

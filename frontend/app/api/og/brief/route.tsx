@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', fontSize: 26, color: accent, fontWeight: 700 }}>
-              WESTBOURSE · Note de conjoncture
+              WESTBOURSE · Brief de séance
             </div>
             <div style={{ display: 'flex', fontSize: 22, color: '#8b93a7' }}>{dateLabel}</div>
           </div>

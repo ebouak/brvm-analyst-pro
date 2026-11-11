@@ -1,6 +1,7 @@
 import { getAnomaliesData } from '@/lib/premium/anomalies';
 import { AnomalieCharts } from '@/components/premium/AnomalieCharts';
 import { SectionHeader, StatPill, PremiumPanel, MetricCard, EmptyStatePremium } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export default async function AnomaliesPage() {
   const data = await getAnomaliesData();
@@ -101,6 +102,11 @@ export default async function AnomaliesPage() {
           icon="◈"
         />
       )}
+      <EtMaintenant suites={[
+              { href: '/premium/correlations', titre: 'Corrélations', detail: 'Comment les valeurs évoluent ensemble.' },
+              { href: '/premium/outils', titre: 'Outils Pro', detail: 'Les autres outils d’analyse.' },
+              { href: '/actions', titre: 'Le marché', detail: 'Les valeurs cotées à la BRVM.' },
+            ]} />
 
     </div>
   );
