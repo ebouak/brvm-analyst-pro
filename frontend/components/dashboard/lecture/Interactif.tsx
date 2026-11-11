@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
- * Les deux pièces interactives du tableau de bord v2.
+ * Les deux pièces interactives de la « Lecture de la séance » (tableau de bord),
+ * reprises du tableau de bord v2 supprimé le 2026-11-11.
  *
  * LA BASCULE — la même séance, pondérée de trois façons. Le nombre de valeurs
  * dit « presque à l'équilibre », les capitaux disent « massivement vendeur ».
@@ -20,26 +21,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
  * Aucune valeur n'est calculée ici : tout arrive en props depuis le serveur.
  */
 
-export interface LigneCote {
-  code: string;
-  nom: string | null;
-  variation: number;
-  valeurEchangee: number;
-  transactions: number;
-  volume: number;
-}
-
-export interface Ponderation {
-  cle: string;
-  libelle: string;
-  unite: string;
-  qualificatif: string;
-  baisse: number;
-  stable: number;
-  hausse: number;
-  etiqBaisse: string;
-  etiqHausse: string;
-}
+import type { LigneCote, Ponderation } from '@/lib/dashboard/lectureSeance';
+export type { LigneCote, Ponderation };
 
 /** L'axe couvre −8 % à +8 %, comme partout ailleurs sur la page. */
 const SPAN = 8;
@@ -177,10 +160,16 @@ type Filtre = 'all' | 'up' | 'down' | 'flat';
 export function Peigne({
   lignes,
   miennes = [],
+  capitauxEstimes = false,
 }: {
   lignes: LigneCote[];
   miennes?: string[];
+  /** Valeur échangée estimée par cours × titres : dit comme tel dans le lecteur. */
+  capitauxEstimes?: boolean;
 }) {
+  // Sans transaction publiée, la hauteur « Transactions » serait nulle partout :
+  // l'option est retirée plutôt que de dessiner un axe vide.
+  const transactionsConnues = lignes.some((x) => x.transactions != null);
   const aMoi = new Set(miennes);
   const [lu, setLu] = useState(0);
   const [unite, setUnite] = useState<Unite>('valeurEchangee');
@@ -245,7 +234,7 @@ export function Peigne({
               ['transactions', 'Transactions'],
               ['volume', 'Titres'],
             ] as [Unite, string][]
-          ).map(([k, lib]) => (
+          ).filter(([k]) => k !== 'transactions' || transactionsConnues).map(([k, lib]) => (
             <button key={k} type="button" aria-pressed={unite === k} onClick={() => setUnite(k)}>
               {lib}
             </button>
@@ -330,12 +319,12 @@ export function Peigne({
           </div>
         </div>
         <div className="v2-cell">
-          <div className="v2-k">Valeur échangée</div>
+          <div className="v2-k">{capitauxEstimes ? 'Valeur échangée (estimée)' : 'Valeur échangée'}</div>
           <div className="v2-v">{nf.format(Math.round(l.valeurEchangee))}</div>
         </div>
         <div className="v2-cell">
           <div className="v2-k">Transactions</div>
-          <div className="v2-v">{nf.format(l.transactions)}</div>
+          <div className="v2-v">{l.transactions != null ? nf.format(l.transactions) : '—'}</div>
         </div>
         <div className="v2-cell">
           <div className="v2-k">Part du montant</div>
