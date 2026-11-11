@@ -186,6 +186,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         <div>
           <h2 className="text-sm font-semibold text-ivory">Questions sur la BRVM</h2>
           <p className="text-xs text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
+          <p className="text-xs text-muted">Vous échangez avec une IA. Ses réponses peuvent être inexactes.</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (

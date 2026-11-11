@@ -62,6 +62,7 @@ export default async function DiagnosticPage(props: Props) {
             vigilance, ce que les chiffres ne disent pas, puis une orientation ACHAT/CONSERVER/VENDRE.
             Actualisée chaque semaine.
           </p>
+          <p className="mt-2 text-xs text-faint">Analyse rédigée par une IA à partir des comptes publiés.</p>
         </div>
 
         <DiagnosticClient
