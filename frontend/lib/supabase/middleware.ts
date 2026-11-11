@@ -1,11 +1,11 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isAdminEmail } from '@/lib/server/admin-emails';
 import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
 import { isPublicPath } from '@/lib/auth/cheminsPublics';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
-const SUPER_ADMIN_EMAIL = 'ebouak@gmail.com';
 
 /**
  * Rendu serveur-à-serveur du dossier valeur : video/dossiers.mjs imprime la
@@ -75,7 +75,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Super admin bypass
-    if (user.email !== SUPER_ADMIN_EMAIL) {
+    if (!isAdminEmail(user.email)) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('is_premium')

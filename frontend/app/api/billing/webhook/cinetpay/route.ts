@@ -136,16 +136,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, motif: 'montant insuffisant' }, { status: 200 });
   }
 
+  // Devise OBLIGATOIRE : une réponse sans devise ne prouve pas qu'on a été payé en XOF.
   const devise = String(check?.data?.currency ?? '');
-  if (devise && devise !== String(txn.currency)) {
+  if (!devise || devise !== String(txn.currency)) {
     // Payer 25 000 dans une devise faible ne vaut pas 25 000 XOF.
     console.error('cinetpay/webhook: DEVISE INATTENDUE', { transactionId, devise, attendu: txn.currency });
     await db.from('billing_transactions').update({ status: 'failed' }).eq('id', transactionId);
     return NextResponse.json({ ok: true, motif: 'devise inattendue' }, { status: 200 });
   }
 
+  // RÈGLE 3 (suite) — verrou optimiste. Deux notifications simultanées passent
+  // toutes deux le contrôle `paid` ci-dessus ; sans verrou, activateSubscription
+  // tournerait deux fois et rallongerait `renews_at`. Une seule requête peut
+  // faire passer la ligne de `pending`/`failed` à `processing` ; l'autre sort.
+  const { data: verrou } = await db
+    .from('billing_transactions')
+    .update({ status: 'processing' })
+    .eq('id', transactionId)
+    .in('status', ['pending', 'failed'])
+    .select('id');
+  if (!verrou || verrou.length === 0) {
+    // Une autre notification traite déjà la ligne (`processing`) ou vient de la
+    // finir (`paid`). `failed` reste verrouillable : le webhook marque `failed` sur
+    // tout statut non ACCEPTED, y compris un paiement encore en attente qui
+    // aboutit ensuite.
+    return NextResponse.json({ ok: true, deja_en_cours: true }, { status: 200 });
+  }
+
   const r = await activateSubscription(String(txn.subscription_id));
   if (!r.ok) {
+    // On rend la ligne à `pending` pour qu'un retry de CinetPay puisse reprendre.
+    await db.from('billing_transactions').update({ status: 'pending' }).eq('id', transactionId).eq('status', 'processing');
     console.error('cinetpay/webhook: activation échouée —', r.message);
     // 500 : le paiement EST valide et vérifié. Un retry de CinetPay nous donne
     // une seconde chance d'activer — sinon le client a payé pour rien.

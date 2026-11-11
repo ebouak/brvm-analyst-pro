@@ -34,7 +34,7 @@ jobs:
 
       - name: Install scraper dependencies
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Run daily full scrape (with retry)
         working-directory: scraper

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { urlSure } from '@/lib/urlSure';
 import Link from 'next/link';
 import { fmtDateCourte } from '@/lib/format';
 import { notFound } from 'next/navigation';
@@ -131,9 +132,13 @@ export default async function ArticlePage(props: { params: Promise<{ slug: strin
           {a.sources.map((s, i) => (
             <span key={s.url}>
               {i > 0 ? ' ; ' : ''}
-              <a href={s.url} className="hover:text-accent-ink" rel="noopener noreferrer" target="_blank">
-                {s.label}
-              </a>
+              {urlSure(s.url) ? (
+                <a href={urlSure(s.url) ?? undefined} className="hover:text-accent-ink" rel="noopener noreferrer" target="_blank">
+                  {s.label}
+                </a>
+              ) : (
+                <span>{s.label}</span>
+              )}
             </span>
           ))}
         </footer>

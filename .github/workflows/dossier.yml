@@ -96,7 +96,7 @@ jobs:
           [ "$echecs" -eq 0 ] || echo "::warning::$echecs code(s) sans prose polie cette semaine (squelette servi)."
 
       - name: Installer les dépendances
-        run: npm install
+        run: npm ci
 
       - name: Installer Chromium
         run: npx playwright install chromium --with-deps
@@ -132,7 +132,7 @@ jobs:
           # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
           WAHA_URL: ${{ secrets.WAHA_URL }}
           WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
-        run: npm install && npm run dossiers:envoi
+        run: npm ci && npm run dossiers:envoi
 
       # Après une correction du générateur : la version corrigée, avec un message
       # qui dit ce qui était faux, aux seuls comptes servis cette semaine. Son
@@ -150,7 +150,7 @@ jobs:
           # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
           WAHA_URL: ${{ secrets.WAHA_URL }}
           WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
-        run: npm install && npm run dossiers:envoi -- --rectificatif
+        run: npm ci && npm run dossiers:envoi -- --rectificatif
 
       - name: Conserver les PDF produits
         if: always()

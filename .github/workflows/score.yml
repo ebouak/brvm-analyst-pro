@@ -31,7 +31,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Run scoring with retry
         working-directory: scraper
@@ -88,7 +88,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Run liquidity
         working-directory: scraper
         env:
@@ -111,7 +111,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Run range52
         working-directory: scraper
         env:
@@ -134,7 +134,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Conseiller — positions par famille de facteurs
         working-directory: scraper
         env:
@@ -169,7 +169,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Saisonnalité — faits mensuels
         working-directory: scraper
         env:

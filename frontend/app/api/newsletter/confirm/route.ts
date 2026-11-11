@@ -8,6 +8,11 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
  * Le jeton est un uuid tiré par la base (0037) : un lien deviné n'a aucune
  * chance raisonnable d'aboutir. Un jeton inconnu répond la même page qu'un
  * jeton déjà confirmé — on ne révèle pas si une adresse existe.
+ *
+ * GET n'écrit RIEN : un lien ouvert par un antivirus ou un aperçu de messagerie
+ * ne doit pas confirmer à la place du destinataire. Les liens déjà envoyés
+ * (GET ?token=) continuent de fonctionner : ils mènent à une page avec un bouton
+ * qui déclenche le POST.
  */
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +28,28 @@ function page(message: string): NextResponse {
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
+  if (!token || !UUID.test(token)) return page('Lien de confirmation invalide.');
+  // Le jeton est un uuid validé ci-dessus : il peut être injecté sans échappement.
+  return page(
+    `Confirmez votre inscription à la newsletter WESTBOURSE.</p>` +
+      `<form method="POST" action="/api/newsletter/confirm">` +
+      `<input type="hidden" name="token" value="${token}">` +
+      `<button type="submit" style="background:#56d7fd;color:#030303;border:0;border-radius:8px;padding:12px 20px;font-size:16px;cursor:pointer">Confirmer mon inscription</button>` +
+      `</form><p style="display:none">`,
+  );
+}
+
+export async function POST(req: NextRequest) {
+  let token: string | null = req.nextUrl.searchParams.get('token');
+  if (!token) {
+    try {
+      const form = await req.formData();
+      const v = form.get('token');
+      token = typeof v === 'string' ? v : null;
+    } catch {
+      token = null;
+    }
+  }
   if (!token || !UUID.test(token)) return page('Lien de confirmation invalide.');
   let db;
   try {

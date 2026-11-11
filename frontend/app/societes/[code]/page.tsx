@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { urlSure } from '@/lib/urlSure';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -444,8 +445,8 @@ export default async function CompanyPage(props: PageProps) {
             <ul>
               {news.map((n, i) => (
                 <li key={i} className="border-t border-border/60 py-3 first:border-0 first:pt-0 last:pb-0">
-                  {n.source_url ? (
-                    <a href={n.source_url} target="_blank" rel="noopener noreferrer"
+                  {urlSure(n.source_url) ? (
+                    <a href={urlSure(n.source_url) ?? undefined} target="_blank" rel="noopener noreferrer"
                        className="block text-sm leading-snug text-ivory transition-colors hover:text-accent-ink">
                       {n.titre}
                     </a>

@@ -28,7 +28,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Run hebdo
         working-directory: scraper
         env:

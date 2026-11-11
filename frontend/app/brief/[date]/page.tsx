@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { urlSure } from '@/lib/urlSure';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -268,8 +269,8 @@ export default async function BriefDatePage(props: PageProps) {
                 <ul className="space-y-3">
                   {d.actualites.map((n, i) => (
                     <li key={i} className="border-t border-border/40 first:border-0 pt-3 first:pt-0">
-                      {n.source_url ? (
-                        <a href={n.source_url} target="_blank" rel="noopener noreferrer"
+                      {urlSure(n.source_url) ? (
+                        <a href={urlSure(n.source_url) ?? undefined} target="_blank" rel="noopener noreferrer"
                           className="text-sm text-ivory hover:text-accent-ink transition-colors leading-snug block">
                           {n.titre}
                         </a>

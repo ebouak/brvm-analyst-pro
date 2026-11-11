@@ -26,7 +26,7 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
     .from('billing_transactions')
     .update({ status: 'paid', paid_at: nowIso })
     .eq('subscription_id', subscriptionId)
-    .eq('status', 'pending');
+    .in('status', ['pending', 'processing']);
 
   const { error: subErr } = await db
     .from('subscriptions')

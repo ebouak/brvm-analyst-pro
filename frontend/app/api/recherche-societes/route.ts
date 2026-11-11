@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       return gate.allowed;
     },
     quota: async (u) =>
-      (await checkRateLimit({ route: 'recherche-societes', ip: hacherIdentifiant(u.id), maxHits: QUOTA_HEURE, windowSeconds: 3600 })).allowed,
+      (await checkRateLimit({ route: 'recherche-societes', ip: hacherIdentifiant(u.id), maxHits: QUOTA_HEURE, windowSeconds: 3600, failClosed: true })).allowed,
     stockage: stockageSupabase(),
     // Sans clé TypeSafe, ne rien réserver : chaque recherche brûlerait une unité du plafond pour rien.
     reserverBudget: () => (process.env.TYPESAFE_API_KEY ? reserverBudgetRecherche(plafondJour()) : Promise.resolve('erreur' as const)),
