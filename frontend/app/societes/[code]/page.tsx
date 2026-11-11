@@ -272,7 +272,7 @@ export default async function CompanyPage(props: PageProps) {
   ];
 
   return (
-    <PublicShell>
+    <PublicShell filLibelle={instrument.designation}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
 
       {/* ── En-tête : une ligne de la cote ───────────────────────────────── */}

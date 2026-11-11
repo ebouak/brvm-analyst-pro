@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import FilAriane from '@/components/nav/FilAriane';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import {
@@ -76,6 +77,7 @@ export default async function Page(
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-10 md:px-6">
+        <FilAriane variante="public" className="mb-6" />
         <EnTeteCote
           titre="Le rendement vrai"
           description="Le cours ne dit qu’une partie de l’histoire. Voici ce qu’une action a réellement rapporté : le cours seul, puis dividendes réinvestis compris, toujours corrigé de l’inflation de votre pays."

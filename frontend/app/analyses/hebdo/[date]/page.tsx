@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import FilAriane from '@/components/nav/FilAriane';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
@@ -46,6 +47,7 @@ export default async function HebdoEditionPage(props: { params: Promise<{ date: 
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
+      <FilAriane variante="public" className="mb-2" />
       <Link
         href="/analyses/hebdo"
         className="mb-6 inline-flex min-h-[44px] items-center gap-1.5 rounded text-sm text-muted transition-colors hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
