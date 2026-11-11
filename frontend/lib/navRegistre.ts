@@ -238,6 +238,7 @@ export const MENU_COMPTE: { href: string; label: string }[] = [
   { href: '/account/achats', label: 'Mes achats' },
   { href: '/account/formations', label: 'Mes formations' },
   { href: '/parametres/compte', label: 'Données personnelles' },
+  { href: '/pricing', label: 'Formules et tarifs' },
 ];
 
 // ── Lecture du registre ──────────────────────────────────────────────────────

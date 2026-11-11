@@ -20,7 +20,7 @@ export default function Sidebar({
   isAdmin?: boolean;
 }) {
   const pathname = usePathname();
-  const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
+  const groups = NAV_GROUPS;
 
   // Groupes repliés (persistés). Un groupe contenant la route active est forcé ouvert.
   const [collapsed, setCollapsed] = useState<Record<string, boolean> | null>(null);
@@ -68,13 +68,7 @@ export default function Sidebar({
               aria-expanded={isOpen ? 'true' : 'false'}
               className={`group/h flex w-full items-center justify-between px-2 mb-1.5 ${EASE} ${hasActive ? 'cursor-default' : 'cursor-pointer hover:text-muted'}`}
             >
-              <span className="overline text-[11px] text-faint">
-                {group.label === 'Premium' ? (
-                  <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
-                ) : (
-                  group.label
-                )}
-              </span>
+              <span className="overline text-[11px] text-faint">{group.label}</span>
               {!hasActive && (
                 <ChevronDown size={13} strokeWidth={2} aria-hidden className={`text-faint ${EASE} ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
               )}
@@ -129,15 +123,11 @@ export default function Sidebar({
 
       {/* Pied */}
       <div className="px-4 py-3.5 border-t border-border space-y-3">
-        {/* Menu utilisateur (avatar + badge + déconnexion) */}
-        <UserAvatarMenu />
-        <div className="flex justify-center gap-4 text-[11px]">
-          <Link href="/methodologie" className="text-faint hover:text-muted transition-colors">
-            Méthodologie
-          </Link>
-          <Link href="/parametres/compte" className="text-faint hover:text-muted transition-colors">
-            Paramètres
-          </Link>
+        {/* Menu du compte (avatar) : abonnement, facturation, sécurité, profil,
+            achats, formations, données personnelles ; Admin pour le super-admin. */}
+        <div className="flex items-center gap-2">
+          <UserAvatarMenu isAdmin={isAdmin} />
+          <span className="text-xs text-faint">Mon compte</span>
         </div>
         <div className="flex justify-center">
           <BeginnerToggle />

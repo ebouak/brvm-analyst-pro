@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isNavItemActive, construireFil } from './nav';
+import { isNavItemActive, construireFil, NAV_GROUPS, PALETTE_EXTRA, MENU_COMPTE } from './nav';
+import { pagesDuDisque } from './navPagesDuDisque';
 
 describe('isNavItemActive : la page OU un de ses parents', () => {
   const cas: [string, string, boolean][] = [
@@ -118,3 +119,38 @@ describe('construireFil', () => {
     expect(construireFil('/nexiste/pas/du/tout')).toBeNull();
   });
 });
+
+describe('menus dérivés du registre', () => {
+  const surDisque = new Set(pagesDuDisque());
+
+  it('le menu a exactement six rubriques, dans l’ordre de la spec', () => {
+    expect(NAV_GROUPS.map((g) => g.label)).toEqual([
+      "Aujourd'hui", 'Le marché', 'Trouver une idée', 'Mes revenus', 'Mon portefeuille', 'Apprendre',
+    ]);
+  });
+
+  it('chaque entrée du menu correspond à une page', () => {
+    for (const g of NAV_GROUPS) for (const it of g.items) expect(surDisque.has(it.href), it.href).toBe(true);
+  });
+
+  it('chaque entrée du menu du compte correspond à une page', () => {
+    for (const it of MENU_COMPTE) expect(surDisque.has(it.href), it.href).toBe(true);
+  });
+
+  it('la palette : sans doublon, sans page du menu, rien que des pages réelles', () => {
+    const menu = new Set(NAV_GROUPS.flatMap((g) => g.items.map((i) => i.href)));
+    const vus = new Set<string>();
+    for (const it of PALETTE_EXTRA) {
+      expect(menu.has(it.href), `${it.href} est à la fois au menu et en secondaire`).toBe(false);
+      expect(vus.has(it.href)).toBe(false);
+      expect(surDisque.has(it.href), it.href).toBe(true);
+      vus.add(it.href);
+    }
+  });
+
+  it('Premium est une marque sur l’entrée, pas une rubrique', () => {
+    const prem = NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.premium).map((i) => i.href).sort();
+    expect(prem).toEqual(['/assistant', '/premium/classements', '/premium/diagnostic', '/premium/outils', '/premium/paper-trading', '/premium/valorisation']);
+  });
+});
+
