@@ -174,7 +174,7 @@ function Bande({ elements, titre }: { elements: ElementBande[]; titre: string })
   return (
     // Fond presque opaque : la bande passe devant l'illustration (pièces,
     // bougies claires) et doit rester lisible par-dessus.
-    <section aria-label={titre} className="cmp-defile-cadre relative z-10 mt-8 rounded-lg border border-sur-nuit/10 bg-nuit/85 py-2.5 backdrop-blur-sm">
+    <section aria-label={titre} className="cmp-defile-cadre relative z-10 overflow-hidden mt-8 rounded-lg border border-sur-nuit/10 bg-nuit/85 py-2.5 backdrop-blur-sm">
       <div tabIndex={0} role="region" aria-label="Bandeau défilant, utilisez les flèches pour le parcourir" className="overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
         <div className="cmp-defile flex w-max" style={{ '--duree': `${Math.max(30, elements.length * 3.2)}s` } as CSSProperties}>
           {liste(false)}

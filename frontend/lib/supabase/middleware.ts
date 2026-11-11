@@ -1,58 +1,11 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
+import { isPublicPath } from '@/lib/auth/cheminsPublics';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 const SUPER_ADMIN_EMAIL = 'ebouak@gmail.com';
-
-/**
- * Vitrine SEO ouverte / app fermée.
- *
- * Un visiteur NON connecté ne voit que les pages « vitrine » (contenu indexable
- * par Google et les IA + acquisition). Tout le reste — l'application interactive
- * — exige un compte. La liste publique = exactement la surface du sitemap, plus
- * les nécessités techniques (auth, api, sitemap, robots, widgets embarqués).
- *
- * Pour ouvrir/fermer une page : éditer PUBLIC_EXACT / PUBLIC_PREFIXES ci-dessous.
- */
-const PUBLIC_EXACT = new Set<string>([
-  '/', '/login', '/signup', '/pricing',
-  '/mentions-legales', '/cgu', '/confidentialite',
-  '/methodologie', '/debutant', '/developers',
-  '/rendement-vrai', '/fiscalite', '/simulateur-budget',
-  '/comparateur-sgi', '/actualites', '/formations', '/secteurs',
-  '/apercu',
-  '/crm/opposition',
-  '/offre/dossier',
-  // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,
-  // il répondait 307 vers /login et aucun navigateur ne pouvait le lire
-  // (constaté le 2026-09-28). /manifest.webmanifest reste pour compatibilité.
-  '/robots.txt', '/sitemap.xml', '/manifest.webmanifest', '/manifest.json',
-  // Contact de signalement de failles (RFC 9116), à renouveler avant son
-  // champ Expires. Sans cette entrée, il répondrait 307 vers /login.
-  '/.well-known/security.txt',
-]);
-const PUBLIC_PREFIXES = [
-  '/formations', // hub, Academy publique et sessions en direct (SEO)
-  '/societes',   // fiches sociétés (SEO)
-  '/analyses',   // pages citables (GEO)
-  '/analyse',    // Westbourse Combined Alpha & co (quant vitrine, publique)
-  '/actions',    // fiches action + onglet /quant (publiques)
-  '/brief',      // briefs de séance datés (SEO)
-  '/actualites', // articles de presse générés depuis la donnée (SEO)
-  '/comparateur-sgi', // modules du comparateur + fiches SGI (SEO, données publiques seules)
-  '/simulateur', // simulateur d'investissement public (/simulateur/[code])
-  '/embed',      // widgets embarqués sur des sites tiers
-  '/certificat', // vérification publique d'un certificat Academy
-  '/auth',       // callback Supabase
-  '/api',        // routes API (gèrent leur propre auth)
-  '/apercu',     // previews isolées hybrides A+B (noindex, bare) — tout /apercu/* public sans auth
-];
-
-function isPublicPath(pathname: string): boolean {
-  if (PUBLIC_EXACT.has(pathname)) return true;
-  return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
 
 /**
  * Rendu serveur-à-serveur du dossier valeur : video/dossiers.mjs imprime la
@@ -104,10 +57,11 @@ export async function updateSession(request: NextRequest) {
   // (avec ?next pour revenir après connexion). Les pages publiques restent
   // indexables ; l'app interactive exige un compte.
   if (!user && !isPublicPath(request.nextUrl.pathname) && !isRenderAuthorized(request)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    // `next` = chemin + query d'origine ; la query n'est pas recopiée sur /login
+    // (elle y serait lue comme paramètres de connexion et perdue après).
+    return NextResponse.redirect(
+      new URL(urlConnexion(request.nextUrl.pathname, request.nextUrl.search), request.url),
+    );
   }
 
   // Gating /premium/* : vérifie is_premium sauf super admin
@@ -115,9 +69,9 @@ export async function updateSession(request: NextRequest) {
       !request.nextUrl.pathname.startsWith('/premium/upgrade')) {
 
     if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(
+        new URL(urlConnexion(request.nextUrl.pathname, request.nextUrl.search), request.url),
+      );
     }
 
     // Super admin bypass
@@ -129,9 +83,11 @@ export async function updateSession(request: NextRequest) {
         .single();
 
       if (!profile?.is_premium) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/premium/upgrade';
-        return NextResponse.redirect(url);
+        // `from` = page demandée (chemin + query), pour que la porte sache d'où
+        // l'on vient et puisse y ramener après l'abonnement.
+        return NextResponse.redirect(
+          new URL(urlPortePremium(request.nextUrl.pathname, request.nextUrl.search), request.url),
+        );
       }
     }
   }

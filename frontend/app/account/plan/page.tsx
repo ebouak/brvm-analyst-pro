@@ -1,3 +1,4 @@
+import { fromSur, urlConnexion, urlFormules } from '@/lib/auth/urlsAcces';
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import { fmtDateCourte } from '@/lib/format';
 import { accesAcademy } from '@/lib/server/academyAccess';
@@ -18,12 +19,15 @@ const DASH = '—';
 
 const fmtDate = (d: string | null | undefined) => fmtDateCourte(d);
 
-export default async function Page() {
+export default async function Page(props: { searchParams: Promise<{ from?: string }> }) {
+  // Page d'où l'on vient (porte Premium, verrou) : assainie, chemin interne seulement.
+  const from = fromSur((await props.searchParams).from);
+  const retourPlan = urlFormules(from);
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect(urlConnexion('/account/plan', from ? `?from=${encodeURIComponent(from)}` : ''));
 
   const db = getServiceClient();
   const [{ data: profile }, { data: plansRaw }, { data: sub }, pass, { data: passActifs }] = await Promise.all([
@@ -112,10 +116,16 @@ export default async function Page() {
         L’abonnement prend effet à la confirmation du paiement et reste actif jusqu’à la fin de la période payée. Aucun
         prélèvement automatique : pour le prolonger, vous effectuez un nouveau paiement.
       </p>
+      {from && (
+        <p className="text-sm text-muted">
+          Vous avez demandé une page réservée aux abonnés Premium. Une fois l’accès ouvert, vous pourrez y revenir :{' '}
+          <Link href={from} className="text-accent underline">revenir à la page demandée</Link>.
+        </p>
+      )}
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
 
       {/* Alternative sans abonnement : la formation complète, avec un mois Premium (Chariow). */}
-      <OffresNiveaux userId={user.id} possedes={(await accesAcademy()).niveaux} retour="/account/plan" />
+      <OffresNiveaux userId={user.id} possedes={(await accesAcademy()).niveaux} retour={retourPlan} />
 
       {pass.length > 0 && (
         <section aria-labelledby="h-pass" className="space-y-3 rounded-panel border border-border bg-surface p-5">
@@ -143,7 +153,7 @@ export default async function Page() {
                     montant={p.montant}
                     devise={p.devise}
                     connecte
-                    retour="/account/plan"
+                    retour={retourPlan}
                     cta={echeance !== undefined ? 'Prolonger' : 'Acheter'}
                   />
                 </li>

@@ -99,7 +99,7 @@ export default function MobileNav({
                   {group.items.map((item) => {
                     const active = isNavItemActive(item.href, pathname);
                     const locked = item.premium && !isPremium;
-                    const href = locked ? '/premium/upgrade' : item.href;
+                    const href = locked ? `/premium/upgrade?from=${encodeURIComponent(item.href)}` : item.href;
                     return (
                       <Link
                         key={item.href}

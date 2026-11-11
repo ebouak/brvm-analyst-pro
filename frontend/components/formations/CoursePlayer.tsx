@@ -145,6 +145,7 @@ function LessonView({
             <video ref={videoRef} src={lesson.video_url} controls className="h-full w-full" onEnded={complete} />
           ) : (
             <iframe
+              key={`${lesson.id}:${chapterStart}`}
               src={embedSrc}
               title={lesson.titre}
               className="h-full w-full"
