@@ -123,7 +123,7 @@ export default function ConditionalShell({
       <div className="flex-1 min-w-0">
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
         {/* pb-16 : réserve la hauteur de la BottomNav mobile (56px + safe-area). */}
-        <main id="contenu" className="min-w-0 pb-16 md:pb-0">{children}</main>
+        <main id="contenu" className="min-w-0 overflow-x-clip pb-16 md:pb-0">{children}</main>
       </div>
       <BottomNav />
       {showNudge && <ContactNudge />}
