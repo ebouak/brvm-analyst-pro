@@ -11,9 +11,6 @@ const CL = {
   texte: 'E6EDF3', blanc: 'FFFFFF', border: '30363D',
 };
 
-const couleurSignal = (sig: string) =>
-  sig === 'ACHAT' ? CL.vert : sig === 'VENTE' ? CL.rouge : CL.or;
-
 function cel(
   texte: string,
   opts: { bold?: boolean; bg?: string; color?: string } = {},
@@ -36,42 +33,19 @@ const BORDERS = {
   insideV: { style: BorderStyle.SINGLE, size: 1, color: CL.border },
 };
 
-function calculerRR(rec: AnalyseStructuree['recommendation']): string {
-  const pe = parseFloat(rec.prixEntree);
-  const o1 = parseFloat(rec.objectif1);
-  const sl = parseFloat(rec.stopLoss);
-  if (isNaN(pe) || isNaN(o1) || isNaN(sl) || sl === pe) return 'N/A';
-  return `${(Math.abs(o1 - pe) / Math.abs(pe - sl)).toFixed(1)}:1`;
-}
-
 export async function genererDocx(data: AnalyseStructuree): Promise<Buffer> {
-  const sigColor = couleurSignal(data.signal);
   const children: (Paragraph | Table)[] = [];
 
   // ── Titre ──
   children.push(
     new Paragraph({ children: [new TextRun({ text: 'WESTBOURSE', size: 18, color: CL.vert, font: 'Calibri' })], spacing: { after: 80 } }),
     new Paragraph({ children: [new TextRun({ text: `${data.nomComplet} (${data.symbole})`, bold: true, size: 36, color: CL.fond, font: 'Calibri' })], heading: HeadingLevel.HEADING_1, spacing: { after: 80 } }),
-    new Paragraph({ children: [new TextRun({ text: `Analyse financière complète · ${data.date}`, size: 20, color: CL.gris, font: 'Calibri' })], spacing: { after: 300 } }),
+    new Paragraph({ children: [new TextRun({ text: `Lecture des données · ${data.date}`, size: 20, color: CL.gris, font: 'Calibri' })], spacing: { after: 300 } }),
   );
 
-  // ── Tableau récapitulatif ──
-  children.push(
-    new Paragraph({ text: 'Récapitulatif', heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 120 } }),
-    new Table({
-      layout: TableLayoutType.FIXED,
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: BORDERS,
-      rows: [
-        new TableRow({ children: [cel('Indicateur', { bold: true, bg: CL.fond, color: CL.blanc }), cel('Valeur', { bold: true, bg: CL.fond, color: CL.blanc }), cel('Indicateur', { bold: true, bg: CL.fond, color: CL.blanc }), cel('Valeur', { bold: true, bg: CL.fond, color: CL.blanc })] }),
-        new TableRow({ children: [cel('Signal', { bg: CL.surface }), cel(data.signal, { bold: true, color: sigColor }), cel('Score de conviction', { bg: CL.surface }), cel(`${data.scoreConviction}/10`, { bold: true, color: sigColor })] }),
-        new TableRow({ children: [cel("Prix d'entrée", { bg: CL.surface }), cel(data.recommendation.prixEntree), cel('Horizon', { bg: CL.surface }), cel(data.recommendation.horizon)] }),
-        new TableRow({ children: [cel('Objectif 1', { bg: CL.surface }), cel(`${data.recommendation.objectif1} (${data.recommendation.objectif1Pct})`, { color: CL.vert }), cel('Objectif 2', { bg: CL.surface }), cel(`${data.recommendation.objectif2} (${data.recommendation.objectif2Pct})`, { color: CL.vert })] }),
-        new TableRow({ children: [cel('Stop-Loss', { bg: CL.surface }), cel(`${data.recommendation.stopLoss} (${data.recommendation.stopLossPct})`, { color: CL.rouge }), cel('R/R Ratio', { bg: CL.surface }), cel(calculerRR(data.recommendation), { bold: true })] }),
-      ],
-    }),
-    new Paragraph({ text: '', spacing: { after: 200 } }),
-  );
+  // Plus de tableau récapitulatif (signal, conviction, entrée, objectifs,
+  // stop, ratio rendement/risque) : il mettait en forme une recommandation
+  // d'investissement (audit lot B, 2026-11-11).
 
   // ── Sections analyse ──
   for (const section of data.sections) {
@@ -98,7 +72,7 @@ export async function genererDocx(data: AnalyseStructuree): Promise<Buffer> {
   // ── Risques ──
   if (data.risques.length > 0) {
     children.push(
-      new Paragraph({ text: '⚠ Risques spécifiques', heading: HeadingLevel.HEADING_2, spacing: { before: 280, after: 100 } }),
+      new Paragraph({ text: 'Points de vigilance', heading: HeadingLevel.HEADING_2, spacing: { before: 280, after: 100 } }),
       ...data.risques.map((r) => new Paragraph({ children: [new TextRun({ text: r, size: 20, color: '5C3D00', font: 'Calibri' })], bullet: { level: 0 }, spacing: { after: 60 } })),
       new Paragraph({ text: '', spacing: { after: 160 } }),
     );
@@ -123,7 +97,7 @@ export async function genererDocx(data: AnalyseStructuree): Promise<Buffer> {
       },
       footers: {
         default: new Footer({
-          children: [new Paragraph({ children: [new TextRun({ text: "⚠ Ce document n'est pas un conseil en investissement.  Page ", size: 14, italics: true, color: CL.gris, font: 'Calibri' }), new TextRun({ children: [PageNumber.CURRENT], size: 14, color: CL.gris })] })],
+          children: [new Paragraph({ children: [new TextRun({ text: "Information générale, pas un conseil en investissement.  Page ", size: 14, italics: true, color: CL.gris, font: 'Calibri' }), new TextRun({ children: [PageNumber.CURRENT], size: 14, color: CL.gris })] })],
         }),
       },
       children,

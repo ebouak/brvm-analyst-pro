@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { fmtDateCourte } from '@/lib/format';
+import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
 
 export default async function DiagnosticIndexPage() {
   const supa = createClient();
@@ -16,7 +17,8 @@ export default async function DiagnosticIndexPage() {
 
   const { data: cached } = await supa
     .from('diagnostic_reports')
-    .select('code, generated_at');
+    .select('code, generated_at')
+    .eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC);
 
   const cachedMap = new Map((cached ?? []).map((r) => [r.code, r.generated_at]));
 

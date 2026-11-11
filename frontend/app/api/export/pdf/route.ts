@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import { parseReponseIA } from '@/lib/export/parseAnalyse';
+import { detecterRecommandation } from '@/lib/ai/filtreRecommandation';
 import { PdfAnalyseDocument } from '@/lib/export/pdfTemplate';
 
 export async function POST(req: NextRequest) {
   try {
     const { texte, symbole } = await req.json();
     if (!texte) return NextResponse.json({ error: 'Texte manquant' }, { status: 400 });
+    // Le texte vient du navigateur : un ancien texte (ou un texte modifié)
+    // portant une recommandation n'est pas mis en forme (audit lot B).
+    if (detecterRecommandation(String(texte)).recommandation) {
+      return NextResponse.json({ error: 'Ce texte contient une recommandation d’investissement : il ne peut pas être exporté.' }, { status: 422 });
+    }
 
     const data = parseReponseIA(texte, symbole);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

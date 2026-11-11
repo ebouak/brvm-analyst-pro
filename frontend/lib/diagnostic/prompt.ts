@@ -314,6 +314,7 @@ Tu vas produire un **diagnostic financier et économique complet** de ${designat
 Ton analyse suit les standards sell-side CFA Level III et s'appuie exclusivement sur les données ci-dessous.
 Rédige en français professionnel, pour un investisseur particulier comme pour un lecteur averti : rigoureux, factuel, nuancé. Longueur cible : 2 000–3 000 mots.
 Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas. Une donnée décrite par un statut (« sources contradictoires », « borne », « non trouvé dans les documents consultés ») se rapporte tel quel : tu ne choisis pas entre les sources et tu ne la remplaces pas par la valeur d'un autre exercice.
+INTERDITS ABSOLUS : ce rapport est une information générale, pas un conseil en investissement (activité réglementée par l'AMF-UMOA). Tu ne formules AUCUNE recommandation (acheter, vendre, conserver, renforcer, alléger), même indirecte (« point d'entrée intéressant », « décote à saisir »), aucun verdict ni orientation, aucun prix d'entrée, objectif de cours, horizon de placement, stop-loss ni taille de position. Une valeur issue d'une méthode de valorisation se présente comme le résultat de cette méthode, avec ses hypothèses, jamais comme un cours à atteindre.
 Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
 
 ${banque
@@ -352,7 +353,7 @@ Secteur : ${secteur ?? 'N/D'} | Marché : BRVM/UEMOA | Référentiel : SYSCOA/OH
 ---
 ## STRUCTURE OBLIGATOIRE DU RAPPORT
 
-**1. SYNTHÈSE EXÉCUTIVE** — verdict (ACHAT/CONSERVER/VENDRE) + 4–5 points-clés + objectif de cours 12 mois
+**1. SYNTHÈSE EXÉCUTIVE** — 4 à 5 points-clés factuels, chacun appuyé sur un chiffre fourni, puis la fourchette de valorisation telle qu'elle ressort du bloc VALORISATION CALCULÉE (valeur la plus basse et la plus haute des méthodes, avec leur nom). Aucun verdict, aucune orientation, aucun objectif de cours.
 **2. FORCES ET FAIBLESSES** — deux listes de 3 à 5 points chacune. Chaque point s'appuie sur un chiffre fourni ci-dessus (ratio, tendance, position face à la médiane, note de pilier) et le cite.
 ${banque
   ? `**3. ANALYSE DE LA RENTABILITÉ** — PNB et sa croissance, marge d'intérêts, coefficient d'exploitation, coût du risque, ROE et ROA. Si des comptes intermédiaires sont fournis, dis ce qu'ils indiquent pour l'exercice en cours, sans les extrapoler à l'année entière.
@@ -369,6 +370,6 @@ ${banque
 **9. RISQUES & CATALYSEURS** — sectoriels, opérationnels, macro UEMOA
 **10. POINTS DE VIGILANCE** — 3 à 6 éléments concrets à surveiller aux prochaines publications (un ratio qui se dégrade, une donnée manquante, un red flag déclenché, une médiane défavorable, un écart entre comptes intermédiaires et annuels). Pour chacun : ce qui est observé aujourd'hui et ce qui changerait la lecture.
 **11. CE QUE LES CHIFFRES NE DISENT PAS** — les limites de cette analyse : données N/D ou absentes, ancienneté du dernier exercice, ce que les états financiers publiés ne montrent pas (qualité du management, gouvernance, carnet de commandes, concurrence, exposition réglementaire, liquidité réelle du titre), et la portée limitée d'une comparaison sur un marché d'une cinquantaine de sociétés. N'invente aucun fait pour combler ces trous : nomme-les.${banque ? " Pour une banque, ne cite PAS comme lacunes la marge brute, les stocks, le BFR, le capex, le free cash-flow, la dette nette ni l'Altman Z' : ces notions ne s'appliquent pas à une banque. N'emploie pas non plus « marge EBITDA » : les charges d'une banque se lisent sur le coefficient d'exploitation. Le taux de couverture est publié par la banque sur ses créances non performantes (« en souffrance » en norme UMOA) : ne l'appelle pas « couverture des créances douteuses »." : ''}
-**12. CONCLUSION & RECOMMANDATION** — ACHAT/CONSERVER/VENDRE + objectif + horizon + stop suggéré
+**12. CONCLUSION** — trois paragraphes courts : (a) ce que les chiffres établissent, (b) ce qu'ils n'établissent pas, (c) les prochaines publications ou échéances à surveiller (comptes annuels ou semestriels, assemblée générale, détachement du dividende) quand elles sont connues. AUCUNE recommandation : ni acheter, conserver ou vendre, ni objectif, horizon ou stop.
 **13. RED FLAGS** — pour chaque check déclenché ci-dessus, rédige 2–3 phrases de contexte expliquant pourquoi c'est préoccupant. N'invente AUCUN chiffre — utilise uniquement les valeurs fournies dans le tableau. Pour les catégories de veille/recherche : si des signaux sont fournis, cite-les avec leur source et leur date ; sinon écris explicitement « non évaluable — aucune source publique trouvée ». Le score global de gravité (déjà calculé : ${redFlags.overallScore ?? 'non évaluable'}/10) doit être repris tel quel, jamais recalculé ou réinterprété.`;
 }
