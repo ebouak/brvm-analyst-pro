@@ -91,7 +91,7 @@ async function Contenu({ params }: { params: Params }) {
       {runs.length === 0 ? (
         <EmptyStatePremium title="Aucune exécution ne correspond à ces filtres" hint="Élargissez la recherche ou réinitialisez les filtres." />
       ) : (
-        <PremiumPanel className="overflow-x-auto p-0">
+        <PremiumPanel className="relative overflow-x-auto p-0">
           <table className="w-full text-sm">
             <caption className="sr-only">Historique des exécutions de tests</caption>
             <thead>

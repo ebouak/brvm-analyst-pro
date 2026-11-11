@@ -45,7 +45,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
   );
 
   return (
-    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto rounded-card border border-border bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="relative overflow-x-auto rounded-card border border-border bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
       <table className="w-full text-sm">
         <thead className="border-b border-border">
           <tr>
