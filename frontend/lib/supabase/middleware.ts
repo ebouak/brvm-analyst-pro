@@ -1,9 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isAdminEmail } from '@/lib/server/admin-emails';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
-const SUPER_ADMIN_EMAIL = 'ebouak@gmail.com';
 
 /**
  * Vitrine SEO ouverte / app fermée.
@@ -121,7 +121,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Super admin bypass
-    if (user.email !== SUPER_ADMIN_EMAIL) {
+    if (!isAdminEmail(user.email)) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('is_premium')
