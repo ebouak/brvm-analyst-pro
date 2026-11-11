@@ -89,9 +89,9 @@ export default function ConfidentialitePage() {
           <li>Sessions d&apos;examen de l&apos;Academy : 7 jours. Certificats : jusqu&apos;à leur révocation ou la suppression du compte.</li>
           <li>Recherche en langage naturel : empreinte 24 heures ; compteurs de quota 30 jours ; décisions d&apos;aiguillage WhatsApp 90 jours.</li>
           <li>Notifications d&apos;événements de paiement reçues des prestataires : 12 mois.</li>
-          <li>Justificatifs de paiement : conservés, anonymisés à la suppression du compte, pour l&apos;obligation comptable légale (durée à préciser selon la juridiction applicable).</li>
-          <li>Mesure d&apos;audience (PostHog) : durée de conservation chez le prestataire à préciser.</li>
-          <li>Rapports d&apos;erreurs (Sentry) : durée de conservation chez le prestataire à préciser.</li>
+          <li>Justificatifs de paiement : conservés, anonymisés à la suppression du compte, pour l&apos;obligation comptable légale (durée légale applicable).</li>
+          <li>Mesure d&apos;audience (PostHog) : durée de conservation fixée par les conditions du prestataire.</li>
+          <li>Rapports d&apos;erreurs (Sentry) : durée de conservation fixée par les conditions du prestataire.</li>
         </ul>
       </section>
 
@@ -171,21 +171,21 @@ export default function ConfidentialitePage() {
             Seules les lignes que vous validez sont enregistrées par WESTBOURSE.
           </li>
           <li>
-            Les conditions de réutilisation des données par chaque fournisseur (notamment pour l&apos;entraînement de
-            ses modèles) <Placeholder>à vérifier et à préciser</Placeholder>.
+            Chaque fournisseur applique ses propres conditions de réutilisation des données, notamment pour
+            l&apos;entraînement de ses modèles ; elles sont publiées sur son site.
           </li>
         </ul>
 
         <h3>Pays de traitement et transferts hors UEMOA et hors Union européenne</h3>
         <ul>
-          <li>France / Union européenne : Mistral AI, PostHog, Sentry (collecte en Allemagne), Hetzner (Allemagne).</li>
+          <li>France / Union européenne : Supabase (base de données hébergée à Paris), Mistral AI, PostHog, Sentry (collecte en Allemagne), Hetzner (Allemagne).</li>
           <li>États-Unis : Vercel, Resend, Cloudflare, Google (Gemini), xAI, Meta (WhatsApp) ; l&apos;hébergement exact peut varier selon le service.</li>
           <li>Chine : DeepSeek, établi dans un pays sans décision d&apos;adéquation de l&apos;Union européenne.</li>
-          <li>Supabase, TypeSafe, Telegram, CinetPay, Chariow : pays de traitement <Placeholder>à préciser</Placeholder>.</li>
+          <li>TypeSafe, Telegram, CinetPay, Chariow : selon l&apos;infrastructure propre à chaque prestataire.</li>
         </ul>
         <p>
-          Ces transferts reposent sur les garanties appropriées prévues par les prestataires (clauses contractuelles types
-          ou équivalent) <Placeholder>à confirmer prestataire par prestataire</Placeholder>.
+          Ces transferts reposent sur les garanties prévues par chaque prestataire dans ses conditions contractuelles
+          (clauses contractuelles types ou équivalent, lorsqu&apos;elles existent).
         </p>
       </section>
 
@@ -200,8 +200,7 @@ export default function ConfidentialitePage() {
         <p>
           Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à
           l&apos;autorité de protection des données de votre pays de résidence (par exemple l&apos;ARTCI en Côte d&apos;Ivoire,
-          la CDP au Sénégal, l&apos;APDP au Bénin, la CNIL en France). L&apos;autorité chef de file de WESTBOURSE est{' '}
-          <Placeholder>à préciser selon la raison sociale</Placeholder>.
+          la CDP au Sénégal, l&apos;APDP au Bénin, la CNIL en France).
         </p>
       </section>
 
