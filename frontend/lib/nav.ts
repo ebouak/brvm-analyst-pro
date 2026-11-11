@@ -1,3 +1,5 @@
+import { trouverEntree, chaineParents, remplirChemin, libelleRubrique } from '@/lib/navRegistre';
+
 export interface NavItem {
   href: string;
   label: string;
@@ -147,12 +149,69 @@ export const PALETTE_EXTRA: NavItem[] = [
   { href: '/pricing', label: 'Tarifs' },
 ];
 
-/** Détection d'item actif cohérente sidebar/mobile. */
+/**
+ * Élément actif, cohérent sidebar / tiroir / barre du bas : une entrée est
+ * active si elle est la page courante OU l'un de ses parents dans le registre
+ * (lib/navRegistre.ts). Ainsi /veille allume « Actualités », /premium/dcf
+ * allume « Valorisation », /comparateur-sgi/annuaire allume « Choisir sa SGI »
+ * (défauts P1-2 et P1-3 de la spec). Une adresse absente du registre (console
+ * /admin) garde l'ancienne règle par préfixe.
+ */
 export function isNavItemActive(href: string, pathname: string): boolean {
-  // Routes à correspondance exacte (sinon « /admin » resterait actif sur ses
-  // sous-pages /admin/cles-api, etc., et « /dashboard » sur /dashboard/*).
+  const c = trouverEntree(pathname);
+  if (c) return chaineParents(c.entree).some((e) => e.chemin === href);
+  // Routes à correspondance exacte (sinon « /admin » resterait actif sur ses sous-pages).
   if (href === '/dashboard' || href === '/admin' || href === '/conseiller') return pathname === href;
-  return pathname.startsWith(href);
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export interface MaillonFil {
+  libelle: string;
+  /** `null` : maillon non cliquable (page courante, ou adresse impossible à reconstituer). */
+  href: string | null;
+}
+
+export interface Fil {
+  /** Libellé de la rubrique (texte, ce n'est pas une page), ou `null`. */
+  rubrique: string | null;
+  /** De la racine à la page courante incluse. */
+  maillons: MaillonFil[];
+  /** La page refuse le fil (sortie d'impression). */
+  sansFil: boolean;
+}
+
+function decoder(v: string): string {
+  try {
+    return decodeURIComponent(v);
+  } catch {
+    return v;
+  }
+}
+
+/**
+ * Fil d'Ariane d'une adresse, tiré du registre. Le dernier maillon prend
+ * `libelleDernier` s'il est fourni par la page ; sinon, pour une page
+ * dynamique déclarée `libelleParam`, la valeur réelle du dernier paramètre de
+ * l'adresse ; sinon le libellé du modèle de route. Jamais une valeur inventée.
+ * `null` si l'adresse n'est pas dans le registre.
+ */
+export function construireFil(pathname: string, libelleDernier?: string | null): Fil | null {
+  const c = trouverEntree(pathname);
+  if (!c) return null;
+  const chaine = chaineParents(c.entree);
+  const maillons = chaine.map((e, i) => {
+    const dernier = i === chaine.length - 1;
+    let libelle = e.libelle;
+    if (e.libelleParam) {
+      const noms = [...e.chemin.matchAll(/\[([^\]]+)\]/g)].map((m) => m[1]);
+      const v = c.params[noms[noms.length - 1]];
+      if (v) libelle = decoder(v);
+    }
+    if (dernier && libelleDernier && libelleDernier.trim()) libelle = libelleDernier.trim();
+    return { libelle, href: dernier ? null : remplirChemin(e.chemin, c.params) };
+  });
+  const racine = chaine[0];
+  return { rubrique: libelleRubrique(racine.rubrique ?? c.entree.rubrique), maillons, sansFil: Boolean(c.entree.sansFil) };
 }
 
 /**
