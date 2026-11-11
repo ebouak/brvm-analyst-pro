@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isNavItemActive, construireFil, NAV_GROUPS, PALETTE_EXTRA, MENU_COMPTE } from './nav';
+import { isNavItemActive, construireFil, rubriqueDe, NAV_GROUPS, PALETTE_EXTRA, MENU_COMPTE } from './nav';
 import { pagesDuDisque } from './navPagesDuDisque';
 
 describe('isNavItemActive : la page OU un de ses parents', () => {
@@ -154,3 +154,23 @@ describe('menus dérivés du registre', () => {
   });
 });
 
+
+describe('rubriqueDe (barre du bas)', () => {
+  const cas: [string, string | null][] = [
+    ['/dashboard', 'aujourdhui'],
+    ['/veille', 'aujourdhui'],
+    ['/brief/2026-11-06', 'aujourdhui'],
+    ['/actions/SNTS/revue', 'marche'],
+    ['/societes/SNTS', 'marche'],
+    ['/premium/classements', 'marche'],
+    ['/portefeuille/import', 'portefeuille'],
+    ['/premium/reports/2026-10', 'portefeuille'],
+    ['/formations/academy/lecon-0', 'apprendre'],
+    ['/comparateur-sgi/annuaire', 'apprendre'],
+    ['/screener', 'idee'],
+    ['/fiscalite', 'revenus'],
+    ['/account/plan', null],
+    ['/admin', null],
+  ];
+  for (const [p, r] of cas) it(`${p} → ${r}`, () => expect(rubriqueDe(p)).toBe(r));
+});

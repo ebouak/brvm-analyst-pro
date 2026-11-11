@@ -2,98 +2,66 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Briefcase, GraduationCap, LayoutDashboard, LineChart, Search } from 'lucide-react';
 import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
+import { rubriqueDe } from '@/lib/nav';
+import type { Rubrique } from '@/lib/navRegistre';
 
 /**
- * Barre de navigation mobile fixe (standard fintech) : les 4 destinations
- * majeures + Recherche (ouvre la command palette). Visible < md uniquement ;
- * complète le tiroir MobileNav (qui reste la nav exhaustive).
+ * Barre de navigation mobile fixe (< md), alignée sur les rubriques du menu
+ * (spec navigation 2026-11-11 §6) : Aujourd'hui · Marché · Recherche ·
+ * Portefeuille · Apprendre. Une case s'allume quand la page courante
+ * appartient à sa rubrique dans le registre (lib/navRegistre.ts), sous-pages
+ * et pages dynamiques comprises. « Trouver une idée » et « Mes revenus »
+ * restent dans le tiroir complet (MobileNav) : aucune case ne s'y allume.
  */
-const TABS: { href: string; label: string; match: (p: string) => boolean; icon: React.ReactNode }[] = [
-  {
-    href: '/dashboard',
-    label: 'Marché',
-    match: (p) => p === '/dashboard' || p.startsWith('/secteurs') || p.startsWith('/heatmap') || p.startsWith('/obligations'),
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M4 19V5m0 14h16M8 15l3-4 3 2 4-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    // Fiche action mise en avant à la place du Conseiller (décision du 2026-11-10,
-    // spec fiche note d'analyse § 8), sous mesure : si les visites mobiles de
-    // /conseiller baissent de plus de 30 % sur 30 jours, il revient ici.
-    // Le Conseiller reste dans le menu complet (lib/nav.ts).
-    href: '/actions',
-    label: 'Actions',
-    match: (p) => p.startsWith('/actions') || p.startsWith('/societes'),
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    href: '/portefeuille',
-    label: 'Portefeuille',
-    match: (p) => p.startsWith('/portefeuille') || p.startsWith('/premium/paper-trading'),
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7M3 12h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    href: '/actualites',
-    label: 'Actus',
-    match: (p) => p.startsWith('/actualites') || p.startsWith('/veille') || p.startsWith('/weekly') || p.startsWith('/brief'),
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
+type Onglet = { href: string; label: string; rubrique: Rubrique; Icone: typeof LineChart };
+
+const AVANT: Onglet[] = [
+  { href: '/dashboard', label: "Aujourd'hui", rubrique: 'aujourdhui', Icone: LayoutDashboard },
+  { href: '/actions', label: 'Marché', rubrique: 'marche', Icone: LineChart },
 ];
+const APRES: Onglet[] = [
+  { href: '/portefeuille', label: 'Portefeuille', rubrique: 'portefeuille', Icone: Briefcase },
+  { href: '/formations', label: 'Apprendre', rubrique: 'apprendre', Icone: GraduationCap },
+];
+
+const CASE = 'flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors';
+
+function Case({ o, rubrique }: { o: Onglet; rubrique: Rubrique | null }) {
+  const actif = o.rubrique === rubrique;
+  return (
+    <Link
+      href={o.href}
+      aria-current={actif ? 'page' : undefined}
+      className={`${CASE} ${actif ? 'text-accent' : 'text-muted hover:text-ivory'}`}
+    >
+      <o.Icone size={20} strokeWidth={1.8} aria-hidden />
+      {o.label}
+    </Link>
+  );
+}
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const rubrique = rubriqueDe(pathname);
 
   return (
     <nav
       aria-label="Navigation principale mobile"
       className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
-      {TABS.map((t) => {
-        const active = t.match(pathname);
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            aria-current={active ? 'page' : undefined}
-            className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
-              active ? 'text-accent' : 'text-muted hover:text-white'
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </Link>
-        );
-      })}
+      {AVANT.map((o) => <Case key={o.href} o={o} rubrique={rubrique} />)}
       <button
         type="button"
-        aria-label="Rechercher un titre ou une page"
+        aria-label="Rechercher une valeur ou une page"
         onClick={() => window.dispatchEvent(new Event(OPEN_PALETTE_EVENT))}
-        className="flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted transition-colors hover:text-white active:scale-95"
+        className={`${CASE} text-muted hover:text-ivory active:scale-95`}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
-          <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
+        <Search size={20} strokeWidth={1.8} aria-hidden />
         Recherche
       </button>
+      {APRES.map((o) => <Case key={o.href} o={o} rubrique={rubrique} />)}
     </nav>
   );
 }

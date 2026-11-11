@@ -6,6 +6,7 @@ import {
   chaineParents,
   remplirChemin,
   libelleRubrique,
+  type Rubrique,
 } from '@/lib/navRegistre';
 
 export { MENU_COMPTE } from '@/lib/navRegistre';
@@ -128,4 +129,9 @@ export function libellePage(chemin: string | null | undefined): string | null {
     .filter((i) => i.href !== '/' && path.startsWith(`${i.href}/`))
     .sort((a, b) => b.href.length - a.href.length);
   return prefixes[0]?.label ?? null;
+}
+
+/** Rubrique de la page servie à `pathname` (registre), ou `null` (compte, légal, admin…). */
+export function rubriqueDe(pathname: string): Rubrique | null {
+  return trouverEntree(pathname)?.entree.rubrique ?? null;
 }
