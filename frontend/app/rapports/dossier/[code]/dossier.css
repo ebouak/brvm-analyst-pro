@@ -372,6 +372,10 @@
   color: var(--dv-encre-douce);
 }
 
+.dv-nav a { color: var(--dv-encre-douce); text-decoration: underline; }
+.dv-nav a:hover { color: var(--dv-encre); }
+.dv-nav-liens { display: flex; flex-wrap: wrap; gap: 14px; }
+
 .dv-bouton {
   border: 1px solid var(--dv-encre);
   background: var(--dv-encre);

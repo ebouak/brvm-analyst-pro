@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import SimulatorClient from '@/components/public/SimulatorClient';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const revalidate = 3600;
 
@@ -36,6 +37,11 @@ export default async function SimulatorPage() {
           </p>
         </div>
         <SimulatorClient companies={instruments ?? []} />
+        <EtMaintenant suites={[
+                { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
+                { href: '/methodologie', titre: 'Notre méthode', detail: 'Comment les chiffres sont calculés.' },
+                { href: '/pricing', titre: 'Les offres', detail: 'Ce que comprend chaque formule.' },
+              ]} />
       </div>
     </PublicShell>
   );

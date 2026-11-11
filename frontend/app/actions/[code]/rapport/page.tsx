@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getValuation } from '@/lib/valuation/server';
@@ -8,8 +9,12 @@ import { versSignalPublic, type LigneSignalPublic } from '@/lib/signals/publics'
 import PrintTrigger from '@/components/financials/PrintTrigger';
 import type { SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
+import Link from 'next/link';
+import { documentsFiche } from '@/components/sousPage/SousPageNav';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = { title: 'Rapport analyste' };
 
 interface Props { params: Promise<{ code: string }> }
 
@@ -56,10 +61,22 @@ export default async function RapportPage(props: Props) {
     <div className="bg-[#ffffff] text-black font-sans p-8 max-w-3xl mx-auto print:p-4 print:max-w-none">
       <PrintTrigger />
 
+      {/* Navigation : masquée à l'impression */}
+      <nav aria-label="Documents de la fiche" className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs print:hidden">
+        <Link href={`/actions/${code}`} className="text-gray-700 underline">
+          ‹ Retour à la fiche {code}
+        </Link>
+        <span className="flex flex-wrap gap-3">
+          {documentsFiche(code).map((d) => (
+            <Link key={d.href} href={d.href} className="text-gray-700 underline">{d.label}</Link>
+          ))}
+        </span>
+      </nav>
+
       {/* En-tête */}
       <div className="flex items-start justify-between mb-5 border-b-2 border-gray-900 pb-3">
         <div>
-          <h1 className="text-2xl font-bold">Note d&apos;analyse · {designation}</h1>
+          <h1 className="text-2xl font-bold">Rapport analyste · {designation}</h1>
           <p className="text-xs text-gray-600 mt-0.5">{[code, secteur].filter(Boolean).join(' · ')}</p>
         </div>
         <div className="text-right text-xs text-gray-600">
