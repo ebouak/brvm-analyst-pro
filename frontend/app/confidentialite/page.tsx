@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Politique de confidentialité' };
 
 export default function ConfidentialitePage() {
   return (
-    <LegalPage title="Politique de confidentialité" updatedAt="2026-11-04">
+    <LegalPage title="Politique de confidentialité" updatedAt="2026-11-11">
       <section>
         <h2>Responsable de traitement</h2>
         <p>
@@ -77,6 +77,22 @@ export default function ConfidentialitePage() {
           commerciales, nous conservons seulement votre adresse et la date de ce refus, même après la suppression
           de votre compte, pour ne plus jamais vous en adresser.
         </p>
+        <p>Récapitulatif par traitement :</p>
+        <ul>
+          <li>Compte, watchlists, portefeuille, alertes, rapports sauvegardés, paper-trading : durée de vie du compte.</li>
+          <li>Newsletter : jusqu&apos;au désabonnement ; adresse non confirmée : 30 jours après le dernier e-mail de confirmation.</li>
+          <li>Journal d&apos;envoi des notifications, journal de sécurité de l&apos;authentification, journal d&apos;audit de l&apos;administration (adresse IP et navigateur de l&apos;administrateur) : 12 mois.</li>
+          <li>Messages du formulaire de contact et réponses : 12 mois après le dernier échange.</li>
+          <li>Conversations WhatsApp et Telegram avec l&apos;assistant : 90 jours (30 jours si elles ne sont liées à aucun compte) ; codes d&apos;appairage : supprimés un jour après leur expiration.</li>
+          <li>Envois de dossiers par e-mail ou messagerie : 90 jours.</li>
+          <li>Relation commerciale : consultations 90 jours, messages de proposition et notes 24 mois ; liste d&apos;opposition : conservée.</li>
+          <li>Sessions d&apos;examen de l&apos;Academy : 7 jours. Certificats : jusqu&apos;à leur révocation ou la suppression du compte.</li>
+          <li>Recherche en langage naturel : empreinte 24 heures ; compteurs de quota 30 jours ; décisions d&apos;aiguillage WhatsApp 90 jours.</li>
+          <li>Notifications d&apos;événements de paiement reçues des prestataires : 12 mois.</li>
+          <li>Justificatifs de paiement : conservés, anonymisés à la suppression du compte, pour l&apos;obligation comptable légale (durée à préciser selon la juridiction applicable).</li>
+          <li>Mesure d&apos;audience (PostHog) : durée de conservation chez le prestataire à préciser.</li>
+          <li>Rapports d&apos;erreurs (Sentry) : durée de conservation chez le prestataire à préciser.</li>
+        </ul>
       </section>
 
       <section>
@@ -107,8 +123,70 @@ export default function ConfidentialitePage() {
             donnée exacte : seul le texte du message lui est transmis, jamais votre numéro, et aucun message
             contenant une adresse e-mail ou un numéro de téléphone ne lui est envoyé.
           </li>
+          <li>
+            <strong>Mistral AI</strong> (France) — lecture des relevés que vous importez, en repli, et
+            transcription de documents publics (voir ci-dessous).
+          </li>
+          <li>
+            <strong>PostHog</strong> (hébergement dans l&apos;Union européenne) — mesure d&apos;audience, chargée
+            uniquement après votre accord ; pour une personne connectée ayant consenti, la session est
+            rattachée à son identifiant de compte et à son adresse e-mail.
+          </li>
+          <li>
+            <strong>Sentry</strong> (collecte hébergée en Allemagne) — rapports d&apos;erreurs techniques du site.
+          </li>
+          <li>
+            <strong>Cloudflare Turnstile</strong> — contrôle anti-robot lors de la connexion et de
+            l&apos;inscription ; le prestataire reçoit des signaux techniques de votre navigateur (dont votre adresse IP).
+          </li>
+          <li>
+            <strong>CinetPay</strong> et <strong>Chariow</strong> — paiement des abonnements et des formations.
+            Les données de carte ou de mobile money sont saisies chez eux, jamais chez WESTBOURSE ; nous recevons
+            l&apos;identifiant et le statut de la transaction.
+          </li>
+          <li>
+            <strong>Telegram</strong> et <strong>WhatsApp (Meta)</strong> — acheminement des messages et
+            alertes que vous demandez de recevoir, et des échanges avec l&apos;assistant.
+          </li>
+          <li>
+            <strong>Synthèse vocale (Microsoft Edge TTS, ElevenLabs)</strong> — voix des vidéos de séance. Seuls
+            des textes de marché générés à partir de données publiques leur sont transmis : aucune donnée personnelle.
+          </li>
         </ul>
-        <p>Certains prestataires peuvent traiter des données hors UEMOA, avec les garanties appropriées.</p>
+
+        <h3>Données personnelles transmises aux fournisseurs d&apos;IA</h3>
+        <ul>
+          <li>
+            <strong>Assistant du site</strong> : le texte de votre question, et des données de marché. Lorsque
+            votre question porte sur votre portefeuille (mots comme « portefeuille », « plus-value »,
+            « position », « renforcer »), vos positions (code, quantité, prix de revient), leur valorisation et
+            votre plus-value ou moins-value latente sont ajoutées à la requête envoyée au fournisseur. Hors de ce cas,
+            votre portefeuille n&apos;est pas transmis.
+          </li>
+          <li>
+            <strong>Import d&apos;un relevé de SGI</strong> : le texte ou les images du relevé que vous choisissez
+            d&apos;importer (positions, quantités, prix, éventuellement nom du titulaire et numéros présents sur le
+            document) sont envoyés à l&apos;un des fournisseurs d&apos;IA (DeepSeek, Mistral AI, xAI) pour en extraire les
+            lignes. N&apos;importez pas un document contenant des données que vous ne voulez pas partager.
+            Seules les lignes que vous validez sont enregistrées par WESTBOURSE.
+          </li>
+          <li>
+            Les conditions de réutilisation des données par chaque fournisseur (notamment pour l&apos;entraînement de
+            ses modèles) <Placeholder>à vérifier et à préciser</Placeholder>.
+          </li>
+        </ul>
+
+        <h3>Pays de traitement et transferts hors UEMOA et hors Union européenne</h3>
+        <ul>
+          <li>France / Union européenne : Mistral AI, PostHog, Sentry (collecte en Allemagne), Hetzner (Allemagne).</li>
+          <li>États-Unis : Vercel, Resend, Cloudflare, Google (Gemini), xAI, Meta (WhatsApp) ; l&apos;hébergement exact peut varier selon le service.</li>
+          <li>Chine : DeepSeek, établi dans un pays sans décision d&apos;adéquation de l&apos;Union européenne.</li>
+          <li>Supabase, TypeSafe, Telegram, CinetPay, Chariow : pays de traitement <Placeholder>à préciser</Placeholder>.</li>
+        </ul>
+        <p>
+          Ces transferts reposent sur les garanties appropriées prévues par les prestataires (clauses contractuelles types
+          ou équivalent) <Placeholder>à confirmer prestataire par prestataire</Placeholder>.
+        </p>
       </section>
 
       <section>
@@ -116,7 +194,14 @@ export default function ConfidentialitePage() {
         <p>
           Conformément à la réglementation applicable, vous disposez d&apos;un droit d&apos;accès, de
           rectification, d&apos;effacement, d&apos;opposition, de limitation et de portabilité. Pour les
-          exercer, écrivez à support@westbourse.com.
+          exercer, écrivez à support@westbourse.com ; vous pouvez aussi exporter vos données et supprimer
+          votre compte vous-même depuis les paramètres du compte.
+        </p>
+        <p>
+          Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à
+          l&apos;autorité de protection des données de votre pays de résidence (par exemple l&apos;ARTCI en Côte d&apos;Ivoire,
+          la CDP au Sénégal, l&apos;APDP au Bénin, la CNIL en France). L&apos;autorité chef de file de WESTBOURSE est{' '}
+          <Placeholder>à préciser selon la raison sociale</Placeholder>.
         </p>
       </section>
 
