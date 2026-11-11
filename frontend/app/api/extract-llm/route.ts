@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
 import {
   TEXT_PROVIDERS, VISION_PROVIDERS, SYSTEM_PROMPT, userPrompt, parseLlmJson,
   type Provider, type ExtractRequest,
 } from '@/lib/import/llmProviders';
 import { resolveApiKey } from '@/lib/server/apiKeys';
+import { requireAdminApi } from '@/lib/server/adminApi';
 
 export const maxDuration = 60;
+
+const MAX_TEXT_CHARS = 200_000;
+const MAX_IMAGES = 12;
 
 interface ProviderCfg {
   key: string | undefined;
@@ -66,13 +69,21 @@ async function callProvider(cfg: ProviderCfg, req: ExtractRequest): Promise<Reco
 }
 
 export async function POST(request: Request) {
-  const supa = createServerClient();
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+  // Route d'import réservée à l'administration (+ 2FA) : elle consomme le budget LLM.
+  const g = await requireAdminApi('content.write');
+  if ('error' in g) return g.error;
 
   const req = (await request.json().catch(() => null)) as ExtractRequest | null;
   if (!req || (req.mode !== 'text' && req.mode !== 'vision')) {
     return NextResponse.json({ error: 'Requête invalide' }, { status: 400 });
+  }
+
+  // Bornes de taille : sans elles, un appelant pouvait faire payer un contexte énorme.
+  if (typeof req.text === 'string' && req.text.length > MAX_TEXT_CHARS) {
+    return NextResponse.json({ error: 'Texte trop volumineux' }, { status: 413 });
+  }
+  if (Array.isArray(req.images) && req.images.length > MAX_IMAGES) {
+    return NextResponse.json({ error: 'Trop d’images' }, { status: 413 });
   }
 
   const cfgs = await providers();
