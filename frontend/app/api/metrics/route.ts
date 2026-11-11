@@ -2,7 +2,7 @@
 // Métriques agrégées depuis Supabase pour monitoring (cf. spec §11.3).
 // À scraper depuis Prometheus avec un bearer optionnel si METRICS_TOKEN défini.
 import { NextResponse, type NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +49,10 @@ export async function GET(req: NextRequest) {
     return new NextResponse('unauthorized', { status: 401 });
   }
 
-  const supabase = createClient();
+  // Client serveur : derrière le jeton ci-dessus. Avec la clé publique, les
+  // tables fermées à l'anonyme (F-04) et les tables internes compteraient 0
+  // en silence, ce qui ferait mentir la supervision.
+  const supabase = getServiceClient();
   const metrics: Metric[] = [];
 
   // Comptages bruts par table.
