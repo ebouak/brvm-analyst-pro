@@ -35,7 +35,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Relancer les messages en attente
         working-directory: scraper
         env:

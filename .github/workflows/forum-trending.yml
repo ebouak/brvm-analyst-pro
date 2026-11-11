@@ -30,7 +30,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Run forum trending calculation with retry
         working-directory: scraper

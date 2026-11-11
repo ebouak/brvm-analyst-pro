@@ -60,7 +60,7 @@ jobs:
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm install
+        run: cd scraper && npm ci
 
       - name: Installer Chromium (Playwright)
         run: cd scraper && npx playwright install chromium --with-deps
@@ -173,7 +173,7 @@ jobs:
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm install
+        run: cd scraper && npm ci
 
       - name: 1 · Re-calculer les signaux
         run: cd scraper && npm run score
@@ -213,7 +213,7 @@ jobs:
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm install
+        run: cd scraper && npm ci
 
       - name: Installer Chromium (Playwright)
         run: cd scraper && npx playwright install chromium --with-deps

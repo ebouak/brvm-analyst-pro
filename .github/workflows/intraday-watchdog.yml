@@ -27,7 +27,7 @@ jobs:
 
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Check intraday data freshness
         working-directory: scraper
