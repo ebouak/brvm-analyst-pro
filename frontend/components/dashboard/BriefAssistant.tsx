@@ -20,7 +20,7 @@ export default function BriefAssistant() {
     try {
       const r = await fetch('/api/brief-assistant', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, history: msgs.map((m) => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({ question, history: msgs.slice(-8).map((m) => ({ role: m.role, content: m.content.slice(0, 4000) })) }),
       });
       const raw = await r.text();
       let j: { answer?: string; error?: string };
@@ -54,6 +54,7 @@ export default function BriefAssistant() {
               ))}
               {busy && <p className="text-xs text-muted">réflexion…</p>}
             </div>
+            <p className="px-4 pb-2 text-xs text-muted">Vous échangez avec une IA. Ses réponses peuvent être inexactes.</p>
             <div className="p-3 border-t border-border flex gap-2">
               <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ask()}
                 placeholder="Votre question…" className="flex-1 bg-bg border border-border rounded px-3 py-2 text-sm" />
