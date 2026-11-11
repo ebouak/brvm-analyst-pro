@@ -10,13 +10,14 @@
 // Auth : bearer CRON_SECRET, comparé à temps constant (comme dossier-polish).
 // Aucune donnée personnelle dans les réponses, les journaux ni l'alerte : des
 // comptes seulement.
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 import { lireReglages } from '@/lib/crm/reglagesServeur';
 import { chargerDossiers } from '@/lib/crm/charger';
 import { selectionnerPassage, cleJournal, PREFIXE_SIMULATION } from '@/lib/crm/sequences';
 import { composerRelance } from '@/lib/crm/gabarits';
 import { envoyerRelanceEmail } from '@/lib/crm/envoiRelance';
-import { autorise, decisionReglages, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
+import { decisionReglages, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 
@@ -46,7 +47,7 @@ async function dejaAujourdhui(simulation: boolean, maintenant: Date): Promise<nu
 }
 
 export async function POST(req: Request) {
-  if (!autorise(process.env.CRON_SECRET, req.headers.get('authorization'))) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  if (!cronAutorise(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const lecture = await lireReglages();
   const decision = decisionReglages(lecture.ok ? { ok: true, mode: lecture.reglages.mode_sequences } : { ok: false });

@@ -294,6 +294,7 @@ export default async function BriefDatePage(props: PageProps) {
                 <audio controls preload="none" src={brief.audio_url} className="w-full">
                   Votre navigateur ne lit pas l&apos;audio : le texte complet est ci-dessous.
                 </audio>
+                <p className="mt-2 text-xs text-faint">Voix de synthèse</p>
               </div>
             )}
             <pre className="whitespace-pre-wrap text-sm text-ivory/90 leading-relaxed font-sans">{brief.contenu}</pre>

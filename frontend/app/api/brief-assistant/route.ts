@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { parametresFournisseur, redacteursDisponibles, type Redacteur } from '@/lib/server/redacteur';
 import { TOOL_DEFS, runTool } from '@/lib/briefTools';
+import { checkFeature } from '@/lib/server/featureGate';
+import { briefBodySchema } from '@/lib/server/briefAssistantSchema';
 
 export const maxDuration = 60;
 
@@ -106,8 +108,18 @@ export async function POST(request: Request) {
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
-  const body = (await request.json().catch(() => null)) as { question?: string; history?: ChatMsg[] } | null;
-  if (!body?.question?.trim()) return NextResponse.json({ error: 'Question vide' }, { status: 400 });
+  const parsed = briefBodySchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: 'Requête invalide' }, { status: 400 });
+  const { question, history } = parsed.data;
+
+  // Garde de fonctionnalité (accès + quota journalier), comme /api/ai/chat.
+  const { data: profile } = await supa.from('profiles').select('is_premium').eq('id', user.id).single();
+  const gate = await checkFeature('assistant_ia', {
+    id: user.id,
+    email: user.email,
+    isPremium: Boolean(profile?.is_premium),
+  });
+  if (!gate.allowed) return NextResponse.json({ error: gate.reason }, { status: gate.status });
 
   const redacteurs = await redacteursDisponibles();
   if (redacteurs.length === 0) return NextResponse.json({ error: 'Aucune clé IA configurée (page Clés API).' }, { status: 503 });
@@ -115,8 +127,8 @@ export async function POST(request: Request) {
   const ctx = await buildContext();
   const messages: ChatMsg[] = [
     { role: 'system', content: `${SYSTEM}\n\n${ctx}` },
-    ...((body.history ?? []).slice(-8)),
-    { role: 'user', content: body.question },
+    ...history,
+    { role: 'user', content: question },
   ];
 
   // Cascade commune : un fournisseur qui échoue (crédit épuisé, modèle retiré)
