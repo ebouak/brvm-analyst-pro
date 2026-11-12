@@ -57,7 +57,7 @@ export default function CompareVerdict({ rows }: { rows: FundaRow[] }) {
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-faint italic">Score = 60% valorisation fondamentale + 40% performance sur la période. Aucun conseil d'investissement.</p>
+      <p className="text-[11px] text-faint italic">Score = 60% valorisation fondamentale + 40% performance sur la période. Aucun conseil d&apos;investissement.</p>
     </div>
   );
 }

@@ -30,7 +30,7 @@ export default function AgentReachExperimentalPage() {
 
       {/* Info Section */}
       <div className="bg-elevated border border-border rounded-lg p-6 space-y-4">
-        <h2 className="font-semibold text-accent">À propos d'Agent Reach</h2>
+        <h2 className="font-semibold text-accent">À propos d&apos;Agent Reach</h2>
         <div className="space-y-3 text-sm text-muted">
           <p>
             <strong className="text-white">Agent Reach</strong> est un outil expérimental pour

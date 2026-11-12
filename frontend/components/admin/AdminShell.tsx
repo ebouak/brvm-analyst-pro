@@ -55,7 +55,7 @@ export function AdminShell({
         </nav>
         <div className="border-t border-border px-5 py-3">
           <Link href="/dashboard" className="text-xs text-muted transition-colors hover:text-ivory">
-            ← Retour à l'application
+            ← Retour à l&apos;application
           </Link>
         </div>
       </aside>

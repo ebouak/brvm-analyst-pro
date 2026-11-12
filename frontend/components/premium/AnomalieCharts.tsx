@@ -47,12 +47,10 @@ export function AnomalieCharts({
   const AXIS_NAME = { color: T.muted };
   const divSigMap = new Map(pointsDividendes.map((p) => [p.code, p.signal]));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const optDiv: any = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (p: any) =>
         `<b>${p.data[3]}</b> (${p.data[2]})<br/>Rendement : ${p.data[1]}%<br/>Payout : ${p.data[0]}%`,
     },
@@ -61,21 +59,17 @@ export function AnomalieCharts({
     series: [{
       type: 'scatter',
       data: pointsDividendes.map((p) => [p.payout, p.rendement, p.code, p.nom]),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       itemStyle: { color: (params: any) => SIG_COLOR[divSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       label: { show: pointsDividendes.length < 20, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };
 
   const liqSigMap = new Map(pointsLiqVol.map((p) => [p.code, p.signal]));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const optLiq: any = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (p: any) =>
         `<b>${p.data[2]}</b><br/>Liquidité : ${(p.data[0] as number).toFixed(1)} M FCFA/j<br/>Volatilité : ${p.data[1]}%`,
     },
@@ -84,10 +78,8 @@ export function AnomalieCharts({
     series: [{
       type: 'scatter',
       data: pointsLiqVol.map((p) => [p.liquidite, p.volatilite, p.code]),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       itemStyle: { color: (params: any) => SIG_COLOR[liqSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       label: { show: true, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };
@@ -97,10 +89,8 @@ export function AnomalieCharts({
   const heatData = heatmapCells
     .filter((c) => codes.includes(c.code) && dates.includes(c.date))
     .map((c) => [dates.indexOf(c.date), codes.indexOf(c.code), c.variation]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const optHeat: any = {
     backgroundColor: 'transparent',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tooltip: { formatter: (p: any) => `${codes[p.data[1]]} — ${dates[p.data[0]]}<br/>Variation : ${p.data[2]}%` },
     xAxis: { type: 'category', data: dates.map((d) => d.slice(5)), axisLabel: { color: T.muted, fontSize: 11, rotate: 45 }, splitLine: { show: false } },
     yAxis: { type: 'category', data: codes, axisLabel: { color: T.ivory, fontSize: 11 } },
@@ -110,12 +100,10 @@ export function AnomalieCharts({
 
   const valSigMap = new Map(pointsValuation.map((p) => [p.code, p.signal]));
   const valData = pointsValuation.filter((p) => p.croissance_ca !== null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const optVal: any = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (p: any) =>
         `<b>${p.data[2]}</b><br/>Marge nette : ${p.data[0]}%<br/>Croissance CA : ${p.data[1]}%`,
     },
@@ -124,10 +112,8 @@ export function AnomalieCharts({
     series: [{
       type: 'scatter',
       data: valData.map((p) => [p.marge_nette, p.croissance_ca, p.code]),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       itemStyle: { color: (params: any) => SIG_COLOR[valSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       label: { show: true, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };

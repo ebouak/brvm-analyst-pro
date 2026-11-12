@@ -285,7 +285,7 @@ export default async function SignauxPage() {
         </div>
 
         <div className="border-t border-border/40 pt-3 text-xs text-faint italic leading-relaxed">
-          Les signaux sont calculés à partir d'indicateurs techniques. {DISCLAIMER_COURT}
+          Les signaux sont calculés à partir d&apos;indicateurs techniques. {DISCLAIMER_COURT}
         </div>
       </div>
     </div>

@@ -111,7 +111,7 @@ export default async function ReportDetailPage(props: { params: Promise<{ month:
         {/* Footer navigation */}
         <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
           <Link href="/premium/reports" className="text-sm text-gold hover:text-gold/80 transition">
-            ← Retour à l'archive
+            ← Retour à l&apos;archive
           </Link>
           <p className="text-xs text-muted">
             Généré le {new Date(reportData.created_at).toLocaleDateString('fr-FR')}

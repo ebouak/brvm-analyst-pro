@@ -52,7 +52,7 @@ export default function EditPositionModal({ isOpen, onClose, position }: Props) 
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
             </div>
             <div>
-              <label htmlFor="ep-prix" className="block text-sm font-medium mb-1">Prix d'entrée *</label>
+              <label htmlFor="ep-prix" className="block text-sm font-medium mb-1">Prix d&apos;entrée *</label>
               <input id="ep-prix" name="prix_entree" type="number" placeholder="0" required step="any"
                 defaultValue={position.prix_entree}
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
@@ -60,7 +60,7 @@ export default function EditPositionModal({ isOpen, onClose, position }: Props) 
           </div>
 
           <div>
-            <label htmlFor="ep-date" className="block text-sm font-medium mb-1">Date d'entrée</label>
+            <label htmlFor="ep-date" className="block text-sm font-medium mb-1">Date d&apos;entrée</label>
             <input id="ep-date" name="date_entree" type="date"
               defaultValue={position.date_entree ?? ''}
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />

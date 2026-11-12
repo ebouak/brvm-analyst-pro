@@ -9,7 +9,7 @@ export interface EQInputs {
   peers: Record<string, (number | null)[]>; sectorPeers?: Record<string, (number | null)[]>;
 }
 function pct(v: number | null, arr: (number | null)[] | undefined, hib: boolean): number | null { if (!arr) return null; return calculatePercentile(v, arr, hib); }
-function useArr(inp: EQInputs, k: string): (number | null)[] | undefined {
+function pairsUtiles(inp: EQInputs, k: string): (number | null)[] | undefined {
   const sp = inp.sectorPeers?.[k];
   if (sp && sp.filter((x) => x != null && isFiniteNumber(x as number)).length >= 5) return sp;
   return inp.peers[k];
@@ -18,11 +18,11 @@ export function computeEarningsQualityScore(inp: EQInputs): { score: number | nu
   const notes: string[] = []; const isBank = inp.sector==='banks'; const isIns = inp.sector==='insurance';
   let factors: Record<string, FactorScore> = {};
   if (isBank) {
-    const roePct = pct(inp.roe, useArr(inp,'roe'), true);
-    const roaPct = pct(inp.roa??null, useArr(inp,'roa'), true);
-    const nigPct = pct(inp.netIncomeGrowth??null, useArr(inp,'netIncomeGrowth'), true);
-    const corPct = pct(inp.costOfRisk??null, useArr(inp,'costOfRisk'), false);
-    const stabPct = pct(inp.earningsStability??null, useArr(inp,'earningsStability'), true);
+    const roePct = pct(inp.roe, pairsUtiles(inp,'roe'), true);
+    const roaPct = pct(inp.roa??null, pairsUtiles(inp,'roa'), true);
+    const nigPct = pct(inp.netIncomeGrowth??null, pairsUtiles(inp,'netIncomeGrowth'), true);
+    const corPct = pct(inp.costOfRisk??null, pairsUtiles(inp,'costOfRisk'), false);
+    const stabPct = pct(inp.earningsStability??null, pairsUtiles(inp,'earningsStability'), true);
     const hasCor = corPct!=null; if (!hasCor) notes.push('Coût du risque indisponible: poids réalloué');
     factors = {
       roe: { value: inp.roe, percentile: roePct, weight: 0.30, weightedScore: roePct!=null?roePct*0.30:null, source:'ROE', notes:[]},
@@ -32,11 +32,11 @@ export function computeEarningsQualityScore(inp: EQInputs): { score: number | nu
       stability: { value: inp.earningsStability??null, percentile: stabPct, weight: hasCor?0.15:0.225, weightedScore: stabPct!=null?stabPct*(hasCor?0.15:0.225):null, source:'Stability', notes:[]},
     };
   } else if (isIns) {
-    const roePct = pct(inp.roe, useArr(inp,'roe'), true);
-    const nigPct = pct(inp.netIncomeGrowth??null, useArr(inp,'netIncomeGrowth'), true);
-    const crPct = pct(inp.combinedRatio??null, useArr(inp,'combinedRatio'), false);
-    const irPct = pct(inp.investmentReturn??null, useArr(inp,'investmentReturn'), true);
-    const stabPct = pct(inp.earningsStability??null, useArr(inp,'earningsStability'), true);
+    const roePct = pct(inp.roe, pairsUtiles(inp,'roe'), true);
+    const nigPct = pct(inp.netIncomeGrowth??null, pairsUtiles(inp,'netIncomeGrowth'), true);
+    const crPct = pct(inp.combinedRatio??null, pairsUtiles(inp,'combinedRatio'), false);
+    const irPct = pct(inp.investmentReturn??null, pairsUtiles(inp,'investmentReturn'), true);
+    const stabPct = pct(inp.earningsStability??null, pairsUtiles(inp,'earningsStability'), true);
     factors = {
       roe: { value: inp.roe, percentile: roePct, weight: 0.30, weightedScore: roePct!=null?roePct*0.30:null, source:'ROE', notes:[]},
       netIncomeGrowth: { value: inp.netIncomeGrowth??null, percentile: nigPct, weight: 0.20, weightedScore: nigPct!=null?nigPct*0.20:null, source:'NIG', notes:[]},
@@ -45,12 +45,12 @@ export function computeEarningsQualityScore(inp: EQInputs): { score: number | nu
       stability: { value: inp.earningsStability??null, percentile: stabPct, weight: 0.15, weightedScore: stabPct!=null?stabPct*0.15:null, source:'Stability', notes:[]},
     };
   } else {
-    const roePct = pct(inp.roe, useArr(inp,'roe'), true);
-    const epsPct = pct(inp.epsGrowth3y??null, useArr(inp,'epsGrowth3y'), true);
-    const msPct = pct(inp.marginStability??null, useArr(inp,'marginStability'), true);
-    const ccPct = pct(inp.cashConversion??null, useArr(inp,'cashConversion'), true);
-    const accPct = pct(inp.accruals??null, useArr(inp,'accruals'), false);
-    const stabPct = pct(inp.earningsStability??null, useArr(inp,'earningsStability'), true);
+    const roePct = pct(inp.roe, pairsUtiles(inp,'roe'), true);
+    const epsPct = pct(inp.epsGrowth3y??null, pairsUtiles(inp,'epsGrowth3y'), true);
+    const msPct = pct(inp.marginStability??null, pairsUtiles(inp,'marginStability'), true);
+    const ccPct = pct(inp.cashConversion??null, pairsUtiles(inp,'cashConversion'), true);
+    const accPct = pct(inp.accruals??null, pairsUtiles(inp,'accruals'), false);
+    const stabPct = pct(inp.earningsStability??null, pairsUtiles(inp,'earningsStability'), true);
     factors = {
       roe: { value: inp.roe, percentile: roePct, weight: 0.25, weightedScore: roePct!=null?roePct*0.25:null, source:'ROE', notes:[]},
       epsGrowth3y: { value: inp.epsGrowth3y??null, percentile: epsPct, weight: 0.20, weightedScore: epsPct!=null?epsPct*0.20:null, source:'EPS3Y', notes:[]},

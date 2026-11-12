@@ -3,7 +3,6 @@ import type { AssetClassPoint, AssetKind } from '@/lib/compare/assetClasses';
 
 let EChartComponent: React.ComponentType<{ option: object; height: number }> | null = null;
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   EChartComponent = require('@/components/EChart').default;
 }
 

@@ -25,7 +25,6 @@ export default function SectorComparisonChart({ data }: { data: SectorBar[] }) {
                 itemStyle: { color: (r.perf ?? 0) >= 0 ? '#00c853' : '#f44336',
                   borderRadius: (r.perf ?? 0) >= 0 ? [0, 4, 4, 0] : [4, 0, 0, 4] },
               })),
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               label: { show: true, position: ((p: unknown) => ((p as any).value ?? 0) >= 0 ? 'right' : 'left') as any,
                 formatter: (p: unknown) => `${((p as { value: number }).value ?? 0).toFixed(1)}%`,
                 color: '#8b93a7', fontSize: 10 },

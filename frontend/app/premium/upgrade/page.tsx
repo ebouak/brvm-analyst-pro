@@ -16,7 +16,7 @@ export default async function UpgradePage(props: { searchParams: Promise<{ from?
         </span>
         <h1 className="text-3xl font-bold text-white mb-3">Accès Premium BRVM</h1>
         <p className="text-muted text-sm leading-relaxed max-w-lg mx-auto">
-          Débloquez les outils d'analyse avancée réservés aux investisseurs professionnels sur la BRVM.
+          Débloquez les outils d&apos;analyse avancée réservés aux investisseurs professionnels sur la BRVM.
         </p>
       </div>
 

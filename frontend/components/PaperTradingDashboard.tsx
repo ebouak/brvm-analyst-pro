@@ -231,13 +231,13 @@ export function PaperTradingDashboard() {
               10 % de votre capital simulé, converti en titres au cours du jour.
             </li>
             <li>
-              <span className="text-white">2.</span> Tant qu'elle est ouverte, votre gain ou perte
+              <span className="text-white">2.</span> Tant qu&apos;elle est ouverte, votre gain ou perte
               est <span className="text-info">latent</span> : il varie chaque jour avec le cours,
-              rien n'est encore acquis.
+              rien n&apos;est encore acquis.
             </li>
             <li>
               <span className="text-white">3.</span> Quand vous fermez la position, le gain ou la
-              perte devient <span className="text-info">réalisé</span> : il s'inscrit définitivement
+              perte devient <span className="text-info">réalisé</span> : il s&apos;inscrit définitivement
               dans votre performance.
             </li>
           </ol>
@@ -362,7 +362,7 @@ export function PaperTradingDashboard() {
                 {confirmClose.pnl >= 0 ? '+' : ''}
                 {fmtFcfa(confirmClose.pnl)}
               </span>{' '}
-              deviendra <span className="text-info">réalisé</span> et s'inscrira définitivement dans
+              deviendra <span className="text-info">réalisé</span> et s&apos;inscrira définitivement dans
               votre performance.
             </p>
             <div className="rounded-lg border border-border bg-surface px-3 py-2.5 text-xs text-muted space-y-1">

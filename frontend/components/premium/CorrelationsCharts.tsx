@@ -5,7 +5,6 @@ import type { CorrelationSerie } from '@/lib/premium/correlations';
 // Dynamic import guard for SSR
 let EChartComponent: React.ComponentType<{ option: object; height: number; style?: object }> | null = null;
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   EChartComponent = require('@/components/EChart').default;
 }
 

@@ -203,7 +203,6 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
   const macdRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const priceSeriesRef = useRef<ReturnType<IChartApi['addSeries']> | null>(null) as React.MutableRefObject<any>;
   const crosshairPt = useRef<Pt | null>(null);
   const tlineFirstPt = useRef<Pt | null>(null);
@@ -382,7 +381,6 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
     chartRef.current = main;
 
     // Keep a reference to apply markers on
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let priceSeries: ReturnType<typeof main.addSeries<any>> | null = null;
 
     if (chartType === 'candle') {

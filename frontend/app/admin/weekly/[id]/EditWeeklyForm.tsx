@@ -163,7 +163,7 @@ export function EditWeeklyForm({ id, slug, initialTitre, initialResume, initialS
           rel="noopener noreferrer"
           className="rounded-lg border border-[#1a2a30] px-4 py-2 text-sm text-[#6b8a9a] transition hover:text-[#FCFCFC]"
         >
-          Voir l'article
+          Voir l&apos;article
         </a>
 
         {status === 'published' && (

@@ -202,9 +202,9 @@ export default async function ScannerPage(props: PageProps) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             <StatPill tone="neutral">
-              <span className="tabular">{codes.length}</span>&nbsp;titres dans l'univers
+              <span className="tabular">{codes.length}</span>&nbsp;titres dans l&apos;univers
             </StatPill>
-            <StatPill tone="gold">200 séances d'historique</StatPill>
+            <StatPill tone="gold">200 séances d&apos;historique</StatPill>
           </div>
         </div>
       ) : (

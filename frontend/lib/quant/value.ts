@@ -53,7 +53,7 @@ export function computeValueScore(inp: ValueInputs): { score: number | null; fac
     notes.push('Payout >100%: dividende pénalisé');
   }
 
-  const useSector = (k: keyof ValueInputs['peers']): (number | null)[] => {
+  const pairsDuSecteur = (k: keyof ValueInputs['peers']): (number | null)[] => {
     const sp = (inp.sectorPeers as Record<string,(number|null)[]> | undefined)?.[k];
     if (sp && (sp as (number|null)[]).filter((v) => v != null && isFiniteNumber(v as number)).length >= 5) return sp as (number|null)[];
     return inp.peers[k];
@@ -64,10 +64,10 @@ export function computeValueScore(inp: ValueInputs): { score: number | null; fac
   if (inp.payoutRatio != null && inp.payoutRatio > 120) penalty += 5;
 
   if (isBank) {
-    const pbPct = pct(inp.pb, useSector('pb'), false);
-    const perPct = pct(per, useSector('per'), false);
-    const dyPct = pct(divYield, useSector('divYield'), true);
-    const roeAdjPct = pct(inp.roe ?? null, useSector('roe'), true);
+    const pbPct = pct(inp.pb, pairsDuSecteur('pb'), false);
+    const perPct = pct(per, pairsDuSecteur('per'), false);
+    const dyPct = pct(divYield, pairsDuSecteur('divYield'), true);
+    const roeAdjPct = pct(inp.roe ?? null, pairsDuSecteur('roe'), true);
     factors = {
       pb: { value: inp.pb, percentile: pbPct, weight: 0.45, weightedScore: pbPct != null ? pbPct * 0.45 : null, source: 'P/B', notes: [] },
       per: { value: per, percentile: perPct, weight: 0.25, weightedScore: perPct != null ? perPct * 0.25 : null, source: 'PER', notes: [] },
@@ -75,10 +75,10 @@ export function computeValueScore(inp: ValueInputs): { score: number | null; fac
       roeAdj: { value: inp.roe ?? null, percentile: roeAdjPct, weight: 0.10, weightedScore: roeAdjPct != null ? roeAdjPct * 0.10 : null, source: 'ROE', notes: [] },
     };
   } else if (isInsurance) {
-    const pbPct = pct(inp.pb, useSector('pb'), false);
-    const perPct = pct(per, useSector('per'), false);
-    const dyPct = pct(divYield, useSector('divYield'), true);
-    const roeAdjPct = pct(inp.roe ?? null, useSector('roe'), true);
+    const pbPct = pct(inp.pb, pairsDuSecteur('pb'), false);
+    const perPct = pct(per, pairsDuSecteur('per'), false);
+    const dyPct = pct(divYield, pairsDuSecteur('divYield'), true);
+    const roeAdjPct = pct(inp.roe ?? null, pairsDuSecteur('roe'), true);
     factors = {
       pb: { value: inp.pb, percentile: pbPct, weight: 0.40, weightedScore: pbPct != null ? pbPct * 0.40 : null, source: 'P/B', notes: [] },
       per: { value: per, percentile: perPct, weight: 0.25, weightedScore: perPct != null ? perPct * 0.25 : null, source: 'PER', notes: [] },
@@ -86,11 +86,11 @@ export function computeValueScore(inp: ValueInputs): { score: number | null; fac
       roeAdj: { value: inp.roe ?? null, percentile: roeAdjPct, weight: 0.15, weightedScore: roeAdjPct != null ? roeAdjPct * 0.15 : null, source: 'ROE', notes: [] },
     };
   } else {
-    const perPct = pct(per, useSector('per'), false);
-    const pbPct = pct(inp.pb, useSector('pb'), false);
-    const dyPct = pct(divYield, useSector('divYield'), true);
-    const evPct = pct(evEbitda, useSector('evEbitda'), false);
-    const eyPct = pct(ey, useSector('earningsYield'), true);
+    const perPct = pct(per, pairsDuSecteur('per'), false);
+    const pbPct = pct(inp.pb, pairsDuSecteur('pb'), false);
+    const dyPct = pct(divYield, pairsDuSecteur('divYield'), true);
+    const evPct = pct(evEbitda, pairsDuSecteur('evEbitda'), false);
+    const eyPct = pct(ey, pairsDuSecteur('earningsYield'), true);
     // limit div yield if payout >100
     let dyScore = dyPct;
     if (inp.payoutRatio != null && inp.payoutRatio > 100 && dyScore != null) dyScore = Math.round(dyScore * 0.6);

@@ -18,7 +18,6 @@ export async function exportReportPDF(data: ReportData): Promise<void> {
   });
 
   const element = React.createElement(ReportPDF, { data, generatedAt });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const blob = await pdf(element as any).toBlob();
 
   const from = data.dateFrom.replace(/-/g, '');
