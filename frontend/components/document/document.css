@@ -60,6 +60,7 @@
   display: flex; justify-content: space-between; gap: 8mm;
   font-size: 9pt; color: var(--doc-faible);
 }
+.doc-pied .doc-tabulaire { white-space: nowrap; }
 .doc-tabulaire { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 
 /* ── Couverture ────────────────────────────────────────────────────────── */
@@ -126,6 +127,66 @@
 .doc-graphique .val-accent { font-size: 9pt; fill: var(--doc-accent); font-weight: 600; }
 .doc-graphique .axe { font-size: 9pt; fill: var(--doc-faible); }
 
+/* ── Couverture photo (v2) ─────────────────────────────────────────────── */
+.doc-couv2 { padding: 0; background: var(--doc-nuit); color: var(--doc-sur-nuit); }
+.doc-couv2-photo { position: absolute; inset: 0 0 auto 0; height: 66%; overflow: hidden; }
+.doc-couv2-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.doc-couv2-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(16, 43, 53, 0.55) 0%, rgba(16, 43, 53, 0) 22%, rgba(16, 43, 53, 0) 52%, rgba(16, 43, 53, 0.92) 90%, #102b35 100%);
+}
+.doc-couv2-haut { position: absolute; top: 14mm; left: var(--doc-marge); right: var(--doc-marge); display: flex; justify-content: space-between; font-size: 9pt; color: rgba(245, 243, 237, 0.85); z-index: 1; }
+.doc-couv2-marque { font-family: var(--font-display), Georgia, serif; font-size: 13pt; letter-spacing: 0.02em; color: #fff; }
+.doc-couv2-credit { position: absolute; top: 21mm; right: var(--doc-marge); font-size: 7pt; color: rgba(245, 243, 237, 0.7); z-index: 1; max-width: 80mm; text-align: right; }
+.doc-couv2-corps { position: absolute; left: var(--doc-marge); right: var(--doc-marge); bottom: 14mm; z-index: 1; }
+.doc-couv2-ident { display: flex; align-items: center; gap: 5mm; }
+.doc-couv2-logo { width: 19mm; height: 19mm; background: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.doc-couv2-logo img { max-width: 15mm; max-height: 15mm; object-fit: contain; }
+.doc-couv2-logo span { font-family: var(--font-display), Georgia, serif; font-size: 18pt; color: var(--doc-nuit); }
+.doc-couv2-surtitre { font-size: 10pt; color: var(--doc-accent-nuit); line-height: 1.35; }
+.doc-couv2-nom { font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 64pt; line-height: 0.95; letter-spacing: -0.025em; margin: 6mm 0 0; }
+.doc-couv2-constat { margin: 6mm 0 0; font-size: 15pt; line-height: 1.35; max-width: 34ch; color: rgba(245, 243, 237, 0.92); }
+.doc-couv2 .doc-couv-chiffres { margin-top: 9mm; padding-top: 6mm; }
+.doc-couv2 .doc-pied { margin-top: 7mm; color: rgba(245, 243, 237, 0.55); border-color: rgba(245, 243, 237, 0.18); }
+
+/* ── Page « L'essentiel » ─────────────────────────────────────────────── */
+.doc-essentiel { padding: 0; flex-direction: row; }
+.doc-essentiel-photo { position: relative; width: 40%; flex: none; overflow: hidden; }
+.doc-essentiel-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 50%; display: block; }
+.doc-essentiel-photo small { position: absolute; left: 6mm; bottom: 6mm; right: 6mm; font-size: 7pt; color: rgba(255, 255, 255, 0.78); }
+.doc-essentiel-corps { flex: 1; padding: 16mm 16mm 12mm 13mm; display: flex; flex-direction: column; }
+.doc-surtitre { font-size: 10pt; color: var(--doc-accent); margin: 0; }
+.doc-declaration { font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 23pt; line-height: 1.2; letter-spacing: -0.01em; margin: 5mm 0 0; }
+.doc-chiffres-cles { margin: 12mm 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 9mm 7mm; }
+.doc-chiffres-cles > div { border-top: 1px solid var(--doc-encre); padding-top: 2.5mm; }
+.doc-chiffres-cles dt { font-size: 9pt; color: var(--doc-faible); }
+.doc-chiffres-cles dd { margin: 1.5mm 0 0; font-family: var(--font-display), Georgia, serif; font-size: 27pt; line-height: 1; color: var(--doc-encre); white-space: nowrap; }
+.doc-chiffres-cles dd span { font-size: 11pt; color: var(--doc-encre-douce); margin-left: 1.5mm; }
+.doc-chiffres-cles small { display: block; margin-top: 2mm; font-size: 9pt; color: var(--doc-encre-douce); }
+
+/* ── Ouverture sur photo ──────────────────────────────────────────────── */
+.doc-ouverture-photo { position: absolute; inset: 0; }
+.doc-ouverture-photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1); }
+.doc-ouverture-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(16, 43, 53, 0.78), rgba(16, 43, 53, 0.97) 70%); }
+.doc-ouverture > *:not(.doc-ouverture-photo):not(.doc-courant) { position: relative; z-index: 1; }
+.doc-ouverture .doc-courant { z-index: 1; }
+
+/* ── Bande de mesures en aplat clair, pleine largeur ───────────────────── */
+.doc-bande { margin: auto calc(-1 * var(--doc-marge)) 0; padding: 7mm var(--doc-marge) 8mm; background: #edf3f5; }
+.doc-bande .doc-mesures { margin: 0; }
+.doc-bande + .doc-pied { margin-top: 0; }
+
+/* ── Deux graphiques côte à côte ──────────────────────────────────────── */
+.doc-duo { margin-top: 10mm; display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
+.doc-duo h3 { margin: 0; font-size: 11pt; font-weight: 600; }
+.doc-duo .doc-graphique { margin-top: 5mm; }
+.doc-duo .doc-graphique .val, .doc-duo .doc-graphique .val-accent, .doc-duo .doc-graphique .axe { font-size: 10pt; }
+
+/* ── Échelle de repérage (valeur contre médiane, cours dans sa plage) ──── */
+.doc-echelle { margin-top: 10mm; }
+.doc-echelle h3 { margin: 0 0 2mm; font-size: 11pt; font-weight: 600; }
+.doc-echelle + .doc-echelle { margin-top: 8mm; }
+
 /* ── Écran étroit (volet d'aperçu 420 px) ──────────────────────────────── */
 @media screen and (max-width: 230mm) {
   .doc { padding: 12px 0 40px; }
@@ -135,6 +196,11 @@
   .doc-ouv-numero { font-size: 96pt; }
   .doc-ouverture { min-height: 120mm; }
   .doc-mesures > div, .doc-couv-chiffres > div { grid-column: span 6; margin-bottom: 3mm; }
+  .doc-couv2, .doc-essentiel { min-height: 240mm; }
+  .doc-couv2-nom { font-size: 38pt; }
+  .doc-essentiel { flex-direction: column; }
+  .doc-essentiel-photo { width: 100%; height: 70mm; }
+  .doc-duo, .doc-chiffres-cles { grid-template-columns: 1fr; }
 }
 
 /* ── Impression ────────────────────────────────────────────────────────── */

@@ -50,3 +50,18 @@ describe('constatValorisation', () => {
     expect(constatValorisation(10, null)).toBe('PER de 10,0');
   });
 });
+
+import { declarationEssentiel } from './constats';
+describe('declarationEssentiel', () => {
+  it('chiffre d’affaires et résultat, avec leurs variations', () => {
+    expect(sp(declarationEssentiel({ societe: 'SONATEL', exercice: '2025', ca: 1923e9, caPrecedent: 1776e9, resultatNet: 413.59e9, resultatNetPrecedent: 393.5e9 })))
+      .toBe('En 2025, SONATEL a réalisé 1 923 Md FCFA de chiffre d’affaires (+8,3 %) pour un résultat net de 413,59 Md FCFA (+5,1 %).');
+  });
+  it('perte : pas de variation en pourcentage', () => {
+    expect(sp(declarationEssentiel({ societe: 'X', exercice: '2025', ca: 10e9, caPrecedent: null, resultatNet: -1e9, resultatNetPrecedent: 2e9 })))
+      .toBe('En 2025, X a réalisé 10,00 Md FCFA de chiffre d’affaires pour une perte nette de 1,00 Md FCFA.');
+  });
+  it('sans chiffre d’affaires : repli sur le constat de couverture', () => {
+    expect(declarationEssentiel({ societe: 'X', exercice: null, ca: null, caPrecedent: null, resultatNet: null, resultatNetPrecedent: null })).toBeNull();
+  });
+});

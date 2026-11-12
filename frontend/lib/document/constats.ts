@@ -67,3 +67,25 @@ export function constatValorisation(per: number | null, medianePer: number | nul
   const pos = Math.abs(ecart) <= 0.1 ? 'proche de' : ecart > 0 ? 'au-dessus de' : 'en dessous de';
   return `${p} : ${pos} la médiane des comparables (${fmtNumber(medianePer, 1)})`;
 }
+
+/**
+ * Déclaration de la page « L'essentiel » : « En 2025, SONATEL a réalisé 1 923 Md FCFA
+ * de chiffre d'affaires (+8,3 %) pour un résultat net de 413,59 Md FCFA (+5,1 %). »
+ * Chaque membre absent disparaît ; sans chiffre d'affaires, repli sur la couverture.
+ */
+export function declarationEssentiel(e: {
+  societe: string; exercice: string | null; ca: number | null; caPrecedent: number | null;
+  resultatNet: number | null; resultatNetPrecedent: number | null;
+}): string | null {
+  if (e.exercice == null || e.ca == null) {
+    return constatCouverture({ exercice: e.exercice, resultatNet: e.resultatNet, resultatNetPrecedent: e.resultatNetPrecedent });
+  }
+  const evo = (a: number, b: number | null) => (b != null && b > 0 ? ` (${pct(((a - b) / b) * 100)})` : '');
+  let s = `En ${e.exercice}, ${e.societe} a réalisé ${fmtFcfa(e.ca)} FCFA de chiffre d’affaires${evo(e.ca, e.caPrecedent)}`;
+  if (e.resultatNet != null) {
+    s += e.resultatNet >= 0
+      ? ` pour un résultat net de ${fmtFcfa(e.resultatNet)} FCFA${evo(e.resultatNet, e.resultatNetPrecedent)}`
+      : ` pour une perte nette de ${fmtFcfa(-e.resultatNet)} FCFA`;
+  }
+  return `${s}.`;
+}
