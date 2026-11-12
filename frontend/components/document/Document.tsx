@@ -22,7 +22,7 @@ export function Feuille({ entete, societe, page, total, children, className }: {
   entete: string; societe: string; page: number; total: number; children: ReactNode; className?: string;
 }) {
   return (
-    <article className={`doc-feuille${className ? ` ${className}` : ''}`}>
+    <article data-feuille="" className={`doc-feuille${className ? ` ${className}` : ''}`}>
       <div className="doc-courant"><span>{societe}</span><span>{entete}</span></div>
       {children}
       <PiedDePage societe={societe} page={page} total={total} />
@@ -37,7 +37,7 @@ export function Couverture({ entete, societe, code, logo, surtitre, constat, chi
   constat: string | null; chiffres: ChiffreCouverture[]; total: number;
 }) {
   return (
-    <article className="doc-feuille doc-couverture">
+    <article data-feuille="" className="doc-feuille doc-couverture">
       <div className="doc-courant"><span>WESTBOURSE</span><span>{entete}</span></div>
       <div className="doc-couv-logo">
         {logo ? <img src={logo} alt={`Logo ${societe}`} /> : <span aria-hidden>{code.slice(0, 2)}</span>}
@@ -66,7 +66,7 @@ export function CouverturePhoto({ entete, societe, code, logo, photo, surtitre, 
   constat: string | null; chiffres: ChiffreCouverture[]; total: number;
 }) {
   return (
-    <article className="doc-feuille doc-couv2">
+    <article data-feuille="" className="doc-feuille doc-couv2">
       {photo && <div className="doc-couv2-photo"><img src={photo.fichier} alt="" /></div>}
       <div className="doc-couv2-haut"><span className="doc-couv2-marque">WESTBOURSE</span><span>{entete}</span></div>
       {photo && <small className="doc-couv2-credit">{photo.credit}</small>}
@@ -91,12 +91,12 @@ export function CouverturePhoto({ entete, societe, code, logo, photo, surtitre, 
 export interface ChiffreCle { libelle: string; valeur: string | null; unite?: string; note?: string | null }
 
 /** Page « L'essentiel » : la photo en bande verticale, une déclaration mesurée, quatre chiffres. */
-export function PageEssentiel({ photo, surtitre, declaration, chiffres, societe, page, total }: {
+export function PageEssentiel({ photo, surtitre, declaration, chiffres, societe, page, total, children }: {
   photo: { fichier: string; credit: string } | null; surtitre: string; declaration: string;
-  chiffres: ChiffreCle[]; societe: string; page: number; total: number;
+  chiffres: ChiffreCle[]; societe: string; page: number; total: number; children?: ReactNode;
 }) {
   return (
-    <article className="doc-feuille doc-essentiel">
+    <article data-feuille="" className="doc-feuille doc-essentiel">
       {photo && <div className="doc-essentiel-photo"><img src={photo.fichier} alt="" /><small>{photo.credit}</small></div>}
       <div className="doc-essentiel-corps">
         <p className="doc-surtitre">{surtitre}</p>
@@ -110,6 +110,7 @@ export function PageEssentiel({ photo, surtitre, declaration, chiffres, societe,
             </div>
           ))}
         </dl>
+        {children}
         <PiedDePage societe={societe} page={page} total={total} />
       </div>
     </article>
@@ -155,8 +156,9 @@ export function EchelleRepere({ titre, min, max, reperes, format }: {
 export function OuvertureSection({ numero, titre, sommaire, entete, societe, photo }: {
   numero: number; titre: string; sommaire: string[]; entete: string; societe: string; photo?: string | null;
 }) {
+  // Pas de pied de page : une ouverture est une respiration, pas une page de contenu.
   return (
-    <article className="doc-feuille doc-ouverture">
+    <article data-feuille="" className="doc-feuille doc-ouverture">
       {photo && <div className="doc-ouverture-photo"><img src={photo} alt="" /></div>}
       <div className="doc-courant"><span>{societe}</span><span>{entete}</span></div>
       <div className="doc-ouv-numero" aria-hidden>{String(numero).padStart(2, '0')}</div>

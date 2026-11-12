@@ -7,12 +7,16 @@ import { construireNarratif } from '@/lib/dossier/narratif';
 import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
-import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
+import { fmtFcfa, fmtNumber, fmtDateFR, fmtDateCourte } from '@/lib/format';
 import { perAffichable, distributionAffichable, horsExploitation, dividendeCourant, evolutionResultat } from '@/lib/fiche/affichage';
 import Link from 'next/link';
 import { documentsFiche } from '@/components/sousPage/SousPageNav';
 import ImprimerDossier from './ImprimerDossier';
-import MaquetteDossier from '@/components/document/MaquetteDossier';
+import { CouverturePhoto, PageEssentiel, OuvertureSection } from '@/components/document/Document';
+import { photoActivite } from '@/lib/document/activite';
+import { constatCouverture, declarationEssentiel, constatIntermediaire } from '@/lib/document/constats';
+import brvmLogos from '@/lib/brvmLogos.json';
+import '@/components/document/document.css';
 import './dossier.css';
 
 /**
@@ -40,19 +44,24 @@ const TOTAL_PANNEAUX = 16;
    (2026-10-11) portent le suivi : titre en bourse, dernière publication
    intermédiaire, comparables, piliers. ⚠️ Le worker (video/dossiers.mjs,
    FEUILLES_ATTENDUES) vérifie ce nombre : les deux changent ensemble. */
-const TOTAL_FEUILLES = 9;
+const TOTAL_FEUILLES = 14;
+/* Refonte du 2026-11-12 (lot 3) : couverture photo (1), « L'essentiel » (2),
+   présentation et sommaire (3), puis trois sections ouvertes chacune par une
+   page d'ouverture (4, 8, 12). Les panneaux gardent leur numéro et leur ordre :
+   la prose polie y renvoie (« panneau 12 »). */
+const LOGOS = brvmLogos as Record<string, string>;
 
 /* Sommaire : [titre, numéros des panneaux, feuille]. ⚠️ Suit la répartition des
    feuilles ci-dessous ; à tenir avec TOTAL_FEUILLES. */
 const SOMMAIRE: [string, string, number][] = [
-  ['Identité et chiffres clés', '02-03', 2],
-  ['Trajectoire et valorisation', '04-05', 3],
-  ['Origine du bénéfice et dividende', '06-07', 4],
-  ['Détachement, cours et niveaux', '08-09', 5],
-  ['Appréciation, appuis et vigilance', '10-11', 6],
-  ['Niveaux et réserves', '12', 7],
-  ['Titre en bourse, publication, comparables', '13-15', 8],
-  ['Piliers et rendez-vous', '16', 9],
+  ['Identité et chiffres clés', '02-03', 5],
+  ['Trajectoire et valorisation', '04-05', 6],
+  ['Origine du bénéfice et dividende', '06-07', 7],
+  ['Détachement, cours et niveaux', '08-09', 9],
+  ['Appréciation, appuis et vigilance', '10-11', 10],
+  ['Niveaux et réserves', '12', 11],
+  ['Titre en bourse, publication, comparables', '13-15', 13],
+  ['Piliers et rendez-vous', '16', 14],
 ];
 
 const STATUT_PILIER: Record<string, string> = {
@@ -136,7 +145,7 @@ function Panneau({ n, titre, chapo, children }: { n: number; titre: string; chap
 
 function Feuille({ d, page, children }: { d: DossierValeur; page: number; children: React.ReactNode }) {
   return (
-    <article className="dv-page">
+    <article className="dv-page" data-feuille="">
       <div className="dv-courant">
         <span>{d.identite.designation ?? d.identite.code}</span>
         <span>Dossier valeur · {d.identite.code}</span>
@@ -168,9 +177,8 @@ function zoneRsi(rsi: number | null): string | null {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default async function DossierPage(props: { params: Promise<{ code: string }>; searchParams: Promise<{ style?: string }> }) {
+export default async function DossierPage(props: { params: Promise<{ code: string }> }) {
   const params = await props.params;
-  const { style } = await props.searchParams;
   const sb = createClient();
   /* Médianes des comparables : même source que le diagnostic (dernier calcul
      Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et
@@ -188,8 +196,6 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const sbLecture = svc && url ? createSbAdmin(url, svc, { auth: { persistSession: false } }) : sb;
   const d = await buildDossier(sbLecture, params.code, { medianes });
   if (!d) notFound();
-  // Maquette du nouveau système de document (lot 3), en attente de validation.
-  if (style === 'v2') return <MaquetteDossier d={d} />;
 
   const n = construireNarratif(d);
   /* Prose : squelette déterministe, remplacé par la version polie SEULEMENT si
@@ -213,8 +219,22 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
      de ranger le PDF s'il n'est pas vide (comme pour un débordement). */
   const anomalies = controlerDossier(d);
 
+  // Couverture et « L'essentiel » (système de document, lot 3).
+  const entete = `Dossier valeur · édition du ${fmtDateCourte(d.genere_le)}`;
+  const photo = photoActivite(id.code, id.secteur);
+  const precedent = traj.length >= 2 ? traj[traj.length - 2]! : null;
+  // Dernière publication intermédiaire (plus récente que l'exercice annuel), même lecture que le panneau 14.
+  const inter = d.suivi.intermediaire;
+  const varInter = (a: number | null, b: number | null) => (a != null && b != null && b > 0 ? pourcent((a - b) / b) : null);
+  const separe = (v: number | null): { valeur: string | null; unite?: string } => {
+    if (v == null) return { valeur: null };
+    const t = fmtFcfa(v);
+    const m = t.match(/^(.*?)\s(Md|M)$/);
+    return m ? { valeur: m[1]!, unite: `${m[2]} FCFA` } : { valeur: t, unite: 'FCFA' };
+  };
+
   return (
-    <div className="dv" data-controles={JSON.stringify(anomalies)}>
+    <div className="dv doc" data-controles={JSON.stringify(anomalies)}>
       {anomalies.length > 0 && (
         <div className="dv-actions print:hidden" role="alert">
           <span>Dossier incohérent, non imprimable : {anomalies.join(' ')}</span>
@@ -238,41 +258,50 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         <ImprimerDossier />
       </div>
 
-      {/* ── Feuille 1 · Couverture ─────────────────────────────────────── */}
-      <article className="dv-page dv-page--couverture">
-        <div>
-          <p className="dv-marque">Westbourse · Dossier valeur</p>
-          <h1 className="dv-couv-titre">{nomComplet}</h1>
-          <p className="dv-couv-code">
-            {id.code}
-            {id.secteur ? ` · ${id.secteur}` : ''}
-            {id.pays ? ` · ${id.pays}` : ''}
-          </p>
+      {/* ── Feuilles 1 et 2 · Couverture photo et « L'essentiel » ──────── */}
+      <CouverturePhoto
+        entete={entete} societe={nomComplet} code={id.code} logo={LOGOS[id.code] ?? null} photo={photo}
+        surtitre={['Dossier valeur', id.secteur, id.pays].filter(Boolean).join(' · ')}
+        constat={constatIntermediaire(inter) ?? constatCouverture({ exercice: c.exercice, resultatNet: c.resultat_net, resultatNetPrecedent: precedent?.resultat_net ?? null })}
+        total={TOTAL_FEUILLES}
+        chiffres={[
+          c.cours != null ? { libelle: 'Cours', valeur: `${fmtNumber(c.cours)} FCFA`, note: [c.date_cours ? `au ${fmtDateCourte(c.date_cours)}` : null, d.suivi.performance.var_ytd != null ? `${pourcent(d.suivi.performance.var_ytd)} depuis janvier` : null].filter(Boolean).join(' · ') } : null,
+          c.capitalisation != null ? { libelle: 'Capitalisation', valeur: `${fmtFcfa(c.capitalisation)} FCFA` } : null,
+          per.valeur != null ? { libelle: 'PER', valeur: fmtNumber(per.valeur, 1), note: c.exercice ? `bénéfice de l’exercice ${c.exercice}` : null } : null,
+        ].filter((x): x is NonNullable<typeof x> => x != null)}
+      />
+      <PageEssentiel
+        photo={photo} societe={nomComplet} page={2} total={TOTAL_FEUILLES}
+        surtitre={`L’essentiel de l’exercice ${c.exercice ?? ''}`.trim()}
+        declaration={declarationEssentiel({
+          societe: nomComplet, exercice: c.exercice, ca: c.chiffre_affaires, caPrecedent: precedent?.chiffre_affaires ?? null,
+          resultatNet: c.resultat_net, resultatNetPrecedent: precedent?.resultat_net ?? null,
+        }) ?? 'Les comptes du dernier exercice ne sont pas disponibles.'}
+        chiffres={[
+          { libelle: 'Chiffre d’affaires', ...separe(c.chiffre_affaires), note: c.croissance_ca_1an != null ? `${pourcent(c.croissance_ca_1an)} sur un an` : null },
+          { libelle: 'Résultat net', ...separe(c.resultat_net), note: evolution ? `${evolution} sur un an` : null },
+          { libelle: 'Marge nette', valeur: c.resultat_net != null && c.chiffre_affaires ? fmtNumber((c.resultat_net / c.chiffre_affaires) * 100, 1) : null, unite: '%', note: 'résultat net rapporté au chiffre d’affaires' },
+          { libelle: 'Dividende par action', valeur: divCourant ? fmtNumber(divCourant.montant, Number.isInteger(divCourant.montant) ? 0 : 2) : null, unite: 'FCFA', note: div.rendement != null ? `rendement de ${fmtNumber(div.rendement * 100, 2)}\u00a0% au cours actuel${div.exercice ? `, exercice ${div.exercice}` : ''}` : null },
+        ]}
+      >
+        {inter && (
+          <section className="doc-recent" aria-label="Dernière publication">
+            <p className="doc-surtitre">Dernière publication · {inter.libelle}</p>
+            <dl>
+              <div><dt>Chiffre d’affaires</dt><dd>{inter.revenu != null ? `${fmtFcfa(inter.revenu)} FCFA` : 'non publié'}</dd>{varInter(inter.revenu, inter.revenuPrecedent) && <small>{varInter(inter.revenu, inter.revenuPrecedent)} sur la même période</small>}</div>
+              <div><dt>Résultat net</dt><dd>{inter.resultatNet != null ? `${fmtFcfa(inter.resultatNet)} FCFA` : 'non publié'}</dd>{varInter(inter.resultatNet, inter.resultatNetPrecedent) && <small>{varInter(inter.resultatNet, inter.resultatNetPrecedent)} sur la même période</small>}</div>
+            </dl>
+            <p className="doc-recent-note">Comparé {/^\d/.test(inter.libellePrecedent) ? 'aux' : 'au'} {inter.libellePrecedent}. Détail au panneau 14.</p>
+          </section>
+        )}
+      </PageEssentiel>
 
-          <div className="dv-couv-cours">
-            <span className="dv-couv-prix">{nb(c.cours) ?? '—'}</span>
-            <span>
-              FCFA
-              {c.variation_veille_pct != null && (
-                <>
-                  {' · '}
-                  {/* Une variation nulle n'est ni une hausse ni une baisse : ni signe, ni couleur. */}
-                  {Math.abs(c.variation_veille_pct) < 0.005 ? (
-                    <strong>{fmtNumber(0, 2)} %</strong>
-                  ) : (
-                    <strong className={c.variation_veille_pct > 0 ? 'dv-hausse' : 'dv-baisse'}>
-                      {c.variation_veille_pct > 0 ? '+' : '−'}
-                      {fmtNumber(Math.abs(c.variation_veille_pct), 2)} %
-                    </strong>
-                  )}
-                </>
-              )}
-              <br />
-              <small>Clôture du {fmtDateFR(c.date_cours)}</small>
-            </span>
-          </div>
+      {/* ── Feuille 3 · Présentation, résumé et sommaire ─────────────────── */}
+      <article className="dv-page" data-feuille="">
+        <div className="dv-courant">
+          <span>{nomComplet}</span>
+          <span>Dossier valeur · {id.code}</span>
         </div>
-
         <Panneau
           n={1}
           titre="Ce que dit ce dossier"
@@ -355,12 +384,18 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
 
         <p className="dv-chapo" style={{ margin: 0 }}>
           Établi le {fmtDateFR(d.genere_le)} · Document d&apos;information. Il ne constitue ni un conseil en
-          investissement, ni une recommandation d&apos;achat ou de vente.
+          investissement, ni une incitation à intervenir sur le titre.
         </p>
+        <div className="dv-pied">
+          <span>Document d&apos;information : ne constitue pas un conseil en investissement.</span>
+          <span>3 / {TOTAL_FEUILLES}</span>
+        </div>
       </article>
 
       {/* ── Feuille 2 · Identité et chiffres clés ──────────────────────── */}
-      <Feuille d={d} page={2}>
+      <OuvertureSection numero={1} titre="L’entreprise et ses comptes" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
+        sommaire={['L’entreprise en bref et ses chiffres clés', 'Trajectoire des résultats et valorisation', 'D’où vient le bénéfice, le dividende']} />
+      <Feuille d={d} page={5}>
         <Panneau n={2} titre="L'entreprise en bref">
           <dl className="dv-grille">
             <Mesure libelle="Secteur" valeur={id.secteur} texte />
@@ -452,7 +487,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       </Feuille>
 
       {/* ── Feuille 3 · Trajectoire et valorisation ────────────────────── */}
-      <Feuille d={d} page={3}>
+      <Feuille d={d} page={6}>
         <Panneau
           n={4}
           titre="Trajectoire des résultats"
@@ -500,7 +535,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       </Feuille>
 
       {/* ── Feuille 4 · Qualité du résultat et dividende ───────────────── */}
-      <Feuille d={d} page={4}>
+      <Feuille d={d} page={7}>
         <Panneau
           n={6}
           titre="D'où vient le bénéfice"
@@ -627,7 +662,9 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       </Feuille>
 
       {/* ── Feuille 5 · Détachement et cours ───────────────────────────── */}
-      <Feuille d={d} page={5}>
+      <OuvertureSection numero={2} titre="Le cours et sa lecture" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
+        sommaire={['La journée de détachement', 'Cours et niveaux', 'Appréciation, points d’appui et de vigilance', 'Niveaux et réserves']} />
+      <Feuille d={d} page={9}>
         <Panneau
           n={8}
           titre="La journée de détachement"
@@ -733,7 +770,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       </Feuille>
 
       {/* ── Feuille 6 · Appréciation ───────────────────────────────────── */}
-      <Feuille d={d} page={6}>
+      <Feuille d={d} page={10}>
         <section className="dv-panneau">
           <h2 className="dv-titre">{lecture!.titre}</h2>
           <p className="dv-prose">{lecture!.texte}</p>
@@ -784,7 +821,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       </Feuille>
 
       {/* ── Feuille 7 · Niveaux et réserves ────────────────────────────── */}
-      <Feuille d={d} page={7}>
+      <Feuille d={d} page={11}>
         <Panneau
           n={12}
           titre="Niveaux et réserves"
@@ -852,14 +889,16 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
 
           <p className="dv-chapo" style={{ marginTop: '4mm', marginBottom: 0 }}>
             Établi le {fmtDateFR(d.genere_le)} à partir des données Westbourse. Document d&apos;information : il ne
-            constitue ni un conseil en investissement, ni une recommandation d&apos;achat ou de vente, et ne tient
+            constitue ni un conseil en investissement, ni une incitation à intervenir sur le titre, et ne tient
             compte ni de votre situation ni de vos objectifs.
           </p>
         </Panneau>
       </Feuille>
 
       {/* ── Feuille 8 : suivi ─────────────────────────────────────────────── */}
-      <Feuille d={d} page={8}>
+      <OuvertureSection numero={3} titre="Suivi du titre" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
+        sommaire={['Le titre en bourse', 'Dernière publication intermédiaire', 'Face aux sociétés comparables', 'Piliers et rendez-vous']} />
+      <Feuille d={d} page={13}>
         <Panneau n={13} titre="Le titre en bourse" chapo="Évolution du cours et facilité à traiter le titre, mesurées sur les séances réelles.">
           <dl className="dv-grille">
             <Mesure libelle="Sur un mois" valeur={pourcent(d.suivi.performance.var_1m)} ton={tonDe(d.suivi.performance.var_1m)} note="Vingt et une séances." />
@@ -969,7 +1008,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       {/* ── Feuille 9 : piliers et rendez-vous ────────────────────────────────
           Séparée de la 8 : les quatre panneaux de suivi débordaient d'une A4
           de 300 à 480 px selon la valeur (mesuré en local, 8 valeurs). */}
-      <Feuille d={d} page={9}>
+      <Feuille d={d} page={14}>
         <Panneau
           n={16}
           titre="Piliers de suivi"

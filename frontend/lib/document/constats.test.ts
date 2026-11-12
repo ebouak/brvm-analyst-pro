@@ -65,3 +65,19 @@ describe('declarationEssentiel', () => {
     expect(declarationEssentiel({ societe: 'X', exercice: null, ca: null, caPrecedent: null, resultatNet: null, resultatNetPrecedent: null })).toBeNull();
   });
 });
+
+import { constatIntermediaire } from './constats';
+describe('constatIntermediaire', () => {
+  it('9 mois comparés à la même période', () => {
+    expect(sp(constatIntermediaire({ libelle: '9 premiers mois de 2026', periodePrecedente: '2025-T3', revenu: 110.5, revenuPrecedent: 100, resultatNet: 113.8, resultatNetPrecedent: 100 })))
+      .toBe('Sur les 9 premiers mois de 2026 : chiffre d’affaires +10,5 %, résultat net +13,8 % par rapport à la même période de 2025.');
+  });
+  it('semestre : « Au 1er semestre »', () => {
+    expect(sp(constatIntermediaire({ libelle: '1er semestre 2026', periodePrecedente: '2025-S1', revenu: 90, revenuPrecedent: 100, resultatNet: null, resultatNetPrecedent: null })))
+      .toBe('Au 1er semestre 2026 : chiffre d’affaires −10,0 % par rapport à la même période de 2025.');
+  });
+  it('rien de comparable : null', () => {
+    expect(constatIntermediaire(null)).toBeNull();
+    expect(constatIntermediaire({ libelle: '1er trimestre 2026', periodePrecedente: '2025-T1', revenu: 1, revenuPrecedent: null, resultatNet: null, resultatNetPrecedent: null })).toBeNull();
+  });
+});

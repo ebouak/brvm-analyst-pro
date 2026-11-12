@@ -187,6 +187,14 @@
 .doc-echelle h3 { margin: 0 0 2mm; font-size: 11pt; font-weight: 600; }
 .doc-echelle + .doc-echelle { margin-top: 8mm; }
 
+/* ── Encadré « Dernière publication » (page L'essentiel) ─────────────── */
+.doc-recent { margin-top: 10mm; padding: 5mm 6mm; background: #edf3f5; border-left: 0; }
+.doc-recent dl { margin: 3mm 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.doc-recent dt { font-size: 9pt; color: var(--doc-faible); }
+.doc-recent dd { margin: 1mm 0 0; font-family: var(--font-display), Georgia, serif; font-size: 18pt; line-height: 1.1; }
+.doc-recent small { display: block; margin-top: 1mm; font-size: 9pt; color: var(--doc-accent); font-weight: 600; }
+.doc-recent-note { margin: 3mm 0 0; font-size: 9pt; color: var(--doc-faible); }
+
 /* ── Écran étroit (volet d'aperçu 420 px) ──────────────────────────────── */
 @media screen and (max-width: 230mm) {
   .doc { padding: 12px 0 40px; }

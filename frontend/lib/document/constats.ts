@@ -89,3 +89,26 @@ export function declarationEssentiel(e: {
   }
   return `${s}.`;
 }
+
+/**
+ * Dernière publication intermédiaire, comparée à la même période un an plus tôt :
+ * « Sur les 9 premiers mois de 2026 : chiffre d'affaires +10,5 %, résultat net
+ * +13,8 % par rapport à la même période de 2025. » null si rien n'est comparable.
+ */
+export function constatIntermediaire(i: {
+  libelle: string; periodePrecedente: string;
+  revenu: number | null; revenuPrecedent: number | null;
+  resultatNet: number | null; resultatNetPrecedent: number | null;
+} | null): string | null {
+  if (!i) return null;
+  const v = (a: number | null, b: number | null) => (a != null && b != null && b > 0 ? pct(((a - b) / b) * 100) : null);
+  const membres = [
+    v(i.revenu, i.revenuPrecedent) ? `chiffre d’affaires ${v(i.revenu, i.revenuPrecedent)}` : null,
+    i.resultatNet != null && i.resultatNet < 0 ? 'résultat net en perte'
+      : v(i.resultatNet, i.resultatNetPrecedent) ? `résultat net ${v(i.resultatNet, i.resultatNetPrecedent)}` : null,
+  ].filter(Boolean);
+  if (membres.length === 0) return null;
+  const annee = i.periodePrecedente.slice(0, 4);
+  return `Sur les ${i.libelle.replace(/^9 premiers mois/, '9 premiers mois')} : ${membres.join(', ')} par rapport à la même période de ${annee}.`
+    .replace('Sur les 1er', 'Au 1er');
+}
