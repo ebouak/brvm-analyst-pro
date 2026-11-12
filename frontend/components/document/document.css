@@ -1,0 +1,148 @@
+/**
+ * Système de document WESTBOURSE — Dossier valeur, Revue, fiche d'événement, Relevé.
+ *
+ * Conçu pour le PAPIER d'abord (même parti pris que `.dv`) : clair à l'écran comme à
+ * l'impression, préfixé `doc-`, rien ne fuit vers l'application. Aplats conservés à
+ * l'impression (`print-color-adjust: exact`).
+ *
+ * Direction (lot 3) : une idée par page, beaucoup de blanc, un chiffre géant par
+ * panneau, des titres qui affirment un constat, des ouvertures de section en aplat
+ * nuit, une grille de 12 colonnes. Ni photo, ni ombre, ni arrondi décoratif.
+ * Trois tailles de texte au plus par page : 9 pt (notes), 11 pt (texte), titres.
+ */
+
+.doc {
+  --doc-encre: #10161c;
+  --doc-encre-douce: #4f5b66;
+  --doc-faible: #7d8791;
+  --doc-papier: #ffffff;
+  --doc-fond: #eef1f3;
+  --doc-trame: #dde3e8;
+  --doc-gris: #c5cdd4;
+  --doc-accent: #0b6c84;
+  --doc-nuit: #102b35;
+  --doc-sur-nuit: #f5f3ed;
+  --doc-accent-nuit: #56d7fd;
+  --doc-hausse: #15803d;
+  --doc-baisse: #b91c1c;
+  --doc-marge: 18mm;
+
+  background: var(--doc-fond);
+  color: var(--doc-encre);
+  font-family: var(--font-sans), 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  padding: 24px 12px 64px;
+}
+.doc * { box-sizing: border-box; }
+
+/* ── Feuille A4 et grille ──────────────────────────────────────────────── */
+.doc-feuille {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto 18px;
+  padding: 16mm var(--doc-marge) 12mm;
+  background: var(--doc-papier);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.doc-grille { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 5mm; }
+
+.doc-courant {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 9pt; color: var(--doc-faible);
+  border-bottom: 1px solid var(--doc-trame); padding-bottom: 3mm;
+}
+.doc-pied {
+  margin-top: auto; padding-top: 3mm; border-top: 1px solid var(--doc-trame);
+  display: flex; justify-content: space-between; gap: 8mm;
+  font-size: 9pt; color: var(--doc-faible);
+}
+.doc-tabulaire { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+/* ── Couverture ────────────────────────────────────────────────────────── */
+.doc-couverture { background: var(--doc-nuit); color: var(--doc-sur-nuit); padding: 22mm var(--doc-marge) 16mm; }
+.doc-couverture .doc-courant, .doc-couverture .doc-pied { color: rgba(245, 243, 237, 0.62); border-color: rgba(245, 243, 237, 0.18); }
+.doc-couv-logo {
+  width: 22mm; height: 22mm; background: #fff; display: flex; align-items: center; justify-content: center;
+  margin-top: 26mm;
+}
+.doc-couv-logo img { max-width: 18mm; max-height: 18mm; object-fit: contain; }
+.doc-couv-logo span { font-family: var(--font-display), Georgia, serif; font-size: 20pt; color: var(--doc-nuit); }
+.doc-couv-surtitre { margin-top: 10mm; font-size: 11pt; color: var(--doc-accent-nuit); }
+.doc-couv-nom {
+  font-family: var(--font-display), Georgia, serif; font-weight: 500;
+  font-size: 54pt; line-height: 0.98; letter-spacing: -0.02em; margin: 3mm 0 0; max-width: 16ch;
+}
+.doc-couv-constat { margin-top: 10mm; font-size: 15pt; line-height: 1.35; max-width: 32ch; }
+.doc-couv-chiffres { margin: auto 0 0; padding-top: 10mm; border-top: 1px solid rgba(245, 243, 237, 0.24); }
+.doc-couv-chiffres > div { grid-column: span 4; }
+.doc-couv-chiffres dt { font-size: 9pt; color: rgba(245, 243, 237, 0.62); }
+.doc-couv-chiffres dd { margin: 1mm 0 0; font-family: var(--font-display), Georgia, serif; font-size: 26pt; line-height: 1.05; }
+.doc-couv-chiffres small { display: block; margin-top: 1mm; font-size: 9pt; color: rgba(245, 243, 237, 0.62); }
+.doc-couverture .doc-pied { margin-top: 10mm; }
+
+/* ── Ouverture de section ──────────────────────────────────────────────── */
+.doc-ouverture { background: var(--doc-nuit); color: var(--doc-sur-nuit); justify-content: flex-end; padding-bottom: 28mm; }
+.doc-ouverture .doc-courant { position: absolute; top: 16mm; left: var(--doc-marge); right: var(--doc-marge); color: rgba(245, 243, 237, 0.62); border-color: rgba(245, 243, 237, 0.18); }
+.doc-ouv-numero {
+  font-family: var(--font-display), Georgia, serif; font-size: 150pt; line-height: 0.85;
+  color: var(--doc-accent-nuit); letter-spacing: -0.04em;
+}
+.doc-ouv-titre { font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 34pt; line-height: 1.08; margin: 8mm 0 0; max-width: 15ch; }
+.doc-ouv-sommaire { margin: 8mm 0 0; padding: 0; list-style: none; font-size: 11pt; color: rgba(245, 243, 237, 0.75); }
+.doc-ouv-sommaire li { padding: 1.5mm 0; border-top: 1px solid rgba(245, 243, 237, 0.18); }
+
+/* ── Panneau à chiffre géant ───────────────────────────────────────────── */
+.doc-panneau { break-inside: avoid; padding-top: 9mm; }
+.doc-panneau + .doc-panneau { margin-top: 9mm; border-top: 1px solid var(--doc-trame); }
+.doc-titre-constat {
+  font-family: var(--font-display), Georgia, serif; font-weight: 500;
+  font-size: 21pt; line-height: 1.15; letter-spacing: -0.01em; margin: 0; max-width: 26ch;
+}
+.doc-geant { margin-top: 7mm; display: flex; align-items: baseline; gap: 3mm; }
+.doc-geant-valeur {
+  font-family: var(--font-display), Georgia, serif; font-size: 88pt; line-height: 0.9;
+  letter-spacing: -0.03em; color: var(--doc-accent);
+}
+.doc-geant-unite { font-size: 18pt; color: var(--doc-encre-douce); }
+.doc-geant-legende { margin: 3mm 0 0; font-size: 11pt; color: var(--doc-encre-douce); max-width: 46ch; }
+
+.doc-mesures { margin: 8mm 0 0; }
+.doc-mesures > div { grid-column: span 3; border-top: 1px solid var(--doc-encre); padding-top: 2mm; }
+.doc-mesures dt { font-size: 9pt; color: var(--doc-faible); }
+.doc-mesures dd { margin: 1mm 0 0; font-size: 11pt; font-weight: 600; }
+.doc-mesures small { display: block; font-size: 9pt; color: var(--doc-faible); }
+.doc-absent { color: var(--doc-faible); font-weight: 400; font-style: italic; }
+
+.doc-note { margin: 4mm 0 0; font-size: 9pt; color: var(--doc-faible); max-width: 70ch; }
+
+/* ── Graphiques SVG ────────────────────────────────────────────────────── */
+.doc-graphique { margin-top: 8mm; width: 100%; height: auto; }
+.doc-graphique text { font-family: var(--font-sans), system-ui, sans-serif; }
+.doc-graphique .val { font-size: 9pt; fill: var(--doc-encre); }
+.doc-graphique .val-accent { font-size: 9pt; fill: var(--doc-accent); font-weight: 600; }
+.doc-graphique .axe { font-size: 9pt; fill: var(--doc-faible); }
+
+/* ── Écran étroit (volet d'aperçu 420 px) ──────────────────────────────── */
+@media screen and (max-width: 230mm) {
+  .doc { padding: 12px 0 40px; }
+  .doc-feuille { width: 100%; height: auto; min-height: 0; padding: 10mm 6mm; }
+  .doc-couv-nom { font-size: 34pt; }
+  .doc-geant-valeur { font-size: 56pt; }
+  .doc-ouv-numero { font-size: 96pt; }
+  .doc-ouverture { min-height: 120mm; }
+  .doc-mesures > div, .doc-couv-chiffres > div { grid-column: span 6; margin-bottom: 3mm; }
+}
+
+/* ── Impression ────────────────────────────────────────────────────────── */
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  .doc { background: #fff; padding: 0; }
+  .doc-feuille { margin: 0; break-after: page; }
+  .doc-feuille:last-child { break-after: auto; }
+  .doc, .doc * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .doc-actions { display: none; }
+}

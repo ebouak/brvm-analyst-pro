@@ -12,6 +12,7 @@ import { perAffichable, distributionAffichable, horsExploitation, dividendeCoura
 import Link from 'next/link';
 import { documentsFiche } from '@/components/sousPage/SousPageNav';
 import ImprimerDossier from './ImprimerDossier';
+import MaquetteDossier from '@/components/document/MaquetteDossier';
 import './dossier.css';
 
 /**
@@ -167,8 +168,9 @@ function zoneRsi(rsi: number | null): string | null {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default async function DossierPage(props: { params: Promise<{ code: string }> }) {
+export default async function DossierPage(props: { params: Promise<{ code: string }>; searchParams: Promise<{ style?: string }> }) {
   const params = await props.params;
+  const { style } = await props.searchParams;
   const sb = createClient();
   /* Médianes des comparables : même source que le diagnostic (dernier calcul
      Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et
@@ -186,6 +188,8 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const sbLecture = svc && url ? createSbAdmin(url, svc, { auth: { persistSession: false } }) : sb;
   const d = await buildDossier(sbLecture, params.code, { medianes });
   if (!d) notFound();
+  // Maquette du nouveau système de document (lot 3), en attente de validation.
+  if (style === 'v2') return <MaquetteDossier d={d} />;
 
   const n = construireNarratif(d);
   /* Prose : squelette déterministe, remplacé par la version polie SEULEMENT si
