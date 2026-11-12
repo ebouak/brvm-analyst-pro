@@ -13,6 +13,7 @@ import { RoueNote } from './RoueNote';
 import { ExplorateurOutils, type OutilAffiche } from './ExplorateurOutils';
 import { MethodeEtapes, type EtapeMethode } from './MethodeEtapes';
 import { EncartPublicite } from './EncartPublicite';
+import { LienInscription } from './LienInscription';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import { pctTexte } from '@/lib/vitrine/seance';
 import { LIBELLE_ACCES, barresSecteurs, titreSecteurs, comptesAcces } from '@/lib/vitrine/outilsPur';
@@ -153,7 +154,7 @@ export function SectionOutils({ outils, demos }: { outils: OutilAffiche[]; demos
           <span className="v-etiquette">
             {ouverts} outil{ouverts > 1 ? 's' : ''} en {LIBELLE_ACCES.libre.toLowerCase()} ou avec un compte gratuit, {c.premium} réservé{c.premium > 1 ? 's' : ''} à Premium.
           </span>
-          <Link href="/signup?from=outils" className="v-bouton">Créer mon compte gratuit</Link>
+          <LienInscription emplacement="outils" />
         </Apparition>
       </div>
     </section>
@@ -237,7 +238,7 @@ export function TuilesSeance({ secteurs, etat, membres, releve }: { secteurs: Se
               <span className="v-carte-titre" style={{ fontSize: 20 }}>membres suivent déjà la BRVM <span className="vitrine-accent" style={{ color: 'rgb(var(--color-sur-nuit) / .72)' }}>ici.</span></span>
             </>
           ) : <span className="v-carte-titre" style={{ fontSize: 20 }}>Suivez la BRVM <span className="vitrine-accent" style={{ color: 'rgb(var(--color-sur-nuit) / .72)' }}>avec nous.</span></span>}
-          <Link href="/signup?from=communaute" className="v-bouton" style={{ marginTop: 'auto' }}>Les rejoindre gratuitement</Link>
+          <LienInscription emplacement="communaute" libelle="Les rejoindre gratuitement" style={{ marginTop: 'auto' }} />
         </Apparition>
       </div>
     </section>

@@ -11,7 +11,8 @@ import type { Slide } from '@/lib/landing/slides';
  * L'étiquette « PUBLICITÉ » est HORS de l'encart.
  */
 export function EncartPublicite({ campagnes }: { campagnes: Slide[] }) {
-  const [i, setI] = useState<number | null>(null);
+  // Rendu serveur : la première campagne (jamais un cadre vide) ; tirage au sort après chargement.
+  const [i, setI] = useState<number | null>(0);
   useEffect(() => {
     if (campagnes.length > 0) setI(Math.floor(Math.random() * campagnes.length));
   }, [campagnes.length]);

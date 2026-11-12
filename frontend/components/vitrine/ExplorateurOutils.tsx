@@ -35,6 +35,9 @@ export function ExplorateurOutils({ outils, demos }: { outils: OutilAffiche[]; d
   const calme = useReducedMotion();
   const visible = useInView(zone, { amount: 0.25 });
   const [sel, setSel] = useState(0);
+  // Le premier panneau est dans le HTML serveur, visible : seuls les changements d'onglet s'animent.
+  const [aChange, setAChange] = useState(false);
+  useEffect(() => { if (sel !== 0) setAChange(true); }, [sel]);
   const [rotations, setRotations] = useState(0);
   const [arrete, setArrete] = useState(false);
   const [touche, setTouche] = useState(false);
@@ -102,7 +105,7 @@ export function ExplorateurOutils({ outils, demos }: { outils: OutilAffiche[]; d
         <motion.div
           key={`t-${o.id}`}
           className="v-panneau-texte"
-          initial={calme ? false : { opacity: 0, y: 12 }}
+          initial={calme || !aChange ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.7, 0, 1] }}
         >
@@ -117,7 +120,7 @@ export function ExplorateurOutils({ outils, demos }: { outils: OutilAffiche[]; d
         <motion.div
           key={`d-${o.id}`}
           className="v-demo"
-          initial={calme ? false : { opacity: 0, y: 12 }}
+          initial={calme || !aChange ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.08, ease: [0.2, 0.7, 0, 1] }}
         >

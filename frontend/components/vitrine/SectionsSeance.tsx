@@ -13,6 +13,8 @@ import { InscriptionAccueil } from './InscriptionAccueil';
 import { SceneIndice } from './SceneIndice';
 import { Mosaique } from './Mosaique';
 import { FilmSeance, type DonneesFilm } from './FilmSeance';
+import { LienInscription } from './LienInscription';
+import { LienCanal } from './LienCanal';
 import { CANAUX } from '@/lib/canaux';
 import { fmtNumber } from '@/lib/format';
 import type { SceneIndice as Indice, CaseValeur } from '@/lib/vitrine/seance';
@@ -52,8 +54,8 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
         </p>
         <div className="v-canaux-ligne">
           <span>Ou suivez la séance sans compte</span>
-          <a className="v-bouton-second" href={CANAUX.whatsappChaine} target="_blank" rel="noopener"><IcoWhatsapp />WhatsApp</a>
-          <a className="v-bouton-second" href={CANAUX.telegram} target="_blank" rel="noopener"><IcoTelegram />Telegram</a>
+          <LienCanal className="v-bouton-second" href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="ouverture"><IcoWhatsapp />WhatsApp</LienCanal>
+          <LienCanal className="v-bouton-second" href={CANAUX.telegram} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>
         </div>
       </div>
     </section>
@@ -63,7 +65,7 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
 export function Indice({ d, releve, hausses, stables, baisses }: { d: Indice | null; releve: string | null; hausses: number; stables: number; baisses: number }) {
   const total = hausses + stables + baisses;
   return (
-    <section className="bande-sombre v-bloc">
+    <section id="marche" className="bande-sombre v-bloc">
       <div className="v-colonne">
         {d ? <SceneIndice d={d} releve={releve} /> : <p className="v-note">BRVM Composite : série non disponible.</p>}
         {total > 0 && (
@@ -114,7 +116,7 @@ export function SectionMosaique({ cases, releve }: { cases: CaseValeur[]; releve
         </p>
         <Apparition className="v-incitation">
           <span className="v-carte-titre">Suivez ces {cases.length} valeurs <span className="vitrine-accent">depuis votre liste.</span></span>
-          <Link href="/signup?from=mosaique" className="v-bouton">Créer mon compte gratuit</Link>
+          <LienInscription emplacement="mosaique" />
         </Apparition>
       </div>
     </section>
@@ -135,8 +137,8 @@ export function SectionFilm({ f, dateCourte }: { f: DonneesFilm; dateCourte: str
         <Apparition className="v-incitation">
           <span className="v-carte-titre">Le film de la séance, chaque soir, <span className="vitrine-accent">sans compte.</span></span>
           <span className="v-canaux-boutons">
-            <a href={CANAUX.whatsappChaine} target="_blank" rel="noopener" className="v-bouton v-bouton--whatsapp">Suivre sur WhatsApp</a>
-            <a href={CANAUX.telegram} target="_blank" rel="noopener" className="v-bouton">Suivre sur Telegram</a>
+            <LienCanal href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="film" className="v-bouton v-bouton--whatsapp">Suivre sur WhatsApp</LienCanal>
+            <LienCanal href={CANAUX.telegram} canal="telegram" emplacement="film" className="v-bouton">Suivre sur Telegram</LienCanal>
           </span>
         </Apparition>
       </div>
