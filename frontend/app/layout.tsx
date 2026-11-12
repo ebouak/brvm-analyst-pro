@@ -12,6 +12,7 @@ import { CookieBanner } from '@/components/consent/CookieBanner';
 import PostHogInit from '@/components/analytics/PostHogInit';
 import { createClient } from '@/lib/supabase/server';
 import { jsonLdScript } from '@/lib/jsonLd';
+import { classesPolices } from '@/lib/vitrine/polices';
 
 // URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
 // via NEXT_PUBLIC_SITE_URL (mettre l'URL RÉELLEMENT servie tant que le domaine
@@ -272,7 +273,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" className={`dark ${classesPolices}`}>
       <head>
         {/* Anti-flash mode clair/sombre : pose data-theme AVANT le premier
             paint (script synchrone, pas de defer/async) — sinon flash du
@@ -284,19 +285,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: `(function(){try{var t=localStorage.getItem('westbourse-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`,
           }}
         />
-        {/* Polices chargées en <link> (découverte immédiate) plutôt qu'en @import
-            CSS render-blocking. preconnect réchauffe les connexions → meilleur FCP. */}
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
-        />
+        {/* Polices : Geist, Geist Mono et Instrument Serif, servies depuis notre
+            domaine par next/font (lib/vitrine/polices.ts), sans feuille externe. */}
       </head>
       <body className="text-white antialiased font-sans">
         {/* JSON-LD Schema.org (rich snippets) */}
