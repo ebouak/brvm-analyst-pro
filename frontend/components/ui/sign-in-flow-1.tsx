@@ -51,6 +51,8 @@ interface SignInPageProps {
   onSuccess?: () => void;
   /** Renvoi du code. */
   onResend?: (email: string) => void | Promise<void>;
+  /** Adresse déjà saisie ailleurs (champ de l'accueil) : préremplit le formulaire, rien de plus. */
+  emailInitial?: string;
 }
       
 export const CanvasRevealEffect = ({
@@ -526,12 +528,13 @@ export const SignInPage = ({
   onSuccess,
   onResend,
   showNewsletterOptIn = false,
+  emailInitial,
 }: SignInPageProps) => {
   const emptyCode = useMemo(
     () => Array.from({ length: codeLength }, () => ""),
     [codeLength],
   );
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailInitial ?? "");
   const [step, setStep] = useState<"email" | "code" | "success">("email");
   const [code, setCode] = useState<string[]>(emptyCode);
   const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
