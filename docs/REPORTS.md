@@ -1,117 +1,85 @@
-# Documentation — Module 6 : Rapports & Événements
+# Documentation : espace Rapports
 
-Implémente le cahier des charges Module 6 (V1). Découplé du frontend : les
-événements sont ingérés par un worker, le frontend ne lit que Supabase (§16).
+Refonte du 2026-11-12 (lots 1 et 2). Quatre produits, chacun nommé par la
+question du lecteur. Le frontend ne lit que Supabase.
+
+| Produit | Question | Route |
+|---|---|---|
+| Dossier valeur (A4) | Que vaut cette société ? | `/rapports/dossier/[code]`, bibliothèque `/rapports/dossiers` |
+| Revue de résultats | Que disent les derniers comptes ? | `/actions/[code]/revue`, bibliothèque `/rapports/revues` |
+| Événements et impact | Qu'est-ce qui vient de sortir, comment le cours a réagi ? | `/dashboard/reports/events`, fiche `/dashboard/reports/events/[id]` |
+| Relevé mensuel | Où en est mon portefeuille ? | `/premium/reports` (refonte au lot 6) |
+
+Onglets communs : `lib/reportTabs.ts`. Les anciennes pages (`/reports`,
+`/dashboard/reports`, rapports instrument, secteur et séance, `/rapports/builder`,
+`/rapports/print`, `/actions/[code]/rapport`) redirigent en 308
+(`next.config.js`). La table `report_snapshots` reste en base (export et
+suppression RGPD la couvrent) ; son interface est retirée.
 
 ## 1. Modèle de données (migration 0005_events.sql)
 
-- **market_events** — un événement (communiqué, avis, info permanente,
-  rapport, bulletin, publication). `dedupe_hash` (source_type+date+titre+url)
-  garantit l'idempotence d'ingestion. `instrument_code` FK vers
-  `brvm_instruments`. Lecture publique (RLS).
-- **market_event_instruments** — pivot événement ↔ titres (relation_type :
-  emetteur | concerne | secteur). Lecture publique.
-- **report_snapshots** — rapports favoris/sauvegardés par utilisateur. Privé
-  (RLS user_id = auth.uid()).
+- **market_events** : un événement (publication, communiqué, avis…).
+  `dedupe_hash` garantit l'idempotence. Types : `resultats`, `dividende`,
+  `assemblee`, `notation`, `liquidite`, `gouvernance`, `admission`,
+  `suspension`, `autre` (reclassement : migration `0214`).
+- **market_event_instruments** : pivot événement ↔ titres. Le worker le
+  SYNCHRONISE sur `related_codes` (il ne faisait qu'ajouter : une publication
+  réattribuée gardait son ancien lien, « BIIC BN » rattachée à BICC).
 
-## 2. Ingestion des événements (scraper/src/events/)
+## 2. Ingestion (scraper/src/events/)
 
-```bash
-cd scraper
-npm run events:mock   # événements fictifs (dev/CI, sans brvm.org)
-npm run events        # ingestion réelle depuis brvm.org
-```
+`npm run events[:mock]`. Source principale : `fromPublications.ts` (table
+`publications`). Classification `classify.ts` (familles précises d'abord :
+notation, contrat de liquidité, dividende, gouvernance), résolution `resolve.ts`,
+upsert `repository.ts`. Tests : `tests/eventsClassify.test.ts`.
 
-Pipeline (`runEvents.ts`) : fetch des pages de listing (communiqués, avis,
-informations permanentes) → `parseEventList` (Cheerio) → classification du type
-et sentiment heuristiques (`classify.ts`) → résolution des titres liés via le
-référentiel (`resolve.ts`) → upsert idempotent events + pivot (`repository.ts`).
+## 3. Étude d'impact (frontend/lib/eventStudy.ts)
 
-> ⚠️ **Calibrage** : les sélecteurs de listing dans `events/parser.ts`
-> (`ITEM_SELECTORS`) et les chemins dans `runEvents.ts` (`SOURCES`) sont des
-> défauts. La structure réelle des pages brvm.org doit être confirmée par
-> inspection, exactement comme pour le scraper BDFIN. Le mode mock permet de
-> développer tout le frontend sans cette dépendance.
+- Données chargées sur la seule fenêtre utile (`fenetreChargement` : 40 jours
+  avant, 30 après), jamais l'historique entier par ordre croissant.
+- Fenêtre post de 5 séances ; si moins de séances ont suivi J0, la mesure le dit
+  (« fenêtre incomplète : n séances sur 5 ») et les horizons non atteints valent
+  `null`.
+- Écart au BRVM Composite `null` quand l'indice manque (historique BRVMC depuis
+  le 2026-05-26).
+- Les clôtures ne sont pas ajustées du dividende : un détachement dans la
+  fenêtre est signalé sur la fiche (`detachementsDansFenetre`).
 
-## 3. Event-study simplifié (frontend/lib/eventStudy.ts, §8)
+## 4. Liste des événements
 
-Pour chaque titre lié à un événement :
-- fenêtre pré J-5→J0, jour J0, fenêtre post J0→J+5 ;
-- rendement cumulé titre, rendement BRVM Composite, **rendement excédentaire**
-  (titre − indice) ;
-- volume moyen avant/après et variation ;
-- rendements par horizon J+1, J+3, J+5, J+10 ;
-- classification de réaction : positive / neutre / négative.
+Regroupement À L'AFFICHAGE (`lib/evenements/regroupement.ts`) : une publication
+= société + période (`periodeDuTitre`) + famille ; les pièces (comptes, rapport
+d'activités, attestation des commissaires aux comptes) sont listées sur la
+fiche. Libellés français uniques : `lib/evenements/libelles.ts`.
 
-Lecture indicative, non assimilable à une étude académique (précisé dans l'UI).
+## 5. Textes générés
 
-## 4. Texte analytique automatique (frontend/lib/narrative.ts, §14)
+`narrative.ts` (titre de l'étude) et `reportCommentary.ts` (constats) : accords
+et élisions testés sur 0, 1 et 2 titres, pourcentages à la française
+(`fmtPctSigneTexte` : moins typographique, espace insécable). Aucune cause
+affirmée : « mesuré autour de la date, non attribué à la publication ».
 
-Génère des phrases **dérivées des métriques calculées**, jamais inventées :
-- instrument : « Le titre SNTS progresse de 6,2% sur 1 mois, avec un volume
-  supérieur à sa moyenne, un RSI à 64 (proche d'une zone de surachat),
-  traduisant un momentum positif. »
-- événement : « L'événement du 14/05/2026 a été suivi d'une surperformance de
-  +3,1% par rapport au BRVM Composite sur 5 séances (SNTS). »
+## 6. Revue de résultats
 
-## 5. API (route handlers Next.js)
+`lib/reports/server.ts` (`getRevue`) : 5 exercices comme le Dossier
+(`EXERCICES_REVUE`), constat mesuré du dernier détachement
+(`lib/reports/detachementRevue.ts`, même calcul que le Dossier).
+
+## 7. Contrôle des dates de détachement
+
+`scraper/scripts/controle-ex-dates.sql` (lecture seule) liste les ex-dates que
+la baisse du cours ne confirme pas (règle `controleExDate`). Aucune correction
+sans source.
+
+## 8. API
 
 | Endpoint | Rôle |
 |---|---|
-| `GET /api/events?type=&source=&code=&from=&to=&importance=` | Listing filtrable |
-| `GET /api/events/[id]` | Un événement |
-| `GET /api/events/instrument/[code]` | Événements d'un titre |
-| `GET /api/reports/instrument/[code]?period=1M` | Rapport instrument (payload §12) |
-| `GET /api/reports/event/[id]?window=5` | Rapport événementiel + impact |
-| `GET /api/reports/market/daily?date=YYYY-MM-DD` | Rapport marché journalier |
+| `GET /api/events…` | Listing et détail des événements |
+| `GET /api/reports/event/[id]?window=5` | Rapport d'événement + impact |
+| `GET /api/reports/monthly/[month]` | Relevé mensuel |
 
-Le payload rapport instrument suit §12 : `instrument`, `period`, `timeseries`,
-`technicalIndicators`, `events`, `signals`, `summary`, `explanation`.
-
-## 6. Pages (App Router)
-
-- `/dashboard/reports` — explorer : cartes de rapports + événements récents.
-- `/dashboard/reports/instrument/[code]` — graphe cours+MA+volume, RSI,
-  timeline événements, signaux, résumé analytique, sélecteur de période.
-- `/dashboard/reports/events` — listing filtrable (type/source/code).
-- `/dashboard/reports/events/[id]` — fiche événement + EventImpactCard
-  (avant/après, excédent vs BRVMC, Δ volume, horizons).
-- `/dashboard/reports/market/daily` — snapshot de séance (indices, top movers,
-  plus actifs, breadth, événements du jour).
-
-Composants : `EventTimeline`, `EventImpactCard`, `ReportSummaryCard`
-(réutilisent `PriceChart` / `IndicatorCharts` du module Actions).
-
-## 7. Fallback (§16)
-
-Toutes les pages gèrent l'absence de données (base vide, aucun événement) avec
-un message invitant à lancer l'ingestor. Les données publiques (marché,
-événements) sont lisibles sans authentification ; seuls les `report_snapshots`
-exigent une session.
-
-## 8. Limites / suite (V2-V3)
-
-- Rapport secteur, comparaison multi-titres avancée, export PDF, rapports
-  sauvegardés (report_snapshots est prêt côté base).
-- Analyse de sentiment réelle (actuellement heuristique mots-clés).
-- Corrélation événements/signaux, alertes intelligentes, narration avancée.
-
-## 9. Module 6 V2 (livré)
-
-- **Rapport secteur** (`/dashboard/reports/sector/[sector]`, API
-  `/api/reports/sector/[sector]`) : performance par titre, meilleurs/pires,
-  dispersion des rendements, événements sectoriels, graphique comparatif.
-  Accès via les chips secteurs sur la page d'accueil des rapports.
-- **Export PDF / lien partageable** : `ExportReportButton` utilise
-  l'impression navigateur (`window.print`) avec une feuille de style
-  d'impression (`@media print` masque sidebar et éléments `.no-print`). Le lien
-  de la page est partageable tel quel. Une génération PDF serveur (puppeteer)
-  reste une option V3.
-- **Rapports sauvegardés** (`report_snapshots`) : bouton ★ Sauvegarder sur le
-  rapport instrument (params `{code, period}`), section « Mes rapports » sur la
-  page d'accueil (auth requise, RLS par utilisateur).
-
-## 10. Marché obligataire (§5.3)
+## 9. Marché obligataire (§5.3)
 
 Page `/obligations` + lib `frontend/lib/bonds.ts` (testée) :
 

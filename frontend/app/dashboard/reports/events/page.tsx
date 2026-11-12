@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import ViewTabs from '@/components/ViewTabs';
+import { REPORT_TABS } from '@/lib/reportTabs';
 import { fmtDateCourte } from '@/lib/format';
 import { libelleEvenement, TYPES_FILTRABLES } from '@/lib/evenements/libelles';
 import { regrouperEvenements, type EvenementBrut } from '@/lib/evenements/regroupement';
@@ -31,9 +33,10 @@ export default async function EventsListPage(
   return (
     <div className="p-6 space-y-4">
       <div>
-        <Link href="/dashboard/reports" className="text-xs text-accent-ink">← Rapports</Link>
-        <h1 className="text-2xl font-semibold mt-1">Événements de marché</h1>
+        <h1 className="text-2xl font-semibold">Événements de marché</h1>
+        <p className="mt-1 text-sm text-muted">Qu&apos;est-ce qui vient de sortir ? Les publications des sociétés cotées, regroupées par période.</p>
       </div>
+      <ViewTabs tabs={REPORT_TABS} current="/dashboard/reports/events" />
 
       <form className="flex flex-wrap gap-2 items-center" action="/dashboard/reports/events">
         <label className="sr-only" htmlFor="filtre-type">Type d&apos;événement</label>

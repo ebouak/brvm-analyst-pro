@@ -53,7 +53,7 @@ test.describe('Shell applicatif (compte actif)', () => {
     { chemin: '/notations', actif: 'Fondamentaux', retour: '/fondamentaux' },
     { chemin: '/premium/dcf', actif: 'Valorisation', retour: '/premium/valorisation' },
     { chemin: '/premium/calendrier', actif: 'Agenda', retour: '/calendrier' },
-    { chemin: '/dashboard/reports', actif: 'Rapports', retour: '/reports' },
+    { chemin: '/rapports/revues', actif: 'Dossiers valeur', retour: '/rapports/dossiers' },
     { chemin: '/actions/SNTS/financials', actif: 'Actions', retour: '/actions/SNTS' },
     { chemin: '/conseiller/track-record', actif: 'Conseiller', retour: '/conseiller' },
   ];
