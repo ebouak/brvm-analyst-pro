@@ -12,11 +12,12 @@ describe('isNavItemActive : la page OU un de ses parents', () => {
     ['/premium/valorisation', '/premium/dcf', true],
     ['/premium/valorisation', '/premium/dcf/SNTS', true],
     ['/calendrier', '/premium/calendrier', true],
-    ['/reports', '/premium/reports', true],
-    ['/reports', '/dashboard/reports', true],
-    ['/reports', '/dashboard/reports/instrument/SNTS', true],
-    // Le tableau de bord ne s'allume pas sur les rapports (parent = Rapports)
-    ['/dashboard', '/dashboard/reports', false],
+    ['/rapports/dossiers', '/rapports/revues', true],
+    ['/rapports/dossiers', '/dashboard/reports/events', true],
+    ['/rapports/dossiers', '/dashboard/reports/events/abc', true],
+    ['/premium/reports', '/premium/reports/2026-10', true],
+    // Le tableau de bord ne s'allume pas sur les événements (parent = Dossiers valeur)
+    ['/dashboard', '/dashboard/reports/events', false],
     ['/dashboard', '/dashboard/personnaliser', true],
     // Comparateur SGI (P1-3)
     ['/comparateur-sgi', '/comparateur-sgi/annuaire/images-finances', true],
@@ -91,9 +92,9 @@ describe('construireFil', () => {
   });
 
   it('paramètre encodé décodé (secteur)', () => {
-    const f = construireFil('/dashboard/reports/sector/Consommation%20de%20base')!;
-    expect(f.maillons[f.maillons.length - 1].libelle).toBe('Consommation de base');
-    expect(f.maillons[0]).toEqual({ libelle: 'Rapports', href: '/reports' });
+    const f = construireFil('/premium/reports/2026%2D10')!;
+    expect(f.maillons[f.maillons.length - 1].libelle).toBe('2026-10');
+    expect(f.maillons[0]!.href).toBe('/premium/reports');
   });
 
   it('route statique prioritaire sur la dynamique', () => {
@@ -150,7 +151,7 @@ describe('menus dérivés du registre', () => {
 
   it('Premium est une marque sur l’entrée, pas une rubrique', () => {
     const prem = NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.premium).map((i) => i.href).sort();
-    expect(prem).toEqual(['/assistant', '/premium/classements', '/premium/diagnostic', '/premium/outils', '/premium/paper-trading', '/premium/valorisation']);
+    expect(prem).toEqual(['/assistant', '/premium/classements', '/premium/diagnostic', '/premium/outils', '/premium/paper-trading', '/premium/reports', '/premium/valorisation']);
   });
 });
 
