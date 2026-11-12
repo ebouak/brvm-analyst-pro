@@ -5,9 +5,10 @@ import path from 'node:path';
 /**
  * Conformité de la page d'accueil (charte §9, lot B) : aucun mot de recommandation
  * dans le code de la vitrine. Échoue au premier mot interdit, avec le fichier.
+ * Seule exception : la mention obligatoire « pas un objectif de cours » (valorisation, spec §3.8).
  */
 const RACINES = ['components/vitrine', 'lib/vitrine'];
-const INTERDITS = /\b(acheter|vendre|achat|vente|opportunit[ée]s?|objectif de cours|recommandation|garanti|sans risque|BUY|SELL|HOLD)\b/i;
+const INTERDITS = /\b(acheter|vendre|achat|vente|opportunit[ée]s?|(?<!pas un )objectif de cours|recommandation|garanti|sans risque|BUY|SELL|HOLD)\b/i;
 
 function fichiers(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {

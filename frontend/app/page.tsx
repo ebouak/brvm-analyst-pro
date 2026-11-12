@@ -3,14 +3,10 @@ import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import NewsletterForm from '@/components/NewsletterForm';
 import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
-import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
-import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
-import { Billboard } from '@/components/landing/bis/Billboard';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
 import { getMemberCount } from '@/lib/landing/memberCount';
-import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { getArticlesLanding } from '@/lib/landing/articles';
@@ -25,6 +21,13 @@ import { Ouverture, Indice, BandeauSeance, SectionMosaique, SectionFilm } from '
 import type { DonneesFilm } from '@/components/vitrine/FilmSeance';
 import { casesMosaique, dateLongue, releve, sceneIndice, motsBandeau, plusFortesVariations, traceSerie, pctTexte, type ChiffresSeance } from '@/lib/vitrine/seance';
 import { estEnSeance } from '@/lib/freshness';
+import { RailDecouvrir, SectionOutils, SectionMethode, TuilesSeance, SectionPublicite } from '@/components/vitrine/SectionsDecouverte';
+import type { EtapeMethode } from '@/components/vitrine/MethodeEtapes';
+import { chargerDemosOutils, chargerDecouvrir } from '@/lib/vitrine/outils';
+import { OUTILS, accesOutil, rubriqueOutil, campagnesPub } from '@/lib/vitrine/outilsPur';
+
+/** Fait réel d'une étape de la méthode (null = la donnée manque, l'étape s'affiche sans). */
+interface Fait { libelle: string; valeur: string; detail: string; href?: string; hrefLabel?: string }
 
 /**
  * Landing « bis » — vitrine CLAIRE et éditoriale (l'app, elle, reste sombre :
@@ -63,12 +66,12 @@ const Thumb = ({ children }: { children: React.ReactNode }) => <div className="t
 
 export default async function Landing() {
   const [d, membres, articles] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), getArticlesLanding()]);
+  const [demos, decouvrir] = await Promise.all([chargerDemosOutils(d), chargerDecouvrir(d)]);
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
   const free = d.plans.find((p) => p.code === 'free');
   const premium = d.plans.find((p) => p.code === 'premium');
   const topH = d.topHausses[0] ?? null;
-  const topB = d.topBaisses[0] ?? null;
 
   // Un fait RÉEL par étape du fil conducteur (null = le panneau le dira, jamais un exemple).
   const age = fraicheur.ageMinutes;
@@ -82,11 +85,17 @@ export default async function Landing() {
     d.nbActions > 0 ? { libelle: 'Collecte de la dernière séance', valeur: `${d.nbActions} sociétés · ${d.hausses} hausses · ${d.baisses} baisses`, detail: `Cours relevés sur brvm.org${dateLabel ? ` pour la séance du ${dateLabel}` : ''}${depuis ? `, dernière collecte ${depuis}` : ''}. Environ toutes les 15 minutes en séance.`, href: '/societes', hrefLabel: 'Voir les sociétés' } : null,
     d.plusEchangee ? { libelle: 'Valeur la plus échangée', valeur: `${d.plusEchangee.code} · ${fmtFcfa(d.plusEchangee.valeur)}`, detail: 'Volumes, RSI, MACD et fondamentaux sont recalculés à chaque séance sur la fiche de chaque société.', href: `/societes/${d.plusEchangee.code}`, hrefLabel: 'Ouvrir la fiche' } : null,
     d.topNote?.grade ? { libelle: 'Meilleure note du jour', valeur: `${d.topNote.grade} · ${d.topNote.code}${d.topNote.nom ? ` · ${d.topNote.nom}` : ''}`, detail: 'Une note de A à F recalculée chaque séance à partir de signaux vérifiables (tendance, volume, RSI, liquidité) avec le poids de chacun.', href: `/societes/${d.topNote.code}`, hrefLabel: 'Voir la note' } : null,
-    sig ? { libelle: `Signal du ${fmtDateFR(sig.date_marche)} · ${sig.code}`, valeur: `${libelleSignal(sig.signal)}${conf != null ? ` · complétude des données ${conf} %` : ''}`, detail: sig.signal === 'HOLD' ? 'Neutre signifie que rien n’est net : le moteur s’abstient plutôt que de fabriquer une recommandation. Ce n’est pas un conseil en investissement.' : 'Un signal n’est émis que lorsque plusieurs sous-scores concordent. Ce n’est pas un conseil en investissement.', href: '/signaux', hrefLabel: 'Tous les signaux' } : null,
-    d.latestDiagnostic ? { libelle: 'Dernier diagnostic généré', valeur: `${d.latestDiagnostic.code}${d.latestDiagnostic.generated_at ? ` · ${fmtDateFR(d.latestDiagnostic.generated_at.slice(0, 10))}` : ''}`, detail: 'Forces, risques et valorisation rédigés à partir des chiffres de la plateforme, une analyse structurée, jamais une recommandation d’achat ou de vente.', href: `/premium/diagnostic/${d.latestDiagnostic.code}`, hrefLabel: 'Lire le diagnostic' } : null,
+    sig ? { libelle: `Signal du ${fmtDateFR(sig.date_marche)} · ${sig.code}`, valeur: `${libelleSignal(sig.signal)}${conf != null ? ` · complétude des données ${conf} %` : ''}`, detail: sig.signal === 'HOLD' ? 'Neutre signifie que rien n’est net : le moteur s’abstient plutôt que de forcer un signal. Ce n’est pas un conseil en investissement.' : 'Un signal n’est émis que lorsque plusieurs sous-scores concordent. Ce n’est pas un conseil en investissement.', href: '/signaux', hrefLabel: 'Tous les signaux' } : null,
+    d.latestDiagnostic ? { libelle: 'Dernier diagnostic généré', valeur: `${d.latestDiagnostic.code}${d.latestDiagnostic.generated_at ? ` · ${fmtDateFR(d.latestDiagnostic.generated_at.slice(0, 10))}` : ''}`, detail: 'Forces, risques et valorisation rédigés à partir des chiffres de la plateforme, une analyse structurée, pas un conseil en investissement.', href: `/premium/diagnostic/${d.latestDiagnostic.code}`, hrefLabel: 'Lire le diagnostic' } : null,
     perf != null ? { libelle: `BRVM Composite sur ${serie.length} séances`, valeur: pct(perf), detail: 'Le simulateur rejoue une décision sur l’historique réel, dividendes inclus, pour mesurer ce qu’elle aurait donné, avant de la prendre.', href: '/simulateur', hrefLabel: 'Simuler' } : null,
     { libelle: 'La décision vous appartient', valeur: membres != null && membres > 0 ? `${fmtNumber(membres)} membres inscrits` : 'Un compte gratuit, sans carte bancaire', detail: 'Explorez les sociétés, suivez la séance et testez vos idées avec un capital fictif. Les outils avancés viennent ensuite, quand vous en aurez besoin.', href: '/signup', hrefLabel: 'Créer mon compte gratuit' },
   ];
+
+  const etapesMethode: EtapeMethode[] = STEPS.map((s, k) => {
+    const f = FAITS[k];
+    return { titre: s.t, description: s.d, fait: f ? { libelle: f.libelle, valeur: f.valeur } : null };
+  });
+  const outils = OUTILS.map((o) => ({ ...o, acces: accesOutil(o.route), rubrique: rubriqueOutil(o.route) }));
 
   const cases = casesMosaique(d.coursSeed);
   const releveTxt = releve(d.derniereCollecte);
@@ -123,29 +132,16 @@ export default async function Landing() {
       <SectionMosaique cases={cases} releve={releveTxt} />
       <SectionFilm f={film} dateCourte={dateLabel} />
 
+      {/* Refonte « vitrine » (PR 2) : sections 3.7 à 3.11. */}
+      <RailDecouvrir d={decouvrir} />
+      <SectionOutils outils={outils} demos={demos} />
+      <SectionMethode etapes={etapesMethode} />
+      <TuilesSeance secteurs={d.secteurs} etat={d.etat} membres={membres} releve={releveTxt} />
+      <SectionPublicite campagnes={campagnesPub(d.slides, d.bandeaux)} />
+
     <div className="lb">
       <div className="wrap">
         <main>
-          {/* Annonceurs : sous notre premier contenu (charte §6), en attendant l'encart unique de la PR 2. */}
-          <section className="une" aria-label="À la une">
-            <HeroCarousel
-              slides={d.slides} dateLabel={dateLabel} brvmCVar={d.brvmC?.variation ?? null}
-              hausses={d.hausses} nbActions={d.nbActions} topNote={d.topNote}
-              topHausse={topH ? { code: topH.code, variation: topH.variation } : null}
-              topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
-              sgi={d.sgi}
-            />
-          </section>
-
-          {/* 1 ter · LA MÉTHODE — sept étapes, chacune illustrée par un fait réel */}
-          <section className="methode" aria-labelledby="h-methode">
-            <div className="methode-tete">
-              <h2 id="h-methode">De la donnée à la décision</h2>
-              <p>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</p>
-            </div>
-            <FilConducteur etapes={STEPS.map((s, k) => ({ ...s, fait: FAITS[k] ?? null }))} />
-          </section>
-
           {/* 1 bis · PREUVES (sous les 7 étapes) */}
           <ProofBandBis nbActions={d.nbActions} />
           <PreuveDonneeBis fraicheur={fraicheur} exemple={topH ? { code: topH.code, nom: topH.nom, cours: topH.cours } : null} nbActions={d.nbActions} />
@@ -160,16 +156,11 @@ export default async function Landing() {
             <BrvmAujourdhui d={d} fraicheur={fraicheur} />
           </div>
 
-          <Billboard creations={d.bandeaux} slot="Emplacement annonceur, milieu de page" />
-
           {/* 2 bis · ÉCRANS DU TERMINAL — vidéo de séance, note quantitative, dossier d’analyse */}
           <Terminal d={d} dateMarche={d.dateMarche} />
 
           {/* 2 bis bis · NOS ARTICLES — décryptages et articles publiés (disparaît sans article) */}
           <NosArticles une={articles.une} autres={articles.autres} />
-
-          {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
-          <QuatreFacons />
 
           {/* 2 quater · AVEC UN COMPTE GRATUIT — la valeur du gratuit AVANT Premium */}
           <section className="gratuit" aria-labelledby="h-gratuit">
@@ -192,7 +183,7 @@ export default async function Landing() {
           <section id="premium" className="prem" aria-labelledby="h-prem">
             <div className="prem-copy">
                             <h2 id="h-prem">Pour aller plus loin, quand vous serez prêt.</h2>
-              <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin et saisir davantage d&apos;opportunités.</p>
+              <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin dans l&apos;analyse.</p>
               <Link href="/pricing" className="btn btn-ghost">Voir les offres <span aria-hidden="true">→</span></Link>
             </div>
 
@@ -218,8 +209,8 @@ export default async function Landing() {
                   <div className="offer-h gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgb(var(--color-accent))" aria-hidden="true"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" /></svg><span className="tag prem">PREMIUM</span><span>Pour aller plus loin</span></div>
                   {premium && <PlanPrice p={premium} />}
                   <Link className="feat" href="/pricing">
-                    <Thumb><rect x="8" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-up))" /><rect x="35" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-border))" /><rect x="62" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-down))" opacity=".5" /><text x="21" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-accent) / .18)" textAnchor="middle">BUY</text><text x="48" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-muted))" textAnchor="middle">HOLD</text><text x="75" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-surface))" textAnchor="middle">SELL</text><rect x="8" y="32" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="40" width="64" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="48" width="72" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>
-                    <span><b>Signaux BUY / HOLD / SELL</b><p>Signaux quotidiens, historique, export CSV.</p></span><span className="chev" aria-hidden="true">›</span>
+                    <Thumb><rect x="8" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-up))" /><rect x="35" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-border))" /><rect x="62" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-down))" opacity=".5" /><text x="21" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-accent) / .18)" textAnchor="middle">▲</text><text x="48" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-muted))" textAnchor="middle">=</text><text x="75" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-surface))" textAnchor="middle">▼</text><rect x="8" y="32" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="40" width="64" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="48" width="72" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>
+                    <span><b>Signaux quotidiens</b><p>Haussier, neutre ou baissier, avec l&apos;historique et l&apos;export CSV. Pas un conseil en investissement.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/pricing">
                     <Thumb><rect x="8" y="8" width="28" height="28" rx="6" fill="rgb(var(--color-accent))" opacity=".2" stroke="rgb(var(--color-accent))" /><text x="22" y="30" fontSize="20" fontFamily="monospace" fill="rgb(var(--color-accent))" textAnchor="middle">A</text><rect x="44" y="10" width="44" height="5" rx="2" fill="rgb(var(--color-muted))" /><rect x="44" y="20" width="36" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="44" y="28" width="40" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="44" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="52" width="60" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>

@@ -91,6 +91,10 @@ export interface LandingBisData {
   spotlightSignal: (SignalDaily & { code: string }) | null;
   /** Dernier dossier d’analyse réellement généré, ou null. */
   latestDiagnostic: LatestDiagnostic | null;
+  /** Notes publiques de la dernière séance scorée (signal et score), pour les démonstrations de l'accueil. */
+  signauxSeance: { code: string; signal: string; score_total: number; date_marche: string }[];
+  /** Désignation par code (brvm_instruments), déjà lue pour les palmarès. */
+  noms: Record<string, string | null>;
 }
 
 const LABELS: Record<string, string> = {
@@ -131,6 +135,8 @@ async function load(): Promise<LandingBisData> {
     spotlightSignal: null,
     latestDiagnostic: null,
     sgi: { nb: 0, nbGrilles: 0, pays: [] },
+    signauxSeance: [],
+    noms: {},
   };
 
   const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic, sgiDir, sgiFrais] = await Promise.all([
@@ -243,6 +249,9 @@ async function load(): Promise<LandingBisData> {
     ? signauxPublicsDeLaSeance(lignesSig, seanceScoree).sort((a, b) => b.score_total - a.score_total)[0] ?? null
     : null;
   const spotlightSignal = sig ?? null;
+  const signauxSeance = seanceScoree
+    ? signauxPublicsDeLaSeance(lignesSig, seanceScoree).map((x) => ({ code: String(x.code), signal: String(x.signal), score_total: Number(x.score_total), date_marche: String(x.date_marche) }))
+    : [];
   const topNote: TopNote | null = sig
     ? { code: String(sig.code), nom: noms.get(String(sig.code)) ?? null, score: sig.score_total == null ? null : Number(sig.score_total), signal: (sig.signal as string | null) ?? null, grade: scoreToRating(sig.score_total == null ? null : Number(sig.score_total), sig.confiance == null ? null : Number(sig.confiance)).note }
     : null;
@@ -252,6 +261,7 @@ async function load(): Promise<LandingBisData> {
     coursSeed: rows.map((r) => ({ code: r.code, cours_jour: r.cours, variation_pct: r.variation, volume: r.volume, valeur_echangee: r.valeur, nb_transactions: r.tx })),
     brvmC,
     topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, bandeaux: pubs, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
+    signauxSeance, noms: Object.fromEntries(noms),
   };
 }
 
