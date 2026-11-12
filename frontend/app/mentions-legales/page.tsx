@@ -20,13 +20,13 @@ export default function MentionsLegalesPage() {
         <p>
           Numéro de contribuable / identifiant fiscal : <Placeholder>NCC / IFU</Placeholder>.<br />
           Adresse e-mail : support@westbourse.com — Téléphone :{' '}
-          <Placeholder>téléphone</Placeholder>.
+          +33 7 43 65 72 71 (WhatsApp).
         </p>
       </section>
 
       <section>
         <h2>Directeur de la publication</h2>
-        <p><Placeholder>nom du directeur de la publication</Placeholder>.</p>
+        <p>Jean-Yves Akesse.</p>
       </section>
 
       <section>
