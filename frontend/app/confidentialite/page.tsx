@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/legal/LegalPage';
-import { Placeholder } from '@/components/legal/Placeholder';
 import { CONSENT_CATEGORIES } from '@/lib/consent/registry';
 
 export const metadata: Metadata = { title: 'Politique de confidentialité' };
@@ -11,7 +10,7 @@ export default function ConfidentialitePage() {
       <section>
         <h2>Responsable de traitement</h2>
         <p>
-          Le responsable du traitement des données est <Placeholder>raison sociale</Placeholder>,
+          Le responsable du traitement des données est Build Outsourcing SARL, société de droit ivoirien,
           joignable à l&apos;adresse support@westbourse.com.
         </p>
       </section>
