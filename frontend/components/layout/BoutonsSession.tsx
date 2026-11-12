@@ -4,7 +4,9 @@
 // (les pages publiques sont en cache ISR, partagé entre visiteurs).
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { phCapture } from '@/lib/analytics/posthogClient';
 
 type Etat = 'inconnu' | 'anonyme' | 'connecte';
 export type VarianteSession = 'bureau' | 'compact' | 'tiroir-haut' | 'tiroir-bas';
@@ -16,6 +18,10 @@ const TIROIR_ACCENT = 'flex min-h-[48px] items-center justify-center rounded-xl 
 
 export function BoutonsSession({ variante, onNavigate }: { variante: VarianteSession; onNavigate?: () => void }) {
   const [etat, setEtat] = useState<Etat>('inconnu');
+  // Point d'inscription « en-tête » de la page d'accueil (spec vitrine §4) :
+  // emplacement seul, aucune donnée personnelle, et seulement sur `/`.
+  const pathname = usePathname();
+  const suivre = () => { if (pathname === '/') void phCapture('vitrine_inscription_clic', { emplacement: 'en-tete' }); };
 
   useEffect(() => {
     let actif = true;
@@ -49,19 +55,19 @@ export function BoutonsSession({ variante, onNavigate }: { variante: VarianteSes
       return connecte ? espace(SECONDAIRE) : (
         <span className={`inline-flex items-center ${cache}`} aria-hidden={etat === 'inconnu' ? true : undefined}>
           <Link href="/login" tabIndex={etat === 'inconnu' ? -1 : undefined} className={SECONDAIRE}>Se connecter</Link>
-          <Link href="/signup" tabIndex={etat === 'inconnu' ? -1 : undefined} className={`ml-1 ${ACCENT}`}>Créer mon compte gratuit</Link>
+          <Link href="/signup" onClick={suivre} tabIndex={etat === 'inconnu' ? -1 : undefined} className={`ml-1 ${ACCENT}`}>Créer mon compte gratuit</Link>
         </span>
       );
     case 'compact':
       return connecte ? espace('whitespace-nowrap rounded-xl border border-border bg-surface px-3.5 py-2 text-sm font-semibold text-ivory', 'Tableau de bord')
-        : <Link href="/signup" tabIndex={etat === 'inconnu' ? -1 : undefined} aria-hidden={etat === 'inconnu' ? true : undefined} className={`whitespace-nowrap rounded-xl bg-accent-ink px-3.5 py-2 text-sm font-semibold text-bg ${cache}`}>Créer un compte</Link>;
+        : <Link href="/signup" onClick={suivre} tabIndex={etat === 'inconnu' ? -1 : undefined} aria-hidden={etat === 'inconnu' ? true : undefined} className={`whitespace-nowrap rounded-xl bg-accent-ink px-3.5 py-2 text-sm font-semibold text-bg ${cache}`}>Créer un compte</Link>;
     case 'tiroir-haut':
       return connecte ? espace(TIROIR_LIEN)
         : <Link href="/login" onClick={onNavigate} tabIndex={etat === 'inconnu' ? -1 : undefined} aria-hidden={etat === 'inconnu' ? true : undefined} className={`${TIROIR_LIEN} ${cache}`}>Se connecter</Link>;
     case 'tiroir-bas':
       // Connecté : le lien « Mon tableau de bord » est déjà en haut du tiroir, rien en bas.
       return connecte ? null
-        : <Link href="/signup" onClick={onNavigate} tabIndex={etat === 'inconnu' ? -1 : undefined} aria-hidden={etat === 'inconnu' ? true : undefined} className={`${TIROIR_ACCENT} ${cache}`}>Créer mon compte gratuit</Link>;
+        : <Link href="/signup" onClick={() => { suivre(); onNavigate?.(); }} tabIndex={etat === 'inconnu' ? -1 : undefined} aria-hidden={etat === 'inconnu' ? true : undefined} className={`${TIROIR_ACCENT} ${cache}`}>Créer mon compte gratuit</Link>;
   }
 }
 export default BoutonsSession;

@@ -20,9 +20,6 @@
   overflow-x: clip;
 }
 
-/* L'en-tête réutilise le conteneur `.lb` de l'ancienne landing, qui impose une
-   hauteur d'écran entière (`min-height: 100vh`) et un fond : neutralisés ici. */
-.vitrine .lb-entete { min-height: 0; padding-block: 0; }
 
 .vitrine .bande-sombre {
   --color-bg: 3 3 3; --color-surface: 10 20 23; --color-elevated: 17 43 51; --color-sunken: 2 3 3;
@@ -368,3 +365,78 @@
   .vitrine .v-carte:hover { transform: none; }
   .vitrine .v-onglet-prog { animation: none; display: none; }
 }
+
+/* ══ PR 3 : sections 3.12 à 3.15 ══════════════════════════════════════════ */
+
+.vitrine .v-bloc--serre { padding-bottom: clamp(32px, 4vw, 56px); }
+.vitrine .v-section--moyen { font-size: clamp(34px, 4.6vw, 64px); }
+.vitrine .v-section--petit { font-size: clamp(30px, 3.8vw, 52px); letter-spacing: -.04em; line-height: 1.04; }
+.vitrine .v-bouton--grand { min-height: 52px; padding: 0 28px; font-size: 17px; }
+.vitrine .v-bouton--compact { min-height: 44px; padding: 0 20px; font-size: 15px; }
+.vitrine .v-bouton-second--grand { min-height: 52px; padding: 0 26px; font-size: 16px; }
+
+/* ── Provenance (bande claire) ───────────────────────────────────────── */
+.vitrine .v-provenance { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.vitrine .v-preuve { border-radius: 24px; background: rgb(var(--color-surface)); border: 1px solid rgb(var(--color-border)); padding: 28px; display: flex; flex-direction: column; gap: 8px; }
+.vitrine .v-preuve--nuit { background: rgb(var(--color-nuit)); border-color: transparent; color: rgb(var(--color-sur-nuit)); }
+.vitrine .v-preuve--nuit .v-carte-sur, .vitrine .v-preuve--nuit .v-carte-pied { color: rgb(var(--color-sur-nuit) / .72); }
+.vitrine .v-preuve-val { font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+
+/* ── Canaux (bande sombre) ───────────────────────────────────────────── */
+.vitrine .v-canaux { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.vitrine .v-canal { border-radius: 28px; background: rgb(var(--color-surface)); border: 1px solid rgb(var(--color-border)); padding: 30px; display: flex; flex-direction: column; gap: 14px; min-height: 520px; box-sizing: border-box; color: rgb(var(--color-ivory)); }
+.vitrine .v-canal.bande-claire { border-color: transparent; }
+.vitrine .v-canal-nom { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+.vitrine .v-canal-pied { text-align: center; }
+.vitrine .v-fil-bloc { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.vitrine .v-fil { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; }
+.vitrine .v-canal > .v-fil { margin-top: auto; }
+.vitrine .v-fil-tete { margin: 0; display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: rgb(var(--color-faint)); }
+.vitrine .v-bulle { align-self: flex-start; max-width: 100%; background: rgb(var(--color-elevated)); border-radius: 16px 16px 16px 4px; padding: 10px 14px; white-space: pre-line; overflow-wrap: anywhere; }
+.vitrine .v-bulle.v-mono { font-size: 13px; }
+.vitrine .v-bulle--moi { align-self: flex-end; background: rgb(var(--color-up) / .18); color: rgb(var(--color-ivory)); border-radius: 16px 16px 4px 16px; }
+.vitrine .v-canal-membres { margin-top: auto; display: flex; align-items: baseline; gap: 10px; font-size: 15px; color: rgb(var(--color-muted)); }
+.vitrine .v-canal-membres .v-chiffre-carte { margin-top: 0; font-size: 72px; }
+.vitrine .v-canal-form { display: flex; flex-direction: column; gap: 8px; }
+.vitrine .v-canal-form input { min-height: 44px; font-size: 16px; }
+.vitrine .v-canal-form button { min-height: 44px; }
+
+/* ── Commencez par explorer + offres (bande claire) ──────────────────── */
+.vitrine .v-gratuit { display: grid; gap: clamp(28px, 5vw, 72px); grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); align-items: start; }
+.vitrine .v-gratuit-texte { display: flex; flex-direction: column; gap: 22px; align-items: flex-start; }
+.vitrine .v-coches--grand { font-size: 17px; gap: 12px; }
+.vitrine .v-coches--grand li { align-items: flex-start; gap: 12px; }
+.vitrine .v-coches--grand svg { margin-top: 3px; }
+.vitrine .v-offres { display: flex; flex-direction: column; gap: 16px; }
+.vitrine .v-offre { border-radius: 24px; background: rgb(var(--color-surface)); border: 1px solid rgb(var(--color-border)); padding: 26px; display: flex; flex-direction: column; gap: 8px; }
+.vitrine .v-offre--nuit { background: rgb(var(--color-nuit)); border-color: transparent; color: rgb(var(--color-sur-nuit)); }
+.vitrine .v-offre--nuit .v-carte-pied { color: rgb(var(--color-sur-nuit) / .78); }
+.vitrine .v-offre-nom { font-size: 12px; font-weight: 600; letter-spacing: .12em; color: rgb(var(--color-muted)); }
+.vitrine .v-offre-prix { font-family: var(--font-mono); font-size: 40px; font-weight: 600; letter-spacing: -.05em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.vitrine .v-offre-prix small { font-family: var(--font-sans); font-size: 15px; font-weight: 400; letter-spacing: 0; opacity: .72; }
+
+/* ── Bloc final : carte sombre dans la bande claire ──────────────────── */
+.vitrine .v-final-bloc { padding: clamp(24px, 3vw, 40px) 0 clamp(56px, 6vw, 96px); }
+.vitrine .v-final { border-radius: 28px; padding: clamp(28px, 4vw, 52px); display: grid; gap: clamp(24px, 4vw, 56px); grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); align-items: center; background: rgb(var(--color-surface)); }
+.vitrine .v-final-texte { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+.vitrine .v-piliers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.vitrine .v-piliers li { background: rgb(var(--color-elevated)); border: 1px solid rgb(var(--color-border)); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+.vitrine .v-piliers b { font-size: 18px; font-weight: 600; }
+.vitrine .v-piliers span { font-size: 13px; color: rgb(var(--color-muted)); }
+
+/* ── Bandeau flottant (seule ombre admise par la charte, §5) ─────────── */
+.vitrine .v-flottant {
+  position: fixed; left: 50%; bottom: 12px; z-index: 30; transform: translateX(-50%);
+  width: max-content; max-width: calc(100vw - 24px); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  border: 1px solid rgb(var(--color-border-strong)); border-radius: 22px; padding: 10px 10px 10px 20px;
+  font-size: 14px; box-shadow: 0 12px 40px rgb(0 0 0 / .35);
+  animation: v-flottant .5s var(--frein) both;
+}
+.vitrine .v-flottant-texte { font-weight: 500; }
+.vitrine .v-flottant-texte span { color: rgb(var(--color-muted)); }
+.vitrine .v-flottant-fermer { appearance: none; cursor: pointer; background: transparent; border: 0; color: rgb(var(--color-faint)); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; }
+@media (max-width: 560px) { .vitrine .v-flottant-texte { display: none; } .vitrine .v-flottant { padding: 8px; } }
+@keyframes v-flottant { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .vitrine .v-flottant { animation: none; } }
+@media print { .vitrine .v-flottant { display: none; } }
