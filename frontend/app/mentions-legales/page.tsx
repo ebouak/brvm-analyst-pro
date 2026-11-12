@@ -11,15 +11,15 @@ export default function MentionsLegalesPage() {
         <h2>Éditeur du service</h2>
         <p>
           Le service <strong>WESTBOURSE</strong> est édité par{' '}
-          <Placeholder>raison sociale</Placeholder>, société{' '}
-          <Placeholder>forme juridique (SARL, SAS…)</Placeholder> au capital de{' '}
+          <strong>Build Outsourcing SARL</strong>, société à responsabilité limitée de droit
+          ivoirien au capital de{' '}
           <Placeholder>montant du capital</Placeholder>, immatriculée au RCCM sous le numéro{' '}
           <Placeholder>numéro RCCM</Placeholder>, dont le siège social est situé{' '}
           <Placeholder>adresse du siège</Placeholder>.
         </p>
         <p>
           Numéro de contribuable / identifiant fiscal : <Placeholder>NCC / IFU</Placeholder>.<br />
-          Adresse e-mail : <Placeholder>email de contact</Placeholder> — Téléphone :{' '}
+          Adresse e-mail : support@westbourse.com — Téléphone :{' '}
           <Placeholder>téléphone</Placeholder>.
         </p>
       </section>
