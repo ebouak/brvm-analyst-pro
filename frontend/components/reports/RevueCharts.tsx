@@ -24,9 +24,9 @@ export function PriceChart({ data, reperes = [] }: { data: { date: string; cours
   // Repères discrets : trait fin et court au pied du graphique, d'une autre teinte que la courbe.
   // Domaine explicite pour pouvoir ancrer le trait en bas ; lettres masquées si deux repères se touchent.
   const cours = data.map((d) => d.cours);
-  const lo = Math.min(...cours), hi = Math.max(...cours);
-  const marge = (hi - lo) * 0.08 || 1;
-  const bas = Math.max(0, lo - marge), haut = hi + marge;
+  // Graduations rondes et régulières, sans forcer le zéro (le cours n'y descend pas).
+  const ech = echelleReguliere(Math.min(...cours), Math.max(...cours), 5, false);
+  const bas = Math.max(0, ech.min), haut = ech.max;
   const hauteurRepere = (haut - bas) * 0.12;
   const marques = etiquettesEspacees(reperes, data.map((d) => d.date));
   return (
@@ -34,7 +34,7 @@ export function PriceChart({ data, reperes = [] }: { data: { date: string; cours
       <LineChart data={data} margin={{ top: 16, right: 12, bottom: 4, left: 4 }}>
         <CartesianGrid stroke={GRILLE} vertical={false} />
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} minTickGap={56} tickFormatter={mois} />
-        <YAxis tick={{ fontSize: 11, fill: MUTED }} width={52} tickFormatter={fr} domain={[bas, haut]} allowDataOverflow />
+        <YAxis tick={{ fontSize: 11, fill: MUTED }} width={52} tickFormatter={fr} domain={[bas, haut]} ticks={ech.ticks.filter((t) => t >= bas)} allowDataOverflow />
         <Tooltip formatter={(v: number) => [`${fr(v)} FCFA`, 'Cours']} labelFormatter={(d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
           labelStyle={{ fontSize: 12 }} contentStyle={FOND_INFOBULLE} />
         {marques.map((r, i) => (

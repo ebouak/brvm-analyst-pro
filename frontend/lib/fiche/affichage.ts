@@ -81,7 +81,9 @@ export function ligneVerdict(signal: string | null, score: number | null, variat
   if (!signal) return null;
   const sc = score != null ? (Math.round(score * 100) === 0 ? 0 : score) : null;
   const s = sc != null ? ` · score ${moins(nf(sc, 2))}` : '';
-  const base = `Signal ${libelleSignal(signal)}${s}.`;
+  // « Signal haussier », « Signal neutre » : jamais « Signal Signal baissier » (libellés du lot B).
+  const lib = libelleSignal(signal);
+  const base = `${lib.toLowerCase().startsWith('signal ') ? lib : `Signal ${lib.toLowerCase()}`}${s}.`;
   if (variationPct == null) return base;
   if (Math.round(variationPct * 100) === 0) return `${base} Séance stable.`;
   return `${base} Séance en ${variationPct > 0 ? 'hausse' : 'baisse'} de ${nf(Math.abs(variationPct), 2)} %.`;
@@ -102,12 +104,29 @@ const PHRASE_EVOLUTION = (d: EvolutionDetail): string => {
 
 /** Synthèse d'un exercice construite uniquement sur quatre valeurs déjà affichées. */
 export function syntheseExercice(p: { croissanceCaPct: number | null; evolution: ReturnType<typeof evolutionResultatDetail>; resultatExploitation: number | null; horsExpl: number | null }): string | null {
+  // Chaque membre porte son chiffre ; quand les deux vont dans le même sens, le
+  // verbe n'est pas répété (« progresse de 8,3 % et le résultat net de 5,1 % »).
   const morceaux: string[] = [];
+  let sensCa: 'hausse' | 'baisse' | null = null;
   if (p.croissanceCaPct != null) {
     const c = p.croissanceCaPct;
-    morceaux.push(c > 100 ? "le chiffre d'affaires a plus que doublé" : c === 100 ? "le chiffre d'affaires a doublé" : c >= 0 ? "le chiffre d'affaires progresse" : "le chiffre d'affaires recule");
+    const v = `${nf(Math.abs(c), 1)} %`;
+    if (c > 100) morceaux.push(`le chiffre d'affaires a plus que doublé (+${v})`);
+    else if (c === 100) morceaux.push("le chiffre d'affaires a doublé");
+    else if (Math.abs(c) < 0.05) morceaux.push("le chiffre d'affaires est stable");
+    else {
+      sensCa = c > 0 ? 'hausse' : 'baisse';
+      morceaux.push(`le chiffre d'affaires ${c > 0 ? 'progresse' : 'recule'} de ${v}`);
+    }
   }
-  if (p.evolution) morceaux.push(PHRASE_EVOLUTION(p.evolution));
+  if (p.evolution) {
+    const e = p.evolution;
+    morceaux.push(
+      (e.type === 'hausse' || e.type === 'baisse') && e.type === sensCa && e.pct != null
+        ? `le résultat net de ${nf(e.pct, 1)} %`
+        : PHRASE_EVOLUTION(e),
+    );
+  }
   let s = morceaux.join(' et ');
   if (p.resultatExploitation != null && p.resultatExploitation < 0 && p.horsExpl != null && p.horsExpl > 0) {
     s += (s ? ', mais ' : '') + "l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation";
@@ -178,18 +197,5 @@ export function insecable(texte: string): string {
   return texte.replace(/(\d) (?=(?:Md|M|k|FCFA|%))/g, '$1 ').replace(/( (?:Md|M|k)) (?=FCFA)/g, '$1 ');
 }
 
-const TYPES_EVENEMENT: Record<string, string> = {
-  resultats: 'Résultats', resultat: 'Résultat', assemblee: 'Assemblée', dividende: 'Dividende', dividendes: 'Dividendes',
-  operation: 'Opération', operations: 'Opérations', publication: 'Publication', communique: 'Communiqué',
-  notation: 'Notation', nomination: 'Nomination', autre: 'Autre',
-};
-
-/** Type d'événement brut (« resultats ») → libellé accentué (« Résultats »). */
-export function libelleEvenement(type: string | null | undefined): string {
-  const t = (type ?? '').trim();
-  if (!t) return '';
-  const cle = t.toLowerCase();
-  if (TYPES_EVENEMENT[cle]) return TYPES_EVENEMENT[cle]!;
-  const propre = t.replace(/[_-]+/g, ' ');
-  return propre.charAt(0).toUpperCase() + propre.slice(1);
-}
+/** Table unique des libellés d'événements : voir lib/evenements/libelles.ts. */
+export { libelleEvenement } from '@/lib/evenements/libelles';

@@ -51,6 +51,15 @@ export async function upsertEvents(events: MarketEvent[]): Promise<number> {
       continue;
     }
     const eventId = data?.id as string | undefined;
+    // Le pivot reflète EXACTEMENT related_codes. L'upsert seul ne fait qu'ajouter :
+    // quand une publication est réattribuée (BIIC BN rattachée à BICC puis corrigée
+    // en BICB), l'événement passait à BICB mais l'ancien lien BICC restait.
+    if (eventId) {
+      let del = sb.from('market_event_instruments').delete().eq('event_id', eventId);
+      if (e.related_codes.length > 0) del = del.not('instrument_code', 'in', `(${e.related_codes.join(',')})`);
+      const { error: de } = await del;
+      if (de) logger.warn({ err: de.message, eventId }, 'Nettoyage pivot échoué');
+    }
     if (eventId && e.related_codes.length > 0) {
       const pivot = e.related_codes.map((code) => ({
         event_id: eventId,

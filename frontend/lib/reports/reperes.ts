@@ -20,9 +20,14 @@ export function reperesSurCourbe(datesCourbe: string[], evenements: Evenement[])
 
 export interface Echelle { min: number; max: number; pas: number; ticks: number[] }
 
-/** Échelle à graduations régulières (pas = 1, 2, 2,5 ou 5 × 10^k) qui encadre [min, max] et contient zéro. */
-export function echelleReguliere(minDonnees: number, maxDonnees: number, cibleGraduations = 5): Echelle {
-  const lo = Math.min(minDonnees, 0), hi = Math.max(maxDonnees, 0);
+/**
+ * Échelle à graduations régulières (pas = 1, 2, 2,5 ou 5 × 10^k) qui encadre [min, max].
+ * Elle contient zéro par défaut (barres) ; une courbe de cours passe `inclureZero = false`
+ * et obtient des graduations rondes (1 000, 2 000…) au lieu de 640,4 / 1 640,4.
+ */
+export function echelleReguliere(minDonnees: number, maxDonnees: number, cibleGraduations = 5, inclureZero = true): Echelle {
+  const lo = inclureZero ? Math.min(minDonnees, 0) : minDonnees;
+  const hi = inclureZero ? Math.max(maxDonnees, 0) : maxDonnees;
   const etendue = hi - lo;
   if (!(etendue > 0)) return { min: 0, max: 1, pas: 0.25, ticks: [0, 0.25, 0.5, 0.75, 1] };
   const brut = etendue / cibleGraduations;

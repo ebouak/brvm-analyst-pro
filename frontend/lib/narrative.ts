@@ -1,4 +1,5 @@
 // Génération de texte analytique DÉRIVÉ des métriques (§14) — jamais inventé.
+import { fmtPctAbsTexte as fmtPctAbs, fmtPctSigneTexte as fmtPctSigne, fmtNumber } from './format';
 
 export interface InstrumentMetrics {
   code: string;
@@ -14,8 +15,7 @@ export function instrumentHeadline(m: InstrumentMetrics): string {
     return `${m.code} : données insuffisantes pour conclure sur la période.`;
   }
   const dir = m.performancePct >= 0 ? 'progresse de' : 'recule de';
-  const perf = Math.abs(m.performancePct).toFixed(1);
-  const parts: string[] = [`Le titre ${m.code} ${dir} ${perf}% sur ${m.periodLabel}`];
+  const parts: string[] = [`Le titre ${m.code} ${dir} ${fmtPctAbs(m.performancePct, 1)} sur ${m.periodLabel}`];
 
   if (m.volumeRatio != null) {
     if (m.volumeRatio > 1.2) parts.push('avec un volume supérieur à sa moyenne');
@@ -26,7 +26,7 @@ export function instrumentHeadline(m: InstrumentMetrics): string {
     let zone = 'neutre';
     if (m.rsi > 70) zone = 'proche d’une zone de surachat';
     else if (m.rsi < 30) zone = 'proche d’une zone de survente';
-    parts.push(`un RSI à ${m.rsi.toFixed(0)} (${zone})`);
+    parts.push(`un RSI à ${fmtNumber(m.rsi, 0)} (${zone})`);
   }
   const trendTxt =
     m.trend === 'bullish' ? 'momentum positif' :
@@ -46,21 +46,20 @@ export function eventHeadline(e: EventNarrativeInput): string {
   if (e.abnormalReturnPost == null) {
     return `L’événement du ${frDate(e.eventDate)} n’a pas pu être relié à une réaction mesurable de ${e.code}.`;
   }
-  const sign = e.abnormalReturnPost >= 0 ? '+' : '';
-  const perf = e.abnormalReturnPost.toFixed(1);
   const qual =
-    e.reaction === 'positive' ? 'une surperformance' :
-    e.reaction === 'negative' ? 'une sous-performance' : 'une performance neutre';
-  return `L’événement du ${frDate(e.eventDate)} a été suivi de ${qual} de ${sign}${perf}% par rapport au BRVM Composite sur ${e.window} séances (${e.code}).`;
+    e.reaction === 'positive' ? 'd’une surperformance' :
+    e.reaction === 'negative' ? 'd’une sous-performance' : 'd’un écart';
+  const seances = `${e.window} séance${e.window > 1 ? 's' : ''}`;
+  return `L’événement du ${frDate(e.eventDate)} a été suivi ${qual} de ${fmtPctSigne(e.abnormalReturnPost, 1)} par rapport au BRVM Composite sur ${seances} (${e.code}).`;
 }
 
 /** Liste de raisons "why" dérivées des métriques. */
 export function whyBullets(m: InstrumentMetrics): string[] {
   const out: string[] = [];
   if (m.performancePct != null)
-    out.push(`Performance ${m.performancePct >= 0 ? '+' : ''}${m.performancePct.toFixed(1)}% sur ${m.periodLabel}.`);
-  if (m.rsi != null) out.push(`RSI à ${m.rsi.toFixed(0)}.`);
-  if (m.volumeRatio != null) out.push(`Volume à ${m.volumeRatio.toFixed(1)}x la moyenne.`);
+    out.push(`Performance de ${fmtPctSigne(m.performancePct, 1)} sur ${m.periodLabel}.`);
+  if (m.rsi != null) out.push(`RSI à ${fmtNumber(m.rsi, 0)}.`);
+  if (m.volumeRatio != null) out.push(`Volume à ${fmtNumber(m.volumeRatio, 1)} fois la moyenne.`);
   out.push(`Tendance ${m.trend === 'bullish' ? 'haussière' : m.trend === 'bearish' ? 'baissière' : 'neutre'}.`);
   return out;
 }

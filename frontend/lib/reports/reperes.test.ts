@@ -70,3 +70,14 @@ describe('etiquettesEspacees', () => {
   });
   it('liste vide', () => expect(etiquettesEspacees([], dates)).toEqual([]));
 });
+
+describe('echelleReguliere sans zéro (courbe de cours)', () => {
+  it('graduations rondes autour de la plage, jamais 640,4 / 1 640,4', () => {
+    const e = echelleReguliere(640.4, 4250, 5, false);
+    expect(e.ticks).toEqual([0, 1000, 2000, 3000, 4000, 5000]);
+    const f = echelleReguliere(3800, 4250, 5, false);
+    expect(f.min).toBe(3800);
+    expect(f.max).toBe(4300);
+    expect(f.ticks.every((t) => t % 100 === 0)).toBe(true);
+  });
+});

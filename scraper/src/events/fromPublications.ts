@@ -44,7 +44,7 @@ function mapEventType(typePublication: string | null, libelle: string): EventTyp
 /** Niveau d'importance heuristique (1-5) pour l'ordonnancement de la page. */
 function importanceFor(eventType: EventType): number {
   if (eventType === 'dividende' || eventType === 'resultats') return 3;
-  if (eventType === 'assemblee' || eventType === 'admission' || eventType === 'suspension') return 2;
+  if (eventType === 'assemblee' || eventType === 'admission' || eventType === 'suspension' || eventType === 'notation' || eventType === 'gouvernance') return 2;
   return 1;
 }
 

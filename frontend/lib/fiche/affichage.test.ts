@@ -74,22 +74,26 @@ describe('volumeAuDessusMoyenne', () => {
 });
 
 describe('ligneVerdict', () => {
-  it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal Attente · score 0,44. Séance en hausse de 5,41 %.'));
-  it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal Vente · score −0,70. Séance en baisse de 2,00 %.'));
+  it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal neutre · score 0,44. Séance en hausse de 5,41 %.'));
+  it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal baissier · score −0,70. Séance en baisse de 2,00 %.'));
   it('null sans signal', () => expect(ligneVerdict(null, null, 1)).toBeNull());
-  it('variation absente : aucune phrase de séance', () => expect(ligneVerdict('HOLD', 0.4412, null)).toBe('Signal Attente · score 0,44.'));
-  it('variation nulle : séance stable', () => expect(ligneVerdict('HOLD', 0.4412, 0)).toBe('Signal Attente · score 0,44. Séance stable.'));
-  it('score arrondi à zéro : pas de −0,00', () => expect(ligneVerdict('HOLD', -0.001, 1)).toBe('Signal Attente · score 0,00. Séance en hausse de 1,00 %.'));
+  it('variation absente : aucune phrase de séance', () => expect(ligneVerdict('HOLD', 0.4412, null)).toBe('Signal neutre · score 0,44.'));
+  it('variation nulle : séance stable', () => expect(ligneVerdict('HOLD', 0.4412, 0)).toBe('Signal neutre · score 0,44. Séance stable.'));
+  it('score arrondi à zéro : pas de −0,00', () => expect(ligneVerdict('HOLD', -0.001, 1)).toBe('Signal neutre · score 0,00. Séance en hausse de 1,00 %.'));
 });
 
 describe('syntheseExercice', () => {
   it('STAC 2025', () => {
     expect(syntheseExercice({ croissanceCaPct: 116.3, evolution: evolutionResultatDetail(-96.6e6, -348.2e6), resultatExploitation: -772e6, horsExpl: 776.3e6 }))
-      .toBe("Le chiffre d'affaires a plus que doublé et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
+      .toBe("Le chiffre d'affaires a plus que doublé (+116,3 %) et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
   });
   it('hausse', () => {
     expect(sp(syntheseExercice({ croissanceCaPct: 10, evolution: evolutionResultatDetail(120, 100), resultatExploitation: 5, horsExpl: 0 })))
-      .toBe("Le chiffre d'affaires progresse et le résultat net progresse de 20,0 %.");
+      .toBe("Le chiffre d'affaires progresse de 10,0 % et le résultat net de 20,0 %.");
+  });
+  it('sens opposés : chaque membre garde son verbe', () => {
+    expect(sp(syntheseExercice({ croissanceCaPct: 8.3, evolution: evolutionResultatDetail(95, 100), resultatExploitation: 5, horsExpl: 0 })))
+      .toBe("Le chiffre d'affaires progresse de 8,3 % et le résultat net recule de 5,0 %.");
   });
   it('exactement 100 % : a doublé', () => {
     expect(syntheseExercice({ croissanceCaPct: 100, evolution: null, resultatExploitation: null, horsExpl: null })).toBe("Le chiffre d'affaires a doublé.");
@@ -189,7 +193,7 @@ describe('insecable', () => {
 describe('libelleEvenement', () => {
   it('accentue les types bruts', () => {
     expect(libelleEvenement('resultats')).toBe('Résultats');
-    expect(libelleEvenement('assemblee')).toBe('Assemblée');
+    expect(libelleEvenement('assemblee')).toBe('Assemblée générale');
   });
   it('type inconnu : première lettre en capitale, tirets en espaces', () => expect(libelleEvenement('opération_titres')).toBe('Opération titres'));
 });
