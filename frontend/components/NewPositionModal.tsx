@@ -57,14 +57,14 @@ export default function NewPositionModal({ isOpen, onClose, instruments, watchli
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
             </div>
             <div>
-              <label htmlFor="pm-prix" className="block text-sm font-medium mb-1">Prix d'entrée *</label>
+              <label htmlFor="pm-prix" className="block text-sm font-medium mb-1">Prix d&apos;entrée *</label>
               <input id="pm-prix" name="prix_entree" type="number" placeholder="0" required step="any"
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
             </div>
           </div>
 
           <div>
-            <label htmlFor="pm-date" className="block text-sm font-medium mb-1">Date d'entrée</label>
+            <label htmlFor="pm-date" className="block text-sm font-medium mb-1">Date d&apos;entrée</label>
             <input id="pm-date" name="date_entree" type="date"
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
           </div>

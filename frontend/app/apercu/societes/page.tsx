@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import CompaniesExplorer, { type CompanyCard } from '@/components/public/CompaniesExplorer';
 import { ApercuFrame, ApercuNav } from '@/components/apercu-app/ApercuFrame';
@@ -33,7 +34,7 @@ export default async function ApercuSocietesPage() {
     <ApercuFrame title="Aperçu — Sociétés" subtitle="Annuaire BRVM — même explorer que prod, isolé sous .apv (noindex).">
       <ApercuNav />
       <SeanceStrip asOf={asOf} nbActions={companies.length} href="/apercu/societes" />
-      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Grille sombre hybride. <a href="/societes" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</a></p>
+      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Grille sombre hybride. <Link href="/societes" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</Link></p>
       <div style={{ background: 'rgb(var(--color-surface))', border: '1px solid rgb(var(--color-border))', borderRadius: 14, padding: 12 }}>
         {companies.length === 0 ? <p style={{ color: 'rgb(var(--color-muted))', fontSize: 13 }}>Annuaire vide.</p> : <CompaniesExplorer companies={companies} />}
       </div>

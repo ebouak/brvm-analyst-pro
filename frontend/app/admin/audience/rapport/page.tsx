@@ -13,7 +13,7 @@ export const metadata = { title: "Rapport d'audience — Administration" };
 
 const n = (x: number) => Math.round(x).toLocaleString('fr-FR').replace(/[  ]/g, ' ');
 const LIB = { jour: 'journalier', semaine: 'hebdomadaire', mois: 'mensuel' } as const;
-const Indispo = () => <p className="ra-note">Indisponible : PostHog n'a pas répondu pour ce bloc.</p>;
+const Indispo = () => <p className="ra-note">Indisponible : PostHog n&apos;a pas répondu pour ce bloc.</p>;
 const Sec = ({ t, children, note }: { t: string; children: ReactNode; note?: string }) => <section><h2>{t}</h2>{children}{note && <p className="ra-note">{note}</p>}</section>;
 
 export default async function Page(props: { searchParams: Promise<{ periode?: string }> }) {
@@ -35,7 +35,7 @@ export default async function Page(props: { searchParams: Promise<{ periode?: st
         <ImprimerRapport />
       </div>
 
-      <h1>Rapport d'audience — {LIB[periode]}</h1>
+      <h1>Rapport d&apos;audience — {LIB[periode]}</h1>
       <p className="ra-sous">{libelleFenetre(b)} · source PostHog (UE)</p>
 
       <Sec t="Chiffres clés">
@@ -46,7 +46,7 @@ export default async function Page(props: { searchParams: Promise<{ periode?: st
               {ligne('Personnes', a.overview.data.personnes, prec?.personnes)}
               {ligne('Sessions', a.overview.data.sessions, prec?.sessions)}
               {ligne('Pages vues', a.overview.data.pagesVues, prec?.pagesVues)}
-              {a.sessions.ok && <tr><td>Durée médiane d'une session</td><td>{fmtDuree(a.sessions.data.dureeMedianeS)}</td><td /></tr>}
+              {a.sessions.ok && <tr><td>Durée médiane d&apos;une session</td><td>{fmtDuree(a.sessions.data.dureeMedianeS)}</td><td /></tr>}
             </tbody>
           </table>
         ) : <Indispo />}
@@ -76,7 +76,7 @@ export default async function Page(props: { searchParams: Promise<{ periode?: st
           <table><tbody>
             <tr><td>Ont consulté la formation</td><td>{n(a.entonnoir.data.academy)}</td></tr>
             <tr><td>Ont ouvert une leçon</td><td>{n(a.entonnoir.data.lecon)}</td></tr>
-            <tr><td>Ont atteint l'inscription</td><td>{n(a.entonnoir.data.inscription)}</td></tr>
+            <tr><td>Ont atteint l&apos;inscription</td><td>{n(a.entonnoir.data.inscription)}</td></tr>
           </tbody></table>
         ) : <Indispo />}
       </Sec>

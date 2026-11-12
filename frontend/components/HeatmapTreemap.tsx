@@ -99,7 +99,6 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   // Build the ECharts treemap data. We cast once at assignment because ECharts'
   // internal TreemapSeriesNodeItemOption is too narrow for our extra fields
   // (custom tooltip data, per-node rich labels with logo images, etc.).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const treemapData: any[] = sectors.map((sector) => ({
     name: sector.name,
     itemStyle: { color: 'transparent', borderColor: T.surface, borderWidth: 3 },
@@ -124,7 +123,6 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
 
       // Rich label : logo (si la tuile est assez grande) au-dessus du code + variation.
       // Le rich doit être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fond = couleurTuile(node.variation_pct);
       const fg = encreTuile(fond);
       const rich: any = {
@@ -172,7 +170,6 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
     }),
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tooltipFormatter = (params: any): string => {
     const d = params?.data as (LeafExtra & { name: string }) | undefined;
     if (!d?.code) return (params?.name as string) ?? '';
@@ -252,7 +249,6 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   };
 
   const onEvents = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     click: (params: any) => {
       const code = params?.data?.code as string | undefined;
       if (code) router.push(`/actions/${code}`);
@@ -263,7 +259,6 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
     <EChart
       // Cast needed: EChartsOption's series union doesn't accommodate our
       // custom treemap node fields; the runtime shape is fully valid.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       option={option as any}
       height={height}
       onEvents={onEvents}

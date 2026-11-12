@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { signauxPublicsDeLaSeance, type LigneSignalPublic } from '@/lib/signals/publics';
 import { fetchAllRows } from '@/lib/supabase/paginate';
@@ -46,7 +47,7 @@ export default async function ApercuActionsPage(
     <ApercuFrame title="Aperçu — Actions" subtitle="Même tableau que prod, isolé en sombre sous .apv (noindex).">
       <ApercuNav />
       <SeanceStrip asOf={lastDate} nbActions={actions.length} href="/apercu/actions" />
-      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Preview lecture seule — colonnes calculées affichées sans gating (prod masque selon <code>feature_flags</code>). <a href="/actions" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</a></p>
+      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Preview lecture seule — colonnes calculées affichées sans gating (prod masque selon <code>feature_flags</code>). <Link href="/actions" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</Link></p>
       <div style={{ background: 'rgb(var(--color-surface))', border: '1px solid rgb(var(--color-border))', borderRadius: 14, padding: 12 }}>
         <ActionsTable actions={actions} signals={signals} sparklines={sparklines} initialSecteur={typeof searchParams?.secteur === 'string' ? searchParams.secteur : ''} showMetrics />
       </div>

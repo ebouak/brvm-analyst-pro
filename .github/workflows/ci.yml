@@ -41,6 +41,12 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npm run typecheck
+      # Lint et tests n'étaient pas lancés : 120 erreurs de lint et 5 tests rouges
+      # s'étaient accumulés sur main sans que rien ne le signale (2026-11-12).
+      - name: Lint
+        run: npm run lint
+      - name: Tests (vitest)
+        run: npm test
       - name: Build (Next.js)
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}

@@ -372,10 +372,10 @@ export default function ThesisPage() {
             <div>
               <p className="font-semibold text-amber-400 mb-1">Cacao · pas de pur joueur coté BRVM</p>
               <p className="text-sm text-muted">
-                Il n'existe pas à ce jour de société cotée à la BRVM dont le modèle d'affaires
-                repose exclusivement sur le cacao. Le cacao affecte l'économie ivoirienne
+                Il n&apos;existe pas à ce jour de société cotée à la BRVM dont le modèle d&apos;affaires
+                repose exclusivement sur le cacao. Le cacao affecte l&apos;économie ivoirienne
                 (≈ 40 % de la production mondiale) et marginalement SIFCA, mais son impact
-                est davantage <strong className="text-gray-200">macro</strong> (revenus d'export UEMOA, sentiment sur la place)
+                est davantage <strong className="text-gray-200">macro</strong> (revenus d&apos;export UEMOA, sentiment sur la place)
                 que <strong className="text-gray-200">micro</strong> par titre coté.
               </p>
               <p className="text-xs text-faint mt-2 font-mono">

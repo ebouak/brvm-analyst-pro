@@ -99,7 +99,7 @@ export default function DcfClient({
             <>
               ⓘ CapEx indisponible en base : la juste-valeur est donnée en{' '}
               <strong>fourchette</strong> entre une borne basse (FCF ≈ résultat net, prudent) et une
-              borne haute (FCF ≈ flux d'exploitation, sans CapEx). Les deux bornes sont des données
+              borne haute (FCF ≈ flux d&apos;exploitation, sans CapEx). Les deux bornes sont des données
               réelles ; la vraie valeur se situe entre les deux.
             </>
           ) : (
@@ -170,7 +170,7 @@ export default function DcfClient({
                       onClick={() => setFcfBase('haut')}
                       className={`px-3 py-1.5 transition ${hautActive ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
                     >
-                      Haut (flux d'exploitation)
+                      Haut (flux d&apos;exploitation)
                     </button>
                   </>
                 );
@@ -214,7 +214,7 @@ export default function DcfClient({
           </h3>
 
           <label className="block text-xs text-muted">
-            Pays de l'émetteur (prime de risque)
+            Pays de l&apos;émetteur (prime de risque)
             <select
               value={pays}
               onChange={(e) => setPays(e.target.value)}

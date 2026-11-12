@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
     }
 
     const data = parseReponseIA(texte, symbole);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfBuffer = await renderToBuffer(React.createElement(PdfAnalyseDocument, { data }) as any);
     const filename = nomFichierSur(data.symbole, new Date().toISOString().split('T')[0], 'pdf');
 

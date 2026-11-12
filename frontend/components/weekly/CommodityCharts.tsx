@@ -48,7 +48,7 @@ function ScoreTooltip({ active, payload, label }: any) {
   return (
     <div className="bg-[#0a1417] border border-[#1a2a30] rounded px-3 py-2 text-sm">
       <p className="text-[#56D7FD] font-mono font-semibold">{label}</p>
-      <p className="text-gray-300">Score d'impact : <span className="text-white font-semibold">{payload[0].value}/100</span></p>
+      <p className="text-gray-300">Score d&apos;impact : <span className="text-white font-semibold">{payload[0].value}/100</span></p>
     </div>
   );
 }
@@ -159,7 +159,7 @@ export function BrvmExposureChart({ brvm_scores }: Pick<CommodityChartsProps, 'b
           <Bar dataKey="score" radius={[0, 4, 4, 0]} fill="#56D7FD" opacity={0.85} />
         </BarChart>
       </ResponsiveContainer>
-      <p className="text-xs text-gray-500 mt-2">Score 0–100 basé sur l'exposition directe aux matières premières</p>
+      <p className="text-xs text-gray-500 mt-2">Score 0–100 basé sur l&apos;exposition directe aux matières premières</p>
     </div>
   );
 }
