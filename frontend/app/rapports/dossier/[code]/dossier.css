@@ -20,7 +20,7 @@
   --dv-papier: #ffffff;
   --dv-fond: #f4f6f8;
   --dv-trame: #dfe4ea;
-  --dv-accent: #0e6f86;
+  --dv-accent: #0b6c84;
   --dv-accent-clair: #e6f2f5;
   --dv-hausse: #15803d;
   --dv-baisse: #b91c1c;
@@ -60,9 +60,7 @@
   align-items: baseline;
   border-bottom: 1px solid var(--dv-trame);
   padding-bottom: 3mm;
-  font-size: 8.5pt;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 9pt;
   color: var(--dv-faible);
 }
 
@@ -84,7 +82,7 @@
 .dv-titre {
   font-family: var(--font-display), Georgia, serif;
   font-size: 14pt;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.01em;
   margin: 0 0 1mm;
   display: flex;
@@ -97,12 +95,9 @@
    même panneau au même rang. */
 .dv-numero {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 8.5pt;
+  font-size: 9pt;
   font-weight: 500;
   color: var(--dv-accent);
-  background: var(--dv-accent-clair);
-  border-radius: 3px;
-  padding: 1px 5px;
 }
 
 .dv-chapo {
