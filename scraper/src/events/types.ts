@@ -13,6 +13,9 @@ export type EventType =
   | 'assemblee'
   | 'admission'
   | 'suspension'
+  | 'notation'
+  | 'gouvernance'
+  | 'liquidite'
   | 'autre';
 
 export interface MarketEvent {

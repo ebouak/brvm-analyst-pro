@@ -7,15 +7,16 @@
  * prévision n'est émise.
  */
 
-/** Formate un pourcentage signé à la française (virgule décimale). */
+import { fmtPctSigneTexte, fmtPctAbsTexte, fmtNumber } from './format';
+
+/** Pourcentage signé à la française : « +1,2 % », « −15,0 % » (moins typographique, espace insécable). */
 function pct(x: number, d = 1): string {
-  const s = x.toFixed(d).replace('.', ',');
-  return `${x >= 0 ? '+' : ''}${s} %`;
+  return fmtPctSigneTexte(x, d);
 }
 
-/** Formate un pourcentage non signé (dispersion, part). */
+/** Pourcentage non signé (dispersion, part). */
 function pctBrut(x: number, d = 1): string {
-  return `${x.toFixed(d).replace('.', ',')} %`;
+  return fmtPctAbsTexte(x, d);
 }
 
 /** Médiane d'une série non vide. Renvoie null si la série est vide. */
@@ -100,7 +101,7 @@ export function sectorCommentary(i: SectorCommentaryInput): string[] {
   if (i.best && i.worst && i.best.code !== i.worst.code) {
     const amplitude = i.best.perf - i.worst.perf;
     out.push(
-      `${amplitude.toFixed(1).replace('.', ',')} points séparent ${i.best.code} (${pct(i.best.perf)}) de ${i.worst.code} (${pct(i.worst.perf)}).`,
+      `${fmtNumber(amplitude, 1)} points séparent ${i.best.code} (${pct(i.best.perf)}) de ${i.worst.code} (${pct(i.worst.perf)}).`,
     );
   }
 
@@ -219,14 +220,21 @@ export function eventCommentary(i: EventCommentaryInput): string[] {
   const baisses = mesures.filter((m) => m.rendementAnormalPct < 0).length;
   const moyenne = mesures.reduce((s, m) => s + m.rendementAnormalPct, 0) / mesures.length;
 
-  out.push(
-    `Sur les ${mesures.length} titre${mesures.length > 1 ? 's' : ''} liés, ${hausses} ${hausses > 1 ? 'ont fait mieux' : 'a fait mieux'} que l’indice ` +
-    `et ${baisses} moins bien sur les ${i.fenetreSeances} séances suivant l’événement, ` +
-    `pour un écart moyen à l’indice de ${pct(moyenne, 2)}.`,
-  );
-
-  const extreme = [...mesures].sort((a, b) => Math.abs(b.rendementAnormalPct) - Math.abs(a.rendementAnormalPct))[0]!;
-  out.push(`L’écart le plus marqué revient à ${extreme.code} (${pct(extreme.rendementAnormalPct, 2)} par rapport à l’indice).`);
+  const fenetre = `${i.fenetreSeances} séance${i.fenetreSeances > 1 ? 's' : ''} suivant l’événement`;
+  if (mesures.length === 1) {
+    const m = mesures[0]!;
+    const verbe = m.rendementAnormalPct > 0 ? 'a fait mieux que' : m.rendementAnormalPct < 0 ? 'a fait moins bien que' : 'a évolué comme';
+    out.push(`Le titre lié (${m.code}) ${verbe} l’indice sur les ${fenetre}, avec un écart de ${pct(m.rendementAnormalPct, 2)}.`);
+  } else {
+    const mieux = hausses === 0 ? 'aucun n’a fait mieux' : `${hausses} ${hausses > 1 ? 'ont fait mieux' : 'a fait mieux'}`;
+    const moins = baisses === 0 ? 'aucun moins bien' : `${baisses} moins bien`;
+    out.push(
+      `Sur les ${mesures.length} titres liés, ${mieux} que l’indice et ${moins} sur les ${fenetre}, ` +
+      `pour un écart moyen à l’indice de ${pct(moyenne, 2)}.`,
+    );
+    const extreme = [...mesures].sort((a, b) => Math.abs(b.rendementAnormalPct) - Math.abs(a.rendementAnormalPct))[0]!;
+    out.push(`L’écart le plus marqué revient à ${extreme.code} (${pct(extreme.rendementAnormalPct, 2)} par rapport à l’indice).`);
+  }
 
   const nonMesures = i.nbTitresLies - mesures.length;
   if (nonMesures > 0) {

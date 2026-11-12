@@ -3,7 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ActionDaily, SignalDaily, MarketEvent, Period } from './types';
 import { PERIOD_DAYS } from './types';
 import { smaSeries, rsiSeries, macdSeries, rsi, sma, detect } from './indicators';
-import { eventStudy, type DatedClose } from './eventStudy';
+import { eventStudy, fenetreChargement, detachementsDansFenetre, type DatedClose } from './eventStudy';
+import { fmtDateFR } from './format';
 import { instrumentHeadline, whyBullets, eventHeadline, type InstrumentMetrics } from './narrative';
 import { sectorCommentary, eventCommentary } from './reportCommentary';
 
@@ -40,7 +41,8 @@ export async function buildInstrumentReport(
   period: Period,
 ): Promise<InstrumentReport | null> {
   const [{ data: hist }, { data: instr }, { data: sigs }, { data: evts }, { data: indRow }] = await Promise.all([
-    supabase.from('brvm_actions_daily').select('*').eq('code', code).order('date_marche', { ascending: true }).limit(2000),
+    // Les 1 000 séances les PLUS RÉCENTES (plafond PostgREST), remises dans l'ordre plus bas.
+    supabase.from('brvm_actions_daily').select('*').eq('code', code).order('date_marche', { ascending: false }).limit(1000),
     supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
     supabase.from('signals_daily').select('*').eq('code', code).order('date_marche', { ascending: false }).limit(20),
     supabase.from('market_events').select('*').eq('instrument_code', code).order('event_date', { ascending: false }).limit(50),
@@ -51,7 +53,7 @@ export async function buildInstrumentReport(
   ]);
   const ind = indRow as Record<string, number | boolean | null> | null;
 
-  const allRows = (hist ?? []) as ActionDaily[];
+  const allRows = ((hist ?? []) as ActionDaily[]).reverse();
   if (allRows.length === 0) return null;
   const rows = cutByPeriod(allRows, period);
 
@@ -150,6 +152,8 @@ export interface EventReport {
   event: MarketEvent;
   relatedCodes: string[];
   impact: Record<string, ReturnType<typeof eventStudy>>;
+  /** Ex-dates de dividende comprises dans la fenêtre observée, par titre. */
+  detachements: Record<string, string[]>;
   explanation: { headline: string; why: string[] };
 }
 
@@ -168,29 +172,48 @@ export async function buildEventReport(
   if (event.instrument_code) codes.add(event.instrument_code);
   const relatedCodes = [...codes];
 
+  // Seule la fenêtre utile est chargée. Lire tout l'historique par ordre croissant
+  // avec une limite renvoyait les plus ANCIENNES séances (SNTS : 4 946 lignes
+  // depuis 2007, plafond PostgREST à 1 000) : aucune séance après l'événement,
+  // donc « historique insuffisant » sur toute valeur ancienne.
+  const { debut, fin } = fenetreChargement(event.event_date);
+
   // Indice BRVM Composite pour le rendement de référence.
   const { data: idx } = await supabase
     .from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC')
-    .order('date_marche', { ascending: true }).limit(2000);
+    .gte('date_marche', debut).lte('date_marche', fin)
+    .order('date_marche', { ascending: true });
   const indexSeries: DatedClose[] = (idx ?? []).map((r) => ({ date: r.date_marche as string, close: r.valeur as number | null }));
 
   const impact: Record<string, ReturnType<typeof eventStudy>> = {};
-  for (const code of relatedCodes) {
-    const { data: hist } = await supabase
-      .from('brvm_actions_daily').select('date_marche, cours_jour, volume').eq('code', code)
-      .order('date_marche', { ascending: true }).limit(2000);
+  const detachements: Record<string, string[]> = {};
+  await Promise.all(relatedCodes.map(async (code) => {
+    const [{ data: hist }, { data: divs }] = await Promise.all([
+      supabase
+        .from('brvm_actions_daily').select('date_marche, cours_jour, volume').eq('code', code)
+        .gte('date_marche', debut).lte('date_marche', fin)
+        .order('date_marche', { ascending: true }),
+      supabase
+        .from('dividends').select('ex_date').eq('code', code)
+        .gte('ex_date', debut).lte('ex_date', fin).gt('montant', 0),
+    ]);
     const rows = (hist ?? []) as { date_marche: string; cours_jour: number | null; volume: number | null }[];
     const series: DatedClose[] = rows.map((r) => ({ date: r.date_marche, close: r.cours_jour }));
     const vols = rows.map((r) => r.volume);
     impact[code] = eventStudy(series, vols, indexSeries, event.event_date, window);
-  }
+    // Les clôtures ne sont pas ajustées du dividende : un détachement dans la
+    // fenêtre fait baisser le cours du montant versé, sans rapport avec l'événement.
+    const exDates = ((divs ?? []) as { ex_date: string | null }[]).map((d) => d.ex_date).filter((d): d is string => !!d);
+    detachements[code] = detachementsDansFenetre(series, impact[code]!, exDates);
+  }));
 
   const firstCode = relatedCodes[0];
   const ar = firstCode ? impact[firstCode]?.abnormalReturnPost ?? null : null;
   const reaction = firstCode ? impact[firstCode]?.reaction ?? 'neutral' : 'neutral';
+  const seances = firstCode ? impact[firstCode]?.seancesObservees ?? window : window;
   const headline = firstCode
-    ? eventHeadline({ eventDate: event.event_date, code: firstCode, abnormalReturnPost: ar, reaction, window })
-    : `Événement du ${event.event_date} — aucun titre rattaché pour mesurer l'impact.`;
+    ? eventHeadline({ eventDate: event.event_date, code: firstCode, abnormalReturnPost: ar, reaction, window: seances })
+    : `Événement du ${fmtDateFR(event.event_date)} : aucun titre rattaché pour mesurer l'impact.`;
 
   const why = eventCommentary({
     impacts: relatedCodes.map((c) => ({ code: c, rendementAnormalPct: impact[c]?.abnormalReturnPost ?? null })),
@@ -198,7 +221,7 @@ export async function buildEventReport(
     fenetreSeances: window,
   });
 
-  return { reportType: 'event', event, relatedCodes, impact, explanation: { headline, why } };
+  return { reportType: 'event', event, relatedCodes, impact, detachements, explanation: { headline, why } };
 }
 
 // --- Rapport secteur (§4.2 / §5) -------------------------------------------

@@ -6,6 +6,8 @@ import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { classifyCompany, type ProfilInfo } from './profile';
 import { bpaAffichable } from '@/lib/fiche/affichage';
 import type { Evenement } from './reperes';
+import { detachementDepuisSerie } from './detachementRevue';
+import type { Detachement } from '@/lib/fundamentals';
 
 export interface YearRow {
   periode: string;
@@ -33,6 +35,8 @@ export interface RevueData {
   /** Publications d'états financiers et détachements de dividende, datés (repères du graphique de cours). */
   evenements: Evenement[];
   ratios: { per: number | null; yieldPct: number | null; margeNette: number | null; payout: number | null };
+  /** Dernier détachement mesuré sur la série complète (même calcul que le Dossier), ou null. */
+  detachement: Detachement | null;
   highlights: {
     synthese: string | null;
     items: { titre: string; detail: string }[];
@@ -42,6 +46,9 @@ export interface RevueData {
   } | null;
   generatedAt: string;
 }
+
+/** Nombre d'exercices annuels présentés, aligné sur le Dossier valeur. */
+export const EXERCICES_REVUE = 5;
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
@@ -98,7 +105,9 @@ export async function getRevue(code: string): Promise<RevueData | null> {
     const calc = bpaAffichable(y.resultatNet, instr?.shares ?? null).valeur;
     if (calc != null && (i === 0 || y.bpa == null)) y.bpa = calc;
   });
-  const years = allYears.slice(0, profil.anneesAffichees);
+  // Même profondeur que le Dossier (trajectoire sur 5 exercices), quel que soit le profil :
+  // la Revue n'en montrait que 2 hors agro-industrie quand le Dossier en traçait 5.
+  const years = allYears.slice(0, EXERCICES_REVUE);
   const latest = allYears[0] ?? null;
   const prev = allYears[1] ?? null;
 
@@ -130,6 +139,18 @@ export async function getRevue(code: string): Promise<RevueData | null> {
       .filter((d) => (num(d.montant) ?? 0) > 0 && (d.ex_date ?? d.payment_date))
       .map((d) => ({ date: (d.ex_date ?? d.payment_date) as string, type: 'dividende' as const, libelle: `Dividende exercice ${d.exercice}` })),
   ];
+  // Dernier détachement : ex-date la plus récente d'un dividende > 0, mesurée sur la série COMPLÈTE.
+  const dernierDiv = divBrut
+    .filter((d) => (num(d.montant) ?? 0) > 0 && d.ex_date)
+    .sort((a, b) => (b.ex_date as string).localeCompare(a.ex_date as string))[0];
+  const detachement = dernierDiv
+    ? detachementDepuisSerie(
+        rawSeries.map((p) => ({ date: p.date_marche, cours: num(p.cours_jour) as number })),
+        dernierDiv.ex_date as string,
+        num(dernierDiv.montant) as number,
+      )
+    : null;
+
   const dividends = divBrut
     .map((d) => ({ exercice: Number(d.exercice), montant: num(d.montant) ?? 0 }))
     .filter((d) => Number.isFinite(d.exercice) && d.montant > 0);
@@ -182,6 +203,7 @@ export async function getRevue(code: string): Promise<RevueData | null> {
     dividends,
     evenements,
     ratios: { per, yieldPct, margeNette, payout },
+    detachement,
     highlights,
     generatedAt: new Date().toISOString(),
   };

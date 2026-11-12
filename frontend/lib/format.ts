@@ -65,3 +65,11 @@ export function fmtFcfaSigne(n: number): string {
   if (!Number.isFinite(n)) return '—';
   return `${signeArrondi(n, 0)}${fmtFcfa(Math.abs(n))}`;
 }
+
+/** Variantes pour la prose générée : espace insécable avant « % » (jamais de « % » seul en début de ligne). */
+export function fmtPctSigneTexte(v: number, d = 1): string {
+  return fmtPctSigne(v, d).replace(' %', ' %');
+}
+export function fmtPctAbsTexte(v: number, d = 1): string {
+  return fmtPctAbs(v, d).replace(' %', ' %');
+}
