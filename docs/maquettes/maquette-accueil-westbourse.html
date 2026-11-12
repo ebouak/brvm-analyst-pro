@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Westbourse — accueil, film et inscription</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:#2997b8;text-decoration:none}a:hover{color:#56D7FD}
+@keyframes wbTrace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes wbPop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes wbMonte{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wbTuile{0%{opacity:0;transform:scale(.3) translateY(18px)}60%{opacity:1;transform:scale(1.12)}100%{opacity:1;transform:none}}
+@keyframes wbOnde{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.4);opacity:0}}
+@keyframes wbRoule{from{transform:translateY(0)}to{transform:translateY(-83.3333%)}}
+@keyframes wbEtape{0%,13%{background:#56D7FD;color:#00141a;transform:scale(1.12)}17%,100%{background:#12181b;color:#8A9AA0;transform:scale(1)}}
+@keyframes wbFil{from{left:-12%}to{left:100%}}
+.wb-w{stroke-dasharray:1;animation:wbTrace .7s cubic-bezier(.32,.72,0,1) both}
+.wb-fl{stroke-dasharray:1;animation:wbTrace .45s cubic-bezier(.32,.72,0,1) .65s both}
+.wb-pt{transform-origin:104px 27px;animation:wbPop .3s cubic-bezier(.32,.72,0,1) 1.05s both}
+.wb-h1{animation:wbMonte .9s cubic-bezier(.2,.7,0,1) both}
+.wb-h2{animation:wbMonte .9s cubic-bezier(.2,.7,0,1) .12s both}
+.wb-h3{animation:wbMonte .9s cubic-bezier(.2,.7,0,1) .24s both}
+.wb-h4{animation:wbMonte 1s cubic-bezier(.2,.7,0,1) .4s both}
+.wb-onde{position:absolute;inset:0;border-radius:50%;background:#56D7FD;animation:wbOnde 2s ease-out infinite}
+.wb-rail{scrollbar-width:none}.wb-rail::-webkit-scrollbar{display:none}
+.wb-carte{transition:transform .5s cubic-bezier(.2,.7,0,1)}
+.wb-carte:hover{transform:translateY(-8px)}
+.wb-tile{appearance:none;border:0;border-radius:12px;padding:11px 10px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;font:inherit;text-align:left;cursor:pointer;position:relative;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.wb-tile:hover,.wb-tile:focus-visible{transform:scale(1.14);z-index:2;outline:2px solid #fff;outline-offset:2px}
+.wb-etape{animation:wbEtape 7s linear infinite}
+.wb-fil{position:absolute;top:0;height:100%;width:12%;background:#56D7FD;border-radius:2px;animation:wbFil 7s linear infinite}
+.wb-f1{transform:rotate(-9deg) translate(-52px,8px)}.wb-f3{transform:rotate(9deg) translate(52px,8px)}
+.wb-f1,.wb-f2,.wb-f3{transition:transform .9s cubic-bezier(.2,.8,.2,1) .15s}
+.wb-carte:hover .wb-f1{transform:rotate(-14deg) translate(-74px,4px)}.wb-carte:hover .wb-f3{transform:rotate(14deg) translate(74px,4px)}
+.wb-rin{transform:translateY(-83.3333%)}
+.wb-bx,.wb-by{transition:transform 1.1s cubic-bezier(.2,.8,.2,1) .2s}
+.wb-bx{transform-origin:left center}.wb-bxr{transform-origin:right center}.wb-by{transform-origin:center bottom}
+.wb-js [data-rv]:not(.in){opacity:0}
+.wb-js [data-rv].in{animation:wbRessort 1.05s cubic-bezier(.2,.8,.2,1) backwards}
+.wb-js .in.d1{animation-delay:.1s}.wb-js .in.d2{animation-delay:.2s}.wb-js .in.d3{animation-delay:.3s}.wb-js .in.d4{animation-delay:.4s}
+.wb-js .wb-mos:not(.in) .wb-tile{opacity:0}
+.wb-js .wb-mos.in .wb-tile{animation:wbTuile .55s cubic-bezier(.2,.9,.2,1.15) backwards}
+.wb-js :not(.in)>.wb-bx,.wb-js :not(.in)>.wb-bxr{transform:scaleX(0)}
+.wb-js :not(.in)>.wb-by{transform:scaleY(0)}
+.wb-js .wb-carte:not(.in) .wb-f1,.wb-js .wb-carte:not(.in) .wb-f3{transform:none}
+.wb-js .wb-rin{transform:translateY(0)}
+.wb-js .in .wb-rin{animation:wbRoule 1.8s cubic-bezier(.12,.85,.15,1) .25s both}
+.wb-js .wb-lg .wb-w2,.wb-js .wb-lg .wb-fl2{stroke-dasharray:1;stroke-dashoffset:1}
+.wb-js .wb-lg .wb-pt2{opacity:0;transform-origin:104px 27px}
+.wb-js .in.wb-lg .wb-w2{animation:wbTrace .9s cubic-bezier(.32,.72,0,1) .1s both}
+.wb-js .in.wb-lg .wb-fl2{animation:wbTrace .5s cubic-bezier(.32,.72,0,1) .95s both}
+.wb-js .in.wb-lg .wb-pt2{animation:wbPop .35s cubic-bezier(.32,.72,0,1) 1.4s both}
+.wb-js .wb-msg:not(.in) .wb-l{opacity:0}
+.wb-js .wb-msg.in .wb-l{animation:wbMonte .55s cubic-bezier(.2,.7,0,1) backwards}
+.wb-js .wb-msg.in .l2{animation-delay:.35s}.wb-js .wb-msg.in .l3{animation-delay:.7s}.wb-js .wb-msg.in .l4{animation-delay:1.05s}.wb-js .wb-msg.in .l5{animation-delay:1.4s}
+@keyframes f-s1{0%{opacity:0;transform:scale(1)}1.5%{opacity:1}14.25%{opacity:1;transform:scale(1.045)}16%,100%{opacity:0;transform:scale(1.07)}}
+@keyframes f-s2{0%,16%{opacity:0;transform:scale(1)}17.5%{opacity:1}39.25%{opacity:1;transform:scale(1.045)}41%,100%{opacity:0;transform:scale(1.07)}}
+@keyframes f-s3{0%,41%{opacity:0;transform:scale(1)}42.5%{opacity:1}61.25%{opacity:1;transform:scale(1.045)}63%,100%{opacity:0;transform:scale(1.07)}}
+@keyframes f-s4{0%,63%{opacity:0;transform:scale(1)}64.5%{opacity:1}81.25%{opacity:1;transform:scale(1.045)}83%,100%{opacity:0;transform:scale(1.07)}}
+@keyframes f-s5{0%,83%{opacity:0;transform:scale(1)}84.5%{opacity:1}98.25%{opacity:1;transform:scale(1.045)}100%{opacity:0;transform:scale(1.07)}}
+@keyframes f-lw{0%,0.75%{stroke-dashoffset:1}4.25%,100%{stroke-dashoffset:0}}
+@keyframes f-lf{0%,3.75%{stroke-dashoffset:1}5.5%,100%{stroke-dashoffset:0}}
+@keyframes f-lp{0%,5.25%{opacity:0;transform:scale(.3)}6.5%{opacity:1;transform:scale(1.2)}7.25%,100%{opacity:1;transform:scale(1)}}
+@keyframes f-e1{0%,2.5%{opacity:0;transform:translateY(70%) scale(.8)}4%{opacity:1;transform:translateY(-7%) scale(1.04)}5%{opacity:1;transform:translateY(2%) scale(.995)}5.75%,100%{opacity:1;transform:none}}
+@keyframes f-t1{0%,4.5%{opacity:0;transform:translateY(70%) scale(.8)}6%{opacity:1;transform:translateY(-7%) scale(1.04)}7%{opacity:1;transform:translateY(2%) scale(.995)}7.75%,100%{opacity:1;transform:none}}
+@keyframes f-t2{0%,5.25%{opacity:0;transform:translateY(70%) scale(.8)}6.75%{opacity:1;transform:translateY(-7%) scale(1.04)}7.75%{opacity:1;transform:translateY(2%) scale(.995)}8.5%,100%{opacity:1;transform:none}}
+@keyframes f-t3{0%,6%{opacity:0;transform:translateY(70%) scale(.8)}7.5%{opacity:1;transform:translateY(-7%) scale(1.04)}8.5%{opacity:1;transform:translateY(2%) scale(.995)}9.25%,100%{opacity:1;transform:none}}
+@keyframes f-a1{0%,17%{opacity:0;transform:translateY(70%) scale(.8)}18.5%{opacity:1;transform:translateY(-7%) scale(1.04)}19.5%{opacity:1;transform:translateY(2%) scale(.995)}20.25%,100%{opacity:1;transform:none}}
+@keyframes f-a2{0%,25%{opacity:0;transform:translateY(70%) scale(.8)}26.5%{opacity:1;transform:translateY(-7%) scale(1.04)}27.5%{opacity:1;transform:translateY(2%) scale(.995)}28.25%,100%{opacity:1;transform:none}}
+@keyframes f-c1{0%,18%{stroke-dashoffset:1}34%,100%{stroke-dashoffset:0}}
+@keyframes f-d1{0%,17.75%{transform:translateY(0)}22.25%{transform:translateY(-76.2%)}23.5%,100%{transform:translateY(-75%)}}
+@keyframes f-d2{0%,18.15%{transform:translateY(0)}22.65%{transform:translateY(-56.2%)}23.9%,100%{transform:translateY(-55%)}}
+@keyframes f-d3{0%,18.55%{transform:translateY(0)}23.05%{transform:translateY(-86.2%)}24.3%,100%{transform:translateY(-85%)}}
+@keyframes f-d4{0%,18.95%{transform:translateY(0)}23.45%{transform:translateY(-56.2%)}24.7%,100%{transform:translateY(-55%)}}
+@keyframes f-d5{0%,19.35%{transform:translateY(0)}23.85%{transform:translateY(-86.2%)}25.1%,100%{transform:translateY(-85%)}}
+@keyframes f-b0{0%,42%{opacity:0;transform:translateY(70%) scale(.8)}43.5%{opacity:1;transform:translateY(-7%) scale(1.04)}44.5%{opacity:1;transform:translateY(2%) scale(.995)}45.25%,100%{opacity:1;transform:none}}
+@keyframes f-b1{0%,43.5%{opacity:0;transform:translateY(70%) scale(.8)}45%{opacity:1;transform:translateY(-7%) scale(1.04)}46%{opacity:1;transform:translateY(2%) scale(.995)}46.75%,100%{opacity:1;transform:none}}
+@keyframes f-x1{0%,44.25%{transform:scaleX(0)}46%{transform:scaleX(1.05)}47%{transform:scaleX(.99)}47.75%,100%{transform:scaleX(1)}}
+@keyframes f-b2{0%,44.5%{opacity:0;transform:translateY(70%) scale(.8)}46%{opacity:1;transform:translateY(-7%) scale(1.04)}47%{opacity:1;transform:translateY(2%) scale(.995)}47.75%,100%{opacity:1;transform:none}}
+@keyframes f-x2{0%,45.25%{transform:scaleX(0)}47%{transform:scaleX(1.05)}48%{transform:scaleX(.99)}48.75%,100%{transform:scaleX(1)}}
+@keyframes f-b3{0%,45.5%{opacity:0;transform:translateY(70%) scale(.8)}47%{opacity:1;transform:translateY(-7%) scale(1.04)}48%{opacity:1;transform:translateY(2%) scale(.995)}48.75%,100%{opacity:1;transform:none}}
+@keyframes f-x3{0%,46.25%{transform:scaleX(0)}48%{transform:scaleX(1.05)}49%{transform:scaleX(.99)}49.75%,100%{transform:scaleX(1)}}
+@keyframes f-b4{0%,46.5%{opacity:0;transform:translateY(70%) scale(.8)}48%{opacity:1;transform:translateY(-7%) scale(1.04)}49%{opacity:1;transform:translateY(2%) scale(.995)}49.75%,100%{opacity:1;transform:none}}
+@keyframes f-x4{0%,47.25%{transform:scaleX(0)}49%{transform:scaleX(1.05)}50%{transform:scaleX(.99)}50.75%,100%{transform:scaleX(1)}}
+@keyframes f-n1{0%,64%{opacity:0;transform:translateY(70%) scale(.8)}65.5%{opacity:1;transform:translateY(-7%) scale(1.04)}66.5%{opacity:1;transform:translateY(2%) scale(.995)}67.25%,100%{opacity:1;transform:none}}
+@keyframes f-g1{0%,67%{transform:scaleX(0)}68.75%{transform:scaleX(1.05)}69.75%{transform:scaleX(.99)}70.5%,100%{transform:scaleX(1)}}
+@keyframes f-r1{0%,84%{opacity:0;transform:translateY(70%) scale(.8)}85.5%{opacity:1;transform:translateY(-7%) scale(1.04)}86.5%{opacity:1;transform:translateY(2%) scale(.995)}87.25%,100%{opacity:1;transform:none}}
+@keyframes f-p1{0%,87.5%{opacity:0;transform:translateY(70%) scale(.8)}89%{opacity:1;transform:translateY(-7%) scale(1.04)}90%{opacity:1;transform:translateY(2%) scale(.995)}90.75%,100%{opacity:1;transform:none}}
+@keyframes f-n2{0%,64.75%{opacity:0;transform:translateY(70%) scale(.8)}66.25%{opacity:1;transform:translateY(-7%) scale(1.04)}67.25%{opacity:1;transform:translateY(2%) scale(.995)}68%,100%{opacity:1;transform:none}}
+@keyframes f-g2{0%,67.75%{transform:scaleX(0)}69.5%{transform:scaleX(1.05)}70.5%{transform:scaleX(.99)}71.25%,100%{transform:scaleX(1)}}
+@keyframes f-r2{0%,84.75%{opacity:0;transform:translateY(70%) scale(.8)}86.25%{opacity:1;transform:translateY(-7%) scale(1.04)}87.25%{opacity:1;transform:translateY(2%) scale(.995)}88%,100%{opacity:1;transform:none}}
+@keyframes f-p2{0%,88.1%{opacity:0;transform:translateY(70%) scale(.8)}89.6%{opacity:1;transform:translateY(-7%) scale(1.04)}90.6%{opacity:1;transform:translateY(2%) scale(.995)}91.35%,100%{opacity:1;transform:none}}
+@keyframes f-n3{0%,65.5%{opacity:0;transform:translateY(70%) scale(.8)}67%{opacity:1;transform:translateY(-7%) scale(1.04)}68%{opacity:1;transform:translateY(2%) scale(.995)}68.75%,100%{opacity:1;transform:none}}
+@keyframes f-g3{0%,68.5%{transform:scaleX(0)}70.25%{transform:scaleX(1.05)}71.25%{transform:scaleX(.99)}72%,100%{transform:scaleX(1)}}
+@keyframes f-r3{0%,85.5%{opacity:0;transform:translateY(70%) scale(.8)}87%{opacity:1;transform:translateY(-7%) scale(1.04)}88%{opacity:1;transform:translateY(2%) scale(.995)}88.75%,100%{opacity:1;transform:none}}
+@keyframes f-p3{0%,88.7%{opacity:0;transform:translateY(70%) scale(.8)}90.2%{opacity:1;transform:translateY(-7%) scale(1.04)}91.2%{opacity:1;transform:translateY(2%) scale(.995)}91.95%,100%{opacity:1;transform:none}}
+@keyframes f-n4{0%,70%{opacity:0;transform:translateY(70%) scale(.8)}71.5%{opacity:1;transform:translateY(-7%) scale(1.04)}72.5%{opacity:1;transform:translateY(2%) scale(.995)}73.25%,100%{opacity:1;transform:none}}
+@keyframes f-prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.f-s1{animation:f-s1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-s2{animation:f-s2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-s3{animation:f-s3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-s4{animation:f-s4 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-s5{animation:f-s5 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-lw{animation:f-lw 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-lf{animation:f-lf 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-lp{animation:f-lp 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-e1{animation:f-e1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-t1{animation:f-t1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-t2{animation:f-t2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-t3{animation:f-t3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-a1{animation:f-a1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-a2{animation:f-a2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-c1{animation:f-c1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-d1{animation:f-d1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-d2{animation:f-d2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-d3{animation:f-d3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-d4{animation:f-d4 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-d5{animation:f-d5 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-b0{animation:f-b0 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-b1{animation:f-b1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-x1{animation:f-x1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-b2{animation:f-b2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-x2{animation:f-x2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-b3{animation:f-b3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-x3{animation:f-x3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-b4{animation:f-b4 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-x4{animation:f-x4 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-n1{animation:f-n1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-g1{animation:f-g1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-r1{animation:f-r1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-p1{animation:f-p1 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-n2{animation:f-n2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-g2{animation:f-g2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-r2{animation:f-r2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-p2{animation:f-p2 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-n3{animation:f-n3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-g3{animation:f-g3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-r3{animation:f-r3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-p3{animation:f-p3 20s cubic-bezier(.2,.8,.2,1) infinite both}.f-n4{animation:f-n4 20s cubic-bezier(.2,.8,.2,1) infinite both}
+.f-prog{animation:f-prog 20s linear infinite both}
+.wb-sc{position:absolute;top:0;left:0;right:0;bottom:9cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;opacity:0;pointer-events:none}
+.wb-sc [class*="f-"]{display:inline-block}.f-lw,.f-lf,.f-c1{stroke-dasharray:1}.f-lp{transform-origin:104px 27px}
+.wb-col{display:inline-block;height:1em;overflow:hidden}.wb-strip{display:flex!important;flex-direction:column}.wb-strip>span{height:1em;line-height:1}
+.wb-js .wb-film:not(.in) *{animation-play-state:paused}.wb-pause *{animation-play-state:paused!important}
+@keyframes wbRessort{0%{opacity:0;transform:translateY(64px) scale(.94)}55%{opacity:1;transform:translateY(-8px) scale(1.012)}78%{opacity:1;transform:translateY(3px) scale(.998)}100%{opacity:1;transform:none}}
+@keyframes wbMot{0%{transform:translateY(118%) rotate(7deg)}60%{transform:translateY(-6%) rotate(-1deg)}100%{transform:none}}
+.wb-ligne{display:inline-block;overflow:hidden;padding:.1em .07em .18em;margin:-.1em -.07em -.18em;vertical-align:bottom}
+.wb-mot{display:inline-block;animation:wbMot .95s cubic-bezier(.2,.8,.2,1) both}.m1{animation-delay:.05s}.m2{animation-delay:.13s}.m3{animation-delay:.21s}.m4{animation-delay:.42s}.m5{animation-delay:.5s}.m6{animation-delay:.58s}
+@media (prefers-reduced-motion: reduce){.wb-film *{animation:none!important}.wb-sc.f-s2{opacity:1}.f-lw,.f-lf,.f-c1{stroke-dasharray:none}.wb-mot{animation:none}.f-d1{transform:translateY(-75%)}.f-d2{transform:translateY(-55%)}.f-d3{transform:translateY(-85%)}.f-d4{transform:translateY(-55%)}.f-d5{transform:translateY(-85%)}}
+@media (prefers-reduced-motion: reduce){.wb-w,.wb-fl,.wb-pt,.wb-h1,.wb-h2,.wb-h3,.wb-h4,.wb-onde,.wb-etape,.wb-fil{animation:none;stroke-dashoffset:0}.wb-carte,.wb-tile,.wb-f1,.wb-f2,.wb-f3{transition:none}}
+@keyframes wbDefile{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.wb-piste{display:flex;width:max-content;animation:wbDefile 38s linear infinite}
+.wb-piste2{animation-direction:reverse;animation-duration:46s}
+@media (prefers-reduced-motion: reduce){.wb-piste{animation:none}}
+@keyframes xIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes xPop{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:none}}
+@keyframes xW{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes xTr{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.x-in{animation:xIn .6s cubic-bezier(.2,.7,0,1) both}
+.x-pop{animation:xPop .6s cubic-bezier(.34,1.56,.64,1) both}
+.x-w{transform-origin:left center;animation:xW 1s cubic-bezier(.2,.8,.2,1) both}
+.x-tr{stroke-dasharray:1;animation:xTr 2.2s cubic-bezier(.4,0,.2,1) both}
+.x-prog{transform-origin:left center;animation:xW 6s linear both}
+.x1{animation-delay:0.09s}.x2{animation-delay:0.18s}.x3{animation-delay:0.27s}.x4{animation-delay:0.36s}.x5{animation-delay:0.45s}.x6{animation-delay:0.54s}.x7{animation-delay:0.63s}.x8{animation-delay:0.72s}.x9{animation-delay:0.81s}.x10{animation-delay:0.90s}.x11{animation-delay:0.99s}.x12{animation-delay:1.08s}
+.x-chip{appearance:none;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #2a3338;background:transparent;color:#C7CCD1;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px;transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s}
+.x-chip:hover{transform:scale(1.05)}
+.x-chip:focus-visible{outline:2px solid #56D7FD;outline-offset:2px}
+.x-on{background:#F5F5F7;color:#0b0d0e;border-color:#F5F5F7}
+@media (prefers-reduced-motion: reduce){.x-in,.x-pop,.x-w,.x-tr,.x-prog{animation:none;stroke-dashoffset:0}.x-chip{transition:none}}
+</style>
+</helmet>
+<div data-wb-root style="font-family: Geist, 'Helvetica Neue', system-ui, sans-serif; color: #F5F5F7; background: #000000; overflow-x: clip">
+
+<header style="background: #0b0d0e; border-bottom: 1px solid #1B2A30">
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap">
+<a href="#" aria-label="Westbourse, accueil" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #F5F5F7">
+<svg aria-hidden="true" viewBox="0 0 130 105" style="width: 34px; height: 27px">
+<rect x="2" y="2" width="126" height="101" rx="22" fill="#0c1d2e"></rect>
+<path class="wb-w" pathLength="1" d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
+<path class="wb-fl" pathLength="1" d="M76 82 L100 33" fill="none" stroke="#16b6a4" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
+<polygon class="wb-pt" points="110,12 117,40 86,28" fill="#16b6a4"></polygon>
+</svg>
+<span style="font-size: 13px; font-weight: 600; letter-spacing: 0.28em">WESTBOURSE</span>
+</a>
+<nav aria-label="Navigation principale" style="display: flex; gap: clamp(14px, 2.6vw, 38px); font-size: 13px; flex-wrap: wrap">
+<a href="#" style="color: #C7CCD1">Le marché</a>
+<a href="#" style="color: #C7CCD1">Idées</a>
+<a href="#" style="color: #C7CCD1">Revenus</a>
+<a href="#" style="color: #C7CCD1">Rapports</a>
+<a href="#" style="color: #C7CCD1">Apprendre</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 18px; font-size: 13px">
+<a href="#" aria-label="Chercher une valeur" style="color: #C7CCD1; display: inline-flex; min-height: 44px; align-items: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg></a>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border-radius: 999px; background: {{accent}}; color: #00141a; font-weight: 600">Créer un compte</a>
+</div>
+</div>
+</header>
+
+<section style="padding: clamp(56px, 7vw, 104px) 24px 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px">
+<p class="wb-h1" style="margin: 0; font-size: 15px; font-weight: 500; color: {{accent}}">Séance du 11 novembre 2026 · marché fermé</p>
+<h1 style="margin: 0; font-weight: 600; font-size: clamp(46px, 8.4vw, 132px); line-height: 0.96; letter-spacing: -0.055em; max-width: 12ch"><span class="wb-ligne"><span class="wb-mot m1">Toute</span></span> <span class="wb-ligne"><span class="wb-mot m2">la</span></span> <span class="wb-ligne"><span class="wb-mot m3">BRVM.</span></span> <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.03em; color: #B9C2C8"><span class="wb-ligne"><span class="wb-mot m4">Au</span></span> <span class="wb-ligne"><span class="wb-mot m5">chiffre</span></span> <span class="wb-ligne"><span class="wb-mot m6">près.</span></span></span></h1>
+<p class="wb-h2" style="margin: 0; font-size: clamp(18px, 1.7vw, 24px); line-height: 1.4; color: #A7AEB4; max-width: 36ch">48 valeurs, notées de A à F, avec la source de chaque chiffre.</p>
+<form data-hero-cta class="wb-h3" onSubmit="{{ envoi }}" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 560px; background: #101214; border: 1px solid #252c30; border-radius: 999px; padding: 6px; box-sizing: border-box">
+<label for="wb-mail-1" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)">Votre adresse e-mail</label>
+<input id="wb-mail-1" type="email" required placeholder="nom@exemple.com" style="flex: 1 1 200px; min-width: 0; min-height: 48px; padding: 0 18px; background: transparent; border: 0; outline-offset: 2px; color: #F5F5F7; font: inherit; font-size: 16px; border-radius: 999px">
+<button type="submit" style="appearance: none; border: 0; cursor: pointer; flex: 0 0 auto; min-height: 48px; padding: 0 24px; border-radius: 999px; background: {{accent}}; color: #00141a; font: inherit; font-size: 16px; font-weight: 600">Créer mon compte gratuit</button>
+</form>
+<sc-if value="{{ envoye }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 14px; color: #3FE18B">Vérifiez votre boîte de réception : un lien de confirmation vous attend.</p></sc-if>
+<p class="wb-h3" style="margin: 0; font-size: 13px; color: #8A9197">Sans carte bancaire · 210 membres inscrits · désabonnement en un clic</p>
+<div class="wb-h4" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; font-size: 14px; color: #A7AEB4">
+<span>Ou suivez la séance sans compte</span>
+<a href="https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #252c30; color: #F5F5F7"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3FE18B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5.2A8.5 8.5 0 1 1 21 11.5z"></path></svg>WhatsApp</a>
+<a href="https://t.me/westbourse7" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #252c30; color: #F5F5F7"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#56D7FD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"></path></svg>Telegram</a>
+</div>
+</section>
+
+<section class="wb-h4" style="padding: clamp(40px, 5vw, 72px) 24px clamp(64px, 7vw, 100px)">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px; color: #A7AEB4">BRVM Composite · {{etiquette}}</span>
+<span aria-live="off" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 11vw, 160px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; font-variant-numeric: tabular-nums">{{indice}}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(16px, 1.6vw, 22px)"><span style="{{ varStyle }}">{{varTxt}}</span></span>
+</div>
+<button type="button" onClick="{{ rejoue }}" style="appearance: none; background: transparent; border: 1px solid #2a3338; color: #F5F5F7; border-radius: 999px; min-height: 44px; padding: 0 18px; font: inherit; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>Rejouer les 60 séances</button>
+</div>
+<div data-wb-scrub style="position: relative; width: 100%; cursor: crosshair; touch-action: pan-y">
+<svg role="img" aria-label="BRVM Composite sur les 60 dernières séances, entre 512,81 et 555,48 points" viewBox="0 0 560 184" style="display: block; width: 100%; height: auto; overflow: visible">
+<line x1="0" y1="8" x2="560" y2="8" stroke="#1d2428" stroke-width="0.6" stroke-dasharray="2 4"></line>
+<line x1="0" y1="168" x2="560" y2="168" stroke="#1d2428" stroke-width="0.6" stroke-dasharray="2 4"></line>
+<path d="M0 157.1 L9.5 157.1 L19 106.7 L28.5 106.7 L38 126.4 L47.5 103.8 L56.9 103.3 L66.4 100.1 L75.9 76.4 L85.4 74.8 L94.9 43.1 L104.4 33.8 L113.9 17.2 L123.4 28.2 L132.9 21.9 L142.4 18.2 L151.9 8 L161.4 8 L170.8 17.4 L180.3 30.2 L189.8 35.8 L199.3 14.6 L208.8 48.5 L218.3 81.4 L227.8 155 L237.3 97.4 L246.8 63.1 L256.3 45.8 L265.8 35.9 L275.3 34.6 L284.7 32.2 L294.2 40.6 L303.7 69.2 L313.2 47.8 L322.7 36.4 L332.2 34.5 L341.7 40.3 L351.2 45.6 L360.7 51.4 L370.2 78.6 L379.7 74.8 L389.2 93.8 L398.6 105.4 L408.1 124.1 L417.6 140 L427.1 133.6 L436.6 106.8 L446.1 85.8 L455.6 95.7 L465.1 109.8 L474.6 110.1 L484.1 85.9 L493.6 121.2 L503.1 105.8 L512.5 109.2 L522 140.3 L531.5 138.3 L541 134 L550.5 168 L560 151.7 L560 184 L0 184 Z" fill="#06161b" stroke="none"></path>
+<path d="M0 157.1 L9.5 157.1 L19 106.7 L28.5 106.7 L38 126.4 L47.5 103.8 L56.9 103.3 L66.4 100.1 L75.9 76.4 L85.4 74.8 L94.9 43.1 L104.4 33.8 L113.9 17.2 L123.4 28.2 L132.9 21.9 L142.4 18.2 L151.9 8 L161.4 8 L170.8 17.4 L180.3 30.2 L189.8 35.8 L199.3 14.6 L208.8 48.5 L218.3 81.4 L227.8 155 L237.3 97.4 L246.8 63.1 L256.3 45.8 L265.8 35.9 L275.3 34.6 L284.7 32.2 L294.2 40.6 L303.7 69.2 L313.2 47.8 L322.7 36.4 L332.2 34.5 L341.7 40.3 L351.2 45.6 L360.7 51.4 L370.2 78.6 L379.7 74.8 L389.2 93.8 L398.6 105.4 L408.1 124.1 L417.6 140 L427.1 133.6 L436.6 106.8 L446.1 85.8 L455.6 95.7 L465.1 109.8 L474.6 110.1 L484.1 85.9 L493.6 121.2 L503.1 105.8 L512.5 109.2 L522 140.3 L531.5 138.3 L541 134 L550.5 168 L560 151.7" fill="none" stroke="#1c3a44" stroke-width="1.2" stroke-linejoin="round"></path>
+<path d="{{ dPart }}" fill="none" stroke="{{accent}}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; pointer-events: none"><span style="{{ guideStyle }}"></span><span style="{{ dotStyle }}"><span class="wb-onde"></span></span></span>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #8A9197">
+<span>plus bas 512,81</span><span>Passez sur la courbe pour remonter les séances</span><span>plus haut 555,48</span>
+</div>
+<div data-in style="display: flex; gap: 4px; height: 10px; margin-top: 22px">
+<span class="wb-bx" style="flex: 15; background: #3FE18B; border-radius: 5px"></span>
+<span class="wb-bx" style="flex: 10; background: #3a4146; border-radius: 5px"></span>
+<span class="wb-bx" style="flex: 23; background: #FF6B6B; border-radius: 5px"></span>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px">
+<span style="color: #3FE18B">15 hausses</span><span style="color: #A7AEB4">10 stables</span><span style="color: #FF8A8A">23 baisses</span>
+</div>
+</div>
+</section>
+
+<div aria-hidden="true" style="overflow: hidden; margin-bottom: clamp(64px, 7vw, 100px); padding: clamp(24px, 3.4vw, 48px) 0; border-top: 1px solid #14191c; border-bottom: 1px solid #14191c; font-weight: 600; font-size: clamp(44px, 7vw, 104px); letter-spacing: -0.05em; line-height: 1.1; white-space: nowrap; display: flex; flex-direction: column; gap: 6px">
+<div class="wb-piste"><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #F5F5F7">517,17<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #3FE18B">▲ +0,85 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">15 hausses<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; color: #56D7FD">la séance<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: #F5F5F7">23 baisses<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: transparent; -webkit-text-stroke: 1.5px #3a464d">1,22 Md FCFA<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #F5F5F7">517,17<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #3FE18B">▲ +0,85 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">15 hausses<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; color: #56D7FD">la séance<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: #F5F5F7">23 baisses<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: transparent; -webkit-text-stroke: 1.5px #3a464d">1,22 Md FCFA<span style="color: #56D7FD; font-size: .4em">●</span></span></div>
+<div class="wb-piste wb-piste2"><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #3FE18B">CABC +7,18 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">48 valeurs<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; color: #56D7FD">au chiffre près<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #FF8A8A">PRSC −6,97 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: #F5F5F7">858 599 titres<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">5 309 transactions<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #3FE18B">CABC +7,18 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">48 valeurs<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; color: #56D7FD">au chiffre près<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; font-family: 'Geist Mono', ui-monospace, monospace; color: #FF8A8A">PRSC −6,97 %<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: #F5F5F7">858 599 titres<span style="color: #56D7FD; font-size: .4em">●</span></span><span style="display: inline-flex; align-items: center; gap: .35em; padding-right: .7em; color: transparent; -webkit-text-stroke: 1.5px #3a464d">5 309 transactions<span style="color: #56D7FD; font-size: .4em">●</span></span></div>
+</div>
+
+<section style="padding: 0 24px clamp(80px, 9vw, 140px)">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+<div data-rv style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 5vw, 72px); letter-spacing: -0.045em; line-height: 1.02">48 valeurs. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">Une séance.</span></h2>
+<p aria-live="polite" style="margin: 0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15px; color: #F5F5F7; min-height: 22px">{{lecture}}</p>
+</div>
+<div data-in class="wb-mos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px">
+<sc-for list="{{ tuiles }}" as="t" hint-placeholder-count="48">
+<button type="button" class="wb-tile" style="{{ t.style }}" data-i="{{ t.i }}" onClick="{{ t.over }}" aria-label="{{ t.aria }}">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.02em">{{ t.code }}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500">{{ t.pct }}</span>
+</button>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 13px; color: #8A9197">Chaque case est une action cotée, de la plus forte hausse à la plus forte baisse. Source BRVM · relevé le 11/11 à 17:04 UTC</p>
+</div>
+</section>
+
+<section style="background: #000000; padding: 0 24px clamp(80px, 9vw, 140px)">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+<div data-rv style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 15px; font-weight: 500; color: {{accent}}">Chaque soir de séance</p>
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 5vw, 72px); letter-spacing: -0.045em; line-height: 1.02">La séance, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">en film.</span></h2>
+<p style="margin: 0; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.45; color: #A7AEB4; max-width: 52ch">Vingt secondes pour tout voir. La version complète dure 101 secondes et part chaque soir sur la Chaîne.</p>
+</div>
+<div data-in class="wb-film" style="position: relative; container-type: inline-size; aspect-ratio: 16 / 9; border-radius: clamp(16px, 2.4vw, 28px); overflow: hidden; background: #04090b; border: 1px solid #1a2327">
+<div class="{{ filmCls }}" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0">
+
+<div class="wb-sc f-s1" aria-hidden="true">
+<svg viewBox="0 0 130 105" style="width: 11cqw; height: auto"><rect x="2" y="2" width="126" height="101" rx="22" fill="#0c1d2e"></rect><path class="f-lw" pathLength="1" d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><path class="f-lf" pathLength="1" d="M76 82 L100 33" fill="none" stroke="#16b6a4" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><polygon class="f-lp" points="110,12 117,40 86,28" fill="#16b6a4"></polygon></svg>
+<span class="f-e1" style="font-size: 1.5cqw; letter-spacing: 0.3em; color: #8A9AA0">WESTBOURSE · LA SÉANCE</span>
+<span style="font-size: 9cqw; font-weight: 600; letter-spacing: -0.05em; line-height: 1; display: flex; gap: 2cqw"><span class="f-t1">11</span><span class="f-t2" style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em">novembre</span><span class="f-t3">2026</span></span>
+</div>
+
+<div class="wb-sc f-s2" aria-hidden="true" style="justify-content: flex-start; padding-top: 5cqw">
+<span class="f-a1" style="font-size: 2cqw; color: #A7AEB4">BRVM Composite</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15cqw; font-weight: 600; letter-spacing: -0.06em; line-height: 1; height: 1em; overflow: hidden; display: flex">
+<span class="wb-col"><span class="wb-strip f-d1"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span><span class="wb-col"><span class="wb-strip f-d2"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span><span class="wb-col"><span class="wb-strip f-d3"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span><span class="f-a1">,</span><span class="wb-col"><span class="wb-strip f-d4"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span><span class="wb-col"><span class="wb-strip f-d5"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>
+</span>
+<span class="f-a2" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 3cqw; color: #3FE18B">▲ +0,85 %</span>
+<svg viewBox="0 0 560 184" preserveAspectRatio="none" style="position: absolute; left: 0; right: 0; bottom: 1cqw; width: 100%; height: 15cqw; overflow: visible"><path class="f-c1" pathLength="1" d="M0 157.1 L9.5 157.1 L19 106.7 L28.5 106.7 L38 126.4 L47.5 103.8 L56.9 103.3 L66.4 100.1 L75.9 76.4 L85.4 74.8 L94.9 43.1 L104.4 33.8 L113.9 17.2 L123.4 28.2 L132.9 21.9 L142.4 18.2 L151.9 8 L161.4 8 L170.8 17.4 L180.3 30.2 L189.8 35.8 L199.3 14.6 L208.8 48.5 L218.3 81.4 L227.8 155 L237.3 97.4 L246.8 63.1 L256.3 45.8 L265.8 35.9 L275.3 34.6 L284.7 32.2 L294.2 40.6 L303.7 69.2 L313.2 47.8 L322.7 36.4 L332.2 34.5 L341.7 40.3 L351.2 45.6 L360.7 51.4 L370.2 78.6 L379.7 74.8 L389.2 93.8 L398.6 105.4 L408.1 124.1 L417.6 140 L427.1 133.6 L436.6 106.8 L446.1 85.8 L455.6 95.7 L465.1 109.8 L474.6 110.1 L484.1 85.9 L493.6 121.2 L503.1 105.8 L512.5 109.2 L522 140.3 L531.5 138.3 L541 134 L550.5 168 L560 151.7" fill="none" stroke="#56D7FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path></svg>
+</div>
+
+<div class="wb-sc f-s3" aria-hidden="true" style="align-items: stretch; padding: 0 9cqw; gap: 1.8cqw">
+<span class="f-b0" style="font-size: 3.4cqw; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 1cqw">Les plus fortes <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em">variations</span></span>
+<span class="f-b1" style="display: grid; grid-template-columns: 11cqw 1fr 15cqw; align-items: center; gap: 1.6cqw; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 2.6cqw"><span>CABC</span><span><span class="f-x1" style="display: block; height: 3.4cqw; width: 100%; background: #3FE18B; border-radius: 0.6cqw; transform-origin: left center"></span></span><span style="text-align: right; color: #3FE18B">+7,18 %</span></span>
+<span class="f-b2" style="display: grid; grid-template-columns: 11cqw 1fr 15cqw; align-items: center; gap: 1.6cqw; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 2.6cqw"><span>SNTS</span><span><span class="f-x2" style="display: block; height: 3.4cqw; width: 66%; background: #3FE18B; border-radius: 0.6cqw; transform-origin: left center"></span></span><span style="text-align: right; color: #3FE18B">+4,75 %</span></span>
+<span class="f-b3" style="display: grid; grid-template-columns: 11cqw 1fr 15cqw; align-items: center; gap: 1.6cqw; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 2.6cqw"><span>UNXC</span><span><span class="f-x3" style="display: block; height: 3.4cqw; width: 49%; background: #FF6B6B; border-radius: 0.6cqw; transform-origin: left center"></span></span><span style="text-align: right; color: #FF8A8A">−3,52 %</span></span>
+<span class="f-b4" style="display: grid; grid-template-columns: 11cqw 1fr 15cqw; align-items: center; gap: 1.6cqw; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 2.6cqw"><span>PRSC</span><span><span class="f-x4" style="display: block; height: 3.4cqw; width: 97%; background: #FF6B6B; border-radius: 0.6cqw; transform-origin: left center"></span></span><span style="text-align: right; color: #FF8A8A">−6,97 %</span></span>
+</div>
+
+<div class="wb-sc f-s4" aria-hidden="true" style="gap: 3cqw; padding: 0 9cqw; align-items: stretch">
+<span style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: center">
+<span class="f-n1" style="display: flex; flex-direction: column; gap: 0.6cqw"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13cqw; font-weight: 600; letter-spacing: -0.06em; line-height: 1; color: #3FE18B">15</span><span style="font-size: 2cqw; color: #A7AEB4">hausses</span></span>
+<span class="f-n2" style="display: flex; flex-direction: column; gap: 0.6cqw"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13cqw; font-weight: 600; letter-spacing: -0.06em; line-height: 1; color: #C7CCD1">10</span><span style="font-size: 2cqw; color: #A7AEB4">stables</span></span>
+<span class="f-n3" style="display: flex; flex-direction: column; gap: 0.6cqw"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13cqw; font-weight: 600; letter-spacing: -0.06em; line-height: 1; color: #FF8A8A">23</span><span style="font-size: 2cqw; color: #A7AEB4">baisses</span></span>
+</span>
+<span style="display: flex; gap: 0.5cqw; height: 1.4cqw"><span class="f-g1" style="flex: 15; background: #3FE18B; border-radius: 0.7cqw; transform-origin: left center"></span><span class="f-g2" style="flex: 10; background: #3a4146; border-radius: 0.7cqw; transform-origin: left center"></span><span class="f-g3" style="flex: 23; background: #FF6B6B; border-radius: 0.7cqw; transform-origin: left center"></span></span>
+<span class="f-n4" style="text-align: center; font-size: 2.4cqw; color: #C7CCD1"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 600; color: #F5F5F7">1,22 Md FCFA</span> échangés · 5 309 transactions</span>
+</div>
+
+<div class="wb-sc f-s5" aria-hidden="true" style="gap: 3cqw">
+<span style="font-size: 7.4cqw; font-weight: 600; letter-spacing: -0.05em; line-height: 1; display: flex; gap: 1.6cqw; flex-wrap: wrap; justify-content: center"><span class="f-r1">Recevez-la</span><span class="f-r2" style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em">chaque</span><span class="f-r3" style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em">soir.</span></span>
+<span style="display: flex; gap: 1.4cqw; font-size: 2cqw; font-weight: 500"><span class="f-p1" style="border: 1px solid #2a3338; border-radius: 99cqw; padding: 1cqw 2.2cqw">WhatsApp</span><span class="f-p2" style="border: 1px solid #2a3338; border-radius: 99cqw; padding: 1cqw 2.2cqw">Telegram</span><span class="f-p3" style="border: 1px solid #2a3338; border-radius: 99cqw; padding: 1cqw 2.2cqw">E-mail</span></span>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 1.6cqw 2.2cqw; display: flex; align-items: center; gap: 1.6cqw">
+<button type="button" onClick="{{ pauseFilm }}" style="appearance: none; cursor: pointer; background: #12181b; border: 1px solid #252c30; color: #F5F5F7; border-radius: 999px; min-height: 44px; min-width: 88px; padding: 0 16px; font: inherit; font-size: 13px; font-weight: 500">{{filmBtn}}</button>
+<span style="flex: 1; height: 4px; background: #1a2327; border-radius: 2px; overflow: hidden"><span class="f-prog" style="display: block; height: 100%; background: {{accent}}; transform-origin: left center"></span></span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #8A9197">0:20</span>
+</div>
+
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #8A9197">Film d'illustration monté à partir des chiffres de la séance du 11/11/2026. Source BRVM.</p>
+<div data-rv style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: #101214; border-radius: 24px; padding: clamp(20px, 3vw, 32px)">
+<span style="font-size: clamp(20px, 2.2vw, 30px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; max-width: 22ch">Le film de la séance, chaque soir, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">sans compte.</span></span>
+<span style="display: flex; gap: 10px; flex-wrap: wrap">
+<a href="https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: #3FE18B; color: #03140b; font-size: 16px; font-weight: 600">Suivre sur WhatsApp</a>
+<a href="https://t.me/westbourse7" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: {{accent}}; color: #00141a; font-size: 16px; font-weight: 600">Suivre sur Telegram</a>
+</span>
+</div>
+</div>
+</section>
+
+<section style="background: #F5F5F7; color: #1D1D1F; padding: clamp(72px, 8vw, 120px) 0 clamp(72px, 8vw, 110px)">
+<div data-rv style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 4.6vw, 64px); letter-spacing: -0.04em; line-height: 1.02">Découvrir Westbourse.</h2>
+<a href="#" style="font-size: 17px; color: #0b6f8a; display: inline-flex; min-height: 44px; align-items: center">Toutes les fonctions ›</a>
+</div>
+<div class="wb-rail" style="margin-top: 40px; display: flex; gap: 20px; overflow-x: auto; padding: 12px max(24px, calc((100% - 1152px) / 2)) 12px; scroll-snap-type: x mandatory">
+
+<a href="#" data-rv class="wb-carte" style="flex: 0 0 300px; height: 520px; border-radius: 28px; background: #000000; color: #F5F5F7; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start">
+<span style="font-size: 13px; font-weight: 600; color: #A7AEB4">Notes A–F</span>
+<span style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">Une lettre par action.</span>
+<span style="margin-top: auto; height: 170px; overflow: hidden; font-size: 170px; font-weight: 700; letter-spacing: -0.06em; line-height: 170px; color: {{accent}}">
+<span class="wb-rin" style="display: flex; flex-direction: column"><span style="height: 170px; color: #3b4a50">F</span><span style="height: 170px; color: #3b4a50">D</span><span style="height: 170px; color: #3b4a50">C</span><span style="height: 170px; color: #3b4a50">A</span><span style="height: 170px; color: #3b4a50">E</span><span style="height: 170px">B+</span></span>
+</span>
+<span style="font-size: 13px; color: #A7AEB4">SIVC · Air Liquide CI, meilleure note du jour.</span>
+</a>
+
+<a href="#" data-rv class="wb-carte d1" style="flex: 0 0 300px; height: 520px; border-radius: 28px; background: #FFFFFF; color: #1D1D1F; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start">
+<span style="font-size: 13px; font-weight: 600; color: #6E6E73">Dossier valeur</span>
+<span style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">Neuf feuilles A4 par société.</span>
+<span style="margin-top: auto; position: relative; height: 270px; display: block">
+<span class="wb-f1" style="position: absolute; left: 50%; bottom: 0; margin-left: -80px; width: 160px; height: 226px; background: #FFFFFF; border: 1px solid #D2D2D7; border-radius: 6px; padding: 14px; box-sizing: border-box; display: flex; align-items: flex-end; gap: 6px"><span style="flex: 1; height: 55%; background: #D2D2D7; border-radius: 2px"></span><span style="flex: 1; height: 68%; background: #D2D2D7; border-radius: 2px"></span><span style="flex: 1; height: 80%; background: #D2D2D7; border-radius: 2px"></span><span style="flex: 1; height: 100%; background: #0b6f8a; border-radius: 2px"></span></span>
+<span class="wb-f3" style="position: absolute; left: 50%; bottom: 0; margin-left: -80px; width: 160px; height: 226px; background: #FFFFFF; border: 1px solid #D2D2D7; border-radius: 6px; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 9px; color: #6E6E73">PER</span><span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 600">10,13 ×</span><span style="margin-top: auto; height: 4px; width: 90%; background: #E8E8ED"></span><span style="height: 4px; width: 60%; background: #E8E8ED"></span></span>
+<span class="wb-f2" style="position: absolute; left: 50%; bottom: 0; margin-left: -80px; width: 160px; height: 226px; background: #102B35; color: #F5F5F7; border-radius: 6px; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 7px; letter-spacing: 0.16em; color: #9FB6BD">WESTBOURSE · DOSSIER VALEUR</span><span style="font-size: 24px; font-weight: 700; letter-spacing: -0.03em; margin-top: 18px">Sonatel</span><span style="font-size: 8px; color: #9FB6BD">SNTS · Télécommunications · Sénégal</span><span style="margin-top: auto; font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 600">4 190 <span style="font-size: 9px; font-weight: 400">FCFA</span></span></span>
+</span>
+</a>
+
+<a href="#" data-rv class="wb-carte d2" style="flex: 0 0 300px; height: 520px; border-radius: 28px; background: #102B35; color: #F5F5F7; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start">
+<span style="font-size: 13px; font-weight: 600; color: #9FB6BD">Événements</span>
+<span style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">La réaction du cours, mesurée.</span>
+<span data-in style="margin-top: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; height: 150px; align-items: start; border-top: 1px solid #2c4a55">
+<span class="wb-by" style="height: 36%; background: #FF6B6B; border-radius: 0 0 6px 6px; transform-origin: center top"></span>
+<span class="wb-by" style="height: 100%; background: #FF6B6B; border-radius: 0 0 6px 6px; transform-origin: center top"></span>
+<span class="wb-by" style="height: 72%; background: #FF6B6B; border-radius: 0 0 6px 6px; transform-origin: center top"></span>
+<span class="wb-by" style="height: 66%; background: #FF6B6B; border-radius: 0 0 6px 6px; transform-origin: center top"></span>
+</span>
+<span style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #C9D6DA; text-align: center"><span>J+1<br>−7,50 %</span><span>J+3<br>−20,80 %</span><span>J+5<br>−14,90 %</span><span>J+10<br>−13,75 %</span></span>
+<span style="font-size: 13px; line-height: 1.45; color: #9FB6BD">BICB après ses comptes semestriels du 21/09/2026.</span>
+</a>
+
+<a href="#" data-rv class="wb-carte d3" style="flex: 0 0 300px; height: 520px; border-radius: 28px; background: #FFFFFF; color: #1D1D1F; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start">
+<span style="font-size: 13px; font-weight: 600; color: #6E6E73">Dividendes</span>
+<span style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">Quatre hausses en cinq exercices.</span>
+<span data-in style="margin-top: auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; height: 190px; align-items: end">
+<span class="wb-by" style="height: 80%; background: #D2D2D7; border-radius: 6px 6px 0 0"></span>
+<span class="wb-by" style="height: 86%; background: #D2D2D7; border-radius: 6px 6px 0 0"></span>
+<span class="wb-by" style="height: 91%; background: #D2D2D7; border-radius: 6px 6px 0 0"></span>
+<span class="wb-by" style="height: 95%; background: #D2D2D7; border-radius: 6px 6px 0 0"></span>
+<span class="wb-by" style="height: 100%; background: #0b6f8a; border-radius: 6px 6px 0 0"></span>
+</span>
+<span style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #6E6E73; text-align: center"><span>2021<br><b style="color: #1D1D1F">140</b></span><span>2022<br><b style="color: #1D1D1F">150</b></span><span>2023<br><b style="color: #1D1D1F">158</b></span><span>2024<br><b style="color: #1D1D1F">166</b></span><span>2025<br><b style="color: #1D1D1F">174</b></span></span>
+<span style="font-size: 13px; color: #6E6E73">Sonatel, dividende net par action, en FCFA.</span>
+</a>
+
+<a href="#" data-rv class="wb-carte d4" style="flex: 0 0 300px; height: 520px; border-radius: 28px; background: #000000; color: #F5F5F7; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start">
+<span style="font-size: 13px; font-weight: 600; color: #A7AEB4">Comparateur SGI</span>
+<span style="font-size: 27px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">Cinq questions, la bonne SGI.</span>
+<span style="margin-top: auto; font-size: 150px; font-weight: 700; letter-spacing: -0.06em; line-height: 0.85">40</span>
+<span style="font-size: 13px; color: #A7AEB4">SGI agréées, classées sur 37 grilles tarifaires.</span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: #C7CCD1"><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Sénégal</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Côte d'Ivoire</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Bénin</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Mali</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Burkina Faso</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Niger</span><span style="border: 1px solid #2a3338; border-radius: 999px; padding: 4px 9px">Togo</span></span>
+</a>
+
+</div>
+</section>
+
+<section data-wb-x style="background: #000000; padding: clamp(80px, 9vw, 140px) 24px clamp(40px, 5vw, 64px)">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px">
+<div data-rv style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 15px; font-weight: 500; color: {{accent}}">Tout Westbourse</p>
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 5vw, 72px); letter-spacing: -0.045em; line-height: 1.02">Quatorze outils. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">Un seul compte.</span></h2>
+<p style="margin: 0; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.45; color: #A7AEB4; max-width: 52ch">Touchez un outil pour le voir tourner sur les chiffres de la séance.</p>
+</div>
+<div data-rv style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ onglets }}" as="o" hint-placeholder-count="14"><button type="button" class="{{ o.cls }}" onClick="{{ o.pick }}" aria-pressed="{{ o.on }}">{{ o.lab }}<sc-if value="{{ o.pro }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; opacity: .7">PRO</span></sc-if><sc-if value="{{ o.auto }}" hint-placeholder-val="{{ false }}"><span class="x-prog" style="position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: #0b6f8a"></span></sc-if></button></sc-for>
+</div>
+<div data-rv style="background: #101214; border: 1px solid #1f262a; border-radius: 28px; padding: clamp(24px, 4vw, 52px); min-height: 460px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center">
+<sc-if value="{{ f0 }}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Compte gratuit</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Screener <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">multi-critères.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Filtrez les actions par RSI, volume, score, secteur et dividende. Essayez les trois filtres ci-contre.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Ouvrir le screener ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{ scrF }}" as="q" hint-placeholder-count="3"><button type="button" class="{{ q.cls }}" onClick="{{ q.tog }}" aria-pressed="{{ q.on }}">{{ q.lab }}</button></sc-for></div>
+<span aria-live="polite" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{accent}}">{{scrCount}}</span>
+<div style="display: flex; flex-direction: column; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">
+<span style="display: grid; grid-template-columns: 1.1fr 1.3fr .8fr 1fr .7fr; gap: 8px; padding: 8px 0; color: #8A9197; font-size: 11px"><span>Code</span><span style="text-align: right">Cours</span><span style="text-align: right">RSI</span><span style="text-align: right">Div.</span><span style="text-align: right">Liq.</span></span>
+<sc-for list="{{ scrRows }}" as="r" hint-placeholder-count="6"><span style="display: grid; grid-template-columns: 1.1fr 1.3fr .8fr 1fr .7fr; gap: 8px; padding: 9px 0; border-top: 1px solid #1f262a"><span style="font-weight: 600">{{ r.code }}</span><span style="text-align: right">{{ r.prix }}</span><span style="text-align: right">{{ r.rsi }}</span><span style="text-align: right">{{ r.div }}</span><span style="text-align: right">{{ r.liq }}</span></span></sc-for>
+</div>
+<span style="font-size: 12px; line-height: 1.5; color: #8A9197">Extrait réel : les 19 premières valeurs par score, séance du 11/11/2026.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f1 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Compte gratuit</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Scanner <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">technique.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Combinez RSI, MACD, moyennes mobiles, volume et signal, calculés sur les 200 dernières séances.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Lancer un scan ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px"><div style="display: flex; flex-wrap: wrap; gap: 8px"><span class="x-pop x1" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">RSI 30 – 50</span><span class="x-pop x2" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Prix &gt; MA20 et MA50</span><span class="x-pop x3" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">MACD &gt; Signal</span><span class="x-pop x4" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Volume &gt; 2× moyenne 20 j</span><span class="x-pop x5" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Hausse &gt; 2 %</span></div><div class="x-in x6" style="border-top: 1px solid #1f262a; padding-top: 16px; display: flex; gap: 28px; flex-wrap: wrap; font-family: 'Geist Mono', ui-monospace, monospace"><span style="display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 600">49,2</span><span style="font-family: Geist, sans-serif; font-size: 12px; color: #8A9197">RSI 14 · SNTS</span></span><span style="display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 600">−39,26</span><span style="font-family: Geist, sans-serif; font-size: 12px; color: #8A9197">MACD · SNTS</span></span><span style="display: flex; flex-direction: column"><span style="font-size: 30px; font-weight: 600">200</span><span style="font-family: Geist, sans-serif; font-size: 12px; color: #8A9197">séances d'historique</span></span></div></div>
+</div>
+</sc-if>
+<sc-if value="{{ f2 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Compte gratuit</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Signaux, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">facteur par facteur.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Une lecture technique recalculée à chaque séance, avec le détail des facteurs qui la composent.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Voir les signaux ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px"><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; text-align: center; font-family: 'Geist Mono', ui-monospace, monospace"><span class="x-pop x1" style="display: flex; flex-direction: column"><span style="font-size: clamp(44px, 6vw, 72px); font-weight: 600; letter-spacing: -0.05em; color: #3FE18B">0</span><span style="font-family: Geist, sans-serif; font-size: 13px; color: #A7AEB4">haussier</span></span><span class="x-pop x2" style="display: flex; flex-direction: column"><span style="font-size: clamp(44px, 6vw, 72px); font-weight: 600; letter-spacing: -0.05em">47</span><span style="font-family: Geist, sans-serif; font-size: 13px; color: #A7AEB4">neutres</span></span><span class="x-pop x3" style="display: flex; flex-direction: column"><span style="font-size: clamp(44px, 6vw, 72px); font-weight: 600; letter-spacing: -0.05em; color: #FF8A8A">1</span><span style="font-family: Geist, sans-serif; font-size: 13px; color: #A7AEB4">baissier</span></span></div><span style="display: flex; gap: 3px; height: 10px"><span class="x-w x3" style="flex: 47; background: #3a4146; border-radius: 5px"></span><span class="x-w x5" style="flex: 1; min-width: 8px; background: #FF6B6B; border-radius: 5px"></span></span><span class="x-in x5" style="font-size: 15px; line-height: 1.45; color: #C7CCD1">Aucun titre ne réunit les conditions d'un signal haussier sur cette séance. Le moteur s'abstient plutôt que d'en fabriquer un.</span><span style="font-size: 12px; line-height: 1.5; color: #8A9197">48 titres analysés · séance du 11/11/2026 · pas un conseil en investissement.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f3 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Accès libre</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Saisonnalité, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">mois par mois.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">L'habitude d'un titre selon le mois, et sa fiabilité mesurée.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Explorer les saisons ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px"><span class="x-pop x1" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Jan</span><span class="x-pop x2" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Fév</span><span class="x-pop x3" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Mar</span><span class="x-pop x4" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Avr</span><span class="x-pop x5" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Mai</span><span class="x-pop x6" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Juin</span><span class="x-pop x7" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Juil</span><span class="x-pop x8" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Août</span><span class="x-pop x9" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Sep</span><span class="x-pop x10" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Oct</span><span class="x-pop x11" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #12343f; font-size: 13px; color: #56D7FD">Nov</span><span class="x-pop x12" style="display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: #1a1f23; font-size: 13px; color: #A7AEB4">Déc</span></div><span class="x-in x8" style="font-size: 15px; line-height: 1.45; color: #C7CCD1">Pour chaque mois : la variation habituelle du titre, et la part des années où elle s'est vérifiée.</span><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Grille de lecture, sans valeur affichée ici. Une saison est une habitude du passé, pas une prévision.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f4 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Accès libre</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Combined Alpha, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">un score sur 100.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Un seul score pour comparer toutes les actions : valorisation, momentum, qualité, solidité, dividende.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Voir le classement ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: {{accent}}">72<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> / 100</span></span><span style="font-size: 14px; color: #A7AEB4">SNTS · Sonatel, premier score des 44 titres notés</span></span><div style="display: flex; flex-direction: column; gap: 9px"><span style="display: grid; grid-template-columns: 110px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>Valorisation</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x1" style="display: block; height: 100%; width: 69%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">69</span></span><span style="display: grid; grid-template-columns: 110px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>Momentum</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x2" style="display: block; height: 100%; width: 89%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">89</span></span><span style="display: grid; grid-template-columns: 110px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>Qualité</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x3" style="display: block; height: 100%; width: 70%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">70</span></span><span style="display: grid; grid-template-columns: 110px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>Solidité</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x4" style="display: block; height: 100%; width: 62%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">62</span></span><span style="display: grid; grid-template-columns: 110px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>Dividende</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x5" style="display: block; height: 100%; width: 55%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">55</span></span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Cinq piliers, puis une pénalité de risque. Mise à jour du 5 oct. 2026.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f5 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Trouver une idée<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Compte gratuit</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Backtest, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">rejouer avant d'agir.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Rejouez une règle sur l'historique d'un titre, sur un mois, trois mois, six mois ou un an.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Lancer un backtest ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="x-pop x1" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">1 mois</span><span class="x-pop x2" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">3 mois</span><span class="x-pop x3" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">6 mois</span><span class="x-pop x4" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">1 an</span></div><svg role="img" aria-label="Courbe rejouée sur 60 séances" viewBox="-4 0 568 184" style="width: 100%; height: auto; overflow: visible"><path class="x-tr" pathLength="1" d="M0 157.1 L9.5 157.1 L19 106.7 L28.5 106.7 L38 126.4 L47.5 103.8 L56.9 103.3 L66.4 100.1 L75.9 76.4 L85.4 74.8 L94.9 43.1 L104.4 33.8 L113.9 17.2 L123.4 28.2 L132.9 21.9 L142.4 18.2 L151.9 8 L161.4 8 L170.8 17.4 L180.3 30.2 L189.8 35.8 L199.3 14.6 L208.8 48.5 L218.3 81.4 L227.8 155 L237.3 97.4 L246.8 63.1 L256.3 45.8 L265.8 35.9 L275.3 34.6 L284.7 32.2 L294.2 40.6 L303.7 69.2 L313.2 47.8 L322.7 36.4 L332.2 34.5 L341.7 40.3 L351.2 45.6 L360.7 51.4 L370.2 78.6 L379.7 74.8 L389.2 93.8 L398.6 105.4 L408.1 124.1 L417.6 140 L427.1 133.6 L436.6 106.8 L446.1 85.8 L455.6 95.7 L465.1 109.8 L474.6 110.1 L484.1 85.9 L493.6 121.2 L503.1 105.8 L512.5 109.2 L522 140.3 L531.5 138.3 L541 134 L550.5 168 L560 151.7" fill="none" stroke="{{accent}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Illustration : BRVM Composite sur 60 séances. Simulation sur performances passées, sans garantie pour l'avenir.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f6 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Le marché<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Compte gratuit</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Liquidité <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">du marché.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Peut-on vraiment traiter ce titre ? Un score de 0 à 100 et une classe de A à D pour chaque valeur.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Voir les scores ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: {{accent}}">90<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> / 100</span></span><span style="font-size: 14px; color: #A7AEB4">SNTS · classe A, négociable sans friction</span></span><div style="display: flex; flex-direction: column; gap: 9px"><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>SNTS</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x1" style="display: block; height: 100%; width: 90%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">90 · A</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>SGBC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x2" style="display: block; height: 100%; width: 89%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">89 · A</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>BBGC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x3" style="display: block; height: 100%; width: 81%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">81 · A</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>BOAC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x4" style="display: block; height: 100%; width: 81%; background: #56D7FD; border-radius: 5px"></span></span><span style="text-align: right">81 · A</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>NSBC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x5" style="display: block; height: 100%; width: 71%; background: #8A9AA0; border-radius: 5px"></span></span><span style="text-align: right">71 · B</span></span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Scores au 11 nov. 2026 : présence, activité, impact prix, écart estimé, flux de séance.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f7 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Mes revenus<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Accès libre</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Dividendes, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">dates et rendements.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Prochains détachements, rendements du dernier exercice et historique des distributions.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Voir les dividendes ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: #F5F5F7">36<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> sociétés</span></span><span style="font-size: 14px; color: #A7AEB4">ont distribué un dividende au titre de 2025</span></span><div style="display: flex; flex-direction: column; gap: 9px"><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>STBC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x1" style="display: block; height: 100%; width: 100%; background: #3FE18B; border-radius: 5px"></span></span><span style="text-align: right">8,05 %</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>NEIC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x2" style="display: block; height: 100%; width: 89%; background: #3FE18B; border-radius: 5px"></span></span><span style="text-align: right">7,14 %</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>SOGC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x3" style="display: block; height: 100%; width: 81%; background: #3FE18B; border-radius: 5px"></span></span><span style="text-align: right">6,56 %</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>BOAB</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x4" style="display: block; height: 100%; width: 77%; background: #3FE18B; border-radius: 5px"></span></span><span style="text-align: right">6,22 %</span></span><span style="display: grid; grid-template-columns: 64px 1fr 78px; gap: 12px; align-items: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px"><span>ABJC</span><span style="height: 10px; border-radius: 5px; background: #1a1f23; overflow: hidden"><span class="x-w x5" style="display: block; height: 100%; width: 76%; background: #3FE18B; border-radius: 5px"></span></span><span style="text-align: right">6,11 %</span></span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Dividende 2025 rapporté au cours de clôture du 11 nov. 2026.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f8 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Mes revenus<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Accès libre</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Fiscalité, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">le net par pays.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">La retenue à la source dépend du pays de l'émetteur. Choisissez-en un pour voir le net.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Calculer mon net ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><div style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{ pays }}" as="c" hint-placeholder-count="6"><button type="button" class="{{ c.cls }}" onClick="{{ c.pick }}" aria-pressed="{{ c.on }}">{{ c.lab }}</button></sc-for></div><div style="display: flex; flex-direction: column; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px"><span style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #1f262a"><span style="font-family: Geist, sans-serif; color: #A7AEB4">Dividende brut</span><span>100 000 FCFA</span></span><span style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #1f262a"><span style="font-family: Geist, sans-serif; color: #A7AEB4">Retenue à la source ({{fiscTaux}})</span><span style="color: #FF8A8A">{{fiscRet}}</span></span><span style="display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; border-top: 1px solid #1f262a"><span style="font-family: Geist, sans-serif; color: #A7AEB4">Net perçu</span><span aria-live="polite" style="font-size: clamp(30px, 4vw, 44px); font-weight: 600; letter-spacing: -0.04em; color: {{accent}}">{{fiscNet}}</span></span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Taux des dividendes de sociétés cotées, personnes physiques, vérifiés le 20 oct. 2026. Guinée-Bissau et Niger : non confirmés.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f9 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Mes revenus<span style="background: #1a1f23; color: #C7CCD1; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Accès libre</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Et si vous aviez <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">investi ?</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Ce qu'un placement passé dans une société cotée aurait rapporté, dividendes inclus.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Ouvrir le simulateur ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: #3FE18B">+22,84<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> %</span></span><span style="font-size: 14px; color: #A7AEB4">BRVM Composite sur 118 séances</span></span><span class="x-in x3" style="font-size: 15px; line-height: 1.45; color: #C7CCD1">Choisissez une société, un montant et une date : le simulateur rejoue l'historique réel, dividendes inclus.</span><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="x-pop x4" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">1 000 000 FCFA</span><span class="x-pop x5" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">3 ans</span><span class="x-pop x6" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Dividendes inclus</span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Les performances passées ne préjugent pas des performances futures.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f10 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">S'entraîner<span style="background: #12343f; color: #56D7FD; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Premium</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Portefeuille <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">virtuel.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Entraînez-vous avec un capital fictif, aux cours réels de la séance, avant d'engager le vôtre.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Créer mon portefeuille virtuel ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: #F5F5F7">0<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> FCFA</span></span><span style="font-size: 14px; color: #A7AEB4">réellement engagés : le capital est fictif, les cours sont réels</span></span><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="x-pop x2" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Capital virtuel</span><span class="x-pop x3" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Cours de séance</span><span class="x-pop x4" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">Classement sous alias</span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">À but pédagogique. Aucune performance réelle.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f11 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Pro<span style="background: #12343f; color: #56D7FD; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Premium</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Valorisation, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">la juste valeur estimée.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Juste valeur estimée face au cours, par multiples sectoriels et dividendes actualisés.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Voir la valorisation ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px"><span style="display: flex; flex-direction: column; gap: 4px"><span class="x-pop" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(64px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.95; color: #F5F5F7">43<span style="font-size: .28em; letter-spacing: 0; font-weight: 500; color: #A7AEB4"> / 48</span></span><span style="font-size: 14px; color: #A7AEB4">sociétés dont la juste valeur est estimable</span></span><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="x-pop x1" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">SNTS</span><span class="x-pop x2" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">P/E 10,1</span><span class="x-pop x3" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">P/B 2,99</span><span class="x-pop x4" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">ROE 29,6 %</span><span class="x-pop x5" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2a3338; font-size: 14px; color: #F5F5F7">F-Score 7/9</span><span class="x-pop x6" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; background: {{accent}}; color: #00141a; font-size: 14px; font-weight: 600">Juste prix</span></div><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Multiples sectoriels et modèle d'actualisation des dividendes. Estimation, pas un objectif de cours.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f12 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Pro<span style="background: #12343f; color: #56D7FD; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Premium</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Diagnostic <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">d'une société.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Une analyse rédigée à partir des états financiers publiés, vérifiée avant publication.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Lire un diagnostic ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px"><span class="x-in x1" style="display: flex; gap: 12px; align-items: center; font-size: 16px"><span style="display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #12343f; color: #56D7FD; flex-shrink: 0"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>États financiers publiés, lus à la source</span><span class="x-in x3" style="display: flex; gap: 12px; align-items: center; font-size: 16px"><span style="display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #12343f; color: #56D7FD; flex-shrink: 0"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>Ratios calculés avant toute rédaction</span><span class="x-in x5" style="display: flex; gap: 12px; align-items: center; font-size: 16px"><span style="display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #12343f; color: #56D7FD; flex-shrink: 0"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>Garde-fous de plausibilité passés</span><span class="x-in x7" style="display: flex; gap: 12px; align-items: center; font-size: 16px"><span style="display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #12343f; color: #56D7FD; flex-shrink: 0"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>Forces, risques et valorisation mis en mots</span><span class="x-in x8" style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{accent}}">BICB · généré le 12 nov. 2026</span><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Disponible pour chaque action de la cote.</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ f13 }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div class="x-in" style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+<span style="display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 500; color: {{accent}}">Pro<span style="background: #12343f; color: #56D7FD; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600">Premium</span></span>
+<h3 style="margin: 0; font-size: clamp(30px, 3.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.04">Poser <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">une question.</span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #A7AEB4; max-width: 40ch">Interrogez le marché, une valeur ou votre portefeuille : les réponses partent des données de la plateforme.</p>
+<a href="#" style="font-size: 16px; color: {{accent}}; display: inline-flex; min-height: 44px; align-items: center">Poser une question ›</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="x-pop x1" style="align-self: flex-end; max-width: 86%; background: #12343f; color: #DDF4FB; border-radius: 16px 16px 4px 16px; padding: 11px 15px; font-size: 14px; line-height: 1.4">Analyse flash : indicateurs clés en 5 points</span><span class="x-pop x3" style="align-self: flex-end; max-width: 86%; background: #12343f; color: #DDF4FB; border-radius: 16px 16px 4px 16px; padding: 11px 15px; font-size: 14px; line-height: 1.4">Historique des dividendes : régularité des versements</span><span class="x-pop x5" style="align-self: flex-end; max-width: 86%; background: #12343f; color: #DDF4FB; border-radius: 16px 16px 4px 16px; padding: 11px 15px; font-size: 14px; line-height: 1.4">Mon portefeuille est-il bien diversifié ?</span><span class="x-pop x7" style="align-self: flex-start; max-width: 86%; background: #1a1f23; color: #F5F5F7; border-radius: 16px 16px 16px 4px; padding: 11px 15px; font-size: 14px; line-height: 1.4">Les réponses s'appuient sur les données de la plateforme.</span><span style="font-size: 12px; line-height: 1.5; color: #8A9197">Vous échangez avec une IA. Ses réponses peuvent être inexactes et ne constituent pas un conseil en investissement.</span></div>
+</div>
+</sc-if>
+</div>
+<div data-rv style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap">
+<span style="font-size: 15px; color: #A7AEB4">Dix outils sont en accès libre ou avec un compte gratuit. Quatre sont réservés à Premium.</span>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; background: {{accent}}; color: #00141a; font-size: 16px; font-weight: 600">Créer mon compte gratuit</a>
+</div>
+</div>
+</section>
+
+<section style="background: #000000; padding: clamp(80px, 9vw, 140px) 24px clamp(48px, 5vw, 72px)">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px">
+<div data-rv style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 15px; font-weight: 600; color: {{accent}}">La méthode</p>
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 5vw, 72px); letter-spacing: -0.045em; line-height: 1.02; max-width: 16ch">De la donnée à la décision. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">Sept étapes, rien d'affirmé sans mesure.</span></h2>
+</div>
+<div data-rv style="display: flex; flex-direction: column; gap: 22px">
+<div aria-hidden="true" style="position: relative; height: 3px; background: #1B2A30; border-radius: 2px; overflow: hidden"><span class="wb-fil"></span></div>
+<ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px">
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 0s">1</span><b style="font-size: 16px; font-weight: 600">Données</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Cours et publications collectés à la source.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 1s">2</span><b style="font-size: 16px; font-weight: 600">Analyse</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Fondamentaux, ratios, dividendes.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 2s">3</span><b style="font-size: 16px; font-weight: 600">Note A–F</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Un score expliqué par action.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 3s">4</span><b style="font-size: 16px; font-weight: 600">Signal</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Une mesure de tendance, ou l'abstention.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 4s">5</span><b style="font-size: 16px; font-weight: 600">Dossier</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Appuis, vigilance et réserves.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 5s">6</span><b style="font-size: 16px; font-weight: 600">Simulation</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">Ce qu'un placement passé aurait donné.</span></li>
+<li style="display: flex; flex-direction: column; gap: 10px"><span class="wb-etape" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #12181b; color: #8A9AA0; font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; animation-delay: 6s">7</span><b style="font-size: 16px; font-weight: 600">Décision</b><span style="font-size: 13px; line-height: 1.45; color: #8A9197">La vôtre, chiffres sous les yeux.</span></li>
+</ol>
+</div>
+</div>
+</section>
+
+<section style="background: #000000; padding: clamp(40px, 5vw, 72px) 24px clamp(80px, 9vw, 130px)">
+<div style="max-width: 1152px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px">
+
+<div data-rv style="background: #101214; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 16px; min-height: 400px; box-sizing: border-box">
+<span style="font-size: 14px; color: #A7AEB4">Secteurs</span>
+<span style="font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1">Les télécoms en tête.</span>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px; font-size: 12px">
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Télécommunications</span><span data-in style="display: flex; justify-content: flex-end"></span><span data-in style="display: flex"><span class="wb-bx" style="height: 6px; width: 100%; background: #3FE18B; border-radius: 0 3px 3px 0"></span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #3FE18B">+2,60 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Industriels</span><span></span><span data-in style="display: flex"><span class="wb-bx" style="height: 6px; width: 33%; background: #3FE18B; border-radius: 0 3px 3px 0"></span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #3FE18B">+0,86 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Consommation de base</span><span></span><span data-in style="display: flex"><span class="wb-bx" style="height: 6px; width: 10%; background: #3FE18B; border-radius: 0 3px 3px 0"></span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #3FE18B">+0,27 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Services financiers</span><span data-in style="display: flex; justify-content: flex-end"><span class="wb-bxr" style="height: 6px; width: 3%; min-width: 2px; background: #FF6B6B; border-radius: 3px 0 0 3px"></span></span><span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #FF8A8A">−0,06 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Énergie</span><span data-in style="display: flex; justify-content: flex-end"><span class="wb-bxr" style="height: 6px; width: 16%; background: #FF6B6B; border-radius: 3px 0 0 3px"></span></span><span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #FF8A8A">−0,42 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Services publics</span><span data-in style="display: flex; justify-content: flex-end"><span class="wb-bxr" style="height: 6px; width: 32%; background: #FF6B6B; border-radius: 3px 0 0 3px"></span></span><span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #FF8A8A">−0,82 %</span></span>
+<span style="display: grid; grid-template-columns: 1fr 44px 44px 58px; gap: 0 2px; align-items: center"><span>Conso. discrétionnaire</span><span data-in style="display: flex; justify-content: flex-end"><span class="wb-bxr" style="height: 6px; width: 50%; background: #FF6B6B; border-radius: 3px 0 0 3px"></span></span><span></span><span style="font-family: 'Geist Mono', monospace; text-align: right; color: #FF8A8A">−1,31 %</span></span>
+</div>
+</div>
+
+<div data-rv class="d1" style="background: #101214; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 12px; min-height: 400px; box-sizing: border-box">
+<span style="font-size: 14px; color: #A7AEB4">Échanges</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(44px, 5vw, 64px); font-weight: 600; letter-spacing: -0.05em; line-height: 1">1,22 Md</span>
+<span style="font-size: 15px; color: #A7AEB4">FCFA échangés, −38,2 % par rapport à la veille.</span>
+<div style="margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid #2a2f33; padding-top: 18px">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 600">858 599</span><span style="font-size: 12px; color: #8A9197">titres</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 600">5 309</span><span style="font-size: 12px; color: #8A9197">transactions</span></span>
+</div>
+</div>
+
+<a href="#" data-rv class="d2" style="background: #102B35; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 12px; min-height: 400px; box-sizing: border-box; color: #F5F5F7">
+<span style="font-size: 14px; color: #9FB6BD">La communauté</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: clamp(72px, 9vw, 120px); font-weight: 600; letter-spacing: -0.06em; line-height: 0.9">210</span>
+<span style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2">membres suivent déjà la BRVM <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">ici.</span></span>
+<span style="margin-top: auto; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: {{accent}}; color: #00141a; font-size: 16px; font-weight: 600">Les rejoindre gratuitement</span>
+</a>
+
+</div>
+</section>
+
+<section aria-label="Publicité" style="background: #000000; padding: 0 24px clamp(72px, 8vw, 120px)">
+<div data-rv style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-size: 11px; letter-spacing: 0.16em; color: #8A9197">PUBLICITÉ</p>
+<a href="#" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: stretch; background: #F5F5F7; border-radius: 28px; overflow: hidden; min-height: 240px; color: #1D1D1F">
+<span style="padding: clamp(28px, 4vw, 48px); display: flex; flex-direction: column; gap: 10px; justify-content: center">
+<span style="font-size: 13px; font-weight: 600; color: #6E6E73">[Nom de l'annonceur]</span>
+<span style="font-size: clamp(26px, 3vw, 40px); font-weight: 700; letter-spacing: -0.035em; line-height: 1.05">[Titre de la campagne, 40 caractères]</span>
+<span style="font-size: 16px; color: #6E6E73">[Une ligne de message]</span>
+<span style="margin-top: 10px; align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #1D1D1F; color: #F5F5F7; font-size: 15px; font-weight: 600">[Action] ›</span>
+</span>
+<span style="background: #E3E3E8; display: grid; place-items: center; min-height: 200px; font-size: 13px; color: #6E6E73">[Visuel de l'annonceur · 600 × 240]</span>
+</a>
+</div>
+</section>
+
+<section style="background: #F5F5F7; color: #1D1D1F; padding: clamp(72px, 8vw, 120px) 24px">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px">
+<h2 data-rv style="margin: 0; font-weight: 600; font-size: clamp(34px, 4.6vw, 64px); letter-spacing: -0.04em; line-height: 1.02; max-width: 16ch">Chaque chiffre a une source, une date, une heure.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px">
+<div data-rv style="background: #FFFFFF; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #6E6E73">La source</span><span style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em">BRVM, publications des émetteurs</span><span style="font-size: 14px; line-height: 1.5; color: #6E6E73">Aucun cours n'est saisi à la main.</span></div>
+<div data-rv class="d1" style="background: #FFFFFF; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #6E6E73">Le chiffre</span><span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 600">CABC 2 910 FCFA</span><span style="font-size: 14px; line-height: 1.5; color: #6E6E73">Sicable CI, clôture du 11/11/2026.</span></div>
+<div data-rv class="d2" style="background: #FFFFFF; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #6E6E73">La collecte</span><span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 600">17:04 UTC</span><span style="font-size: 14px; line-height: 1.5; color: #6E6E73">Environ toutes les 15 minutes en séance.</span></div>
+<div data-rv class="d3" style="background: #1D1D1F; color: #F5F5F7; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #A7AEB4">Ce qui manque</span><span style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em">Nous l'écrivons.</span><span style="font-size: 14px; line-height: 1.5; color: #A7AEB4">Une donnée absente est déclarée, jamais comblée.</span></div>
+</div>
+</div>
+</section>
+
+<section style="background: #000000; padding: clamp(90px, 10vw, 150px) 24px">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px">
+<div data-rv style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 15px; font-weight: 500; color: {{accent}}">Restez au courant</p>
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(38px, 5.6vw, 84px); letter-spacing: -0.05em; line-height: 1; max-width: 14ch">La BRVM vient à vous. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">Choisissez le canal.</span></h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px">
+
+<div data-rv style="background: #101214; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 14px; min-height: 520px; box-sizing: border-box">
+<span style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #3FE18B"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5.2A8.5 8.5 0 1 1 21 11.5z"></path></svg>WhatsApp</span>
+<span style="font-size: 28px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1">Posez la question, <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">le cours répond.</span></span>
+<span style="font-size: 14px; line-height: 1.5; color: #A7AEB4">La Chaîne publie la vidéo chaque soir. Personne ne voit votre numéro.</span>
+<div data-in class="wb-msg" style="margin-top: auto; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<span class="wb-l" style="align-self: flex-end; background: #0f3d2a; color: #DFF8EA; border-radius: 16px 16px 4px 16px; padding: 10px 14px">Cours SNTS</span>
+<span class="wb-l l2" style="align-self: flex-start; background: #1a1f23; border-radius: 16px 16px 16px 4px; padding: 10px 14px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">SNTS · 4 190 FCFA · +4,75 %</span>
+<span class="wb-l l3" style="align-self: flex-end; background: #0f3d2a; color: #DFF8EA; border-radius: 16px 16px 4px 16px; padding: 10px 14px">Palmarès</span>
+<span class="wb-l l4" style="align-self: flex-start; background: #1a1f23; border-radius: 16px 16px 16px 4px; padding: 10px 14px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.5">CABC +7,18 %<br>SNTS +4,75 %<br>FTSC +4,00 %</span>
+</div>
+<a href="https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: #3FE18B; color: #03140b; font-size: 16px; font-weight: 600">Suivre la Chaîne</a>
+<span style="font-size: 12px; color: #8A9197; text-align: center">Ou écrivez AIDE au +33 7 43 65 72 71 · 3 questions par jour gratuites</span>
+</div>
+
+<div data-rv class="d1" style="background: #101214; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 14px; min-height: 520px; box-sizing: border-box">
+<span style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #56D7FD"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"></path></svg>Telegram</span>
+<span style="font-size: 28px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1">Le point de clôture <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #B9C2C8">arrive tout seul.</span></span>
+<span style="font-size: 14px; line-height: 1.5; color: #A7AEB4">Le même service, l'autre messagerie. Alertes de seuil comprises.</span>
+<div data-in class="wb-msg" style="margin-top: auto; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.4">
+<span style="display: flex; justify-content: space-between; font-size: 12px; color: #8A9197"><span>Westbourse · brief de séance</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">18:00</span></span>
+<span class="wb-l" style="background: #1a1f23; border-radius: 14px; padding: 10px 14px">L'indice gagne 0,85 %, à 517,17 points.</span>
+<span class="wb-l l2" style="background: #1a1f23; border-radius: 14px; padding: 10px 14px">23 valeurs reculent, 15 progressent.</span>
+<span class="wb-l l3" style="background: #1a1f23; border-radius: 14px; padding: 10px 14px">CABC, plus forte hausse : +7,18 %.</span>
+<span class="wb-l l4" style="background: #1a1f23; border-radius: 14px; padding: 10px 14px">PRSC, plus forte baisse : −6,97 %.</span>
+<span class="wb-l l5" style="background: #1a1f23; border-radius: 14px; padding: 10px 14px">SNTS concentre les échanges.</span>
+</div>
+<a href="https://t.me/westbourse7" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: {{accent}}; color: #00141a; font-size: 16px; font-weight: 600">Ouvrir le canal</a>
+<span style="font-size: 12px; color: #8A9197; text-align: center">t.me/westbourse7 · sans compte Westbourse</span>
+</div>
+
+<div data-rv class="d2" style="background: #F5F5F7; color: #1D1D1F; border-radius: 28px; padding: 30px; display: flex; flex-direction: column; gap: 14px; min-height: 520px; box-sizing: border-box">
+<span style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #0b6f8a"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>E-mail</span>
+<span style="font-size: 28px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1">Le brief du soir. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #6E6E73">Cinq lignes, à 18 h.</span></span>
+<span style="font-size: 14px; line-height: 1.5; color: #6E6E73">La séance résumée chaque jour de cotation.</span>
+<span style="margin-top: auto; display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 72px; font-weight: 600; letter-spacing: -0.06em; line-height: 1">210</span><span style="font-size: 15px; color: #6E6E73">membres inscrits</span></span>
+<form onSubmit="{{ envoi2 }}" style="display: flex; flex-direction: column; gap: 10px">
+<label for="wb-mail-2" style="font-size: 13px; font-weight: 500">Votre adresse e-mail</label>
+<input id="wb-mail-2" type="email" required placeholder="nom@exemple.com" style="min-height: 48px; padding: 0 16px; border: 1px solid #C7C7CC; border-radius: 14px; background: #FFFFFF; font: inherit; font-size: 16px; color: #1D1D1F; box-sizing: border-box; width: 100%">
+<button type="submit" style="appearance: none; border: 0; cursor: pointer; min-height: 48px; border-radius: 999px; background: #1D1D1F; color: #F5F5F7; font: inherit; font-size: 16px; font-weight: 600">Recevoir le brief</button>
+</form>
+<sc-if value="{{ envoye2 }}" hint-placeholder-val="{{ false }}"><span role="status" style="font-size: 13px; color: #0A7844; text-align: center">Un e-mail de confirmation vient de partir.</span></sc-if>
+<span style="font-size: 12px; color: #6E6E73; text-align: center">Inscription confirmée par e-mail · désabonnement en un clic</span>
+</div>
+
+</div>
+</div>
+</section>
+
+<section style="background: #FAF8F4; color: #201C17; padding: clamp(72px, 8vw, 120px) 24px clamp(40px, 5vw, 64px)">
+<div style="max-width: 1152px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 5vw, 72px); align-items: start">
+<div data-rv style="display: flex; flex-direction: column; gap: 22px; align-items: flex-start">
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(34px, 4.6vw, 64px); letter-spacing: -0.045em; line-height: 1.02">Commencez par explorer. <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: #076880">Gratuitement.</span></h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 17px">
+<li style="display: flex; gap: 12px; align-items: flex-start"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A7844" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Explorer les 48 sociétés cotées et leurs fiches</li>
+<li style="display: flex; gap: 12px; align-items: flex-start"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A7844" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Consulter les fondamentaux et les dividendes</li>
+<li style="display: flex; gap: 12px; align-items: flex-start"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A7844" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Suivre la séance et les indices</li>
+<li style="display: flex; gap: 12px; align-items: flex-start"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A7844" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Créer votre watchlist et votre portefeuille</li>
+<li style="display: flex; gap: 12px; align-items: flex-start"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A7844" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Recevoir le brief du soir et vos alertes par e-mail</li>
+</ul>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #076880; color: #FFFFFF; font-size: 17px; font-weight: 600">Créer mon compte gratuit</a>
+<span style="font-size: 13px; color: #6E6556">Sans carte bancaire · Sans engagement</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<p data-rv style="margin: 0; font-size: 15px; color: #574E40">Pour aller plus loin, quand vous serez prêt.</p>
+<div data-rv class="d1" style="background: #FFFFFF; border: 1px solid #ECE6DA; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: #574E40">GRATUIT</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 40px; font-weight: 600; letter-spacing: -0.05em">0 FCFA</span>
+<span style="font-size: 14px; line-height: 1.5; color: #574E40">Veille de marché, cours et états financiers officiels, watchlist et portefeuille.</span>
+</div>
+<div data-rv class="d2" style="background: #102B35; color: #F5F3ED; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: #56D7FD">PREMIUM</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 40px; font-weight: 600; letter-spacing: -0.05em">10 000 FCFA <span style="font-family: Geist, sans-serif; font-size: 15px; font-weight: 400; letter-spacing: 0; color: #9FB6BD">par mois</span></span>
+<span style="font-size: 14px; line-height: 1.5; color: #C9D6DA">Ou 90 000 FCFA par an. Notation A–F complète, dossiers d'analyse, filtres avancés, alertes Telegram.</span>
+<a href="#" style="align-self: flex-start; color: #56D7FD; font-size: 15px; display: inline-flex; min-height: 44px; align-items: center">Voir les offres ›</a>
+</div>
+</div>
+</div>
+</section>
+
+<section style="background: #FAF8F4; padding: clamp(24px, 3vw, 40px) 24px clamp(40px, 5vw, 64px)">
+<div data-rv style="max-width: 1152px; margin: 0 auto; background: #1F1B17; color: #F5F3ED; border-radius: 28px; padding: clamp(28px, 4vw, 52px); display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(24px, 4vw, 56px); align-items: center">
+<div style="display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+<h2 style="margin: 0; font-weight: 600; font-size: clamp(30px, 3.8vw, 52px); letter-spacing: -0.04em; line-height: 1.04">Votre première analyse peut commencer <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em">maintenant.</span></h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: #C9C2B6; max-width: 40ch">Explorez gratuitement la BRVM, découvrez les sociétés cotées et entraînez-vous avant d'aller plus loin.</p>
+<div style="display: flex; gap: 12px; flex-wrap: wrap">
+<a href="#" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 14px; background: #0b7f9c; color: #FFFFFF; font-size: 16px; font-weight: 600">Créer mon compte gratuit</a>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 14px; border: 1px solid #4a433b; color: #F5F3ED; font-size: 16px; font-weight: 500">Explorer les sociétés</a>
+</div>
+<span style="font-size: 12px; color: #A89F92">Gratuit · Sans carte bancaire · À votre rythme · Ceci n'est pas un conseil en investissement.</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<span style="background: #2a2520; border: 1px solid #3a342d; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><b style="font-size: 18px; font-weight: 600">Données</b><span style="font-size: 13px; color: #A89F92">fiables et datées</span></span>
+<span style="background: #2a2520; border: 1px solid #3a342d; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><b style="font-size: 18px; font-weight: 600">Analyse</b><span style="font-size: 13px; color: #A89F92">indépendante</span></span>
+<span style="background: #2a2520; border: 1px solid #3a342d; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><b style="font-size: 18px; font-weight: 600">Outils</b><span style="font-size: 13px; color: #A89F92">simples</span></span>
+<span style="background: #2a2520; border: 1px solid #3a342d; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px"><b style="font-size: 18px; font-weight: 600">Décision</b><span style="font-size: 13px; color: #A89F92">la vôtre</span></span>
+</div>
+</div>
+</section>
+
+<footer style="background: #06090B; color: #9AA6AB; padding: clamp(40px, 5vw, 64px) 24px 36px; font-size: 13px">
+<div style="max-width: 1152px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<span style="display: inline-flex; align-items: center; gap: 10px; color: #F5F5F7"><svg aria-hidden="true" viewBox="0 0 130 105" style="width: 34px; height: 27px"><rect x="2" y="2" width="126" height="101" rx="22" fill="#0c1d2e"></rect><path d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><path d="M76 82 L100 33" fill="none" stroke="#16b6a4" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><polygon points="110,12 117,40 86,28" fill="#16b6a4"></polygon></svg><span style="font-size: 13px; font-weight: 600; letter-spacing: 0.28em">WESTBOURSE</span></span>
+<span style="line-height: 1.5">Analyse et aide à la décision d'investissement sur la BRVM (UEMOA).</span>
+<span style="font-size: 12px">Suivez-nous</span>
+<span style="display: flex; gap: 8px">
+<a href="https://www.tiktok.com/@westbourse7" aria-label="Westbourse sur TikTok" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #1f2a2f; color: #F5F5F7"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4c.5 2.5 2.5 4.5 5 5"></path></svg></a>
+<a href="https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d" aria-label="Westbourse sur WhatsApp" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #1f2a2f; color: #F5F5F7"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5.2A8.5 8.5 0 1 1 21 11.5z"></path></svg></a>
+<a href="https://t.me/westbourse7" aria-label="Westbourse sur Telegram" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #1f2a2f; color: #F5F5F7"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"></path></svg></a>
+</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span style="font-size: 12px; color: #6f7c82">· Produit</span><a href="#" style="color: #D5DCDF">Marché actions</a><a href="#" style="color: #D5DCDF">Marché obligataire <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Comparateur SGI</a><a href="#" style="color: #D5DCDF">Notes A–F <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Tarifs</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span style="font-size: 12px; color: #6f7c82">· Outils</span><a href="#" style="color: #D5DCDF">Simulateur</a><a href="#" style="color: #D5DCDF">Screener <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Signaux <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Dossier d'analyse <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Paper trading <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Watchlist et alertes <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">Liquidité <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span style="font-size: 12px; color: #6f7c82">· Ressources</span><a href="#" style="color: #D5DCDF">Actualités</a><a href="#" style="color: #D5DCDF">Brief du jour</a><a href="#" style="color: #D5DCDF">Analyses hebdo</a><a href="#" style="color: #D5DCDF">Méthodologie</a><a href="#" style="color: #D5DCDF">Academy</a><a href="#" style="color: #D5DCDF">Fiscalité UEMOA</a><a href="#" style="color: #D5DCDF">Classement papier <svg role="img" aria-label="compte requis" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6f7c82" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-left: 4px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></a><a href="#" style="color: #D5DCDF">API développeurs</a><a href="#" style="color: #D5DCDF">Flux RSS</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span style="font-size: 12px; color: #6f7c82">· Légal</span><a href="#" style="color: #D5DCDF">Mentions légales</a><a href="#" style="color: #D5DCDF">Conditions d'utilisation</a><a href="#" style="color: #D5DCDF">Confidentialité</a><a href="#" style="color: #D5DCDF">Gérer mes cookies</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span style="font-size: 12px; color: #6f7c82">· Sources officielles</span>
+<span style="display: flex; gap: 6px; flex-wrap: wrap"><span style="background: #FFFFFF; color: #201C17; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600">[BRVM]</span><span style="background: #FFFFFF; color: #201C17; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600">[BCEAO]</span><span style="background: #FFFFFF; color: #201C17; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600">[Bloomfield]</span></span>
+<span style="font-size: 12px; line-height: 1.5">Publications des émetteurs et données de marché officielles.</span>
+<span style="font-size: 12px; line-height: 1.5">Le cadenas signale une page réservée aux comptes (gratuit).</span>
+<a href="#" style="color: #D5DCDF">Connexion</a><a href="#" style="color: #D5DCDF">Créer un compte</a></div>
+</div>
+<div style="border-top: 1px solid #141c20; padding-top: 22px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; line-height: 1.6">
+<span>Les analyses, notes, signaux et simulations présentés sur WESTBOURSE sont fournis à titre informatif et pédagogique. Ils ne constituent pas un conseil en investissement, une recommandation personnalisée, ni une incitation à acheter ou vendre. Tout investissement comporte un risque de perte en capital.</span>
+<span>© 2026 WESTBOURSE. Tous droits réservés.</span>
+</div>
+</div>
+</footer>
+
+<div style="position: sticky; bottom: 12px; z-index: 20; height: 0; display: flex; justify-content: center; align-items: flex-end; pointer-events: none">
+<div style="{{ barreStyle }}">
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; background: #101214; border: 1px solid #2a3338; border-radius: 22px; padding: 10px 10px 10px 20px; margin: 0 12px; color: #F5F5F7; font-size: 14px; max-width: 760px">
+<span style="font-weight: 500">La BRVM au chiffre près. <span style="color: #A7AEB4">Gratuit, sans carte bancaire.</span></span>
+<a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: {{accent}}; color: #00141a; font-weight: 600">Créer mon compte</a>
+<a href="https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid #2a3338; color: #F5F5F7">WhatsApp</a>
+<button type="button" aria-label="Masquer ce bandeau" onClick="{{ fermeBarre }}" style="appearance: none; cursor: pointer; background: transparent; border: 0; color: #8A9197; width: 44px; height: 44px; display: grid; place-items: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#56D7FD"},"$preview":{"width":1440,"height":10900}}'>
+class Component extends DCLogic {
+componentDidMount() {
+var self = this;
+var root = document.querySelector('[data-wb-root]');
+var calme = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+if (root) {
+var cibles = root.querySelectorAll('[data-rv],[data-in]');
+var k;
+if (calme || !('IntersectionObserver' in window)) {
+for (k = 0; k < cibles.length; k++) cibles[k].classList.add('in');
+} else {
+root.classList.add('wb-js');
+this._io = new IntersectionObserver(function (es) {
+es.forEach(function (e) {
+if (e.isIntersecting) { e.target.classList.add('in'); self._io.unobserve(e.target); }
+});
+}, { threshold: 0.15, rootMargin: '0px 0px -5% 0px' });
+for (k = 0; k < cibles.length; k++) this._io.observe(cibles[k]);
+}
+}
+if (!calme) this.joue();
+this._calme = calme;
+var zone = root && root.querySelector('[data-wb-scrub]');
+if (zone && this._h) {
+zone.addEventListener('mousemove', this._h.scrub);
+zone.addEventListener('touchstart', this._h.scrub, { passive: true });
+zone.addEventListener('touchmove', this._h.scrub, { passive: true });
+zone.addEventListener('mouseleave', this._h.lache);
+zone.addEventListener('touchend', this._h.lache);
+}
+var mos = root && root.querySelector('.wb-mos');
+if (mos) {
+var surv = function (e) {
+var b = e.target && e.target.closest ? e.target.closest('[data-i]') : null;
+if (b) self.setState({ tile: parseInt(b.getAttribute('data-i'), 10) });
+};
+mos.addEventListener('mouseover', surv);
+mos.addEventListener('focusin', surv);
+}
+var xs = root && root.querySelector('[data-wb-x]');
+if (xs && !calme && ('IntersectionObserver' in window)) {
+this._io3 = new IntersectionObserver(function (es) {
+var vu = es[0].isIntersecting;
+if (vu && !self._xt && !self._xstop) {
+self.setState({ xvu: true });
+self._xt = setInterval(function () { var c = (self.state && self.state.fx) || 0; self.setState({ fx: (c + 1) % 14 }); }, 6000);
+} else if (!vu && self._xt) { clearInterval(self._xt); self._xt = null; self.setState({ xvu: false }); }
+}, { threshold: 0.25 });
+this._io3.observe(xs);
+}
+var cta = root && root.querySelector('[data-hero-cta]');
+if (cta && ('IntersectionObserver' in window)) {
+this._io2 = new IntersectionObserver(function (es) { self.setState({ barre: !es[0].isIntersecting }); }, { threshold: 0 });
+this._io2.observe(cta);
+}
+}
+componentWillUnmount() {
+if (this._raf) cancelAnimationFrame(this._raf);
+if (this._io) this._io.disconnect();
+if (this._io2) this._io2.disconnect();
+if (this._io3) this._io3.disconnect();
+if (this._xt) clearInterval(this._xt);
+}
+joue() {
+var self = this, t0 = null, D = 2800;
+if (this._raf) cancelAnimationFrame(this._raf);
+function pas(t) {
+if (t0 === null) t0 = t;
+var k = Math.min(1, (t - t0) / D);
+var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+self.setState({ p: e * 59, hover: null });
+if (k < 1) self._raf = requestAnimationFrame(pas); else self._raf = null;
+}
+this._raf = requestAnimationFrame(pas);
+}
+renderVals() {
+var self = this;
+var s = this.state || {};
+var Y = [157.1,157.1,106.7,106.7,126.4,103.8,103.3,100.1,76.4,74.8,43.1,33.8,17.2,28.2,21.9,18.2,8,8,17.4,30.2,35.8,14.6,48.5,81.4,155,97.4,63.1,45.8,35.9,34.6,32.2,40.6,69.2,47.8,36.4,34.5,40.3,45.6,51.4,78.6,74.8,93.8,105.4,124.1,140,133.6,106.8,85.8,95.7,109.8,110.1,85.9,121.2,105.8,109.2,140.3,138.3,134,168,151.7];
+var n = Y.length;
+var val = function (y) { return 555.48 - (y - 8) / 160 * 42.67; };
+var fr = function (z, dec) { return z.toFixed(dec).replace('.', ','); };
+var p = (s.hover != null) ? s.hover : (s.p != null ? s.p : n - 1);
+if (p > n - 1) p = n - 1;
+var i0 = Math.floor(p), f = p - i0, i1 = Math.min(n - 1, i0 + 1);
+var y = Y[i0] + (Y[i1] - Y[i0]) * f;
+var x = p * 560 / (n - 1);
+var d = 'M0 ' + Y[0], k;
+for (k = 1; k <= i0; k++) d += ' L' + (k * 560 / (n - 1)).toFixed(1) + ' ' + Y[k];
+if (f > 0) d += ' L' + x.toFixed(1) + ' ' + y.toFixed(1);
+if (i0 === 0 && f === 0) d += ' L0.1 ' + Y[0];
+var idx = Math.round(p);
+var v = (p >= n - 1.001) ? 517.17 : val(y);
+var cur = (idx === n - 1) ? 517.17 : val(Y[idx]);
+var prev = idx > 0 ? val(Y[idx - 1]) : null;
+var dv = prev ? (cur / prev - 1) * 100 : null;
+var plat = dv !== null && Math.abs(dv) < 0.005;
+var varTxt = dv === null ? 'Début de la période' : (plat ? 'Stable sur la séance' : ((dv > 0 ? '▲ +' : '▼ −') + fr(Math.abs(dv), 2) + ' % sur la séance'));
+var reste = n - 1 - idx;
+var etiquette = reste === 0 ? 'dernière séance, 11 novembre 2026' : (reste === 1 ? 'il y a 1 séance' : 'il y a ' + reste + ' séances');
+if (!this._h) {
+this._h = {
+scrub: function (e) {
+var r = e.currentTarget.getBoundingClientRect();
+var cx = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+var t = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+if (self._raf) { cancelAnimationFrame(self._raf); self._raf = null; }
+self.setState({ hover: Math.round(t * 59), p: 59 });
+},
+lache: function () { self.setState({ hover: null, p: 59 }); },
+rejoue: function () { self.joue(); },
+envoi: function (e) { e.preventDefault(); self.setState({ envoye: true }); },
+envoi2: function (e) { e.preventDefault(); self.setState({ envoye2: true }); },
+fermeBarre: function () { self.setState({ barreFermee: true }); },
+pauseFilm: function () { self.setState({ pause: !(self.state && self.state.pause) }); }
+};
+var D = [['CABC',2910,7.18],['SNTS',4190,4.75],['FTSC',1690,4.00],['CBIBF',32000,3.23],['SIVC',1750,2.94],['BICB',8090,2.93],['BOABF',7900,2.60],['BOAB',9410,2.28],['STAC',2040,2.00],['ORGT',2550,1.80],['NTLC',13130,1.00],['SAFC',3695,0.96],['SPHC',8000,0.76],['SOGC',7650,0.66],['STBC',21200,0.24],['BOAC',11940,0],['UNLC',47000,0],['BOAM',5700,0],['ETIT',60,0],['SEMC',1495,0],['CFAC',1260,0],['SLBC',40000,0],['SICC',8400,0],['BNBC',1795,0],['ORAC',20000,0],['SMBC',17940,-0.06],['PALC',7590,-0.07],['TTLS',3695,-0.14],['BBGC',9465,-0.16],['SDCC',12500,-0.36],['TTLC',3015,-0.50],['SDSC',2830,-0.53],['NEIC',1965,-0.76],['SGBC',38600,-0.77],['SCRC',1635,-0.91],['SHEC',2100,-0.94],['CIEC',4900,-1.01],['LNBB',3900,-1.02],['BOAS',8140,-1.21],['NSBC',17010,-1.39],['BOAN',4920,-1.40],['ECOC',15550,-1.86],['SIBC',8605,-2.22],['ABJC',3300,-2.94],['ONTBF',2900,-3.17],['BICC',31700,-3.35],['UNXC',1920,-3.52],['PRSC',3535,-6.97]];
+var mil = function (z) { return String(z).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+this._t = D.map(function (r, i) {
+var c = r[2], a = Math.abs(c), st, pct;
+if (c === 0) { st = { background: '#16191c', color: '#8A9197' }; pct = '0,00 %'; }
+else if (c > 0) {
+pct = '+' + fr(a, 2) + ' %';
+st = a >= 1 ? { background: 'rgba(63,225,139,' + (0.78 + 0.22 * a / 7.18).toFixed(2) + ')', color: '#03140b' } : { background: 'rgba(63,225,139,0.14)', color: '#3FE18B' };
+} else {
+pct = '−' + fr(a, 2) + ' %';
+st = a >= 1 ? { background: 'rgba(255,107,107,' + (0.86 + 0.14 * a / 6.97).toFixed(2) + ')', color: '#1c0505' } : { background: 'rgba(255,107,107,0.14)', color: '#FF8A8A' };
+}
+st.animationDelay = (i * 20) + 'ms';
+var texte = r[0] + ' · ' + mil(r[1]) + ' FCFA · ' + pct;
+return { i: String(i), code: r[0], pct: pct, style: st, aria: texte, texte: texte, over: function () { self.setState({ tile: i }); } };
+});
+}
+if (!this._x) {
+var NOMS = [['Screener',0],['Scanner technique',0],['Signaux',0],['Saisonnalité',0],['Combined Alpha',0],['Backtest',0],['Liquidité',0],['Dividendes',0],['Fiscalité',0],['Et si vous aviez investi ?',0],['Portefeuille virtuel',1],['Valorisation',1],['Diagnostic',1],['Poser une question',1]];
+var stop = function () { self._xstop = true; if (self._xt) { clearInterval(self._xt); self._xt = null; } };
+this._x = {
+noms: NOMS,
+pick: NOMS.map(function (n, i) { return function () { stop(); self.setState({ fx: i, xvu: false }); }; }),
+scr: [['SIVC',1750,46,0,'C'],['SNTS',4190,49,4.15,'A'],['CABC',2910,49,5.22,'C'],['SAFC',3695,38,0,'B'],['CBIBF',32000,53,2.81,'B'],['STBC',21200,49,8.05,'A'],['BICB',8090,39,3.15,'B'],['SPHC',8000,51,5.38,'B'],['STAC',2040,53,0,'C'],['BOAB',9410,53,6.22,'B'],['FTSC',1690,42,0,'C'],['SOGC',7650,47,6.56,'C'],['ORGT',2550,33,0,'C'],['BOABF',7900,48,5.03,'B'],['SLBC',40000,66,4.68,'B'],['NTLC',13130,30,2.81,'B'],['BOAC',11940,60,4.98,'A'],['BOAM',5700,41,5.35,'B'],['SMBC',17940,70,3.92,'B']],
+filtres: [['Dividende > 3 %','fd'],['Liquidité A ou B','fl'],['RSI < 45','fr']],
+tog: ['fd','fl','fr'].map(function (k) { return function () { stop(); var o = { xvu: false }; o[k] = !(self.state && self.state[k]); self.setState(o); }; }),
+pays: [['Bénin',5],['Burkina Faso',12.5],["Côte d'Ivoire",12],['Mali',7],['Sénégal',10],['Togo',3]]
+};
+this._x.payPick = this._x.pays.map(function (p, i) { return function () { stop(); self.setState({ fp: i, xvu: false }); }; });
+}
+var X = this._x, fx = s.fx || 0, esp = function (z) { return String(Math.round(z)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f'); };
+var lignes = X.scr.filter(function (r) { return (!s.fd || r[3] > 3) && (!s.fl || r[4] === 'A' || r[4] === 'B') && (!s.fr || r[2] < 45); });
+var fp = s.fp != null ? s.fp : 2, taux = X.pays[fp][1], ret = 100000 * taux / 100;
+var lecture = (s.tile != null && this._t[s.tile]) ? this._t[s.tile].texte : 'Survolez une case pour lire le cours.';
+var R = {
+accent: this.props.accent ?? '#56D7FD',
+indice: fr(v, 2),
+varTxt: varTxt,
+varStyle: { color: (dv === null || plat) ? '#8A9197' : (dv > 0 ? '#3FE18B' : '#FF8A8A') },
+etiquette: etiquette,
+dPart: d,
+guideStyle: { position: 'absolute', top: 0, bottom: 0, width: '1px', background: '#2f5663', left: (x / 560 * 100) + '%' },
+dotStyle: { position: 'absolute', width: '12px', height: '12px', marginLeft: '-6px', marginTop: '-6px', borderRadius: '50%', background: this.props.accent ?? '#56D7FD', left: (x / 560 * 100) + '%', top: (y / 184 * 100) + '%' },
+scrub: this._h.scrub, lache: this._h.lache, rejoue: this._h.rejoue,
+tuiles: this._t,
+lecture: lecture,
+envoye: !!s.envoye, envoye2: !!s.envoye2,
+envoi: this._h.envoi, envoi2: this._h.envoi2, fermeBarre: this._h.fermeBarre, pauseFilm: this._h.pauseFilm,
+filmCls: s.pause ? 'wb-pause' : 'wb-lecture',
+filmBtn: s.pause ? 'Lecture' : 'Pause',
+barreStyle: (s.barre && !s.barreFermee)
+? { pointerEvents: 'auto', opacity: 1, transform: 'none', transition: 'opacity .5s, transform .7s cubic-bezier(.2,1.3,.3,1)' }
+: { pointerEvents: 'none', opacity: 0, transform: 'translateY(90px) scale(.94)', transition: 'opacity .3s, transform .4s' }
+};
+for (var q = 0; q < 14; q++) R['f' + q] = (q === fx);
+R.onglets = X.noms.map(function (n, i) { return { lab: n[0], pro: !!n[1], on: i === fx, cls: i === fx ? 'x-chip x-on' : 'x-chip', auto: i === fx && !!s.xvu, pick: X.pick[i] }; });
+R.scrF = X.filtres.map(function (f, i) { var on = !!s[f[1]]; return { lab: f[0], on: on, cls: on ? 'x-chip x-on' : 'x-chip', tog: X.tog[i] }; });
+R.scrRows = lignes.slice(0, 6).map(function (r) { return { code: r[0], prix: esp(r[1]), rsi: String(r[2]), div: r[3] ? fr(r[3], 2) + ' %' : '0 %', liq: r[4] }; });
+R.scrCount = lignes.length + (lignes.length > 1 ? ' actions correspondent' : ' action correspond') + ' sur 19' + (lignes.length > 6 ? ' · 6 affichées' : '');
+R.pays = X.pays.map(function (p, i) { return { lab: p[0], on: i === fp, cls: i === fp ? 'x-chip x-on' : 'x-chip', pick: X.payPick[i] }; });
+R.fiscTaux = String(taux).replace('.', ',') + ' %';
+R.fiscRet = '− ' + esp(ret) + ' FCFA';
+R.fiscNet = esp(100000 - ret) + ' FCFA';
+return R;
+}
+}
+</script>
+</body>
+</html>

@@ -23,7 +23,10 @@ export default function SignInClient({
   subscribeNewsletter = false,
   subtitle = 'Connexion ou inscription',
   next,
+  emailInitial,
 }: {
+  /** Adresse saisie sur l'accueil : préremplit le formulaire, le parcours reste inchangé. */
+  emailInitial?: string;
   /** Abonne l'e-mail à la newsletter après une première vérification réussie (flux signup). */
   subscribeNewsletter?: boolean;
   subtitle?: string;
@@ -82,6 +85,7 @@ export default function SignInClient({
       </div>
     <SignInPage
       showNavbar={false}
+      emailInitial={emailInitial}
       // Doit correspondre au réglage Supabase « Email OTP Length ».
       codeLength={8}
       // Cyan DeFi pour coller au thème.

@@ -1,0 +1,40 @@
+/* Bandeau défilant : CSS pur, deux pistes identiques, translation de 0 à -50 %. */
+.vm-bandeau { overflow: hidden; }
+.vm-bandeau__rail {
+  display: flex;
+  width: max-content;
+  animation: vm-defile var(--vm-duree, 42s) linear infinite;
+}
+.vm-bandeau--inverse .vm-bandeau__rail { animation-direction: reverse; }
+.vm-bandeau:hover .vm-bandeau__rail { animation-play-state: paused; }
+.vm-bandeau__piste { display: flex; flex: none; align-items: center; }
+@keyframes vm-defile {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vm-bandeau__rail { animation: none; }
+}
+
+/* Titre mot par mot : chaque mot sort de son conteneur masqué, ressort, 0,07 s d'écart. */
+.vm-ligne { display: inline-block; overflow: hidden; padding: .1em .07em .18em; margin: -.1em -.07em -.18em; vertical-align: bottom; }
+.vm-mot { display: inline-block; animation: vm-mot .95s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.05s + var(--vm-rang, 0) * .07s); }
+@keyframes vm-mot {
+  0% { transform: translateY(118%) rotate(7deg); }
+  60% { transform: translateY(-6%) rotate(-1deg); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vm-mot { animation: none; }
+}
+
+/* Film : commande et progression. */
+.vm-seq__barre {
+  height: 2px;
+  transform-origin: left center;
+  background: currentColor;
+}
+.vm-seq__bouton {
+  min-width: 44px;
+  min-height: 44px;
+}

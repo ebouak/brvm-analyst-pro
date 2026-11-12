@@ -6,7 +6,6 @@ import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
 import { Billboard } from '@/components/landing/bis/Billboard';
-import { Seance } from '@/components/landing/bis/Seance';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
@@ -19,6 +18,13 @@ import { NosArticles } from '@/components/landing/bis/NosArticles';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
 import '@/components/landing/bis/landing-bis.css';
+import '@/components/vitrine/vitrine.css';
+import '@/components/vitrine/mouvement/mouvement.css';
+import { classesPolices } from '@/lib/vitrine/polices';
+import { Ouverture, Indice, BandeauSeance, SectionMosaique, SectionFilm } from '@/components/vitrine/SectionsSeance';
+import type { DonneesFilm } from '@/components/vitrine/FilmSeance';
+import { casesMosaique, dateLongue, releve, sceneIndice, motsBandeau, plusFortesVariations, traceSerie, pctTexte, type ChiffresSeance } from '@/lib/vitrine/seance';
+import { estEnSeance } from '@/lib/freshness';
 
 /**
  * Landing « bis » — vitrine CLAIRE et éditoriale (l'app, elle, reste sombre :
@@ -82,27 +88,45 @@ export default async function Landing() {
     { libelle: 'La décision vous appartient', valeur: membres != null && membres > 0 ? `${fmtNumber(membres)} membres inscrits` : 'Un compte gratuit, sans carte bancaire', detail: 'Explorez les sociétés, suivez la séance et testez vos idées avec un capital fictif. Les outils avancés viennent ensuite, quand vous en aurez besoin.', href: '/signup', hrefLabel: 'Créer mon compte gratuit' },
   ];
 
+  const cases = casesMosaique(d.coursSeed);
+  const releveTxt = releve(d.derniereCollecte);
+  const extremes = plusFortesVariations(cases);
+  const chiffres: ChiffresSeance = {
+    indice: d.brvmC?.valeur ?? null, variation: d.brvmC?.variation ?? null,
+    hausses: d.hausses, stables: d.inchangees, baisses: d.baisses,
+    capitaux: d.etat.valeurEchangee, titres: d.etat.titresEchanges, transactions: d.etat.transactions,
+    meilleure: cases[0] && cases[0].variation > 0 ? { code: cases[0].code, variation: cases[0].variation } : null,
+    pire: cases.length && cases[cases.length - 1]!.variation < 0 ? { code: cases[cases.length - 1]!.code, variation: cases[cases.length - 1]!.variation } : null,
+    nbValeurs: cases.length,
+  };
+  const sixante = d.brvmCSerie.slice(-60).map((p) => p.v);
+  const film: DonneesFilm = {
+    dateLongue: d.dateMarche ? dateLongue(d.dateMarche) : 'dernière séance',
+    indice: d.brvmC?.valeur ?? null,
+    variation: d.brvmC?.variation != null ? `${d.brvmC.variation > 0 ? '▲' : d.brvmC.variation < 0 ? '▼' : ''} ${pctTexte(d.brvmC.variation)}`.trim() : null,
+    variationSens: d.brvmC?.variation == null ? null : d.brvmC.variation > 0 ? 'up' : d.brvmC.variation < 0 ? 'down' : 'plat',
+    trace: traceSerie(sixante),
+    variations: extremes,
+    hausses: d.hausses, stables: d.inchangees, baisses: d.baisses,
+    capitaux: d.etat.valeurEchangee != null ? `${fmtFcfa(d.etat.valeurEchangee)} FCFA` : null,
+    transactions: d.etat.transactions,
+  };
+
   return (
+    <div className={`vitrine ${classesPolices}`}>
+      <div className="lb lb-entete"><div className="wrap"><LandingNav /></div></div>
+
+      {/* Refonte « vitrine » (PR 1, spec 2026-11-12) : sections 3.2 à 3.6. */}
+      <Ouverture o={{ dateLongue: d.dateMarche ? dateLongue(d.dateMarche) : null, enSeance: estEnSeance(new Date()), membres, nbValeurs: d.nbActions || NB_SOCIETES_COTEES }} />
+      <Indice d={sceneIndice(d.brvmC?.valeur ?? null, d.brvmC?.variation ?? null, d.brvmCSerie)} releve={releveTxt} hausses={d.hausses} stables={d.inchangees} baisses={d.baisses} />
+      <BandeauSeance lignes={motsBandeau(chiffres)} />
+      <SectionMosaique cases={cases} releve={releveTxt} />
+      <SectionFilm f={film} dateCourte={dateLabel} />
+
     <div className="lb">
       <div className="wrap">
-        <LandingNav />
-
         <main>
-          {/* 1 · LA COTE DU SOIR — l'argument à gauche, la séance réelle à droite */}
-          <section className="hc" aria-labelledby="h1">
-            <div>
-              <h1 id="h1">Les {NB_SOCIETES_COTEES} valeurs de la BRVM, chiffre par chiffre, source à l&apos;appui.</h1>
-              <p className="lead">Cours environ toutes les 15 minutes en séance, note de A à F par action, fondamentaux, dossiers et simulateur. Chaque chiffre porte sa source, sa date et son heure.</p>
-              <div className="cta">
-                <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit</Link>
-                <Link href="/societes" className="btn btn-ghost">Explorer les sociétés</Link>
-              </div>
-              <p className="apres">Sans carte bancaire. Vous débutez ? <Link href="/debutant">Commencez par le guide</Link></p>
-            </div>
-            <Seance d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
-          </section>
-
-          {/* 1 bis · À LA UNE — carrousel et annonceurs, sous le premier écran */}
+          {/* Annonceurs : sous notre premier contenu (charte §6), en attendant l'encart unique de la PR 2. */}
           <section className="une" aria-label="À la une">
             <HeroCarousel
               slides={d.slides} dateLabel={dateLabel} brvmCVar={d.brvmC?.variation ?? null}
@@ -253,6 +277,7 @@ export default async function Landing() {
           {/* Pied de page : le footer global du site (ConditionalShell) suit — pas de doublon ici. */}
         </main>
       </div>
+    </div>
     </div>
   );
 }

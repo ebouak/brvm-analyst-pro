@@ -6,9 +6,15 @@ import { libellePage } from '@/lib/nav';
 
 export const revalidate = 300;
 
+/** Adresse transmise par le champ de l'accueil : reprise seulement si elle a la forme d'une adresse. */
+function emailSaisie(v: string | undefined): string | undefined {
+  const e = (v ?? '').trim().slice(0, 254);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : undefined;
+}
+
 export default async function SignupPage(
   props: {
-    searchParams: Promise<{ error?: string; next?: string }>;
+    searchParams: Promise<{ error?: string; next?: string; email?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -31,7 +37,7 @@ export default async function SignupPage(
           </p>
         </div>
       )}
-      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" next={searchParams.next} />
+      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" next={searchParams.next} emailInitial={emailSaisie(searchParams.email)} />
     </div>
   );
 }
