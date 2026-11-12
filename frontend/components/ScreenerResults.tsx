@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { ActionRow } from '@/lib/screener/filters';
 import ExportButton from '@/components/ExportButton';
 import type { CsvColumn } from '@/lib/export';
+import { fmtPctSigne, fmtPctAbs } from '@/lib/format';
 
 type SortKey = keyof ActionRow;
 
@@ -126,7 +127,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
                 </td>
                 <td className="px-4 py-2.5 text-right tabular text-ivory">{r.cours_jour ? fmt(r.cours_jour) : '—'}</td>
                 <td className={`px-4 py-2.5 text-right tabular font-medium ${r.variation_pct != null ? (r.variation_pct >= 0 ? 'text-up' : 'text-down') : 'text-faint'}`}>
-                  {r.variation_pct != null ? `${r.variation_pct >= 0 ? '+' : ''}${r.variation_pct.toFixed(2)}` : '—'}%
+                  {r.variation_pct != null ? fmtPctSigne(r.variation_pct) : '—'}
                 </td>
                 <td className={`px-4 py-2.5 text-right tabular font-medium ${rsiClass(r.rsi)}`}>
                   {r.rsi != null ? r.rsi.toFixed(0) : '—'}
@@ -135,7 +136,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
                   {r.score_signal != null ? r.score_signal.toFixed(0) : '—'}
                 </td>
                 <td className="px-4 py-2.5 text-right tabular text-muted">
-                  {r.rendement_dividende != null ? `${r.rendement_dividende.toFixed(2)}%` : '—'}
+                  {r.rendement_dividende != null ? fmtPctAbs(r.rendement_dividende) : '—'}
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   {liqBadge(r.liquidite_classe, r.liquidite_score)}

@@ -3,10 +3,11 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { CompanyValuation } from '@/lib/valuation/server';
 import type { CompanyScoring } from '@/lib/scoring/server';
+import { fmtPctSigne } from '@/lib/format';
 
 function pct(v: number | null, d = 0): string {
   if (v == null) return '—';
-  return `${v >= 0 ? '+' : ''}${(v * 100).toFixed(d)}%`;
+  return fmtPctSigne(v * 100, d);
 }
 function num(v: number | null, d = 1): string {
   return v == null ? '—' : v.toFixed(d);
@@ -66,7 +67,7 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
             <tr>
               <th className="text-left py-2 px-3">Société</th>
               <th className="text-left py-2 px-3">Secteur</th>
-              <Th k="upside" label="Potentiel" />
+              <Th k="upside" label="Écart valeur estimée / cours" />
               <Th k="per" label="P/E" />
               <Th k="pbr" label="P/B" />
               <Th k="roe" label="ROE" />
@@ -109,8 +110,9 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
         </table>
       </div>
       <p className="text-xs text-faint">
-        Juste-valeur par multiples sectoriels (P/E, P/B médians) et DDM pour les valeurs à dividende. P/E, P/B et potentiel
-        nécessitent le nombre d’actions (disponible pour une partie des sociétés). Outil informatif.
+        Juste-valeur par multiples sectoriels (P/E, P/B médians) et DDM pour les valeurs à dividende. P/E, P/B et écart
+        nécessitent le nombre d’actions (disponible pour une partie des sociétés). L’écart compare le cours à une
+        valeur estimée par des modèles : ce n’est pas un objectif de cours. Outil informatif.
       </p>
     </div>
   );

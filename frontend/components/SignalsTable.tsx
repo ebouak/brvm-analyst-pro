@@ -196,7 +196,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
             Réinitialiser
           </button>
           <span className="text-xs text-muted self-center ml-auto">
-            {filtered.length} signal{filtered.length !== 1 ? 's' : ''}
+            {filtered.length} signa{filtered.length !== 1 ? 'ux' : 'l'}
           </span>
           <ExportButton<SignalRow>
             filename={`signaux_${new Date().toISOString().slice(0, 10)}.csv`}

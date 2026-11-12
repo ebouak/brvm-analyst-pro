@@ -47,9 +47,9 @@ export default function SignalPerformance({
       {/* ── Bloc 2 : signaux réels récents ─────────────────────────────── */}
       {recentReal.length > 0 && (
         <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-3">
-          <h2 className={TITRE}>Derniers signaux d&apos;achat réels</h2>
+          <h2 className={TITRE}>Derniers signaux haussiers réels</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Chiffre valeur={String(recentReal.length)} legende="signaux d'achat réels" />
+            <Chiffre valeur={String(recentReal.length)} legende="signaux haussiers réels" />
             <Chiffre valeur={moyenne != null ? fmtPctSigne(moyenne) : '—'} legende="performance moyenne à ce jour" />
             <Chiffre valeur={med != null ? fmtPctSigne(med) : '—'} legende="performance médiane à ce jour" />
             <Chiffre valeur={`${enHausse} / ${enBaisse}`} legende="en hausse / en baisse" />
@@ -122,7 +122,7 @@ export default function SignalPerformance({
           <h2 className={TITRE}>Mesure historique : backtest rétroactif de la méthode</h2>
           {backtest.n > 0 && (
             <span className="text-[11px] text-faint">
-              {backtest.n} signaux d&apos;achat sur 24 mois
+              {backtest.n} signaux haussiers sur 24 mois
             </span>
           )}
         </div>
@@ -132,7 +132,7 @@ export default function SignalPerformance({
         ) : (
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <Chiffre valeur={String(backtest.n)} legende="signaux d'achat analysés" />
+              <Chiffre valeur={String(backtest.n)} legende="signaux haussiers analysés" />
               <Chiffre valeur={backtest.avgPerfPct != null ? fmtPctSigne(backtest.avgPerfPct) : '—'} legende="performance moyenne à ~30j" />
               <Chiffre valeur={backtest.pctPositive != null ? `${fmtNumber(backtest.pctPositive, 0)} %` : '—'} legende="de signaux positifs" />
             </div>

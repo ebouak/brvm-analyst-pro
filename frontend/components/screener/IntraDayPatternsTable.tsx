@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getPatternsForDate } from '@/lib/patterns/queries';
 import type { PatternScreenerData } from '@/lib/patterns/queries';
+import { fmtPctAbs } from '@/lib/format';
 
 interface IntraDayPatternsTableProps {
   dateMarche?: string;
@@ -173,7 +174,7 @@ export default function IntraDayPatternsTable({
                 <td className="py-3 px-4 font-medium text-accent">{pattern.code}</td>
                 <td className="py-3 px-4">{getPatternBadge(pattern.pattern_type)}</td>
                 <td className="py-3 px-4">{getConfidenceBadge(pattern.confidence_level)}</td>
-                <td className="py-3 px-4 tabular">{(pattern.quality_score * 100).toFixed(0)}%</td>
+                <td className="py-3 px-4 tabular">{fmtPctAbs(pattern.quality_score * 100, 0)}</td>
                 <td className="py-3 px-4">{formatAdvisorDelta(pattern.advisor_delta)}</td>
                 <td className="py-3 px-4 tabular text-center">
                   <span className="bg-surface px-2 py-1 rounded text-xs">

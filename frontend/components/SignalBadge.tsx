@@ -11,9 +11,9 @@ const STYLES: Record<string, string> = {
 };
 
 const SIGNAL_HINTS: Record<string, string> = {
-  BUY: "Signal d'achat : le score technique dépasse le seuil d'achat. Lecture des cours passés, ni prévision ni conseil.",
-  HOLD: "Aucun signal : le score technique reste entre les seuils d'achat et de vente.",
-  SELL: "Signal de vente : le score technique passe sous le seuil de vente. Lecture des cours passés, ni prévision ni conseil.",
+  BUY: "Signal haussier : le score technique dépasse le seuil haut. Lecture des cours passés, ni prévision ni conseil.",
+  HOLD: "Neutre : le score technique reste entre les deux seuils.",
+  SELL: "Signal baissier : le score technique passe sous le seuil bas. Lecture des cours passés, ni prévision ni conseil.",
 };
 
 export default function SignalBadge({
@@ -24,7 +24,7 @@ export default function SignalBadge({
   signal: SignalDaily['signal'] | null | undefined;
   confiance?: number | null;
   small?: boolean;
-  /** Sans effet : le libellé est toujours français (Achat / Attente / Vente). */
+  /** Sans effet : le libellé est toujours français (haussier / neutre / baissier). */
   francais?: boolean;
 }) {
   const { beginner } = useBeginnerMode();
