@@ -215,7 +215,7 @@ export default async function BacktestPage(props: PageProps) {
       {/* Header */}
       <SectionHeader
         title="Backtest"
-        subtitle="Signal momentum : variation supérieure à 2 % = achat, inférieure à −2 % = vente, sinon attente. Simulation sur performances passées, sans garantie pour l'avenir."
+        subtitle="Signal momentum : variation supérieure à 2 % = position ouverte, inférieure à −2 % = position soldée, sinon inchangée. Simulation sur performances passées, sans garantie pour l'avenir."
       />
 
       <div className="gold-rule" />

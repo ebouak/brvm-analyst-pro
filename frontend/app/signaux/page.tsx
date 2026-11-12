@@ -113,7 +113,7 @@ export default async function SignauxPage() {
       <AccessGate
         required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les Signaux"
-        hint="Signaux d’achat et de vente notés, avec leur performance historique."
+        hint="Signaux haussiers et baissiers notés, avec leur performance historique."
       />
     );
   }
@@ -183,21 +183,21 @@ export default async function SignauxPage() {
           accent="neutral"
         />
         <MetricCard
-          label="Signaux Achat"
+          label="Signaux haussiers"
           value={String(buyCount)}
           delta={total > 0 ? `${Math.round((buyCount / total) * 100)} % du marché` : undefined}
           deltaDir="flat"
           accent="emerald"
         />
         <MetricCard
-          label="Signaux Attente"
+          label="Neutres"
           value={String(holdCount)}
           delta={total > 0 ? `${Math.round((holdCount / total) * 100)} % du marché` : undefined}
           deltaDir="flat"
           accent="neutral"
         />
         <MetricCard
-          label="Signaux Vente"
+          label="Signaux baissiers"
           value={String(sellCount)}
           delta={total > 0 ? `${Math.round((sellCount / total) * 100)} % du marché` : undefined}
           deltaDir="flat"
@@ -205,13 +205,13 @@ export default async function SignauxPage() {
         />
       </div>
 
-      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
+      {/* ── Message pédagogique quand aucun signal haussier ──────────────── */}
       {total > 0 && buyCount === 0 && (
         <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="font-medium text-ivory">Aucun signal d&apos;achat sur cette séance.</span>{' '}
-          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
+          <span className="font-medium text-ivory">Aucun signal haussier sur cette séance.</span>{' '}
+          Aucun titre ne réunit les conditions d&apos;un signal haussier. C&apos;est une situation
           courante en phase de marché neutre, pas une anomalie. Les titres classés{' '}
-          <span className="text-ivory">Attente</span> n&apos;ont simplement franchi aucun des deux seuils.
+          <span className="text-ivory">Neutre</span> n&apos;ont simplement franchi aucun des deux seuils.
         </div>
       )}
 

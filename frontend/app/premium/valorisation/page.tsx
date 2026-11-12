@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
 import { VALO_TABS } from '@/lib/viewTabsPresets';
+import { fmtPctAbsTexte } from '@/lib/format';
 
 export const revalidate = 3600;
 export const metadata = { title: 'Valorisation' };
@@ -33,11 +34,11 @@ export default async function ValorisationPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard label="Sociétés valorisables" value={String(valuable.length)} delta={`sur ${all.length} analysées`} deltaDir="flat" accent="sapphire" />
-        <MetricCard label="En décote estimée" value={String(decotes)} delta="potentiel > +15 %" deltaDir="up" accent="emerald" />
+        <MetricCard label="En décote estimée" value={String(decotes)} delta="valeur estimée > cours de 15 %" deltaDir="up" accent="emerald" />
         <MetricCard
-          label="Plus forte décote"
+          label="Plus fort écart estimé"
           value={cheapest ? cheapest.code : '—'}
-          delta={cheapest && cheapest.fairValue.upside != null ? `+${(cheapest.fairValue.upside * 100).toFixed(0)} %` : undefined}
+          delta={cheapest && cheapest.fairValue.upside != null ? `valeur estimée ${fmtPctAbsTexte(cheapest.fairValue.upside * 100, 0)} au-dessus du cours` : undefined}
           deltaDir="up"
           accent="gold"
         />

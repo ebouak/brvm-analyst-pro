@@ -62,9 +62,17 @@ export default function PaperTradingPage() {
           </p>
         </div>
 
+        {/* État de chargement : un squelette à la forme du tableau de bord, et non une
+            phrase figée dans le HTML initial (le compte se lit côté navigateur). */}
         {account === 'loading' && (
-          <div className="text-center text-muted py-8">
-            Vérification du compte...
+          <div role="status" aria-live="polite" className="mt-8 space-y-4">
+            <span className="sr-only">Chargement de votre compte fictif</span>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-hidden="true">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-20 rounded-lg border border-border bg-surface motion-safe:animate-pulse" />
+              ))}
+            </div>
+            <div className="h-64 rounded-lg border border-border bg-surface motion-safe:animate-pulse" aria-hidden="true" />
           </div>
         )}
 
