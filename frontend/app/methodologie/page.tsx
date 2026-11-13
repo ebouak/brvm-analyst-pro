@@ -95,7 +95,7 @@ export default function MethodologiePage() {
               { label: 'score_volume',          desc: 'Volume relatif à la moyenne 20j',            weight: '30 %', tone: 'sapphire' as const },
               { label: 'score_rsi',             desc: 'Position RSI (survente / surachat)',          weight: '30 %', tone: 'sapphire' as const },
               { label: 'bonus_tendance',        desc: 'Bonus si golden cross ou breakout',           weight: '+bonus', tone: 'gold' as const },
-              { label: 'penalite_liquidite',    desc: 'Malus si volume < seuil minimum',             weight: '−malus', tone: 'neutral' as const },
+              { label: 'penalite_liquidite',    desc: 'Rapproche le score de zéro si la liquidité est faible', weight: 'atténue', tone: 'neutral' as const },
             ].map(({ label, desc, weight, tone }) => (
               <div key={label} className="flex items-center gap-4 px-5 py-3">
                 <code className="text-xs text-ivory font-mono shrink-0 w-44">{label}</code>
