@@ -20,6 +20,7 @@ import { RailDecouvrir, SectionOutils, SectionMethode, TuilesSeance, SectionPubl
 import type { EtapeMethode } from '@/components/vitrine/MethodeEtapes';
 import { chargerDemosOutils, chargerDecouvrir } from '@/lib/vitrine/outils';
 import { OUTILS, accesOutil, rubriqueOutil, campagnesPub } from '@/lib/vitrine/outilsPur';
+import { CanauxFlottants } from '@/components/vitrine/CanauxFlottants';
 
 /** Fait réel d'une étape de la méthode (null = la donnée manque, l'étape s'affiche sans). */
 interface Fait { libelle: string; valeur: string; detail: string; href?: string; hrefLabel?: string }
@@ -153,6 +154,7 @@ export default async function Landing() {
       <SectionGratuit o={{ gratuit: prixGratuit, premium: prixPremium }} />
       <SectionFinale />
       <BandeauFlottant />
+      <CanauxFlottants />
     </div>
   );
 }

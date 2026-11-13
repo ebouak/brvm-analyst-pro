@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fmtDateCourte } from '@/lib/format';
 import { libelleClasse } from '@/lib/fiche/quantTextes';
 import { SectionHeader, PremiumPanel, MetricCard, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 
-export const revalidate = 300;
+// Verrou par utilisateur (feature_flags.combined_alpha) : rendu dynamique, plus de cache partagé.
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Combined Alpha — classement quant BRVM' };
 
 function signalCls(c: string): string {
@@ -23,6 +26,16 @@ function tone(v: number | null): string {
 }
 
 export default async function CombinedAlphaPage() {
+  const gate = await canAccess('combined_alpha');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Combined Alpha"
+        hint="Le classement quantitatif des valeurs cotées : valeur, qualité des résultats, solidité financière, dividende et dynamique de cours."
+      />
+    );
+  }
   const supabase = createPublicClient();
   const { data: run } = await supabase.from('quant_model_runs').select('*').eq('model_code','WB_COMBINED_ALPHA').order('calculation_date',{ascending:false}).limit(1).maybeSingle();
   type Row = { security_id:string; combined_alpha_score:number|null; value_score:number|null; earnings_quality_score:number|null; financial_strength_score:number|null; dividend_quality_score:number|null; price_momentum_score:number|null; rank_global:number|null; classification:string; confidence_level:string };

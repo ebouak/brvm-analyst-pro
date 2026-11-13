@@ -165,7 +165,7 @@ export function SectionOutils({ outils, demos }: { outils: OutilAffiche[]; demos
 
 export function SectionMethode({ etapes }: { etapes: EtapeMethode[] }) {
   return (
-    <section id="methode" className="bande-sombre v-bloc" aria-labelledby="h-methode">
+    <section id="methode" className="bande-claire v-bloc" aria-labelledby="h-methode">
       <div className="v-colonne">
         <Apparition className="v-tete-section">
           <p className="v-surtitre">La méthode</p>
