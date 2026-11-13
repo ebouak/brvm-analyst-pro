@@ -23,12 +23,6 @@ const nextConfig = {
   // existant n'a jamais été linté → on évite de casser les déploiements Vercel.
   // À durcir progressivement (corriger puis passer à false).
   eslint: { ignoreDuringBuilds: true },
-  // Vérification des types SAUTÉE sur Vercel uniquement : depuis le 2026-11-13, le
-  // build y est tué par manque de mémoire (OOM, SIGKILL) pendant cette étape, après
-  // une compilation réussie. Elle est faite par la CI (job « Frontend — typecheck +
-  // build ») sur chaque PR, et reste exigée en local. Ne fusionner qu'une PR dont la
-  // CI est verte.
-  typescript: { ignoreBuildErrors: process.env.VERCEL === '1' },
   async redirects() {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
