@@ -128,6 +128,7 @@ export async function redeemPairingCode(chatId: number, rawText: string): Promis
     chatId,
     '✓ Telegram lié à votre compte WESTBOURSE.\n\n' +
       'Vous recevrez ici les alertes que vous avez définies. Pour me poser des ' +
-      "questions sur le marché, activez l'agent conversationnel dans vos paramètres.",
+      "questions sur le marché, activez l'agent conversationnel dans vos paramètres.\n\n" +
+      'Pour commencer, les bases de la Bourse expliquées simplement : https://www.westbourse.com/debutant',
   );
 }

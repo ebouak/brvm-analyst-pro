@@ -65,6 +65,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
     { t: 'Sociétés', href: '/societes' },
     { t: 'Analyses', href: '/analyses' },
     { t: 'Formations', href: '/formations' },
+    { t: 'Débutant', href: '/debutant' },
     { t: 'À propos', href: '/methodologie' },
   ] as const;
   return (
@@ -102,14 +103,13 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
 export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string }) {
   const pathname = usePathname();
   const active = (h: string) => pathname === h || pathname.startsWith(h + '/');
-  const cls = (h: string) => `inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors ${active(h) ? 'bg-accent/10 text-accent-ink' : 'text-muted hover:bg-white/[0.06] hover:text-ivory'}`;
+  const cls = (h: string) => `inline-flex min-h-[44px] items-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${active(h) ? 'bg-accent/10 text-accent-ink' : 'text-muted hover:bg-white/[0.06] hover:text-ivory'}`;
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-surface/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" aria-label="WESTBOURSE accueil" className="flex shrink-0 items-center gap-2.5">
           <AnimatedLogo size={30} variant="mark" animate={false} />
           <span className="hidden font-display text-lg font-semibold tracking-tight text-ivory min-[400px]:inline">WESTBOURSE</span>
-          <span className="ml-1 hidden border-l border-border pl-3 text-xs font-semibold leading-none text-faint 2xl:block">Comprendre aujourd&apos;hui,<br />investir demain</span>
         </Link>
         {/* Navigation complète à partir de 1280 px seulement : six liens, le thème,
             la connexion et l'inscription mesurent ~1 200 px et débordaient de 150 à
@@ -119,6 +119,7 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
           <Link href="/societes" className={cls('/societes')}>Sociétés</Link>
           <Link href="/analyses" className={cls('/analyses')}>Analyses</Link>
           <Link href="/formations" className={cls('/formations')}>Formations</Link>
+          <Link href="/debutant" className={cls('/debutant')}>Débutant</Link>
           <OutilsDrop />
           <Link href="/methodologie" className={`${cls('/methodologie')} whitespace-nowrap`}>À propos</Link>
           <span className="mx-1 hidden h-5 w-px bg-border lg:block" aria-hidden />
@@ -126,6 +127,7 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
           <BoutonsSession variante="bureau" />
         </nav>
         <div className="flex items-center gap-2 xl:hidden">
+          <Link href="/debutant" className={`hidden md:inline-flex ${cls('/debutant')}`}>Débutant</Link>
           <ThemeToggle className="hidden sm:inline-flex" />
           <BoutonsSession variante="compact" />
           <MobileDrawer marchesHref={marchesHref} />

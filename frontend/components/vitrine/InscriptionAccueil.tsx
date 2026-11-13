@@ -11,7 +11,8 @@ import { suivreInscription, useEtatSession } from './suivi';
  * avec l'adresse déjà saisie. Mêmes validations, même message de confirmation
  * que la page de connexion, sans dupliquer le captcha ni l'appel Supabase.
  *
- * Connecté : le champ laisse place à « Mon tableau de bord ». L'attribut
+ * Connecté : le champ laisse place à « Créer un compte » (contour) puis
+ * « Mon tableau de bord ». L'attribut
  * `data-hero-cta` reste dans les deux cas : le bandeau flottant s'y repère.
  */
 export function InscriptionAccueil({ id = 'v-mail-ouverture' }: { id?: string }) {
@@ -26,7 +27,8 @@ export function InscriptionAccueil({ id = 'v-mail-ouverture' }: { id?: string })
   };
   if (session === 'connecte') {
     return (
-      <div data-hero-cta="">
+      <div data-hero-cta="" className="v-cta-duo">
+        <Link href="/signup?from=ouverture" className="v-bouton-second">Créer un compte</Link>
         <Link href="/dashboard" className="v-bouton">Mon tableau de bord</Link>
       </div>
     );

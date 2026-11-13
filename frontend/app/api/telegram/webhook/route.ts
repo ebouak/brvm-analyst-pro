@@ -12,6 +12,9 @@ import { checkRateLimit } from '@/lib/server/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
+/** Page publique des bases, jointe à tout premier message. */
+const LIEN_DEBUTANT = 'https://www.westbourse.com/debutant';
+
 /**
  * Telegram REJOUE une mise à jour qu'il n'a pas vue acquittée, et le fait
  * agressivement. Un cold start Vercel suffit à déclencher un rejeu : sans
@@ -110,7 +113,8 @@ export async function POST(request: Request) {
             'Bienvenue sur WESTBOURSE.\n\n' +
               'Pour lier ce Telegram à votre compte, générez un code dans vos ' +
               `paramètres (rubrique Alertes) et envoyez-le-moi ici. Il est valable ${PAIRING_TTL_MINUTES} minutes.\n\n` +
-              'Une fois lié, vous recevrez vos alertes et pourrez me poser des questions sur le marché.',
+              'Une fois lié, vous recevrez vos alertes et pourrez me poser des questions sur le marché.\n\n' +
+              `Pour commencer, les bases de la Bourse expliquées simplement : ${LIEN_DEBUTANT}`,
           );
           return;
         }
