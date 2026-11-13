@@ -93,3 +93,54 @@ export function spearman(xs: number[], ys: number[]): number | null {
   }
   return dx === 0 || dy === 0 ? null : num / Math.sqrt(dx * dy);
 }
+
+/** Sous-scores d'une séance, tels que computeScore les renvoie. */
+export interface Composantes {
+  variation: number;
+  volume: number;
+  macd: number;
+  /** RSI déjà multiplié par le poids de régime. */
+  rsi: number;
+  tendance: number;
+}
+
+/**
+ * Trois façons de composer le score, pour les comparer au banc :
+ *  - actuel : la formule en production (hors pénalité de liquidité, qui ne fait
+ *    qu'atténuer et ne change pas l'ordre des titres à liquidité égale) ;
+ *  - retrait : RSI et tendance seuls ;
+ *  - inversion : variation, volume et MACD comptés en sens contraire.
+ */
+export function variantesScore(c: Composantes): { actuel: number; retrait: number; inversion: number } {
+  const momentum = P.W_VARIATION * c.variation + P.W_VOLUME * c.volume + P.W_MACD * c.macd;
+  const contrarien = P.W_RSI * c.rsi + c.tendance;
+  return { actuel: momentum + contrarien, retrait: contrarien, inversion: -momentum + contrarien };
+}
+
+/**
+ * Écart haut − bas : chaque jour retenu, rendement relatif moyen des 20 % de titres
+ * les mieux notés moins celui des 20 % les moins bien notés. Un jour sur `pas`
+ * seulement, pour que les fenêtres de rendement ne se chevauchent pas.
+ * Renvoie la moyenne, l'écart-type de la moyenne et le nombre de jours.
+ */
+export function ecartHautBas(
+  obs: { date: string; score: number; rel: number }[],
+  pas: number,
+  part = 0.2,
+): { moyenne: number; erreur: number; jours: number } | null {
+  const parJour = new Map<string, { score: number; rel: number }[]>();
+  for (const o of obs) (parJour.get(o.date) ?? parJour.set(o.date, []).get(o.date)!).push(o);
+  const dates = [...parJour.keys()].sort();
+  const ecarts: number[] = [];
+  for (let i = 0; i < dates.length; i += pas) {
+    const jour = parJour.get(dates[i]!)!.slice().sort((a, b) => a.score - b.score);
+    const k = Math.floor(jour.length * part);
+    if (k < 3) continue;
+    const moy = (xs: { rel: number }[]) => xs.reduce((s, x) => s + x.rel, 0) / xs.length;
+    ecarts.push(moy(jour.slice(-k)) - moy(jour.slice(0, k)));
+  }
+  if (ecarts.length < 5) return null;
+  const m = ecarts.reduce((a, b) => a + b, 0) / ecarts.length;
+  const sd = Math.sqrt(ecarts.reduce((s, x) => s + (x - m) ** 2, 0) / (ecarts.length - 1));
+  return { moyenne: m, erreur: sd / Math.sqrt(ecarts.length), jours: ecarts.length };
+}
