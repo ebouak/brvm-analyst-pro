@@ -15,8 +15,8 @@ describe('accès des outils', () => {
     expect(accesOutil('/assistant')).toBe('premium'); // premium: true au registre
     expect(accesOutil('/fiscalite')).toBe('libre');
     expect(accesOutil('/simulateur')).toBe('libre');
-    expect(accesOutil('/analyse/combined-alpha')).toBe('libre');
-    expect(accesOutil('/screener')).toBe('compte');
+    expect(accesOutil('/analyse/combined-alpha')).toBe('premium'); // 0216
+    expect(accesOutil('/screener')).toBe('premium'); // 0216
     expect(accesOutil('/dividendes')).toBe('compte');
     expect(accesOutil('/premium/inconnu')).toBe('premium'); // gardé par le middleware
   });

@@ -11,7 +11,7 @@ import { phCapture } from '@/lib/analytics/posthogClient';
  */
 
 export type EmplacementInscription = 'en-tete' | 'ouverture' | 'mosaique' | 'outils' | 'communaute' | 'gratuit' | 'final' | 'bandeau';
-export type EmplacementCanal = 'ouverture' | 'film' | 'canaux' | 'bandeau';
+export type EmplacementCanal = 'ouverture' | 'film' | 'canaux' | 'bandeau' | 'flottant';
 export type Canal = 'whatsapp' | 'whatsapp-numero' | 'telegram' | 'email';
 
 export function suivreInscription(emplacement: EmplacementInscription): void {

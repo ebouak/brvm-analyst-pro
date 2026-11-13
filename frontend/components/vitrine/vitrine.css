@@ -3,7 +3,10 @@
  * rien ne fuit vers le reste du site. Les couleurs passent par les jetons du site
  * (triplets RGB de globals.css), jamais par des hex en dur.
  *
- * La page alterne des bandes sombres et claires QUEL QUE SOIT le thème choisi :
+ * La page alterne des bandes sombres et claires, comme apple.com. En mode clair,
+ * chaque bande S'INVERSE : la page devient majoritairement claire avec des bandes
+ * sombres intercalées (sinon l'accueil restait noir quel que soit le thème).
+ * Mécanique :
  * `.bande-sombre` et `.bande-claire` redéclarent les jetons localement (même
  * principe que `.dark-band` dans globals.css : les blocs `:root[data-theme]`
  * sont attachés à la racine et ne cascadent pas sur une section).
@@ -21,7 +24,8 @@
 }
 
 
-.vitrine .bande-sombre {
+.vitrine .bande-sombre,
+:root[data-theme="light"] .vitrine .bande-claire {
   --color-bg: 3 3 3; --color-surface: 10 20 23; --color-elevated: 17 43 51; --color-sunken: 2 3 3;
   --color-border: 27 42 48; --color-border-strong: 42 61 68;
   --color-accent: 86 215 253; --color-accent-ink: 86 215 253;
@@ -31,7 +35,8 @@
   background: rgb(var(--color-bg));
   color: rgb(var(--color-ivory));
 }
-.vitrine .bande-claire {
+.vitrine .bande-claire,
+:root[data-theme="light"] .vitrine .bande-sombre {
   --color-bg: 250 248 244; --color-surface: 255 255 255; --color-elevated: 255 255 255; --color-sunken: 243 240 232;
   --color-border: 236 230 218; --color-border-strong: 217 208 189;
   --color-accent: 9 117 143; --color-accent-ink: 7 104 128;
@@ -61,7 +66,7 @@
 .vitrine .v-bouton {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 0 24px; border-radius: 999px; border: 0;
-  background: rgb(var(--color-accent)); color: #00141a; font: inherit; font-size: 16px; font-weight: 600;
+  background: rgb(var(--color-accent)); color: rgb(var(--color-bg)); font: inherit; font-size: 16px; font-weight: 600;
   cursor: pointer; text-decoration: none; transition: transform .3s var(--ressort);
 }
 .vitrine .v-bouton:hover { transform: scale(1.03); }
@@ -204,17 +209,17 @@
 .vitrine .v-case:hover, .vitrine .v-case:focus-visible { transform: scale(1.14); position: relative; z-index: 2; }
 .vitrine .v-case-code { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
 .vitrine .v-case-pct { font-size: 12px; font-weight: 500; }
-.vitrine .v-case--hausse-pleine { background: rgb(var(--color-up)); color: #03140b; }
+.vitrine .v-case--hausse-pleine { background: rgb(var(--color-up)); color: rgb(var(--color-bg)); }
 .vitrine .v-case--hausse { background: rgb(var(--color-up) / .14); color: rgb(var(--color-up)); }
 .vitrine .v-case--stable { background: rgb(var(--color-elevated)); color: rgb(var(--color-faint)); }
 .vitrine .v-case--baisse { background: rgb(var(--color-down) / .14); color: rgb(var(--color-down)); }
-.vitrine .v-case--baisse-pleine { background: rgb(var(--color-down)); color: #1c0505; }
+.vitrine .v-case--baisse-pleine { background: rgb(var(--color-down)); color: rgb(var(--color-bg)); }
 .vitrine .v-incitation {
   margin-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
   background: rgb(var(--color-surface)); border-radius: 24px; padding: clamp(20px, 3vw, 32px);
 }
 .vitrine .v-canaux-boutons { display: flex; gap: 10px; flex-wrap: wrap; }
-.vitrine .v-bouton--whatsapp { background: rgb(var(--color-up)); color: #03140b; }
+.vitrine .v-bouton--whatsapp { background: rgb(var(--color-up)); color: rgb(var(--color-bg)); }
 
 /* ── Film de séance (unités relatives au cadre) ───────────────────────── */
 .vitrine .v-film { position: relative; container-type: inline-size; border-radius: clamp(16px, 2.4vw, 28px); overflow: hidden; background: rgb(var(--color-sunken)); border: 1px solid rgb(var(--color-border)); }
@@ -375,7 +380,7 @@
   transition: transform .3s var(--ressort), background-color .3s, color .3s;
 }
 .vitrine .v-methode--joue .v-etape-num { border-color: rgb(var(--color-border-strong)); color: rgb(var(--color-faint)); }
-.vitrine .v-methode--joue .v-etape--on .v-etape-num { background: rgb(var(--color-accent)); color: #00141a; border-color: transparent; transform: scale(1.12); }
+.vitrine .v-methode--joue .v-etape--on .v-etape-num { background: rgb(var(--color-accent)); color: rgb(var(--color-bg)); border-color: transparent; transform: scale(1.12); }
 .vitrine .v-etape b { font-size: 17px; font-weight: 600; }
 .vitrine .v-etape-desc { font-size: 14px; color: rgb(var(--color-muted)); }
 .vitrine .v-etape-fait { font-size: 13px; color: rgb(var(--color-faint)); }
@@ -493,3 +498,35 @@
 @keyframes v-flottant { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @media (prefers-reduced-motion: reduce) { .vitrine .v-flottant { animation: none; } }
 @media print { .vitrine .v-flottant { display: none; } }
+
+/* ── Canaux flottants : WhatsApp et Telegram, toujours à portée (bas droite).
+   Remontés sur petit écran pour ne pas chevaucher le bandeau d'inscription. ── */
+.vitrine .v-canaux-flottants {
+  position: fixed; right: 16px; bottom: 16px; z-index: 31;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+  animation: v-canaux-entree .7s var(--frein) 1.6s both;
+}
+.vitrine .v-canal-flottant {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px 0 14px;
+  border-radius: 999px; font-size: 14px; font-weight: 600; text-decoration: none;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .28); transition: transform .3s var(--ressort), box-shadow .3s;
+}
+.vitrine .v-canal-flottant:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 36px rgb(0 0 0 / .34); }
+.vitrine .v-canal-flottant:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.vitrine .v-canal-flottant--whatsapp { background: #128c4b; color: #fff; }
+.vitrine .v-canal-flottant--telegram { background: #1e79b8; color: #fff; }
+.vitrine .v-canal-flottant svg { flex: none; }
+@keyframes v-canaux-entree { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@media (max-width: 1023px) {
+  .vitrine .v-canal-flottant { width: 52px; height: 52px; padding: 0; justify-content: center; }
+  .vitrine .v-canal-flottant span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-width: 640px) { .vitrine .v-canaux-flottants { bottom: 92px; right: 12px; } }
+@media (prefers-reduced-motion: reduce) {
+  .vitrine .v-canaux-flottants { animation: none; }
+  .vitrine .v-canal-flottant { transition: none; }
+}
+@media print { .vitrine .v-canaux-flottants { display: none; } }
+/* Tant que le bandeau des cookies occupe le bas de l'écran, les boutons passent au-dessus. */
+body:has([data-bandeau-cookies]) .vitrine .v-canaux-flottants { bottom: 120px; }
+@media (max-width: 640px) { body:has([data-bandeau-cookies]) .vitrine .v-canaux-flottants { bottom: 200px; } }

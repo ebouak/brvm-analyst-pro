@@ -110,7 +110,7 @@ export function BandeauSeance({ lignes }: { lignes: [string[], string[]] }) {
 
 export function SectionMosaique({ cases, releve }: { cases: CaseValeur[]; releve: string | null }) {
   return (
-    <section className="bande-sombre v-bloc">
+    <section className="bande-claire v-bloc">
       <div className="v-colonne">
         <Apparition className="v-tete-section">
           <h2 className="v-section">{cases.length} valeurs. <span className="vitrine-accent">Une séance.</span></h2>

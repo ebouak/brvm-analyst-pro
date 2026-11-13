@@ -1,4 +1,6 @@
 import { Crosshair } from 'lucide-react';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import { smaSeries, rsiSeries, macdSeries } from '@/lib/indicators';
@@ -29,6 +31,16 @@ interface PageProps {
 
 export default async function ScannerPage(props: PageProps) {
   const searchParams = await props.searchParams;
+  const gate = await canAccess('scanner_technique');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Le Scanner technique"
+        hint="Filtrez les 48 valeurs sur la tendance, le RSI, le MACD et les moyennes mobiles."
+      />
+    );
+  }
   const criteria = parseCriteriaFromSearchParams(searchParams);
   const filtersActive = hasAnyCriteria(criteria);
 
