@@ -104,7 +104,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
               )}
               {stock.confiance != null && (
                 <span className="rounded-full border border-border px-3 py-1 text-[11px] text-muted">
-                  Confiance {(stock.confiance * 100).toFixed(0)}&nbsp;%
+                  Complétude des données {(stock.confiance * 100).toFixed(0)}&nbsp;%
                 </span>
               )}
             </div>

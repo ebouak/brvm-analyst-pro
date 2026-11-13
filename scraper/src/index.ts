@@ -678,6 +678,14 @@ async function main(): Promise<number> {
       console.log(JSON.stringify(await runEmd(), null, 2));
       return 0;
     }
+    case 'eval:signaux:rejeu': {
+      // Rejeu LECTURE SEULE : ancienne et nouvelle formule de score sur les mêmes
+      // séances, passées au même banc, + corrélation de chaque composante.
+      const { runRejeuSignaux } = await import('./signaux/runRejeuSignaux.js');
+      const r = await runRejeuSignaux();
+      console.log(r.rapport);
+      return 0;
+    }
     case 'eval:signaux': {
       // Banc d'évaluation des signaux (lecture seule) : les scores ont-ils
       // annoncé la suite ? Aucun seuil de scoring/score.ts ne change sans un

@@ -40,6 +40,14 @@ export const SCORING_PARAMS = {
   MIN_LIQUIDITY_AVG_VOLUME: 100,
   /** Valeur max de la pénalité de liquidité. */
   PENALITE_LIQUIDITE_MAX: 0.25,
+  /**
+   * Part du score retirée à pénalité maximale (liquidité nulle) : le score est
+   * MULTIPLIÉ par (1 − pénalité/max × cette part), il n'est plus décalé vers le
+   * bas. Avant le 2026-11-13, la pénalité était soustraite : un titre immobile et
+   * illiquide sortait à −0,25, et une baisse déclenchait un signal là où la
+   * hausse symétrique n'en déclenchait pas.
+   */
+  REDUCTION_LIQUIDITE_MAX: 0.5,
   /** Amplitude du facteur de tendance, désormais SYMÉTRIQUE (±) selon MA20 vs MA50. */
   BONUS_TENDANCE: 0.1,
   BUY_THRESHOLD: 0.6,
@@ -126,15 +134,17 @@ export function computeScore(input: ScoreInput): ScoreResult {
 
   // --- Sous-score volume (confirmation directionnelle, lissée) -------------
   // volume_ratio = volume / moyenne 30j ; lissé en log pour écraser les pics.
-  // Le signe suit la direction du jour : un volume élevé renforce le sens de
-  // la variation ; un volume faible le tempère.
+  // Le signe suit la direction du jour. Seul un volume SUPÉRIEUR à la moyenne
+  // confirme le mouvement ; un volume inférieur ne confirme rien (0). Avant le
+  // 2026-11-13, une valeur absolue effaçait le signe de tanh(log(ratio)) : un
+  // volume de 0,05 × la moyenne donnait le même 0,99 qu'un volume de 20 ×.
   let volumeRatio: number | null = null;
   let scoreVolume: number | null = null;
   if (input.volume != null && input.avg_volume_30d != null && input.avg_volume_30d > 0) {
     volumeRatio = input.volume / input.avg_volume_30d;
     const magnitude = clamp(Math.tanh(Math.log(volumeRatio + 1e-9)), -1, 1);
     const dir = Math.sign(input.variation_pct ?? 0);
-    scoreVolume = dir === 0 ? 0 : clamp(Math.abs(magnitude) * dir, -1, 1);
+    scoreVolume = dir === 0 ? 0 : clamp(dir * Math.max(0, magnitude), -1, 1);
   }
 
   // --- Sous-score MACD (momentum de fond) ----------------------------------
@@ -173,14 +183,18 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const vVol = scoreVolume ?? 0;
   const vMacd = scoreMacd ?? 0;
   const vRsi = (scoreRsi ?? 0) * rsiRegimeWeight; // RSI atténué par le régime
-  let scoreTotal =
+  const scoreBrut = clamp(
     P.W_VARIATION * vVar +
     P.W_VOLUME * vVol +
     P.W_MACD * vMacd +
     P.W_RSI * vRsi +
-    bonusTendance -
-    penaliteLiquidite;
-  scoreTotal = clamp(scoreTotal, -1, 1);
+    bonusTendance,
+    -1,
+    1,
+  );
+  // Faible liquidité : le score est rapproché de zéro, symétriquement.
+  const facteurLiquidite = 1 - (penaliteLiquidite / P.PENALITE_LIQUIDITE_MAX) * P.REDUCTION_LIQUIDITE_MAX;
+  const scoreTotal = clamp(scoreBrut * facteurLiquidite, -1, 1);
 
   // --- Neutralisation si données incomplètes (§9) --------------------------
   const incomplet =
@@ -312,7 +326,7 @@ function buildExplanation(a: {
   }
   if (a.bonusTendance > 0.001) parts.push('tendance de fond haussière (MA20 > MA50)');
   else if (a.bonusTendance < -0.001) parts.push('tendance de fond baissière (MA20 < MA50)');
-  if (a.penaliteLiquidite > 0) parts.push('pénalité de faible liquidité appliquée');
+  if (a.penaliteLiquidite > 0) parts.push('score atténué pour faible liquidité');
 
   const intro =
     a.signal === 'BUY'
