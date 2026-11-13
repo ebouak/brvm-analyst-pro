@@ -127,9 +127,12 @@ const jsonLd = {
         'https://www.linkedin.com/company/westbourse',
         // Profil personnel du fondateur — renforce l'ancrage humain de la marque.
         'https://www.linkedin.com/in/westbourse-lt-745473422/',
-        // À AJOUTER dès leur création :
+        // Page Facebook (communiquée par l'exploitant le 2026-11-13).
+        'https://www.facebook.com/profile.php?id=61593099424531',
+        // TikTok, compte de publication des vidéos de séance.
+        'https://www.tiktok.com/@westbourse7',
+        // À AJOUTER dès sa création :
         // 'https://x.com/westbourse',
-        // 'https://www.facebook.com/westbourse',
       ],
       areaServed: [
         { '@type': 'Country', name: "Côte d'Ivoire" },
