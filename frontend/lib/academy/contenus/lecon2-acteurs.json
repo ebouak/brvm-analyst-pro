@@ -1,0 +1,128 @@
+{
+  "titre": "Leçon 2 — Les 4 acteurs clés du marché",
+  "categorie": "regulatory",
+  "duree_min": 8,
+  "sous_titre": "Qui organise, qui contrôle, qui exécute, qui conserve : et à qui s’adresser en cas de problème.",
+  "resume": "Quatre acteurs font fonctionner la BRVM : la bourse, le régulateur, votre SGI et le dépositaire central.\nBien distinguer leurs rôles vous fait gagner du temps quand un problème survient, et vous protège des escroqueries.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Quatre acteurs, quatre rôles",
+      "contenu": "Chaque acteur a une mission précise. Les confondre, c’est frapper à la mauvaise porte, ou faire confiance à qui n’en mérite pas.",
+      "tableau": {
+        "colonnes": ["Acteur", "Son rôle", "Ce qu’il fait pour vous"],
+        "lignes": [
+          ["BRVM", "La bourse", "Organise les séances, publie les cours et les indices, tient le Bulletin officiel de la cote."],
+          ["AMF-UMOA", "Le régulateur", "Agrée les intermédiaires, contrôle le marché, protège les investisseurs et sanctionne les abus."],
+          ["SGI", "Votre intermédiaire", "Ouvre votre compte, exécute vos ordres, conserve vos titres et vous adresse vos relevés."],
+          ["DC/BR", "Le dépositaire central", "Tient le registre des titres et règle les échanges entre intermédiaires."]
+        ],
+        "note": "L’AMF-UMOA a succédé au CREPMF : les documents anciens emploient encore ce nom."
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "De votre ordre à vos titres",
+      "contenu": "Chaque achat suit la même chaîne. Vous ne parlez qu’à votre SGI ; les autres acteurs travaillent derrière elle.",
+      "flux": [
+        { "titre": "Vous", "detail": "Vous passez votre ordre à votre SGI.", "icone": "decision" },
+        { "titre": "Votre SGI", "detail": "Elle le transmet au système de cotation.", "icone": "entreprise" },
+        { "titre": "La BRVM", "detail": "L’ordre rencontre un vendeur en séance.", "icone": "graphique" },
+        { "titre": "Le DC/BR", "detail": "Les titres et les espèces changent de main.", "icone": "paiement" }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Un dividende qui n’arrive pas : par où commencer",
+      "contenu": "Situation pédagogique : la date de paiement d’un dividende est passée, et rien n’apparaît sur votre compte.\nLe bon ordre des démarches évite de perdre des jours.",
+      "etapes": [
+        { "titre": "Vérifier la date de paiement", "detail": "Elle figure au calendrier des dividendes publié par la BRVM." },
+        { "titre": "Lire son relevé", "detail": "Le dividende est versé sur le compte espèces associé au compte-titres." },
+        { "titre": "Contacter sa SGI", "detail": "C’est elle qui tient votre compte : c’est le bon premier interlocuteur.", "cle": true },
+        { "titre": "Faire une réclamation écrite", "detail": "Si la réponse ne vient pas, une réclamation écrite à la SGI laisse une trace." },
+        { "titre": "En dernier recours, le régulateur", "detail": "L’AMF-UMOA veille au respect des règles par les intermédiaires agréés." }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Reconnaître une fausse « opportunité »",
+      "contenu": "Des escrocs se présentent comme des courtiers ou des « experts » sur les réseaux sociaux et les messageries. Quatre signaux doivent vous arrêter.",
+      "points": [
+        { "titre": "Un gain promis, garanti ou très élevé", "detail": "Aucun placement en actions ne garantit un rendement. Une promesse de gain sûr est un mensonge." },
+        { "titre": "La pression pour décider vite", "detail": "« Plus que quelques places », « l’offre expire ce soir » : une vraie SGI vous laisse le temps de lire." },
+        { "titre": "Un agrément introuvable", "detail": "Seuls les intermédiaires agréés peuvent recevoir vos ordres.", "verifier": "le nom exact sur la liste officielle de l’AMF-UMOA." },
+        { "titre": "Des fonds versés à une personne", "detail": "Les versements se font sur le compte de la SGI, jamais sur le compte personnel d’un conseiller." }
+      ]
+    },
+    {
+      "type": "lexique",
+      "titre": "Le vocabulaire de l’écosystème",
+      "contenu": "Six mots que vous retrouverez dans tous les documents de votre SGI.",
+      "points": [
+        { "titre": "BRVM", "detail": "Bourse Régionale des Valeurs Mobilières : la bourse commune aux huit pays de l’UEMOA." },
+        { "titre": "AMF-UMOA", "detail": "Autorité des Marchés Financiers de l’UMOA : le régulateur, qui a succédé au CREPMF." },
+        { "titre": "SGI", "detail": "Société de Gestion et d’Intermédiation : l’intermédiaire agréé par lequel il faut passer." },
+        { "titre": "DC/BR", "detail": "Dépositaire Central / Banque de Règlement : il tient le registre des titres et règle les échanges." },
+        { "titre": "Compte-titres", "detail": "Le compte, tenu par votre SGI, où sont inscrites vos actions, avec un compte espèces associé." },
+        { "titre": "Règlement-livraison", "detail": "L’échange des titres contre les espèces, quelques jours après l’exécution de l’ordre." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Quatre idées à garder en tête.",
+      "points": [
+        { "titre": "La BRVM organise", "detail": "Séances, cours, indices, Bulletin officiel de la cote." },
+        { "titre": "L’AMF-UMOA régule", "detail": "Elle agrée les intermédiaires et protège les investisseurs." },
+        { "titre": "Votre SGI exécute et conserve", "detail": "C’est votre premier interlocuteur pour tout problème." },
+        { "titre": "Vérifiez toujours l’agrément", "detail": "Avant d’ouvrir un compte ou de verser le moindre franc." }
+      ]
+    }
+  ],
+  "chart": null,
+  "charts": [],
+  "quiz": [
+    {
+      "question": "Votre dividende n’est pas arrivé à la date de paiement. Qui contactez-vous en premier ?",
+      "options": ["La BRVM", "L’AMF-UMOA", "Votre SGI", "La société qui verse le dividende"],
+      "correct": 2,
+      "explication": "Votre SGI tient votre compte-titres et votre compte espèces : elle seule peut vérifier ce qui s’est passé sur votre compte. Le régulateur n’intervient qu’en dernier recours."
+    },
+    {
+      "question": "Quel acteur agrée les SGI et contrôle le marché ?",
+      "options": ["La BRVM", "L’AMF-UMOA", "Le DC/BR", "La BCEAO"],
+      "correct": 1,
+      "explication": "L’Autorité des Marchés Financiers de l’UMOA, qui a succédé au CREPMF, agrée les intermédiaires et veille au respect des règles."
+    },
+    {
+      "question": "Quel est le rôle du DC/BR ?",
+      "options": ["Fixer le prix des actions", "Tenir le registre des titres et régler les échanges", "Conseiller les investisseurs", "Organiser les assemblées générales"],
+      "correct": 1,
+      "explication": "Le Dépositaire Central / Banque de Règlement inscrit les titres et règle les espèces entre intermédiaires après chaque échange."
+    },
+    {
+      "question": "Un « conseiller » vous propose sur WhatsApp un placement garanti à 15 % par mois. Que faites-vous ?",
+      "options": ["Vous versez une petite somme pour tester", "Vous refusez : aucun placement en actions n’est garanti", "Vous demandez une remise", "Vous attendez que l’offre expire pour décider"],
+      "correct": 1,
+      "explication": "Un gain garanti et très élevé est le signe le plus sûr d’une escroquerie. Vérifiez aussi l’agrément sur la liste de l’AMF-UMOA."
+    },
+    {
+      "question": "Où sont inscrites les actions que vous achetez ?",
+      "options": ["Sur votre compte-titres, tenu par votre SGI", "Sur un certificat papier envoyé chez vous", "Sur le site de la société", "Sur votre compte bancaire courant"],
+      "correct": 0,
+      "explication": "Les titres sont dématérialisés : ils sont inscrits sur votre compte-titres chez votre SGI, et enregistrés au dépositaire central."
+    }
+  ],
+  "qcm": {
+    "question": "Votre dividende n’est pas arrivé à la date de paiement. Qui contactez-vous en premier ?",
+    "options": ["La BRVM", "L’AMF-UMOA", "Votre SGI", "La société qui verse le dividende"],
+    "correct": 2,
+    "explication": "Votre SGI tient votre compte-titres et votre compte espèces : elle seule peut vérifier ce qui s’est passé sur votre compte. Le régulateur n’intervient qu’en dernier recours."
+  },
+  "liens": [
+    { "label": "Comparer les SGI agréées", "href": "/comparateur-sgi" },
+    { "label": "Le calendrier des dividendes", "href": "/dividendes/calendrier" },
+    { "label": "Le guide du débutant", "href": "/debutant" }
+  ]
+}
