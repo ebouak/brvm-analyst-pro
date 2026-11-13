@@ -1,4 +1,8 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
+import { secretRenduValide, EN_TETE_RENDU } from '@/lib/dossier/renduAutorise';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
@@ -179,6 +183,22 @@ function zoneRsi(rsi: number | null): string | null {
 
 export default async function DossierPage(props: { params: Promise<{ code: string }> }) {
   const params = await props.params;
+  /* Réservé Premium (niveau lu en base, `dossiers_valeur`). Le robot qui imprime
+     les PDF du samedi n'a ni session ni abonnement : il passe par le secret
+     d'impression, revérifié ici car le middleware ne fait que l'admettre. */
+  const robot = secretRenduValide(process.env.DOSSIER_RENDER_SECRET, (await headers()).get(EN_TETE_RENDU));
+  if (!robot) {
+    const gate = await canAccess('dossiers_valeur');
+    if (!gate.allowed) {
+      return (
+        <AccessGate
+          required={gate.required === 'free' ? 'premium' : gate.required}
+          feature="Les Dossiers valeur"
+          hint="Un dossier de quatorze pages par société cotée, mis à jour chaque semaine : comptes, valorisation, dividende, niveaux et points de vigilance, en PDF."
+        />
+      );
+    }
+  }
   const sb = createClient();
   /* Médianes des comparables : même source que le diagnostic (dernier calcul
      Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ViewTabs from '@/components/ViewTabs';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { REPORT_TABS } from '@/lib/reportTabs';
 import { fmtDateCourte } from '@/lib/format';
 import { periodeDuTitre } from '@/lib/evenements/regroupement';
@@ -16,6 +18,16 @@ interface Pub { code: string; date_publication: string; libelle: string | null }
  * de comptes ou de rapport d'activité de chaque société (table `publications`).
  */
 export default async function RevuesPage() {
+  const gate = await canAccess('revues_resultats');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Les Revues de résultats"
+        hint="Les derniers comptes de chaque société lus pour vous : chiffre d'affaires, résultat, dividende et ratios, comparés à l'exercice précédent."
+      />
+    );
+  }
   const sb = createClient();
   const depuis = new Date(Date.now() - 400 * 86_400_000).toISOString().slice(0, 10);
   const [{ data: instr }, { data: pubs }] = await Promise.all([
