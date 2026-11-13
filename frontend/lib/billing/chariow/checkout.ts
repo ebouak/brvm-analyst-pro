@@ -61,6 +61,7 @@ export async function demarrerAchat(args: {
       .from('subscription_plans')
       .select('price_monthly, price_quarterly, price_yearly, currency')
       .eq('code', produit.planCode ?? '')
+      .eq('is_active', true) // plan retiré de la vente : plus achetable, même par lien direct
       .maybeSingle();
     const prixPlan = plan && produit.cycle ? prixDuCycle(plan, produit.cycle) : null;
     if (prixPlan == null || prixPlan !== produit.montant || (plan?.currency ?? 'XOF') !== produit.devise) {

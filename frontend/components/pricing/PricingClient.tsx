@@ -38,17 +38,25 @@ export interface PricingPlan {
   is_recommended: boolean;
 }
 
-/** Listes de fonctionnalités par plan (copy produit ; les prix viennent de la base). */
+/**
+ * Listes de fonctionnalités par plan. Chaque ligne correspond à un réglage
+ * d'accès RÉEL (feature_flags, middleware) relevé le 2026-11-13 : rien n'est
+ * promis que le site ne débloque pas. Les prix viennent de la base.
+ * Platinium a été retiré de la vente le 2026-11-13 (il n'ouvrait rien de plus
+ * que Premium) ; la « gestion assistée » qu'il annonçait pouvait passer pour du
+ * conseil en investissement.
+ */
 const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }> = {
   free: {
     tagline: 'Suivre la séance et l’actualité des sociétés cotées.',
     cta: 'Commencer gratuitement',
     items: [
-      'Vue marché globale',
-      'Actualités des sociétés cotées',
+      'Cours, séance et fiches des sociétés',
+      'Fondamentaux et dividendes',
       'Watchlist et portefeuille',
-      'Une alerte de cours',
-      'Rapports restreints',
+      'Portefeuille virtuel (paper trading)',
+      'Brief du soir par e-mail',
+      'Assistant IA : une question par jour',
     ],
   },
   premium: {
@@ -56,42 +64,31 @@ const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }
     cta: 'Passer à Premium',
     items: [
       'Tout le plan Gratuit',
-      'Signaux avancés',
-      'Historique étendu',
-      'Rapports enrichis',
-      'Export PDF / Word',
-      'Comparatifs sectoriels',
-      'Plus d’alertes et de watchlists',
-    ],
-  },
-  platinium: {
-    tagline: 'Être accompagné dans ses décisions, avec un support prioritaire.',
-    cta: 'Choisir Platinium',
-    items: [
-      'Tout le plan Premium',
-      'Gestion assistée',
-      'Analyse fondamentale complète',
-      'Rapports approfondis',
-      'Exports enrichis',
-      'Support prioritaire',
-      'Accompagnement renforcé',
+      'Signaux, Screener et Scanner technique',
+      'Saisonnalité, Backtest et Combined Alpha',
+      'Dossiers valeur et revues de résultats',
+      'Valorisation DCF et diagnostic IA',
+      'Alertes de cours (e-mail, Telegram, WhatsApp)',
+      'Assistant IA : trente questions par jour',
     ],
   },
 };
 
 /** Ordre d'affichage des formules ; les cellules du comparatif suivent cet ordre. */
-const ORDRE = ['free', 'premium', 'platinium'];
+const ORDRE = ['free', 'premium'];
 
 /** Tableau comparatif : true = inclus, false = absent, texte = niveau. */
 const COMPARATIF: { label: string; cells: (boolean | string)[] }[] = [
-  { label: 'Vue marché et actualités', cells: [true, true, true] },
-  { label: 'Signaux avancés', cells: [false, true, true] },
-  { label: 'Historique étendu', cells: [false, true, true] },
-  { label: 'Rapports', cells: ['Restreints', 'Enrichis', 'Approfondis'] },
-  { label: 'Exports', cells: [false, 'PDF / Word', 'Enrichis'] },
-  { label: 'Comparatifs sectoriels', cells: [false, true, true] },
-  { label: 'Analyse fondamentale complète', cells: [false, false, true] },
-  { label: 'Accompagnement et support', cells: [false, 'Standard', 'Prioritaire'] },
+  { label: 'Cours, séance, fiches et fondamentaux', cells: [true, true] },
+  { label: 'Watchlist, portefeuille et portefeuille virtuel', cells: [true, true] },
+  { label: 'Brief du soir par e-mail', cells: [true, true] },
+  { label: 'Assistant IA', cells: ['1 par jour', '30 par jour'] },
+  { label: 'Saisonnalité', cells: ['Aperçu', true] },
+  { label: 'Signaux, Screener, Scanner technique', cells: [false, true] },
+  { label: 'Backtest et Combined Alpha', cells: [false, true] },
+  { label: 'Dossiers valeur et revues de résultats', cells: [false, true] },
+  { label: 'Valorisation DCF et diagnostic IA', cells: [false, true] },
+  { label: 'Alertes de cours', cells: [false, true] },
 ];
 
 function fmtPrice(n: number): string {
@@ -141,8 +138,8 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
       a: 'Oui. Le changement de formule prend effet à la confirmation du paiement.',
     },
     {
-      q: 'Que signifie « gestion assistée » ?',
-      a: 'Un accompagnement plus suivi, avec une analyse plus poussée et une aide à la décision. Ce n’est ni une gestion automatique de votre portefeuille, ni un mandat de gestion.',
+      q: 'WESTBOURSE me dit-il quoi acheter ?',
+      a: 'Non. Les outils mesurent et comparent ; ils ne constituent pas un conseil en investissement. La décision vous appartient.',
     },
     { q: 'Quelle période puis-je payer ?', a: reponseCycles },
     {
@@ -151,7 +148,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
     },
     {
       q: 'Mes rapports peuvent-ils être exportés ?',
-      a: 'Oui, selon la formule : PDF et Word avec Premium, exports enrichis avec Platinium.',
+      a: 'Les analyses de l’assistant IA s’exportent en PDF et en Word, dans la limite de son quota : une par jour en Gratuit, trente en Premium. Les dossiers valeur se téléchargent en PDF avec Premium.',
     },
   ];
 
@@ -162,8 +159,8 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
         <div className="max-w-xl">
           <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formules et tarifs</h1>
           <p className="mt-4 text-base leading-relaxed text-muted">
-            Le plan Gratuit suffit pour suivre la séance à la BRVM, avec des alertes et des rapports en nombre
-            limité. Premium ouvre les signaux avancés ; Platinium y ajoute l’analyse fondamentale complète.
+            Le plan Gratuit suffit pour suivre la séance à la BRVM et les comptes des sociétés. Premium ouvre
+            les outils d’analyse, les dossiers valeur et les alertes.
           </p>
         </div>
 
@@ -207,7 +204,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
       </div>
 
       {/* Fiche des formules : un seul panneau, colonnes séparées par des filets */}
-      <div className="mt-12 grid grid-cols-1 overflow-hidden rounded-2xl border border-border bg-surface md:grid-cols-3">
+      <div className="mt-12 grid grid-cols-1 overflow-hidden rounded-2xl border border-border bg-surface md:grid-cols-2">
         {ordered.map((plan, i) => {
           const f = FEATURES[plan.code];
           const monthly = plan.price_monthly;

@@ -11,7 +11,7 @@ import type { Slide } from '@/lib/landing/slides';
 
 describe('accès des outils', () => {
   it('lit le registre et la liste publique, ne suppose rien', () => {
-    expect(accesOutil('/premium/paper-trading')).toBe('premium');
+    expect(accesOutil('/premium/paper-trading')).toBe('compte'); // gratuit depuis le 13/11
     expect(accesOutil('/assistant')).toBe('premium'); // premium: true au registre
     expect(accesOutil('/fiscalite')).toBe('libre');
     expect(accesOutil('/simulateur')).toBe('libre');

@@ -1,6 +1,8 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { limiteAlertesCourante } from '@/lib/server/alertesLimite';
+import { refusCreation } from '@/lib/alertes/limite';
 
 async function requireUser() {
   const supabase = createClient();
@@ -184,6 +186,15 @@ export async function createAlert(formData: FormData) {
   const seuilNum = rawSeuil != null && String(rawSeuil).trim() !== '' ? Number(rawSeuil) : null;
   if (PRICE_TYPES.includes(type) && (seuilNum == null || seuilNum <= 0)) {
     throw new Error('Seuil doit être positif');
+  }
+
+  // Limite de la formule (une alerte de prix en gratuit) : appliquée côté
+  // serveur, l'écran ne fait que la refléter.
+  const { premium, limite } = await limiteAlertesCourante();
+  if (!premium) {
+    const { count } = await supabase.from('alerts').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+    const refus = refusCreation({ premium, limite, existantes: count ?? 0, type });
+    if (refus) throw new Error(refus);
   }
 
   const { error } = await supabase.from('alerts').insert({

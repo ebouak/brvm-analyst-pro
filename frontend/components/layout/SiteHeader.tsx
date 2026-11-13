@@ -10,7 +10,7 @@ const OUTILS = [
   { t: 'SGI', d: 'Choisir sa SGI', href: '/comparateur-sgi' },
   { t: 'Simulateur', d: 'Et si vous aviez investi ?', href: '/simulateur' },
   { t: 'Budget', d: 'Plan d’épargne', href: '/simulateur-budget' },
-  { t: 'Paper trading', d: 'Capital virtuel — Premium', href: '/premium/paper-trading' },
+  { t: 'Paper trading', d: 'Capital virtuel, gratuit', href: '/premium/paper-trading' },
   { t: 'Backtest', d: 'Rejouer une stratégie', href: '/backtest' },
   { t: 'Dossier d’analyse', d: 'Rapport par société — Premium', href: '/premium/diagnostic' },
 ] as const;

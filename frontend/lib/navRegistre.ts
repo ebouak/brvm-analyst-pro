@@ -147,7 +147,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/portefeuille/import', libelle: 'Importer un relevé SGI', rubrique: 'portefeuille', parent: '/portefeuille', statut: 'secondaire', raison: 'lié depuis le portefeuille' },
   { chemin: '/journal', libelle: 'Journal de décision', libelleMenu: 'Journal', rubrique: 'portefeuille', statut: 'menu' },
   { chemin: '/parametres/alertes', libelle: 'Mes alertes', libelleMenu: 'Alertes', rubrique: 'portefeuille', statut: 'menu' },
-  { chemin: '/premium/paper-trading', libelle: 'Portefeuille virtuel', rubrique: 'portefeuille', statut: 'menu', premium: true },
+  { chemin: '/premium/paper-trading', libelle: 'Portefeuille virtuel', rubrique: 'portefeuille', statut: 'menu' },
   { chemin: '/classement', libelle: 'Classement des portefeuilles virtuels', rubrique: 'portefeuille', parent: '/premium/paper-trading', statut: 'secondaire', raison: 'lié depuis le portefeuille virtuel' },
   { chemin: '/dashboard/reports/events', libelle: 'Événements de marché', rubrique: 'marche', parent: '/rapports/dossiers', statut: 'secondaire', raison: ONGLET('Rapports') },
   { chemin: '/dashboard/reports/events/[id]', libelle: "Étude d'événement", rubrique: 'marche', parent: '/dashboard/reports/events', statut: 'parcours', raison: 'détail atteint depuis la liste des événements' },
