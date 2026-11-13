@@ -57,7 +57,7 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
           Sans carte bancaire{o.membres != null ? ` · ${fmtNumber(o.membres, 0)} membres inscrits` : ''} · désabonnement en un clic ·{' '}
           <Link href="/login" className="v-lien-discret">continuer avec Google</Link>
         </p>
-        <div className="v-canaux-ligne vh-entree" style={rang(10)}>
+        <div className="v-canaux-ligne vh-entree" style={rang(10)} data-canaux-ouverture="">
           <span>Ou suivez la séance sans compte</span>
           <LienCanal className="v-bouton-second" href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="ouverture"><IcoWhatsapp />WhatsApp</LienCanal>
           <LienCanal className="v-bouton-second" href={CANAUX.telegram} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>

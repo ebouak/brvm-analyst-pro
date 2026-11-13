@@ -22,7 +22,7 @@ export function CookieBanner() {
             <p className="text-xs leading-snug text-ivory sm:text-sm">
               Nous utilisons des cookies strictement nécessaires au fonctionnement du site.
               Vous pouvez accepter la mesure d&apos;audience pour nous aider à l&apos;améliorer.{' '}
-              <Link href="/confidentialite" className="underline hover:text-ivory">En savoir plus</Link>.
+              <Link href="/confidentialite" className="-my-2 inline-block py-2 underline hover:text-ivory">En savoir plus</Link>.
             </p>
             <div className="flex w-full shrink-0 flex-wrap items-stretch gap-2 sm:w-auto">
               <button type="button" onClick={() => save(defaultDenied())} className={CHOIX}>Refuser</button>

@@ -195,7 +195,7 @@ const COCHES = [
   'Consulter les fondamentaux et les dividendes',
   'Suivre la séance et les indices',
   'Créer votre watchlist et votre portefeuille',
-  'Recevoir le brief du soir et vos alertes par e-mail',
+  'Recevoir le brief du soir par e-mail',
 ];
 
 const Coche = () => <svg aria-hidden width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;

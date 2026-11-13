@@ -4,6 +4,7 @@
  * Aucune I/O ici : tout est testé (outilsPur.test.ts). Une donnée absente reste
  * `null` et le composant la dit « non disponible » ou se retire.
  */
+import { estCheminPremium } from '@/lib/auth/cheminsPremium';
 import { entreeParChemin, libelleRubrique } from '@/lib/navRegistre';
 import { isPublicPath } from '@/lib/auth/cheminsPublics';
 import { sensSignal } from '@/lib/signalLabel';
@@ -24,7 +25,7 @@ export const LIBELLE_ACCES: Record<Acces, string> = { libre: 'Accès libre', com
  * `/premium/*` est gardé par le middleware, même sans drapeau au registre.
  */
 export function accesOutil(chemin: string): Acces {
-  if (entreeParChemin(chemin)?.premium || chemin === '/premium' || chemin.startsWith('/premium/')) return 'premium';
+  if (entreeParChemin(chemin)?.premium || estCheminPremium(chemin)) return 'premium';
   if (isPublicPath(chemin)) return 'libre';
   return 'compte';
 }

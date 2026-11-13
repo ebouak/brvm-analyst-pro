@@ -64,7 +64,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="group/link relative inline-flex w-fit items-center text-[#fff]/75 transition-all duration-200 hover:translate-x-0.5 hover:text-[#fff] focus:outline-none focus-visible:text-[#fff]"
+      className="group/link relative inline-flex min-h-[44px] w-fit items-center text-[#fff]/75 md:min-h-0 transition-all duration-200 hover:translate-x-0.5 hover:text-[#fff] focus:outline-none focus-visible:text-[#fff]"
     >
       {label}
       {/* Page qui exige un compte : dit avant le clic, pas après la redirection. */}
@@ -130,7 +130,7 @@ export default function Footer() {
 
         <nav aria-label="Produit" className="group/col">
           <ColHeader>Produit</ColHeader>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-1 space-y-0 md:mt-3 md:space-y-2">
             {PRODUIT.map((l) => (
               <li key={l.href}>
                 <FooterLink href={l.href} label={l.label} />
@@ -142,7 +142,7 @@ export default function Footer() {
 
         <nav aria-label="Outils" className="group/col">
           <ColHeader>Outils</ColHeader>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-1 space-y-0 md:mt-3 md:space-y-2">
             {OUTILS.map((l) => (
               <li key={l.href}>
                 <FooterLink href={l.href} label={l.label} />
@@ -153,7 +153,7 @@ export default function Footer() {
 
         <nav aria-label="Ressources" className="group/col">
           <ColHeader>Ressources</ColHeader>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-1 space-y-0 md:mt-3 md:space-y-2">
             {RESSOURCES.map((l) => (
               <li key={l.href}>
                 <FooterLink href={l.href} label={l.label} />
@@ -164,7 +164,7 @@ export default function Footer() {
 
         <nav aria-label="Légal" className="group/col">
           <ColHeader>Légal</ColHeader>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-1 space-y-0 md:mt-3 md:space-y-2">
             {LEGAL.map((l) => (
               <li key={l.href}>
                 <FooterLink href={l.href} label={l.label} />
@@ -189,7 +189,7 @@ export default function Footer() {
           <p className="mt-4 text-[11px] leading-snug text-[#fff]/45">
             Le cadenas signale une page réservée aux comptes (gratuit).
           </p>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-1 space-y-0 md:mt-2 md:space-y-2">
             <li><FooterLink href="/login" label="Connexion" /></li>
             <li><FooterLink href="/signup" label="Créer un compte" /></li>
           </ul>

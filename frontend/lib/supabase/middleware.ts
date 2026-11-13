@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isAdminEmail } from '@/lib/server/admin-emails';
 import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
 import { isPublicPath } from '@/lib/auth/cheminsPublics';
+import { estCheminPremium } from '@/lib/auth/cheminsPremium';
 import { secretRenduValide, EN_TETE_RENDU, PREFIXE_RENDU } from '@/lib/dossier/renduAutorise';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
@@ -59,8 +60,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Gating /premium/* : vérifie is_premium sauf super admin
-  if (request.nextUrl.pathname.startsWith('/premium') &&
-      !request.nextUrl.pathname.startsWith('/premium/upgrade')) {
+  if (estCheminPremium(request.nextUrl.pathname)) {
 
     if (!user) {
       return NextResponse.redirect(

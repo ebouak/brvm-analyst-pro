@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import NewAlertModal from '@/components/NewAlertModal';
@@ -40,10 +41,14 @@ function fmtSeuil(a: UserAlert): string {
 export function AlertsManager({
   alerts,
   instruments,
+  limite = null,
 }: {
   alerts: UserAlert[];
   instruments: { code: string; designation: string | null }[];
+  /** Formule gratuite : nombre d'alertes de prix permises ; null = illimité (Premium). */
+  limite?: number | null;
 }) {
+  const atteinte = limite != null && alerts.length >= limite;
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -67,14 +72,26 @@ export function AlertsManager({
           {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} · notifications par e-mail, et sur
           WhatsApp ou Telegram si vous les avez liés ci-dessous
         </p>
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-info px-4 py-2 text-sm font-medium text-bg"
-        >
-          + Créer une alerte
-        </button>
+        {atteinte ? (
+          <Link href="/account/plan?from=/parametres/alertes" className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-ivory">
+            Plus d&apos;alertes avec Premium
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="rounded-lg bg-info px-4 py-2 text-sm font-medium text-bg"
+          >
+            + Créer une alerte
+          </button>
+        )}
       </div>
+      {limite != null && (
+        <p className="text-xs text-muted">
+          Formule gratuite : {limite} alerte de prix. Les alertes de signal, de RSI, de dividende et de saison, et les
+          alertes en nombre, sont incluses dans Premium.
+        </p>
+      )}
 
       {alerts.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-10 text-center">

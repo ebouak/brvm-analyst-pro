@@ -152,7 +152,7 @@ describe('menus dérivés du registre', () => {
   it('Premium est une marque sur l’entrée, pas une rubrique', () => {
     const prem = NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.premium).map((i) => i.href).sort();
     // 2026-11-13 : Screener, Signaux, Saisonnalité, Combined Alpha et Backtest passent Premium (0216).
-    expect(prem).toEqual(['/analyse/combined-alpha', '/assistant', '/backtest', '/premium/classements', '/premium/diagnostic', '/premium/outils', '/premium/paper-trading', '/premium/reports', '/premium/valorisation', '/saisonnalite', '/screener', '/signaux'].sort());
+    expect(prem).toEqual(['/analyse/combined-alpha', '/assistant', '/backtest', '/premium/classements', '/premium/diagnostic', '/premium/outils', '/premium/reports', '/premium/valorisation', '/saisonnalite', '/screener', '/signaux'].sort());
   });
 });
 
