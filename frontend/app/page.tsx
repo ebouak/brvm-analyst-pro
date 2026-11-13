@@ -8,6 +8,7 @@ import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
 import { SectionProvenance, SectionCanaux, SectionGratuit, SectionFinale } from '@/components/vitrine/SectionsBas';
 import { BandeauFlottant } from '@/components/vitrine/BandeauFlottant';
 import { chargerBrief, quotaWhatsappGratuit } from '@/lib/vitrine/canaux';
+import { chargerCommunaute } from '@/lib/vitrine/communaute';
 import { depuis as depuisTexte, exemplesWhatsapp, horodatageUtc, lignesBrief, lignesSeance, prixOffre } from '@/lib/vitrine/basPur';
 import '@/components/vitrine/vitrine.css';
 import '@/components/vitrine/mouvement/mouvement.css';
@@ -51,7 +52,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const [d, membres, brief, quotaWa] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), chargerBrief(), quotaWhatsappGratuit()]);
+  const [d, membres, brief, quotaWa, communaute] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), chargerBrief(), quotaWhatsappGratuit(), chargerCommunaute()]);
   const [demos, decouvrir] = await Promise.all([chargerDemosOutils(d), chargerDecouvrir(d)]);
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
@@ -123,6 +124,7 @@ export default async function Landing() {
     ? { lignes: lignesTg, entete: `Brief de la séance du ${fmtDateFR(brief!.dateMarche)}`, heure: horodatageUtc(brief!.envoyeLe)?.heure ?? null }
     : { lignes: lignesSeance({ indice: chiffres.indice, variation: chiffres.variation, hausses: d.hausses, baisses: d.baisses, stables: d.inchangees, meilleure: chiffres.meilleure, pire: chiffres.pire, capitaux: d.etat.valeurEchangee }), entete: dateLabel ? `Séance du ${dateLabel}` : 'Dernière séance', heure: null };
   const canaux = {
+    communaute,
     whatsapp: exemplesWhatsapp(d.coursSeed, d.dateMarche, d.plusEchangee?.code ?? d.coursSeed[0]?.code ?? null, d.noms),
     quotaGratuit: quotaWa,
     telegram,

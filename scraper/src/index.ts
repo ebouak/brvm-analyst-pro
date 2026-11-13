@@ -35,6 +35,7 @@
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
+ *   tsx src/index.ts communaute            # membres du canal Telegram -> communaute_releves
  *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
@@ -461,6 +462,13 @@ async function main(): Promise<number> {
           };
         },
       );
+      return 0;
+    }
+    case 'communaute': {
+      // Relevé automatique des membres du canal Telegram (communaute_releves, 0218).
+      const { runCommunaute } = await import('./communaute/runCommunaute.js');
+      const r = await runCommunaute({ mock });
+      logger.info(r, 'communauté relevée');
       return 0;
     }
     case 'sante:llm': {
