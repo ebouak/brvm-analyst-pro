@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import SignalPerformance from '@/components/SignalPerformance';
+import CarteSignaux from '@/components/signaux/CarteSignaux';
+import type { SousScores } from '@/lib/signals/carte';
 import { getBacktestStats, getRecentRealBuySignals } from '@/lib/signals/backtest';
 import { ArrowRight } from 'lucide-react';
 import { DISCLAIMER_COURT } from '@/lib/legal/disclaimer';
@@ -219,6 +221,9 @@ export default async function SignauxPage() {
       <PremiumPanel>
         <SignalsTable rows={rows} />
       </PremiumPanel>
+
+      {/* ── Carte : élan × RSI, ce que le score composite moyenne ───────── */}
+      <CarteSignaux lignes={rows as unknown as SousScores[]} date={lastDate} />
 
       {/* ── Bascules depuis la séance précédente (les VRAIES nouveautés) ── */}
       {changes.length > 0 && (

@@ -6,7 +6,7 @@ import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import ScreenerFilters from '@/components/ScreenerFilters';
 import ViewTabs from '@/components/ViewTabs';
 import { FILTER_TABS } from '@/lib/filterTabs';
-import ScreenerResults from '@/components/ScreenerResults';
+import ScreenerVues from '@/components/screener/ScreenerVues';
 import { applyFilters, exclusFauteDeDonnee, type ActionRow } from '@/lib/screener/filters';
 import type { ScreenerPreset } from '@/lib/screener/presets';
 import { computeLiquidity } from '@/lib/liquidity';
@@ -235,7 +235,7 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
               <span className="tabular">{exclus}</span> valeur{exclus > 1 ? 's' : ''} écartée{exclus > 1 ? 's' : ''} faute de donnée sur un critère filtré.
             </p>
           )}
-          <ScreenerResults results={displayed} />
+          <ScreenerVues results={displayed} />
         </div>
       </div>
     </div>
