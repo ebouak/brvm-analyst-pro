@@ -11,6 +11,7 @@ import CarnetOrdres, { dateSeanceLongue, type CarnetRow } from '@/components/Car
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
+import { perAffichable, roeAffichable, montantDividende, dividendesAffichables } from '@/lib/fiche/affichage';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
@@ -56,8 +57,11 @@ async function getCompany(code: string) {
         .from('dividends')
         .select('exercice, montant, ex_date, payment_date')
         .eq('code', code)
-        .order('exercice', { ascending: false })
-        .limit(5),
+        // Sans `nullsFirst: false`, PostgreSQL place les lignes sans exercice EN
+        // TÊTE d'un tri décroissant : elles s'affichaient « — 121 FCFA » au-dessus
+        // du dernier dividende.
+        .order('exercice', { ascending: false, nullsFirst: false })
+        .limit(8),
       supabase
         .from('brvm_news')
         .select('titre, date_publication, source, source_url')
@@ -163,7 +167,8 @@ export default async function CompanyPage(props: PageProps) {
   // sans ex_date sont biaisées (~12 %). Cohérent avec le reste du site.
   const lastDividend =
     (dividends as { montant: number; ex_date: string | null }[]).find((d) => d.ex_date && d.montant > 0)
-    ?? dividends[0]
+    // Repli : jamais une ligne sans exercice ni un montant nul (rendement 0 % affiché à tort).
+    ?? dividendesAffichables(dividends)[0]
     ?? null;
   const ratios = bestFund
     ? computeRatios({
@@ -176,6 +181,12 @@ export default async function CompanyPage(props: PageProps) {
         dividende: lastDividend?.montant ?? null,
       })
     : null;
+
+  // PER au-delà de 100 ou négatif, ROE sur capitaux propres négatifs : un
+  // ratio sans objet s'écrit en clair plutôt qu'en chiffre trompeur.
+  const per = perAffichable(ratios?.per ?? null, ratios?.bpa ?? null);
+  const roe = roeAffichable(ratios?.roe ?? null, bestFund?.equity ?? null);
+  const historiqueDividendes = dividendesAffichables(dividends);
 
   // ── « Ce que dit la séance » (verrou premium `lecture_seance`) ──────────
   // Repris de /actions/[code], réduit à ce que CETTE page charge déjà — pas
@@ -399,8 +410,8 @@ export default async function CompanyPage(props: PageProps) {
               { label: 'Résultat net', value: avecUnite(fmtFcfa(bestFund.net_income), 'FCFA') },
               { label: 'Capitaux propres', value: avecUnite(fmtFcfa(bestFund.equity), 'FCFA') },
               { label: 'BPA', value: ratios?.bpa != null ? fmtNumber(ratios.bpa, 0) + ' FCFA' : '—' },
-              { label: 'PER', value: ratios?.per != null ? fmtNumber(ratios.per, 1) + '×' : '—' },
-              { label: 'ROE', value: ratios?.roe != null ? fmtNumber(ratios.roe * 100, 1) + ' %' : '—' },
+              { label: 'PER', value: per.valeur != null ? fmtNumber(per.valeur, 1) + '×' : per.motif ?? '—' },
+              { label: 'ROE', value: roe.valeur != null ? fmtNumber(roe.valeur * 100, 1) + ' %' : roe.motif ?? '—' },
               { label: 'Marge nette', value: ratios?.margeNette != null ? fmtNumber(ratios.margeNette * 100, 1) + ' %' : '—' },
               { label: 'Rendement dividende', value: ratios?.rendementDiv != null ? fmtNumber(ratios.rendementDiv * 100, 2) + ' %' : '—' },
             ].map((m) => (
@@ -417,7 +428,7 @@ export default async function CompanyPage(props: PageProps) {
         {/* ── Dividendes ──────────────────────────────────────────────────── */}
         <section className="rounded-xl border border-border bg-surface p-5">
           <h2 className={`${titreSection} mb-3`}>Historique des dividendes</h2>
-          {dividends.length > 0 ? (
+          {historiqueDividendes.length > 0 ? (
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-faint">
@@ -427,10 +438,10 @@ export default async function CompanyPage(props: PageProps) {
                 </tr>
               </thead>
               <tbody>
-                {dividends.map((d, i) => (
+                {historiqueDividendes.map((d, i) => (
                   <tr key={i} className="border-t border-border/60">
-                    <td className="tabular py-2 text-ivory">{d.exercice ?? '—'}</td>
-                    <td className="tabular py-2 text-right text-ivory">{fmtNumber(d.montant)} FCFA</td>
+                    <td className="tabular py-2 text-ivory">{d.exercice}</td>
+                    <td className="tabular py-2 text-right text-ivory">{montantDividende(d.montant)}</td>
                     <td className="py-2 text-right text-muted">{d.payment_date ? dateCourte(d.payment_date) : '—'}</td>
                   </tr>
                 ))}

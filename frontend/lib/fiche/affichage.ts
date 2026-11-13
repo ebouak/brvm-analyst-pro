@@ -5,10 +5,44 @@ const moins = (s: string) => s.replace('-', '−'); // U+2212, comme le reste du
 
 export interface Affichable { valeur: number | null; motif: string | null }
 
+/**
+ * Au-delà de ce PER, le bénéfice est trop faible pour que le ratio mesure une
+ * valorisation : BNBC 519×, UNLC 670×, SEMC 837× (audit du 2026-11-13). On
+ * l'écrit « n.s. » plutôt que d'afficher un chiffre qui ne dit rien.
+ */
+export const PER_NON_SIGNIFICATIF = 100;
+
 export function perAffichable(per: number | null, bpa: number | null): Affichable {
   if (bpa != null && bpa <= 0) return { valeur: null, motif: 'non calculable, perte' };
+  if (per != null && per < 0) return { valeur: null, motif: 'non calculable, perte' };
   if (per == null) return { valeur: null, motif: 'non disponible' };
+  if (per > PER_NON_SIGNIFICATIF) return { valeur: null, motif: 'n.s., bénéfice très faible' };
   return { valeur: per, motif: null };
+}
+
+/** ROE : sans objet quand les capitaux propres sont négatifs (le signe du ratio n'aurait plus de sens). */
+export function roeAffichable(roe: number | null, capitauxPropres: number | null): Affichable {
+  if (capitauxPropres != null && capitauxPropres <= 0) return { valeur: null, motif: 'n.s., capitaux propres négatifs' };
+  if (roe == null) return { valeur: null, motif: 'non disponible' };
+  return { valeur: roe, motif: null };
+}
+
+/** Montant de dividende : décimales gardées quand le montant officiel en a (597,53 ; 0,92), entier sinon. */
+export function montantDividende(montant: number): string {
+  const entier = Math.abs(montant - Math.round(montant)) < 0.005;
+  return `${nf(montant, entier ? 0 : 2)} FCFA`;
+}
+
+/**
+ * Lignes de dividende affichables dans un historique : une ligne sans exercice
+ * n'est pas datable, et un montant nul ou négatif n'est pas un versement. Ces
+ * lignes restent en base (leur fausseté n'est pas prouvée, voir CLAUDE.md
+ * 2026-09-08) mais ne s'affichent plus, triées par exercice décroissant.
+ */
+export function dividendesAffichables<T extends { exercice: number | null; montant: number }>(lignes: T[]): T[] {
+  return lignes
+    .filter((l) => l.exercice != null && l.montant > 0)
+    .sort((a, b) => (b.exercice as number) - (a.exercice as number));
 }
 
 /** BPA, source unique : résultat net ÷ nombre de titres, arrondi à 2 décimales. */

@@ -8,7 +8,7 @@ import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ValueTrapBadge from './ValueTrapBadge';
-import { perAffichable, distributionAffichable, evolutionResultat, bpaAffichable, insecable } from '@/lib/fiche/affichage';
+import { perAffichable, roeAffichable, distributionAffichable, evolutionResultat, bpaAffichable, insecable } from '@/lib/fiche/affichage';
 import { formatRendementDividende } from '@/lib/fiche/affichage';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import type { RatiosBilan } from '@/lib/fiche/ratiosBilan';
@@ -80,6 +80,8 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const bpa = bpaAffichable(inp.net_income, inp.shares);
   const per = perAffichable(r.per, bpa.valeur ?? r.bpa);
   const dist = distributionAffichable(r.payout, p.resultatNet ?? null);
+  // Capitaux propres négatifs : le ROE change de signe sans rien mesurer (UNLC).
+  const roe = roeAffichable(r.roe, p.comptesRetenus?.capitauxPropres ?? inp.equity);
 
   const sortedHist = [...p.history].sort((a, b) => a.year - b.year);
   const last = sortedHist[sortedHist.length - 1];
@@ -154,7 +156,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         </Section>
 
         <Section title="Rentabilité">
-          <RatioCard label="ROE" value={pct(r.roe)} quality={assessQuality('roe', r.roe)} positive={r.roe != null ? r.roe >= 0 : null} />
+          <RatioCard label="ROE" value={roe.valeur != null ? pct(roe.valeur) : roe.motif ?? '—'} quality={roe.valeur == null ? 'missing' : assessQuality('roe', roe.valeur)} positive={roe.valeur != null ? roe.valeur >= 0 : null} motif={roe.motif} />
           <RatioCard label={`Marge nette (RN / ${fam.revenu})`} value={pct(r.margeNette)} quality={assessQuality('margeNette', r.margeNette)} positive={r.margeNette != null ? r.margeNette >= 0 : null} />
         </Section>
 

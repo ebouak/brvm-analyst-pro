@@ -17,7 +17,9 @@ export const PRESETS: ScreenerPreset[] = [
     name: 'oversold',
     label: 'Survendu (RSI<30)',
     isPremium: false,
-    filters: { rsiMax: 30, scoreMin: 40 },
+    // Sans plancher de score : le score composite ne dépasse +0,40 que pour
+    // quelques séances par an, et jamais sur une valeur survendue (audit 2026-11-13).
+    filters: { rsiMax: 30 },
   },
   {
     name: 'high_div',
@@ -29,7 +31,7 @@ export const PRESETS: ScreenerPreset[] = [
     name: 'volume',
     label: 'Fort volume',
     isPremium: false,
-    filters: { volumeGtAvg: true, scoreMin: 50 },
+    filters: { volumeGtAvg: true },
   },
   {
     name: 'growth',
