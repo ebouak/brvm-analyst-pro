@@ -98,10 +98,12 @@ export type Simulation = z.infer<typeof simulationSchema>;
  * (lib/academy/donneesServer.ts) : le contenu ne porte que des codes, jamais
  * de chiffres — ils seraient périmés dès la séance suivante.
  *  - `rendement` : dernier dividende, dernier cours, rendement, revenu pour `actions` ;
- *  - `historique` : dividendes des cinq derniers exercices (régularité).
+ *  - `historique` : dividendes des cinq derniers exercices (régularité) ;
+ *  - `cours` : dernier cours, et coût de `actions` titres (ticket d'entrée) ;
+ *  - `indices` : dernière valeur et variation d'indices (codes BRVMC, BRVM30…).
  */
 export const donneesReellesSchema = z.object({
-  vue: z.enum(['rendement', 'historique']),
+  vue: z.enum(['rendement', 'historique', 'cours', 'indices']),
   codes: z.array(z.string().regex(/^[A-Z0-9]{3,6}$/)).min(1).max(6),
   actions: z.number().int().positive().max(1_000_000).optional(),
 });

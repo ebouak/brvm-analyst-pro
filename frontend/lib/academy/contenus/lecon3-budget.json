@@ -1,0 +1,112 @@
+{
+  "titre": "Leçon 3 — Combien faut-il pour investir à la BRVM ?",
+  "categorie": "evaluation",
+  "duree_min": 9,
+  "sous_titre": "Le vrai ticket d’entrée : le cours d’une action, les frais, et ce qu’il faut pour répartir son risque.",
+  "resume": "Aucun montant minimum n’est fixé par la loi pour acheter une action : on achète des titres entiers, au cours du jour.\nCette leçon montre ce que coûte réellement un premier achat, pourquoi les frais pèsent lourd sur les petits ordres, et comment répartir un premier budget.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Le prix d’une action n’est pas un droit d’entrée",
+      "contenu": "À la BRVM, on achète des actions entières, au cours de la séance. Le coût d’un achat est donc le cours multiplié par la quantité, auquel s’ajoutent les frais.\nCertaines SGI demandent un dépôt minimum à l’ouverture du compte : il varie d’une SGI à l’autre, et se compare avant de s’engager.",
+      "formules": [
+        { "nom": "Coût d’un achat", "expression": "Quantité × Cours + Frais", "exemple": "10 × 2 500 + 1 % de frais = 25 250 FCFA" }
+      ]
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Sur la BRVM : le prix de 10 actions",
+      "contenu": "Le tableau donne le dernier cours de six valeurs, et ce que coûtent 10 actions de chacune, hors frais.\nL’écart entre elles vient surtout du nombre de titres de chaque société, pas de leur qualité : une action à petit prix n’est pas une bonne affaire pour autant.",
+      "donnees_reelles": { "vue": "cours", "codes": ["UNXC", "TTLC", "CIEC", "SPHC", "SGBC", "SNTS"], "actions": 10 }
+    },
+    {
+      "type": "importance",
+      "titre": "Les frais, l’ennemi des petits ordres",
+      "contenu": "Chaque ordre supporte des frais : le courtage de la SGI, des commissions du marché et du dépositaire, et la TVA sur ces commissions. Beaucoup de SGI appliquent aussi un montant minimum par ordre.\nCes frais se paient à l’achat puis à la revente. L’action doit donc monter d’au moins le total des deux pour que l’opération soit gagnante.",
+      "formules": [
+        { "nom": "Seuil de rentabilité d’un aller-retour", "expression": "Frais à l’achat + Frais à la revente", "exemple": "1,5 % + 1,5 % : l’action doit monter d’environ 3 %" }
+      ],
+      "points": [
+        { "titre": "Le courtage", "detail": "La rémunération de la SGI, en pourcentage de l’ordre, souvent avec un minimum.", "verifier": "la grille tarifaire de votre SGI." },
+        { "titre": "Les commissions de marché", "detail": "Celles de la bourse et du dépositaire central, communes à toutes les SGI." },
+        { "titre": "La tenue de compte", "detail": "Certaines SGI facturent des frais annuels de tenue de compte ou de conservation." }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Répartir un premier budget de 50 000 FCFA",
+      "contenu": "Exemple pédagogique : avec 50 000 FCFA, on peut viser trois valeurs de trois secteurs différents, soit un peu plus de 16 000 FCFA par ligne, frais compris.\nLe nombre d’actions de chaque ligne dépend de son cours : quelques titres d’une valeur chère, davantage d’une valeur moins chère. L’important est la répartition, pas le nombre de titres.",
+      "formules": [
+        { "nom": "Budget par ligne", "expression": "Budget total ÷ Nombre de valeurs", "exemple": "50 000 ÷ 3 ≈ 16 667 FCFA par valeur" }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Ne pas mettre tous ses œufs dans le même panier",
+      "contenu": "Exemple pédagogique : 50 000 FCFA sur une seule action qui baisse de 20 %, c’est 10 000 FCFA de perte. Répartis sur cinq valeurs à parts égales, la même baisse sur une seule d’entre elles coûte 2 000 FCFA, soit 4 % du portefeuille.",
+      "points": [
+        { "titre": "Tout miser sur une valeur", "detail": "Une mauvaise nouvelle sur une société, et c’est tout le capital qui recule." },
+        { "titre": "Multiplier les très petits ordres", "detail": "Avec un minimum de frais par ordre, dix petits achats coûtent bien plus qu’un seul." },
+        { "titre": "Investir son épargne de précaution", "detail": "L’argent des imprévus doit rester disponible : une action peut être en baisse le jour où vous en avez besoin." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Quatre idées à garder en tête.",
+      "points": [
+        { "titre": "Coût = quantité × cours + frais", "detail": "Aucun minimum légal ; le dépôt minimum dépend de la SGI." },
+        { "titre": "Les frais se paient deux fois", "detail": "À l’achat et à la revente : ils fixent le seuil de rentabilité." },
+        { "titre": "Un cours bas n’est pas une affaire", "detail": "Il dépend du nombre de titres de la société." },
+        { "titre": "Répartir dès le premier budget", "detail": "Au moins trois valeurs, dans des secteurs différents." }
+      ]
+    }
+  ],
+  "chart": null,
+  "charts": [],
+  "quiz": [
+    {
+      "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais. Combien payez-vous ?",
+      "options": ["2 525 FCFA", "25 000 FCFA", "25 250 FCFA", "27 500 FCFA"],
+      "correct": 2,
+      "explication": "10 × 2 500 = 25 000 FCFA, plus 1 % de frais, soit 250 FCFA : 25 250 FCFA au total."
+    },
+    {
+      "question": "Vos frais sont de 1,5 % à l’achat et 1,5 % à la revente. De combien l’action doit-elle monter, environ, pour que l’opération ne perde rien ?",
+      "options": ["0,75 %", "1,5 %", "3 %", "15 %"],
+      "correct": 2,
+      "explication": "Les frais se paient deux fois : 1,5 % + 1,5 % = environ 3 %. En dessous, l’aller-retour est perdant."
+    },
+    {
+      "question": "Une action cote 1 800 FCFA, une autre 30 000 FCFA. Que peut-on en conclure ?",
+      "options": ["La première est une meilleure affaire", "La seconde est de meilleure qualité", "Rien : le cours dépend surtout du nombre de titres de la société", "La première verse forcément un plus petit dividende"],
+      "correct": 2,
+      "explication": "Le cours d’une action ne dit rien de sa qualité ni de sa cherté. Pour juger, il faut rapporter le prix aux bénéfices ou aux dividendes."
+    },
+    {
+      "question": "50 000 FCFA répartis à parts égales sur cinq valeurs. L’une d’elles baisse de 20 %. Combien perd le portefeuille ?",
+      "options": ["10 000 FCFA", "2 000 FCFA", "4 000 FCFA", "20 000 FCFA"],
+      "correct": 1,
+      "explication": "Chaque ligne vaut 10 000 FCFA ; 20 % de 10 000 = 2 000 FCFA, soit 4 % du portefeuille. Sur une seule valeur, la perte aurait été de 10 000 FCFA."
+    },
+    {
+      "question": "Pourquoi éviter de multiplier les très petits ordres ?",
+      "options": ["La BRVM les refuse", "Le minimum de frais par ordre les rend très coûteux", "Ils ne donnent pas droit au dividende", "Ils sont exécutés en dernier"],
+      "correct": 1,
+      "explication": "Beaucoup de SGI appliquent un montant minimum de frais par ordre : sur un petit achat, ce minimum pèse lourd en pourcentage."
+    }
+  ],
+  "qcm": {
+    "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais. Combien payez-vous ?",
+    "options": ["2 525 FCFA", "25 000 FCFA", "25 250 FCFA", "27 500 FCFA"],
+    "correct": 2,
+    "explication": "10 × 2 500 = 25 000 FCFA, plus 1 % de frais, soit 250 FCFA : 25 250 FCFA au total."
+  },
+  "liens": [
+    { "label": "Simuler un budget d’épargne", "href": "/simulateur-budget" },
+    { "label": "Comparer les frais des SGI", "href": "/comparateur-sgi" },
+    { "label": "Les cours de toutes les actions", "href": "/actions" }
+  ]
+}

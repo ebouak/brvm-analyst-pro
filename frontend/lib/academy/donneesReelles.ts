@@ -119,3 +119,69 @@ export function historiqueDividendes(
   }
   return { exercices, lignes, manquants };
 }
+
+// ── Cours seuls (ticket d'entrée) ───────────────────────────────────────
+
+export interface ExempleCours {
+  code: string;
+  nom: string;
+  cours: number;
+  dateCours: string;
+  /** Coût de `actions` titres, hors frais (null si aucun nombre n'est donné). */
+  cout: number | null;
+}
+
+/** Dernier cours de chaque valeur, dans l'ordre demandé. Une valeur sans cours est nommée. */
+export function exemplesCours(
+  codes: string[],
+  noms: Record<string, string>,
+  cotations: Cotation[],
+  actions?: number,
+): { dateCours: string | null; lignes: ExempleCours[]; manquants: string[] } {
+  const lignes: ExempleCours[] = [];
+  const manquants: string[] = [];
+  for (const code of codes) {
+    const c = cotations.find((x) => x.code === code && x.cours > 0);
+    if (!c) {
+      manquants.push(code);
+      continue;
+    }
+    lignes.push({ code, nom: noms[code] ?? code, cours: c.cours, dateCours: c.date, cout: actions ? Math.round(actions * c.cours) : null });
+  }
+  return { dateCours: lignes.map((l) => l.dateCours).sort().at(-1) ?? null, lignes, manquants };
+}
+
+// ── Indices ─────────────────────────────────────────────────────────────
+
+export interface LigneIndice {
+  code: string;
+  date_marche: string;
+  libelle: string | null;
+  valeur: number | null;
+  variation_pct: number | null;
+}
+
+export interface LectureIndice {
+  code: string;
+  libelle: string;
+  valeur: number;
+  variationPct: number | null;
+  date: string;
+}
+
+/** Dernière valeur connue de chaque indice demandé. Un indice sans valeur est nommé. */
+export function lectureIndices(codes: string[], lignes: LigneIndice[]): { date: string | null; lignes: LectureIndice[]; manquants: string[] } {
+  const out: LectureIndice[] = [];
+  const manquants: string[] = [];
+  for (const code of codes) {
+    const d = lignes
+      .filter((l) => l.code === code && l.valeur != null && l.valeur > 0)
+      .sort((a, b) => b.date_marche.localeCompare(a.date_marche))[0];
+    if (!d) {
+      manquants.push(code);
+      continue;
+    }
+    out.push({ code, libelle: d.libelle ?? code, valeur: d.valeur as number, variationPct: d.variation_pct, date: d.date_marche });
+  }
+  return { date: out.map((l) => l.date).sort().at(-1) ?? null, lignes: out, manquants };
+}
