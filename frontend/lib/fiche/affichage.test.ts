@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
+  perAffichable, roeAffichable, montantDividende, dividendesAffichables, distributionAffichable, evolutionResultat, horsExploitation,
   dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, moisAnnee, insecable, libelleEvenement,
 } from './affichage';
 
@@ -9,6 +9,38 @@ const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
 describe('perAffichable', () => {
   it('non calculable si BPA ≤ 0', () => expect(perAffichable(-271.42, -7.18)).toEqual({ valeur: null, motif: 'non calculable, perte' }));
   it('rend le PER si BPA > 0', () => expect(perAffichable(12.3, 40)).toEqual({ valeur: 12.3, motif: null }));
+});
+
+describe('perAffichable : non significatif (audit 2026-11-13)', () => {
+  it('n.s. au-delà de 100', () => expect(perAffichable(519.4, 3)).toEqual({ valeur: null, motif: 'n.s., bénéfice très faible' }));
+  it('100 exactement reste affiché', () => expect(perAffichable(100, 10)).toEqual({ valeur: 100, motif: null }));
+  it('PER négatif = perte, même sans BPA fourni', () => expect(perAffichable(-62.7, null)).toEqual({ valeur: null, motif: 'non calculable, perte' }));
+});
+
+describe('roeAffichable', () => {
+  it('n.s. si capitaux propres négatifs (UNLC)', () => expect(roeAffichable(-0.06, -10.66e9)).toEqual({ valeur: null, motif: 'n.s., capitaux propres négatifs' }));
+  it('rend le ROE sinon', () => expect(roeAffichable(0.296, 1399e9)).toEqual({ valeur: 0.296, motif: null }));
+  it('non disponible sans ROE', () => expect(roeAffichable(null, null)).toEqual({ valeur: null, motif: 'non disponible' }));
+});
+
+describe('montantDividende', () => {
+  it('garde les décimales officielles', () => {
+    expect(sp(montantDividende(597.53))).toBe('597,53 FCFA');
+    expect(sp(montantDividende(0.92))).toBe('0,92 FCFA');
+  });
+  it('entier sans décimales', () => expect(sp(montantDividende(174))).toBe('174 FCFA'));
+});
+
+describe('dividendesAffichables', () => {
+  it('écarte sans exercice et montant nul, trie par exercice décroissant', () => {
+    const r = dividendesAffichables([
+      { exercice: null, montant: 121 },
+      { exercice: 2024, montant: 0 },
+      { exercice: 2023, montant: 206 },
+      { exercice: 2025, montant: 201.52 },
+    ]);
+    expect(r.map((l) => l.exercice)).toEqual([2025, 2023]);
+  });
 });
 
 describe('distributionAffichable', () => {

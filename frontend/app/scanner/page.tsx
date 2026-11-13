@@ -3,6 +3,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
+import SECTEURS_PAR_CODE from '@/lib/brvmSectors.json';
 import { smaSeries, rsiSeries, macdSeries } from '@/lib/indicators';
 import {
   parseCriteriaFromSearchParams,
@@ -42,7 +43,10 @@ export default async function ScannerPage(props: PageProps) {
     );
   }
   const criteria = parseCriteriaFromSearchParams(searchParams);
-  const filtersActive = hasAnyCriteria(criteria);
+  // « Lancer le scan » sans critère soumet le formulaire avec des champs vides :
+  // on montre alors tout l'univers au lieu d'un écran vide sans explication.
+  const formulaireSoumis = 'signal' in searchParams;
+  const filtersActive = hasAnyCriteria(criteria) || formulaireSoumis;
 
   const supabase = createClient();
 
@@ -53,9 +57,15 @@ export default async function ScannerPage(props: PageProps) {
     .not('secteur', 'is', null)
     .order('secteur');
 
+  // La colonne `secteur` des cotations est vide : le référentiel curé
+  // (lib/brvmSectors.json) sert de repli, sinon le filtre n'offrait que « Tous ».
+  const secteurParCode = SECTEURS_PAR_CODE as Record<string, string>;
   const secteurs = [
-    ...new Set((secteurRows ?? []).map((r: { secteur: string | null }) => r.secteur).filter(Boolean) as string[]),
-  ];
+    ...new Set([
+      ...((secteurRows ?? []).map((r: { secteur: string | null }) => r.secteur).filter(Boolean) as string[]),
+      ...Object.values(secteurParCode),
+    ]),
+  ].sort((a, b) => a.localeCompare(b, 'fr'));
 
   // ── Dernière séance par code ───────────────────────────────────────────────
   const { data: latestRows } = await supabase
@@ -161,7 +171,7 @@ export default async function ScannerPage(props: PageProps) {
     const row: ScanRow = {
       code,
       designation: latest.designation,
-      secteur: latest.secteur,
+      secteur: latest.secteur ?? secteurParCode[code] ?? null,
       cours_jour: latest.cours_jour,
       variation_pct: latest.variation_pct,
       volume: latest.volume,
@@ -256,7 +266,7 @@ export default async function ScannerPage(props: PageProps) {
             Indicateurs orientés à la baisse
           </span>
           <span className="text-faint">
-            Score : sous-score agrégé · Complétude des données entre parenthèses
+            Score composite de −1 à +1 (signal au-delà de ±0,60) · confiance du signal entre parenthèses
           </span>
         </div>
       </div>

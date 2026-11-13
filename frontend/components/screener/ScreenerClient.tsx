@@ -7,9 +7,15 @@ import ScreenerFilters from '@/components/ScreenerFilters';
 import ViewTabs from '@/components/ViewTabs';
 import { FILTER_TABS } from '@/lib/filterTabs';
 import ScreenerResults from '@/components/ScreenerResults';
-import { applyFilters, type ActionRow } from '@/lib/screener/filters';
+import { applyFilters, exclusFauteDeDonnee, type ActionRow } from '@/lib/screener/filters';
 import type { ScreenerPreset } from '@/lib/screener/presets';
 import { computeLiquidity } from '@/lib/liquidity';
+import { fetchAllRows } from '@/lib/supabase/paginate';
+import SECTEURS from '@/lib/brvmSectors.json';
+import {
+  dernierSignalParCode, dernierDividendeParCode, rsiParCode, ratioVolumeParCode,
+  type SignalLigne, type DividendeLigne,
+} from '@/lib/screener/donnees';
 
 export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
   const [allActions, setAllActions] = useState<ActionRow[]>([]);
@@ -36,27 +42,35 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
 
         const marketDate = latestDate[0].date_marche;
 
-        // Fetch actions with signals
         const { data: actions } = await supabase
           .from('brvm_actions_daily')
           .select('code, cours_jour, variation_pct, volume, secteur')
           .eq('date_marche', marketDate);
 
-        // Liquidité : ~30 dernières séances (présence + valeur échangée moyenne)
-        const d30 = new Date();
-        d30.setDate(d30.getDate() - 45); // ~30 séances ouvrées sur 45 jours calendaires
-        const { data: histo } = await supabase
-          .from('brvm_actions_daily')
-          .select('code, date_marche, volume, cours_jour, valeur_echangee')
-          .gte('date_marche', d30.toISOString().slice(0, 10));
-
-        const histoRows = (histo ?? []) as {
+        // Historique ~150 jours : liquidité (30 séances), RSI 14 et volume moyen 20 séances.
+        // PAGINÉ : 48 valeurs × ~100 séances dépassent le plafond PostgREST de 1000
+        // lignes, et la troncature est silencieuse (voir lib/supabase/paginate.ts).
+        const debut = new Date();
+        debut.setDate(debut.getDate() - 150);
+        const histoRows = await fetchAllRows<{
           code: string; date_marche: string; volume: number | null;
           cours_jour: number | null; valeur_echangee: number | null;
-        }[];
-        const seances = new Set(histoRows.map((r) => r.date_marche)).size;
-        const histoByCode = new Map<string, typeof histoRows>();
-        for (const r of histoRows) {
+        }>((from, to) =>
+          supabase
+            .from('brvm_actions_daily')
+            .select('code, date_marche, volume, cours_jour, valeur_echangee')
+            .gte('date_marche', debut.toISOString().slice(0, 10))
+            .order('date_marche', { ascending: true })
+            .range(from, to),
+        );
+
+        const d30 = new Date();
+        d30.setDate(d30.getDate() - 45); // ~30 séances ouvrées sur 45 jours calendaires
+        const borne30 = d30.toISOString().slice(0, 10);
+        const histo30 = histoRows.filter((r) => r.date_marche >= borne30);
+        const seances = new Set(histo30.map((r) => r.date_marche)).size;
+        const histoByCode = new Map<string, typeof histo30>();
+        for (const r of histo30) {
           const list = histoByCode.get(r.code) ?? [];
           list.push(r);
           histoByCode.set(r.code, list);
@@ -77,75 +91,42 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
           }
         }
 
+        // Signaux des 10 derniers jours : le scoring porte sur la séance CLOSE, la
+        // cotation du jour peut déjà exister en séance. On garde le dernier par valeur.
+        const d10 = new Date();
+        d10.setDate(d10.getDate() - 10);
         const { data: signals } = await supabase
           .from('signals_daily')
-          .select('code, score_total, score_rsi')
-          .eq('date_marche', marketDate);
+          .select('code, date_marche, score_total')
+          .gte('date_marche', d10.toISOString().slice(0, 10));
+        const signalByCode = dernierSignalParCode((signals ?? []) as SignalLigne[], marketDate);
 
-        // Fetch dividends for all actions
         const { data: dividends } = await supabase
           .from('dividends')
           .select('code, montant, exercice');
+        const dividendeByCode = dernierDividendeParCode((dividends ?? []) as DividendeLigne[]);
 
-        // Build signal map
-        const signalMap: Record<string, any> = {};
-        (signals || []).forEach((s) => {
-          signalMap[s.code] = s;
-        });
+        const rsiByCode = rsiParCode(histoRows);
+        const volumeRatioByCode = ratioVolumeParCode(histoRows);
 
-        // Calculate average volume per code
-        const volumeByCode: Record<string, number[]> = {};
-        (actions || []).forEach((a) => {
-          if (!volumeByCode[a.code]) volumeByCode[a.code] = [];
-          if (a.volume) volumeByCode[a.code].push(a.volume);
-        });
-
-        const avgVolumeByCode: Record<string, number> = {};
-        Object.entries(volumeByCode).forEach(([code, vols]) => {
-          avgVolumeByCode[code] = vols.reduce((a, b) => a + b, 0) / vols.length;
-        });
-
-        // Calculate dividend yield (latest dividend / current price)
-        const latestDividendByCode: Record<string, number> = {};
-        if (dividends && dividends.length > 0) {
-          // Group by code and find latest
-          const divByCode: Record<string, any> = {};
-          dividends.forEach((d) => {
-            if (!divByCode[d.code] || d.exercice > divByCode[d.code].exercice) {
-              divByCode[d.code] = d;
-            }
-          });
-
-          // Calculate yield for actions
-          (actions || []).forEach((a) => {
-            if (divByCode[a.code] && a.cours_jour && a.cours_jour > 0) {
-              latestDividendByCode[a.code] = (divByCode[a.code].montant / a.cours_jour) * 100;
-            }
-          });
-        }
-
-        // Combine into ActionRow with signals.
-        // Échelles : score_rsi et score_total sont des sous-scores ∈ [-1, +1]
-        // (cf. scoring §9 : score_rsi = clamp((50 − RSI)/20)). Les filtres et
-        // presets attendent un RSI 0-100 et un score en % — on convertit ici,
-        // sinon aucun preset ne matche jamais (bug corrigé 2026-06-13).
         const enriched: ActionRow[] = (actions || []).map((a) => {
-          const sig = signalMap[a.code];
-          const rsiEstime =
-            sig?.score_rsi != null
-              ? Math.max(0, Math.min(100, 50 - 20 * sig.score_rsi))
-              : null;
+          const sig = signalByCode.get(a.code);
+          const div = dividendeByCode.get(a.code);
           return {
             code: a.code,
             cours_jour: a.cours_jour,
             variation_pct: a.variation_pct,
-            rsi: rsiEstime,
+            rsi: rsiByCode.get(a.code) ?? null,
             volume: a.volume,
+            // score_total ∈ [−1 ; +1] affiché en points (−100 à +100), seuils de signal à ±60.
             score_signal: sig?.score_total != null ? Math.round(sig.score_total * 100) : null,
-            secteur: a.secteur,
-            rendement_dividende: latestDividendByCode[a.code] ?? null,
+            // La colonne `secteur` de la cotation est vide : référentiel curé en repli.
+            secteur: a.secteur ?? (SECTEURS as Record<string, string>)[a.code] ?? null,
+            rendement_dividende:
+              div && a.cours_jour && a.cours_jour > 0 ? (div.montant / a.cours_jour) * 100 : null,
             liquidite_score: liquidityByCode.get(a.code)?.score ?? null,
             liquidite_classe: liquidityByCode.get(a.code)?.classe ?? null,
+            volume_ratio: volumeRatioByCode.get(a.code) ?? null,
           };
         });
 
@@ -163,8 +144,10 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
     fetchData();
   }, [supabase]);
 
+  const [exclus, setExclus] = useState(0);
   const handleFilter = (filters: ScreenerPreset['filters']) => {
     setFiltered(applyFilters(allActions, filters));
+    setExclus(exclusFauteDeDonnee(allActions, filters));
   };
 
   // Filtre rapide liquidité (appliqué APRÈS les presets, côté affichage)
@@ -247,6 +230,11 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
               </span>
             )}
           </div>
+          {exclus > 0 && (
+            <p className="text-xs text-faint">
+              <span className="tabular">{exclus}</span> valeur{exclus > 1 ? 's' : ''} écartée{exclus > 1 ? 's' : ''} faute de donnée sur un critère filtré.
+            </p>
+          )}
           <ScreenerResults results={displayed} />
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { Lock } from 'lucide-react';
 import { useEffect } from 'react';
-import { useQueryStates, parseAsFloat, parseAsString } from 'nuqs';
+import { useQueryStates, parseAsFloat, parseAsString, parseAsBoolean } from 'nuqs';
 import { PRESETS } from '@/lib/screener/presets';
 import type { ScreenerPreset } from '@/lib/screener/presets';
 
@@ -25,6 +25,9 @@ const PARSEURS = {
   scoreMin: parseAsFloat.withDefault(0),
   secteur: parseAsString.withDefault(''),
   dividendMin: parseAsFloat.withDefault(0),
+  // Préréglage « Fort volume » : il n'était pas porté par l'URL, donc perdu dès
+  // son application (le préréglage ne filtrait rien).
+  volumeFort: parseAsBoolean.withDefault(false),
 };
 
 interface FiltersState {
@@ -33,6 +36,7 @@ interface FiltersState {
   scoreMin: number;
   secteur: string;
   dividendMin: number;
+  volumeFort: boolean;
 }
 
 /** Traduit l'état brut en filtres : une valeur par défaut vaut « pas de filtre ». */
@@ -43,6 +47,7 @@ function versFiltres(f: FiltersState): ScreenerPreset['filters'] {
     scoreMin: f.scoreMin > 0 ? f.scoreMin : undefined,
     dividendMin: f.dividendMin > 0 ? f.dividendMin : undefined,
     secteur: f.secteur ? f.secteur : undefined,
+    volumeGtAvg: f.volumeFort ? true : undefined,
   };
 }
 
@@ -63,7 +68,7 @@ export default function ScreenerFilters({
   useEffect(() => {
     onFilterChange(versFiltres(filters));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.rsiMin, filters.rsiMax, filters.scoreMin, filters.secteur, filters.dividendMin]);
+  }, [filters.rsiMin, filters.rsiMax, filters.scoreMin, filters.secteur, filters.dividendMin, filters.volumeFort]);
 
   const handleChange = (key: keyof FiltersState, value: number | string) => {
     void setFilters({ [key]: value } as Partial<FiltersState>);
@@ -80,6 +85,7 @@ export default function ScreenerFilters({
       scoreMin: preset.filters.scoreMin ?? 0,
       secteur: '',
       dividendMin: preset.filters.dividendMin ?? 0,
+      volumeFort: preset.filters.volumeGtAvg ?? false,
     });
   };
 
