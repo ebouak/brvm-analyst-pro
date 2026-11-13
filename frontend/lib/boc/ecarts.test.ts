@@ -86,3 +86,17 @@ describe('badgeRatio', () => {
     expect(badgeRatio({ ...base, valeurSite: null, motifSite: 'non disponible', comparaison: null, dateBoc: null }).source).toBe('manquant');
   });
 });
+
+import { concordance } from './ecarts';
+
+describe('concordance', () => {
+  it('ne compte que les valeurs comparables des deux côtés', () => {
+    const c = [
+      controlerValeur({ code: 'A', resultatNet: 1e9, titres: 1e7, dividende: 50 }, boc({ code: 'A', per: 10, rendement_net_pct: 5 })),
+      controlerValeur({ code: 'B', resultatNet: 1e9, titres: 1e7, dividende: 50 }, boc({ code: 'B', per: 15, rendement_net_pct: 5 })),
+      controlerValeur(null, boc({ code: 'C', per: 12 })),
+    ];
+    expect(concordance(c, 'per')).toEqual({ comparees: 2, concordantes: 1, taux: 0.5 });
+    expect(concordance([], 'per').taux).toBeNull();
+  });
+});

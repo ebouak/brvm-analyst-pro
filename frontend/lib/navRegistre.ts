@@ -179,6 +179,8 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/forum/[id]', libelle: 'Sujet', rubrique: 'apprendre', parent: '/forum', statut: 'parcours', raison: 'sujet atteint depuis le forum' },
   { chemin: '/forum/nouveau', libelle: 'Nouveau sujet', rubrique: 'apprendre', parent: '/forum', statut: 'parcours', raison: 'formulaire lié depuis le forum' },
   { chemin: '/methodologie', libelle: 'Méthodologie', rubrique: 'apprendre', statut: 'menu' },
+  { chemin: '/qualite-donnees', libelle: 'Qualité des données', rubrique: 'apprendre', parent: '/methodologie', statut: 'public', raison: 'transparence : contrôle quotidien contre le Bulletin officiel (SEO)' },
+  { chemin: '/operations-titres', libelle: 'Opérations sur titres', rubrique: 'apprendre', parent: '/methodologie', statut: 'public', raison: 'registre public des fractionnements et suspensions (SEO)' },
 
   // ── Compte (menu de l'avatar) ──────────────────────────────────────────────
   { chemin: '/parametres/compte', libelle: 'Mon compte', racine: true, statut: 'secondaire', raison: COMPTE },

@@ -175,3 +175,19 @@ function dateCourte(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
 }
+
+/* ─── Taux de concordance (page publique « Qualité des données ») ─────────── */
+
+export interface Concordance {
+  /** Valeurs où le site ET le bulletin publient le ratio. */
+  comparees: number;
+  concordantes: number;
+  /** Part concordante, de 0 à 1 ; null si rien n'est comparable. */
+  taux: number | null;
+}
+
+export function concordance(controles: ControleValeur[], k: 'per' | 'rendement'): Concordance {
+  const comparables = controles.filter((c) => c[k].etat === 'concordant' || c[k].etat === 'ecart');
+  const concordantes = comparables.filter((c) => c[k].etat === 'concordant').length;
+  return { comparees: comparables.length, concordantes, taux: comparables.length ? concordantes / comparables.length : null };
+}

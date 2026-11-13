@@ -20,6 +20,8 @@ export const PUBLIC_EXACT = new Set<string>([
   '/rendement-vrai', '/fiscalite', '/simulateur-budget',
   '/comparateur-sgi', '/actualites', '/formations', '/secteurs',
   '/apercu',
+  // Transparence : contrôle quotidien contre le Bulletin officiel, opérations sur titres.
+  '/qualite-donnees', '/operations-titres',
   '/crm/opposition',
   '/offre/dossier',
   // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,

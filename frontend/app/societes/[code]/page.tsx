@@ -14,6 +14,8 @@ import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { coteBocValeur } from '@/lib/boc/charger';
 import { controlerValeur, badgeRatio, type BadgeRatio } from '@/lib/boc/ecarts';
 import BadgeSource from '@/components/fiche/BadgeSource';
+import EstimateurLiquidite from '@/components/fiche/EstimateurLiquidite';
+import { fiabiliteDividende, FENETRE_ANS } from '@/lib/dividendes/fiabilite';
 import { perAffichable, roeAffichable, montantDividende, dividendesAffichables, dividendePourRendement } from '@/lib/fiche/affichage';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
@@ -196,6 +198,19 @@ export default async function CompanyPage(props: PageProps) {
     ? controlerValeur({ code, resultatNet: bestFund?.net_income ?? null, titres: instrument.shares ?? null, dividende: lastDividend?.montant ?? null }, boc)
     : null;
   const suspendue = boc?.statut === 'suspendu';
+
+  // Fiabilité du dividende : distribution, croissance sur 5 ans, années sans versement.
+  const fiabilite = fiabiliteDividende(dividends, fundamentals, instrument.shares ?? null);
+
+  // Liquidité : valeur échangée moyenne par séance de MARCHÉ (30 séances).
+  const { data: liq } = await createPublicClient()
+    .from('liquidity_daily')
+    .select('valeur_moyenne_30j, classe')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const liquidite = liq as { valeur_moyenne_30j: number | null; classe: string | null } | null;
   const exercice = bestFund?.year ?? null;
   const badgeCalcule = (valeur: number | null, motif: string | null = null): BadgeRatio =>
     badgeRatio({ valeurSite: valeur, motifSite: motif, exercice, comparaison: null, dateBoc: null, unite: '', decimales: 2 });
@@ -378,6 +393,13 @@ export default async function CompanyPage(props: PageProps) {
 
       <CarnetOrdres carnet={carnet} />
 
+      {/* Estimateur de liquidité : sans objet sur une valeur suspendue (aucun échange possible). */}
+      {!suspendue && liquidite?.valeur_moyenne_30j != null && (
+        <div className="mb-6">
+          <EstimateurLiquidite code={code} valeurMoyenne={liquidite.valeur_moyenne_30j} classe={liquidite.classe} />
+        </div>
+      )}
+
       {/* ── Ce que dit la séance ─────────────────────────────────────────────
           `accesLectureSeance === 'free'` est le SEUL cas où ce bloc s'adresse à
           tout le monde — puisqu'on ne sait pas QUI regarde (voir plus haut, pas
@@ -486,6 +508,38 @@ export default async function CompanyPage(props: PageProps) {
             </table>
           ) : (
             <p className="py-6 text-sm text-faint">Aucun dividende enregistré.</p>
+          )}
+          {fiabilite && (
+            <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-border/60 pt-3 text-xs">
+              <div>
+                <dt className="text-faint">Distribution {fiabilite.dernierExercice}</dt>
+                <dd className={`tabular text-sm ${fiabilite.distributionAuDela ? 'text-warn' : 'text-ivory'}`}>
+                  {fiabilite.distribution != null ? `${fmtNumber(fiabilite.distribution * 100, 0)} % du résultat` : '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-faint">Croissance annuelle</dt>
+                <dd className="tabular text-sm text-ivory">
+                  {fiabilite.croissanceAnnuelle != null ? fmtPctSigne(fiabilite.croissanceAnnuelle * 100) : '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-faint">Sans versement</dt>
+                <dd className="tabular text-sm text-ivory">
+                  {fiabilite.sansVersement.length}/{fiabilite.exercicesFenetre} exercice{fiabilite.exercicesFenetre > 1 ? 's' : ''}
+                </dd>
+              </div>
+              {fiabilite.distributionAuDela && (
+                <p className="col-span-3 text-warn">
+                  Le dividende de l&apos;exercice {fiabilite.dernierExercice} dépasse le résultat de cet exercice : il est
+                  financé en partie sur les réserves ou la trésorerie, ce qui ne peut pas se répéter indéfiniment.
+                </p>
+              )}
+              <p className="col-span-3 text-faint">
+                Sur {FENETRE_ANS} exercices au plus, depuis le premier exercice connu
+                {fiabilite.sansVersement.length > 0 && <> ; sans versement : {fiabilite.sansVersement.join(', ')}</>}.
+              </p>
+            </dl>
           )}
         </section>
 
