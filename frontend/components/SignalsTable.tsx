@@ -21,7 +21,7 @@ const SIGNAL_CSV_COLUMNS: CsvColumn<SignalRow>[] = [
   { header: 'Date', accessor: (r) => r.date_marche },
   { header: 'Signal', accessor: (r) => r.signal },
   { header: 'Score', accessor: (r) => r.score_total ?? '' },
-  { header: 'Confiance', accessor: (r) => r.confiance != null ? Number((r.confiance * 100).toFixed(1)) : '' },
+  { header: 'Complétude des données', accessor: (r) => r.confiance != null ? Number((r.confiance * 100).toFixed(1)) : '' },
   { header: 'Explication', accessor: (r) => r.explication ?? '' },
   { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
   { header: 'Pays', accessor: (r) => r.pays ?? '' },
@@ -176,11 +176,11 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
         {/* Slider confiance */}
         <div className="flex items-center gap-3">
           <label className="text-xs text-muted whitespace-nowrap">
-            Confiance min : <span className="tabular text-white font-medium">{minConf} %</span>
+            Complétude min : <span className="tabular text-white font-medium">{minConf} %</span>
           </label>
           <input
             type="range" min={0} max={100} step={5}
-            aria-label="Confiance minimum"
+            aria-label="Complétude des données minimum"
             value={minConf}
             onChange={(e) => { setMinConf(Number(e.target.value)); setPage(1); }}
             className="flex-1 h-1 accent-[#00c853]"
@@ -233,7 +233,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
                       Score {sortKey === 'score_total' && (asc ? '▲' : '▼')}
                     </th>
                     <th onClick={() => toggleSort('confiance')} className="px-3 py-2 text-right cursor-pointer hover:text-white">
-                      Confiance {sortKey === 'confiance' && (asc ? '▲' : '▼')}
+                      Complétude {sortKey === 'confiance' && (asc ? '▲' : '▼')}
                     </th>
                     <th className="px-3 py-2 text-right">Cours</th>
                     <th className="px-3 py-2 text-center w-16">Détail</th>

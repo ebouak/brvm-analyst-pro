@@ -83,6 +83,7 @@
     "communaute": "tsx src/index.ts communaute",
     "sante:llm": "tsx src/index.ts sante:llm",
     "eval:signaux": "tsx src/index.ts eval:signaux",
+    "eval:signaux:rejeu": "tsx src/index.ts eval:signaux:rejeu",
     "conseiller": "tsx --env-file-if-exists=.env.local src/index.ts conseiller",
     "saisonnalite": "tsx --env-file-if-exists=.env.local src/index.ts saisonnalite",
     "conseiller:signaux": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:signaux",
