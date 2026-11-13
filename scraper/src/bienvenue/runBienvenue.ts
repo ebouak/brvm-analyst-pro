@@ -74,6 +74,7 @@ export async function runBienvenue({ mock = false } = {}): Promise<BienvenueResu
     lecon: `${SITE}/formations/academy/lecon-0`,
     affiche: `${url}/storage/v1/object/public/academy-lecon0/ecosysteme-umoa.jpg`,
     sgi: `${SITE}/comparateur-sgi`,
+    debutant: `${SITE}/debutant`,
   };
 
   let envoyes = 0, echecs = 0;

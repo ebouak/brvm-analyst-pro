@@ -58,7 +58,7 @@ describe('aEnvoyer — qui reçoit quoi', () => {
 });
 
 describe('composer — ce qui est écrit', () => {
-  const liens = { lecon: 'https://www.westbourse.com/formations/academy/lecon-0', affiche: 'https://x.supabase.co/a.jpg', sgi: 'https://www.westbourse.com/comparateur-sgi' };
+  const liens = { lecon: 'https://www.westbourse.com/formations/academy/lecon-0', affiche: 'https://x.supabase.co/a.jpg', sgi: 'https://www.westbourse.com/comparateur-sgi', debutant: 'https://www.westbourse.com/debutant' };
 
   it('les deux motifs pointent vers la leçon 0, en HTML comme en texte', () => {
     for (const motif of ['inscription', 'abonnement'] as const) {

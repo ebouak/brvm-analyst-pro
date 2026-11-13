@@ -4,6 +4,7 @@
  * titre, l'accroche et le chiffre de l'indice sont dans le HTML initial ; seuls les
  * blocs animés ou interactifs sont des composants client.
  */
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { TitreMots } from './mouvement/TitreMots';
 import { Apparition } from './mouvement/Apparition';
@@ -33,26 +34,30 @@ const IcoTelegram = () => (
   <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="v-accent"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z" /></svg>
 );
 
+/** Rang d'entrée dans la cascade de l'ouverture (0,09 s par rang, CSS pur). */
+const rang = (n: number) => ({ '--vh-rang': n }) as CSSProperties;
+
 export function Ouverture({ o }: { o: DonneesOuverture }) {
   return (
     <section className="bande-sombre v-ouverture-bloc">
-      <div className="v-colonne v-centre">
+      <span className="vh-lumiere" aria-hidden />
+      <div className="v-colonne v-centre vh-scene">
         {o.dateLongue && (
-          <p className="v-etat">
+          <p className="v-etat vh-entree" style={rang(0)}>
             <span className={`v-pastille ${o.enSeance ? 'v-pastille--ouverte' : ''}`} aria-hidden />
             Séance du {o.dateLongue} · {o.enSeance ? 'marché ouvert' : 'marché fermé'}
           </p>
         )}
         <TitreMots as="h1" texte="Toute la BRVM. Au chiffre près." accent="Au chiffre près." className="v-ouverture" />
-        <p className="v-accroche">
+        <p className="v-accroche vh-entree" style={rang(5)}>
           {o.nbValeurs} valeurs, notées de A à F, avec la source de chaque chiffre.
         </p>
-        <InscriptionAccueil />
-        <p className="v-note">
+        <div className="vh-entree vh-entree--cta" style={rang(7)}><InscriptionAccueil /></div>
+        <p className="v-note vh-entree" style={rang(9)}>
           Sans carte bancaire{o.membres != null ? ` · ${fmtNumber(o.membres, 0)} membres inscrits` : ''} · désabonnement en un clic ·{' '}
           <Link href="/login" className="v-lien-discret">continuer avec Google</Link>
         </p>
-        <div className="v-canaux-ligne">
+        <div className="v-canaux-ligne vh-entree" style={rang(10)}>
           <span>Ou suivez la séance sans compte</span>
           <LienCanal className="v-bouton-second" href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="ouverture"><IcoWhatsapp />WhatsApp</LienCanal>
           <LienCanal className="v-bouton-second" href={CANAUX.telegram} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>

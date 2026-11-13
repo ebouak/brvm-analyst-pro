@@ -21,6 +21,8 @@ export interface Liens {
   affiche: string;
   /** Comparateur de SGI. */
   sgi: string;
+  /** Page publique « Débutant » : les bases de la Bourse. */
+  debutant: string;
 }
 
 export interface MessageBienvenue {
@@ -54,6 +56,8 @@ export function composer(motif: Motif, liens: Liens): MessageBienvenue {
     '',
     `Regarder la leçon 0 : ${liens.lecon}`,
     '',
+    `Les bases de la Bourse, expliquées simplement : ${liens.debutant}`,
+    '',
     `Pour investir en direct, tout commence par une SGI agréée. Comparez-les : ${liens.sgi}`,
     '',
     'Contenu pédagogique — pas un conseil en investissement.',
@@ -71,6 +75,7 @@ export function composer(motif: Motif, liens: Liens): MessageBienvenue {
   <p style="margin:18px 0 26px;text-align:center">
     <a href="${echappe(liens.lecon)}" style="display:inline-block;background:#006fba;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:8px">Regarder la leçon 0</a>
   </p>
+  <p style="margin:0 0 14px;font-size:15px;line-height:1.55">Vous débutez ? <a href="${echappe(liens.debutant)}" style="color:#006fba">Les bases de la Bourse, expliquées simplement</a>.</p>
   <p style="margin:0 0 20px;font-size:15px;line-height:1.55">Pour investir en direct, tout commence par une SGI agréée. <a href="${echappe(liens.sgi)}" style="color:#006fba">Comparez-les sur WESTBOURSE</a>.</p>
   <p style="margin:0;font-size:12px;color:#52667a">Contenu pédagogique — pas un conseil en investissement.</p>
 </div></body></html>`;

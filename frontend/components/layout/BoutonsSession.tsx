@@ -54,8 +54,10 @@ export function BoutonsSession({ variante, onNavigate }: { variante: VarianteSes
     case 'bureau':
       return connecte ? espace(SECONDAIRE) : (
         <span className={`inline-flex items-center ${cache}`} aria-hidden={etat === 'inconnu' ? true : undefined}>
+          {/* « Créer un compte », libellé court : la barre est plafonnée à 1152 px et, avec
+              « Débutant », le libellé long débordait de 73 px à toute largeur (mesuré). */}
           <Link href="/login" tabIndex={etat === 'inconnu' ? -1 : undefined} className={SECONDAIRE}>Se connecter</Link>
-          <Link href="/signup" onClick={suivre} tabIndex={etat === 'inconnu' ? -1 : undefined} className={`ml-1 ${ACCENT}`}>Créer mon compte gratuit</Link>
+          <Link href="/signup" onClick={suivre} tabIndex={etat === 'inconnu' ? -1 : undefined} className={`ml-1 ${ACCENT}`}>Créer un compte</Link>
         </span>
       );
     case 'compact':

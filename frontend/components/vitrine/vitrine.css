@@ -108,6 +108,59 @@
   flex: 1 1 200px; min-width: 0; min-height: 48px; padding: 0 18px; background: transparent; border: 0;
   color: rgb(var(--color-ivory)); font: inherit; font-size: 16px; border-radius: 999px;
 }
+/* ── Ouverture en mouvement (CSS pur : rien à hydrater, le titre reste le plus
+   grand élément peint tout de suite). Trois temps : cascade d'entrée, lumière
+   qui traverse le titre une fois, recul du bloc au défilement. ─────────────── */
+.vitrine .v-ouverture-bloc { position: relative; overflow: hidden; isolation: isolate; }
+.vitrine .v-cta-duo { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.vitrine .vh-entree--cta { width: 100%; display: flex; justify-content: center; }
+.vitrine .vh-entree {
+  animation: vh-entree 1.1s cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(.12s + var(--vh-rang, 0) * .09s);
+}
+@keyframes vh-entree {
+  from { opacity: 0; transform: translateY(26px) scale(.97); filter: blur(12px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+/* Le titre arrive de près : il se pose pendant que ses mots montent. */
+.vitrine .vh-scene .v-ouverture { animation: vh-titre 1.6s cubic-bezier(.16, 1, .3, 1) both; transform-origin: 50% 60%; }
+@keyframes vh-titre { from { transform: scale(1.12); } to { transform: none; } }
+/* Lumière : un halo blanc très faible qui traverse la scène, puis reste en veille. */
+.vitrine .vh-lumiere {
+  position: absolute; z-index: -1; top: -30%; left: 50%; width: min(1100px, 130vw); aspect-ratio: 1.5; pointer-events: none;
+  background: radial-gradient(closest-side, rgb(var(--color-ivory) / .11), rgb(var(--color-ivory) / .04) 45%, transparent 72%);
+  transform: translateX(-50%);
+  animation: vh-lumiere 2.8s cubic-bezier(.22, 1, .36, 1) both, vh-souffle 9s ease-in-out 2.8s infinite alternate;
+}
+@keyframes vh-lumiere {
+  from { opacity: 0; transform: translateX(-115%) scale(.7); }
+  35% { opacity: 1; }
+  to { opacity: .75; transform: translateX(-50%) scale(1); }
+}
+@keyframes vh-souffle { from { opacity: .75; transform: translateX(-54%) scale(1); } to { opacity: .45; transform: translateX(-46%) scale(1.08); } }
+/* Bouton principal : un reflet le traverse une fois, à la fin de la cascade. */
+.vitrine .vh-entree--cta .v-bouton { position: relative; overflow: hidden; }
+.vitrine .vh-entree--cta .v-bouton::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .55) 50%, transparent 65%);
+  transform: translateX(-120%); animation: vh-reflet 1.1s cubic-bezier(.4, 0, .2, 1) 1.5s both;
+}
+@keyframes vh-reflet { to { transform: translateX(120%); } }
+/* Au défilement, la scène recule : plus petite, plus pâle, elle monte moins vite
+   que la page. Seulement là où le navigateur sait lier une animation au
+   défilement ; ailleurs le bloc reste tel quel, pleinement visible. */
+@supports (animation-timeline: scroll()) {
+  .vitrine .vh-scene {
+    animation: vh-recul linear both; animation-timeline: scroll(root block); animation-range: 0 85vh;
+    transform-origin: 50% 30%; will-change: transform, opacity;
+  }
+  @keyframes vh-recul { to { transform: translateY(22vh) scale(.86); opacity: .12; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vitrine .vh-entree, .vitrine .vh-scene, .vitrine .vh-scene .v-ouverture, .vitrine .vh-lumiere, .vitrine .vh-entree--cta .v-bouton::after { animation: none; }
+  .vitrine .vh-entree--cta .v-bouton::after { display: none; }
+  .vitrine .vh-lumiere { opacity: .5; }
+}
 .vitrine .v-lien-discret { color: rgb(var(--color-muted)); text-decoration: underline; text-underline-offset: 3px; }
 .vitrine .v-canaux-ligne { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; font-size: 14px; color: rgb(var(--color-muted)); }
 
