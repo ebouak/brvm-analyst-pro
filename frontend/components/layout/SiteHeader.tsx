@@ -78,7 +78,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
         </span>
       </button>
       <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open} {...(open ? {} : ({ inert: '' } as object))}>
-        <div className={`absolute inset-0 bg-bg/80 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
+        <div className={`absolute inset-x-0 top-[57px] bottom-0 bg-bg/80 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
         <nav id={id} aria-label="Menu" className={`absolute inset-x-0 top-[57px] bottom-0 overflow-y-auto bg-bg px-5 py-6 transition-[transform,opacity] duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
           <div className="flex justify-center mb-6"><ThemeToggle /></div>
           <div className="space-y-1">
@@ -105,7 +105,11 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
   const active = (h: string) => pathname === h || pathname.startsWith(h + '/');
   const cls = (h: string) => `inline-flex min-h-[44px] items-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${active(h) ? 'bg-accent/10 text-accent-ink' : 'text-muted hover:bg-white/[0.06] hover:text-ivory'}`;
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-surface/90 backdrop-blur print:hidden">
+    <header className="sticky top-0 z-40 border-b border-border/60 print:hidden">
+      {/* Le fond flouté vit dans un calque à part : posé sur le <header>, backdrop-filter
+          en fait le bloc conteneur des descendants en position fixe, et le tiroir mobile
+          (fixed inset-0) se retrouvait limité aux 57 px de l'en-tête (mesuré le 13/11). */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface/90 backdrop-blur" />
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" aria-label="WESTBOURSE accueil" className="flex shrink-0 items-center gap-2.5">
           <AnimatedLogo size={30} variant="mark" animate={false} />
