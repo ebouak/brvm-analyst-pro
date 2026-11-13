@@ -28,7 +28,7 @@ import { sendEmail, sendTelegramDocument, sendTelegramText } from '../alerts/cha
 import { envoyerDocumentWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 import { cleSemaine, selectionnerLignes, type LigneCandidate, type Selection } from './selection.js';
-import { composerMessage, composerRectificatif } from './message.js';
+import { composerInvitation, composerMessage, composerRectificatif } from './message.js';
 
 const BUCKET = 'dossiers';
 
@@ -39,6 +39,8 @@ export interface EnvoiResult {
   vides: number;
   echecs: number;
   sautes: number;
+  /** Comptes non Premium : e-mail d'invitation à la place des PDF. */
+  invitations: number;
 }
 
 interface Pref {
@@ -51,7 +53,9 @@ interface Pref {
 }
 
 type Canal = 'email' | 'telegram' | 'whatsapp';
-type Statut = 'en_cours' | 'envoye' | 'echec' | 'vide';
+type Statut = 'en_cours' | 'envoye' | 'echec' | 'vide' | 'invitation';
+
+/** Une invitation au Premium au plus par trimestre : le journal est purgé à 90 jours (0132). */
 
 /**
  * `rectificatif` : renvoie la version CORRIGÉE des dossiers aux seuls comptes
@@ -66,7 +70,7 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
   const sb = getSupabase();
   const maintenant = new Date();
   const semaine = cleSemaine(maintenant);
-  const res: EnvoiResult = { semaine, comptes: 0, envoyes: 0, vides: 0, echecs: 0, sautes: 0 };
+  const res: EnvoiResult = { semaine, comptes: 0, envoyes: 0, vides: 0, echecs: 0, sautes: 0, invitations: 0 };
 
   // ── 1. Comptes ayant explicitement demandé l'envoi ──────────────────────
   const { data: prefsRows, error: errPrefs } = await sb
@@ -97,6 +101,18 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
   const premiumPar = new Set(
     ((profils ?? []) as { id: string; is_premium: boolean | null }[]).filter((p) => p.is_premium).map((p) => p.id),
   );
+  /* Les PDF suivent le MÊME drapeau que la page du dossier (`dossiers_valeur`,
+     réglable dans /admin/features). Illisible = Premium : on n'ouvre pas un
+     contenu payant sur une panne de lecture. `disabled` coupe tout, invitation comprise. */
+  const { data: drapeau } = await sb.from('feature_flags').select('acces').eq('code', 'dossiers_valeur').maybeSingle();
+  const acces = (drapeau as { acces: string } | null)?.acces ?? 'premium';
+  if (acces === 'disabled') {
+    logger.info(res, 'envoi des dossiers : fonctionnalité coupée (dossiers_valeur = disabled)');
+    return res;
+  }
+  const autorise = (userId: string) => acces === 'free' || premiumPar.has(userId);
+  const { data: invRows } = await sb.from('dossier_envois').select('user_id').eq('statut', 'invitation');
+  const dejaInvites = new Set(((invRows ?? []) as { user_id: string }[]).map((r) => r.user_id));
   const passerelle = wahaConfiguree();
   // Chaque WhatsApp lié au compte (0165, au plus 2) reçoit les dossiers.
   const waPar = passerelle
@@ -189,6 +205,34 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
         pdf_updated_at: majPar.get(x.code) ?? null,
       }));
     const sel: Selection = selectionnerLignes(candidates, maintenant);
+
+    /* Non Premium : aucun PDF, sur aucun canal. Un seul e-mail d'invitation à
+       la place (au plus un par trimestre), jamais pendant un rectificatif. */
+    if (!autorise(p.user_id)) {
+      const email = emailPar.get(p.user_id);
+      if (rectificatif || !p.dossiers_email || !email || dejaInvites.has(p.user_id)) {
+        res.sautes += 1;
+        continue;
+      }
+      const inv = composerInvitation(candidates.map((c) => ({ code: c.code, designation: c.designation })));
+      if (mock) {
+        logger.info({ user_id: p.user_id, sujet: inv.sujet }, 'mock : invitation simulée');
+        res.invitations += 1;
+        continue;
+      }
+      try {
+        const r = await sendEmail({ to: email, subject: inv.sujet, body: inv.corps });
+        if (!r || r.status !== 'sent') throw new Error(r?.error ?? 'canal email non configuré');
+        await journal(p.user_id, 'email', 'invitation', []);
+        res.invitations += 1;
+      } catch (err) {
+        const e = err instanceof Error ? err.message : String(err);
+        await journal(p.user_id, 'email', 'echec', [], `invitation : ${e}`);
+        res.echecs += 1;
+        logger.error({ user_id: p.user_id, err: e }, 'invitation Premium non envoyée');
+      }
+      continue;
+    }
 
     /* Un canal demandé mais inutilisable (pas d'adresse, pas d'appairage) est
        ignoré en silence : ce n'est pas un échec d'envoi, c'est un canal non
