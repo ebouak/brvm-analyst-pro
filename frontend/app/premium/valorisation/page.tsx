@@ -34,7 +34,7 @@ export default async function ValorisationPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard label="Sociétés valorisables" value={String(valuable.length)} delta={`sur ${all.length} analysées`} deltaDir="flat" accent="sapphire" />
-        <MetricCard label="En décote estimée" value={String(decotes)} delta="valeur estimée > cours de 15 %" deltaDir="up" accent="emerald" />
+        <MetricCard label="Valeur estimée au-dessus du cours" value={String(decotes)} delta="valeur estimée > cours de 15 %" deltaDir="up" accent="emerald" />
         <MetricCard
           label="Plus fort écart estimé"
           value={cheapest ? cheapest.code : '—'}

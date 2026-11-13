@@ -5,6 +5,8 @@ import { computeAltmanZ, type AltmanResult } from './altman';
 export interface CompanyScoring {
   code: string;
   fscore: FScoreResult | null;
+  /** Le F-Score ne s'applique pas à un bilan bancaire (B5, 2026-11-13). */
+  fscoreNonApplicable?: boolean;
   altman: AltmanResult | null;
 }
 
@@ -34,7 +36,11 @@ function buildYear(inc: IncRow | null, bal: BalRow | null, cf: CfRow | null): FS
 function compute(code: string, inc: IncRow[], bal: BalRow[], cf: CfRow[], famille: string | null): CompanyScoring {
   const i = latestTwo(inc), b = latestTwo(bal), c = latestTwo(cf);
   let fscore: FScoreResult | null = null;
-  if (i.curr && i.prev && b.curr && b.prev) {
+  // Piotroski repose sur la marge brute, la liquidité générale et la rotation de
+  // l'actif : des notions sans objet pour une banque. Sept banques affichaient
+  // « 1/9 » ; elles affichent désormais « non applicable ».
+  const banque = (famille ?? '').toLowerCase() === 'banque';
+  if (!banque && i.curr && i.prev && b.curr && b.prev) {
     fscore = computeFScore(buildYear(i.curr, b.curr, c.curr), buildYear(i.prev, b.prev, c.prev));
   }
   let altman: AltmanResult | null = null;
@@ -49,7 +55,7 @@ function compute(code: string, inc: IncRow[], bal: BalRow[], cf: CfRow[], famill
       famille,
     });
   }
-  return { code, fscore, altman };
+  return { code, fscore, fscoreNonApplicable: banque, altman };
 }
 
 const INC_SEL = 'code, periode, revenu_total, marge_brute, resultat_net, actions_en_circulation, resultat_exploitation';
