@@ -39,6 +39,18 @@ const DEFAUT = { cloture: 222, variation: 246, reference: 366, variationAnnee: 4
 
 const NOMBRE = /^-?\d[\d  ]*(,\d+)?$/;
 
+/**
+ * Une séance BRVM est plafonnée à ±7,5 % : une référence à plus du double ou à
+ * moins de la moitié de la clôture ne peut être qu'une lecture fautive. Elle est
+ * écartée (null) plutôt qu'écrite : un trou se voit, un faux cours se propage
+ * au contrôle des écarts et au PER affiché.
+ */
+export function referencePlausible(reference: number | null, cloture: number | null): number | null {
+  if (reference == null || cloture == null || cloture <= 0) return reference;
+  const r = reference / cloture;
+  return r >= 0.5 && r <= 2 ? reference : null;
+}
+
 export function lireCoteBoc(pages: ItemPdf[][]): CoteBoc[] {
   let col = { ...DEFAUT };
   const dividendes = new Map(lireDerniersDividendes(pages).map((d) => [d.code, d]));
@@ -67,7 +79,11 @@ export function lireCoteBoc(pages: ItemPdf[][]): CoteBoc[] {
       const zoneCloture = dans(col.cloture - 8, col.variation + 8);
       const suspendu = zoneCloture.some((i) => i.s === 'SP');
       const clotureBrute = zoneCloture.find((i) => NOMBRE.test(i.s));
-      const refBrute = dans(col.reference - 15, col.variationAnnee + 10).find((i) => NOMBRE.test(i.s));
+      /* Référence = le nombre le plus À DROITE de la fenêtre : la valeur échangée
+         qui la précède est alignée à droite et, quand elle est longue (« 927 230 »,
+         SIVC le 12/11/2026), son début entre dans la fenêtre. Prendre le premier
+         nombre lisait alors la valeur échangée comme cours de référence. */
+      const refBrute = dans(col.reference - 15, col.variationAnnee + 10).filter((i) => NOMBRE.test(i.s)).sort((a, b) => b.x - a.x)[0];
       const perBrut = ligne.find((i) => i.x >= col.per - 8 && NOMBRE.test(i.s));
       if (!suspendu && !clotureBrute) continue; // en-tête d'indice, ligne de titre…
 
@@ -76,7 +92,7 @@ export function lireCoteBoc(pages: ItemPdf[][]): CoteBoc[] {
         code: c.s,
         statut: suspendu ? 'suspendu' : 'cote',
         cours_cloture: suspendu || !clotureBrute ? null : parseFrNumber(clotureBrute.s),
-        cours_reference: refBrute ? parseFrNumber(refBrute.s) : null,
+        cours_reference: referencePlausible(refBrute ? parseFrNumber(refBrute.s) : null, suspendu || !clotureBrute ? null : parseFrNumber(clotureBrute.s)),
         per: perBrut ? parseFrNumber(perBrut.s) : null,
         rendement_net_pct: d?.rendement_net_pct ?? null,
         dividende_net: d?.montant ?? null,
