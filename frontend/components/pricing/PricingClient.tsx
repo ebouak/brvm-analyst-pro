@@ -46,8 +46,8 @@ const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }
     items: [
       'Vue marché globale',
       'Actualités des sociétés cotées',
-      'Watchlist limitée',
-      'Alertes limitées',
+      'Watchlist et portefeuille',
+      'Une alerte de cours',
       'Rapports restreints',
     ],
   },

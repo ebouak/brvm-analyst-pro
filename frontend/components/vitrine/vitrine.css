@@ -167,6 +167,8 @@
   .vitrine .vh-lumiere { opacity: .5; }
 }
 .vitrine .v-lien-discret { color: rgb(var(--color-muted)); text-decoration: underline; text-underline-offset: 3px; }
+/* Zone tactile de 34 px sans décaler la ligne de texte (lien dans une phrase). */
+.vitrine .v-lien-discret { display: inline-block; padding: 8px 0; margin: -8px 0; }
 .vitrine .v-canaux-ligne { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; font-size: 14px; color: rgb(var(--color-muted)); }
 
 /* ── Indice ───────────────────────────────────────────────────────────── */
@@ -506,6 +508,8 @@
   display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
   animation: v-canaux-entree .7s var(--frein) 1.6s both;
 }
+.vitrine .v-canaux-flottants { transition: opacity .35s var(--frein), transform .35s var(--frein); }
+.vitrine .v-canaux-flottants--cache { opacity: 0; transform: translateY(16px); pointer-events: none; visibility: hidden; }
 .vitrine .v-canal-flottant {
   display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px 0 14px;
   border-radius: 999px; font-size: 14px; font-weight: 600; text-decoration: none;

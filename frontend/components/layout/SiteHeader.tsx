@@ -111,7 +111,7 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
           (fixed inset-0) se retrouvait limité aux 57 px de l'en-tête (mesuré le 13/11). */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface/90 backdrop-blur" />
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
-        <Link href="/" aria-label="WESTBOURSE accueil" className="flex shrink-0 items-center gap-2.5">
+        <Link href="/" aria-label="WESTBOURSE accueil" className="flex min-h-[44px] shrink-0 items-center gap-2.5">
           <AnimatedLogo size={30} variant="mark" animate={false} />
           <span className="hidden font-display text-lg font-semibold tracking-tight text-ivory min-[400px]:inline">WESTBOURSE</span>
         </Link>
