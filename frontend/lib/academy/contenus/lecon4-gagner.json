@@ -1,0 +1,120 @@
+{
+  "titre": "Leçon 4 — Les 3 façons de gagner à la BRVM",
+  "categorie": "income",
+  "duree_min": 9,
+  "sous_titre": "Le dividende, la plus-value et les droits de souscription : trois sources de gain, trois logiques.",
+  "resume": "Une action peut rapporter de trois façons : par le dividende versé chaque année, par la plus-value à la revente, et par les droits reçus lors d’une augmentation de capital.\nCette leçon apprend à les calculer, à les additionner, et à reconnaître ce qui n’est pas la norme.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis et les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Trois sources de gain",
+      "contenu": "Un actionnaire gagne de l’argent de trois manières, qui peuvent s’additionner.",
+      "points": [
+        { "titre": "Le dividende", "detail": "La part du bénéfice que l’assemblée générale décide de verser chaque année. Un revenu, sans vendre vos titres, mais jamais garanti." },
+        { "titre": "La plus-value", "detail": "La différence entre le prix de revente et le prix d’achat. Elle peut aussi être négative : c’est alors une moins-value." },
+        { "titre": "Les droits préférentiels de souscription (DPS)", "detail": "Lors d’une augmentation de capital, les actionnaires reçoivent des droits pour souscrire aux nouvelles actions. Ces droits ont une valeur et se négocient." }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Les calculer",
+      "contenu": "Trois formules suffisent. Les exemples sont pédagogiques : ils ne décrivent aucune société cotée.",
+      "formules": [
+        { "nom": "Revenu du dividende", "expression": "Nombre d’actions × Dividende par action", "exemple": "300 × 1 000 = 300 000 FCFA" },
+        { "nom": "Plus-value", "expression": "(Prix de revente − Prix d’achat) × Nombre d’actions", "exemple": "(5 600 − 5 000) × 200 = 120 000 FCFA" },
+        { "nom": "Rendement total", "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie", "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %" }
+      ]
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Sur la BRVM : la régularité des dividendes",
+      "contenu": "Le dividende d’une société varie d’un exercice à l’autre. Le tableau donne le dividende par action de quatre valeurs sur cinq exercices, tel qu’enregistré dans notre base.\nRepérez les distributions régulières, celles qui progressent, et les baisses.",
+      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "ORAC", "SGBC", "CIEC"] }
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Sur la BRVM : ce que rapportent 100 actions",
+      "contenu": "Le même calcul, appliqué au dernier dividende enregistré et au cours de la dernière séance. Le rendement change chaque jour avec le cours.",
+      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "CIEC"], "actions": 100 }
+    },
+    {
+      "type": "importance",
+      "titre": "Une augmentation de capital : trois choix",
+      "contenu": "Quand une société cotée émet de nouvelles actions, ses actionnaires reçoivent des DPS, en proportion des titres qu’ils détiennent. Le prix de souscription est fixé par la société dans la note d’information de l’opération.",
+      "points": [
+        { "titre": "Exercer ses droits", "detail": "Vous souscrivez aux nouvelles actions et gardez votre part du capital.", "verifier": "le prix de souscription et la période de l’opération." },
+        { "titre": "Céder ses droits", "detail": "Les DPS se négocient pendant la période de souscription : vous encaissez leur valeur sans rien débourser." },
+        { "titre": "Ne rien faire", "detail": "À la fin de la période, les droits non utilisés perdent leur valeur. C’est le seul mauvais choix." }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs à éviter",
+      "contenu": "Trois confusions coûtent cher aux débutants.",
+      "points": [
+        { "titre": "Prendre une envolée passée pour la norme", "detail": "Une action qui a triplé en quelques années est l’exception. Un rendement passé, même réel, ne se répète pas sur commande." },
+        { "titre": "Acheter juste avant le détachement pour « toucher » le dividende", "detail": "Au détachement, le cours baisse d’environ le montant du dividende : le gain n’est pas gratuit." },
+        { "titre": "Oublier l’impôt", "detail": "Le dividende est versé après une retenue à la source, dont le taux dépend du pays de la société.", "verifier": "si le montant affiché est brut ou net." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Quatre idées à garder en tête.",
+      "points": [
+        { "titre": "Trois sources de gain", "detail": "Dividende, plus-value, droits de souscription." },
+        { "titre": "Le dividende est voté, pas promis", "detail": "Il peut baisser ou disparaître d’un exercice à l’autre." },
+        { "titre": "Le rendement total additionne tout", "detail": "Dividendes reçus et plus-value, rapportés à la somme investie." },
+        { "titre": "Ne jamais laisser expirer ses DPS", "detail": "Les exercer ou les céder, mais ne pas les ignorer." }
+      ]
+    }
+  ],
+  "chart": null,
+  "charts": [],
+  "quiz": [
+    {
+      "question": "Vous achetez 200 actions à 5 000 FCFA et les revendez à 5 600 FCFA. Quelle est votre plus-value, hors frais ?",
+      "options": ["600 FCFA", "12 000 FCFA", "120 000 FCFA", "1 120 000 FCFA"],
+      "correct": 2,
+      "explication": "(5 600 − 5 000) × 200 = 600 × 200 = 120 000 FCFA."
+    },
+    {
+      "question": "Vous avez investi 1 000 000 FCFA, reçu 80 000 FCFA de dividendes et réalisé 120 000 FCFA de plus-value. Quel est votre rendement total ?",
+      "options": ["8 %", "12 %", "20 %", "200 %"],
+      "correct": 2,
+      "explication": "(80 000 + 120 000) ÷ 1 000 000 = 200 000 ÷ 1 000 000 = 20 %."
+    },
+    {
+      "question": "Une société lance une augmentation de capital. Quel choix fait perdre de l’argent à coup sûr ?",
+      "options": ["Exercer ses DPS", "Céder ses DPS sur le marché", "Laisser expirer ses DPS sans rien faire", "Céder une partie et exercer l’autre"],
+      "correct": 2,
+      "explication": "Les droits non utilisés perdent leur valeur à la fin de la période de souscription. Les exercer ou les céder préserve leur valeur."
+    },
+    {
+      "question": "Vous achetez une action la veille du détachement, juste pour toucher le dividende. Que se passe-t-il ?",
+      "options": ["Vous gagnez le dividende sans contrepartie", "Le cours baisse d’environ le montant du dividende au détachement", "Le dividende vous est refusé", "La société vous rembourse les frais"],
+      "correct": 1,
+      "explication": "Au détachement, le cours est ajusté du dividende. Le gain apparent est compensé, et les frais d’achat restent à votre charge."
+    },
+    {
+      "question": "Une société a versé un dividende chaque année depuis dix ans. Que pouvez-vous en déduire ?",
+      "options": ["Le dividende est garanti l’an prochain", "Il est voté chaque année : il peut baisser ou disparaître", "Il augmentera forcément", "La société ne peut plus le supprimer"],
+      "correct": 1,
+      "explication": "La régularité passée est un bon signe, pas une garantie : l’assemblée générale décide chaque année."
+    }
+  ],
+  "qcm": {
+    "question": "Vous achetez 200 actions à 5 000 FCFA et les revendez à 5 600 FCFA. Quelle est votre plus-value, hors frais ?",
+    "options": ["600 FCFA", "12 000 FCFA", "120 000 FCFA", "1 120 000 FCFA"],
+    "correct": 2,
+    "explication": "(5 600 − 5 000) × 200 = 600 × 200 = 120 000 FCFA."
+  },
+  "liens": [
+    { "label": "Les dividendes de toutes les valeurs", "href": "/dividendes" },
+    { "label": "Le calendrier des dividendes", "href": "/dividendes/calendrier" },
+    { "label": "Le rendement réel, après inflation", "href": "/rendement-vrai" }
+  ]
+}
