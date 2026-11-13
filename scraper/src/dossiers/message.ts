@@ -25,6 +25,39 @@ function dateFR(iso: string): string {
 }
 
 /**
+ * Invitation — à la place des PDF, pour un compte NON Premium qui a coché
+ * l'envoi des dossiers (réservés au Premium depuis le 2026-11-13, drapeau
+ * `dossiers_valeur`). Aucune pièce jointe, aucun chiffre : le message dit ce
+ * qui a changé, ce que contient un dossier, où s'abonner et comment ne plus
+ * le recevoir. Il ne part qu'une fois par trimestre au plus (runEnvoi.ts).
+ */
+export function composerInvitation(valeurs: { code: string; designation: string }[]): Message {
+  const sujet = 'Vos dossiers valeur sont désormais réservés au Premium';
+  const lignes: string[] = [sujet, ''];
+  if (valeurs.length > 0) {
+    lignes.push('Vous avez demandé à recevoir chaque samedi le dossier valeur des sociétés de votre portefeuille :');
+    for (const v of valeurs) lignes.push(`  • ${v.code} — ${v.designation}`);
+  } else {
+    lignes.push('Vous avez demandé à recevoir chaque samedi le dossier valeur des sociétés de votre portefeuille.');
+  }
+  lignes.push(
+    '',
+    'Ces dossiers font désormais partie de l’abonnement Premium. Pour chaque société : les comptes,',
+    'la valorisation, le dividende, les niveaux de cours et les points de vigilance, relus chaque',
+    'semaine et livrés en PDF, avec les sources de chaque chiffre.',
+    '',
+    'Passer au Premium : https://www.westbourse.com/account/plan',
+    'Voir un dossier : https://www.westbourse.com/rapports/dossiers',
+    '',
+    'Pour ne plus recevoir ce message, décochez « Dossiers valeur » dans vos préférences :',
+    'https://www.westbourse.com/parametres/alertes',
+    '',
+    'Document d’information ; ne constitue pas un conseil en investissement.',
+  );
+  return { sujet, corps: lignes.join('\n') };
+}
+
+/**
  * Rectificatif — envoyé aux comptes qui ont reçu un dossier fautif.
  *
  * Il dit CE qui était faux, en mots et sans chiffre (même règle que le message
