@@ -3,7 +3,7 @@ import { logger } from '../logger.js';
 import { getSupabase } from '../persistence/supabase.js';
 import { computeScore } from '../scoring/score.js';
 import { evaluerSignaux, formaterRapport, HORIZONS_DEFAUT, type PointCours, type PointSignal } from './evaluation.js';
-import { ancienScore, entreeSeance, spearman, type LigneSeance } from './rejeu.js';
+import { ancienScore, ecartHautBas, entreeSeance, spearman, variantesScore, type LigneSeance } from './rejeu.js';
 
 /**
  * Rejeu du scoring, LECTURE SEULE : recalcule chaque séance avec la formule
@@ -72,6 +72,10 @@ export async function runRejeuSignaux(): Promise<{ rapport: string }> {
   const fin = apres.map((s) => s.date).sort().at(-1)!;
   const rapportAvant = formaterRapport(evaluerSignaux(avant, cours, { horizons: HORIZONS_DEFAUT }), { debut, fin, nSignaux: avant.length });
   const rapportApres = formaterRapport(evaluerSignaux(apres, cours, { horizons: HORIZONS_DEFAUT }), { debut, fin, nSignaux: apres.length });
+  // Variante « retrait » ramenée sur l'échelle [−1 ; 1] (RSI et tendance pèsent au plus 0,4),
+  // pour la juger au même banc et aux mêmes tranches que la formule en production.
+  const retrait: PointSignal[] = comp.map((c) => ({ code: c.code, date: c.date, score: Math.max(-1, Math.min(1, variantesScore(c).retrait / 0.4)) }));
+  const rapportRetrait = formaterRapport(evaluerSignaux(retrait, cours, { horizons: HORIZONS_DEFAUT }), { debut, fin, nSignaux: retrait.length });
 
   // Corrélation de rang composante → rendement relatif au marché (moyenne équipondérée du jour).
   const lignesCorr: string[] = [];
@@ -89,6 +93,31 @@ export async function runRejeuSignaux(): Promise<{ rapport: string }> {
     lignesCorr.push(`| ${h} séances | ${obs.length} | ${f('variation')} | ${f('volume')} | ${f('macd')} | ${f('rsi')} | ${f('tendance')} | ${f('ancien')} | ${f('nouveau')} |`);
   }
 
+  // Variantes de composition : écart haut − bas, par période, sur jours non chevauchants.
+  const PERIODES: [string, string, string][] = [['2024-2025', '2024-01-01', '2025-12-31'], ['2026', '2026-01-01', '2099-12-31']];
+  const lignesVar: string[] = [];
+  for (const h of [5, 20]) {
+    for (const [nom, d0, d1] of PERIODES) {
+      const obs: { c: (typeof comp)[number]; r: number }[] = [];
+      for (const c of comp) {
+        if (c.date < d0 || c.date > d1) continue;
+        const histo = parCode.get(c.code)!;
+        const arrivee = histo[c.pos + h];
+        if (arrivee) obs.push({ c, r: arrivee.cours / histo[c.pos]!.cours - 1 });
+      }
+      const moy = new Map<string, { s: number; n: number }>();
+      for (const o of obs) { const m = moy.get(o.c.date) ?? { s: 0, n: 0 }; m.s += o.r; m.n++; moy.set(o.c.date, m); }
+      const cellule = (cle: 'actuel' | 'retrait' | 'inversion') => {
+        const r = ecartHautBas(obs.map((o) => ({ date: o.c.date, score: variantesScore(o.c)[cle], rel: o.r - moy.get(o.c.date)!.s / moy.get(o.c.date)!.n })), h);
+        if (!r) return '—';
+        const t = r.moyenne / r.erreur;
+        const pct = (x: number) => `${x >= 0 ? '+' : '−'}${Math.abs(x * 100).toFixed(2).replace('.', ',')} %`;
+        return `${pct(r.moyenne)} (t = ${t.toFixed(1).replace('.', ',')}, ${r.jours} j.)`;
+      };
+      lignesVar.push(`| ${h} séances | ${nom} | ${cellule('actuel')} | ${cellule('retrait')} | ${cellule('inversion')} |`);
+    }
+  }
+
   const rapport = [
     `# Rejeu du scoring, ${debut} → ${fin}`,
     '',
@@ -100,12 +129,22 @@ export async function runRejeuSignaux(): Promise<{ rapport: string }> {
     '## Après (volume corrigé, liquidité en atténuation)',
     rapportApres,
     '',
+    '## Variante « retrait » (RSI + tendance, ramenée sur [−1 ; 1])',
+    rapportRetrait,
+    '',
     '## Corrélation de rang avec le rendement relatif au marché',
     'Positif : la composante annonce une surperformance. Les observations se chevauchent (une par titre et par jour) : ces corrélations orientent, elles ne prouvent rien seules.',
     '',
     '| Horizon | Observations | Variation | Volume | MACD | RSI (× régime) | Tendance | Total avant | Total après |',
     '|---|---|---|---|---|---|---|---|---|',
     ...lignesCorr,
+    '',
+    '## Variantes de composition : écart de rendement entre les 20 % mieux notés et les 20 % moins bien notés',
+    'Rendement relatif au marché ; un jour sur h (fenêtres sans chevauchement). Positif : le score classe bien. |t| ≥ 2 : écart significatif.',
+    '',
+    '| Horizon | Période | Actuel | Retrait (RSI + tendance) | Inversion du momentum |',
+    '|---|---|---|---|---|',
+    ...lignesVar,
   ].join('\n');
 
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${rapport}\n`);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeScore } from '../src/scoring/score.js';
-import { ancienScore, entreeSeance, spearman, volumeMoyen30j, type LigneSeance } from '../src/signaux/rejeu.js';
+import { ancienScore, ecartHautBas, entreeSeance, spearman, variantesScore, volumeMoyen30j, type LigneSeance } from '../src/signaux/rejeu.js';
 
 const plat = Array.from({ length: 60 }, () => 100);
 
@@ -32,5 +32,21 @@ describe('rejeu du scoring', () => {
     expect(spearman([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1, 6);
     expect(spearman([1, 2, 3, 4], [4, 3, 2, 1])).toBeCloseTo(-1, 6);
     expect(spearman([1, 2], [1, 2])).toBeNull();
+  });
+});
+
+describe('variantes de composition', () => {
+  it('actuel = momentum + contrarien ; inversion = −momentum + contrarien', () => {
+    const v = variantesScore({ variation: 1, volume: 1, macd: 1, rsi: 0, tendance: 0 });
+    expect(v.actuel).toBeCloseTo(0.7, 6);
+    expect(v.inversion).toBeCloseTo(-0.7, 6);
+    expect(v.retrait).toBe(0);
+  });
+  it('écart haut − bas : positif quand le score ordonne les rendements', () => {
+    const obs = [];
+    for (let j = 0; j < 10; j++) for (let k = 0; k < 20; k++) obs.push({ date: `2026-01-${String(j + 1).padStart(2, '0')}`, score: k, rel: k / 100 });
+    const r = ecartHautBas(obs, 1)!;
+    expect(r.moyenne).toBeCloseTo(0.16, 6); // (17,5 − 1,5) / 100
+    expect(r.jours).toBe(10);
   });
 });
