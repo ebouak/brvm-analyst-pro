@@ -276,3 +276,34 @@
 @media (prefers-reduced-motion: reduce) {
   .lp-quiz-option { transition: none; }
 }
+
+/* ── Mouvement de lecture ─────────────────────────────────────────────────
+   Les blocs entrent quand ils arrivent à l'écran, liés au défilement (aucun
+   JavaScript). Là où le navigateur ne sait pas le faire, ou si le lecteur a
+   demandé moins d'animations, la règle n'existe pas : tout reste visible.
+   Jamais de contenu garé à opacity 0 sans animation pour le révéler. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lp .lp-h2, .lp .lp-corps, .lp .lp-figure, .lp .lp-formules, .lp .lp-chiffres {
+      animation: lp-entre linear both; animation-timeline: view(); animation-range: entry 0% entry 38%;
+    }
+    /* Listes : chaque élément entre à son tour. */
+    .lp .lp-flux-etape, .lp .lp-point, .lp .lp-frise-etape, .lp .lp-formule, .lp .lp-chiffre {
+      animation: lp-entre-fort linear both; animation-timeline: view(); animation-range: entry 0% entry 55%;
+    }
+    .lp .lp-flux-etape:nth-child(2), .lp .lp-frise-etape:nth-child(2), .lp .lp-formule:nth-child(2), .lp .lp-chiffre:nth-child(2) { animation-range: entry 8% entry 63%; }
+    .lp .lp-flux-etape:nth-child(3), .lp .lp-frise-etape:nth-child(3), .lp .lp-formule:nth-child(3), .lp .lp-chiffre:nth-child(3) { animation-range: entry 16% entry 71%; }
+    .lp .lp-flux-etape:nth-child(4), .lp .lp-frise-etape:nth-child(4), .lp .lp-chiffre:nth-child(4) { animation-range: entry 24% entry 79%; }
+    .lp .lp-flux-etape:nth-child(n+5), .lp .lp-frise-etape:nth-child(n+5), .lp .lp-chiffre:nth-child(n+5) { animation-range: entry 32% entry 87%; }
+    /* Pictogramme du schéma : il se pose avec un léger rebond. */
+    .lp .lp-flux-picto { animation: lp-pose linear both; animation-timeline: view(); animation-range: entry 10% entry 70%; }
+    /* Étape clé d'une frise : son halo respire. */
+    .lp .lp-frise-etape--cle .lp-frise-point { animation: lp-halo 2.4s ease-in-out infinite; }
+    /* Lignes d'un tableau de données réelles : elles se posent une à une. */
+    .lp .lp-table tbody tr { animation: lp-entre linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+  }
+}
+@keyframes lp-entre { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes lp-entre-fort { from { opacity: 0; transform: translateY(28px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes lp-pose { from { transform: scale(.6) rotate(-8deg); } 70% { transform: scale(1.08); } to { transform: none; } }
+@keyframes lp-halo { 0%, 100% { box-shadow: 0 0 0 4px rgb(11 125 147 / .18); } 50% { box-shadow: 0 0 0 9px rgb(11 125 147 / .06); } }

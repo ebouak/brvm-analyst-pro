@@ -2,10 +2,13 @@ import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import type { Lesson } from './types';
 import {
+  exemplesCours,
   exemplesRendement,
   historiqueDividendes,
+  lectureIndices,
   type Cotation,
   type LigneDividende,
+  type LigneIndice,
 } from './donneesReelles';
 
 /**
@@ -20,7 +23,9 @@ import {
 
 export type DonneesSection =
   | ({ vue: 'rendement' } & ReturnType<typeof exemplesRendement>)
-  | ({ vue: 'historique' } & ReturnType<typeof historiqueDividendes>);
+  | ({ vue: 'historique' } & ReturnType<typeof historiqueDividendes>)
+  | ({ vue: 'cours' } & ReturnType<typeof exemplesCours>)
+  | ({ vue: 'indices' } & ReturnType<typeof lectureIndices>);
 
 /** Par index de leçon, puis index de section. */
 export type DonneesLecons = Record<number, Record<number, DonneesSection | null>>;
@@ -60,14 +65,30 @@ export async function chargerDonneesReelles(lessons: Lesson[]): Promise<DonneesL
       ((ins.data ?? []) as { code: string; designation: string | null }[]).map((r) => [r.code, r.designation ?? r.code]),
     );
 
+    // Indices : lus seulement si une leçon en demande (dix dernières séances par code).
+    let indices: LigneIndice[] = [];
+    const codesIndices = [...new Set(blocs.filter((b) => b.spec.vue === 'indices').flatMap((b) => b.spec.codes))];
+    if (codesIndices.length > 0) {
+      const ix = await sb
+        .from('brvm_indices_daily')
+        .select('code, date_marche, libelle, valeur, variation_pct')
+        .in('code', codesIndices)
+        .order('date_marche', { ascending: false })
+        .limit(codesIndices.length * 10);
+      if (ix.error) throw new Error('lecture des indices impossible');
+      indices = (ix.data ?? []) as LigneIndice[];
+    }
+
     for (const { li, si, spec } of blocs) {
-      poser(
-        li,
-        si,
+      const v: DonneesSection =
         spec.vue === 'rendement'
           ? { vue: 'rendement', ...exemplesRendement(spec.codes, noms, dividendes, cotations, spec.actions) }
-          : { vue: 'historique', ...historiqueDividendes(spec.codes, noms, dividendes) },
-      );
+          : spec.vue === 'cours'
+            ? { vue: 'cours', ...exemplesCours(spec.codes, noms, cotations, spec.actions) }
+            : spec.vue === 'indices'
+              ? { vue: 'indices', ...lectureIndices(spec.codes, indices) }
+              : { vue: 'historique', ...historiqueDividendes(spec.codes, noms, dividendes) };
+      poser(li, si, v);
     }
   } catch {
     for (const { li, si } of blocs) poser(li, si, null);
