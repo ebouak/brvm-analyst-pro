@@ -530,3 +530,16 @@
 /* Tant que le bandeau des cookies occupe le bas de l'écran, les boutons passent au-dessus. */
 body:has([data-bandeau-cookies]) .vitrine .v-canaux-flottants { bottom: 120px; }
 @media (max-width: 640px) { body:has([data-bandeau-cookies]) .vitrine .v-canaux-flottants { bottom: 200px; } }
+
+/* ── Communauté : derniers relevés datés par réseau ───────────────────── */
+.vitrine .v-communaute { margin-top: 40px; display: grid; gap: 14px; }
+.vitrine .v-communaute-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.vitrine .v-communaute-item {
+  display: grid; gap: 4px; padding: 18px 20px; border-radius: 20px; text-decoration: none; color: inherit;
+  background: rgb(var(--color-surface)); border: 1px solid rgb(var(--color-border));
+  transition: transform .3s var(--ressort), border-color .3s;
+}
+.vitrine a.v-communaute-item:hover { transform: translateY(-2px); border-color: rgb(var(--color-border-strong)); }
+.vitrine .v-communaute-chiffre { font-size: 34px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.vitrine .v-communaute-libelle { font-size: 14px; font-weight: 500; color: rgb(var(--color-muted)); }
+@media (prefers-reduced-motion: reduce) { .vitrine .v-communaute-item { transition: none; } }

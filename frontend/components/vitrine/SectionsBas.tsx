@@ -82,7 +82,11 @@ export function SectionProvenance({ p }: { p: DonneesProvenance }) {
 
 // ── 3.13 Canaux ─────────────────────────────────────────────────────────
 
+export interface ChiffreCommunaute { reseau: string; libelle: string; unite: string; url: string | null; abonnes: number; releve_le: string }
+
 export interface DonneesCanaux {
+  /** Derniers relevés datés par réseau (communaute_releves) ; vide = bandeau absent. */
+  communaute?: ChiffreCommunaute[];
   whatsapp: EchangeWhatsapp[];
   quotaGratuit: number | null;
   telegram: { lignes: string[]; entete: string; heure: string | null };
@@ -153,6 +157,27 @@ export function SectionCanaux({ c }: { c: DonneesCanaux }) {
             <p className="v-note v-canal-pied">Inscription confirmée par e-mail · désabonnement en un clic</p>
           </Apparition>
         </div>
+        {c.communaute && c.communaute.length > 0 && (
+          <Apparition className="v-communaute">
+            <p className="v-etiquette" style={{ margin: 0 }}>La communauté</p>
+            <ul className="v-communaute-liste">
+              {c.communaute.map((x) => {
+                const contenu = (
+                  <>
+                    <span className="v-communaute-chiffre v-mono">{fmtNumber(x.abonnes, 0)}</span>
+                    <span className="v-communaute-libelle">{x.unite} {x.libelle}</span>
+                    <span className="v-note">relevé le {x.releve_le.split('-').reverse().join('/')}</span>
+                  </>
+                );
+                return (
+                  <li key={x.reseau}>
+                    {x.url ? <a href={x.url} target="_blank" rel="noopener" className="v-communaute-item">{contenu}</a> : <span className="v-communaute-item">{contenu}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          </Apparition>
+        )}
       </div>
     </section>
   );

@@ -80,6 +80,7 @@
     "obscura:start": "obscura serve --port 9222 --stealth",
     "carnet": "tsx src/index.ts carnet",
     "carnet:date": "tsx src/index.ts carnet",
+    "communaute": "tsx src/index.ts communaute",
     "sante:llm": "tsx src/index.ts sante:llm",
     "eval:signaux": "tsx src/index.ts eval:signaux",
     "conseiller": "tsx --env-file-if-exists=.env.local src/index.ts conseiller",
