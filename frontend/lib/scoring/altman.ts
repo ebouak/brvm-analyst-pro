@@ -22,6 +22,8 @@ export interface AltmanInput {
   resultat_exploitation: number | null;
   total_capitaux_propres: number | null;
   famille: string | null; // 'banque' | 'general' | ...
+  /** Société financière (banque, société de financement, crédit-bail) : modèle inadapté. */
+  financiere?: boolean;
 }
 
 export type AltmanZone = 'safe' | 'grey' | 'distress';
@@ -34,8 +36,10 @@ export interface AltmanResult {
 }
 
 export function computeAltmanZ(inp: AltmanInput): AltmanResult {
-  if ((inp.famille ?? '').toLowerCase() === 'banque') {
-    return { applicable: false, z: null, zone: null, note: 'Modèle Altman inadapté aux banques (structure de bilan spécifique).' };
+  if ((inp.famille ?? '').toLowerCase() === 'banque' || inp.financiere) {
+    // Pour un établissement de crédit ou de financement, l'endettement EST l'activité :
+    // le modèle le lirait comme un risque de détresse (SAFC, société de financement).
+    return { applicable: false, z: null, zone: null, note: 'Modèle Altman inadapté aux sociétés financières (banques, sociétés de financement).' };
   }
 
   const ta = inp.total_actifs;
