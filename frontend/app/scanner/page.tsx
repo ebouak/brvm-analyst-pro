@@ -190,9 +190,24 @@ export default async function ScannerPage(props: PageProps) {
     allRows.push(row);
   }
 
+  // ── Valeurs suspendues (« SP » au Bulletin officiel) ──────────────────────
+  // Leur cours est figé : RSI, MACD et moyennes mobiles y décriraient une
+  // séance qui n'a pas eu lieu. Elles sortent du scan, et c'est annoncé.
+  const suspendues = new Set<string>();
+  const { data: derniereCote } = await supabase
+    .from('boc_cote_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const dateCote = (derniereCote?.[0] as { date_marche: string } | undefined)?.date_marche;
+  if (dateCote) {
+    const { data: sp } = await supabase.from('boc_cote_daily').select('code').eq('date_marche', dateCote).eq('statut', 'suspendu');
+    for (const r of (sp ?? []) as { code: string }[]) suspendues.add(r.code);
+  }
+
   // ── Filtrage ───────────────────────────────────────────────────────────────
   const filteredRows = filtersActive
-    ? allRows.filter((r) => matchesCriteria(r, criteria))
+    ? allRows.filter((r) => !suspendues.has(r.code) && matchesCriteria(r, criteria))
     : [];
 
   return (
@@ -239,6 +254,11 @@ export default async function ScannerPage(props: PageProps) {
               Scan actif
             </StatPill>
           </div>
+          {suspendues.size > 0 && (
+            <p className="text-xs text-faint">
+              Hors scan, cotation suspendue au Bulletin officiel du {dateCote} : {[...suspendues].sort().join(', ')}.
+            </p>
+          )}
           <PremiumPanel>
             <ScannerResults rows={filteredRows} />
           </PremiumPanel>
