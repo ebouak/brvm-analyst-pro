@@ -4,6 +4,9 @@ import { computeFairValue, median, type FairValueResult } from './fairValue';
 import { computeQuality, type QualityScore } from './quality';
 import { buildVerdict, type ValuationVerdict } from './verdict';
 
+/** Comptes plus anciens que l'année en cours moins ce nombre : non estimable (B3). */
+export const AGE_MAX_EXERCICE = 2;
+
 export interface CompanyValuation {
   code: string;
   designation: string | null;
@@ -69,7 +72,7 @@ export async function getMarketValuations(): Promise<CompanyValuation[]> {
   }
 
   // 1re passe : métriques par société.
-  type Pre = { code: string; designation: string | null; secteur: string; price: number | null; shares: number | null; metrics: ValuationMetrics; dps: number | null; revGrowthDiv: number | null };
+  type Pre = { code: string; designation: string | null; secteur: string; price: number | null; shares: number | null; metrics: ValuationMetrics; dps: number | null; revGrowthDiv: number | null; annee: number | null };
   const pre: Pre[] = [];
   for (const [code, rows] of fundsByCode) {
     const meta = instrByCode.get(code);
@@ -79,27 +82,30 @@ export async function getMarketValuations(): Promise<CompanyValuation[]> {
     const price = priceByCode.get(code) ?? null;
     const dps = divByCode.get(code) ?? null;
     const metrics = computeMetrics({ current: picked.current, previous: picked.previous, price, shares: meta.shares, dividendPerShare: dps });
-    pre.push({ code, designation: meta.designation, secteur: meta.secteur, price, shares: meta.shares, metrics, dps, revGrowthDiv: metrics.netIncomeGrowth });
+    pre.push({ code, designation: meta.designation, secteur: meta.secteur, price, shares: meta.shares, metrics, dps, revGrowthDiv: metrics.netIncomeGrowth, annee: picked.current.year });
   }
 
-  // Médianes sectorielles (P/E, P/B), repli marché si < 3 pairs.
-  const marketPER = median(pre.map((p) => p.metrics.per));
-  const marketPBR = median(pre.map((p) => p.metrics.pbr));
-  function sectorMedian(secteur: string, key: 'per' | 'pbr'): number | null {
-    const peers = pre.filter((p) => p.secteur === secteur && p.metrics[key] != null);
+  // Médianes sectorielles (P/E, P/B), repli marché si < 3 pairs. La société
+  // évaluée est EXCLUE de ses pairs (B2, 2026-11-13) : SCRC, ROE −35,6 %, était
+  // la médiane P/B de son propre secteur et ressortait « juste prix ».
+  function sectorMedian(secteur: string, key: 'per' | 'pbr', code: string): number | null {
+    const peers = pre.filter((p) => p.code !== code && p.secteur === secteur && p.metrics[key] != null);
     if (peers.length >= 3) return median(peers.map((p) => p.metrics[key]));
-    return key === 'per' ? marketPER : marketPBR;
+    return median(pre.filter((p) => p.code !== code).map((p) => p.metrics[key]));
   }
+  const anneeCourante = new Date().getUTCFullYear();
 
   // 2e passe : juste-valeur + qualité + verdict.
   return pre.map((p) => {
     const fairValue = computeFairValue({
       eps: p.metrics.eps, bvps: p.metrics.bvps, price: p.price,
-      peers: { medianPER: sectorMedian(p.secteur, 'per'), medianPBR: sectorMedian(p.secteur, 'pbr') },
+      peers: { medianPER: sectorMedian(p.secteur, 'per', p.code), medianPBR: sectorMedian(p.secteur, 'pbr', p.code) },
       dividendPerShare: p.dps, dividendGrowth: 0,
+      roe: p.metrics.roe, per: p.metrics.per,
     });
     const quality = computeQuality(p.metrics);
-    const verdict = buildVerdict(p.metrics, fairValue, quality);
+    const tropAncien = p.annee == null || p.annee < anneeCourante - AGE_MAX_EXERCICE;
+    const verdict = buildVerdict(p.metrics, fairValue, quality, { annee: p.annee, tropAncien });
     return { code: p.code, designation: p.designation, secteur: p.secteur, price: p.price, shares: p.shares, metrics: p.metrics, fairValue, quality, verdict };
   });
 }

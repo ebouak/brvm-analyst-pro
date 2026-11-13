@@ -1,4 +1,5 @@
 'use client';
+import { ecartAffiche } from '@/lib/valuation/verdict';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { CompanyValuation } from '@/lib/valuation/server';
@@ -16,9 +17,11 @@ function num(v: number | null, d = 1): string {
 type SortKey = 'upside' | 'per' | 'pbr' | 'roe' | 'quality';
 
 const STANCE_LABEL: Record<CompanyValuation['verdict']['stance'], { txt: string; cls: string }> = {
-  decote: { txt: 'Décote', cls: 'text-up bg-up/5 border-up/30' },
-  surcote: { txt: 'Surcote', cls: 'text-down bg-down/5 border-down/30' },
-  proche: { txt: 'Juste prix', cls: 'text-warn bg-warn/10 border-warn/30' },
+  decote: { txt: 'Valeur > cours', cls: 'text-up bg-up/5 border-up/30' },
+  surcote: { txt: 'Valeur < cours', cls: 'text-down bg-down/5 border-down/30' },
+  proche: { txt: 'Proche du cours', cls: 'text-warn bg-warn/10 border-warn/30' },
+  desaccord: { txt: 'Méthodes en désaccord', cls: 'text-muted bg-surface border-border' },
+  non_estimable: { txt: 'Non estimable', cls: 'text-muted bg-surface border-border' },
   indisponible: { txt: 'n/d', cls: 'text-muted bg-surface border-border' },
 };
 
@@ -85,12 +88,15 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
                     <Link href={`/actions/${c.code}`} className="font-medium text-white hover:text-up transition">{c.code}</Link>
                   </td>
                   <td className="py-2 px-3 text-xs text-muted">{c.secteur}</td>
-                  <td className={`py-2 px-3 text-right tabular font-semibold ${(c.fairValue.upside ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>{pct(c.fairValue.upside)}</td>
+                  <td className={`py-2 px-3 text-right tabular font-semibold ${(c.fairValue.upside ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
+                    {/* Un écart n'a de sens que si les méthodes sont du même côté du cours. */}
+                    {c.fairValue.upside != null && ['decote', 'surcote', 'proche'].includes(c.verdict.stance) ? ecartAffiche(c.fairValue.upside) : <span className="text-faint">—</span>}
+                  </td>
                   <td className="py-2 px-3 text-right tabular text-ivory">{num(c.metrics.per, 1)}</td>
                   <td className="py-2 px-3 text-right tabular text-ivory">{num(c.metrics.pbr, 2)}</td>
                   <td className="py-2 px-3 text-right tabular text-ivory">{pct(c.metrics.roe, 1)}</td>
                   <td className="py-2 px-3 text-right tabular text-muted">
-                    {scoring[c.code]?.fscore?.reliable ? `${scoring[c.code]!.fscore!.score}/9` : '—'}
+                    {scoring[c.code]?.fscoreNonApplicable ? <span className="text-faint" title="Le F-Score ne s’applique pas à un bilan bancaire">n. a.</span> : scoring[c.code]?.fscore?.reliable ? `${scoring[c.code]!.fscore!.score}/9` : '—'}
                   </td>
                   <td className="py-2 px-3 text-right tabular">
                     {(() => {
