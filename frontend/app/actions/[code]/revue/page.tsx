@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getRevue, type YearRow } from '@/lib/reports/server';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import BoutonImprimer from '@/components/revue/BoutonImprimer';
 import SousPageNav from '@/components/sousPage/SousPageNav';
 import { PriceChart, FinancialsBars } from '@/components/reports/RevueCharts';
@@ -36,6 +38,17 @@ export default async function RevuePage(props: Props) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const d = await getRevue(code).catch(() => null);
   if (!d) notFound();
+  // Après le 404 : un code inconnu doit rester une 404, pas un écran d'offre en 200.
+  const gate = await canAccess('revues_resultats');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Les Revues de résultats"
+        hint="Les derniers comptes de chaque société lus pour vous : chiffre d'affaires, résultat, dividende et ratios, comparés à l'exercice précédent."
+      />
+    );
+  }
 
   const { latest, prev, profil } = d;
   const today = new Date(d.generatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });

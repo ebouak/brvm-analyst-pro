@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isAdminEmail } from '@/lib/server/admin-emails';
 import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
 import { isPublicPath } from '@/lib/auth/cheminsPublics';
+import { secretRenduValide, EN_TETE_RENDU, PREFIXE_RENDU } from '@/lib/dossier/renduAutorise';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -20,15 +21,8 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
  * gardé par « test ».
  */
 function isRenderAuthorized(request: NextRequest): boolean {
-  if (!request.nextUrl.pathname.startsWith('/rapports/dossier/')) return false;
-  const attendu = process.env.DOSSIER_RENDER_SECRET;
-  const fourni = request.headers.get('x-dossier-render');
-  if (!attendu || !fourni || attendu.length < 32) return false;
-  let diff = attendu.length ^ fourni.length;
-  for (let i = 0; i < attendu.length; i++) {
-    diff |= attendu.charCodeAt(i) ^ (fourni.charCodeAt(i % fourni.length) || 0);
-  }
-  return diff === 0;
+  if (!request.nextUrl.pathname.startsWith(PREFIXE_RENDU)) return false;
+  return secretRenduValide(process.env.DOSSIER_RENDER_SECRET, request.headers.get(EN_TETE_RENDU));
 }
 
 export async function updateSession(request: NextRequest) {

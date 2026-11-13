@@ -5,6 +5,8 @@ import { REPORT_TABS } from '@/lib/reportTabs';
 import { fmtDateCourte } from '@/lib/format';
 import { nomPays } from '@/lib/crm/geo';
 import brvmLogos from '@/lib/brvmLogos.json';
+import { canAccess } from '@/lib/server/featureAccess';
+import { urlFormules } from '@/lib/auth/urlsAcces';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dossiers valeur' };
@@ -21,6 +23,7 @@ interface Ligne { code: string; designation: string | null; secteur: string | nu
 export default async function DossiersPage(props: { searchParams: Promise<{ q?: string; secteur?: string; pays?: string }> }) {
   const sp = await props.searchParams;
   const sb = createClient();
+  const gate = await canAccess('dossiers_valeur');
   const [{ data: instr }, { data: editions }] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, pays').eq('type', 'action').order('code'),
     sb.from('dossier_narratifs').select('code, genere_le'),
@@ -42,7 +45,13 @@ export default async function DossiersPage(props: { searchParams: Promise<{ q?: 
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6">
       <div>
         <h1 className="font-display text-2xl text-ivory">Dossiers valeur</h1>
-        <p className="mt-1 text-sm text-muted">Que vaut cette société ? Un dossier de sept pages par valeur, mis à jour chaque semaine.</p>
+        <p className="mt-1 text-sm text-muted">Que vaut cette société ? Un dossier de quatorze pages par valeur, mis à jour chaque semaine.</p>
+        {!gate.allowed && gate.required !== 'disabled' && (
+          <p className="mt-2 text-sm text-muted">
+            La liste est ouverte à tous ; la lecture d&apos;un dossier est réservée au plan {gate.required === 'pro' ? 'Platinium' : 'Premium'}.{' '}
+            <Link href={urlFormules('/rapports/dossiers')} className="text-accent-ink underline underline-offset-2">Voir les formules</Link>
+          </p>
+        )}
       </div>
       <ViewTabs tabs={REPORT_TABS} current="/rapports/dossiers" />
 
