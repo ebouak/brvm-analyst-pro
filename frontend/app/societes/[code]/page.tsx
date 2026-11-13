@@ -11,7 +11,10 @@ import CarnetOrdres, { dateSeanceLongue, type CarnetRow } from '@/components/Car
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
-import { perAffichable, roeAffichable, montantDividende, dividendesAffichables } from '@/lib/fiche/affichage';
+import { coteBocValeur } from '@/lib/boc/charger';
+import { controlerValeur, badgeRatio, type BadgeRatio } from '@/lib/boc/ecarts';
+import BadgeSource from '@/components/fiche/BadgeSource';
+import { perAffichable, roeAffichable, montantDividende, dividendesAffichables, dividendePourRendement } from '@/lib/fiche/affichage';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
@@ -165,11 +168,8 @@ export default async function CompanyPage(props: PageProps) {
   const bestFund = pickBestFundamental(fundamentals);
   // Dividende VÉRIFIÉ (détachement daté) pour le rendement : les valeurs société
   // sans ex_date sont biaisées (~12 %). Cohérent avec le reste du site.
-  const lastDividend =
-    (dividends as { montant: number; ex_date: string | null }[]).find((d) => d.ex_date && d.montant > 0)
-    // Repli : jamais une ligne sans exercice ni un montant nul (rendement 0 % affiché à tort).
-    ?? dividendesAffichables(dividends)[0]
-    ?? null;
+  // Repli : jamais une ligne sans exercice ni un montant nul (rendement 0 % affiché à tort).
+  const lastDividend = dividendePourRendement(dividends);
   const ratios = bestFund
     ? computeRatios({
         cours,
@@ -187,6 +187,28 @@ export default async function CompanyPage(props: PageProps) {
   const per = perAffichable(ratios?.per ?? null, ratios?.bpa ?? null);
   const roe = roeAffichable(ratios?.roe ?? null, bestFund?.equity ?? null);
   const historiqueDividendes = dividendesAffichables(dividends);
+
+  // ── Bulletin officiel : statut SP et recoupement des ratios ─────────────
+  // PER et rendement du site recalculés au cours du bulletin (même règle que le
+  // contrôle quotidien) : seul le bénéfice ou le dividende explique un écart.
+  const boc = await coteBocValeur(createPublicClient(), code);
+  const controle = boc
+    ? controlerValeur({ code, resultatNet: bestFund?.net_income ?? null, titres: instrument.shares ?? null, dividende: lastDividend?.montant ?? null }, boc)
+    : null;
+  const suspendue = boc?.statut === 'suspendu';
+  const exercice = bestFund?.year ?? null;
+  const badgeCalcule = (valeur: number | null, motif: string | null = null): BadgeRatio =>
+    badgeRatio({ valeurSite: valeur, motifSite: motif, exercice, comparaison: null, dateBoc: null, unite: '', decimales: 2 });
+  const badgePer = badgeRatio({ valeurSite: per.valeur, motifSite: per.motif, exercice, comparaison: controle?.per ?? null, dateBoc: boc?.date_marche ?? null, unite: '×', decimales: 2 });
+  const rdtSite = ratios?.rendementDiv != null ? ratios.rendementDiv * 100 : null;
+  const badgeRdt = badgeRatio({ valeurSite: rdtSite, motifSite: null, exercice: null, comparaison: controle?.rendement ?? null, dateBoc: boc?.date_marche ?? null, unite: ' %', decimales: 2 });
+  // Le site n'a pas de PER (BBGC sans fondamentaux) mais la BRVM en publie un : on le montre, sourcé.
+  const perAffiche = per.valeur != null ? fmtNumber(per.valeur, 1) + '×'
+    : badgePer.source === 'boc' && boc?.per != null ? fmtNumber(boc.per, 1) + '×'
+    : per.motif ?? '—';
+  const rdtAffiche = rdtSite != null ? fmtNumber(rdtSite, 2) + ' %'
+    : badgeRdt.source === 'boc' && boc?.rendement_net_pct != null ? fmtNumber(boc.rendement_net_pct, 2) + ' %'
+    : '—';
 
   // ── « Ce que dit la séance » (verrou premium `lecture_seance`) ──────────
   // Repris de /actions/[code], réduit à ce que CETTE page charge déjà — pas
@@ -322,6 +344,13 @@ export default async function CompanyPage(props: PageProps) {
         </div>
       </header>
 
+      {suspendue && boc && (
+        <p role="status" className="mb-6 rounded-xl border border-warn/40 bg-warn/10 p-4 text-sm text-warn">
+          Cotation suspendue : le Bulletin officiel de la cote du {dateSeanceLongue(boc.date_marche)} indique « SP » pour {code}.
+          Le dernier cours affiché est un cours figé, pas un prix d&apos;échange.
+        </p>
+      )}
+
       {/* ── Cours de clôture ─────────────────────────────────────────────── */}
       <section className="mb-6 rounded-xl border border-border bg-surface p-5">
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -398,29 +427,37 @@ export default async function CompanyPage(props: PageProps) {
       </dl>
 
       {/* ── Fondamentaux ─────────────────────────────────────────────────── */}
-      {bestFund && (
+      {/* Sans comptes en base (BBGC), la section s'affiche quand même si la BRVM publie un PER : sourcé « BOC ». */}
+      {(bestFund || boc?.per != null) && (
         <section className="mb-6 rounded-xl border border-border bg-surface p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h2 className={titreSection}>Fondamentaux</h2>
-            <p className="text-xs text-faint">Exercice <span className="tabular">{bestFund.year ?? '—'}</span></p>
+            <p className="text-xs text-faint">Exercice <span className="tabular">{bestFund?.year ?? '—'}</span></p>
           </div>
           <dl className="grid gap-x-8 md:grid-cols-2">
             {[
-              { label: "Chiffre d'affaires", value: avecUnite(fmtFcfa(bestFund.revenue), 'FCFA') },
-              { label: 'Résultat net', value: avecUnite(fmtFcfa(bestFund.net_income), 'FCFA') },
-              { label: 'Capitaux propres', value: avecUnite(fmtFcfa(bestFund.equity), 'FCFA') },
-              { label: 'BPA', value: ratios?.bpa != null ? fmtNumber(ratios.bpa, 0) + ' FCFA' : '—' },
-              { label: 'PER', value: per.valeur != null ? fmtNumber(per.valeur, 1) + '×' : per.motif ?? '—' },
-              { label: 'ROE', value: roe.valeur != null ? fmtNumber(roe.valeur * 100, 1) + ' %' : roe.motif ?? '—' },
-              { label: 'Marge nette', value: ratios?.margeNette != null ? fmtNumber(ratios.margeNette * 100, 1) + ' %' : '—' },
-              { label: 'Rendement dividende', value: ratios?.rendementDiv != null ? fmtNumber(ratios.rendementDiv * 100, 2) + ' %' : '—' },
+              { label: "Chiffre d'affaires", value: avecUnite(fmtFcfa(bestFund?.revenue ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.revenue ?? null) },
+              { label: 'Résultat net', value: avecUnite(fmtFcfa(bestFund?.net_income ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.net_income ?? null) },
+              { label: 'Capitaux propres', value: avecUnite(fmtFcfa(bestFund?.equity ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.equity ?? null) },
+              { label: 'BPA', value: ratios?.bpa != null ? fmtNumber(ratios.bpa, 0) + ' FCFA' : '—', badge: badgeCalcule(ratios?.bpa ?? null) },
+              { label: 'PER', value: perAffiche, badge: badgePer },
+              { label: 'ROE', value: roe.valeur != null ? fmtNumber(roe.valeur * 100, 1) + ' %' : roe.motif ?? '—', badge: badgeCalcule(roe.valeur, roe.motif) },
+              { label: 'Marge nette', value: ratios?.margeNette != null ? fmtNumber(ratios.margeNette * 100, 1) + ' %' : '—', badge: badgeCalcule(ratios?.margeNette ?? null) },
+              { label: 'Rendement dividende', value: rdtAffiche, badge: badgeRdt },
             ].map((m) => (
               <div key={m.label} className="flex items-baseline justify-between gap-4 border-b border-border/60 py-2">
-                <dt className="text-sm text-muted">{m.label}</dt>
+                <dt className="flex items-center gap-2 text-sm text-muted">
+                  {m.label}
+                  <BadgeSource badge={m.badge} />
+                </dt>
                 <dd className="tabular text-sm text-ivory">{m.value}</dd>
               </div>
             ))}
           </dl>
+          <p className="mt-3 text-xs text-faint">
+            « Calculé » : à partir des états financiers de l&apos;exercice {exercice ?? '—'}.
+            {boc && <> PER et rendement recoupés avec le Bulletin officiel de la cote du {dateSeanceLongue(boc.date_marche)} ; « écart BOC » signale plus de 3 % d&apos;écart, à vérifier sur les comptes.</>}
+          </p>
         </section>
       )}
 

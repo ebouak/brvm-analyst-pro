@@ -27,6 +27,18 @@ export function roeAffichable(roe: number | null, capitauxPropres: number | null
   return { valeur: roe, motif: null };
 }
 
+/**
+ * Dividende retenu pour le rendement de la fiche société : le plus récent qui a
+ * une date de détachement vérifiée, sinon le dernier affichable (exercice connu,
+ * montant > 0). Source UNIQUE, partagée par la fiche et le contrôle quotidien des
+ * écarts avec le Bulletin officiel (`lib/boc/ecarts.ts`) : deux règles voisines
+ * finiraient par comparer deux rendements différents.
+ * `lignes` doit être trié par exercice décroissant, nulls en dernier.
+ */
+export function dividendePourRendement<T extends { exercice: number | null; montant: number; ex_date: string | null }>(lignes: T[]): T | null {
+  return lignes.find((d) => d.ex_date && d.montant > 0) ?? dividendesAffichables(lignes)[0] ?? null;
+}
+
 /** Montant de dividende : décimales gardées quand le montant officiel en a (597,53 ; 0,92), entier sinon. */
 export function montantDividende(montant: number): string {
   const entier = Math.abs(montant - Math.round(montant)) < 0.005;

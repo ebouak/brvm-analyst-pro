@@ -419,6 +419,27 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'boc:cote': {
+      // Cote officielle (statut SP, PER, dividende) depuis le Bulletin
+      // Officiel de la Cote : référence du contrôle quotidien des écarts.
+      const { runCoteBoc } = await import('./boc/runCoteBoc.js');
+      await monitored(
+        { code: 'boc-cote', label: 'Cote officielle (BOC)' },
+        async () => {
+          const r = await runCoteBoc({ date: positional[0] });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lues,
+              rows_upserted: r.ecrites,
+              metadata: { date_marche: r.date, suspendues: r.suspendues, saute: r.saute },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'social:articles': {
       // Reprise manuelle de la publication LinkedIn/TikTok des articles du
       // jour (le cron `articles` la fait déjà). Le verrou par (article,
