@@ -1,3 +1,4 @@
+import { premieresEmissions, perfNette } from './trackRecord';
 import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import { createClient } from '@/lib/supabase/server';
@@ -50,6 +51,8 @@ export interface RecentRealSignal {
   coursSignal: number;
   coursActuel: number | null;
   perfPct: number | null;
+  /** Performance après un aller-retour de frais (0,6 % à l'achat, 0,6 % à la vente). */
+  perfNettePct: number | null;
   joursEcoules: number;
 }
 
@@ -63,14 +66,16 @@ export async function getRecentRealBuySignals(limit = 10): Promise<RecentRealSig
   // Seul appelant : /signaux, derrière canAccess('signaux').
   const supabase = createClient();
 
+  // On lit large puis on ne garde que la PREMIÈRE émission de chaque épisode :
+  // un titre signalé quatre jours de suite ne compte qu'une fois (audit 2026-11-13).
   const { data: sigs } = await supabase
     .from('signals_daily')
     .select('code, date_marche')
     .eq('signal', 'BUY')
     .order('date_marche', { ascending: false })
-    .limit(limit);
+    .limit(limit * 10);
 
-  const rows = (sigs ?? []) as { code: string; date_marche: string }[];
+  const rows = premieresEmissions((sigs ?? []) as { code: string; date_marche: string }[]).slice(0, limit);
   if (rows.length === 0) return [];
 
   const codes = [...new Set(rows.map((r) => r.code))];
@@ -110,6 +115,7 @@ export async function getRecentRealBuySignals(limit = 10): Promise<RecentRealSig
       coursSignal: coursSignal ?? 0,
       coursActuel,
       perfPct,
+      perfNettePct: perfNette(perfPct),
       joursEcoules,
     };
   });
