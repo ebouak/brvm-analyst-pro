@@ -17,7 +17,7 @@ export interface ReleveCommunaute {
 
 export const RESEAUX_COMMUNAUTE: { reseau: ReseauCommunaute; libelle: string; unite: string; url: string | null }[] = [
   { reseau: 'tiktok', libelle: 'TikTok', unite: 'abonnés', url: 'https://www.tiktok.com/@westbourse7' },
-  { reseau: 'facebook', libelle: 'Facebook', unite: 'abonnés', url: null },
+  { reseau: 'facebook', libelle: 'Facebook', unite: 'abonnés', url: 'https://www.facebook.com/profile.php?id=61593099424531' },
   { reseau: 'linkedin', libelle: 'LinkedIn', unite: 'abonnés', url: 'https://www.linkedin.com/company/westbourse' },
   { reseau: 'telegram', libelle: 'Telegram', unite: 'membres', url: 'https://t.me/westbourse7' },
   { reseau: 'whatsapp', libelle: 'Chaîne WhatsApp', unite: 'abonnés', url: 'https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d' },

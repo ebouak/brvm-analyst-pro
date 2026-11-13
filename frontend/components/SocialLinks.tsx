@@ -20,10 +20,10 @@ type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) 
 
 const PROFILS: { label: string; href: string | null; Icon: Social['Icon'] }[] = [
   { label: 'TikTok', href: 'https://www.tiktok.com/@westbourse7', Icon: TikTokIcon },
-  { label: 'LinkedIn', href: null, Icon: LinkedInIcon },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/westbourse', Icon: LinkedInIcon },
   { label: 'X (Twitter)', href: null, Icon: XIcon },
   { label: 'Instagram', href: null, Icon: InstagramIcon },
-  { label: 'Facebook', href: null, Icon: FacebookIcon },
+  { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61593099424531', Icon: FacebookIcon },
   { label: 'YouTube', href: null, Icon: YouTubeIcon },
   { label: 'WhatsApp', href: whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${WHATSAPP_PREREMPLI}` : null, Icon: WhatsAppIcon },
 ];
