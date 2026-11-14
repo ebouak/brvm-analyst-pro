@@ -42,6 +42,14 @@ describe('moyennes mobiles', () => {
     expect(r.pente).toBe('monte');
     expect(r.derniere.courte).toBeCloseTo(1_000 + 5 * (119 - 9.5), 6);
   });
+  it('cours sous ses moyennes mais moyenne longue encore montante : pas de contradiction', () => {
+    // Cas réel SNTS du 13/11/2026 : longue hausse, puis repli récent sous les deux moyennes.
+    const r = lectureMoyennes(serie(120, (i) => (i < 110 ? 1_000 + 10 * i : 2_090 - 60 * (i - 109))), 20, 50);
+    expect(r.position).toBe('sous les deux');
+    expect(r.pente).toBe('monte');
+    expect(r.lecture).not.toMatch(/tendance de fond (vont|va) .*vers le bas/);
+    expect(r.lecture).toMatch(/n’a pas encore retourné la tendance de fond/);
+  });
   it('marché plat : pente plate', () => {
     const r = lectureMoyennes(serie(120, (i) => 1_000 + (i % 2 === 0 ? 5 : -5)), 20, 50);
     expect(r.pente).toBe('plate');

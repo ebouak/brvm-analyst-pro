@@ -117,19 +117,28 @@ export function lectureMoyennes(serie: PointSerie[], courte: number, longue: num
     if (signe(points[i]!) !== signe(points[i - 1]!)) { seancesDepuisCroisement = points.length - 1 - i; break; }
   }
   const LECT: Record<PositionMoyennes, string> = {
-    'au-dessus des deux': 'le mouvement récent et la tendance de fond vont ensemble vers le haut',
-    'sous les deux': 'le mouvement récent et la tendance de fond vont ensemble vers le bas',
+    // La position ne décrit que le mouvement récent ; la tendance de fond, c'est
+    // la PENTE de la moyenne longue (phrase suivante). Les mêler faisait dire
+    // « la tendance de fond va vers le bas » puis « la moyenne longue monte ».
+    'au-dessus des deux': 'le mouvement récent est orienté à la hausse',
+    'sous les deux': 'le mouvement récent est orienté à la baisse',
     'entre les deux': 'court terme et fond divergent : souvent une phase d’hésitation',
   };
   const PENTE: Record<PenteMoyenne, string> = {
-    monte: 'monte : une tendance installée',
-    baisse: 'baisse : une tendance de fond orientée vers le bas',
+    monte: 'monte : la tendance de fond reste haussière',
+    baisse: 'baisse : la tendance de fond est orientée à la baisse',
     plate: 'est plate : un marché sans direction, où les croisements perdent leur sens',
   };
   let lecture =
     `Le cours (${fmtFcfa(derniere.cours)}) est ${position} moyennes (${courte} séances : ${fmtFcfa(mc)} ; ${longue} séances : ${fmtFcfa(ml)}) : ${LECT[position]}. ` +
     `La moyenne longue ${PENTE[pente]} (${fmtPct(pentePct)} en 10 séances).`;
-  if (seancesDepuisCroisement != null) lecture += ` Le cours a croisé sa moyenne longue il y a ${nb(seancesDepuisCroisement)} séance(s).`;
+  if (position === 'sous les deux' && pente === 'monte') lecture += ' La baisse récente n’a pas encore retourné la tendance de fond.';
+  if (position === 'au-dessus des deux' && pente === 'baisse') lecture += ' La hausse récente n’a pas encore retourné la tendance de fond.';
+  if (seancesDepuisCroisement != null) {
+    lecture += seancesDepuisCroisement === 0
+      ? ' Le cours a croisé sa moyenne longue à la dernière séance.'
+      : ` Le cours a croisé sa moyenne longue il y a ${nb(seancesDepuisCroisement)} séance${seancesDepuisCroisement > 1 ? 's' : ''}.`;
+  }
   lecture += ` ${CONCLUSION}`;
   const alertes: string[] = [];
   if (courte < 5) alertes.push('Une moyenne sur moins de 5 séances suit presque chaque mouvement : elle lisse très peu.');
