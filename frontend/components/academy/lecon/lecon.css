@@ -307,3 +307,65 @@
 @keyframes lp-entre-fort { from { opacity: 0; transform: translateY(28px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes lp-pose { from { transform: scale(.6) rotate(-8deg); } 70% { transform: scale(1.08); } to { transform: none; } }
 @keyframes lp-halo { 0%, 100% { box-shadow: 0 0 0 4px rgb(11 125 147 / .18); } 50% { box-shadow: 0 0 0 9px rgb(11 125 147 / .06); } }
+
+/* ── Simulateurs interactifs (carnet, répartition, scénario) ───────────── */
+.lp-atelier { display: block; }
+.lp-atelier fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.lp-atelier legend { font-size: 0.85rem; font-weight: 600; color: var(--lp-encre); padding: 0; margin-bottom: 0.4rem; }
+.lp-champ-groupe { margin-top: 1rem; }
+.lp-champ-groupe.lp-sous { margin-top: 0.9rem; }
+.lp-choix { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+.lp-choix--colonne { flex-direction: column; gap: 0.2rem; }
+.lp-choix label { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.5rem; cursor: pointer; color: var(--lp-texte); }
+.lp-choix input[type='radio'] { accent-color: var(--lp-accent); width: 1.1rem; height: 1.1rem; }
+.lp-champ { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.7rem; max-width: 22rem; }
+.lp-champ label { font-size: 0.85rem; color: var(--lp-encre); }
+.lp-champ input, .lp-champ select {
+  font: inherit; min-height: 2.75rem; padding: 0.4rem 0.7rem; color: var(--lp-encre);
+  background: #fff; border: 1px solid var(--lp-doux); border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.lp-atelier :is(input, select, button):focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 2px; }
+.lp-carnet-entete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.35rem 1rem; margin: 1.25rem 0 0.4rem; }
+.lp-carnet-titre { font-weight: 600; color: var(--lp-encre); }
+.lp-note--haut { margin-top: 0; }
+.lp-ordre { margin-top: 0.5rem; }
+.lp-bouton {
+  margin-top: 1.1rem; min-height: 2.75rem; padding: 0.5rem 1.25rem; font: inherit; font-weight: 600;
+  color: #fff; background: var(--lp-accent); border: 1px solid var(--lp-accent); border-radius: 999px; cursor: pointer;
+}
+.lp-bouton:hover:not(:disabled) { background: #096a7d; }
+.lp-bouton:disabled { opacity: 0.55; cursor: not-allowed; }
+.lp-bouton--discret { color: var(--lp-accent); background: transparent; }
+.lp-bouton--discret:hover:not(:disabled) { background: var(--lp-accent-clair); }
+.lp-resultat { margin-top: 1.1rem; }
+.lp-resultat:empty { margin-top: 0; }
+.lp-verdict {
+  padding: 0.8rem 1rem; border-radius: 12px; background: var(--lp-accent-clair); color: var(--lp-encre); line-height: 1.5;
+}
+.lp-verdict--rejete, .lp-verdict--non_execute { background: var(--lp-alerte-clair); }
+.lp-verdict--indetermine { background: #f3efe4; }
+.lp-alerte-texte { margin-top: 0.75rem; color: var(--lp-alerte); font-weight: 600; }
+.lp-atelier .lp-alerte { color: var(--lp-alerte); font-weight: 600; }
+.lp-atelier tfoot th, .lp-atelier tfoot td { border-top: 2px solid var(--lp-trame); font-weight: 600; padding: 0.55rem 0.6rem; }
+.lp-atelier tfoot th { padding-left: 0; text-align: left; }
+.lp-resultat .lp-table-wrap { margin-top: 0.75rem; }
+.lp-synthese { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; margin: 0.9rem 0 0; }
+.lp-synthese div { padding: 0.6rem 0.8rem; border: 1px solid var(--lp-trame); border-radius: 10px; }
+.lp-synthese dt { font-size: 0.8rem; color: var(--lp-doux); }
+.lp-synthese dd { margin: 0.15rem 0 0; font-weight: 600; color: var(--lp-encre); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.lp-curseurs { display: grid; gap: 0.4rem; }
+.lp-curseur { display: grid; grid-template-columns: 11rem 1fr 13rem; align-items: center; gap: 0.75rem; min-height: 2.75rem; }
+.lp-curseur label { color: var(--lp-encre); }
+.lp-curseur input[type='range'] { width: 100%; min-height: 2.75rem; accent-color: var(--lp-accent); }
+.lp-curseur output { font-variant-numeric: tabular-nums; text-align: right; color: var(--lp-encre); }
+.lp-total { font-weight: 600; color: var(--lp-encre); }
+.lp-alertes { margin: 0.5rem 0 0; padding-left: 1.1rem; color: var(--lp-alerte); font-size: 0.9rem; }
+.lp-alertes li + li { margin-top: 0.3rem; }
+@media (max-width: 640px) {
+  .lp-curseur { grid-template-columns: 1fr; gap: 0.1rem; padding-bottom: 0.4rem; }
+  .lp-curseur output { text-align: left; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lp-bouton { transition: background-color 120ms ease; }
+}

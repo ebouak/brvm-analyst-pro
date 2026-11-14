@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lessonSchema, libelleSection, sectionSchema } from './types';
+import { lessonSchema, libelleSection, sectionSchema, simulationSchema } from './types';
 
 const ancienne = {
   titre: 'Leçon 1 — Qu’est-ce que la BRVM ?',
@@ -97,5 +97,20 @@ describe('schéma de leçon — blocs éditoriaux optionnels', () => {
     const cas = sectionSchema.parse({ type: 'cas', titre: 't', contenu: 'c' });
     expect(libelleSection(cas)).toBe('Exemple');
     expect(libelleSection({ ...cas, reel: true })).toBe('Cas réel BRVM');
+  });
+});
+
+describe('simulationSchema — simulateurs interactifs', () => {
+  const secteurs = [{ nom: 'A', pct: 60 }, { nom: 'B', pct: 40 }];
+  it('accepte carnet, allocation et scénario cohérents', () => {
+    expect(simulationSchema.safeParse({ type: 'carnet', niveaux: [{ prix: 3280, quantite: 10 }, { prix: 3290, quantite: 20 }], quantite_defaut: 5 }).success).toBe(true);
+    expect(simulationSchema.safeParse({ type: 'allocation', capital: 1_000_000, secteurs }).success).toBe(true);
+    expect(simulationSchema.safeParse({ type: 'scenario_baisse', capital: 1_000_000, rendement_pct: 8, secteurs }).success).toBe(true);
+  });
+  it('refuse un scénario dont la répartition ne fait pas 100 %, des secteurs en double, un carnet à un niveau, un code invalide', () => {
+    expect(simulationSchema.safeParse({ type: 'scenario_baisse', capital: 1000, rendement_pct: 8, secteurs: [{ nom: 'A', pct: 60 }, { nom: 'B', pct: 30 }] }).success).toBe(false);
+    expect(simulationSchema.safeParse({ type: 'allocation', capital: 1000, secteurs: [{ nom: 'A', pct: 50 }, { nom: 'A', pct: 50 }] }).success).toBe(false);
+    expect(simulationSchema.safeParse({ type: 'carnet', niveaux: [{ prix: 3280, quantite: 10 }], quantite_defaut: 5 }).success).toBe(false);
+    expect(simulationSchema.safeParse({ type: 'carnet', niveaux: [{ prix: 1, quantite: 1 }, { prix: 2, quantite: 1 }], quantite_defaut: 5, codes: ['snts'] }).success).toBe(false);
   });
 });

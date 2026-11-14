@@ -67,6 +67,11 @@ function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: Donn
           <SimulationLecon sim={s.simulation} />
         </div>
       )}
+      {s.simulations.map((sm, k) => (
+        <div key={k} className="lp-bloc">
+          <SimulationLecon sim={sm} />
+        </div>
+      ))}
       {s.donnees_reelles && (
         <div className="lp-bloc">
           <DonneesReelles donnees={donnees} />
