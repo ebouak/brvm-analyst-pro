@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sma, ema, rsi, macd, emaSeries, clamp } from '../src/scoring/indicators.js';
-import { computeScore } from '../src/scoring/score.js';
+import { computeScore, SCORING_PARAMS } from '../src/scoring/score.js';
 
 describe('indicateurs', () => {
   it('sma: moyenne des N derniers', () => {
@@ -90,7 +90,7 @@ describe('computeScore', () => {
     expect(r.explication).toContain('Signal d’achat');
   });
 
-  it('tendance baissière qui accélère + baisse + volume => SELL', () => {
+  it('tendance baissière qui accélère + baisse + volume => score très négatif, mais HOLD (aucune vente émise)', () => {
     const closes: number[] = [];
     for (let i = 0; i < 40; i++) closes.push(300 - i);
     for (let i = 0; i < 20; i++) closes.push(260 - i * 4); // accélération baissière
@@ -104,7 +104,9 @@ describe('computeScore', () => {
     expect(r.inputs.trend_norm).toBeLessThan(0); // régime baissier
     expect(r.bonus_tendance).toBeLessThan(0); // facteur tendance SYMÉTRIQUE (négatif)
     expect(r.score_total).toBeLessThan(-0.6);
-    expect(r.signal).toBe('SELL');
+    expect(r.score_total).toBeLessThan(SCORING_PARAMS.SELL_THRESHOLD);
+    expect(r.signal).toBe('HOLD');
+    expect(r.explication).toMatch(/aucun signal de vente/);
   });
 
   it('facteur de tendance symétrique : baissier => bonus_tendance négatif', () => {

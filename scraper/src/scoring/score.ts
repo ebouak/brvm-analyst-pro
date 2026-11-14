@@ -52,6 +52,16 @@ export const SCORING_PARAMS = {
   BONUS_TENDANCE: 0.1,
   BUY_THRESHOLD: 0.6,
   SELL_THRESHOLD: -0.6,
+  /**
+   * Aucun signal de vente n'est émis (2026-11-13). Le banc l'a mesuré sur
+   * 31 666 séances (docs/signaux/rejeu-2026-11-13.md) : les titres notés sous
+   * −0,45 font MIEUX que le marché (+1,90 % à 5 séances, +2,22 % à 20, prouvé),
+   * et sous −0,60 le sens est le même sans être prouvé. Le score devient négatif
+   * après une forte baisse, souvent suivie d'un rebond à la BRVM : « vendre »
+   * pousserait à vendre au plus bas. Le score reste calculé et publié ; le signal
+   * redevient « neutre ». À rouvrir seulement sur un verdict « prouvé : sous-performe ».
+   */
+  EMETTRE_VENTE: false,
   /** Nb minimum de points d'historique pour ne pas neutraliser le signal.
    * 5 jours suffisent pour variation+volume ; RSI et SMA50 resteront partiels. */
   MIN_HISTORY: 5,
@@ -208,7 +218,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
     signal = 'HOLD';
   } else if (scoreTotal > P.BUY_THRESHOLD) {
     signal = 'BUY';
-  } else if (scoreTotal < P.SELL_THRESHOLD) {
+  } else if (scoreTotal < P.SELL_THRESHOLD && P.EMETTRE_VENTE) {
     signal = 'SELL';
   } else {
     signal = 'HOLD';
@@ -238,7 +248,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
   let confiance = clamp(0.5 * completude + 0.3 * histFactor + 0.2 * nettete, 0, 1);
   if (incomplet) confiance = Math.min(confiance, 0.3);
 
-  const explication = buildExplanation({
+  const venteRetenue = !incomplet && scoreTotal < P.SELL_THRESHOLD && !P.EMETTRE_VENTE;
+  const explicationBase = buildExplanation({
     signal,
     incomplet,
     scoreVariation,
@@ -252,6 +263,9 @@ export function computeScore(input: ScoreInput): ScoreResult {
     trendUp: trendNorm > 0.15,
     trendDown: trendNorm < -0.15,
   });
+  const explication = venteRetenue
+    ? `${explicationBase} Score très négatif, mais aucun signal de vente n’est émis : sur l’historique, ces situations ont été suivies plus souvent d’un rebond que d’une baisse.`
+    : explicationBase;
 
   return {
     code: input.code,
