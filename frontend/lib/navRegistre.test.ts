@@ -71,6 +71,13 @@ describe('registre de navigation', () => {
     }
   });
 
+  it('une entrée du menu a une description et une colonne (barre de cote)', () => {
+    for (const e of REGISTRE.filter((x) => x.statut === 'menu')) {
+      expect((e.description ?? '').trim().length, `description manquante : ${e.chemin}`).toBeGreaterThan(0);
+      expect([1, 2], `colonne manquante : ${e.chemin}`).toContain(e.colonne);
+    }
+  });
+
   it('chaque rubrique a au moins une entrée de menu', () => {
     for (const r of RUBRIQUES) {
       expect(REGISTRE.some((e) => e.statut === 'menu' && e.rubrique === r.id), r.libelle).toBe(true);

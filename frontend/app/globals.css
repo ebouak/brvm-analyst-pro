@@ -750,3 +750,8 @@ body::after {
 }
 @keyframes cmp-revele { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes cmp-defile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Barre de cote : le contenu du panneau fond en 120 ms quand on change de rubrique. */
+@keyframes coteFondu { from { opacity: 0; } to { opacity: 1; } }
+.cote-fondu { animation: coteFondu 120ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .cote-fondu { animation: none; } }
