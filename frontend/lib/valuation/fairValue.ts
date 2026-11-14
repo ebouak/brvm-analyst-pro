@@ -62,6 +62,29 @@ export const ROE_MIN = 0.02;
 export const PER_MIN_PLAUSIBLE = 3;
 export const ROE_MAX_PLAUSIBLE = 0.5;
 
+/**
+ * Un comparable n'entre dans une médiane sectorielle que s'il passerait LUI-MÊME
+ * les exclusions appliquées à la société évaluée (2026-11-14). Sans cela, des
+ * ratios aberrants faussaient les médianes : SDSC (ROE 1,1 %, P/E 193) et FTSC
+ * (P/E 1,3, ROE 75 %) donnaient à SMBC une valeur « par les bénéfices » de
+ * 78 000 FCFA pour un cours de 18 000.
+ *  - P/E : ROE entre ROE_MIN et ROE_MAX_PLAUSIBLE, P/E ≥ PER_MIN_PLAUSIBLE ;
+ *  - P/B : ROE ≥ ROE_MIN (résultat suffisant), fonds propres positifs ;
+ *  - dans les deux cas, comptes de moins de `ageMax` ans.
+ */
+export function comparableRetenu(
+  key: 'per' | 'pbr',
+  m: { per: number | null; pbr: number | null; roe: number | null },
+  annee: number | null,
+  anneeCourante: number,
+  ageMax: number,
+): boolean {
+  if (annee == null || annee < anneeCourante - ageMax) return false;
+  if (m.roe == null || m.roe < ROE_MIN) return false;
+  if (key === 'per') return m.per != null && m.per >= PER_MIN_PLAUSIBLE && m.roe <= ROE_MAX_PLAUSIBLE;
+  return m.pbr != null && m.pbr > 0;
+}
+
 /** Médiane d'une liste de nombres (ignore null et non-positifs). */
 export function median(values: (number | null | undefined)[]): number | null {
   const xs = values.filter((v): v is number => v != null && Number.isFinite(v) && v > 0).sort((a, b) => a - b);
