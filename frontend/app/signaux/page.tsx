@@ -260,9 +260,10 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="BUY" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Score &gt; +0,60</p>
+            <p className="tabular text-sm font-semibold text-ivory">Plus émis depuis le 14/11/2026</p>
             <p className="text-xs text-muted leading-relaxed">
-              Les facteurs techniques (variation, volume, RSI, MACD, tendance) penchent nettement à la hausse.
+              Sur 2008-2023, les titres notés au-dessus de +0,60 n’ont pas fait mieux que le marché : le score reste
+              affiché comme une description, sans signal d’achat.
             </p>
           </div>
 
@@ -271,7 +272,7 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="HOLD" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">−0,60 ≤ Score ≤ +0,60</p>
+            <p className="tabular text-sm font-semibold text-ivory">Tous les scores, depuis le 14/11/2026</p>
             <p className="text-xs text-muted leading-relaxed">
               Aucun seuil franchi : les facteurs techniques ne penchent pas assez nettement.
             </p>

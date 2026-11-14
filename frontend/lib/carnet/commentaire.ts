@@ -407,7 +407,7 @@ export function commenterSeance(entree: {
     if (s != null) signalPenche = s > 0.05 ? 'hausse' : s < -0.05 ? 'baisse' : 'aucun';
 
     const positionScore = s == null ? '' :
-      ` Score : ${dec(s)} sur une échelle de −1 à +1 ; un signal d'achat exige plus de +${dec(SEUIL_ACHAT, 1)} ; sous −${dec(Math.abs(SEUIL_VENTE), 1)}, aucun signal de vente n'est plus émis, ces situations ayant plus souvent précédé un rebond qu'une baisse.`;
+      ` Score : ${dec(s)} sur une échelle de −1 à +1 ; le moteur n'émet plus ni signal d'achat (au-dessus de +${dec(SEUIL_ACHAT, 1)}) ni signal de vente (sous −${dec(Math.abs(SEUIL_VENTE), 1)}) : sur 2008-2023, ni l'un ni l'autre n'annonçait la suite. Le score décrit l'orientation technique.`;
 
     constats.push({
       origine: 'signal',

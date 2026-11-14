@@ -86,8 +86,10 @@ describe('computeScore', () => {
     expect(r.inputs.trend_norm).toBeGreaterThan(0); // régime haussier
     expect(r.bonus_tendance).toBeGreaterThan(0); // facteur tendance positif
     expect(r.score_total).toBeGreaterThan(0.6);
-    expect(r.signal).toBe('BUY');
-    expect(r.explication).toContain('Signal d’achat');
+    expect(r.score_total).toBeGreaterThan(SCORING_PARAMS.BUY_THRESHOLD);
+    expect(r.signal).toBe('HOLD');
+    expect(r.explication).toMatch(/pas un signal d’achat/);
+    expect(r.explication).toContain('Orientation technique nettement haussière');
   });
 
   it('tendance baissière qui accélère + baisse + volume => score très négatif, mais HOLD (aucune vente émise)', () => {

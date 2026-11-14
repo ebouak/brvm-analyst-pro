@@ -108,14 +108,14 @@ export default function MethodologiePage() {
           {/* Seuils de signal */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SignalThreshold
-              signal="Signal haussier"
-              condition="score > +0,60"
+              signal="Signal haussier : plus émis"
+              condition="score > +0,60 : affiché comme description depuis le 14/11/2026 (sur 2008-2023, ces titres n’ont pas fait mieux que le marché)"
               cls="border-up/25 bg-up/[0.05] text-up"
               dot="bg-up"
             />
             <SignalThreshold
               signal="Neutre"
-              condition="−0,60 ≤ score ≤ +0,60"
+              condition="Tous les scores, depuis le 14/11/2026"
               cls="border-border/60 bg-elevated/40 text-muted"
               dot="bg-muted"
             />

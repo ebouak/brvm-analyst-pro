@@ -64,6 +64,15 @@ export const SCORING_PARAMS = {
    * redevient « neutre ». À rouvrir seulement sur un verdict « prouvé : sous-performe ».
    */
   EMETTRE_VENTE: false,
+  /**
+   * Aucun signal d'achat n'est émis (2026-11-14, décision de l'exploitant).
+   * Rejeu HORS ÉCHANTILLON 2008-2023 (109 634 séances, docs/signaux/rejeu-2008-2023.md) :
+   * les scores > 0,60 ont fait −1,5 % face au marché à 20 séances et −2,2 % à
+   * 60 séances (non prouvé, mais dans le mauvais sens) ; le score total est
+   * légèrement anti-prédictif (corrélation de rang −0,04 à −0,06). Le score
+   * reste calculé et publié comme DESCRIPTION de l'orientation technique.
+   */
+  EMETTRE_ACHAT: false,
   /** Nb minimum de points d'historique pour ne pas neutraliser le signal.
    * 5 jours suffisent pour variation+volume ; RSI et SMA50 resteront partiels. */
   MIN_HISTORY: 5,
@@ -218,7 +227,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
   let signal: SignalLabel;
   if (incomplet) {
     signal = 'HOLD';
-  } else if (scoreTotal > P.BUY_THRESHOLD) {
+  } else if (scoreTotal > P.BUY_THRESHOLD && P.EMETTRE_ACHAT) {
     signal = 'BUY';
   } else if (scoreTotal < P.SELL_THRESHOLD && P.EMETTRE_VENTE) {
     signal = 'SELL';
@@ -251,8 +260,10 @@ export function computeScore(input: ScoreInput): ScoreResult {
   if (incomplet) confiance = Math.min(confiance, 0.3);
 
   const venteRetenue = !incomplet && scoreTotal < P.SELL_THRESHOLD && !P.EMETTRE_VENTE;
+  const achatRetenu = !incomplet && scoreTotal > P.BUY_THRESHOLD && !P.EMETTRE_ACHAT;
   const explicationBase = buildExplanation({
     signal,
+    orientation: achatRetenu ? 'haute' : venteRetenue ? 'basse' : null,
     incomplet,
     scoreVariation,
     scoreVolume,
@@ -267,7 +278,9 @@ export function computeScore(input: ScoreInput): ScoreResult {
   });
   const explication = venteRetenue
     ? `${explicationBase} Score très négatif, mais aucun signal de vente n’est émis : sur l’historique, ces situations ont été suivies plus souvent d’un rebond que d’une baisse.`
-    : explicationBase;
+    : achatRetenu
+      ? `${explicationBase} Score très positif : les facteurs techniques sont orientés à la hausse. Ce n’est pas un signal d’achat : sur 2008-2023, ces situations n’ont pas fait mieux que le marché.`
+      : explicationBase;
 
   return {
     code: input.code,
@@ -302,6 +315,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
 
 function buildExplanation(a: {
   signal: SignalLabel;
+  /** Score au-delà d'un seuil dont le signal n'est plus émis (description seule). */
+  orientation?: 'haute' | 'basse' | null;
   incomplet: boolean;
   scoreVariation: number | null;
   scoreVolume: number | null;
@@ -349,7 +364,11 @@ function buildExplanation(a: {
       ? 'Signal d’achat'
       : a.signal === 'SELL'
         ? 'Signal de vente'
-        : 'Aucun signal (score entre les seuils)';
+        : a.orientation === 'haute'
+          ? 'Orientation technique nettement haussière, sans signal d’achat'
+          : a.orientation === 'basse'
+            ? 'Orientation technique nettement baissière, sans signal de vente'
+            : 'Aucun signal (score entre les seuils)';
 
   // Clause de tension : court terme vs tendance de fond divergents.
   let tension = '';

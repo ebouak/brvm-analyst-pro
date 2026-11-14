@@ -11,7 +11,7 @@ const I:any={ trend:<path d="M3 16l5-6 4 4 5-8 4 5"/>, search:<><circle cx={11} 
 export function BentoFacons(){
  const cols=[
   {k:'01',t:'Analyser',d:"Comprendre une société avant d'agir.", accent:'rgb(var(--color-accent))', href:'/societes', outils:[
-   {t:'Fondamentaux',d:'Bilans, résultats, ratios',href:'/fondamentaux',ic:I.search},{t:'Signaux',d:'Notes A–F et BUY/HOLD/SELL',href:'/signaux',ic:I.trend},{t:'Diagnostics',d:'Dossiers Premium structurés',href:'/premium/diagnostic',ic:I.news},{t:'Screener',d:'Filtrer les 46 sociétés',href:'/screener',ic:I.search},
+   {t:'Fondamentaux',d:'Bilans, résultats, ratios',href:'/fondamentaux',ic:I.search},{t:'Signaux',d:'Notes A–F et scores techniques',href:'/signaux',ic:I.trend},{t:'Diagnostics',d:'Dossiers Premium structurés',href:'/premium/diagnostic',ic:I.news},{t:'Screener',d:'Filtrer les 46 sociétés',href:'/screener',ic:I.search},
   ]},
   {k:'02',t:'Surveiller',d:'Ne rien rater de la séance.', accent:'rgb(var(--color-up))', href:'/portefeuille', outils:[
    {t:'Portefeuille',d:'Positions, perf., dividendes',href:'/portefeuille',ic:I.pie},{t:'Alertes',d:'Seuils, gardiens, email',href:'/parametres/alertes',ic:I.bell},{t:'Brief du soir',d:'L’essentiel à 18h',href:'/weekly',ic:I.news},

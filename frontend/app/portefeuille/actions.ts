@@ -175,7 +175,8 @@ export async function createAlert(formData: FormData) {
   const actif = formData.get('actif') === 'true';
 
   const PRICE_TYPES = ['prix_au_dessus', 'prix_en_dessous', 'variation'];
-  const SMART_TYPES = ['signal_achat', 'signal_vente', 'rsi_survente', 'rsi_surachat', 'dividende_proche', 'saison_hors_fourchette'];
+  // signal_achat / signal_vente : plus créables, le moteur n'émet plus ces signaux (2026-11-14).
+  const SMART_TYPES = ['rsi_survente', 'rsi_surachat', 'dividende_proche', 'saison_hors_fourchette'];
   if (![...PRICE_TYPES, ...SMART_TYPES].includes(type)) {
     throw new Error('Type d\'alerte invalide');
   }

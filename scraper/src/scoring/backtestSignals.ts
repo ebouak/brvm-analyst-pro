@@ -10,7 +10,7 @@
  * fois), et mesure la performance à horizon fixe (~30 jours calendaires ≈ 21
  * séances de bourse).
  */
-import { computeScore } from './score.js';
+import { computeScore, SCORING_PARAMS } from './score.js';
 
 export interface DailyPoint {
   date: string; // YYYY-MM-DD
@@ -60,7 +60,9 @@ export function backtestSignalsForCode(code: string, points: DailyPoint[]): Back
       avg_volume_30d: avgVolume30d,
     });
 
-    if (res.signal === 'BUY') raw.push({ date: p.date, close: p.close });
+    // Le moteur n'émet plus de BUY (2026-11-14) : on repère les situations de score
+    // élevé (même seuil, données complètes), que ce bilan continue de mesurer.
+    if (!res.inputs.incomplet && res.score_total > SCORING_PARAMS.BUY_THRESHOLD) raw.push({ date: p.date, close: p.close });
   }
 
   // Déduplique : ne garde que le 1er jour de chaque séquence (écart > MIN_GAP_DAYS = nouvelle séquence).

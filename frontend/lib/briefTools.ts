@@ -29,7 +29,7 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'get_action_detail',
-      description: "Détail complet d'une action BRVM : historique de cours, signal BUY/HOLD/SELL, notation financière, dividendes, fondamentaux, publications récentes, événements.",
+      description: "Détail complet d'une action BRVM : historique de cours, score technique (description, sans signal d'achat ni de vente), notation financière, dividendes, fondamentaux, publications récentes, événements.",
       parameters: {
         type: 'object',
         properties: {
@@ -44,7 +44,7 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'get_signals',
-      description: "Signaux BUY/HOLD/SELL du jour pour toutes les actions ou filtrés. Inclut score, confiance, explication.",
+      description: "Scores techniques du jour pour toutes les actions ou filtrés, avec explication. Depuis le 14/11/2026, le moteur n'émet plus de signal d'achat ni de vente : le score est une description, jamais une recommandation.",
       parameters: {
         type: 'object',
         properties: {
