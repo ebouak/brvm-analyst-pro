@@ -162,7 +162,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
           <div>
             <p className="text-xs text-muted mb-1">Notifications email</p>
             {([
-              ['signaux', "Scores techniques notables", 'activé · livraison bientôt'],
+              ['signaux', "Achats de rebond détectés", 'activé · livraison bientôt'],
               ['briefHebdo', 'Brief hebdomadaire du marché', '(dé)abonne la newsletter'],
               ['alertesPrix', 'Alertes de prix sur mes titres', 'activé · livraison bientôt'],
               ['actus', 'Actualités importantes', ''],

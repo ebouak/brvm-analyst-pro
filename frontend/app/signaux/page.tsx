@@ -260,10 +260,10 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="BUY" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Plus émis depuis le 14/11/2026</p>
+            <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0,60 : achat de rebond</p>
             <p className="text-xs text-muted leading-relaxed">
-              Sur 2008-2023, les titres notés au-dessus de +0,60 n’ont pas fait mieux que le marché : le score reste
-              affiché comme une description, sans signal d’achat.
+              Depuis le 14/11/2026. Sur 2008-2023, ces titres, souvent après une forte baisse, ont fait mieux que le
+              marché (+8,4 % à 20 séances). Sur 2024-2026, l’effet à 60 séances n’est pas confirmé.
             </p>
           </div>
 
@@ -272,7 +272,7 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="HOLD" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Tous les scores, depuis le 14/11/2026</p>
+            <p className="tabular text-sm font-semibold text-ivory">Score ≥ −0,60 : description seulement</p>
             <p className="text-xs text-muted leading-relaxed">
               Aucun seuil franchi : les facteurs techniques ne penchent pas assez nettement.
             </p>
@@ -285,8 +285,8 @@ export default async function SignauxPage() {
             </div>
             <p className="tabular text-sm font-semibold text-ivory">Plus émis depuis le 13/11/2026</p>
             <p className="text-xs text-muted leading-relaxed">
-              Sur l’historique, les titres notés sous −0,60 ont plus souvent rebondi que baissé : le score reste
-              affiché, mais aucun signal de vente n’est donné.
+              Aucun signal de vente n’est donné : un score très négatif annonce plutôt un rebond, et devient un
+              achat de rebond.
             </p>
           </div>
         </div>

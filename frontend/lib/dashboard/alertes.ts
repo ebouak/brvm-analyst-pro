@@ -28,7 +28,7 @@ export function depuisAlertesRecentes(maintenant: Date, jours = ALERTES_RECENTES
 
 // Types « intelligents » (migration 0039) : seuil facultatif, le motif s'en passe.
 const SANS_SEUIL: Record<string, string> = {
-  signal_achat: 'Signal d’achat du moteur',
+  signal_achat: 'Achat de rebond du moteur',
   signal_vente: 'Signal de vente du moteur',
   rsi_survente: 'RSI en zone de survente',
   rsi_surachat: 'RSI en zone de surachat',

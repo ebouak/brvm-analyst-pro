@@ -21,7 +21,6 @@ interface PaperTradingAccount {
   capital_current: number;
 }
 
-const SIGNAL_THRESHOLD = 0.6; // 60% confidence minimum to auto-open
 const POSITION_SIZE_PCT = 0.1; // Risquer 10% du capital par position
 
 export async function runPaperTradingAuto(): Promise<{
@@ -55,23 +54,23 @@ export async function runPaperTradingAuto(): Promise<{
     }
     const today = lastSig.date_marche as string;
 
-    // Signaux d'achat forts de la séance : BUY, score >= seuil, confiance suffisante
+    // Achats de rebond de la séance (BUY = score < −0,60 depuis le 2026-11-14),
+    // du plus marqué au moins marqué, confiance suffisante
     // (schéma réel signals_daily : signal/score_total/confiance — cf. scoring §9)
     const { data: signals, error: signalError } = await supabase
       .from('signals_daily')
       .select('id, code, date_marche, score_total')
       .eq('date_marche', today)
       .eq('signal', 'BUY')
-      .gte('score_total', SIGNAL_THRESHOLD)
       .gte('confiance', 0.4)
-      .order('score_total', { ascending: false });
+      .order('score_total', { ascending: true });
 
     if (signalError) {
       throw new Error(`Failed to fetch signals: ${signalError.message}`);
     }
 
     if (!signals || signals.length === 0) {
-      log.info(`No strong BUY signals for ${today} (threshold: ${SIGNAL_THRESHOLD})`);
+      log.info(`No rebound BUY signals for ${today}`);
       return { status: 'success', opened: 0, skipped: 0, errors: [] };
     }
 

@@ -21,7 +21,7 @@ const TYPE_LABEL: Record<string, string> = {
   prix_au_dessus: 'Prix ≥ seuil',
   prix_en_dessous: 'Prix ≤ seuil',
   variation: 'Variation ≥ seuil',
-  signal_achat: 'Signal d’achat (plus déclenchée : le moteur n’émet plus ce signal)',
+  signal_achat: 'Achat de rebond',
   signal_vente: 'Signal de vente (plus déclenchée : le moteur n’émet plus ce signal)',
   rsi_survente: 'RSI survente',
   rsi_surachat: 'RSI surachat',

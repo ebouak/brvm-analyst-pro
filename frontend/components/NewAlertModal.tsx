@@ -69,6 +69,7 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
                 <option value="variation">↕ Variation en %</option>
               </optgroup>
               <optgroup label="Intelligentes">
+                <option value="signal_achat">Achat de rebond du moteur</option>
                 <option value="rsi_survente">RSI en survente</option>
                 <option value="rsi_surachat">RSI en surachat</option>
                 <option value="dividende_proche">Détachement de dividende proche</option>
