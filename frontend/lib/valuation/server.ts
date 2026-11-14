@@ -1,6 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import { computeMetrics, isReliable, type Fundamentals, type ValuationMetrics } from './metrics';
-import { computeFairValue, median, type FairValueResult } from './fairValue';
+import { comparableRetenu, computeFairValue, median, type FairValueResult } from './fairValue';
 import { computeQuality, type QualityScore } from './quality';
 import { buildVerdict, type ValuationVerdict } from './verdict';
 
@@ -88,12 +88,15 @@ export async function getMarketValuations(): Promise<CompanyValuation[]> {
   // Médianes sectorielles (P/E, P/B), repli marché si < 3 pairs. La société
   // évaluée est EXCLUE de ses pairs (B2, 2026-11-13) : SCRC, ROE −35,6 %, était
   // la médiane P/B de son propre secteur et ressortait « juste prix ».
-  function sectorMedian(secteur: string, key: 'per' | 'pbr', code: string): number | null {
-    const peers = pre.filter((p) => p.code !== code && p.secteur === secteur && p.metrics[key] != null);
-    if (peers.length >= 3) return median(peers.map((p) => p.metrics[key]));
-    return median(pre.filter((p) => p.code !== code).map((p) => p.metrics[key]));
-  }
+  // Les comparables passent les mêmes exclusions que la société évaluée
+  // (comparableRetenu) : aucun ratio aberrant ni compte périmé dans une médiane.
   const anneeCourante = new Date().getUTCFullYear();
+  function sectorMedian(secteur: string, key: 'per' | 'pbr', code: string): number | null {
+    const valides = pre.filter((p) => p.code !== code && comparableRetenu(key, p.metrics, p.annee, anneeCourante, AGE_MAX_EXERCICE));
+    const peers = valides.filter((p) => p.secteur === secteur);
+    if (peers.length >= 3) return median(peers.map((p) => p.metrics[key]));
+    return median(valides.map((p) => p.metrics[key]));
+  }
 
   // 2e passe : juste-valeur + qualité + verdict.
   return pre.map((p) => {

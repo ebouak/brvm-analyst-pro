@@ -144,3 +144,17 @@ describe('corrections du 2026-11-13', () => {
     expect(texte).not.toMatch(/P\/[EB] \d+\.\d/);
   });
 });
+
+import { comparableRetenu } from './fairValue';
+
+describe('comparableRetenu : mêmes exclusions que la société évaluée', () => {
+  const m = (per: number | null, pbr: number | null, roe: number | null) => ({ per, pbr, roe });
+  it('écarte les ratios aberrants et les comptes périmés', () => {
+    expect(comparableRetenu('per', m(15, 3, 0.2), 2025, 2026, 2)).toBe(true);
+    expect(comparableRetenu('per', m(193, 2, 0.011), 2025, 2026, 2)).toBe(false); // résultat insuffisant
+    expect(comparableRetenu('per', m(1.3, 1, 0.75), 2024, 2026, 2)).toBe(false); // résultat exceptionnel
+    expect(comparableRetenu('pbr', m(1.3, 1, 0.75), 2024, 2026, 2)).toBe(true); // P/B garde un sens
+    expect(comparableRetenu('pbr', m(-5, 1.8, -0.36), 2025, 2026, 2)).toBe(false); // perte
+    expect(comparableRetenu('per', m(15, 3, 0.2), 2023, 2026, 2)).toBe(false); // comptes trop anciens
+  });
+});
