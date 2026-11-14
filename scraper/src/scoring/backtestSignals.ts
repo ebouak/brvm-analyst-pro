@@ -60,6 +60,7 @@ export function backtestSignalsForCode(code: string, points: DailyPoint[]): Back
       avg_volume_30d: avgVolume30d,
     });
 
+    // Depuis le 2026-11-14, un BUY est un achat de rebond (score < −0,60).
     if (res.signal === 'BUY') raw.push({ date: p.date, close: p.close });
   }
 

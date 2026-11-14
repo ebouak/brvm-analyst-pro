@@ -86,11 +86,13 @@ describe('computeScore', () => {
     expect(r.inputs.trend_norm).toBeGreaterThan(0); // régime haussier
     expect(r.bonus_tendance).toBeGreaterThan(0); // facteur tendance positif
     expect(r.score_total).toBeGreaterThan(0.6);
-    expect(r.signal).toBe('BUY');
-    expect(r.explication).toContain('Signal d’achat');
+    expect(r.score_total).toBeGreaterThan(SCORING_PARAMS.BUY_THRESHOLD);
+    expect(r.signal).toBe('HOLD');
+    expect(r.explication).toMatch(/pas un signal d’achat/);
+    expect(r.explication).toContain('Orientation technique nettement haussière');
   });
 
-  it('tendance baissière qui accélère + baisse + volume => score très négatif, mais HOLD (aucune vente émise)', () => {
+  it('tendance baissière qui accélère + baisse + volume => score très négatif : achat de rebond', () => {
     const closes: number[] = [];
     for (let i = 0; i < 40; i++) closes.push(300 - i);
     for (let i = 0; i < 20; i++) closes.push(260 - i * 4); // accélération baissière
@@ -105,8 +107,9 @@ describe('computeScore', () => {
     expect(r.bonus_tendance).toBeLessThan(0); // facteur tendance SYMÉTRIQUE (négatif)
     expect(r.score_total).toBeLessThan(-0.6);
     expect(r.score_total).toBeLessThan(SCORING_PARAMS.SELL_THRESHOLD);
-    expect(r.signal).toBe('HOLD');
-    expect(r.explication).toMatch(/aucun signal de vente/);
+    expect(r.signal).toBe('BUY');
+    expect(r.explication).toMatch(/^Achat de rebond/);
+    expect(r.explication).toMatch(/2024-2026/);
   });
 
   it('facteur de tendance symétrique : baissier => bonus_tendance négatif', () => {

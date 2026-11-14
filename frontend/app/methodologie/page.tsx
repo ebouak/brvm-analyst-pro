@@ -108,20 +108,20 @@ export default function MethodologiePage() {
           {/* Seuils de signal */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SignalThreshold
-              signal="Signal haussier"
-              condition="score > +0,60"
+              signal="Achat de rebond"
+              condition="score < −0,60, depuis le 14/11/2026 : sur 2008-2023, ces titres ont fait mieux que le marché"
               cls="border-up/25 bg-up/[0.05] text-up"
               dot="bg-up"
             />
             <SignalThreshold
               signal="Neutre"
-              condition="−0,60 ≤ score ≤ +0,60"
+              condition="score ≥ −0,60 : le score décrit l’orientation technique, sans signal"
               cls="border-border/60 bg-elevated/40 text-muted"
               dot="bg-muted"
             />
             <SignalThreshold
-              signal="Signal baissier : plus émis"
-              condition="score < −0,60 : affiché, classé neutre depuis le 13/11/2026 (ces titres ont plus souvent rebondi que baissé)"
+              signal="Signal de vente : plus émis"
+              condition="depuis le 13/11/2026 : un score très négatif annonce plutôt un rebond"
               cls="border-down/25 bg-down/[0.05] text-down"
               dot="bg-down"
             />

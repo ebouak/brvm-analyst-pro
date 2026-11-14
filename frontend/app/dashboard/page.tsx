@@ -457,7 +457,7 @@ export default async function Dashboard() {
       const signauxBloc = isPremium ? <SignauxRecents signaux={signals as SignalDaily[]} notes={notesHold} /> : (
         <Bloc id="t-signaux-lock">
           <TeteBloc id="t-signaux-lock" titre="Signaux d'opportunité" />
-          <PremiumLock title="Signaux d'achat et de vente réservés au Premium" pitch="Les signaux notés A–F, avec leur explication, sont inclus dans l'abonnement Premium." rows={3} />
+          <PremiumLock title="Signaux d'achat de rebond réservés au Premium" pitch="Les signaux notés A–F, avec leur explication, sont inclus dans l'abonnement Premium." rows={3} />
         </Bloc>
       );
       return (
