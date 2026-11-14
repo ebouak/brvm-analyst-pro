@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "L’impôt est retenu avant le versement",
-   "contenu": "L’impôt sur le revenu des valeurs mobilières (IRVM) est prélevé par la société au moment du paiement. Vous recevez le dividende net : vous n’avez rien à verser vous-même pour cet impôt.\nLe taux dépend de la législation du pays de la société qui verse, pas de la SGI.",
+   "contenu": "L’impôt sur le revenu des valeurs mobilières (IRVM) est prélevé par la société au moment du paiement du dividende. Vous recevez le dividende net : vous n’avez pas à verser vous-même cet impôt, la société s’en charge auprès de l’administration fiscale de son pays.\nLe taux dépend de la législation du pays de la société qui verse le dividende, et non de votre SGI. Votre situation personnelle peut toutefois compter dans certains cas, comme on le verra plus bas.\nExemple fictif : un dividende brut de 1 000 FCFA, avec un IRVM de 12 %, donne 880 FCFA nets. Si l’action cote 16 000 FCFA, le rendement net est de 5,5 %. C’est ce rendement net qui mesure ce que vous touchez réellement.",
    "formules": [
     {
      "nom": "Dividende net",
@@ -26,7 +26,7 @@
   {
    "type": "importance",
    "titre": "Les taux sur les dividendes d’actions cotées",
-   "contenu": "Taux applicables aux personnes physiques, tels que WestBourse les a vérifiés. Ils changent avec les lois de finances : la page Fiscalité du site fait foi et cite ses sources.",
+   "contenu": "Les taux ci-dessous s’appliquent aux personnes physiques, tels que WestBourse les a vérifiés. Ils changent avec les lois de finances de chaque pays : la page Fiscalité du site fait foi et cite ses sources.\nLes écarts sont importants. Pour un même dividende brut, l’actionnaire d’une société togolaise et celui d’une société burkinabè ne reçoivent pas le même montant net. Comparer deux sociétés de pays différents sur leur rendement brut conduit donc à une erreur : comparez les rendements nets.\nQuand le taux d’un pays n’a pas pu être confirmé, WestBourse ne l’affiche pas. Une case « non vérifié » vaut mieux qu’un taux supposé, qui fausserait tous les calculs qui en dépendent.",
    "tableau": {
     "colonnes": [
      "Pays de la société",
@@ -76,12 +76,12 @@
   {
    "type": "importance",
    "titre": "Les obligations",
-   "contenu": "Les coupons des titres émis par les États de l’UEMOA et par les institutions régionales comme la BOAD ou la BIDC sont en principe exonérés. Les obligations de sociétés privées supportent une retenue, dont le taux varie selon le pays.\nC’est l’une des raisons pour lesquelles une obligation d’État peut rapporter plus, net, qu’un placement affiché à un taux supérieur."
+   "contenu": "Les coupons des titres émis par les États de l’UEMOA et par les institutions régionales comme la BOAD ou la BIDC sont en principe exonérés. Les obligations de sociétés privées supportent une retenue, dont le taux varie selon le pays de l’émetteur.\nCette différence compte au moment de comparer deux placements. Exemple fictif : une obligation d’État exonérée à 6 % rapporte 6 % net. Une obligation de société à 6,5 %, soumise à une retenue de 10 %, rapporte 5,85 % net. Le placement affiché au taux le plus haut rapporte le moins.\nAvant de souscrire, vérifiez le régime fiscal de l’emprunt dans sa note d’information."
   },
   {
    "type": "piege",
    "titre": "Les confusions fréquentes",
-   "contenu": "La plupart des erreurs viennent d’un mélange entre brut et net.",
+   "contenu": "La plupart des erreurs viennent d’un mélange entre brut et net. Elles conduisent à se tromper sur son revenu, donc sur le rendement réel de ses placements.\nLa plus fréquente consiste à retirer l’impôt deux fois. Le calendrier officiel des dividendes de la BRVM publie souvent des montants déjà nets. Leur appliquer de nouveau l’IRVM sous-estime votre revenu. Exemple fictif : un dividende net publié de 880 FCFA, auquel on retire encore 12 %, donne 774 FCFA, un montant que vous ne toucherez jamais.\nLes cas particuliers relèvent d’un professionnel : investisseur résidant hors de l’UEMOA, société qui investit pour son propre compte, contribuable soumis à d’autres impôts dans son pays. Votre SGI vous remet un relevé de dividendes, et un conseiller fiscal peut trancher.",
    "points": [
     {
      "titre": "Retirer l’impôt deux fois",
@@ -103,7 +103,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Toujours savoir si un montant est brut ou net.",
+   "contenu": "Toujours savoir si un montant est brut ou net, avant tout calcul. C’est la question la plus simple, et celle qu’on oublie le plus souvent.\nLa retenue à la source simplifie la vie de l’épargnant : il n’a pas à verser lui-même l’IRVM. En contrepartie, il doit comparer ses placements sur leurs rendements nets, en tenant compte du pays de chaque société et du régime fiscal de chaque obligation.",
    "points": [
     {
      "titre": "L’IRVM est retenu à la source, selon le pays de la société"

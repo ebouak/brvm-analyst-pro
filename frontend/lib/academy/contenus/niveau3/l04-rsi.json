@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Le calcul",
-   "contenu": "Le RSI ramène le rapport entre hausses et baisses moyennes sur une échelle de 0 à 100. Exemple pédagogique.",
+   "contenu": "Le RSI (relative strength index, ou indice de force relative) compare l’ampleur des hausses et des baisses du cours sur les dernières séances, en général 14. Il a été présenté par J. Welles Wilder en 1978.\nLe calcul se fait en trois temps. On sépare les séances de hausse et de baisse, et on calcule la hausse moyenne et la baisse moyenne sur la période. On divise l’une par l’autre : c’est la force relative. On ramène enfin ce rapport sur une échelle de 0 à 100.\nExemple fictif : avec une hausse moyenne de 2 et une baisse moyenne de 1, la force relative vaut 2 et le RSI environ 66,7. Si les baisses disparaissent, le RSI tend vers 100 ; si les hausses disparaissent, il tend vers 0. Cette échelle fixe est son grand avantage : un RSI se compare d’une action à l’autre, contrairement au MACD de la leçon suivante.",
    "formules": [
     {
      "nom": "Force relative (RS)",
@@ -26,7 +26,7 @@
   {
    "type": "importance",
    "titre": "Les trois zones",
-   "contenu": "Les seuils de 70 et 30 sont des conventions, pas des lois.",
+   "contenu": "Les seuils de 70 et 30 sont des conventions, proposées par l’auteur de l’indicateur et reprises par l’usage. Ce ne sont pas des lois du marché.\nAu-dessus de 70, les hausses récentes ont nettement dominé les baisses : on parle de surachat. Sous 30, c’est l’inverse : on parle de survente. Ces mots trompent. « Surachat » ne signifie pas que l’action est trop chère, mais que son cours a monté vite récemment ; une action peut être en surachat et rester bon marché au regard de ses comptes.\nCertains utilisateurs resserrent les seuils à 80 et 20 pour ne retenir que les excès les plus marqués. Quel que soit le réglage, la zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.",
    "stats": [
     {
      "label": "RSI supérieur à 70",
@@ -49,7 +49,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : le RSI du jour",
    "reel": true,
-   "contenu": "Le RSI sur 14 séances de cinq valeurs, recalculé à l’ouverture de la leçon. Un RSI en zone extrême décrit un mouvement récent ; il ne dit pas quand il s’arrêtera.",
+   "contenu": "Le RSI sur 14 séances de cinq valeurs, recalculé à l’ouverture de la leçon sur les clôtures réelles.\nPour chacune, situez d’abord le RSI dans l’une des trois zones, puis regardez le cours face à sa moyenne longue sur la même ligne. Un RSI élevé sur une valeur au-dessus de sa moyenne longue décrit une tendance forte ; le même RSI sur une valeur sous sa moyenne longue décrit plutôt un rebond récent dans une tendance restée baissière.\nUn RSI en zone extrême décrit un mouvement récent ; il ne dit pas quand il s’arrêtera. Avant de vous y intéresser, vérifiez sur la fiche de la valeur que ce mouvement a été porté par de vrais échanges.",
    "donnees_reelles": {
     "vue": "technique",
     "codes": [
@@ -64,7 +64,7 @@
   {
    "type": "importance",
    "titre": "Ce que nous avons mesuré sur la BRVM",
-   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.\nCe résultat porte sur un score qui combine plusieurs éléments, dont le RSI, et non sur le RSI seul. Il ne transforme pas un RSI bas en raison d’acheter.",
    "stats": [
     {
      "label": "Séances rejouées",
@@ -86,7 +86,7 @@
   {
    "type": "piege",
    "titre": "Les mauvaises lectures du RSI",
-   "contenu": "Le RSI est populaire, et souvent mal utilisé.",
+   "contenu": "Le RSI est l’un des indicateurs les plus populaires, et l’un des plus mal utilisés. Trois erreurs reviennent.\nLa première consiste à vendre dès que le RSI dépasse 70. Dans une tendance forte, il peut rester au-dessus de ce seuil pendant des semaines, et la hausse continuer. Le seuil décrit un excès ; il ne fixe pas la date d’un retournement.\nLa deuxième tient à la liquidité. Sur une valeur peu échangée, deux ou trois séances de hausse portées par quelques titres suffisent à pousser le RSI vers 80 ou 90. L’indicateur mesure alors moins un excès du marché que l’effet de quelques ordres isolés.\nLa troisième est d’oublier ce que le RSI ignore : les comptes de la société, son dividende, sa dette. Un RSI bas sur une société dont les résultats se dégradent ne signale pas une occasion ; il reflète une baisse qui a peut-être de bonnes raisons.",
    "points": [
     {
      "titre": "« Surachat » ne veut pas dire « vendre »",
@@ -108,7 +108,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Le RSI mesure un excès récent, pas une valeur.",
+   "contenu": "Le RSI mesure un excès récent, pas une valeur. Il répond à une seule question : le cours a-t-il bougé de façon inhabituellement rapide dans un sens ces dernières semaines ?\nC’est une information de contexte, à croiser avec la tendance de fond donnée par la moyenne longue, avec les volumes, et surtout avec les comptes de la société. La mesure faite par WestBourse sur la BRVM décrit une moyenne passée ; elle ne dit rien d’une valeur en particulier.",
    "points": [
     {
      "titre": "RSI = 100 − 100 ÷ (1 + RS), en général sur 14 séances"

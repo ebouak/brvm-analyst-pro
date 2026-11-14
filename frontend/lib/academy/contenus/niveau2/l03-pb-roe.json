@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Trois ratios, trois questions",
-   "contenu": "Les exemples chiffrés sont pédagogiques.",
+   "contenu": "Le PER ne regarde que le bénéfice d’une année. Trois autres ratios complètent la lecture, chacun avec sa question.\nLe P/B (price to book, ou cours sur valeur comptable) compare la valeur que la bourse donne à la société, sa capitalisation, à la valeur de ses fonds propres inscrite au bilan. Un P/B de 1 signifie que le marché valorise la société exactement à sa valeur comptable. Le même ratio se calcule par action : cours divisé par fonds propres par action.\nLe ROE (return on equity, ou rentabilité des fonds propres) mesure ce que la société gagne avec l’argent de ses actionnaires. Le rendement du dividende, enfin, dit ce que l’actionnaire reçoit chaque année en espèces, rapporté au prix payé. Les exemples chiffrés sont fictifs.",
    "formules": [
     {
      "nom": "Price to book (P/B)",
@@ -31,7 +31,7 @@
   {
    "type": "importance",
    "titre": "Le lien qui explique tout",
-   "contenu": "Ces ratios ne sont pas indépendants : le P/B est égal au PER multiplié par le ROE.\nUne société très rentable mérite un P/B élevé. Un P/B élevé avec un ROE faible, en revanche, demande une explication.",
+   "contenu": "Ces ratios ne sont pas indépendants : le P/B est égal au PER multiplié par le ROE. La formule se vérifie en écrivant chaque ratio par action : le BPA apparaît une fois au numérateur et une fois au dénominateur, et s’annule.\nCette relation explique beaucoup de choses. Une société qui gagne 25 % par an sur ses fonds propres peut valoir 2,5 fois sa valeur comptable avec un PER de seulement 10. Une société qui ne gagne que 5 %, avec le même PER, ne vaut que la moitié de sa valeur comptable. Le P/B élevé de la première n’est pas un excès : il reflète sa rentabilité.\nLa vraie question n’est donc pas « ce P/B est-il élevé ? », mais « ce P/B est-il cohérent avec le ROE ? ». Un P/B élevé avec un ROE faible demande une explication : soit le marché attend une forte amélioration, soit il paie trop cher.\nLe taux de distribution complète le tableau : c’est la part du bénéfice versée en dividende. Une société qui distribue presque tout garde peu pour investir, et sa croissance future en dépend.",
    "formules": [
     {
      "nom": "P/B = PER × ROE",
@@ -61,7 +61,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : des profils très différents",
    "reel": true,
-   "contenu": "Une société peut afficher un P/B très élevé parce qu’elle distribue presque tout son bénéfice : ses fonds propres restent petits, et son ROE devient très élevé. Une autre cote sous sa valeur comptable. Les deux situations demandent une lecture, pas un réflexe.",
+   "contenu": "Les quatre sociétés ci-dessous ont des profils très différents, et c’est l’intérêt de les comparer.\nUne société peut afficher un P/B très élevé parce qu’elle distribue presque tout son bénéfice depuis des années : ses fonds propres restent petits, son ROE devient très élevé, et le P/B suit. Une autre peut coter sous sa valeur comptable, par exemple parce que sa rentabilité est jugée faible ou trop irrégulière. Les deux situations demandent une lecture, pas un réflexe.\nLes ratios sont recalculés à l’ouverture de la leçon avec le dernier cours et les derniers comptes publiés. Pour chaque valeur, vérifiez la cohérence entre P/B et ROE avec la relation vue plus haut, puis lisez la fiche de la société pour comprendre l’écart.",
    "donnees_reelles": {
     "vue": "ratios",
     "codes": [
@@ -75,7 +75,7 @@
   {
    "type": "cas",
    "titre": "Une lecture croisée",
-   "contenu": "Exemple pédagogique : deux sociétés au même PER de 12 ne se valent pas.",
+   "contenu": "Exemple fictif : deux sociétés affichent le même PER de 12. Un lecteur pressé les jugerait aussi chères l’une que l’autre.\nLe ROE change tout. La société A gagne 25 % sur ses fonds propres : son P/B de 3 traduit une entreprise qui crée beaucoup de valeur avec peu de capital. La société B ne gagne que 6 % : son P/B de 0,7 n’est pas une aubaine, c’est la conséquence d’une rentabilité faible. Si rien ne change dans sa gestion, la décote a de bonnes raisons de durer.\nLa décote de B ne devient intéressante que si vous avez une raison précise de penser que sa rentabilité va remonter : nouvelle direction, fin d’une charge exceptionnelle, cession d’une activité déficitaire. Sans cette raison, un P/B bas est seulement le prix d’une rentabilité basse.",
    "tableau": {
     "colonnes": [
      "Ratio",
@@ -110,7 +110,7 @@
   {
    "type": "piege",
    "titre": "Les erreurs fréquentes",
-   "contenu": "Chaque ratio a son angle mort.",
+   "contenu": "Chaque ratio a son angle mort, et les quatre pièges ci-dessous en découlent.\nLe plus trompeur est le ROE gonflé par la dette. Exemple fictif : deux sociétés gagnent chacune 4 milliards de FCFA. La première est financée par 40 milliards de fonds propres ; la seconde par 10 milliards de fonds propres et 30 milliards de dettes. La première affiche un ROE de 10 %, la seconde de 40 %. La seconde n’est pas quatre fois mieux gérée : elle est surtout plus endettée, donc plus fragile si ses ventes baissent.\nLe rendement du dividende a un piège symétrique : il monte mécaniquement quand le cours baisse. Un rendement inhabituellement élevé peut donc signaler un marché qui doute du prochain dividende. Vérifiez le taux de distribution : un dividende supérieur au bénéfice est payé en puisant dans les réserves, ce qui ne peut pas durer.",
    "points": [
     {
      "titre": "Un ROE gonflé par la dette",
@@ -137,7 +137,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Un ratio seul ne dit rien ; deux ratios ensemble commencent à raconter.",
+   "contenu": "Un ratio seul ne dit rien ; deux ratios ensemble commencent à raconter une histoire. Le couple P/B et ROE est le plus utile : il relie le prix payé à la rentabilité obtenue.\nEn pratique, lisez dans cet ordre : le ROE et sa régularité sur plusieurs années, la structure du bilan (dette et fonds propres), puis le P/B. Le rendement du dividende vient en dernier, une fois vérifié que le bénéfice couvre bien la distribution.",
    "points": [
     {
      "titre": "P/B = capitalisation ÷ fonds propres"

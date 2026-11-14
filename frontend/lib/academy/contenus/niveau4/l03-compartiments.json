@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Trois compartiments",
-   "contenu": "La réorganisation est entrée en vigueur le 2 janvier 2023, selon le communiqué publié par la BRVM ce jour-là.",
+   "contenu": "La réorganisation est entrée en vigueur le 2 janvier 2023, selon le communiqué publié par la BRVM ce jour-là. Le marché des actions est depuis organisé en trois compartiments : Prestige, Principal et Croissance.\nLe Prestige réunit les grandes sociétés établies, qui remplissent des critères exigeants de taille, d’ancienneté, de flottant et de qualité de l’information. Le Principal accueille les sociétés cotées qui remplissent les critères généraux d’admission sans atteindre ceux du Prestige. Le Croissance est destiné aux PME et aux entreprises à fort potentiel de croissance, avec des conditions d’accès allégées.\nLe flottant est la part du capital qui circule réellement en bourse, par opposition aux titres gardés par les actionnaires de référence. Un flottant important signifie davantage de titres disponibles à l’achat et à la vente, donc en principe une meilleure liquidité. C’est pourquoi il figure parmi les critères du Prestige.",
    "tableau": {
     "colonnes": [
      "Compartiment",
@@ -39,7 +39,7 @@
   {
    "type": "importance",
    "titre": "Les indices de la BRVM",
-   "contenu": "Un indice résume l’évolution d’un groupe de valeurs. Depuis 2023, la BRVM publie notamment trois indices de référence.",
+   "contenu": "Un indice résume en un seul chiffre l’évolution d’un groupe de valeurs. Depuis 2023, la BRVM publie notamment trois indices de référence, à côté d’indices par compartiment et par secteur.\nLe BRVM Composite regroupe toutes les sociétés cotées, pondérées par leur capitalisation : il mesure l’ensemble du marché, avec un poids prépondérant pour les plus grandes. Le BRVM 30 retient les trente valeurs les plus échangées sur un trimestre ; sa composition suit donc la liquidité des titres. Le BRVM Prestige suit les valeurs du compartiment Prestige.\nUn indice se lit comme une variation, pas comme un niveau. Son nombre de points n’a pas de sens en soi ; ce qui compte est son évolution sur une période, comparée à celle d’un autre indice ou d’un portefeuille.",
    "points": [
     {
      "titre": "BRVM Composite",
@@ -59,7 +59,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : les indices à la dernière séance",
    "reel": true,
-   "contenu": "Les valeurs des principaux indices, lues en base à l’ouverture de la leçon.",
+   "contenu": "Les valeurs des principaux indices, lues en base à l’ouverture de la leçon.\nComparez leurs variations plutôt que leurs niveaux. Si le BRVM Prestige progresse nettement plus que le BRVM Composite, le mouvement du marché est porté par les grandes valeurs ; s’il progresse moins, ce sont plutôt les autres qui tirent le marché. La même lecture vaut pour le BRVM Principal.\nCes comparaisons décrivent le marché d’une séance ; elles ne disent rien de ce que fera un indice à la séance suivante.",
    "donnees_reelles": {
     "vue": "indices",
     "codes": [
@@ -73,7 +73,7 @@
   {
    "type": "piege",
    "titre": "Ce qu’un compartiment ne dit pas",
-   "contenu": "Un classement décrit des caractéristiques, pas une qualité d’investissement.",
+   "contenu": "Un classement décrit des caractéristiques, pas une qualité d’investissement. Trois malentendus sont fréquents.\nLe premier consiste à lire « Prestige » comme une garantie. Les critères portent sur la taille, l’ancienneté, le flottant et l’information publiée. Ils ne disent rien du prix de l’action ni des résultats futurs : une grande société bien informée peut être chère, et son cours peut baisser.\nLe deuxième est symétrique : « Croissance » désigne le profil des entreprises accueillies, pas une croissance assurée. Ces sociétés sont souvent plus jeunes, plus petites et moins échangées, donc plus risquées.\nLe troisième concerne les indices pondérés par la capitalisation. Quand quelques valeurs représentent une grande part de la capitalisation totale, elles dictent l’évolution de l’indice. Un indice en hausse peut ainsi cacher une majorité de valeurs en baisse.",
    "points": [
     {
      "titre": "Prestige ne veut pas dire « sans risque »",
@@ -95,7 +95,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Classer n’est pas recommander.",
+   "contenu": "Classer n’est pas recommander. Un compartiment renseigne sur la taille, le flottant et la transparence d’une société ; il ne remplace ni la lecture de ses comptes, ni l’examen de son prix.\nLes indices servent de repères pour situer un portefeuille : comparer sa performance à celle du BRVM Composite, sur la même période, dit si vos choix ont fait mieux ou moins bien que le marché.",
    "points": [
     {
      "titre": "Trois compartiments depuis le 2 janvier 2023 : Prestige, Principal, Croissance"

@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Retournement ou continuation",
-   "contenu": "Les figures se classent selon ce qu’elles suggèrent.",
+   "contenu": "Les figures chartistes sont des formes que le cours dessine sur plusieurs semaines ou plusieurs mois, et que les analystes ont l’habitude de reconnaître. Elles se classent en deux familles : celles qui suggèrent un retournement de la tendance, et celles qui suggèrent sa continuation après une pause.\nLes figures de retournement se forment à la fin d’une tendance. Le double creux montre un cours qui baisse, rebondit, rebaisse jusqu’au même niveau, puis repart : les acheteurs ont défendu deux fois le même prix. La tête-épaules montre trois sommets, celui du milieu plus haut que les deux autres : la hausse s’essouffle, la dernière tentative échoue plus bas.\nLes figures de continuation marquent une pause. Dans un triangle, les oscillations se resserrent jusqu’à ce que le cours sorte d’un côté. Dans un canal, le cours évolue entre deux droites parallèles. Pour chaque figure, le tableau indique ce qui la confirme ; sans cette confirmation, ce n’est qu’une hypothèse.",
    "tableau": {
     "colonnes": [
      "Figure",
@@ -55,7 +55,7 @@
   {
    "type": "importance",
    "titre": "La méthode : attendre la cassure",
-   "contenu": "La règle commune à toutes les figures : ne rien conclure avant la confirmation.",
+   "contenu": "La règle commune à toutes les figures est de ne rien conclure avant la confirmation. Une figure en formation peut toujours échouer, et elle échoue souvent.\nLe niveau clé est le cœur de la méthode. Pour un double creux, c’est le sommet entre les deux creux ; pour une tête-épaules, la ligne de cou qui relie les creux de part et d’autre de la tête ; pour un triangle, sa borne. La figure n’est confirmée que lorsque le cours clôture au-delà de ce niveau. Une mèche qui le franchit pendant la séance, avant de revenir, ne suffit pas.\nExemple fictif : une action forme deux creux à 1 500 FCFA, séparés d’un sommet à 1 700. Tant que le cours n’a pas clôturé au-dessus de 1 700, il n’y a pas de double creux, seulement deux rebonds. Et si, après la cassure, le cours repasse sous 1 500, la figure est invalidée : c’est ce niveau qu’on fixe d’avance comme point d’erreur, comme le montre la leçon suivante.",
    "etapes": [
     {
      "titre": "Repérer la forme",
@@ -84,7 +84,7 @@
   {
    "type": "piege",
    "titre": "Voir des figures partout",
-   "contenu": "L’œil humain trouve des formes même dans le hasard.",
+   "contenu": "L’œil humain trouve des formes même dans le hasard. C’est le principal danger des figures chartistes : on finit par voir ce que l’on espère voir.\nPremier réflexe : vérifier sa lecture sur un autre horizon. Une tête-épaules visible sur trois semaines disparaît souvent sur six mois. Si une figure n’apparaît que sur l’échelle de temps qui arrange votre idée, elle est probablement fragile.\nDeuxième réflexe, propre à la BRVM. Une cassure suppose que de nombreux acheteurs ou vendeurs franchissent ensemble un niveau. Sur une valeur peu échangée, une « cassure » peut venir d’un seul ordre de quelques titres. Le volume du jour de cassure, comparé à celui des séances précédentes, dit si le mouvement est porté par le marché ou par un ordre isolé.\nEnfin, une figure ne dit rien de la société. Une cassure à la hausse sur une entreprise dont les résultats se dégradent reste un mouvement de cours, pas une amélioration de ses comptes.",
    "points": [
     {
      "titre": "Conclure avant la cassure",
@@ -106,7 +106,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Une figure est une hypothèse jusqu’à sa confirmation.",
+   "contenu": "Une figure est une hypothèse jusqu’à sa confirmation. La discipline consiste à attendre une clôture au-delà du niveau clé, avec du volume, et à savoir d’avance ce qui invaliderait la figure.\nCette discipline compte plus que le nombre de figures connues. Celui qui en connaît dix mais conclut avant la cassure risque de se tromper plus souvent que celui qui n’en connaît que deux et attend la confirmation. Sur un marché étroit comme la BRVM, l’attente est encore plus justifiée.",
    "points": [
     {
      "titre": "Double creux, double sommet, tête-épaules : des retournements"

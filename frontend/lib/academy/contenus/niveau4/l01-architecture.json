@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Les institutions et leurs rôles",
-   "contenu": "Chaque acteur a un périmètre précis. Savoir qui fait quoi permet de savoir à qui s’adresser.",
+   "contenu": "Le marché financier régional de l’UMOA réunit huit pays : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo. Il repose sur quelques institutions communes, aux rôles distincts et complémentaires.\nL’AMF-UMOA est l’autorité de régulation : elle agrée les acteurs, vise les opérations proposées au public, contrôle et sanctionne. La BRVM est l’entreprise de marché : elle admet les titres à la cote, organise les séances et diffuse les cours. Le Dépositaire central / Banque de règlement conserve les titres et assure le dénouement des transactions. Les SGI sont les intermédiaires agréés, seuls habilités à négocier en bourse pour leurs clients.\nSavoir qui fait quoi a une utilité pratique. Une question sur votre compte-titres se pose d’abord à votre SGI ; une question sur une cotation relève de la BRVM ; une réclamation contre un intermédiaire peut être portée devant l’AMF-UMOA.",
    "tableau": {
     "colonnes": [
      "Institution",
@@ -49,7 +49,7 @@
   {
    "type": "importance",
    "titre": "Du CREPMF à l’AMF-UMOA",
-   "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement résulte du Traité révisé de l’UMOA du 12 juillet 2019, entré en vigueur le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.",
+   "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement résulte du Traité révisé de l’UMOA du 12 juillet 2019, entré en vigueur le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.\nLa Commission des sanctions statue sur les manquements des acteurs du marché. Le Médiateur, lui, recherche un règlement amiable des différends entre épargnants et acteurs du marché. Pour l’épargnant, ce second organe est le plus concret : il offre une voie de recours qui ne passe pas d’emblée par un tribunal.",
    "etapes": [
     {
      "titre": "12 juillet 2019",
@@ -70,7 +70,7 @@
   {
    "type": "importance",
    "titre": "Le circuit d’un ordre de bourse",
-   "contenu": "Un achat d’actions traverse plusieurs institutions avant que les titres n’arrivent sur votre compte.",
+   "contenu": "Un achat d’actions traverse plusieurs institutions avant que les titres n’arrivent sur votre compte. Chaque étape a son responsable.\nVous transmettez votre ordre à votre SGI, selon les moyens qu’elle propose. La SGI vérifie que vous disposez des fonds, puis place l’ordre sur le système de cotation électronique de la BRVM. Pendant la séance, le système rapproche les ordres d’achat et de vente selon leur prix, puis leur ordre d’arrivée.\nUne fois l’ordre exécuté, la transaction n’est pas terminée. Le Dépositaire central / Banque de règlement procède au dénouement : l’argent passe de l’acheteur au vendeur, les titres du compte du vendeur à celui de l’acheteur, dans un délai fixé par les règles du marché. C’est seulement alors que les titres sont réellement à vous.\nLes titres sont dématérialisés : il n’existe pas de certificat papier. Votre propriété est prouvée par l’inscription en compte.",
    "flux": [
     {
      "titre": "Vous",
@@ -102,7 +102,7 @@
   {
    "type": "piege",
    "titre": "Les confusions fréquentes",
-   "contenu": "Des erreurs de compréhension qui coûtent cher en cas de litige.",
+   "contenu": "Certaines confusions sur le rôle des institutions coûtent cher, surtout en cas de litige ou de difficulté d’une société.\nLa plus répandue consiste à croire que la cotation est une garantie. La BRVM vérifie qu’une société remplit les conditions d’admission et qu’elle publie ses informations ; elle ne garantit ni sa solidité, ni son dividende, ni son cours. Une société cotée peut voir ses résultats baisser, comme toute entreprise.\nLa deuxième, plus grave, concerne les intermédiaires. Des offres de « placements boursiers » à rendement élevé circulent par messagerie ou sur les réseaux sociaux, proposées par des personnes ou des sociétés qui ne sont pas des SGI agréées. Elles ne passent pas par le circuit décrit plus haut et n’offrent aucune de ses protections. L’AMF-UMOA publie la liste des acteurs agréés : vérifier un nom prend quelques minutes.",
    "points": [
     {
      "titre": "Croire que la BRVM garantit les sociétés",
@@ -124,7 +124,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Quatre acteurs, quatre rôles.",
+   "contenu": "Quatre acteurs, quatre rôles. Devant une offre de placement, une question suffit souvent : qui est l’intermédiaire, et figure-t-il sur la liste des acteurs agréés par l’AMF-UMOA ?\nLes banques cotées relèvent en outre d’une autre supervision, celle de la Commission bancaire de l’UMOA, aux côtés de la BCEAO. Une banque cotée est donc contrôlée à deux titres : comme banque, et comme société dont les titres sont proposés au public.",
    "points": [
     {
      "titre": "L’AMF-UMOA réglemente, agrée, contrôle et sanctionne"

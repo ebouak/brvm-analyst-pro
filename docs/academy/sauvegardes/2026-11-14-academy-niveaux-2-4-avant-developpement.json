@@ -1,0 +1,4480 @@
+{
+ "academy-niveau-2-fondamental": [
+  {
+   "index": 0,
+   "titre": "Leçon 1 — Lire un rapport annuel",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Les quatre pièces d’un rapport annuel",
+     "contenu": "Les sociétés de la BRVM tiennent leurs comptes selon le SYSCOHADA révisé ; les banques suivent le plan comptable bancaire de l’UMOA. Le vocabulaire diffère un peu, la logique est la même.\nChaque pièce répond à une question différente. Les lire ensemble évite les conclusions hâtives.",
+     "points": [
+      {
+       "titre": "Le bilan",
+       "detail": "Une photographie à la date de clôture : ce que la société possède (actif) et comment c’est financé (passif : fonds propres et dettes).",
+       "verifier": "Le total des capitaux propres, et sa variation d’une année sur l’autre."
+      },
+      {
+       "titre": "Le compte de résultat",
+       "detail": "Le film de l’année : chiffre d’affaires, charges, résultat d’exploitation, résultat net.",
+       "verifier": "Le résultat d’exploitation, avant les éléments hors activités ordinaires."
+      },
+      {
+       "titre": "Le tableau des flux de trésorerie",
+       "detail": "L’argent réellement entré et sorti : activité, investissements, financement (dont les dividendes versés).",
+       "verifier": "Le flux des activités opérationnelles : positif, et proche du résultat ?"
+      },
+      {
+       "titre": "Les notes et le rapport des commissaires",
+       "detail": "Les notes détaillent les postes ; le rapport des commissaires aux comptes dit si les comptes sont certifiés, avec ou sans réserve.",
+       "verifier": "Le mot « réserve » ou « observation » dans le rapport des commissaires."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Le mécanisme : du chiffre d’affaires au dividende",
+     "contenu": "Le résultat net appartient aux actionnaires. L’assemblée générale décide d’en distribuer une partie (le dividende) et de garder le reste en réserves, ce qui augmente les fonds propres.",
+     "flux": [
+      {
+       "titre": "Ventes",
+       "detail": "Chiffre d’affaires de l’année",
+       "icone": "entreprise"
+      },
+      {
+       "titre": "Résultat net",
+       "detail": "Après charges, intérêts et impôt",
+       "icone": "benefices"
+      },
+      {
+       "titre": "Assemblée générale",
+       "detail": "Vote l’affectation du résultat",
+       "icone": "decision"
+      },
+      {
+       "titre": "Dividende",
+       "detail": "Versé aux actionnaires",
+       "icone": "paiement"
+      },
+      {
+       "titre": "Réserves",
+       "detail": "Le reste renforce les fonds propres",
+       "icone": "actionnaires"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Un ordre de lecture en cinq étapes",
+     "contenu": "Lire de la première à la dernière page fait perdre l’essentiel. Cet ordre va du plus important au détail.",
+     "etapes": [
+      {
+       "titre": "Le rapport des commissaires aux comptes",
+       "detail": "Des comptes certifiés sans réserve sont le point de départ. Une réserve se lit avant tout le reste.",
+       "cle": true
+      },
+      {
+       "titre": "Le compte de résultat sur deux exercices",
+       "detail": "Le chiffre d’affaires progresse-t-il ? Le résultat suit-il, ou dépend-il d’un élément exceptionnel ?"
+      },
+      {
+       "titre": "Le tableau des flux",
+       "detail": "Un bénéfice qui ne devient jamais trésorerie est un signal : créances qui gonflent, stocks qui s’accumulent."
+      },
+      {
+       "titre": "Le bilan",
+       "detail": "Les fonds propres augmentent-ils ? La dette financière est-elle supportable face au résultat ?"
+      },
+      {
+       "titre": "L’affectation du résultat",
+       "detail": "Quelle part du bénéfice est distribuée, et quelle part est gardée pour investir."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Où trouver les comptes",
+     "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité trimestriels et semestriels. Les documents officiels sont diffusés par la BRVM.",
+     "tableau": {
+      "colonnes": [
+       "Document",
+       "Fréquence",
+       "Ce qu’on y trouve"
+      ],
+      "lignes": [
+       [
+        "États financiers annuels",
+        "Une fois par an",
+        "Bilan, compte de résultat, flux, affectation du résultat"
+       ],
+       [
+        "Rapport des commissaires aux comptes",
+        "Une fois par an",
+        "Certification des comptes, réserves éventuelles"
+       ],
+       [
+        "Rapport d’activité",
+        "Trimestre, semestre",
+        "Chiffre d’affaires, résultat, commentaires de la direction"
+       ],
+       [
+        "Avis et communiqués",
+        "Selon les événements",
+        "Dividende, assemblée générale, opération sur le capital"
+       ]
+      ],
+      "note": "Sur WestBourse, chaque fiche société regroupe ses comptes, ses publications et ses dividendes."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les pièges de lecture",
+     "contenu": "Un rapport annuel est un document que la société rédige sur elle-même. Les chiffres sont contrôlés ; les commentaires restent de la communication.",
+     "points": [
+      {
+       "titre": "Confondre provisoire et définitif",
+       "detail": "Certains états sont publiés « provisoires, non approuvés par l’assemblée générale ». Ils peuvent encore changer.",
+       "verifier": "La mention en tête du document."
+      },
+      {
+       "titre": "Prendre un résultat exceptionnel pour une tendance",
+       "detail": "Une cession d’actif gonfle le résultat d’une seule année. Le résultat d’exploitation la neutralise.",
+       "verifier": "La ligne « résultat hors activités ordinaires »."
+      },
+      {
+       "titre": "Comparer des périmètres différents",
+       "detail": "Comptes sociaux (la société seule) et comptes consolidés (avec ses filiales) ne se comparent pas.",
+       "verifier": "Le titre exact du document."
+      },
+      {
+       "titre": "Oublier l’unité",
+       "detail": "Certains tableaux sont en millions, d’autres en FCFA, plus rarement en devise étrangère.",
+       "verifier": "L’unité indiquée sous le titre du tableau."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Lire un rapport annuel, c’est répondre à quatre questions dans l’ordre.",
+     "points": [
+      {
+       "titre": "Les comptes sont-ils certifiés sans réserve ?"
+      },
+      {
+       "titre": "Le résultat vient-il de l’activité courante ?"
+      },
+      {
+       "titre": "Ce résultat devient-il de la trésorerie ?"
+      },
+      {
+       "titre": "Les fonds propres et la dette évoluent-ils dans le bon sens ?"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quel document indique si les comptes sont certifiés ?",
+     "options": [
+      "Le compte de résultat",
+      "Le rapport des commissaires aux comptes",
+      "Le rapport d’activité trimestriel",
+      "L’avis de convocation à l’assemblée générale"
+     ],
+     "correct": 1,
+     "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire."
+    },
+    {
+     "question": "Une société affiche un résultat net en forte hausse, mais son flux de trésorerie opérationnel est négatif. Que vérifier en priorité ?",
+     "options": [
+      "Rien, le résultat suffit",
+      "L’évolution des créances clients et des stocks",
+      "Le nombre d’administrateurs",
+      "Le cours de l’action"
+     ],
+     "correct": 1,
+     "explication": "Un bénéfice qui ne devient pas trésorerie vient souvent de créances ou de stocks qui augmentent. Ce n’est pas forcément grave, mais il faut comprendre pourquoi."
+    },
+    {
+     "question": "Que montre le bilan ?",
+     "options": [
+      "Les ventes de l’année",
+      "Ce que la société possède et comment c’est financé, à une date donnée",
+      "L’argent entré et sorti dans l’année",
+      "Le cours moyen de l’action"
+     ],
+     "correct": 1,
+     "explication": "Le bilan est une photographie à la date de clôture : actif d’un côté, fonds propres et dettes de l’autre."
+    },
+    {
+     "question": "Pourquoi regarder le résultat d’exploitation, pas seulement le résultat net ?",
+     "options": [
+      "Il est toujours plus élevé",
+      "Il exclut les éléments exceptionnels et financiers : il montre l’activité courante",
+      "Il inclut le dividende",
+      "Il est le seul certifié"
+     ],
+     "correct": 1,
+     "explication": "Le résultat d’exploitation reflète l’activité courante. Une cession exceptionnelle peut gonfler le résultat net d’une seule année."
+    },
+    {
+     "question": "Des états financiers publiés « provisoires, non approuvés par l’assemblée générale » :",
+     "options": [
+      "Ne peuvent plus changer",
+      "Peuvent encore être modifiés avant leur approbation",
+      "Sont toujours faux",
+      "Ne sont pas publics"
+     ],
+     "correct": 1,
+     "explication": "Des comptes provisoires peuvent évoluer jusqu’à l’assemblée générale. Ils sont utiles, à condition de le savoir."
+    }
+   ],
+   "qcm": {
+    "question": "Quel document indique si les comptes sont certifiés ?",
+    "options": [
+     "Le compte de résultat",
+     "Le rapport des commissaires aux comptes",
+     "Le rapport d’activité trimestriel",
+     "L’avis de convocation à l’assemblée générale"
+    ],
+    "correct": 1,
+    "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire."
+   }
+  },
+  {
+   "index": 1,
+   "titre": "Leçon 2 — Le PER : évaluer la cherté d’une action",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Trois formules",
+     "contenu": "Le PER (price earnings ratio) se calcule à partir du bénéfice par action, le BPA. Les exemples ci-dessous sont pédagogiques.",
+     "formules": [
+      {
+       "nom": "Bénéfice par action (BPA)",
+       "expression": "Résultat net ÷ Nombre d’actions",
+       "exemple": "2 000 000 000 ÷ 10 000 000 = 200 FCFA"
+      },
+      {
+       "nom": "PER",
+       "expression": "Cours de l’action ÷ BPA",
+       "exemple": "3 000 ÷ 200 = 15 (on dit « 15 fois les bénéfices »)"
+      },
+      {
+       "nom": "Rendement bénéficiaire",
+       "expression": "1 ÷ PER",
+       "exemple": "1 ÷ 15 ≈ 6,7 % : le bénéfice rapporté au prix payé"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Ce que le PER raconte",
+     "contenu": "Un PER de 15 signifie qu’au bénéfice actuel, il faudrait 15 ans de bénéfices pour « rembourser » le prix de l’action.\nUn PER élevé traduit souvent une attente de croissance ; un PER faible peut signaler une société délaissée, ou une société en difficulté. Le chiffre seul ne tranche pas.",
+     "stats": [
+      {
+       "label": "PER faible",
+       "valeur": "Moins de 8",
+       "detail": "Décote, ou méfiance du marché : à expliquer"
+      },
+      {
+       "label": "PER intermédiaire",
+       "valeur": "8 à 15",
+       "detail": "Zone fréquente pour une société mature"
+      },
+      {
+       "label": "PER élevé",
+       "valeur": "Plus de 20",
+       "detail": "Croissance attendue, ou bénéfice temporairement bas"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : trois opérateurs télécoms",
+     "reel": true,
+     "contenu": "Comparer des sociétés du même secteur est la seule comparaison qui ait un sens. Les ratios ci-dessous sont recalculés à l’ouverture de la leçon, à partir du dernier cours et des derniers comptes publiés.",
+     "donnees_reelles": {
+      "vue": "ratios",
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "ONTBF"
+      ]
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Les trois PER qu’on rencontre",
+     "contenu": "Le même mot recouvre des calculs différents. Toujours demander : sur quel bénéfice ?",
+     "tableau": {
+      "colonnes": [
+       "PER",
+       "Bénéfice utilisé",
+       "Usage"
+      ],
+      "lignes": [
+       [
+        "Historique",
+        "Dernier exercice publié",
+        "Le plus fiable : chiffres certifiés"
+       ],
+       [
+        "Glissant (12 mois)",
+        "Quatre derniers trimestres publiés",
+        "Plus récent, quand la société publie des comptes intermédiaires"
+       ],
+       [
+        "Prévisionnel",
+        "Bénéfice estimé de l’année en cours",
+        "Rare à la BRVM : aucune estimation n’est certifiée"
+       ]
+      ],
+      "note": "WestBourse utilise le PER historique, sur le résultat consolidé quand la société publie des comptes consolidés."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Quand le PER trompe",
+     "contenu": "Le PER est simple à calculer et facile à mal lire.",
+     "points": [
+      {
+       "titre": "Le bénéfice exceptionnel",
+       "detail": "Une plus-value de cession gonfle le bénéfice d’une année : le PER paraît bas, à tort.",
+       "verifier": "Le résultat d’exploitation a-t-il suivi ?"
+      },
+      {
+       "titre": "La perte",
+       "detail": "Avec un résultat négatif, le PER n’a pas de sens : il ne faut pas le lire comme « très bas ».",
+       "verifier": "Le signe du résultat net."
+      },
+      {
+       "titre": "Le piège de la valeur",
+       "detail": "Un PER bas sur une société dont les bénéfices baissent d’année en année n’est pas une affaire.",
+       "verifier": "La tendance du bénéfice sur 3 à 5 ans."
+      },
+      {
+       "titre": "Comparer deux secteurs",
+       "detail": "Une banque et une société de distribution n’ont pas les mêmes PER « normaux ».",
+       "verifier": "La médiane du secteur."
+      },
+      {
+       "titre": "Le nombre d’actions qui change",
+       "detail": "Après un fractionnement, le BPA se divise : il faut le comparer avec le bon nombre de titres.",
+       "verifier": "Les opérations sur titres de la société."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Le PER est un point de départ, pas un verdict.",
+     "points": [
+      {
+       "titre": "PER = cours ÷ bénéfice par action"
+      },
+      {
+       "titre": "Il se compare dans un même secteur, et dans le temps pour une même société"
+      },
+      {
+       "titre": "Il n’a pas de sens en cas de perte"
+      },
+      {
+       "titre": "Un PER bas demande une explication avant d’être une opportunité"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?",
+     "options": [
+      "10",
+      "15",
+      "20",
+      "1 350"
+     ],
+     "correct": 1,
+     "explication": "4 500 ÷ 300 = 15."
+    },
+    {
+     "question": "Une société a gagné 5 milliards et compte 20 millions d’actions. Quel est son BPA ?",
+     "options": [
+      "25 FCFA",
+      "250 FCFA",
+      "2 500 FCFA",
+      "4 FCFA"
+     ],
+     "correct": 1,
+     "explication": "5 000 000 000 ÷ 20 000 000 = 250 FCFA par action."
+    },
+    {
+     "question": "Une société a un PER de 4, nettement sous ses concurrents. Quelle est la bonne réaction ?",
+     "options": [
+      "Acheter immédiatement",
+      "Chercher pourquoi : bénéfice exceptionnel, bénéfices en baisse, risque particulier",
+      "Vendre immédiatement",
+      "Ignorer le PER"
+     ],
+     "correct": 1,
+     "explication": "Un PER très bas peut être une opportunité, ou le signe d’un problème. Il faut l’expliquer avant de conclure."
+    },
+    {
+     "question": "Avec quelle société comparer le PER d’un opérateur télécom ?",
+     "options": [
+      "Une banque",
+      "Un autre opérateur télécom",
+      "Une société agricole",
+      "L’indice BRVM Composite seul"
+     ],
+     "correct": 1,
+     "explication": "Les PER « normaux » varient d’un secteur à l’autre. La comparaison utile se fait dans le même secteur."
+    },
+    {
+     "question": "Une société affiche une perte. Que vaut son PER ?",
+     "options": [
+      "Il est très attractif",
+      "Il n’a pas de sens",
+      "Il vaut zéro",
+      "Il vaut 100"
+     ],
+     "correct": 1,
+     "explication": "Avec un bénéfice négatif, le PER n’a pas de signification économique."
+    }
+   ],
+   "qcm": {
+    "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?",
+    "options": [
+     "10",
+     "15",
+     "20",
+     "1 350"
+    ],
+    "correct": 1,
+    "explication": "4 500 ÷ 300 = 15."
+   }
+  },
+  {
+   "index": 2,
+   "titre": "Leçon 3 — P/B, ROE et rendement : les ratios complémentaires",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Trois ratios, trois questions",
+     "contenu": "Les exemples chiffrés sont pédagogiques.",
+     "formules": [
+      {
+       "nom": "Price to book (P/B)",
+       "expression": "Capitalisation ÷ Fonds propres",
+       "exemple": "60 Md ÷ 40 Md = 1,5 : le marché paie 1,5 fois la valeur comptable"
+      },
+      {
+       "nom": "Rentabilité des fonds propres (ROE)",
+       "expression": "Résultat net ÷ Fonds propres",
+       "exemple": "8 Md ÷ 40 Md = 20 %"
+      },
+      {
+       "nom": "Rendement du dividende",
+       "expression": "Dividende par action ÷ Cours",
+       "exemple": "180 ÷ 3 000 = 6 %"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Le lien qui explique tout",
+     "contenu": "Ces ratios ne sont pas indépendants : le P/B est égal au PER multiplié par le ROE.\nUne société très rentable mérite un P/B élevé. Un P/B élevé avec un ROE faible, en revanche, demande une explication.",
+     "formules": [
+      {
+       "nom": "P/B = PER × ROE",
+       "expression": "(Cours ÷ BPA) × (BPA ÷ Fonds propres par action)",
+       "exemple": "PER 10 × ROE 25 % = P/B de 2,5"
+      }
+     ],
+     "stats": [
+      {
+       "label": "P/B inférieur à 1",
+       "valeur": "Sous la valeur comptable",
+       "detail": "Décote : actifs mal valorisés, ou rentabilité jugée faible"
+      },
+      {
+       "label": "ROE de 15 à 25 %",
+       "valeur": "Rentabilité solide",
+       "detail": "À comparer au secteur et au coût de la dette"
+      },
+      {
+       "label": "Taux de distribution",
+       "valeur": "Dividende ÷ Bénéfice",
+       "detail": "Proche de 100 % : peu de bénéfice gardé pour investir"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : des profils très différents",
+     "reel": true,
+     "contenu": "Une société peut afficher un P/B très élevé parce qu’elle distribue presque tout son bénéfice : ses fonds propres restent petits, et son ROE devient très élevé. Une autre cote sous sa valeur comptable. Les deux situations demandent une lecture, pas un réflexe.",
+     "donnees_reelles": {
+      "vue": "ratios",
+      "codes": [
+       "NTLC",
+       "PALC",
+       "SNTS",
+       "SGBC"
+      ]
+     }
+    },
+    {
+     "type": "cas",
+     "titre": "Une lecture croisée",
+     "contenu": "Exemple pédagogique : deux sociétés au même PER de 12 ne se valent pas.",
+     "tableau": {
+      "colonnes": [
+       "Ratio",
+       "Société A",
+       "Société B"
+      ],
+      "lignes": [
+       [
+        "PER",
+        "12",
+        "12"
+       ],
+       [
+        "ROE",
+        "25 %",
+        "6 %"
+       ],
+       [
+        "P/B (= PER × ROE)",
+        "3,0",
+        "0,7"
+       ],
+       [
+        "Lecture",
+        "Rentable : le P/B élevé se justifie",
+        "Peu rentable : la décote s’explique"
+       ]
+      ],
+      "note": "Le même PER cache deux réalités : c’est le ROE qui fait la différence."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les erreurs fréquentes",
+     "contenu": "Chaque ratio a son angle mort.",
+     "points": [
+      {
+       "titre": "Un ROE gonflé par la dette",
+       "detail": "Une société très endettée a peu de fonds propres : son ROE paraît excellent, son risque est élevé aussi.",
+       "verifier": "Le rapport dette financière ÷ fonds propres."
+      },
+      {
+       "titre": "Un rendement élevé par chute du cours",
+       "detail": "Le rendement monte quand le cours baisse. Un rendement de 12 % peut annoncer un dividende qui sera réduit.",
+       "verifier": "Le taux de distribution et la tendance du bénéfice."
+      },
+      {
+       "titre": "Un P/B lu pour une société de services",
+       "detail": "Une entreprise qui a peu d’actifs physiques a naturellement un P/B élevé.",
+       "verifier": "La nature des actifs du bilan."
+      },
+      {
+       "titre": "Des fonds propres négatifs",
+       "detail": "Après des pertes accumulées, P/B et ROE n’ont plus de sens.",
+       "verifier": "Le signe des capitaux propres."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Un ratio seul ne dit rien ; deux ratios ensemble commencent à raconter.",
+     "points": [
+      {
+       "titre": "P/B = capitalisation ÷ fonds propres"
+      },
+      {
+       "titre": "ROE = résultat ÷ fonds propres"
+      },
+      {
+       "titre": "P/B = PER × ROE : un P/B élevé se justifie par un ROE élevé"
+      },
+      {
+       "titre": "Un rendement très élevé se vérifie avant de se célébrer"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?",
+     "options": [
+      "5 %",
+      "20 %",
+      "50 %",
+      "500 %"
+     ],
+     "correct": 1,
+     "explication": "10 ÷ 50 = 20 %."
+    },
+    {
+     "question": "Une société a un PER de 8 et un ROE de 25 %. Quel est son P/B ?",
+     "options": [
+      "0,32",
+      "2",
+      "3,1",
+      "33"
+     ],
+     "correct": 1,
+     "explication": "P/B = PER × ROE = 8 × 0,25 = 2."
+    },
+    {
+     "question": "Une action cote 2 000 FCFA et verse 140 FCFA de dividende. Quel est son rendement ?",
+     "options": [
+      "1,4 %",
+      "7 %",
+      "14 %",
+      "70 %"
+     ],
+     "correct": 1,
+     "explication": "140 ÷ 2 000 = 7 %."
+    },
+    {
+     "question": "Pourquoi un ROE très élevé n’est-il pas toujours une bonne nouvelle ?",
+     "options": [
+      "Il est toujours faux",
+      "Il peut venir de fonds propres très faibles, à cause d’une dette importante ou de pertes passées",
+      "Il réduit le dividende",
+      "Il n’existe pas à la BRVM"
+     ],
+     "correct": 1,
+     "explication": "Un ROE élevé avec peu de fonds propres peut cacher un endettement important. Il faut regarder la structure du bilan."
+    },
+    {
+     "question": "Une action cote sous sa valeur comptable (P/B inférieur à 1). Que faut-il en conclure ?",
+     "options": [
+      "C’est forcément une affaire",
+      "Il faut chercher pourquoi : rentabilité faible, actifs douteux, ou simple désintérêt du marché",
+      "La société va faire faillite",
+      "Le ratio est faux"
+     ],
+     "correct": 1,
+     "explication": "Une décote peut être une opportunité ou refléter une rentabilité faible. Le ROE aide à trancher."
+    }
+   ],
+   "qcm": {
+    "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?",
+    "options": [
+     "5 %",
+     "20 %",
+     "50 %",
+     "500 %"
+    ],
+    "correct": 1,
+    "explication": "10 ÷ 50 = 20 %."
+   }
+  },
+  {
+   "index": 3,
+   "titre": "Leçon 4 — Analyser une banque cotée",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Le compte de résultat d’une banque",
+     "contenu": "Une banque gagne la différence entre ce que lui rapportent ses prêts et ce que lui coûtent ses ressources, plus des commissions.",
+     "flux": [
+      {
+       "titre": "Produit net bancaire",
+       "detail": "Marge d’intérêts + commissions : le « chiffre d’affaires »",
+       "icone": "piece"
+      },
+      {
+       "titre": "Frais généraux",
+       "detail": "Salaires, agences, informatique",
+       "icone": "entreprise"
+      },
+      {
+       "titre": "Coût du risque",
+       "detail": "Prêts qui ne seront pas remboursés",
+       "icone": "graphique"
+      },
+      {
+       "titre": "Résultat net",
+       "detail": "Après impôt",
+       "icone": "benefices"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les quatre indicateurs d’une banque",
+     "contenu": "Les formules sont pédagogiques ; les banques publient elles-mêmes la plupart de ces indicateurs dans leur rapport d’activité.",
+     "formules": [
+      {
+       "nom": "Coefficient d’exploitation",
+       "expression": "Frais généraux ÷ Produit net bancaire",
+       "exemple": "40 ÷ 100 = 40 % : plus il est bas, plus la banque est efficace"
+      },
+      {
+       "nom": "Coût du risque",
+       "expression": "Dotations nettes aux provisions pour créances douteuses",
+       "exemple": "Il se compare au produit net bancaire et à l’encours de crédits"
+      },
+      {
+       "nom": "ROE",
+       "expression": "Résultat net ÷ Fonds propres",
+       "exemple": "Une banque bien gérée vise souvent 15 à 25 %"
+      }
+     ],
+     "points": [
+      {
+       "titre": "La solvabilité",
+       "detail": "Les fonds propres réglementaires rapportés aux risques pris. La réglementation bancaire de l’UMOA fixe un minimum : une banque doit le respecter avec une marge.",
+       "verifier": "Le ratio publié dans le rapport d’activité."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Un exemple publié : la SIB en 2025",
+     "contenu": "La Société Ivoirienne de Banque a publié ces indicateurs dans son rapport d’activité 2025 (avril 2026). Ce sont des chiffres datés : ils décrivent l’exercice 2025, pas la situation d’aujourd’hui.",
+     "stats": [
+      {
+       "label": "Produit net bancaire 2025",
+       "valeur": "108,7 Md FCFA",
+       "detail": "Contre 102,8 Md en 2024 (+6 %)"
+      },
+      {
+       "label": "Coefficient d’exploitation",
+       "valeur": "38,59 %",
+       "detail": "Contre 39,05 % en 2024"
+      },
+      {
+       "label": "Coût du risque",
+       "valeur": "3,6 Md FCFA",
+       "detail": "Contre 5,2 Md en 2024 (−30 %)"
+      },
+      {
+       "label": "Résultat net 2025",
+       "valeur": "55,6 Md FCFA",
+       "detail": "Contre 50,2 Md en 2024 (+11 %)"
+      },
+      {
+       "label": "ROE publié",
+       "valeur": "27,16 %",
+       "detail": "Rapport d’activité 2025 de la SIB"
+      },
+      {
+       "label": "Solvabilité",
+       "valeur": "Supérieure à 14 %",
+       "detail": "Selon la banque, au-dessus du seuil réglementaire"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : quatre banques comparées",
+     "reel": true,
+     "contenu": "Pour une banque, le P/B est souvent plus parlant que le PER : ses actifs sont des prêts, inscrits au bilan à leur valeur. Les ratios sont recalculés à l’ouverture de la leçon.",
+     "donnees_reelles": {
+      "vue": "ratios",
+      "codes": [
+       "SGBC",
+       "BOAC",
+       "NSBC",
+       "SIBC"
+      ]
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Ce qu’il ne faut pas appliquer à une banque",
+     "contenu": "Plusieurs outils pensés pour l’industrie ne fonctionnent pas sur une banque.",
+     "points": [
+      {
+       "titre": "La dette n’est pas un défaut",
+       "detail": "Les dépôts des clients sont, comptablement, une dette. Un ratio d’endettement « classique » n’a pas de sens.",
+       "verifier": "La solvabilité, à la place."
+      },
+      {
+       "titre": "Les scores de faillite industriels",
+       "detail": "Le score d’Altman ou le F-Score de Piotroski sont construits pour des sociétés non financières. WestBourse ne les affiche pas pour les banques.",
+       "verifier": "La mention « non applicable » sur la fiche."
+      },
+      {
+       "titre": "Un coût du risque anormalement bas",
+       "detail": "Une année sans provisions peut précéder une année de rattrapage.",
+       "verifier": "La moyenne sur trois à cinq ans."
+      },
+      {
+       "titre": "Banque et société de financement",
+       "detail": "Leurs métiers et leurs ratios diffèrent, même si elles sont classées dans le même secteur.",
+       "verifier": "L’activité exacte de la société."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Pour une banque, quatre chiffres d’abord.",
+     "points": [
+      {
+       "titre": "Le produit net bancaire et sa progression"
+      },
+      {
+       "titre": "Le coefficient d’exploitation : l’efficacité"
+      },
+      {
+       "titre": "Le coût du risque : la qualité des prêts"
+      },
+      {
+       "titre": "La solvabilité et le ROE : la solidité et la rentabilité"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Comment s’appelle le « chiffre d’affaires » d’une banque ?",
+     "options": [
+      "Le résultat d’exploitation",
+      "Le produit net bancaire",
+      "Le coût du risque",
+      "La capitalisation"
+     ],
+     "correct": 1,
+     "explication": "Le produit net bancaire regroupe la marge d’intérêts et les commissions."
+    },
+    {
+     "question": "Une banque a 120 Md de produit net bancaire et 48 Md de frais généraux. Quel est son coefficient d’exploitation ?",
+     "options": [
+      "25 %",
+      "40 %",
+      "60 %",
+      "250 %"
+     ],
+     "correct": 1,
+     "explication": "48 ÷ 120 = 40 %."
+    },
+    {
+     "question": "Que mesure le coût du risque ?",
+     "options": [
+      "Le prix de l’action",
+      "Les pertes probables sur les prêts accordés",
+      "Les salaires",
+      "Le dividende"
+     ],
+     "correct": 1,
+     "explication": "Le coût du risque enregistre les prêts qui ne seront probablement pas remboursés."
+    },
+    {
+     "question": "Pourquoi un ratio d’endettement classique n’a-t-il pas de sens pour une banque ?",
+     "options": [
+      "Les banques n’ont pas de dettes",
+      "Les dépôts des clients sont comptablement des dettes : c’est son métier",
+      "Il est interdit par la loi",
+      "Il est toujours nul"
+     ],
+     "correct": 1,
+     "explication": "Le métier de la banque consiste à collecter des ressources pour prêter. On mesure sa solidité par la solvabilité."
+    },
+    {
+     "question": "Pour comparer des banques cotées, quel ratio de valorisation est souvent le plus parlant ?",
+     "options": [
+      "Le P/B, lu avec le ROE",
+      "Le nombre d’agences",
+      "Le volume d’échanges",
+      "La date de création"
+     ],
+     "correct": 0,
+     "explication": "Les actifs d’une banque sont des prêts inscrits à leur valeur au bilan : le P/B, lu avec le ROE, est très utilisé."
+    }
+   ],
+   "qcm": {
+    "question": "Comment s’appelle le « chiffre d’affaires » d’une banque ?",
+    "options": [
+     "Le résultat d’exploitation",
+     "Le produit net bancaire",
+     "Le coût du risque",
+     "La capitalisation"
+    ],
+    "correct": 1,
+    "explication": "Le produit net bancaire regroupe la marge d’intérêts et les commissions."
+   }
+  },
+  {
+   "index": 4,
+   "titre": "Leçon 5 — Diversification et allocation d’actifs",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Deux risques différents",
+     "contenu": "Le risque d’un portefeuille a deux sources. La diversification ne supprime que la première.",
+     "points": [
+      {
+       "titre": "Le risque propre à une société",
+       "detail": "Un mauvais résultat, un litige, un dirigeant qui part. Il se réduit en multipliant les lignes."
+      },
+      {
+       "titre": "Le risque de marché",
+       "detail": "Une crise régionale, une hausse des taux, un recul général. Il touche toutes les actions à la fois : la diversification ne l’efface pas."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Combien de lignes ?",
+     "contenu": "Les études menées sur les grands marchés montrent que l’essentiel du risque propre disparaît entre 10 et 20 lignes. Le graphique de la leçon illustre cette courbe avec des valeurs d’exemple.\nÀ la BRVM, avec une cinquantaine de sociétés et des secteurs concentrés, viser 8 à 15 lignes réparties sur plusieurs secteurs est un repère raisonnable."
+    },
+    {
+     "type": "importance",
+     "titre": "Les quatre dimensions de la répartition",
+     "contenu": "Une bonne répartition se vérifie sur quatre axes, pas seulement sur le nombre de lignes.",
+     "tableau": {
+      "colonnes": [
+       "Dimension",
+       "Question",
+       "Repère"
+      ],
+      "lignes": [
+       [
+        "Société",
+        "Quel poids pèse ma première ligne ?",
+        "Rarement plus de 15 à 20 % du portefeuille"
+       ],
+       [
+        "Secteur",
+        "Suis-je trop exposé aux banques ?",
+        "Pas plus d’un tiers sur un seul secteur"
+       ],
+       [
+        "Pays",
+        "Mes sociétés dépendent-elles d’une seule économie ?",
+        "Répartir entre plusieurs pays de l’UEMOA"
+       ],
+       [
+        "Classe d’actifs",
+        "Ai-je des obligations pour amortir les chocs ?",
+        "Selon l’horizon et la tolérance au risque"
+       ]
+      ],
+      "note": "Ces repères sont des ordres de grandeur pédagogiques, pas des règles réglementaires."
+     }
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : deux indices",
+     "reel": true,
+     "contenu": "L’indice BRVM Composite pondère les sociétés par leur capitalisation boursière : quelques grandes valeurs y pèsent lourd. Suivre un indice concentré n’est pas la même chose qu’être diversifié.",
+     "donnees_reelles": {
+      "vue": "indices",
+      "codes": [
+       "BRVMC",
+       "BRVM30"
+      ]
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les fausses diversifications",
+     "contenu": "Avoir beaucoup de lignes ne suffit pas.",
+     "points": [
+      {
+       "titre": "Dix banques, un seul risque",
+       "detail": "Dix lignes dans le même secteur réagissent ensemble à la même nouvelle.",
+       "verifier": "La répartition par secteur de votre portefeuille."
+      },
+      {
+       "titre": "Des lignes trop petites",
+       "detail": "Avec de petits montants, les frais minimum de courtage pèsent lourd sur chaque achat.",
+       "verifier": "Le coût total d’un ordre chez votre SGI."
+      },
+      {
+       "titre": "Oublier la liquidité",
+       "detail": "Certaines valeurs s’échangent peu : en cas de besoin, on peut ne pas réussir à vendre au prix affiché.",
+       "verifier": "La classe de liquidité de chaque valeur."
+      },
+      {
+       "titre": "Ne jamais rééquilibrer",
+       "detail": "Une ligne qui a beaucoup monté finit par peser trop lourd.",
+       "verifier": "Le poids de chaque ligne, une fois par an."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Diversifier, c’est accepter de moins gagner sur sa meilleure idée pour ne pas tout perdre sur la pire.",
+     "points": [
+      {
+       "titre": "La diversification réduit le risque propre, pas le risque de marché"
+      },
+      {
+       "titre": "Plusieurs secteurs et plusieurs pays valent mieux que beaucoup de lignes"
+      },
+      {
+       "titre": "Une ligne ne devrait pas dominer le portefeuille"
+      },
+      {
+       "titre": "Vérifier et rééquilibrer au moins une fois par an"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quel risque la diversification ne peut-elle pas supprimer ?",
+     "options": [
+      "Le risque propre à une société",
+      "Le risque de marché",
+      "Le risque d’un mauvais résultat",
+      "Le risque d’un litige"
+     ],
+     "correct": 1,
+     "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché."
+    },
+    {
+     "question": "Un portefeuille compte dix lignes, toutes des banques. Est-il bien diversifié ?",
+     "options": [
+      "Oui, dix lignes suffisent",
+      "Non, il reste exposé à un seul secteur",
+      "Oui, à condition que ce soit dix pays différents",
+      "La question n’a pas de sens"
+     ],
+     "correct": 1,
+     "explication": "Dix banques réagissent souvent ensemble aux mêmes nouvelles. La répartition par secteur compte autant que le nombre de lignes."
+    },
+    {
+     "question": "Pourquoi des lignes trop petites posent-elles problème ?",
+     "options": [
+      "Elles sont interdites",
+      "Les frais minimum de courtage pèsent alors lourd sur chaque ordre",
+      "Elles ne versent pas de dividende",
+      "Elles augmentent le risque de marché"
+     ],
+     "correct": 1,
+     "explication": "Les frais de courtage comportent souvent un minimum : sur un petit ordre, ils représentent un pourcentage élevé."
+    },
+    {
+     "question": "Une ligne a beaucoup monté et pèse désormais 40 % du portefeuille. Que suggère le principe de diversification ?",
+     "options": [
+      "Ne rien faire",
+      "Envisager de rééquilibrer pour réduire sa part",
+      "Acheter encore la même valeur",
+      "Vendre toutes les autres lignes"
+     ],
+     "correct": 1,
+     "explication": "Rééquilibrer ramène le portefeuille vers sa répartition cible et limite la dépendance à une seule société."
+    },
+    {
+     "question": "Pourquoi suivre l’indice BRVM Composite n’équivaut-il pas forcément à être diversifié ?",
+     "options": [
+      "Il ne contient qu’une société",
+      "Il pondère par la capitalisation : quelques grandes valeurs pèsent lourd",
+      "Il ne contient que des obligations",
+      "Il n’existe plus"
+     ],
+     "correct": 1,
+     "explication": "Un indice pondéré par la capitalisation peut être dominé par quelques grandes sociétés."
+    }
+   ],
+   "qcm": {
+    "question": "Quel risque la diversification ne peut-elle pas supprimer ?",
+    "options": [
+     "Le risque propre à une société",
+     "Le risque de marché",
+     "Le risque d’un mauvais résultat",
+     "Le risque d’un litige"
+    ],
+    "correct": 1,
+    "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché."
+   }
+  },
+  {
+   "index": 5,
+   "titre": "Leçon 6 — Les droits préférentiels de souscription (DPS)",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Pourquoi un droit préférentiel ?",
+     "contenu": "Les actions nouvelles sont émises sous le cours de bourse pour attirer les souscripteurs. Sans protection, l’actionnaire en place verrait sa part diluée et la valeur de ses titres baisser.\nLe DPS compense cette perte : il donne la priorité aux anciens actionnaires, et il a une valeur négociable pendant la période de souscription.",
+     "flux": [
+      {
+       "titre": "Annonce",
+       "detail": "Prix d’émission et parité fixés",
+       "icone": "decision"
+      },
+      {
+       "titre": "Détachement",
+       "detail": "Un DPS par action ancienne",
+       "icone": "calendrier"
+      },
+      {
+       "titre": "Souscription",
+       "detail": "Exercer, vendre ou acheter des droits",
+       "icone": "piece"
+      },
+      {
+       "titre": "Actions nouvelles",
+       "detail": "Livrées, puis cotées",
+       "icone": "actionnaires"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Calculer la valeur d’un droit",
+     "contenu": "Exemple pédagogique : l’action cote 6 000 FCFA, la société émet 1 action nouvelle pour 4 anciennes à 4 500 FCFA.",
+     "formules": [
+      {
+       "nom": "Valeur théorique du DPS",
+       "expression": "(Cours − Prix d’émission) ÷ (Parité + 1)",
+       "exemple": "(6 000 − 4 500) ÷ (4 + 1) = 300 FCFA par droit"
+      },
+      {
+       "nom": "Cours théorique après détachement",
+       "expression": "Cours − Valeur du DPS",
+       "exemple": "6 000 − 300 = 5 700 FCFA"
+      },
+      {
+       "nom": "Vérification",
+       "expression": "(4 × 6 000 + 4 500) ÷ 5",
+       "exemple": "28 500 ÷ 5 = 5 700 FCFA : la valeur se conserve"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Les trois choix de l’actionnaire",
+     "contenu": "Exemple pédagogique : vous détenez 400 actions, donc 400 droits. Il faut 4 droits pour souscrire 1 action nouvelle.",
+     "tableau": {
+      "colonnes": [
+       "Choix",
+       "Ce que vous faites",
+       "Résultat"
+      ],
+      "lignes": [
+       [
+        "Souscrire",
+        "Exercer 400 droits et payer 100 × 4 500 FCFA",
+        "500 actions ; votre part du capital est préservée"
+       ],
+       [
+        "Vendre les droits",
+        "Céder 400 droits à environ 300 FCFA",
+        "Environ 120 000 FCFA encaissés ; votre part est diluée"
+       ],
+       [
+        "Ne rien faire",
+        "Laisser les droits expirer",
+        "Perte d’environ 120 000 FCFA de valeur : à éviter"
+       ]
+      ],
+      "note": "Les montants réels dépendent du cours du droit pendant la période de souscription, et des frais de votre SGI."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Le calendrier d’une opération",
+     "contenu": "Les dates sont fixées par l’avis publié par la BRVM. Elles comptent : un droit non exercé à la clôture perd toute valeur.",
+     "etapes": [
+      {
+       "titre": "Avis de l’opération",
+       "detail": "Prix d’émission, parité, dates de souscription, publiés par la BRVM et par la société."
+      },
+      {
+       "titre": "Détachement du droit",
+       "detail": "Le cours de l’action s’ajuste ; le droit commence à se négocier.",
+       "cle": true
+      },
+      {
+       "titre": "Période de souscription",
+       "detail": "Vous transmettez votre choix à votre SGI : exercer, vendre, ou acheter des droits pour compléter."
+      },
+      {
+       "titre": "Clôture",
+       "detail": "Les droits non exercés ni vendus ne valent plus rien."
+      },
+      {
+       "titre": "Livraison des actions nouvelles",
+       "detail": "Elles s’ajoutent à votre compte-titres et deviennent négociables."
+      }
+     ],
+     "etapes_style": "frise"
+    },
+    {
+     "type": "piege",
+     "titre": "Les erreurs à éviter",
+     "contenu": "Les DPS sont rares, et c’est justement pour cela qu’on se trompe.",
+     "points": [
+      {
+       "titre": "Ignorer le courrier de sa SGI",
+       "detail": "Sans instruction de votre part, les droits peuvent expirer.",
+       "verifier": "La date de clôture de la souscription."
+      },
+      {
+       "titre": "Croire que le cours a « chuté »",
+       "detail": "Le jour du détachement, la baisse du cours correspond à la valeur du droit : ce n’est pas une perte.",
+       "verifier": "La valeur théorique du DPS."
+      },
+      {
+       "titre": "Souscrire sans comprendre l’opération",
+       "detail": "Une augmentation de capital peut financer un projet, ou combler des pertes. Ce n’est pas la même chose.",
+       "verifier": "L’objet de l’opération dans la note d’information."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Un DPS a toujours une valeur tant que la souscription est ouverte.",
+     "points": [
+      {
+       "titre": "Valeur théorique = (cours − prix d’émission) ÷ (parité + 1)"
+      },
+      {
+       "titre": "Trois choix : souscrire, vendre, ou acheter des droits pour compléter"
+      },
+      {
+       "titre": "Ne rien faire revient à perdre la valeur du droit"
+      },
+      {
+       "titre": "Lire l’objet de l’augmentation de capital avant de souscrire"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une action cote 8 000 FCFA. La société émet 1 action nouvelle pour 3 anciennes à 6 000 FCFA. Quelle est la valeur théorique du DPS ?",
+     "options": [
+      "250 FCFA",
+      "500 FCFA",
+      "667 FCFA",
+      "2 000 FCFA"
+     ],
+     "correct": 1,
+     "explication": "(8 000 − 6 000) ÷ (3 + 1) = 500 FCFA."
+    },
+    {
+     "question": "Dans le même exemple, quel est le cours théorique après détachement ?",
+     "options": [
+      "6 000 FCFA",
+      "7 500 FCFA",
+      "8 000 FCFA",
+      "8 500 FCFA"
+     ],
+     "correct": 1,
+     "explication": "8 000 − 500 = 7 500 FCFA. Vérification : (3 × 8 000 + 6 000) ÷ 4 = 7 500."
+    },
+    {
+     "question": "Que se passe-t-il si vous ne faites rien de vos droits ?",
+     "options": [
+      "Ils sont automatiquement exercés",
+      "Ils expirent sans valeur à la clôture",
+      "Ils se transforment en dividende",
+      "Ils sont remboursés au nominal"
+     ],
+     "correct": 1,
+     "explication": "Un droit non exercé et non vendu à la clôture perd toute valeur."
+    },
+    {
+     "question": "Le jour du détachement, le cours baisse d’un montant proche de la valeur du droit. Est-ce une perte pour l’actionnaire ?",
+     "options": [
+      "Oui, une perte définitive",
+      "Non : cette baisse est compensée par la valeur du droit reçu",
+      "Oui, sauf si le dividende est maintenu",
+      "Non, le cours ne bouge jamais"
+     ],
+     "correct": 1,
+     "explication": "La valeur se répartit entre l’action ex-droit et le droit. L’actionnaire ne s’appauvrit que s’il laisse le droit expirer."
+    },
+    {
+     "question": "Pourquoi lire l’objet d’une augmentation de capital avant de souscrire ?",
+     "options": [
+      "Ce n’est pas utile",
+      "Financer un projet de croissance et combler des pertes ne présentent pas le même risque",
+      "Pour connaître la couleur du logo",
+      "Pour connaître le nom de la SGI"
+     ],
+     "correct": 1,
+     "explication": "L’usage des fonds levés dit beaucoup sur la situation de la société."
+    }
+   ],
+   "qcm": {
+    "question": "Une action cote 8 000 FCFA. La société émet 1 action nouvelle pour 3 anciennes à 6 000 FCFA. Quelle est la valeur théorique du DPS ?",
+    "options": [
+     "250 FCFA",
+     "500 FCFA",
+     "667 FCFA",
+     "2 000 FCFA"
+    ],
+    "correct": 1,
+    "explication": "(8 000 − 6 000) ÷ (3 + 1) = 500 FCFA."
+   }
+  },
+  {
+   "index": 6,
+   "titre": "Leçon 7 — Simulation de portefeuille sur 3 ans",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Ce qu’une simulation est, et n’est pas",
+     "contenu": "Une simulation applique des hypothèses : un dividende, une croissance, un cours. Si une hypothèse change, le résultat change.\nElle sert à comparer des scénarios et à comprendre un mécanisme. Elle ne garantit aucun résultat.",
+     "points": [
+      {
+       "titre": "Elle aide à",
+       "detail": "Mesurer l’effet du réinvestissement, comparer des rendements, fixer un ordre de grandeur."
+      },
+      {
+       "titre": "Elle ne dit pas",
+       "detail": "Ce que fera le cours, si le dividende sera maintenu, ni ce que coûteront les frais et l’impôt dans votre situation."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Réinvestir ses dividendes pendant 3 ans",
+     "contenu": "Hypothèses pédagogiques : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à racheter des actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.",
+     "simulation": {
+      "type": "reinvestissement",
+      "actions": 200,
+      "dpa": 900,
+      "cours": 15000,
+      "croissance_pct": 3,
+      "annees": 3
+     }
+    },
+    {
+     "type": "cas",
+     "titre": "Combien investir pour viser un revenu ?",
+     "contenu": "Hypothèse pédagogique : vous visez 600 000 FCFA de dividendes nets par an. La somme nécessaire dépend du rendement retenu. Plus le rendement visé est élevé, plus le risque d’un dividende réduit l’est aussi.",
+     "simulation": {
+      "type": "objectif",
+      "revenu_cible": 600000,
+      "rendements_pct": [
+       5,
+       7,
+       9
+      ]
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Trois portefeuilles d’exemple",
+     "contenu": "Trois répartitions pédagogiques de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.",
+     "tableau": {
+      "colonnes": [
+       "Profil",
+       "Répartition",
+       "Ce qu’il cherche",
+       "Ce qu’il accepte"
+      ],
+      "lignes": [
+       [
+        "Prudent",
+        "Moitié obligations, moitié actions à dividende régulier",
+        "Des revenus stables",
+        "Une croissance plus lente"
+       ],
+       [
+        "Équilibré",
+        "Un quart d’obligations, trois quarts d’actions de 4 secteurs",
+        "Revenus et croissance",
+        "Des baisses temporaires"
+       ],
+       [
+        "Dynamique",
+        "Actions seulement, 8 à 12 lignes",
+        "La croissance du capital",
+        "De fortes variations"
+       ]
+      ],
+      "note": "Exemples pédagogiques. La bonne répartition dépend de votre horizon, de vos besoins et de votre tolérance aux pertes."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Tester sans risque",
+     "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le meilleur moyen de vérifier qu’une stratégie tient sur la durée, et de connaître ses propres réactions face à une baisse.",
+     "etapes": [
+      {
+       "titre": "Définir le profil et la somme",
+       "detail": "Par exemple 3 000 000 FCFA, profil équilibré."
+      },
+      {
+       "titre": "Composer le portefeuille virtuel",
+       "detail": "En respectant les repères de diversification de la leçon 5."
+      },
+      {
+       "titre": "Le suivre trois mois",
+       "detail": "Noter ses réactions aux baisses, et l’arrivée des dividendes.",
+       "cle": true
+      },
+      {
+       "titre": "Comparer à l’indice",
+       "detail": "Le portefeuille fait-il mieux, ou moins bien, que le marché ?"
+      }
+     ]
+    },
+    {
+     "type": "piege",
+     "titre": "Les illusions des simulations",
+     "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité.",
+     "points": [
+      {
+       "titre": "Oublier les frais et l’impôt",
+       "detail": "Les frais de courtage et la retenue sur les dividendes réduisent le résultat réel.",
+       "verifier": "Si le dividende simulé est brut ou net."
+      },
+      {
+       "titre": "Supposer un cours constant",
+       "detail": "Le cours peut baisser ; réinvestir à un cours plus bas achète alors plus d’actions, mais le capital affiché diminue.",
+       "verifier": "Le résultat dans un scénario défavorable."
+      },
+      {
+       "titre": "Extrapoler le passé",
+       "detail": "Une croissance de dividende passée n’est pas une promesse.",
+       "verifier": "La régularité du dividende sur cinq ans."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Simuler, c’est rendre ses hypothèses visibles.",
+     "points": [
+      {
+       "titre": "Une simulation compare des scénarios, elle ne prédit pas"
+      },
+      {
+       "titre": "Le réinvestissement des dividendes accélère la croissance du nombre d’actions"
+      },
+      {
+       "titre": "Un rendement visé plus élevé demande moins de capital, et plus de risque"
+      },
+      {
+       "titre": "Le portefeuille virtuel teste une stratégie sans engager d’argent"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
+     "options": [
+      "3 200 000 FCFA",
+      "5 000 000 FCFA",
+      "8 000 000 FCFA",
+      "32 000 000 FCFA"
+     ],
+     "correct": 1,
+     "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA."
+    },
+    {
+     "question": "Vous détenez 100 actions à 10 000 FCFA ; le dividende est de 600 FCFA, entièrement réinvesti au même cours. Combien d’actions achetez-vous ?",
+     "options": [
+      "3",
+      "6",
+      "10",
+      "60"
+     ],
+     "correct": 1,
+     "explication": "100 × 600 = 60 000 FCFA, soit 6 actions à 10 000 FCFA."
+    },
+    {
+     "question": "Qu’est-ce qu’une simulation ne peut pas faire ?",
+     "options": [
+      "Comparer deux scénarios",
+      "Garantir le résultat futur",
+      "Montrer l’effet du réinvestissement",
+      "Donner un ordre de grandeur"
+     ],
+     "correct": 1,
+     "explication": "Une simulation applique des hypothèses ; elle ne garantit rien."
+    },
+    {
+     "question": "Pourquoi viser un rendement très élevé augmente-t-il le risque ?",
+     "options": [
+      "Ce n’est pas le cas",
+      "Les rendements très élevés vont souvent avec des dividendes fragiles ou des cours en baisse",
+      "Les frais sont plus élevés",
+      "L’impôt est plus élevé"
+     ],
+     "correct": 1,
+     "explication": "Un rendement élevé peut annoncer un dividende réduit. Il faut vérifier sa régularité."
+    },
+    {
+     "question": "À quoi sert le portefeuille virtuel ?",
+     "options": [
+      "À investir de l’argent réel sans frais",
+      "À tester une stratégie aux cours réels, sans engager d’argent",
+      "À obtenir des dividendes gratuits",
+      "À éviter l’impôt"
+     ],
+     "correct": 1,
+     "explication": "Il reproduit les achats et ventes aux cours réels, sans argent engagé."
+    }
+   ],
+   "qcm": {
+    "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
+    "options": [
+     "3 200 000 FCFA",
+     "5 000 000 FCFA",
+     "8 000 000 FCFA",
+     "32 000 000 FCFA"
+    ],
+    "correct": 1,
+    "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA."
+   }
+  },
+  {
+   "index": 7,
+   "titre": "Leçon 8 — La fiscalité des revenus boursiers",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "L’impôt est retenu avant le versement",
+     "contenu": "L’impôt sur le revenu des valeurs mobilières (IRVM) est prélevé par la société au moment du paiement. Vous recevez le dividende net : vous n’avez rien à verser vous-même pour cet impôt.\nLe taux dépend de la législation du pays de la société qui verse, pas de la SGI.",
+     "formules": [
+      {
+       "nom": "Dividende net",
+       "expression": "Dividende brut × (1 − taux d’IRVM)",
+       "exemple": "1 000 × (1 − 12 %) = 880 FCFA"
+      },
+      {
+       "nom": "Rendement net",
+       "expression": "Dividende net ÷ Cours",
+       "exemple": "880 ÷ 16 000 = 5,5 %"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les taux sur les dividendes d’actions cotées",
+     "contenu": "Taux applicables aux personnes physiques, tels que WestBourse les a vérifiés. Ils changent avec les lois de finances : la page Fiscalité du site fait foi et cite ses sources.",
+     "tableau": {
+      "colonnes": [
+       "Pays de la société",
+       "Taux sur les dividendes",
+       "Précision"
+      ],
+      "lignes": [
+       [
+        "Côte d’Ivoire",
+        "12 %",
+        "10 % pour les personnes morales, depuis l’annexe fiscale 2025"
+       ],
+       [
+        "Sénégal",
+        "10 %",
+        "—"
+       ],
+       [
+        "Burkina Faso",
+        "12,5 %",
+        "—"
+       ],
+       [
+        "Mali",
+        "7 %",
+        "Taux en vigueur depuis 2017"
+       ],
+       [
+        "Bénin",
+        "5 %",
+        "Taux réduit en vigueur depuis 2018"
+       ],
+       [
+        "Togo",
+        "3 %",
+        "Personnes physiques ; 7 % pour les personnes morales"
+       ],
+       [
+        "Niger, Guinée-Bissau",
+        "Non vérifié",
+        "WestBourse n’affiche pas de taux tant qu’il n’est pas confirmé"
+       ]
+      ],
+      "note": "Source : barème WestBourse (page Fiscalité), constitué à partir de sources publiques citées sur cette page."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Les obligations",
+     "contenu": "Les coupons des titres émis par les États de l’UEMOA et par les institutions régionales comme la BOAD ou la BIDC sont en principe exonérés. Les obligations de sociétés privées supportent une retenue, dont le taux varie selon le pays.\nC’est l’une des raisons pour lesquelles une obligation d’État peut rapporter plus, net, qu’un placement affiché à un taux supérieur."
+    },
+    {
+     "type": "piege",
+     "titre": "Les confusions fréquentes",
+     "contenu": "La plupart des erreurs viennent d’un mélange entre brut et net.",
+     "points": [
+      {
+       "titre": "Retirer l’impôt deux fois",
+       "detail": "Le calendrier officiel des dividendes de la BRVM publie souvent des montants déjà nets. Leur appliquer à nouveau l’IRVM sous-estime le rendement.",
+       "verifier": "La mention brut ou net du montant."
+      },
+      {
+       "titre": "Appliquer le taux de son propre pays",
+       "detail": "C’est le pays de la société qui verse qui détermine la retenue.",
+       "verifier": "Le pays de la société sur sa fiche."
+      },
+      {
+       "titre": "Oublier sa situation personnelle",
+       "detail": "Résidence fiscale, investissement depuis l’étranger, compte d’entreprise : votre SGI ou un conseiller fiscal tranche.",
+       "verifier": "Votre relevé de dividendes chez votre SGI."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Toujours savoir si un montant est brut ou net.",
+     "points": [
+      {
+       "titre": "L’IRVM est retenu à la source, selon le pays de la société"
+      },
+      {
+       "titre": "Les taux sur les dividendes vont de 3 % à 12,5 % selon les pays vérifiés"
+      },
+      {
+       "titre": "Les titres d’État et des institutions régionales sont en principe exonérés"
+      },
+      {
+       "titre": "Ne pas retirer l’impôt d’un montant déjà net"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une société ivoirienne verse un dividende brut de 1 500 FCFA. Avec un IRVM de 12 %, quel est le dividende net ?",
+     "options": [
+      "1 200 FCFA",
+      "1 320 FCFA",
+      "1 380 FCFA",
+      "1 500 FCFA"
+     ],
+     "correct": 1,
+     "explication": "1 500 × (1 − 0,12) = 1 320 FCFA."
+    },
+    {
+     "question": "Qui retient l’IRVM sur un dividende ?",
+     "options": [
+      "L’actionnaire, dans sa déclaration annuelle",
+      "La société, au moment du versement",
+      "La BRVM, à la fin de l’année",
+      "Personne"
+     ],
+     "correct": 1,
+     "explication": "L’IRVM est une retenue à la source : la société le prélève avant de verser le dividende net."
+    },
+    {
+     "question": "Quel pays détermine le taux d’IRVM d’un dividende ?",
+     "options": [
+      "Le pays de l’investisseur",
+      "Le pays de la société qui verse le dividende",
+      "Le pays de la SGI",
+      "Le pays de la banque de l’investisseur"
+     ],
+     "correct": 1,
+     "explication": "La retenue suit la législation du pays de la société émettrice."
+    },
+    {
+     "question": "Un montant publié est déjà net d’impôt. Que se passe-t-il si vous lui retirez encore l’IRVM ?",
+     "options": [
+      "Rien",
+      "Vous sous-estimez votre revenu et votre rendement",
+      "Vous surestimez votre revenu",
+      "Vous payez deux fois l’impôt"
+     ],
+     "correct": 1,
+     "explication": "Retirer l’impôt d’un montant déjà net donne un revenu calculé trop bas."
+    },
+    {
+     "question": "Les coupons des obligations d’État de l’UEMOA sont :",
+     "options": [
+      "Imposés au même taux que les dividendes",
+      "En principe exonérés",
+      "Imposés à 50 %",
+      "Interdits aux particuliers"
+     ],
+     "correct": 1,
+     "explication": "Les titres publics des États et des institutions régionales sont en principe exonérés."
+    }
+   ],
+   "qcm": {
+    "question": "Une société ivoirienne verse un dividende brut de 1 500 FCFA. Avec un IRVM de 12 %, quel est le dividende net ?",
+    "options": [
+     "1 200 FCFA",
+     "1 320 FCFA",
+     "1 380 FCFA",
+     "1 500 FCFA"
+    ],
+    "correct": 1,
+    "explication": "1 500 × (1 − 0,12) = 1 320 FCFA."
+   }
+  },
+  {
+   "index": 8,
+   "titre": "Leçon 9 — Les obligations cotées à la BRVM",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Le vocabulaire d’une obligation",
+     "contenu": "Toutes les informations figurent dans la note d’information de l’emprunt.",
+     "points": [
+      {
+       "titre": "Le nominal",
+       "detail": "La valeur d’un titre, souvent 10 000 FCFA à la BRVM. Le coupon se calcule sur ce montant."
+      },
+      {
+       "titre": "Le taux nominal (coupon)",
+       "detail": "L’intérêt annuel, en pourcentage du nominal. Un titre de 10 000 FCFA à 6 % rapporte 600 FCFA par an avant impôt."
+      },
+      {
+       "titre": "La maturité",
+       "detail": "La date du dernier remboursement. Au-delà, le titre n’existe plus."
+      },
+      {
+       "titre": "L’amortissement",
+       "detail": "In fine : tout le capital est rendu à la fin. Constant : une part est rendue chaque année, souvent après un différé."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Prix, coupon couru et rendement",
+     "contenu": "Le prix d’une obligation varie : il baisse quand les taux du marché montent, et monte quand ils baissent. Le rendement réel dépend donc du prix payé. Exemples pédagogiques.",
+     "formules": [
+      {
+       "nom": "Coupon annuel",
+       "expression": "Nominal × Taux nominal",
+       "exemple": "10 000 × 6,5 % = 650 FCFA par an"
+      },
+      {
+       "nom": "Rendement courant",
+       "expression": "Coupon annuel ÷ Prix payé",
+       "exemple": "650 ÷ 9 800 = 6,6 %"
+      },
+      {
+       "nom": "Coupon couru",
+       "expression": "Coupon × Jours écoulés ÷ 365",
+       "exemple": "Payé en plus du prix à l’achat, rendu au prochain coupon"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Un emprunt amorti : exemple",
+     "contenu": "Exemple pédagogique : 100 titres de 10 000 FCFA à 6 %, sur 5 ans, avec remboursement constant du capital chaque année. Le coupon baisse à mesure que le capital restant diminue.",
+     "tableau": {
+      "colonnes": [
+       "Année",
+       "Capital restant dû",
+       "Coupon (6 %)",
+       "Capital remboursé",
+       "Total reçu"
+      ],
+      "lignes": [
+       [
+        "1",
+        "1 000 000",
+        "60 000",
+        "200 000",
+        "260 000"
+       ],
+       [
+        "2",
+        "800 000",
+        "48 000",
+        "200 000",
+        "248 000"
+       ],
+       [
+        "3",
+        "600 000",
+        "36 000",
+        "200 000",
+        "236 000"
+       ],
+       [
+        "4",
+        "400 000",
+        "24 000",
+        "200 000",
+        "224 000"
+       ],
+       [
+        "5",
+        "200 000",
+        "12 000",
+        "200 000",
+        "212 000"
+       ]
+      ],
+      "note": "Montants en FCFA, avant impôt. Sur cinq ans : 180 000 FCFA de coupons et le million rendu."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Les risques d’une obligation",
+     "contenu": "Une obligation est moins risquée qu’une action, pas sans risque.",
+     "points": [
+      {
+       "titre": "Le risque de défaut",
+       "detail": "L’émetteur peut payer en retard ou ne pas rembourser. Un État n’est pas à l’abri d’un rééchelonnement.",
+       "verifier": "La notation de l’émetteur, quand elle existe."
+      },
+      {
+       "titre": "Le risque de taux",
+       "detail": "Si les taux montent, le prix d’une obligation déjà émise baisse avant l’échéance.",
+       "verifier": "La durée restante : plus elle est longue, plus le prix est sensible."
+      },
+      {
+       "titre": "Le risque de liquidité",
+       "detail": "Beaucoup d’obligations s’échangent rarement. Revendre avant l’échéance peut prendre du temps, ou coûter une décote.",
+       "verifier": "Les volumes échangés récemment."
+      }
+     ]
+    },
+    {
+     "type": "piege",
+     "titre": "Les pièges propres à la BRVM",
+     "contenu": "Quelques réflexes évitent des erreurs coûteuses.",
+     "points": [
+      {
+       "titre": "Un cours affiché n’est pas une transaction",
+       "detail": "Sans échange, le cours d’une obligation reste souvent au pair pendant des mois. Il ne dit rien du prix auquel vous pourriez vendre.",
+       "verifier": "La date du dernier échange réel."
+      },
+      {
+       "titre": "Un titre listé peut être échu",
+       "detail": "Des emprunts arrivés à échéance depuis des années restent parfois affichés sur les listes publiques. WestBourse les retire de ses tableaux.",
+       "verifier": "La date de maturité."
+      },
+      {
+       "titre": "Confondre taux nominal et rendement",
+       "detail": "Acheter au-dessus du pair réduit le rendement réel sous le taux affiché.",
+       "verifier": "Le prix payé, coupon couru compris."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Une obligation se juge à quatre éléments.",
+     "points": [
+      {
+       "titre": "Qui emprunte, et sa capacité à rembourser"
+      },
+      {
+       "titre": "Le taux, comparé au prix payé"
+      },
+      {
+       "titre": "Le calendrier de remboursement : in fine ou amorti"
+      },
+      {
+       "titre": "La liquidité : pourrez-vous revendre avant l’échéance ?"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une obligation de nominal 10 000 FCFA verse un coupon de 7 %. Combien rapporte-t-elle par an, avant impôt ?",
+     "options": [
+      "70 FCFA",
+      "700 FCFA",
+      "7 000 FCFA",
+      "10 700 FCFA"
+     ],
+     "correct": 1,
+     "explication": "10 000 × 7 % = 700 FCFA."
+    },
+    {
+     "question": "Vous achetez cette obligation 10 500 FCFA. Son rendement courant est-il supérieur ou inférieur à 7 % ?",
+     "options": [
+      "Supérieur",
+      "Inférieur",
+      "Égal",
+      "Impossible à dire"
+     ],
+     "correct": 1,
+     "explication": "700 ÷ 10 500 ≈ 6,7 % : payer au-dessus du pair réduit le rendement."
+    },
+    {
+     "question": "Que se passe-t-il pour le prix d’une obligation existante quand les taux du marché montent ?",
+     "options": [
+      "Il monte",
+      "Il baisse",
+      "Il ne bouge pas",
+      "Le coupon augmente"
+     ],
+     "correct": 1,
+     "explication": "Les nouvelles émissions rapportent plus : le prix des anciennes baisse pour s’aligner."
+    },
+    {
+     "question": "Dans un emprunt à amortissement constant, le coupon versé chaque année :",
+     "options": [
+      "Augmente",
+      "Diminue, car le capital restant diminue",
+      "Reste identique",
+      "Est nul"
+     ],
+     "correct": 1,
+     "explication": "Le coupon se calcule sur le capital restant dû, qui baisse à chaque remboursement."
+    },
+    {
+     "question": "Une obligation affiche le même cours depuis des mois. Qu’en conclure ?",
+     "options": [
+      "Que le titre est très stable",
+      "Qu’il s’échange peut-être très peu : vérifier la date du dernier échange réel",
+      "Qu’il va bientôt monter",
+      "Qu’il est garanti par l’État"
+     ],
+     "correct": 1,
+     "explication": "Sans échange, le cours affiché ne bouge pas. Ce n’est pas un prix auquel on est sûr de vendre."
+    }
+   ],
+   "qcm": {
+    "question": "Une obligation de nominal 10 000 FCFA verse un coupon de 7 %. Combien rapporte-t-elle par an, avant impôt ?",
+    "options": [
+     "70 FCFA",
+     "700 FCFA",
+     "7 000 FCFA",
+     "10 700 FCFA"
+    ],
+    "correct": 1,
+    "explication": "10 000 × 7 % = 700 FCFA."
+   }
+  },
+  {
+   "index": 9,
+   "titre": "Leçon 10 — Les OPCVM : investir par des fonds collectifs",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Le principe",
+     "contenu": "Vous achetez des parts du fonds. Le gérant investit l’ensemble selon une politique écrite dans le prospectus. La valeur de vos parts suit celle des placements du fonds.",
+     "flux": [
+      {
+       "titre": "Épargnants",
+       "detail": "Achètent des parts",
+       "icone": "actionnaires"
+      },
+      {
+       "titre": "Société de gestion",
+       "detail": "Agréée, décide des placements",
+       "icone": "decision"
+      },
+      {
+       "titre": "Placements",
+       "detail": "Actions, obligations, monétaire",
+       "icone": "graphique"
+      },
+      {
+       "titre": "Valeur liquidative",
+       "detail": "Prix d’une part, publié régulièrement",
+       "icone": "piece"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "FCP et SICAV, et leurs acteurs",
+     "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.",
+     "tableau": {
+      "colonnes": [
+       "Critère",
+       "FCP",
+       "SICAV"
+      ],
+      "lignes": [
+       [
+        "Nature",
+        "Copropriété de titres, sans personnalité juridique",
+        "Société anonyme dont on devient actionnaire"
+       ],
+       [
+        "Gestion",
+        "Une société de gestion d’OPCVM agréée",
+        "La SICAV elle-même, ou un gérant délégué"
+       ],
+       [
+        "Conservation",
+        "Un dépositaire, en général une banque",
+        "Un dépositaire, en général une banque"
+       ],
+       [
+        "Pour l’épargnant",
+        "Achat et vente de parts à la valeur liquidative",
+        "Achat et vente d’actions de la SICAV à la valeur liquidative"
+       ]
+      ],
+      "note": "Dans les deux cas, le dépositaire conserve les actifs : ils sont séparés de ceux de la société de gestion."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Ce que coûte un fonds",
+     "contenu": "Les frais réduisent directement la performance. Ils figurent dans le prospectus. Exemple pédagogique sur 1 000 000 FCFA.",
+     "formules": [
+      {
+       "nom": "Frais d’entrée",
+       "expression": "Somme investie × taux d’entrée",
+       "exemple": "1 000 000 × 2 % = 20 000 FCFA prélevés dès la souscription"
+      },
+      {
+       "nom": "Frais de gestion annuels",
+       "expression": "Encours × taux de gestion",
+       "exemple": "1 000 000 × 1,5 % = 15 000 FCFA par an"
+      },
+      {
+       "nom": "Valeur liquidative",
+       "expression": "Actif net du fonds ÷ Nombre de parts",
+       "exemple": "5 Md ÷ 500 000 parts = 10 000 FCFA la part"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Les grandes familles de fonds",
+     "contenu": "La politique d’investissement détermine le risque.",
+     "points": [
+      {
+       "titre": "Monétaire",
+       "detail": "Placements très courts. Faible risque, faible rendement, disponibilité rapide."
+      },
+      {
+       "titre": "Obligataire",
+       "detail": "Surtout des obligations. Revenus réguliers, sensibles aux taux."
+      },
+      {
+       "titre": "Diversifié",
+       "detail": "Un mélange d’actions et d’obligations, selon des bornes fixées par le prospectus."
+      },
+      {
+       "titre": "Actions",
+       "detail": "Surtout des actions de la BRVM. Le potentiel et les variations les plus forts."
+      }
+     ]
+    },
+    {
+     "type": "piege",
+     "titre": "Les questions à poser avant de souscrire",
+     "contenu": "Un fonds se choisit sur des faits écrits, pas sur une promesse.",
+     "points": [
+      {
+       "titre": "Le fonds est-il agréé ?",
+       "detail": "Un OPCVM doit être agréé par l’AMF-UMOA.",
+       "verifier": "La liste publiée par l’AMF-UMOA."
+      },
+      {
+       "titre": "Quels sont tous les frais ?",
+       "detail": "Entrée, sortie, gestion : additionnez-les sur votre horizon.",
+       "verifier": "Le prospectus."
+      },
+      {
+       "titre": "Quelle performance, sur quelle durée, comparée à quoi ?",
+       "detail": "Une bonne année isolée ne prouve rien.",
+       "verifier": "La performance sur trois à cinq ans, comparée à un indice."
+      },
+      {
+       "titre": "Méfiance devant un rendement garanti élevé",
+       "detail": "Un fonds investi en actions ne peut pas garantir un rendement élevé.",
+       "verifier": "Le mot « garanti » dans le document officiel."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Un OPCVM délègue le choix des titres, pas la responsabilité de choisir le fonds.",
+     "points": [
+      {
+       "titre": "Une société de gestion agréée investit, un dépositaire conserve"
+      },
+      {
+       "titre": "La valeur liquidative est le prix d’une part"
+      },
+      {
+       "titre": "Les frais réduisent directement la performance"
+      },
+      {
+       "titre": "Vérifier l’agrément et la performance sur plusieurs années"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Un fonds a un actif net de 2 milliards de FCFA et 400 000 parts. Quelle est sa valeur liquidative ?",
+     "options": [
+      "500 FCFA",
+      "5 000 FCFA",
+      "50 000 FCFA",
+      "800 FCFA"
+     ],
+     "correct": 1,
+     "explication": "2 000 000 000 ÷ 400 000 = 5 000 FCFA par part."
+    },
+    {
+     "question": "Vous investissez 2 000 000 FCFA avec 3 % de frais d’entrée. Combien est réellement investi ?",
+     "options": [
+      "1 400 000 FCFA",
+      "1 940 000 FCFA",
+      "2 000 000 FCFA",
+      "2 060 000 FCFA"
+     ],
+     "correct": 1,
+     "explication": "2 000 000 × 3 % = 60 000 FCFA de frais ; 1 940 000 FCFA sont investis."
+    },
+    {
+     "question": "Qui conserve les actifs d’un OPCVM ?",
+     "options": [
+      "Le gérant, sur son propre compte",
+      "Un dépositaire, en général une banque",
+      "La BRVM",
+      "Chaque épargnant"
+     ],
+     "correct": 1,
+     "explication": "Le dépositaire conserve les actifs, séparés de ceux de la société de gestion."
+    },
+    {
+     "question": "Quelle autorité agrée les OPCVM dans l’UEMOA ?",
+     "options": [
+      "La BCEAO",
+      "L’AMF-UMOA",
+      "La BRVM",
+      "Chaque SGI"
+     ],
+     "correct": 1,
+     "explication": "L’AMF-UMOA, qui a succédé au CREPMF, agrée et contrôle les OPCVM et leurs sociétés de gestion."
+    },
+    {
+     "question": "Un fonds investi en actions promet un rendement « garanti » de 15 % par an. Quelle est la bonne réaction ?",
+     "options": [
+      "Souscrire vite",
+      "Se méfier : un fonds actions ne peut pas garantir un rendement élevé",
+      "Négocier les frais",
+      "Demander 20 %"
+     ],
+     "correct": 1,
+     "explication": "La valeur d’un fonds actions suit le marché : aucun rendement élevé ne peut y être garanti."
+    }
+   ],
+   "qcm": {
+    "question": "Un fonds a un actif net de 2 milliards de FCFA et 400 000 parts. Quelle est sa valeur liquidative ?",
+    "options": [
+     "500 FCFA",
+     "5 000 FCFA",
+     "50 000 FCFA",
+     "800 FCFA"
+    ],
+    "correct": 1,
+    "explication": "2 000 000 000 ÷ 400 000 = 5 000 FCFA par part."
+   }
+  }
+ ],
+ "academy-niveau-3-technique": [
+  {
+   "index": 0,
+   "titre": "Leçon 1 — Lire un graphique de cours",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Quatre notions de base",
+     "contenu": "Un graphique de cours montre l’histoire des prix. Il se lit avant de se calculer.",
+     "points": [
+      {
+       "titre": "La tendance",
+       "detail": "Haussière si les sommets et les creux sont de plus en plus hauts ; baissière dans le cas inverse ; sans tendance sinon.",
+       "verifier": "Les trois derniers creux et sommets."
+      },
+      {
+       "titre": "Le support",
+       "detail": "Une zone de prix où le cours a cessé de baisser plusieurs fois : des acheteurs y sont apparus."
+      },
+      {
+       "titre": "La résistance",
+       "detail": "Une zone où le cours a cessé de monter plusieurs fois : des vendeurs y sont apparus."
+      },
+      {
+       "titre": "Le volume",
+       "detail": "Le nombre de titres échangés. Un mouvement sans volume est fragile.",
+       "verifier": "Le volume du jour comparé à sa moyenne."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les trois échelles de temps",
+     "contenu": "Une même action peut monter sur un mois et baisser sur un an. Toujours préciser l’horizon.",
+     "tableau": {
+      "colonnes": [
+       "Horizon",
+       "Graphique utile",
+       "Question"
+      ],
+      "lignes": [
+       [
+        "Court terme",
+        "Quelques semaines, cours quotidien",
+        "Le mouvement récent est-il confirmé par le volume ?"
+       ],
+       [
+        "Moyen terme",
+        "Quelques mois",
+        "La tendance est-elle intacte ?"
+       ],
+       [
+        "Long terme",
+        "Plusieurs années",
+        "Où se situe le cours dans son histoire ?"
+       ]
+      ],
+      "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les limites propres à la BRVM",
+     "contenu": "L’analyse technique a été développée sur des marchés très liquides. La BRVM ne l’est pas toujours.",
+     "points": [
+      {
+       "titre": "Des cours qui ne bougent pas",
+       "detail": "Une valeur peut rester plusieurs séances sans échange : son cours reste figé, sans information.",
+       "verifier": "Le volume des dernières séances."
+      },
+      {
+       "titre": "Une variation encadrée",
+       "detail": "La BRVM limite la variation d’un cours en une séance : un mouvement fort peut s’étaler sur plusieurs jours.",
+       "verifier": "Les règles de cotation publiées par la BRVM."
+      },
+      {
+       "titre": "Une suspension",
+       "detail": "Une valeur suspendue garde son dernier cours affiché : ce n’est pas un prix auquel on peut traiter.",
+       "verifier": "La mention « suspendue » sur la fiche."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : une lecture du jour",
+     "reel": true,
+     "contenu": "Le cours de quatre valeurs, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.",
+     "donnees_reelles": {
+      "vue": "technique",
+      "codes": [
+       "SNTS",
+       "SGBC",
+       "ORAC",
+       "PALC"
+      ]
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Ce que nous avons mesuré sur la BRVM",
+     "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+     "stats": [
+      {
+       "label": "Séances rejouées",
+       "valeur": "109 634",
+       "detail": "2008-2023, hors échantillon de construction"
+      },
+      {
+       "label": "Scores les plus bas, 20 séances après",
+       "valeur": "+8,4 % face au marché",
+       "detail": "Moyenne, écart statistiquement établi"
+      },
+      {
+       "label": "Scores les plus hauts, 20 séances après",
+       "valeur": "−1,5 % face au marché",
+       "detail": "Moyenne, écart non établi"
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Lire avant de calculer.",
+     "points": [
+      {
+       "titre": "Une tendance se lit aux sommets et aux creux successifs"
+      },
+      {
+       "titre": "Supports et résistances sont des zones, pas des prix exacts"
+      },
+      {
+       "titre": "Un mouvement sans volume est fragile, surtout à la BRVM"
+      },
+      {
+       "titre": "Un cours figé ou suspendu ne dit rien du prix réel"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+     "options": [
+      "Baissière",
+      "Haussière",
+      "Sans tendance",
+      "Impossible à dire"
+     ],
+     "correct": 1,
+     "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+    },
+    {
+     "question": "Qu’est-ce qu’un support ?",
+     "options": [
+      "Le cours le plus haut de l’année",
+      "Une zone où le cours a cessé de baisser plusieurs fois",
+      "Le dividende",
+      "Le volume moyen"
+     ],
+     "correct": 1,
+     "explication": "Un support est une zone de prix où des acheteurs sont apparus à plusieurs reprises."
+    },
+    {
+     "question": "Un cours monte de 5 % avec un volume très faible. Comment lire ce mouvement ?",
+     "options": [
+      "Comme très solide",
+      "Comme fragile : peu d’échanges l’ont produit",
+      "Comme une garantie de hausse",
+      "Comme une erreur"
+     ],
+     "correct": 1,
+     "explication": "Sans volume, un mouvement peut venir de quelques ordres isolés."
+    },
+    {
+     "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?",
+     "options": [
+      "Le prix exact du marché",
+      "Le dernier prix échangé, qui ne dit rien du prix actuel",
+      "Zéro",
+      "La moyenne du secteur"
+     ],
+     "correct": 1,
+     "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle."
+    },
+    {
+     "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés ?",
+     "options": [
+      "Ils ont continué à baisser",
+      "Ils ont fait mieux que le marché dans les semaines suivantes",
+      "Ils ont été radiés",
+      "Rien de mesurable"
+     ],
+     "correct": 1,
+     "explication": "Sur seize ans, les excès à la baisse ont plutôt été suivis d’un rattrapage relatif. C’est une moyenne, pas une règle."
+    }
+   ],
+   "qcm": {
+    "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+    "options": [
+     "Baissière",
+     "Haussière",
+     "Sans tendance",
+     "Impossible à dire"
+    ],
+    "correct": 1,
+    "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+   }
+  },
+  {
+   "index": 1,
+   "titre": "Leçon 2 — Les chandeliers japonais",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "L’anatomie d’une bougie",
+     "contenu": "Chaque bougie représente une période : une séance, une semaine.",
+     "points": [
+      {
+       "titre": "Le corps",
+       "detail": "L’écart entre l’ouverture et la clôture. Clair (ou vert) : clôture au-dessus de l’ouverture. Sombre (ou rouge) : en dessous."
+      },
+      {
+       "titre": "La mèche haute",
+       "detail": "Le plus haut atteint pendant la période."
+      },
+      {
+       "titre": "La mèche basse",
+       "detail": "Le plus bas atteint pendant la période."
+      },
+      {
+       "titre": "La taille",
+       "detail": "Un grand corps traduit un mouvement net ; un petit corps, de l’hésitation."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Quatre configurations connues",
+     "contenu": "Ces figures décrivent un comportement ; aucune n’est un signal fiable à elle seule.",
+     "tableau": {
+      "colonnes": [
+       "Configuration",
+       "À quoi elle ressemble",
+       "Ce qu’elle suggère"
+      ],
+      "lignes": [
+       [
+        "Doji",
+        "Ouverture et clôture presque égales",
+        "Hésitation entre acheteurs et vendeurs"
+       ],
+       [
+        "Marteau",
+        "Petit corps en haut, longue mèche basse",
+        "Les vendeurs ont poussé, les acheteurs ont repris le dessus"
+       ],
+       [
+        "Étoile filante",
+        "Petit corps en bas, longue mèche haute",
+        "Les acheteurs ont poussé, les vendeurs ont repris le dessus"
+       ],
+       [
+        "Avalement",
+        "Un corps qui englobe entièrement le précédent",
+        "Un changement de rapport de force"
+       ]
+      ],
+      "note": "Une configuration se confirme par la séance suivante et par le volume."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les chandeliers à la BRVM",
+     "contenu": "Une bougie suppose une séance active, avec de nombreux échanges.",
+     "points": [
+      {
+       "titre": "Une bougie sans échange",
+       "detail": "Sans transaction, ouverture, plus haut, plus bas et clôture sont identiques : la bougie est plate et ne dit rien.",
+       "verifier": "Le volume de la séance."
+      },
+      {
+       "titre": "Peu d’ordres, beaucoup de forme",
+       "detail": "Avec quelques échanges, une longue mèche peut venir d’un seul ordre isolé.",
+       "verifier": "Le nombre de titres échangés."
+      },
+      {
+       "titre": "Des données incomplètes",
+       "detail": "Les sources publiques ne fournissent pas toujours le plus haut et le plus bas de chaque séance. WestBourse affiche alors des courbes de clôture plutôt que des bougies inventées.",
+       "verifier": "La mention de la source sous le graphique."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Une bougie raconte une séance ; elle ne prédit pas la suivante.",
+     "points": [
+      {
+       "titre": "Le corps : ouverture et clôture ; les mèches : les extrêmes"
+      },
+      {
+       "titre": "Doji, marteau, étoile filante, avalement : des indices, pas des signaux"
+      },
+      {
+       "titre": "Toujours vérifier le volume"
+      },
+      {
+       "titre": "À la BRVM, une bougie sans échange ne dit rien"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?",
+     "options": [
+      "La clôture est sous l’ouverture",
+      "La clôture est au-dessus de l’ouverture",
+      "Il n’y a pas eu d’échange",
+      "Le cours a atteint un record"
+     ],
+     "correct": 1,
+     "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture."
+    },
+    {
+     "question": "Que représente la mèche basse ?",
+     "options": [
+      "La clôture",
+      "Le plus bas atteint pendant la période",
+      "Le dividende",
+      "Le volume"
+     ],
+     "correct": 1,
+     "explication": "La mèche basse descend jusqu’au plus bas de la période."
+    },
+    {
+     "question": "Un doji traduit plutôt :",
+     "options": [
+      "Une forte hausse",
+      "Une hésitation entre acheteurs et vendeurs",
+      "Une suspension",
+      "Un dividende"
+     ],
+     "correct": 1,
+     "explication": "Ouverture et clôture presque égales : aucun camp ne l’a emporté."
+    },
+    {
+     "question": "Une valeur n’a eu aucun échange dans la séance. À quoi ressemble sa bougie ?",
+     "options": [
+      "À un marteau",
+      "À un trait plat, sans information",
+      "À un avalement",
+      "À une étoile filante"
+     ],
+     "correct": 1,
+     "explication": "Sans transaction, les quatre prix sont identiques."
+    },
+    {
+     "question": "Comment confirmer une configuration de chandeliers ?",
+     "options": [
+      "Par la couleur du logo",
+      "Par la séance suivante et par le volume",
+      "Par le PER",
+      "Elle n’a pas besoin de confirmation"
+     ],
+     "correct": 1,
+     "explication": "Une configuration isolée est un indice ; la suite des cours et le volume la confirment ou non."
+    }
+   ],
+   "qcm": {
+    "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?",
+    "options": [
+     "La clôture est sous l’ouverture",
+     "La clôture est au-dessus de l’ouverture",
+     "Il n’y a pas eu d’échange",
+     "Le cours a atteint un record"
+    ],
+    "correct": 1,
+    "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture."
+   }
+  },
+  {
+   "index": 2,
+   "titre": "Leçon 3 — Les moyennes mobiles",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Le calcul",
+     "contenu": "Exemple pédagogique sur cinq séances.",
+     "formules": [
+      {
+       "nom": "Moyenne mobile simple sur N séances",
+       "expression": "(Somme des N dernières clôtures) ÷ N",
+       "exemple": "(100 + 102 + 101 + 105 + 107) ÷ 5 = 103"
+      },
+      {
+       "nom": "Écart à la moyenne",
+       "expression": "(Cours − Moyenne) ÷ Moyenne",
+       "exemple": "(107 − 103) ÷ 103 ≈ +3,9 %"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Moyenne courte et moyenne longue",
+     "contenu": "Une moyenne courte (20 séances, environ un mois) suit le cours de près. Une moyenne longue (50 séances ou plus) décrit la tendance de fond.\nLe graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne.",
+     "stats": [
+      {
+       "label": "Cours au-dessus des deux moyennes",
+       "valeur": "Tendance haussière",
+       "detail": "Description de la situation, pas une prévision"
+      },
+      {
+       "label": "Cours sous les deux moyennes",
+       "valeur": "Tendance baissière",
+       "detail": "Idem"
+      },
+      {
+       "label": "Cours entre les deux",
+       "valeur": "Hésitation",
+       "detail": "Tendances courte et longue divergentes"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : le cours face à ses moyennes",
+     "reel": true,
+     "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.",
+     "donnees_reelles": {
+      "vue": "technique",
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SGBC",
+       "ETIT",
+       "SIBC"
+      ]
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Le retard, défaut inévitable",
+     "contenu": "Une moyenne mobile regarde en arrière : elle confirme une tendance quand celle-ci est déjà installée.",
+     "points": [
+      {
+       "titre": "Les croisements arrivent tard",
+       "detail": "Quand la moyenne courte croise la longue, une bonne partie du mouvement a souvent eu lieu.",
+       "verifier": "L’écart du cours à sa moyenne au moment du croisement."
+      },
+      {
+       "titre": "Les faux signaux en marché sans tendance",
+       "detail": "Quand le cours oscille, les moyennes se croisent sans cesse.",
+       "verifier": "La pente de la moyenne longue."
+      },
+      {
+       "titre": "Des séances sans échange",
+       "detail": "Une moyenne calculée sur des cours figés paraît stable sans l’être.",
+       "verifier": "Le nombre de séances réellement échangées."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Une moyenne mobile décrit, elle ne prévoit pas.",
+     "points": [
+      {
+       "titre": "Moyenne mobile = moyenne des N dernières clôtures"
+      },
+      {
+       "titre": "Courte pour le mouvement récent, longue pour la tendance de fond"
+      },
+      {
+       "titre": "Le cours face à ses deux moyennes décrit la tendance"
+      },
+      {
+       "titre": "Les croisements arrivent en retard et se trompent sans tendance"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+     "options": [
+      "200",
+      "205",
+      "210",
+      "820"
+     ],
+     "correct": 1,
+     "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
+    },
+    {
+     "question": "Le cours est au-dessus de sa moyenne sur 20 séances et de sa moyenne sur 50 séances. Comment le décrire ?",
+     "options": [
+      "Tendance baissière",
+      "Tendance haussière",
+      "Valeur suspendue",
+      "Achat garanti"
+     ],
+     "correct": 1,
+     "explication": "Un cours au-dessus de ses deux moyennes décrit une tendance haussière, sans rien garantir."
+    },
+    {
+     "question": "Pourquoi un croisement de moyennes arrive-t-il en retard ?",
+     "options": [
+      "Parce que les moyennes regardent les cours passés",
+      "Parce que la BRVM publie tard",
+      "Parce que le volume est faible",
+      "Il n’arrive jamais en retard"
+     ],
+     "correct": 0,
+     "explication": "Une moyenne se calcule sur des cours passés : elle réagit après le mouvement."
+    },
+    {
+     "question": "Dans un marché sans tendance, les croisements de moyennes :",
+     "options": [
+      "Sont très fiables",
+      "Se multiplient et donnent beaucoup de faux signaux",
+      "Disparaissent",
+      "Annoncent un dividende"
+     ],
+     "correct": 1,
+     "explication": "Quand le cours oscille, les moyennes se croisent souvent sans tendance réelle."
+    },
+    {
+     "question": "Un cours vaut 110 et sa moyenne 100. Quel est son écart à la moyenne ?",
+     "options": [
+      "+1 %",
+      "+10 %",
+      "+110 %",
+      "−10 %"
+     ],
+     "correct": 1,
+     "explication": "(110 − 100) ÷ 100 = +10 %."
+    }
+   ],
+   "qcm": {
+    "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+    "options": [
+     "200",
+     "205",
+     "210",
+     "820"
+    ],
+    "correct": 1,
+    "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
+   }
+  },
+  {
+   "index": 3,
+   "titre": "Leçon 4 — Le RSI : mesurer les excès de marché",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Le calcul",
+     "contenu": "Le RSI ramène le rapport entre hausses et baisses moyennes sur une échelle de 0 à 100. Exemple pédagogique.",
+     "formules": [
+      {
+       "nom": "Force relative (RS)",
+       "expression": "Hausse moyenne ÷ Baisse moyenne, sur 14 séances",
+       "exemple": "2 ÷ 1 = 2"
+      },
+      {
+       "nom": "RSI",
+       "expression": "100 − 100 ÷ (1 + RS)",
+       "exemple": "100 − 100 ÷ 3 ≈ 66,7"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les trois zones",
+     "contenu": "Les seuils de 70 et 30 sont des conventions, pas des lois.",
+     "stats": [
+      {
+       "label": "RSI supérieur à 70",
+       "valeur": "Surachat",
+       "detail": "Les hausses récentes dominent nettement"
+      },
+      {
+       "label": "RSI entre 30 et 70",
+       "valeur": "Zone neutre",
+       "detail": "Pas d’excès marqué"
+      },
+      {
+       "label": "RSI inférieur à 30",
+       "valeur": "Survente",
+       "detail": "Les baisses récentes dominent nettement"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : le RSI du jour",
+     "reel": true,
+     "contenu": "Le RSI sur 14 séances de cinq valeurs, recalculé à l’ouverture de la leçon. Un RSI en zone extrême décrit un mouvement récent ; il ne dit pas quand il s’arrêtera.",
+     "donnees_reelles": {
+      "vue": "technique",
+      "codes": [
+       "SNTS",
+       "BOAC",
+       "NTLC",
+       "SDCC",
+       "TTLC"
+      ]
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Ce que nous avons mesuré sur la BRVM",
+     "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+     "stats": [
+      {
+       "label": "Séances rejouées",
+       "valeur": "109 634",
+       "detail": "2008-2023, hors échantillon de construction"
+      },
+      {
+       "label": "Scores les plus bas, 20 séances après",
+       "valeur": "+8,4 % face au marché",
+       "detail": "Moyenne, écart statistiquement établi"
+      },
+      {
+       "label": "Scores les plus hauts, 20 séances après",
+       "valeur": "−1,5 % face au marché",
+       "detail": "Moyenne, écart non établi"
+      }
+     ]
+    },
+    {
+     "type": "piege",
+     "titre": "Les mauvaises lectures du RSI",
+     "contenu": "Le RSI est populaire, et souvent mal utilisé.",
+     "points": [
+      {
+       "titre": "« Surachat » ne veut pas dire « vendre »",
+       "detail": "Dans une forte tendance, le RSI peut rester au-dessus de 70 longtemps.",
+       "verifier": "La tendance de fond, sur la moyenne longue."
+      },
+      {
+       "titre": "Peu d’échanges, RSI extrême",
+       "detail": "Sur une valeur peu liquide, deux ou trois séances suffisent à pousser le RSI vers un extrême.",
+       "verifier": "Les volumes des séances qui ont fait bouger le RSI."
+      },
+      {
+       "titre": "Un indicateur parmi d’autres",
+       "detail": "Le RSI ne dit rien de la société : ni de ses comptes, ni de son dividende.",
+       "verifier": "Les fondamentaux, avant toute décision."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Le RSI mesure un excès récent, pas une valeur.",
+     "points": [
+      {
+       "titre": "RSI = 100 − 100 ÷ (1 + RS), en général sur 14 séances"
+      },
+      {
+       "titre": "Au-dessus de 70 : surachat ; sous 30 : survente"
+      },
+      {
+       "titre": "Une zone extrême peut durer dans une tendance forte"
+      },
+      {
+       "titre": "À la BRVM, les excès ont plutôt eu tendance à se corriger en moyenne"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?",
+     "options": [
+      "25",
+      "50",
+      "75",
+      "300"
+     ],
+     "correct": 2,
+     "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75."
+    },
+    {
+     "question": "Un RSI de 25 se situe dans quelle zone ?",
+     "options": [
+      "Surachat",
+      "Neutre",
+      "Survente",
+      "Hors échelle"
+     ],
+     "correct": 2,
+     "explication": "Sous 30, on parle de survente."
+    },
+    {
+     "question": "Un RSI reste au-dessus de 70 pendant des semaines. Est-ce possible ?",
+     "options": [
+      "Non, c’est impossible",
+      "Oui, dans une forte tendance haussière",
+      "Seulement pour les obligations",
+      "Seulement les jours fériés"
+     ],
+     "correct": 1,
+     "explication": "Une tendance forte peut maintenir le RSI en zone de surachat."
+    },
+    {
+     "question": "Pourquoi le RSI d’une valeur peu liquide est-il à lire avec prudence ?",
+     "options": [
+      "Il ne se calcule pas",
+      "Quelques séances avec peu d’échanges suffisent à le pousser vers un extrême",
+      "Il vaut toujours 50",
+      "Il est interdit"
+     ],
+     "correct": 1,
+     "explication": "Avec peu d’échanges, quelques ordres font bouger le cours, et donc le RSI."
+    },
+    {
+     "question": "Que dit le RSI sur les comptes d’une société ?",
+     "options": [
+      "Tout",
+      "Rien : il ne mesure que les mouvements de cours",
+      "Son bénéfice",
+      "Son dividende"
+     ],
+     "correct": 1,
+     "explication": "Le RSI est calculé sur les cours seulement."
+    }
+   ],
+   "qcm": {
+    "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?",
+    "options": [
+     "25",
+     "50",
+     "75",
+     "300"
+    ],
+    "correct": 2,
+    "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75."
+   }
+  },
+  {
+   "index": 4,
+   "titre": "Leçon 5 — Le MACD : l’élan d’une tendance",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Trois composantes",
+     "contenu": "Les paramètres usuels sont 12, 26 et 9 séances.",
+     "formules": [
+      {
+       "nom": "Ligne MACD",
+       "expression": "Moyenne exponentielle 12 − Moyenne exponentielle 26",
+       "exemple": "105 − 102 = +3 : la tendance courte est au-dessus de la longue"
+      },
+      {
+       "nom": "Ligne de signal",
+       "expression": "Moyenne exponentielle sur 9 séances de la ligne MACD",
+       "exemple": "Elle lisse la ligne MACD"
+      },
+      {
+       "nom": "Histogramme",
+       "expression": "Ligne MACD − Ligne de signal",
+       "exemple": "Positif et croissant : l’élan haussier se renforce"
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Moyenne exponentielle : pourquoi ?",
+     "contenu": "Une moyenne exponentielle donne plus de poids aux séances récentes qu’une moyenne simple. Elle réagit plus vite, au prix de plus de bruit.\nLe MACD n’est pas borné comme le RSI : sa valeur dépend du niveau du cours, et ne se compare pas d’une action à l’autre."
+    },
+    {
+     "type": "cas",
+     "titre": "Lire l’histogramme",
+     "contenu": "Exemple pédagogique : l’histogramme décrit l’accélération ou le ralentissement de la tendance.",
+     "tableau": {
+      "colonnes": [
+       "Histogramme",
+       "Lecture"
+      ],
+      "lignes": [
+       [
+        "Positif et croissant",
+        "La tendance haussière s’accélère"
+       ],
+       [
+        "Positif et décroissant",
+        "La hausse ralentit"
+       ],
+       [
+        "Négatif et décroissant",
+        "La tendance baissière s’accélère"
+       ],
+       [
+        "Négatif et croissant",
+        "La baisse ralentit"
+       ]
+      ],
+      "note": "Le passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Ce que le MACD ne fait pas",
+     "contenu": "Le MACD hérite des défauts des moyennes mobiles.",
+     "points": [
+      {
+       "titre": "Il est en retard",
+       "detail": "Construit sur des moyennes, il confirme plus qu’il n’anticipe.",
+       "verifier": "Le moment du croisement par rapport au mouvement du cours."
+      },
+      {
+       "titre": "Il ne se compare pas entre actions",
+       "detail": "Un MACD de +50 sur une action à 30 000 FCFA n’a rien à voir avec +50 sur une action à 500 FCFA.",
+       "verifier": "L’écart rapporté au cours."
+      },
+      {
+       "titre": "Il trompe sans tendance",
+       "detail": "Dans un marché qui oscille, les croisements se multiplient.",
+       "verifier": "La pente des moyennes."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Le MACD mesure un élan, pas une destination.",
+     "points": [
+      {
+       "titre": "MACD = moyenne exponentielle 12 − moyenne exponentielle 26"
+      },
+      {
+       "titre": "Signal = moyenne exponentielle 9 du MACD ; histogramme = leur écart"
+      },
+      {
+       "titre": "L’histogramme décrit l’accélération ou le ralentissement"
+      },
+      {
+       "titre": "Il ne se compare pas d’une action à l’autre"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?",
+     "options": [
+      "−10",
+      "+10",
+      "490",
+      "250"
+     ],
+     "correct": 1,
+     "explication": "250 − 240 = +10."
+    },
+    {
+     "question": "L’histogramme est positif et croissant. Que décrit-il ?",
+     "options": [
+      "Une baisse qui accélère",
+      "Une hausse qui accélère",
+      "Une suspension",
+      "Un dividende"
+     ],
+     "correct": 1,
+     "explication": "Positif et croissant : la tendance haussière s’accélère."
+    },
+    {
+     "question": "Pourquoi ne pas comparer le MACD de deux actions différentes ?",
+     "options": [
+      "Il est confidentiel",
+      "Sa valeur dépend du niveau du cours",
+      "Il est toujours égal",
+      "Il est borné de 0 à 100"
+     ],
+     "correct": 1,
+     "explication": "Le MACD s’exprime en points de cours : il dépend du prix de l’action."
+    },
+    {
+     "question": "Qu’est-ce qui distingue une moyenne exponentielle d’une moyenne simple ?",
+     "options": [
+      "Elle ignore les séances récentes",
+      "Elle donne plus de poids aux séances récentes",
+      "Elle ne se calcule que sur les dividendes",
+      "Rien"
+     ],
+     "correct": 1,
+     "explication": "Les séances récentes pèsent plus : la moyenne réagit plus vite."
+    },
+    {
+     "question": "Quels sont les paramètres usuels du MACD ?",
+     "options": [
+      "5, 10, 15",
+      "12, 26, 9",
+      "14, 70, 30",
+      "20, 50, 200"
+     ],
+     "correct": 1,
+     "explication": "12 et 26 pour les moyennes, 9 pour la ligne de signal."
+    }
+   ],
+   "qcm": {
+    "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?",
+    "options": [
+     "−10",
+     "+10",
+     "490",
+     "250"
+    ],
+    "correct": 1,
+    "explication": "250 − 240 = +10."
+   }
+  },
+  {
+   "index": 5,
+   "titre": "Leçon 6 — Les figures chartistes classiques",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Retournement ou continuation",
+     "contenu": "Les figures se classent selon ce qu’elles suggèrent.",
+     "tableau": {
+      "colonnes": [
+       "Figure",
+       "Famille",
+       "Description",
+       "Confirmation"
+      ],
+      "lignes": [
+       [
+        "Double creux",
+        "Retournement haussier",
+        "Deux creux au même niveau, séparés d’un sommet",
+        "Cassure du sommet intermédiaire"
+       ],
+       [
+        "Double sommet",
+        "Retournement baissier",
+        "Deux sommets au même niveau, séparés d’un creux",
+        "Cassure du creux intermédiaire"
+       ],
+       [
+        "Tête-épaules",
+        "Retournement baissier",
+        "Trois sommets, celui du milieu le plus haut",
+        "Cassure de la ligne de cou"
+       ],
+       [
+        "Triangle",
+        "Continuation, le plus souvent",
+        "Des oscillations qui se resserrent",
+        "Sortie du triangle avec du volume"
+       ],
+       [
+        "Canal",
+        "Continuation",
+        "Le cours évolue entre deux droites parallèles",
+        "Rebonds répétés sur les bornes"
+       ]
+      ],
+      "note": "Une figure n’existe vraiment qu’une fois confirmée ; avant, ce n’est qu’une hypothèse."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "La méthode : attendre la cassure",
+     "contenu": "La règle commune à toutes les figures : ne rien conclure avant la confirmation.",
+     "etapes": [
+      {
+       "titre": "Repérer la forme",
+       "detail": "Sur un horizon suffisant : quelques semaines au moins."
+      },
+      {
+       "titre": "Identifier le niveau clé",
+       "detail": "Le sommet intermédiaire, la ligne de cou, la borne du triangle."
+      },
+      {
+       "titre": "Attendre la cassure",
+       "detail": "Une clôture au-delà du niveau clé, pas une simple mèche.",
+       "cle": true
+      },
+      {
+       "titre": "Vérifier le volume",
+       "detail": "Une cassure sans volume est suspecte, surtout à la BRVM."
+      },
+      {
+       "titre": "Fixer d’avance où l’on s’est trompé",
+       "detail": "Le niveau qui invaliderait la figure : c’est la leçon suivante."
+      }
+     ],
+     "etapes_style": "frise"
+    },
+    {
+     "type": "piege",
+     "titre": "Voir des figures partout",
+     "contenu": "L’œil humain trouve des formes même dans le hasard.",
+     "points": [
+      {
+       "titre": "Conclure avant la cassure",
+       "detail": "Une figure non confirmée échoue souvent.",
+       "verifier": "La clôture au-delà du niveau clé."
+      },
+      {
+       "titre": "Choisir l’horizon qui arrange",
+       "detail": "En changeant d’échelle, on trouve presque toujours une figure.",
+       "verifier": "La même lecture sur un autre horizon."
+      },
+      {
+       "titre": "Ignorer la liquidité",
+       "detail": "Sur une valeur peu échangée, une « cassure » peut venir d’un seul ordre.",
+       "verifier": "Le volume du jour de cassure."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Une figure est une hypothèse jusqu’à sa confirmation.",
+     "points": [
+      {
+       "titre": "Double creux, double sommet, tête-épaules : des retournements"
+      },
+      {
+       "titre": "Triangles et canaux : plutôt des continuations"
+      },
+      {
+       "titre": "Attendre une clôture au-delà du niveau clé, avec du volume"
+      },
+      {
+       "titre": "Savoir d’avance ce qui invaliderait la figure"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Une tête-épaules suggère plutôt :",
+     "options": [
+      "Une continuation haussière",
+      "Un retournement baissier",
+      "Un dividende",
+      "Une suspension"
+     ],
+     "correct": 1,
+     "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier."
+    },
+    {
+     "question": "Quand une figure est-elle confirmée ?",
+     "options": [
+      "Dès qu’on la voit",
+      "Quand le cours clôture au-delà du niveau clé, avec du volume",
+      "Quand le RSI vaut 50",
+      "Jamais"
+     ],
+     "correct": 1,
+     "explication": "La cassure du niveau clé, en clôture et avec du volume, confirme la figure."
+    },
+    {
+     "question": "Un double creux se confirme par :",
+     "options": [
+      "La cassure du creux le plus bas",
+      "La cassure du sommet intermédiaire",
+      "Une baisse du volume",
+      "Un nouveau dividende"
+     ],
+     "correct": 1,
+     "explication": "Le double creux est confirmé quand le cours dépasse le sommet entre les deux creux."
+    },
+    {
+     "question": "Pourquoi une cassure sur une valeur peu liquide est-elle suspecte ?",
+     "options": [
+      "Elle est interdite",
+      "Elle peut venir d’un seul ordre isolé",
+      "Elle est toujours fiable",
+      "Elle n’existe pas"
+     ],
+     "correct": 1,
+     "explication": "Avec peu d’échanges, un ordre isolé suffit à franchir un niveau."
+    },
+    {
+     "question": "Un triangle est le plus souvent une figure de :",
+     "options": [
+      "Retournement",
+      "Continuation",
+      "Liquidation",
+      "Dividende"
+     ],
+     "correct": 1,
+     "explication": "Le triangle traduit le plus souvent une pause avant la reprise de la tendance."
+    }
+   ],
+   "qcm": {
+    "question": "Une tête-épaules suggère plutôt :",
+    "options": [
+     "Une continuation haussière",
+     "Un retournement baissier",
+     "Un dividende",
+     "Une suspension"
+    ],
+    "correct": 1,
+    "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier."
+   }
+  },
+  {
+   "index": 6,
+   "titre": "Leçon 7 — Stop-loss, objectif et taille de position",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Trois décisions à prendre avant l’achat",
+     "contenu": "Elles s’écrivent avant de passer l’ordre, jamais après.",
+     "points": [
+      {
+       "titre": "Le niveau d’invalidation (stop)",
+       "detail": "Le prix auquel votre raisonnement est faux : sous un support, sous la ligne de cou."
+      },
+      {
+       "titre": "L’objectif",
+       "detail": "Un niveau plausible de sortie : une résistance, un sommet précédent."
+      },
+      {
+       "titre": "La taille de la position",
+       "detail": "Calculée pour qu’une sortie au stop ne coûte qu’une petite part du portefeuille."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les calculs",
+     "contenu": "Exemple pédagogique : portefeuille de 5 000 000 FCFA, risque accepté de 1 % par position.",
+     "formules": [
+      {
+       "nom": "Risque maximal par position",
+       "expression": "Portefeuille × % de risque accepté",
+       "exemple": "5 000 000 × 1 % = 50 000 FCFA"
+      },
+      {
+       "nom": "Risque par action",
+       "expression": "Prix d’achat − Stop",
+       "exemple": "2 000 − 1 800 = 200 FCFA"
+      },
+      {
+       "nom": "Nombre d’actions",
+       "expression": "Risque maximal ÷ Risque par action",
+       "exemple": "50 000 ÷ 200 = 250 actions, soit 500 000 FCFA investis"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Le rapport gain sur risque",
+     "contenu": "Exemple pédagogique : avec un stop à 1 800 et un objectif à 2 500 pour un achat à 2 000 FCFA.",
+     "tableau": {
+      "colonnes": [
+       "Élément",
+       "Calcul",
+       "Résultat"
+      ],
+      "lignes": [
+       [
+        "Risque par action",
+        "2 000 − 1 800",
+        "200 FCFA"
+       ],
+       [
+        "Gain visé par action",
+        "2 500 − 2 000",
+        "500 FCFA"
+       ],
+       [
+        "Rapport gain sur risque",
+        "500 ÷ 200",
+        "2,5"
+       ],
+       [
+        "Taux de réussite nécessaire pour ne pas perdre",
+        "1 ÷ (1 + 2,5)",
+        "Environ 29 %"
+       ]
+      ],
+      "note": "Avec un rapport de 2,5, il suffit d’avoir raison un peu moins d’une fois sur trois pour ne pas perdre, hors frais."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les limites à la BRVM",
+     "contenu": "Un stop n’est pas une garantie de prix.",
+     "points": [
+      {
+       "titre": "Le stop n’est pas automatique partout",
+       "detail": "Selon les SGI, l’ordre stop n’existe pas toujours : il faut alors surveiller soi-même et passer l’ordre.",
+       "verifier": "Les types d’ordres proposés par votre SGI."
+      },
+      {
+       "titre": "Le prix peut sauter le stop",
+       "detail": "Sur une valeur peu liquide, le cours peut passer d’un coup sous votre niveau : la vente se fait plus bas.",
+       "verifier": "La liquidité de la valeur avant d’acheter."
+      },
+      {
+       "titre": "Les frais",
+       "detail": "Courtage à l’achat et à la vente réduisent le gain et augmentent la perte.",
+       "verifier": "Le barème de votre SGI."
+      },
+      {
+       "titre": "Déplacer son stop vers le bas",
+       "detail": "Le reculer pour « laisser une chance » transforme une petite perte en grande perte.",
+       "verifier": "Votre règle écrite avant l’achat."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "On ne contrôle pas le marché ; on contrôle ce qu’on risque.",
+     "points": [
+      {
+       "titre": "Fixer le stop et l’objectif avant l’achat"
+      },
+      {
+       "titre": "Taille de position = risque accepté ÷ risque par action"
+      },
+      {
+       "titre": "Viser un rapport gain sur risque d’au moins 2"
+      },
+      {
+       "titre": "À la BRVM, le stop est une intention : la liquidité décide du prix réel"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?",
+     "options": [
+      "4 000 FCFA",
+      "40 000 FCFA",
+      "400 000 FCFA",
+      "20 000 FCFA"
+     ],
+     "correct": 1,
+     "explication": "2 000 000 × 2 % = 40 000 FCFA."
+    },
+    {
+     "question": "Achat à 3 000 FCFA, stop à 2 700 FCFA, risque maximal de 30 000 FCFA. Combien d’actions acheter ?",
+     "options": [
+      "10",
+      "100",
+      "300",
+      "1 000"
+     ],
+     "correct": 1,
+     "explication": "Risque par action : 300 FCFA ; 30 000 ÷ 300 = 100 actions."
+    },
+    {
+     "question": "Stop à 900, achat à 1 000, objectif à 1 300. Quel est le rapport gain sur risque ?",
+     "options": [
+      "1",
+      "2",
+      "3",
+      "13"
+     ],
+     "correct": 2,
+     "explication": "Gain visé 300, risque 100 : rapport de 3."
+    },
+    {
+     "question": "Pourquoi un stop ne garantit-il pas le prix de vente à la BRVM ?",
+     "options": [
+      "Il est interdit",
+      "Sur une valeur peu liquide, le cours peut sauter le niveau du stop",
+      "Les stops sont toujours exécutés au cours d’achat",
+      "La BRVM rembourse la différence"
+     ],
+     "correct": 1,
+     "explication": "Sans contrepartie au niveau du stop, la vente se fait au prix suivant disponible."
+    },
+    {
+     "question": "Quelle est l’erreur la plus coûteuse avec un stop ?",
+     "options": [
+      "Le fixer avant d’acheter",
+      "Le reculer vers le bas quand le cours s’en approche",
+      "Calculer la taille de position",
+      "Noter son raisonnement"
+     ],
+     "correct": 1,
+     "explication": "Reculer son stop transforme une perte contrôlée en perte non contrôlée."
+    }
+   ],
+   "qcm": {
+    "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?",
+    "options": [
+     "4 000 FCFA",
+     "40 000 FCFA",
+     "400 000 FCFA",
+     "20 000 FCFA"
+    ],
+    "correct": 1,
+    "explication": "2 000 000 × 2 % = 40 000 FCFA."
+   }
+  }
+ ],
+ "academy-niveau-4-expert": [
+  {
+   "index": 0,
+   "titre": "Leçon 1 — L’architecture du marché financier régional",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Les institutions et leurs rôles",
+     "contenu": "Chaque acteur a un périmètre précis. Savoir qui fait quoi permet de savoir à qui s’adresser.",
+     "tableau": {
+      "colonnes": [
+       "Institution",
+       "Rôle",
+       "Ce que cela signifie pour vous"
+      ],
+      "lignes": [
+       [
+        "AMF-UMOA",
+        "Autorité de régulation : agrément des acteurs, visa des opérations, contrôle et sanctions",
+        "C’est elle qui protège l’épargne publique et qui reçoit les réclamations"
+       ],
+       [
+        "BRVM",
+        "Entreprise de marché : admission à la cote, cotation, diffusion des cours",
+        "Elle publie les cours, le Bulletin officiel de la cote et les avis"
+       ],
+       [
+        "Dépositaire central / Banque de règlement",
+        "Conservation centrale des titres, règlement et livraison des transactions",
+        "Il garantit que vos titres existent et changent bien de main"
+       ],
+       [
+        "SGI",
+        "Sociétés de gestion et d’intermédiation agréées : seules habilitées à négocier en bourse",
+        "Tout ordre passe par une SGI ; elle tient souvent votre compte-titres"
+       ],
+       [
+        "Sociétés de gestion d’OPCVM",
+        "Gestion des fonds collectifs",
+        "Elles gèrent les FCP et SICAV que vous pouvez souscrire"
+       ]
+      ],
+      "note": "Les banques, elles, sont supervisées par la Commission bancaire de l’UMOA, aux côtés de la BCEAO."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Du CREPMF à l’AMF-UMOA",
+     "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement résulte du Traité révisé de l’UMOA du 12 juillet 2019, entré en vigueur le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.",
+     "etapes": [
+      {
+       "titre": "12 juillet 2019",
+       "detail": "Signature du Traité révisé de l’UMOA."
+      },
+      {
+       "titre": "1er octobre 2022",
+       "detail": "Entrée en vigueur : l’AMF-UMOA a succédé au CREPMF.",
+       "cle": true
+      },
+      {
+       "titre": "Depuis",
+       "detail": "L’AMF-UMOA agrée, contrôle et sanctionne ; une Commission des sanctions statue sur les manquements."
+      }
+     ],
+     "etapes_style": "frise"
+    },
+    {
+     "type": "importance",
+     "titre": "Le circuit d’un ordre de bourse",
+     "contenu": "Un achat d’actions traverse plusieurs institutions avant que les titres n’arrivent sur votre compte.",
+     "flux": [
+      {
+       "titre": "Vous",
+       "detail": "Transmettez un ordre à votre SGI",
+       "icone": "actionnaires"
+      },
+      {
+       "titre": "SGI",
+       "detail": "Place l’ordre sur le système de cotation",
+       "icone": "entreprise"
+      },
+      {
+       "titre": "BRVM",
+       "detail": "Rapproche acheteurs et vendeurs",
+       "icone": "graphique"
+      },
+      {
+       "titre": "Dépositaire central",
+       "detail": "Règle l’argent et livre les titres",
+       "icone": "paiement"
+      },
+      {
+       "titre": "Compte-titres",
+       "detail": "Les actions sont inscrites à votre nom",
+       "icone": "piece"
+      }
+     ]
+    },
+    {
+     "type": "piege",
+     "titre": "Les confusions fréquentes",
+     "contenu": "Des erreurs de compréhension qui coûtent cher en cas de litige.",
+     "points": [
+      {
+       "titre": "Croire que la BRVM garantit les sociétés",
+       "detail": "La BRVM organise la cotation ; elle ne garantit ni la solidité des sociétés ni le cours.",
+       "verifier": "Les comptes publiés par la société."
+      },
+      {
+       "titre": "Passer par un intermédiaire non agréé",
+       "detail": "Seule une SGI agréée peut négocier en bourse. Un « placement » proposé hors de ce circuit n’offre pas les mêmes protections.",
+       "verifier": "La liste des acteurs agréés publiée par l’AMF-UMOA."
+      },
+      {
+       "titre": "S’étonner de l’ancien nom",
+       "detail": "Les documents antérieurs à octobre 2022 parlent de l’ex-CREPMF : il s’agit de la même autorité, sous son ancien nom.",
+       "verifier": "La date du document."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Quatre acteurs, quatre rôles.",
+     "points": [
+      {
+       "titre": "L’AMF-UMOA réglemente, agrée, contrôle et sanctionne"
+      },
+      {
+       "titre": "La BRVM organise la cotation et publie les cours"
+      },
+      {
+       "titre": "Le Dépositaire central conserve les titres et règle les transactions"
+      },
+      {
+       "titre": "Seule une SGI agréée peut négocier vos ordres"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quelle institution a succédé à l’ex-CREPMF ?",
+     "options": [
+      "La BCEAO",
+      "L’AMF-UMOA",
+      "La BRVM",
+      "La Commission bancaire"
+     ],
+     "correct": 1,
+     "explication": "L’AMF-UMOA a succédé au CREPMF le 1er octobre 2022, à l’entrée en vigueur du Traité révisé de l’UMOA."
+    },
+    {
+     "question": "Qui est seul habilité à négocier vos ordres en bourse ?",
+     "options": [
+      "Votre banque, quelle qu’elle soit",
+      "Une SGI agréée",
+      "La BRVM directement",
+      "Le Dépositaire central"
+     ],
+     "correct": 1,
+     "explication": "Les ordres de bourse passent obligatoirement par une SGI agréée."
+    },
+    {
+     "question": "Quel est le rôle du Dépositaire central / Banque de règlement ?",
+     "options": [
+      "Fixer les cours",
+      "Conserver les titres et régler les transactions",
+      "Agréer les SGI",
+      "Publier les comptes des sociétés"
+     ],
+     "correct": 1,
+     "explication": "Il assure la conservation centrale des titres, le règlement et la livraison."
+    },
+    {
+     "question": "La BRVM garantit-elle la solidité des sociétés cotées ?",
+     "options": [
+      "Oui, toujours",
+      "Non : elle organise la cotation, sans garantir les sociétés ni les cours",
+      "Oui, pour le compartiment Prestige",
+      "Seulement pour les banques"
+     ],
+     "correct": 1,
+     "explication": "La cotation n’est pas une garantie : l’investisseur reste exposé au risque de la société."
+    },
+    {
+     "question": "Quel organe la réforme de 2022 a-t-elle créé au sein de l’AMF-UMOA ?",
+     "options": [
+      "Une banque centrale",
+      "Une Commission des sanctions",
+      "Une nouvelle bourse",
+      "Un fonds de garantie des dépôts"
+     ],
+     "correct": 1,
+     "explication": "La réforme a doté l’AMF-UMOA d’une Commission des sanctions et d’un Médiateur."
+    }
+   ],
+   "qcm": {
+    "question": "Quelle institution a succédé à l’ex-CREPMF ?",
+    "options": [
+     "La BCEAO",
+     "L’AMF-UMOA",
+     "La BRVM",
+     "La Commission bancaire"
+    ],
+    "correct": 1,
+    "explication": "L’AMF-UMOA a succédé au CREPMF le 1er octobre 2022, à l’entrée en vigueur du Traité révisé de l’UMOA."
+   }
+  },
+  {
+   "index": 1,
+   "titre": "Leçon 2 — L’information et l’intégrité du marché",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Deux obligations d’information",
+     "contenu": "Une société cotée informe le marché selon un calendrier, et chaque fois qu’un fait important survient.",
+     "points": [
+      {
+       "titre": "L’information périodique",
+       "detail": "États financiers annuels certifiés, rapports d’activité trimestriels et semestriels, publiés dans des délais fixés."
+      },
+      {
+       "titre": "L’information permanente",
+       "detail": "Tout fait nouveau susceptible d’influencer sensiblement le cours doit être rendu public sans délai : résultat inattendu, contrat majeur, litige, changement de dirigeant."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "L’information privilégiée",
+     "contenu": "Une information est dite privilégiée quand elle réunit trois caractères. Celui qui la détient ne doit ni s’en servir pour opérer, ni la communiquer, tant qu’elle n’est pas publique.",
+     "points": [
+      {
+       "titre": "Précise",
+       "detail": "Elle porte sur un fait ou un événement déterminé, pas sur une rumeur vague."
+      },
+      {
+       "titre": "Non publique",
+       "detail": "Elle n’a pas encore été diffusée au marché par les canaux officiels."
+      },
+      {
+       "titre": "Susceptible d’influencer le cours",
+       "detail": "Un investisseur raisonnable en tiendrait compte pour décider."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Les principaux abus de marché",
+     "contenu": "Les comportements visés par la réglementation, résumés à titre pédagogique.",
+     "tableau": {
+      "colonnes": [
+       "Abus",
+       "En quoi il consiste",
+       "Exemple pédagogique"
+      ],
+      "lignes": [
+       [
+        "Délit d’initié",
+        "Opérer ou faire opérer grâce à une information privilégiée",
+        "Un salarié achète avant l’annonce d’un résultat exceptionnel"
+       ],
+       [
+        "Communication illicite",
+        "Transmettre une information privilégiée hors du cadre de ses fonctions",
+        "Un conseiller confie l’annonce à venir à un proche"
+       ],
+       [
+        "Manipulation de cours",
+        "Passer des ordres pour fixer artificiellement un cours",
+        "Des achats répétés en fin de séance pour gonfler la clôture"
+       ],
+       [
+        "Fausse information",
+        "Diffuser une information trompeuse pour influencer le cours",
+        "Une rumeur inventée de rachat publiée sur les réseaux"
+       ]
+      ],
+      "note": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Pourquoi cela concerne aussi le petit investisseur",
+     "contenu": "Les abus de marché ne sont pas réservés aux initiés. Relayer une rumeur de rachat dans un groupe de discussion, ou acheter sur la foi d’un « tuyau » venu de l’intérieur d’une société, expose à des risques réels.\nSur un marché peu liquide, quelques ordres suffisent à déplacer un cours : la vigilance y est d’autant plus nécessaire."
+    },
+    {
+     "type": "piege",
+     "titre": "Les bons réflexes",
+     "contenu": "Quelques règles simples protègent votre épargne et votre responsabilité.",
+     "points": [
+      {
+       "titre": "Se fier aux publications officielles",
+       "detail": "Les avis de la BRVM et les communiqués des sociétés font foi, pas les rumeurs.",
+       "verifier": "La source et la date de l’information."
+      },
+      {
+       "titre": "Se méfier des « tuyaux »",
+       "detail": "Une information présentée comme confidentielle et sûre est soit fausse, soit interdite d’usage.",
+       "verifier": "Si elle est publique."
+      },
+      {
+       "titre": "Signaler un abus",
+       "detail": "Un comportement suspect peut être signalé à l’AMF-UMOA.",
+       "verifier": "Les canaux de réclamation de l’AMF-UMOA."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Même information, au même moment, pour tous.",
+     "points": [
+      {
+       "titre": "Information périodique et permanente : deux obligations des sociétés cotées"
+      },
+      {
+       "titre": "Information privilégiée : précise, non publique, et pouvant influencer le cours"
+      },
+      {
+       "titre": "Délit d’initié, manipulation, fausse information : des abus sanctionnés"
+      },
+      {
+       "titre": "Ne décider que sur des informations publiques et officielles"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quels sont les trois caractères d’une information privilégiée ?",
+     "options": [
+      "Ancienne, publique, sans effet",
+      "Précise, non publique, susceptible d’influencer le cours",
+      "Vague, publique, chiffrée",
+      "Officielle, ancienne, confidentielle"
+     ],
+     "correct": 1,
+     "explication": "Une information privilégiée est précise, non encore publique, et susceptible d’influencer sensiblement le cours."
+    },
+    {
+     "question": "Une société signe un contrat majeur. Que lui impose l’information permanente ?",
+     "options": [
+      "D’attendre le rapport annuel",
+      "De le rendre public sans délai s’il peut influencer le cours",
+      "De n’en parler qu’aux grands actionnaires",
+      "Rien"
+     ],
+     "correct": 1,
+     "explication": "Tout fait susceptible d’influencer sensiblement le cours doit être publié sans délai."
+    },
+    {
+     "question": "Des achats répétés en fin de séance pour gonfler le cours de clôture relèvent :",
+     "options": [
+      "D’une stratégie normale",
+      "De la manipulation de cours",
+      "D’une information périodique",
+      "D’un dividende"
+     ],
+     "correct": 1,
+     "explication": "Fixer artificiellement un cours par ses ordres est une manipulation."
+    },
+    {
+     "question": "Un ami salarié d’une société cotée vous annonce un excellent résultat, pas encore publié. Que faire ?",
+     "options": [
+      "Acheter avant l’annonce",
+      "Ne pas opérer sur cette base : l’information est privilégiée",
+      "La relayer à d’autres",
+      "Vendre à découvert"
+     ],
+     "correct": 1,
+     "explication": "Utiliser ou transmettre une information privilégiée est interdit, pour lui comme pour vous."
+    },
+    {
+     "question": "Qui enquête et sanctionne les abus de marché dans l’UMOA ?",
+     "options": [
+      "La BRVM seule",
+      "L’AMF-UMOA",
+      "Chaque SGI",
+      "Personne"
+     ],
+     "correct": 1,
+     "explication": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+    }
+   ],
+   "qcm": {
+    "question": "Quels sont les trois caractères d’une information privilégiée ?",
+    "options": [
+     "Ancienne, publique, sans effet",
+     "Précise, non publique, susceptible d’influencer le cours",
+     "Vague, publique, chiffrée",
+     "Officielle, ancienne, confidentielle"
+    ],
+    "correct": 1,
+    "explication": "Une information privilégiée est précise, non encore publique, et susceptible d’influencer sensiblement le cours."
+   }
+  },
+  {
+   "index": 2,
+   "titre": "Leçon 3 — Les compartiments et les indices de la BRVM",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Trois compartiments",
+     "contenu": "La réorganisation est entrée en vigueur le 2 janvier 2023, selon le communiqué publié par la BRVM ce jour-là.",
+     "tableau": {
+      "colonnes": [
+       "Compartiment",
+       "Pour qui",
+       "Critères publiés"
+      ],
+      "lignes": [
+       [
+        "Prestige",
+        "Les grandes sociétés établies",
+        "10 ans d’activité, 50 Md FCFA de capitalisation, flottant d’au moins 20 % et 4 millions de titres, information régulière, engagement RSE"
+       ],
+       [
+        "Principal",
+        "Les sociétés cotées qui ne relèvent pas du Prestige",
+        "Les critères d’admission généraux de la BRVM"
+       ],
+       [
+        "Croissance",
+        "Les PME et les entreprises à fort potentiel de croissance",
+        "Des conditions d’accès allégées, avec un accompagnement spécifique"
+       ]
+      ],
+      "note": "Source : communiqué de la BRVM du 2 janvier 2023. Le règlement de la BRVM fait foi pour le détail des critères."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Les indices de la BRVM",
+     "contenu": "Un indice résume l’évolution d’un groupe de valeurs. Depuis 2023, la BRVM publie notamment trois indices de référence.",
+     "points": [
+      {
+       "titre": "BRVM Composite",
+       "detail": "Toutes les sociétés cotées, pondérées par leur capitalisation."
+      },
+      {
+       "titre": "BRVM 30",
+       "detail": "Les trente valeurs les plus échangées sur un trimestre ; il a remplacé le BRVM 10."
+      },
+      {
+       "titre": "BRVM Prestige",
+       "detail": "Les valeurs du compartiment Prestige ; sa composition est révisée chaque année."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : les indices à la dernière séance",
+     "reel": true,
+     "contenu": "Les valeurs des principaux indices, lues en base à l’ouverture de la leçon.",
+     "donnees_reelles": {
+      "vue": "indices",
+      "codes": [
+       "BRVMC",
+       "BRVM30",
+       "BRVMPRES",
+       "BRVMPRIN"
+      ]
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Ce qu’un compartiment ne dit pas",
+     "contenu": "Un classement décrit des caractéristiques, pas une qualité d’investissement.",
+     "points": [
+      {
+       "titre": "Prestige ne veut pas dire « sans risque »",
+       "detail": "Une grande société peut voir ses résultats baisser et son cours reculer.",
+       "verifier": "Les comptes et la valorisation de la société."
+      },
+      {
+       "titre": "Croissance ne veut pas dire « croissance assurée »",
+       "detail": "Le compartiment accueille des entreprises jeunes, souvent plus risquées et moins liquides.",
+       "verifier": "La liquidité et l’historique de la valeur."
+      },
+      {
+       "titre": "Un indice pondéré par la capitalisation est concentré",
+       "detail": "Quelques grandes valeurs y pèsent lourd.",
+       "verifier": "Le poids des premières valeurs dans l’indice."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Classer n’est pas recommander.",
+     "points": [
+      {
+       "titre": "Trois compartiments depuis le 2 janvier 2023 : Prestige, Principal, Croissance"
+      },
+      {
+       "titre": "Prestige : 10 ans, 50 Md FCFA de capitalisation, 20 % de flottant"
+      },
+      {
+       "titre": "BRVM Composite, BRVM 30, BRVM Prestige : trois indices de référence"
+      },
+      {
+       "titre": "Un compartiment décrit une société, il ne juge pas son action"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Depuis quand le marché des actions de la BRVM est-il organisé en compartiments Prestige, Principal et Croissance ?",
+     "options": [
+      "1998",
+      "2 janvier 2023",
+      "1er octobre 2022",
+      "2026"
+     ],
+     "correct": 1,
+     "explication": "La réorganisation est entrée en vigueur le 2 janvier 2023."
+    },
+    {
+     "question": "Quel flottant minimum le compartiment Prestige exige-t-il ?",
+     "options": [
+      "5 % du capital",
+      "20 % du capital, et au moins 4 millions de titres",
+      "50 % du capital",
+      "Aucun"
+     ],
+     "correct": 1,
+     "explication": "Le communiqué de la BRVM fixe un flottant d’au moins 20 % du capital, correspondant à au moins 4 millions de titres."
+    },
+    {
+     "question": "Que regroupe l’indice BRVM 30 ?",
+     "options": [
+      "Les 30 plus grandes capitalisations",
+      "Les 30 valeurs les plus échangées sur un trimestre",
+      "Les 30 plus anciennes sociétés",
+      "30 obligations"
+     ],
+     "correct": 1,
+     "explication": "Le BRVM 30 regroupe les trente valeurs les plus échangées sur un trimestre."
+    },
+    {
+     "question": "À qui s’adresse le compartiment Croissance ?",
+     "options": [
+      "Aux banques uniquement",
+      "Aux PME et aux entreprises à fort potentiel de croissance",
+      "Aux États",
+      "Aux OPCVM"
+     ],
+     "correct": 1,
+     "explication": "Le compartiment Croissance est destiné aux PME et aux entreprises à fort potentiel de croissance."
+    },
+    {
+     "question": "Une société du compartiment Prestige est-elle un placement sans risque ?",
+     "options": [
+      "Oui",
+      "Non : le compartiment décrit sa taille et sa transparence, pas l’évolution de son cours",
+      "Oui, si elle verse un dividende",
+      "Oui, pendant 10 ans"
+     ],
+     "correct": 1,
+     "explication": "Le classement repose sur des critères de taille, de flottant et d’information, pas sur une garantie de performance."
+    }
+   ],
+   "qcm": {
+    "question": "Depuis quand le marché des actions de la BRVM est-il organisé en compartiments Prestige, Principal et Croissance ?",
+    "options": [
+     "1998",
+     "2 janvier 2023",
+     "1er octobre 2022",
+     "2026"
+    ],
+    "correct": 1,
+    "explication": "La réorganisation est entrée en vigueur le 2 janvier 2023."
+   }
+  },
+  {
+   "index": 3,
+   "titre": "Leçon 4 — Pourquoi une société entre en bourse",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Deux façons d’entrer en bourse",
+     "contenu": "Ce qui est vendu au public détermine à qui va l’argent.",
+     "tableau": {
+      "colonnes": [
+       "Opération",
+       "Ce qui est vendu",
+       "À qui va l’argent"
+      ],
+      "lignes": [
+       [
+        "Augmentation de capital",
+        "Des actions nouvelles",
+        "À la société, qui peut investir"
+       ],
+       [
+        "Offre publique de vente (OPV)",
+        "Des actions existantes",
+        "Aux actionnaires qui cèdent leurs titres"
+       ],
+       [
+        "Opération mixte",
+        "Les deux à la fois",
+        "En partie à la société, en partie aux vendeurs"
+       ]
+      ],
+      "note": "Lire la note d’information pour savoir qui reçoit l’argent levé : c’est une indication sur le projet."
+     }
+    },
+    {
+     "type": "importance",
+     "titre": "Ce que la société gagne, ce qu’elle accepte",
+     "contenu": "L’introduction est un arbitrage durable, pas un événement d’un jour.",
+     "points": [
+      {
+       "titre": "Gains",
+       "detail": "Accès à l’épargne du public, valeur de marché quotidienne, notoriété, possibilité de lever à nouveau des fonds plus tard."
+      },
+      {
+       "titre": "Contraintes",
+       "detail": "Publication régulière des comptes et des faits importants, contrôle de l’AMF-UMOA, assemblées ouvertes à de nombreux actionnaires."
+      },
+      {
+       "titre": "Coûts",
+       "detail": "Rémunération des conseils et de la SGI chef de file, frais d’admission et de cotation, coûts de communication financière."
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Un exemple récent : Bridge Bank Group Côte d’Ivoire",
+     "contenu": "Bridge Bank Group Côte d’Ivoire (code BBGC) est devenue la 48e société cotée de la BRVM, avec une première cotation le 24 septembre 2026. Les chiffres de l’offre sont ceux publiés à l’issue de l’opération.",
+     "stats": [
+      {
+       "label": "Type d’opération",
+       "valeur": "Offre publique de vente",
+       "detail": "Cession d’actions existantes au public"
+      },
+      {
+       "label": "Titres offerts",
+       "valeur": "10 millions d’actions",
+       "detail": "Selon les résultats publiés de l’offre"
+      },
+      {
+       "label": "Prix de l’offre",
+       "valeur": "6 750 FCFA",
+       "detail": "Par action"
+      },
+      {
+       "label": "Taux de souscription",
+       "valeur": "142 %",
+       "detail": "La demande a dépassé l’offre : les ordres ont été servis en partie"
+      },
+      {
+       "label": "Première cotation",
+       "valeur": "24 septembre 2026",
+       "detail": "48e société cotée de la BRVM"
+      }
+     ]
+    },
+    {
+     "type": "cas",
+     "titre": "Sur la BRVM : le cours aujourd’hui",
+     "reel": true,
+     "contenu": "Le dernier cours de BBGC, lu en base à l’ouverture de la leçon, à comparer au prix de l’offre de 6 750 FCFA. Un écart dans un sens ou dans l’autre ne dit rien de la qualité de la société : il dit ce que le marché paie aujourd’hui.",
+     "donnees_reelles": {
+      "vue": "cours",
+      "codes": [
+       "BBGC"
+      ],
+      "actions": 100
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les illusions de l’introduction",
+     "contenu": "Une introduction attire l’attention ; elle mérite la même analyse que n’importe quel achat.",
+     "points": [
+      {
+       "titre": "« Sursouscrite, donc bonne affaire »",
+       "detail": "Une forte demande dit que l’offre plaît, pas que le prix est bas. Elle réduit aussi la part servie à chacun.",
+       "verifier": "La valorisation implicite du prix d’offre."
+      },
+      {
+       "titre": "Oublier qui vend",
+       "detail": "Dans une offre publique de vente, l’argent va aux vendeurs, pas à la société.",
+       "verifier": "La structure de l’opération dans la note d’information."
+      },
+      {
+       "titre": "Ignorer la liquidité après la cotation",
+       "detail": "Une valeur nouvelle peut s’échanger peu une fois l’enthousiasme passé.",
+       "verifier": "Les volumes des premières semaines."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Une introduction se juge comme un achat : sur les comptes et sur le prix.",
+     "points": [
+      {
+       "titre": "Augmentation de capital : l’argent va à la société ; OPV : aux vendeurs"
+      },
+      {
+       "titre": "La cotation apporte fonds et visibilité, contre transparence et coûts"
+      },
+      {
+       "titre": "Une offre sursouscrite n’est pas forcément bon marché"
+      },
+      {
+       "titre": "Lire la note d’information avant de souscrire"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Dans une offre publique de vente, à qui va l’argent des souscripteurs ?",
+     "options": [
+      "À la société",
+      "Aux actionnaires qui cèdent leurs titres",
+      "À la BRVM",
+      "À l’AMF-UMOA"
+     ],
+     "correct": 1,
+     "explication": "Une OPV porte sur des actions existantes : le produit va aux vendeurs."
+    },
+    {
+     "question": "Une offre de 10 millions d’actions reçoit des demandes pour 14,2 millions. Quel est le taux de souscription ?",
+     "options": [
+      "70 %",
+      "100 %",
+      "142 %",
+      "242 %"
+     ],
+     "correct": 2,
+     "explication": "14,2 ÷ 10 = 142 %."
+    },
+    {
+     "question": "Dans le même cas, si toutes les demandes sont réduites de façon égale, quelle part de sa demande chacun reçoit-il ?",
+     "options": [
+      "Environ 50 %",
+      "Environ 70 %",
+      "100 %",
+      "142 %"
+     ],
+     "correct": 1,
+     "explication": "10 ÷ 14,2 ≈ 70 % de la demande servie."
+    },
+    {
+     "question": "Quelle contrainte durable accepte une société en entrant en bourse ?",
+     "options": [
+      "Ne plus jamais verser de dividende",
+      "Publier régulièrement ses comptes et les faits importants",
+      "Fermer son capital",
+      "Changer de pays"
+     ],
+     "correct": 1,
+     "explication": "La cotation impose une information périodique et permanente, sous le contrôle de l’AMF-UMOA."
+    },
+    {
+     "question": "Une introduction très sursouscrite garantit-elle une hausse du cours ?",
+     "options": [
+      "Oui",
+      "Non : la demande ne dit rien du niveau du prix ni de l’évolution future",
+      "Oui, la première année",
+      "Oui, si la société est une banque"
+     ],
+     "correct": 1,
+     "explication": "Une forte demande ne garantit rien. Le cours dépend ensuite des résultats et du prix payé."
+    }
+   ],
+   "qcm": {
+    "question": "Dans une offre publique de vente, à qui va l’argent des souscripteurs ?",
+    "options": [
+     "À la société",
+     "Aux actionnaires qui cèdent leurs titres",
+     "À la BRVM",
+     "À l’AMF-UMOA"
+    ],
+    "correct": 1,
+    "explication": "Une OPV porte sur des actions existantes : le produit va aux vendeurs."
+   }
+  },
+  {
+   "index": 4,
+   "titre": "Leçon 5 — La procédure d’introduction à la BRVM",
+   "sections": [
+    {
+     "type": "definition",
+     "titre": "Les acteurs d’une introduction",
+     "contenu": "Chacun engage sa responsabilité sur une partie du processus.",
+     "points": [
+      {
+       "titre": "La société émettrice",
+       "detail": "Décide de l’opération en assemblée, fournit ses comptes et répond de l’exactitude des informations."
+      },
+      {
+       "titre": "La SGI chef de file",
+       "detail": "Conduit l’opération, organise le placement auprès du public et centralise les ordres avec les autres SGI."
+      },
+      {
+       "titre": "L’AMF-UMOA",
+       "detail": "Examine le dossier et vise la note d’information avant toute offre au public."
+      },
+      {
+       "titre": "La BRVM",
+       "detail": "Se prononce sur l’admission des titres à la cote et organise la première cotation."
+      }
+     ]
+    },
+    {
+     "type": "importance",
+     "titre": "Les étapes",
+     "contenu": "L’ordre des étapes est constant ; leurs durées varient selon les opérations.",
+     "etapes": [
+      {
+       "titre": "Décision et préparation",
+       "detail": "Assemblée générale, choix de la SGI chef de file et des conseils, audit des comptes."
+      },
+      {
+       "titre": "Note d’information",
+       "detail": "Document décrivant la société, ses comptes, ses risques et l’opération."
+      },
+      {
+       "titre": "Visa de l’AMF-UMOA",
+       "detail": "Aucune offre au public ne peut être ouverte avant ce visa.",
+       "cle": true
+      },
+      {
+       "titre": "Période de souscription",
+       "detail": "Les investisseurs transmettent leurs ordres par l’intermédiaire d’une SGI."
+      },
+      {
+       "titre": "Allocation et résultats",
+       "detail": "En cas de sursouscription, les ordres sont réduits selon les règles annoncées."
+      },
+      {
+       "titre": "Admission et première cotation",
+       "detail": "La BRVM inscrit les titres à la cote ; les échanges commencent."
+      }
+     ],
+     "etapes_style": "frise"
+    },
+    {
+     "type": "importance",
+     "titre": "Ce qu’il faut lire dans une note d’information",
+     "contenu": "C’est le seul document de référence de l’offre. Il est long : ces rubriques suffisent à se faire une opinion.",
+     "tableau": {
+      "colonnes": [
+       "Rubrique",
+       "La question à se poser"
+      ],
+      "lignes": [
+       [
+        "Structure de l’opération",
+        "Qui vend, combien, et à qui va l’argent ?"
+       ],
+       [
+        "Facteurs de risque",
+        "Qu’est-ce qui pourrait faire baisser les résultats ?"
+       ],
+       [
+        "Comptes historiques",
+        "Le résultat est-il régulier sur plusieurs années ?"
+       ],
+       [
+        "Prix et valorisation",
+        "Quel PER et quel P/B le prix d’offre implique-t-il ?"
+       ],
+       [
+        "Politique de dividende",
+        "Un engagement de distribution est-il annoncé, et sur quelle base ?"
+       ],
+       [
+        "Règles d’allocation",
+        "Comment les ordres seront-ils servis en cas de forte demande ?"
+       ]
+      ],
+      "note": "Le visa de l’AMF-UMOA atteste que l’information est complète et compréhensible ; il ne juge pas l’intérêt de l’investissement."
+     }
+    },
+    {
+     "type": "piege",
+     "titre": "Les malentendus fréquents",
+     "contenu": "Trois idées fausses reviennent souvent.",
+     "points": [
+      {
+       "titre": "Le visa n’est pas une recommandation",
+       "detail": "Il porte sur la qualité de l’information, pas sur l’opportunité d’acheter.",
+       "verifier": "La mention exacte du visa sur la note."
+      },
+      {
+       "titre": "Souscrire n’est pas recevoir",
+       "detail": "En cas de sursouscription, vous ne recevez qu’une partie des titres demandés.",
+       "verifier": "Les règles d’allocation."
+      },
+      {
+       "titre": "Le prix d’offre n’est pas un plancher",
+       "detail": "Après la première cotation, le cours peut passer sous le prix d’offre.",
+       "verifier": "La valorisation implicite du prix."
+      }
+     ]
+    },
+    {
+     "type": "retenir",
+     "titre": "L’essentiel",
+     "contenu": "Un visa, une note d’information, une SGI : trois repères.",
+     "points": [
+      {
+       "titre": "Pas d’offre au public sans visa de l’AMF-UMOA"
+      },
+      {
+       "titre": "La note d’information est le document de référence"
+      },
+      {
+       "titre": "Les ordres passent par une SGI ; l’allocation peut les réduire"
+      },
+      {
+       "titre": "Le visa atteste l’information, pas l’intérêt de l’investissement"
+      }
+     ]
+    }
+   ],
+   "quiz": [
+    {
+     "question": "Quelle étape doit précéder toute offre au public ?",
+     "options": [
+      "La première cotation",
+      "Le visa de l’AMF-UMOA sur la note d’information",
+      "Le versement d’un dividende",
+      "L’allocation des titres"
+     ],
+     "correct": 1,
+     "explication": "Aucune offre au public ne peut être ouverte avant le visa de l’AMF-UMOA."
+    },
+    {
+     "question": "Que signifie le visa de l’AMF-UMOA ?",
+     "options": [
+      "Que l’investissement est recommandé",
+      "Que l’information est complète et compréhensible",
+      "Que le cours montera",
+      "Que la société est garantie par l’État"
+     ],
+     "correct": 1,
+     "explication": "Le visa porte sur l’information, pas sur l’opportunité d’investir."
+    },
+    {
+     "question": "Qui conduit l’opération et organise le placement auprès du public ?",
+     "options": [
+      "La BCEAO",
+      "La SGI chef de file",
+      "Le Dépositaire central",
+      "Chaque investisseur"
+     ],
+     "correct": 1,
+     "explication": "La SGI chef de file pilote l’opération et centralise les ordres."
+    },
+    {
+     "question": "Vous demandez 1 000 titres dans une offre sursouscrite à 200 %, avec une réduction proportionnelle. Combien en recevez-vous ?",
+     "options": [
+      "250",
+      "500",
+      "1 000",
+      "2 000"
+     ],
+     "correct": 1,
+     "explication": "À 200 %, chaque ordre est servi à moitié : 500 titres."
+    },
+    {
+     "question": "Le cours peut-il passer sous le prix d’offre après la première cotation ?",
+     "options": [
+      "Non, jamais",
+      "Oui : le prix d’offre n’est pas un plancher",
+      "Seulement le premier jour",
+      "Seulement pour les PME"
+     ],
+     "correct": 1,
+     "explication": "Après la cotation, le cours résulte de l’offre et de la demande."
+    }
+   ],
+   "qcm": {
+    "question": "Quelle étape doit précéder toute offre au public ?",
+    "options": [
+     "La première cotation",
+     "Le visa de l’AMF-UMOA sur la note d’information",
+     "Le versement d’un dividende",
+     "L’allocation des titres"
+    ],
+    "correct": 1,
+    "explication": "Aucune offre au public ne peut être ouverte avant le visa de l’AMF-UMOA."
+   }
+  }
+ ]
+}

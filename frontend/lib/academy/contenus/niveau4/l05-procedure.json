@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Les acteurs d’une introduction",
-   "contenu": "Chacun engage sa responsabilité sur une partie du processus.",
+   "contenu": "Une introduction en bourse réunit plusieurs acteurs, et chacun engage sa responsabilité sur une partie du processus.\nLa société émettrice décide de l’opération en assemblée générale. Elle fournit ses comptes, décrit son activité et ses risques, et répond de l’exactitude des informations publiées. La SGI chef de file conduit l’opération : elle conseille la société, prépare le dossier avec elle, organise le placement auprès du public et centralise les ordres reçus par l’ensemble des SGI. D’autres conseils interviennent souvent : avocats, auditeurs, conseillers financiers.\nL’AMF-UMOA examine le dossier et vise la note d’information avant toute offre au public. La BRVM se prononce sur l’admission des titres à la cote, dans le compartiment qui correspond aux critères de la société, puis organise la première cotation.\nPour l’investisseur, la porte d’entrée reste sa SGI : c’est par elle que passe tout ordre de souscription, comme tout ordre de bourse.",
    "points": [
     {
      "titre": "La société émettrice",
@@ -32,7 +32,7 @@
   {
    "type": "importance",
    "titre": "Les étapes",
-   "contenu": "L’ordre des étapes est constant ; leurs durées varient selon les opérations.",
+   "contenu": "L’ordre des étapes est constant ; leurs durées varient selon les opérations.\nLa préparation est la phase la plus longue et la moins visible. La société met ses comptes et sa gouvernance au niveau attendu d’une société cotée, choisit ses conseils et rédige avec eux la note d’information. Le dossier est ensuite déposé auprès de l’AMF-UMOA, qui peut demander des compléments avant d’accorder son visa.\nUne fois le visa obtenu, la période de souscription s’ouvre, pour une durée fixée dans la note d’information. Les investisseurs transmettent leurs ordres à leur SGI. À la clôture, la SGI chef de file centralise les demandes ; si elles dépassent l’offre, les ordres sont réduits selon les règles annoncées. Les résultats sont publiés, les titres livrés, et la BRVM organise la première séance de cotation.",
    "etapes": [
     {
      "titre": "Décision et préparation",
@@ -65,7 +65,7 @@
   {
    "type": "importance",
    "titre": "Ce qu’il faut lire dans une note d’information",
-   "contenu": "C’est le seul document de référence de l’offre. Il est long : ces rubriques suffisent à se faire une opinion.",
+   "contenu": "C’est le seul document de référence de l’offre. Il est long : ces six rubriques suffisent à se faire une opinion.\nLa structure de l’opération dit qui vend, combien, et à qui va l’argent, comme on l’a vu à la leçon précédente. Les facteurs de risque sont rédigés par la société elle-même : ils sont parfois génériques, mais une société qui y signale une forte dépendance à un client ou à un contrat vous apprend quelque chose d’important.\nLes comptes historiques montrent la régularité des résultats sur plusieurs années, et permettent de vérifier que l’exercice qui sert de base au prix est représentatif. Le prix d’offre, rapporté au bénéfice et aux fonds propres, donne le PER et le P/B implicites. La politique de dividende dit ce que vous pouvez attendre en revenus ; les règles d’allocation, ce que vous recevrez réellement.",
    "tableau": {
     "colonnes": [
      "Rubrique",
@@ -103,7 +103,7 @@
   {
    "type": "piege",
    "titre": "Les malentendus fréquents",
-   "contenu": "Trois idées fausses reviennent souvent.",
+   "contenu": "Trois idées fausses reviennent souvent, et chacune peut coûter cher.\nLe visa de l’AMF-UMOA n’est pas une recommandation. Il atteste que la note d’information est complète et compréhensible ; il ne dit pas que le prix est bon ni que l’opération est intéressante. Une société peut obtenir un visa et voir son cours baisser dès la première séance.\nSouscrire n’est pas recevoir. Exemple fictif : vous demandez 1 000 titres dans une offre souscrite à 200 %, avec une réduction proportionnelle. Chaque demande est servie à moitié : vous recevez 500 titres. D’autres règles existent, comme une priorité aux petits ordres ou à certaines catégories d’investisseurs : elles figurent dans la note.\nLe prix d’offre, enfin, n’est pas un plancher. Après la première cotation, le cours résulte de l’offre et de la demande, et peut passer sous le prix payé par les souscripteurs.",
    "points": [
     {
      "titre": "Le visa n’est pas une recommandation",
@@ -125,7 +125,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Un visa, une note d’information, une SGI : trois repères.",
+   "contenu": "Un visa, une note d’information, une SGI : trois repères qui structurent toute introduction en bourse.\nLa démarche de l’investisseur tient en quatre gestes : lire la structure de l’opération, lire les facteurs de risque, calculer la valorisation implicite du prix d’offre, et vérifier les règles d’allocation avant de décider combien demander. Le reste de la note se consulte selon les questions qui restent.",
    "points": [
     {
      "titre": "Pas d’offre au public sans visa de l’AMF-UMOA"

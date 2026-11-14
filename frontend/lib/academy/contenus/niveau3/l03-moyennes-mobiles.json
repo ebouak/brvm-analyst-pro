@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Le calcul",
-   "contenu": "Exemple pédagogique sur cinq séances.",
+   "contenu": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, sur un nombre de séances fixé. À chaque nouvelle séance, la clôture la plus ancienne sort du calcul et la plus récente y entre : la moyenne « glisse » avec le temps, d’où son nom.\nSon intérêt est de lisser les variations d’une séance à l’autre. Une action qui monte, baisse un peu, puis remonte dessine une courbe en dents de scie ; sa moyenne mobile dessine une ligne plus régulière, qui fait apparaître la direction de fond.\nExemple fictif sur cinq séances : les clôtures 100, 102, 101, 105 et 107 donnent une moyenne de 103. Si l’action clôture à 108 à la séance suivante, la clôture 100 sort du calcul et la nouvelle moyenne vaut (102 + 101 + 105 + 107 + 108) ÷ 5, soit 104,6. L’écart du cours à sa moyenne mesure, en pourcentage, de combien il s’en éloigne.",
    "formules": [
     {
      "nom": "Moyenne mobile simple sur N séances",
@@ -26,7 +26,7 @@
   {
    "type": "importance",
    "titre": "Moyenne courte et moyenne longue",
-   "contenu": "Une moyenne courte (20 séances, environ un mois) suit le cours de près. Une moyenne longue (50 séances ou plus) décrit la tendance de fond.\nLe graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne.",
+   "contenu": "Le nombre de séances change ce que la moyenne décrit. Une moyenne courte, sur 20 séances, soit environ un mois de cotation, suit le cours de près et réagit vite. Une moyenne longue, sur 50 séances ou plus, réagit lentement et décrit la tendance de fond.\nOn lit d’abord la position du cours face aux deux moyennes. Au-dessus des deux, le mouvement récent et la tendance de fond vont ensemble vers le haut. En dessous des deux, ils vont ensemble vers le bas. Entre les deux, court terme et fond divergent : c’est souvent une phase d’hésitation.\nOn lit ensuite la pente de la moyenne longue. Une moyenne longue qui monte régulièrement décrit une tendance installée ; une moyenne plate décrit un marché sans direction, où les croisements perdent leur sens. Le graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne et y reste.",
    "stats": [
     {
      "label": "Cours au-dessus des deux moyennes",
@@ -49,7 +49,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : le cours face à ses moyennes",
    "reel": true,
-   "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.",
+   "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.\nPour chaque ligne, faites la lecture en deux temps vue plus haut : où se situe le cours face à ses deux moyennes, et quel écart les sépare ? Un cours très éloigné de sa moyenne courte décrit un mouvement récent rapide. Rien ne dit qu’il se prolongera, ni qu’il se corrigera.\nGardez en tête une particularité de la BRVM : si une valeur a connu plusieurs séances sans échange, sa moyenne a été calculée en partie sur des cours figés. Elle paraît plus stable qu’elle ne l’est. La fiche de chaque valeur indique ses volumes récents.",
    "donnees_reelles": {
     "vue": "technique",
     "codes": [
@@ -64,7 +64,7 @@
   {
    "type": "piege",
    "titre": "Le retard, défaut inévitable",
-   "contenu": "Une moyenne mobile regarde en arrière : elle confirme une tendance quand celle-ci est déjà installée.",
+   "contenu": "Une moyenne mobile regarde en arrière par construction : elle est faite de cours passés. Elle confirme donc une tendance quand celle-ci est déjà installée, jamais avant.\nExemple fictif : une action passe de 1 000 à 1 300 FCFA en deux mois. La moyenne courte ne croise la moyenne longue à la hausse qu’après plusieurs semaines, quand le cours a déjà parcouru une bonne partie du chemin. Celui qui attend le croisement pour acheter paie plus cher que celui qui a acheté au début ; celui qui attend le croisement inverse pour vendre vend sous le sommet.\nCe retard est le prix de la régularité. Une moyenne plus courte le réduit, mais elle croise le cours plus souvent et multiplie les faux signaux, surtout quand le marché oscille sans direction. Aucun réglage ne supprime ce dilemme.",
    "points": [
     {
      "titre": "Les croisements arrivent tard",
@@ -86,7 +86,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Une moyenne mobile décrit, elle ne prévoit pas.",
+   "contenu": "Une moyenne mobile décrit, elle ne prévoit pas. C’est un outil de lecture, qui rend une tendance plus visible et évite de confondre une séance agitée avec un retournement.\nUtilisez-la comme un repère de contexte : savoir si le cours est au-dessus ou en dessous de sa moyenne longue, et si cette moyenne monte ou baisse, situe un achat. Cela ne dit rien du juste prix de la société, qui relève de ses comptes.",
    "points": [
     {
      "titre": "Moyenne mobile = moyenne des N dernières clôtures"

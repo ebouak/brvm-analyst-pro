@@ -36,7 +36,7 @@ export const tableauSchema = z
 /** Bloc étapes — frise numérotée verticale (phases de séance, parcours, dates). */
 export const etapeSchema = z.object({
   titre: z.string().min(1).max(120),
-  detail: z.string().max(400).optional().default(''),
+  detail: z.string().max(600).optional().default(''),
   /** Étape mise en avant (ex. la date de détachement). */
   cle: z.boolean().optional().default(false),
 });
@@ -67,7 +67,7 @@ export const fluxEtapeSchema = z.object({
 /** Point d'une liste éditoriale numérotée (critère, piège, idée essentielle). */
 export const pointSchema = z.object({
   titre: z.string().min(1).max(80),
-  detail: z.string().max(300).optional().default(''),
+  detail: z.string().max(600).optional().default(''),
   /** « À vérifier » — ce que le lecteur doit contrôler (facultatif). */
   verifier: z.string().max(160).optional().default(''),
 });
@@ -116,7 +116,7 @@ export type DonneesReellesSpec = z.infer<typeof donneesReellesSchema>;
 export const sectionSchema = z.object({
   type: z.enum(SECTION_TYPES),
   titre: z.string().min(1).max(120),
-  contenu: z.string().min(1).max(2000),
+  contenu: z.string().min(1).max(6000),
   // ── Blocs structurés optionnels (mise en page riche type slide) ──
   stats: z.array(statSchema).max(6).optional().default([]),
   tableau: tableauSchema.nullable().optional(),
@@ -142,7 +142,7 @@ export const qcmSchema = z.object({
   question: z.string().min(1).max(400),
   options: z.array(z.string().min(1).max(300)).min(2).max(5),
   correct: z.number().int().min(0),
-  explication: z.string().min(1).max(600),
+  explication: z.string().min(1).max(900),
 });
 
 /**
@@ -179,7 +179,7 @@ export const lessonSchema = z.object({
   resume: z.string().min(1).max(600),
   /** Mention réglementaire affichée en pied d'article (facultatif). */
   avertissement: z.string().max(300).nullable().optional(),
-  sections: z.array(sectionSchema).min(1).max(8),
+  sections: z.array(sectionSchema).min(1).max(12),
   chart: chartSchema.nullable().optional(),
   // Graphiques multiples (leçons enrichies) — rendus après `chart`.
   charts: z.array(chartSchema).max(4).optional().default([]),

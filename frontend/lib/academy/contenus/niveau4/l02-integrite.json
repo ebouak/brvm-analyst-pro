@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Deux obligations d’information",
-   "contenu": "Une société cotée informe le marché selon un calendrier, et chaque fois qu’un fait important survient.",
+   "contenu": "Un marché ne fonctionne que si tous les investisseurs disposent de la même information au même moment. Si certains savent avant les autres, ceux qui ne savent pas achètent et vendent à des prix faussés, et finissent par se retirer. Les sociétés cotées ont donc deux obligations d’information.\nL’information périodique suit un calendrier : états financiers annuels certifiés, rapports d’activité en cours d’année, publiés dans des délais fixés par la réglementation. Elle permet de suivre la société dans la durée.\nL’information permanente répond à l’événement. Tout fait nouveau susceptible d’influencer sensiblement le cours doit être rendu public sans délai : un résultat très différent de l’attendu, un contrat majeur, un litige important, un changement de dirigeant. Le principe est que la publication suit le fait, et non le calendrier qui arrangerait la société.",
    "points": [
     {
      "titre": "L’information périodique",
@@ -24,7 +24,7 @@
   {
    "type": "importance",
    "titre": "L’information privilégiée",
-   "contenu": "Une information est dite privilégiée quand elle réunit trois caractères. Celui qui la détient ne doit ni s’en servir pour opérer, ni la communiquer, tant qu’elle n’est pas publique.",
+   "contenu": "Une information est dite privilégiée quand elle réunit trois caractères. Celui qui la détient ne doit ni s’en servir pour opérer, ni la communiquer, tant qu’elle n’est pas publique.\nExemple fictif : le directeur financier d’une société apprend, une semaine avant la publication, que le résultat annuel sera deux fois plus élevé que prévu. L’information est précise, elle n’est pas publique, et elle ferait évidemment monter le cours : elle est privilégiée. Tant qu’elle n’est pas publiée, il ne doit ni acheter d’actions, ni en parler à ses proches.\nL’interdiction ne vise pas seulement les dirigeants. Elle concerne aussi un salarié, un conseiller, et le proche à qui l’information a été confiée.",
    "points": [
     {
      "titre": "Précise",
@@ -43,7 +43,7 @@
   {
    "type": "cas",
    "titre": "Les principaux abus de marché",
-   "contenu": "Les comportements visés par la réglementation, résumés à titre pédagogique.",
+   "contenu": "Les comportements visés par la réglementation, résumés à titre pédagogique. Ils ont un point commun : ils faussent le prix que paient les autres investisseurs.\nLe délit d’initié et la communication illicite exploitent une information privilégiée. La manipulation de cours et la fausse information n’ont pas besoin d’information secrète : elles créent une fausse image du marché, par des ordres ou par des messages.\nLa manipulation est un risque réel sur un marché peu liquide. Quand une valeur s’échange peu, quelques ordres placés au bon moment suffisent à déplacer sa clôture, donc la valorisation affichée de tous ses détenteurs. Un cours qui bondit en fin de séance sur très peu de titres mérite d’être regardé avec prudence, sans conclure pour autant à un abus.",
    "tableau": {
     "colonnes": [
      "Abus",
@@ -78,12 +78,12 @@
   {
    "type": "importance",
    "titre": "Pourquoi cela concerne aussi le petit investisseur",
-   "contenu": "Les abus de marché ne sont pas réservés aux initiés. Relayer une rumeur de rachat dans un groupe de discussion, ou acheter sur la foi d’un « tuyau » venu de l’intérieur d’une société, expose à des risques réels.\nSur un marché peu liquide, quelques ordres suffisent à déplacer un cours : la vigilance y est d’autant plus nécessaire."
+   "contenu": "Les abus de marché ne sont pas réservés aux initiés. Relayer une rumeur de rachat dans un groupe de discussion, ou acheter sur la foi d’un « tuyau » venu de l’intérieur d’une société, expose à des risques réels.\nSur un marché peu liquide, quelques ordres suffisent à déplacer un cours : la vigilance y est d’autant plus nécessaire.\nLe cas le plus courant passe par les messageries. Un message annonce un rachat imminent, une hausse « assurée », un résultat connu d’avance. Soit l’information est fausse, et ceux qui l’ont lancée vendent pendant que les autres achètent ; soit elle est vraie et non publique, et l’utiliser est interdit. Dans les deux cas, acheter sur cette base est une erreur.\nTransférer un tel message n’est pas anodin non plus : diffuser une information trompeuse pour influencer un cours fait partie des abus de marché."
   },
   {
    "type": "piege",
    "titre": "Les bons réflexes",
-   "contenu": "Quelques règles simples protègent votre épargne et votre responsabilité.",
+   "contenu": "Quelques règles simples protègent à la fois votre épargne et votre responsabilité.\nLa source d’abord. Les avis de la BRVM, les communiqués des sociétés et les documents visés par l’AMF-UMOA font foi. Une information qui ne figure dans aucun de ces canaux n’est pas encore une information de marché, quelle que soit la personne qui la relaie.\nLa date ensuite. Une vraie information, mais ancienne, peut circuler de nouveau comme si elle était fraîche. Vérifier la date d’un communiqué évite d’acheter sur une nouvelle que le cours a intégrée depuis longtemps.\nEnfin, l’AMF-UMOA reçoit les signalements et les réclamations des épargnants. Un comportement suspect, une offre douteuse ou un intermédiaire non agréé peuvent lui être signalés par les canaux indiqués sur son site.",
    "points": [
     {
      "titre": "Se fier aux publications officielles",
@@ -105,7 +105,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Même information, au même moment, pour tous.",
+   "contenu": "Même information, au même moment, pour tous. C’est la condition de la confiance, donc de la liquidité du marché.\nPour l’épargnant, la règle pratique est simple : ne décider que sur des informations publiques et officielles, datées et sourcées. Ce qui circule en privé est soit faux, soit interdit d’usage ; dans les deux cas, ce n’est pas une base de décision.",
    "points": [
     {
      "titre": "Information périodique et permanente : deux obligations des sociétés cotées"

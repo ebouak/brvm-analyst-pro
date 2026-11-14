@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Les quatre pièces d’un rapport annuel",
-   "contenu": "Les sociétés de la BRVM tiennent leurs comptes selon le SYSCOHADA révisé ; les banques suivent le plan comptable bancaire de l’UMOA. Le vocabulaire diffère un peu, la logique est la même.\nChaque pièce répond à une question différente. Les lire ensemble évite les conclusions hâtives.",
+   "contenu": "Les sociétés cotées à la BRVM tiennent leurs comptes selon le SYSCOHADA révisé ; les banques suivent le plan comptable bancaire de l’UMOA. Le vocabulaire diffère un peu, la logique est la même : chaque document répond à une question précise.\nLe bilan dit ce que la société possède et ce qu’elle doit, à une date donnée. Le compte de résultat dit ce qu’elle a gagné ou perdu pendant l’année. Le tableau des flux dit si ce gain s’est transformé en argent disponible. Les notes et le rapport des commissaires aux comptes disent comment lire les trois premiers, et s’ils sont fiables.\nLire une seule pièce conduit souvent à une erreur. Un bénéfice élevé peut cacher une trésorerie qui fond. Des fonds propres solides peuvent cacher une activité qui recule. C’est en croisant les quatre que l’on se fait une idée juste de la société.",
    "points": [
     {
      "titre": "Le bilan",
@@ -36,7 +36,7 @@
   {
    "type": "importance",
    "titre": "Le mécanisme : du chiffre d’affaires au dividende",
-   "contenu": "Le résultat net appartient aux actionnaires. L’assemblée générale décide d’en distribuer une partie (le dividende) et de garder le reste en réserves, ce qui augmente les fonds propres.",
+   "contenu": "Le compte de résultat part des ventes de l’année. On en retire les achats, les salaires et les amortissements, puis les intérêts de la dette et l’impôt. Ce qui reste est le résultat net : il appartient aux actionnaires.\nCe résultat n’est pas versé automatiquement. L’assemblée générale des actionnaires, réunie après la clôture de l’exercice, vote son affectation : une partie est distribuée sous forme de dividende, le reste est mis en réserve. Les réserves s’ajoutent aux fonds propres et financent les investissements futurs.\nPour l’épargnant, la conséquence est pratique : le dividende versé une année dépend du résultat de l’exercice précédent et de la décision de l’assemblée. Une société peut faire un bon bénéfice et choisir de le garder, pour investir ou pour rembourser une dette. Le rapport annuel explique en général ce choix dans la proposition d’affectation du résultat.",
    "flux": [
     {
      "titre": "Ventes",
@@ -68,7 +68,7 @@
   {
    "type": "cas",
    "titre": "Un ordre de lecture en cinq étapes",
-   "contenu": "Lire de la première à la dernière page fait perdre l’essentiel. Cet ordre va du plus important au détail.",
+   "contenu": "Un rapport annuel compte souvent des dizaines de pages. Les lire de la première à la dernière fait perdre l’essentiel dans les commentaires de la direction. L’ordre ci-dessous va du plus important au détail : en cinq étapes, vous savez si la société mérite une lecture plus poussée.\nCommencez par le rapport des commissaires aux comptes, même s’il est placé à la fin. S’il contient une réserve, tous les chiffres qui suivent se lisent avec cette réserve en tête. Passez ensuite au compte de résultat, en mettant au moins deux exercices côte à côte : une seule année ne montre pas de tendance.\nExemple fictif : une société affiche un résultat net en hausse de 40 %. Son résultat d’exploitation, lui, est stable : la hausse vient d’une plus-value sur la vente d’un immeuble. Le tableau des flux confirme une rentrée d’argent exceptionnelle, qui ne se reproduira pas. Lire dans l’ordre évite de prendre cette année pour une nouvelle tendance.",
    "etapes": [
     {
      "titre": "Le rapport des commissaires aux comptes",
@@ -96,7 +96,7 @@
   {
    "type": "importance",
    "titre": "Où trouver les comptes",
-   "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité trimestriels et semestriels. Les documents officiels sont diffusés par la BRVM.",
+   "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité en cours d’année. Les documents officiels sont diffusés par la BRVM ; beaucoup de sociétés les mettent aussi sur leur propre site.\nLe calendrier compte. Les comptes annuels arrivent plusieurs mois après la clôture de l’exercice : ils décrivent une situation déjà passée au moment où vous les lisez. Les rapports trimestriels et semestriels sont plus récents, mais moins détaillés, et ils ne font pas toujours l’objet d’une certification complète.\nUne bonne habitude consiste à garder les rapports de chaque année pour une même société. Comparer cinq exercices successifs montre bien mieux sa régularité que n’importe quel ratio calculé sur une seule année.",
    "tableau": {
     "colonnes": [
      "Document",
@@ -131,7 +131,7 @@
   {
    "type": "piege",
    "titre": "Les pièges de lecture",
-   "contenu": "Un rapport annuel est un document que la société rédige sur elle-même. Les chiffres sont contrôlés ; les commentaires restent de la communication.",
+   "contenu": "Un rapport annuel est rédigé par la société sur elle-même. Les chiffres sont contrôlés par les commissaires aux comptes ; les commentaires de la direction restent de la communication. Ils mettent en avant les réussites et passent plus vite sur les difficultés.\nLe piège le plus fréquent tient aux unités et aux périmètres. Un tableau en millions de FCFA lu comme s’il était en milliers donne un résultat mille fois trop petit. Des comptes sociaux comparés à des comptes consolidés mélangent la société seule et le groupe avec ses filiales : les deux chiffres sont exacts, mais ils ne décrivent pas la même chose.\nAvant de comparer deux chiffres, vérifiez donc trois mentions : l’unité sous le titre du tableau, le périmètre (social ou consolidé) et le statut du document (provisoire, ou approuvé par l’assemblée générale).",
    "points": [
     {
      "titre": "Confondre provisoire et définitif",
@@ -158,7 +158,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Lire un rapport annuel, c’est répondre à quatre questions dans l’ordre.",
+   "contenu": "Lire un rapport annuel, c’est répondre à quatre questions, dans l’ordre. Si la réponse à la première est négative, la suite se lit avec prudence.\nCes questions ne disent pas si l’action est chère ou bon marché : c’est le rôle des ratios des leçons suivantes, qui partent tous de ces chiffres. Un ratio calculé sur des comptes mal lus est faux, même avec une formule exacte.",
    "points": [
     {
      "titre": "Les comptes sont-ils certifiés sans réserve ?"
