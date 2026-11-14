@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Trois composantes",
-   "contenu": "Les paramètres usuels sont 12, 26 et 9 séances.",
+   "contenu": "Le MACD (moving average convergence divergence, ou convergence et divergence de moyennes mobiles) a été présenté par Gerald Appel à la fin des années 1970. Il repose sur deux moyennes mobiles exponentielles du cours, une courte et une longue, et mesure l’écart entre elles.\nLes paramètres usuels sont 12, 26 et 9 séances. La ligne MACD est la différence entre la moyenne exponentielle sur 12 séances et celle sur 26. Positive, elle indique une tendance courte au-dessus de la tendance longue ; négative, l’inverse.\nLa ligne de signal est une moyenne exponentielle sur 9 séances de la ligne MACD elle-même : elle la lisse. L’histogramme représente l’écart entre les deux lignes, sous forme de barres. C’est souvent la composante la plus lisible, parce qu’elle montre si l’écart grandit ou se resserre.",
    "formules": [
     {
      "nom": "Ligne MACD",
@@ -31,12 +31,12 @@
   {
    "type": "importance",
    "titre": "Moyenne exponentielle : pourquoi ?",
-   "contenu": "Une moyenne exponentielle donne plus de poids aux séances récentes qu’une moyenne simple. Elle réagit plus vite, au prix de plus de bruit.\nLe MACD n’est pas borné comme le RSI : sa valeur dépend du niveau du cours, et ne se compare pas d’une action à l’autre."
+   "contenu": "Une moyenne simple donne le même poids à chaque séance : la clôture d’il y a vingt séances compte autant que celle d’hier. Une moyenne exponentielle donne plus de poids aux séances récentes, et ce poids décroît progressivement pour les plus anciennes. Elle réagit donc plus vite à un changement de direction, au prix de plus de bruit.\nLe MACD n’est pas borné comme le RSI : il s’exprime en points de cours, et sa valeur dépend du prix de l’action. Exemple fictif : un écart de 50 FCFA entre les deux moyennes représente un mouvement important pour une action à 1 000 FCFA, et presque rien pour une action à 30 000 FCFA. On compare donc le MACD d’une action à son propre passé, jamais à celui d’une autre.\nPour comparer deux valeurs, il faudrait rapporter l’écart au cours, en pourcentage. Certains outils le proposent sous un autre nom ; le MACD classique ne le fait pas."
   },
   {
    "type": "cas",
    "titre": "Lire l’histogramme",
-   "contenu": "Exemple pédagogique : l’histogramme décrit l’accélération ou le ralentissement de la tendance.",
+   "contenu": "L’histogramme décrit l’accélération ou le ralentissement de la tendance. Il se lit selon deux critères, son signe et son évolution, comme dans l’exemple fictif du tableau.\nPositif et croissant, il montre une moyenne courte qui s’éloigne de plus en plus de la longue, vers le haut : la hausse accélère. Positif et décroissant, il montre un écart qui se resserre : la hausse continue peut-être, mais elle ralentit. Les deux cas symétriques décrivent la baisse.\nLe passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal. Beaucoup y voient un signal ; il hérite pourtant du retard des moyennes, et arrive souvent après le début du mouvement. Le ralentissement de l’histogramme, qui précède le croisement, est une information plus précoce, mais aussi plus souvent démentie.",
    "tableau": {
     "colonnes": [
      "Histogramme",
@@ -66,7 +66,7 @@
   {
    "type": "piege",
    "titre": "Ce que le MACD ne fait pas",
-   "contenu": "Le MACD hérite des défauts des moyennes mobiles.",
+   "contenu": "Le MACD hérite des défauts des moyennes mobiles dont il est fait. Les moyennes exponentielles les atténuent un peu, sans les supprimer.\nIl est en retard : construit sur des moyennes, il confirme plus qu’il n’anticipe. Il trompe dans un marché qui oscille sans direction : les lignes se croisent alors sans cesse, et chaque croisement est un faux départ.\nÀ la BRVM s’ajoute la question des séances sans échange. Quand le cours d’une valeur reste figé plusieurs jours, ses moyennes se rapprochent mécaniquement et son MACD tend vers zéro. Ce resserrement ne décrit pas une tendance qui s’essouffle : il décrit un marché qui ne traite pas. Vérifiez les volumes avant de lire le MACD d’une valeur peu liquide.",
    "points": [
     {
      "titre": "Il est en retard",
@@ -88,7 +88,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Le MACD mesure un élan, pas une destination.",
+   "contenu": "Le MACD mesure un élan, pas une destination. Il dit si une tendance accélère ou ralentit ; il ne dit pas jusqu’où elle ira, ni quand elle s’arrêtera.\nIl complète le RSI plus qu’il ne le remplace : le RSI mesure l’intensité d’un mouvement récent sur une échelle fixe, le MACD la dynamique de la tendance en points de cours. Lus avec les moyennes mobiles et le volume, ils décrivent l’état d’un graphique. Aucun des trois ne dit si la société mérite votre argent.",
    "points": [
     {
      "titre": "MACD = moyenne exponentielle 12 − moyenne exponentielle 26"

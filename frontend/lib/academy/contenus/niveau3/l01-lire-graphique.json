@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Quatre notions de base",
-   "contenu": "Un graphique de cours montre l’histoire des prix. Il se lit avant de se calculer.",
+   "contenu": "Un graphique de cours montre l’histoire des prix d’une action. Avant de calculer le moindre indicateur, il faut savoir le lire à l’œil, comme on lit une carte avant de mesurer une distance.\nL’analyse technique part d’une idée simple : le cours résume ce que les acheteurs et les vendeurs ont accepté de payer. En étudiant son évolution et les volumes échangés, on décrit le comportement du marché. On ne dit rien, en revanche, de la valeur de la société : c’est le rôle de l’analyse fondamentale du niveau 2.\nQuatre notions suffisent pour commencer. La tendance donne la direction. Le support et la résistance marquent les zones où le mouvement s’est déjà arrêté. Le volume dit si ces mouvements ont été portés par de vrais échanges. Les trois premières se lisent sur la courbe ; la quatrième, sur les barres placées sous la courbe.",
    "points": [
     {
      "titre": "La tendance",
@@ -34,7 +34,7 @@
   {
    "type": "importance",
    "titre": "Les trois échelles de temps",
-   "contenu": "Une même action peut monter sur un mois et baisser sur un an. Toujours préciser l’horizon.",
+   "contenu": "Une même action peut monter sur un mois et baisser sur un an. Les deux descriptions sont exactes : elles ne portent pas sur le même horizon. Avant toute lecture, choisissez donc l’échelle de temps qui correspond à votre projet.\nUn épargnant qui achète pour plusieurs années regarde d’abord le graphique long : où se situe le cours dans son histoire ? Le graphique de quelques mois sert ensuite à vérifier que la tendance n’est pas en train de se retourner. Le court terme ne sert qu’à choisir un moment d’achat, et c’est l’horizon le plus trompeur.\nÀ la BRVM, le court terme est particulièrement bruité. Sur une valeur peu échangée, quelques ordres suffisent à déplacer le cours d’une séance à l’autre, sans que rien n’ait changé dans la société.",
    "tableau": {
     "colonnes": [
      "Horizon",
@@ -64,7 +64,7 @@
   {
    "type": "piege",
    "titre": "Les limites propres à la BRVM",
-   "contenu": "L’analyse technique a été développée sur des marchés très liquides. La BRVM ne l’est pas toujours.",
+   "contenu": "L’analyse technique a été développée sur des marchés très liquides, où des milliers d’ordres s’échangent chaque minute. La BRVM est un marché plus étroit, et plusieurs de ses particularités changent la lecture d’un graphique.\nUne valeur peut rester plusieurs séances sans échange : son cours reste figé au dernier prix traité. Sur le graphique, la courbe paraît calme ; en réalité, personne n’a acheté ni vendu, et ce calme ne contient aucune information.\nLa BRVM encadre aussi la variation d’un cours en une séance. Une nouvelle importante peut donc se traduire par plusieurs séances consécutives de hausse ou de baisse, au lieu d’un saut unique. Lire ces séances comme une tendance qui s’installe est une erreur : c’est le même événement, étalé par la règle.\nEnfin, une valeur suspendue garde son dernier cours affiché. Ce chiffre n’est pas un prix auquel on peut traiter tant que la cotation n’a pas repris.",
    "points": [
     {
      "titre": "Des cours qui ne bougent pas",
@@ -87,7 +87,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : une lecture du jour",
    "reel": true,
-   "contenu": "Le cours de quatre valeurs, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.",
+   "contenu": "Le cours de quatre valeurs très suivies, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.\nCes indicateurs sont expliqués dans les leçons suivantes. Pour l’instant, retenez la lecture la plus simple : un cours au-dessus de ses deux moyennes décrit une tendance récente haussière, un cours en dessous une tendance baissière. C’est ce qui s’est passé, pas ce qui va se passer.\nExercez-vous en ouvrant le graphique de l’une de ces valeurs sur sa fiche : repérez les trois derniers sommets et les trois derniers creux, puis vérifiez si votre lecture concorde avec la position du cours face à ses moyennes.",
    "donnees_reelles": {
     "vue": "technique",
     "codes": [
@@ -101,7 +101,7 @@
   {
    "type": "importance",
    "titre": "Ce que nous avons mesuré sur la BRVM",
-   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.\nCe résultat ne dit pas qu’une action qui a baissé va remonter : certaines ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil.",
    "stats": [
     {
      "label": "Séances rejouées",
@@ -123,7 +123,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Lire avant de calculer.",
+   "contenu": "Lire avant de calculer. Un indicateur ne remplace pas l’œil : il précise ce que l’œil a déjà vu, ou il le contredit, et c’est alors qu’il devient utile.\nAvant de tirer la moindre conclusion d’un graphique de la BRVM, vérifiez deux choses : que la valeur s’échange réellement, et que l’horizon regardé correspond à votre projet.",
    "points": [
     {
      "titre": "Une tendance se lit aux sommets et aux creux successifs"

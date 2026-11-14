@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Deux risques différents",
-   "contenu": "Le risque d’un portefeuille a deux sources. La diversification ne supprime que la première.",
+   "contenu": "Le risque d’un portefeuille a deux sources. Il faut les distinguer avant de parler de diversification, car celle-ci ne supprime que la première.\nLa première est propre à chaque société : un mauvais résultat, un litige, un contrat perdu, un dirigeant qui part. Ce risque varie d’une société à l’autre. Si vous détenez dix sociétés à parts égales, une mauvaise nouvelle sur l’une ne touche qu’un dixième de votre portefeuille.\nLa seconde touche toutes les actions à la fois : une crise régionale, une hausse générale des taux, une baisse des prix des matières premières qui pèse sur plusieurs économies. Multiplier les lignes ne protège pas contre ce risque-là. D’autres placements, comme les obligations ou une épargne disponible, en amortissent l’effet.\nSupprimer la première source, c’est déjà beaucoup : c’est elle qui peut faire perdre une grande partie d’un portefeuille concentré sur une seule valeur.",
    "points": [
     {
      "titre": "Le risque propre à une société",
@@ -24,12 +24,12 @@
   {
    "type": "importance",
    "titre": "Combien de lignes ?",
-   "contenu": "Les études menées sur les grands marchés montrent que l’essentiel du risque propre disparaît entre 10 et 20 lignes. Le graphique de la leçon illustre cette courbe avec des valeurs d’exemple.\nÀ la BRVM, avec une cinquantaine de sociétés et des secteurs concentrés, viser 8 à 15 lignes réparties sur plusieurs secteurs est un repère raisonnable."
+   "contenu": "Les études menées sur les grands marchés montrent que l’essentiel du risque propre disparaît entre 10 et 20 lignes. Au-delà, chaque ligne supplémentaire réduit très peu le risque et complique le suivi. Le graphique de la leçon illustre cette courbe avec des valeurs d’exemple.\nÀ la BRVM, avec une cinquantaine de sociétés et des secteurs concentrés, viser 8 à 15 lignes réparties sur plusieurs secteurs est un repère raisonnable.\nCe repère dépend aussi de la somme investie. Avec un petit capital, multiplier les lignes oblige à passer de petits ordres, sur lesquels les frais minimum de courtage pèsent lourd. Mieux vaut alors construire le portefeuille progressivement, ligne après ligne, que d’acheter quinze valeurs d’un coup avec de très petits montants."
   },
   {
    "type": "importance",
    "titre": "Les quatre dimensions de la répartition",
-   "contenu": "Une bonne répartition se vérifie sur quatre axes, pas seulement sur le nombre de lignes.",
+   "contenu": "Une bonne répartition se vérifie sur quatre axes. Le nombre de lignes n’en est qu’un, et ce n’est pas le plus important.\nLe poids de la première ligne compte davantage : un portefeuille de quinze valeurs dont une pèse la moitié est en réalité concentré. Le secteur vient ensuite. À la BRVM, il est facile d’accumuler des banques sans s’en rendre compte, car elles sont nombreuses à la cote.\nLe pays est un axe propre à l’UEMOA. Toutes les sociétés sont cotées sur le même marché, mais leur activité dépend de l’économie d’un pays, ou de plusieurs : c’est le pays de l’activité qui compte. Enfin, la part d’obligations dépend de votre horizon et de la baisse que vous pouvez supporter : plus l’échéance de votre projet est proche, plus elle mérite d’être importante.\nExemple fictif : un portefeuille de 3 000 000 FCFA réparti en dix lignes égales de 300 000 FCFA ne dépasse jamais 10 % par ligne. S’il contient six banques, il dépasse pourtant de loin un tiers sur un seul secteur.",
    "tableau": {
     "colonnes": [
      "Dimension",
@@ -65,7 +65,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : deux indices",
    "reel": true,
-   "contenu": "L’indice BRVM Composite pondère les sociétés par leur capitalisation boursière : quelques grandes valeurs y pèsent lourd. Suivre un indice concentré n’est pas la même chose qu’être diversifié.",
+   "contenu": "L’indice BRVM Composite regroupe toutes les sociétés cotées, pondérées par leur capitalisation boursière. Une société deux fois plus grande pèse deux fois plus dans l’indice : quelques grandes valeurs y occupent une place importante.\nC’est utile à savoir : suivre l’indice n’est pas la même chose qu’être diversifié. Si les deux ou trois premières capitalisations baissent, l’indice baisse, même si la majorité des autres sociétés monte.\nLe BRVM 30 retient les trente valeurs les plus échangées. Comparer l’évolution des deux indices sur la même période indique si le mouvement du marché est porté par quelques grandes valeurs ou partagé par l’ensemble. Les valeurs ci-dessous sont lues en base à l’ouverture de la leçon.",
    "donnees_reelles": {
     "vue": "indices",
     "codes": [
@@ -77,7 +77,7 @@
   {
    "type": "piege",
    "titre": "Les fausses diversifications",
-   "contenu": "Avoir beaucoup de lignes ne suffit pas.",
+   "contenu": "Avoir beaucoup de lignes ne suffit pas. Les quatre erreurs ci-dessous donnent l’apparence d’un portefeuille réparti, sans en avoir la protection.\nLa plus fréquente consiste à accumuler des valeurs qui réagissent ensemble. Dix banques subissent la même décision sur les taux, la même hausse des créances douteuses dans un pays, la même nouvelle réglementation : elles montent et baissent souvent ensemble.\nLa liquidité est un piège moins visible. Une ligne peu échangée paraît stable sur un graphique, parce que son cours bouge rarement. Le jour où vous voulez la vendre, il peut ne pas y avoir d’acheteur au prix affiché. Diversifier, c’est aussi garder une part du portefeuille dans des valeurs que l’on peut revendre facilement.\nLe rééquilibrage, enfin, se fait au moins une fois par an. Une ligne qui a fortement monté finit par dominer le portefeuille : votre risque se concentre sans que vous l’ayez décidé.",
    "points": [
     {
      "titre": "Dix banques, un seul risque",
@@ -104,7 +104,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Diversifier, c’est accepter de moins gagner sur sa meilleure idée pour ne pas tout perdre sur la pire.",
+   "contenu": "Diversifier, c’est accepter de moins gagner sur sa meilleure idée pour ne pas tout perdre sur la pire. Personne ne sait à l’avance laquelle de ses idées sera la meilleure, ni laquelle sera la pire.\nUne règle simple résume la leçon : notez une fois par an le poids de chaque ligne, de chaque secteur et de chaque pays dans votre portefeuille. Si un chiffre vous surprend, c’est là qu’il faut agir. Le portefeuille virtuel de WestBourse permet de s’exercer à cette discipline sans engager d’argent.",
    "points": [
     {
      "titre": "La diversification réduit le risque propre, pas le risque de marché"

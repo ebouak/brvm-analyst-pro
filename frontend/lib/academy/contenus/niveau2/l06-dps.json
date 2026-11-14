@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Pourquoi un droit préférentiel ?",
-   "contenu": "Les actions nouvelles sont émises sous le cours de bourse pour attirer les souscripteurs. Sans protection, l’actionnaire en place verrait sa part diluée et la valeur de ses titres baisser.\nLe DPS compense cette perte : il donne la priorité aux anciens actionnaires, et il a une valeur négociable pendant la période de souscription.",
+   "contenu": "Quand une société a besoin de capitaux, elle peut émettre des actions nouvelles. Pour attirer les souscripteurs, elle les propose en général sous le cours de bourse. Sans protection, l’actionnaire en place perdrait deux fois : sa part du capital diminuerait, et la valeur de ses titres baisserait, puisque de nouvelles actions entrent à prix réduit.\nLe droit préférentiel de souscription (DPS) compense cette perte. Chaque action ancienne reçoit un droit. Ces droits donnent la priorité aux actionnaires existants pour souscrire les actions nouvelles, et ils se négocient pendant la période de souscription : celui qui ne veut pas souscrire peut les vendre, celui qui veut souscrire davantage peut en acheter.\nLa parité indique combien de droits il faut pour une action nouvelle. « Une action nouvelle pour quatre anciennes » signifie qu’il faut quatre droits, donc détenir quatre actions, pour en souscrire une.",
    "flux": [
     {
      "titre": "Annonce",
@@ -36,7 +36,7 @@
   {
    "type": "importance",
    "titre": "Calculer la valeur d’un droit",
-   "contenu": "Exemple pédagogique : l’action cote 6 000 FCFA, la société émet 1 action nouvelle pour 4 anciennes à 4 500 FCFA.",
+   "contenu": "Exemple fictif : l’action cote 6 000 FCFA, la société émet 1 action nouvelle pour 4 anciennes au prix de 4 500 FCFA.\nLe raisonnement est le suivant. Un actionnaire qui détenait 4 actions à 6 000 FCFA et en souscrit 1 à 4 500 FCFA possède ensuite 5 actions, pour une valeur totale de 28 500 FCFA. Chaque action vaut donc, en théorie, 5 700 FCFA. Les 300 FCFA d’écart avec le cours d’avant correspondent à la valeur du droit.\nLa formule résume ce calcul : l’écart entre le cours et le prix d’émission, divisé par la parité plus un. La vérification montre que rien ne se perd : l’action après détachement et le droit valent ensemble l’action d’avant.\nEn pratique, le droit cote pendant la souscription, et son prix s’écarte un peu de cette valeur théorique selon l’offre et la demande. La formule donne un repère pour juger si le prix proposé est raisonnable.",
    "formules": [
     {
      "nom": "Valeur théorique du DPS",
@@ -58,7 +58,7 @@
   {
    "type": "cas",
    "titre": "Les trois choix de l’actionnaire",
-   "contenu": "Exemple pédagogique : vous détenez 400 actions, donc 400 droits. Il faut 4 droits pour souscrire 1 action nouvelle.",
+   "contenu": "Exemple fictif : vous détenez 400 actions, donc 400 droits. Il faut 4 droits pour souscrire 1 action nouvelle à 4 500 FCFA.\nSouscrire préserve votre part du capital : vous passez de 400 à 500 actions, en payant 450 000 FCFA. C’est le choix logique si vous croyez au projet financé et si vous disposez de la somme.\nVendre vos droits rapporte de l’argent sans en débourser : environ 120 000 FCFA si le droit cote près de sa valeur théorique. Votre part du capital diminue, mais vous êtes indemnisé de cette dilution. Une solution intermédiaire existe : vendre une partie des droits pour financer la souscription avec les autres.\nNe rien faire est le seul mauvais choix. Les droits expirent à la clôture de la souscription, et la baisse du cours au détachement n’est alors compensée par rien.",
    "tableau": {
     "colonnes": [
      "Choix",
@@ -88,7 +88,7 @@
   {
    "type": "importance",
    "titre": "Le calendrier d’une opération",
-   "contenu": "Les dates sont fixées par l’avis publié par la BRVM. Elles comptent : un droit non exercé à la clôture perd toute valeur.",
+   "contenu": "Les dates sont fixées par l’avis publié par la BRVM et par la société. Elles comptent plus que tout le reste : un droit ni exercé ni vendu à la clôture perd toute sa valeur.\nLe jour du détachement, le cours de l’action baisse d’environ la valeur du droit. Ce n’est pas une mauvaise nouvelle : c’est le mécanisme qui transfère une partie de la valeur de l’action vers le droit. À partir de ce jour, le droit se négocie séparément, jusqu’à la fin de la période de souscription.\nVotre SGI vous informe en principe de l’opération et vous demande vos instructions. Répondez-lui avant la date limite qu’elle vous indique : elle peut être antérieure à la clôture officielle, le temps pour elle de transmettre les ordres.",
    "etapes": [
     {
      "titre": "Avis de l’opération",
@@ -117,7 +117,7 @@
   {
    "type": "piege",
    "titre": "Les erreurs à éviter",
-   "contenu": "Les DPS sont rares, et c’est justement pour cela qu’on se trompe.",
+   "contenu": "Les DPS sont rares, et c’est justement pour cela qu’on se trompe : on connaît mal un mécanisme qu’on rencontre peu.\nL’erreur la plus coûteuse est l’oubli. Un message de la SGI passe inaperçu, la date limite passe, et les droits disparaissent. Une autre erreur fréquente consiste à prendre la baisse du cours au détachement pour une chute du titre, et à vendre ses actions dans la précipitation.\nEnfin, souscrire n’est pas un réflexe obligé. Une augmentation de capital peut financer un projet de croissance, ou combler des pertes et reconstituer des fonds propres insuffisants. Dans le second cas, la société a besoin de cet argent pour continuer : la question du risque se pose autrement. La note d’information décrit l’objet de l’opération.",
    "points": [
     {
      "titre": "Ignorer le courrier de sa SGI",
@@ -139,7 +139,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Un DPS a toujours une valeur tant que la souscription est ouverte.",
+   "contenu": "Un DPS a toujours une valeur tant que la souscription est ouverte. Le laisser expirer revient à abandonner de l’argent.\nDevant une augmentation de capital, trois gestes suffisent : calculer la valeur théorique du droit, lire l’objet de l’opération dans la note d’information, et transmettre votre choix à votre SGI avant sa date limite.",
    "points": [
     {
      "titre": "Valeur théorique = (cours − prix d’émission) ÷ (parité + 1)"

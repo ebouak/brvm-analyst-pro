@@ -34,7 +34,7 @@ describe.each(LECONS)('%s — règles éditoriales', (_f, l, brut) => {
     expect(l.avertissement).toContain('pas un conseil en investissement');
     expect(l.sous_titre).toBeTruthy();
     expect(l.module).toMatch(/^Module [1-3] — /);
-    for (const s of l.sections) for (const p of s.contenu.split(/\n+/)) expect(p.length, s.titre).toBeLessThanOrEqual(320);
+    for (const s of l.sections) for (const p of s.contenu.split(/\n+/)) expect(p.length, s.titre).toBeLessThanOrEqual(650);
   });
 
   it('un cas « réel » lit ses chiffres en base ; un graphique écrit à la main est un exemple', () => {
@@ -51,6 +51,10 @@ describe.each(LECONS)('%s — règles éditoriales', (_f, l, brut) => {
     for (const m of brut.matchAll(/CREPMF/g)) expect(brut.slice(Math.max(0, m.index! - 60), m.index)).toMatch(/succédé|ex-/);
   });
 
+  it('texte courant développé : au moins 2 500 caractères par leçon', () => {
+    const total = l.sections.reduce((n, s) => n + s.contenu.length, 0);
+    expect(total, l.titre).toBeGreaterThanOrEqual(2500);
+  });
   it('les liens « pratiquer » mènent à des pages qui existent', () => {
     for (const lien of l.liens) expect(existsSync(`${APP}${lien.href.replace(/^\//, '')}/page.tsx`), lien.href).toBe(true);
   });

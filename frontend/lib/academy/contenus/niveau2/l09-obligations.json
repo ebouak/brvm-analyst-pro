@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Le vocabulaire d’une obligation",
-   "contenu": "Toutes les informations figurent dans la note d’information de l’emprunt.",
+   "contenu": "Une obligation est un prêt découpé en titres. Un État ou une entreprise a besoin de financer un projet ; au lieu d’emprunter à une seule banque, il emprunte à des milliers d’épargnants, chacun pour le montant de ses titres.\nEn échange, l’émetteur s’engage sur trois points : verser un intérêt chaque année, le coupon ; rembourser le capital selon un calendrier ; respecter les conditions décrites dans la note d’information de l’emprunt. Ce document reste la référence pendant toute la vie du titre.\nLe porteur d’obligation n’est pas propriétaire d’une part de l’entreprise : il est son créancier. Il ne vote pas en assemblée générale et ne profite pas d’une hausse des bénéfices. En contrepartie, ses revenus sont fixés d’avance, et il est remboursé avant les actionnaires si l’émetteur est liquidé.",
    "points": [
     {
      "titre": "Le nominal",
@@ -32,7 +32,7 @@
   {
    "type": "importance",
    "titre": "Prix, coupon couru et rendement",
-   "contenu": "Le prix d’une obligation varie : il baisse quand les taux du marché montent, et monte quand ils baissent. Le rendement réel dépend donc du prix payé. Exemples pédagogiques.",
+   "contenu": "Une obligation est émise à un prix, en général son nominal. Elle se négocie ensuite en bourse, et son prix varie.\nLa raison principale tient aux taux d’intérêt. Si de nouveaux emprunts sont émis à 7 % alors que votre obligation verse 6 %, personne n’acceptera de la payer à son nominal : son prix baisse jusqu’à ce que son rendement rejoigne celui du marché. Si les taux baissent, votre obligation devient plus attractive et son prix monte.\nLe rendement réel dépend donc du prix payé. Le rendement courant, qui rapporte le coupon au prix, en donne une première idée ; il ne tient pas compte de l’écart entre le prix payé et le capital remboursé à l’échéance.\nLe coupon couru s’ajoute au prix lors d’un achat en cours d’année : vous payez au vendeur la part du coupon accumulée depuis le dernier versement, et vous recevez le coupon entier à l’échéance suivante. Les exemples ci-dessous sont fictifs.",
    "formules": [
     {
      "nom": "Coupon annuel",
@@ -54,7 +54,7 @@
   {
    "type": "cas",
    "titre": "Un emprunt amorti : exemple",
-   "contenu": "Exemple pédagogique : 100 titres de 10 000 FCFA à 6 %, sur 5 ans, avec remboursement constant du capital chaque année. Le coupon baisse à mesure que le capital restant diminue.",
+   "contenu": "Exemple fictif : 100 titres de 10 000 FCFA à 6 %, sur 5 ans, avec remboursement constant du capital chaque année. Ce mode de remboursement est fréquent sur les emprunts cotés à la BRVM, souvent après un différé pendant lequel seuls les coupons sont versés.\nLe tableau montre l’effet sur vos revenus. Chaque année, un cinquième du capital vous est rendu. Le coupon se calcule sur ce qui reste dû : il baisse donc d’année en année. Au total, vous recevez 180 000 FCFA de coupons, contre 300 000 FCFA pour un emprunt de même taux remboursé en une fois à l’échéance.\nLe capital rendu chaque année n’est pas un revenu : c’est votre propre argent qui revient. Pour garder le même niveau de revenu, il faut le replacer. C’est la grande différence avec un emprunt in fine, où le capital reste placé jusqu’au bout.",
    "tableau": {
     "colonnes": [
      "Année",
@@ -106,7 +106,7 @@
   {
    "type": "importance",
    "titre": "Les risques d’une obligation",
-   "contenu": "Une obligation est moins risquée qu’une action, pas sans risque.",
+   "contenu": "Une obligation est moins risquée qu’une action, pas sans risque. Trois risques demandent votre attention.\nLe risque de défaut est le plus grave : l’émetteur peut payer en retard, demander un rééchelonnement ou ne pas rembourser. Un État n’est pas à l’abri, surtout quand ses finances publiques sont tendues. Les notations, quand elles existent, donnent une indication, sans garantie.\nLe risque de taux ne concerne que celui qui revend avant l’échéance. Si vous gardez le titre jusqu’au bout, les variations de prix intermédiaires ne changent pas ce que vous recevez, sauf défaut. Si vous devez vendre plus tôt, une hausse des taux peut vous faire céder sous le prix payé.\nLe risque de liquidité est très réel à la BRVM, où beaucoup d’emprunts s’échangent rarement. Avant d’acheter, demandez-vous si vous pourrez attendre l’échéance.",
    "points": [
     {
      "titre": "Le risque de défaut",
@@ -128,7 +128,7 @@
   {
    "type": "piege",
    "titre": "Les pièges propres à la BRVM",
-   "contenu": "Quelques réflexes évitent des erreurs coûteuses.",
+   "contenu": "Quelques réflexes évitent des erreurs coûteuses sur un marché obligataire où les échanges sont rares.\nNe prenez pas un cours affiché pour un prix de transaction. Quand un emprunt ne s’échange pas, son cours reste souvent au pair pendant des mois. Ce chiffre ne dit pas à quel prix vous pourriez vendre : la date du dernier échange réel est plus informative.\nVérifiez la maturité. Des emprunts arrivés à échéance depuis des années restent parfois sur des listes publiques. WestBourse les retire de ses tableaux ; d’autres sources ne le font pas.\nCalculez le rendement sur le prix réellement payé. Exemple fictif : un titre de nominal 10 000 FCFA à 6,5 %, acheté 10 300 FCFA, rapporte environ 6,3 % de rendement courant, et vous perdrez 300 FCFA par titre au remboursement.",
    "points": [
     {
      "titre": "Un cours affiché n’est pas une transaction",
@@ -150,7 +150,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Une obligation se juge à quatre éléments.",
+   "contenu": "Une obligation se juge à quatre éléments, et le taux affiché n’est que le deuxième.\nLa qualité de l’émetteur vient d’abord, parce qu’un taux élevé ne vaut rien s’il n’est pas payé. Viennent ensuite le prix, qui fixe le rendement réel ; le calendrier, qui fixe quand votre capital revient ; et la liquidité, qui dit si vous pourrez changer d’avis en cours de route.",
    "points": [
     {
      "titre": "Qui emprunte, et sa capacité à rembourser"

@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Le principe",
-   "contenu": "Vous achetez des parts du fonds. Le gérant investit l’ensemble selon une politique écrite dans le prospectus. La valeur de vos parts suit celle des placements du fonds.",
+   "contenu": "Un OPCVM (organisme de placement collectif en valeurs mobilières) réunit l’argent de nombreux épargnants dans un même fonds. Vous achetez des parts ; un gérant professionnel investit l’ensemble selon une politique écrite dans le prospectus.\nLa valeur de vos parts suit celle des placements du fonds. Si les titres détenus montent, vos parts montent ; s’ils baissent, vos parts baissent. Le gérant ne promet pas un résultat : il s’engage à respecter la politique annoncée.\nL’intérêt est double. Avec une petite somme, vous accédez à un portefeuille diversifié que vous ne pourriez pas construire seul sans frais excessifs. Et vous déléguez le suivi quotidien à un professionnel. En contrepartie, vous payez des frais, et vous ne choisissez pas les titres.",
    "flux": [
     {
      "titre": "Épargnants",
@@ -36,7 +36,7 @@
   {
    "type": "importance",
    "titre": "FCP et SICAV, et leurs acteurs",
-   "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.",
+   "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.\nLe fonds commun de placement (FCP) est une copropriété de titres, sans personnalité juridique : une société de gestion agréée le gère pour le compte des porteurs de parts. La société d’investissement à capital variable (SICAV) est une société anonyme : en achetant ses actions, vous en devenez actionnaire, avec un droit de vote en assemblée.\nPour l’épargnant, la différence est surtout juridique. Dans les deux cas, on entre et on sort à la valeur liquidative, et un dépositaire, en général une banque, conserve les actifs. Cette séparation protège l’épargnant : les actifs du fonds ne se confondent pas avec ceux de la société de gestion.",
    "tableau": {
     "colonnes": [
      "Critère",
@@ -71,7 +71,7 @@
   {
    "type": "importance",
    "titre": "Ce que coûte un fonds",
-   "contenu": "Les frais réduisent directement la performance. Ils figurent dans le prospectus. Exemple pédagogique sur 1 000 000 FCFA.",
+   "contenu": "Les frais réduisent directement la performance, année après année. Ils figurent dans le prospectus, et il faut les additionner sur toute la durée de placement prévue.\nExemple fictif sur 1 000 000 FCFA placés cinq ans : 2 % de frais d’entrée prélèvent 20 000 FCFA dès le départ ; 1,5 % de frais de gestion annuels prélèvent environ 15 000 FCFA par an, soit près de 75 000 FCFA sur cinq ans si l’encours reste stable. Avec d’éventuels frais de sortie, le total approche 10 % de la somme investie.\nLa valeur liquidative est le prix d’une part : l’actif net du fonds divisé par le nombre de parts. Elle est publiée régulièrement, et les frais de gestion y sont déjà prélevés. C’est sur elle, et non sur la performance des titres détenus, que se mesure ce que vous gagnez.",
    "formules": [
     {
      "nom": "Frais d’entrée",
@@ -93,7 +93,7 @@
   {
    "type": "cas",
    "titre": "Les grandes familles de fonds",
-   "contenu": "La politique d’investissement détermine le risque.",
+   "contenu": "La politique d’investissement, écrite dans le prospectus, détermine le risque du fonds bien plus que le talent du gérant.\nUn fonds monétaire place à très court terme : il convient à une épargne dont on peut avoir besoin vite, pour un rendement modeste. Un fonds obligataire vise des revenus réguliers, mais sa valeur baisse quand les taux montent. Un fonds diversifié mélange actions et obligations dans des bornes fixées. Un fonds actions suit le marché des actions, avec ses hausses et ses baisses.\nLe choix se fait comme pour un portefeuille en direct, d’après votre horizon. Placer dans un fonds actions une somme dont vous aurez besoin dans un an expose à devoir sortir pendant une baisse.",
    "points": [
     {
      "titre": "Monétaire",
@@ -116,7 +116,7 @@
   {
    "type": "piege",
    "titre": "Les questions à poser avant de souscrire",
-   "contenu": "Un fonds se choisit sur des faits écrits, pas sur une promesse.",
+   "contenu": "Un fonds se choisit sur des faits écrits, pas sur une promesse. Quatre questions suffisent à écarter la plupart des mauvaises surprises.\nL’agrément vient en premier. Un OPCVM proposé au public dans l’UEMOA doit être agréé par l’AMF-UMOA, comme sa société de gestion. Un produit présenté comme un fonds, mais absent des listes publiées par l’AMF-UMOA, n’offre pas les mêmes protections.\nLa performance se lit sur plusieurs années, comparée à un repère : un indice, ou des fonds de la même catégorie. Une excellente année isolée peut venir de la chance, ou d’un risque élevé qui n’apparaîtra qu’après. Méfiez-vous enfin de tout rendement élevé présenté comme « garanti » : un fonds investi en actions ne peut pas le garantir, puisque sa valeur suit le marché.",
    "points": [
     {
      "titre": "Le fonds est-il agréé ?",
@@ -143,7 +143,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Un OPCVM délègue le choix des titres, pas la responsabilité de choisir le fonds.",
+   "contenu": "Un OPCVM délègue le choix des titres, pas la responsabilité de choisir le fonds. C’est à vous de vérifier son agrément, ses frais et l’accord entre sa politique et votre horizon.\nUn fonds convient surtout à qui dispose de peu de temps ou de petites sommes. Comparer chaque année sa performance, frais déduits, à celle d’un indice permet de vérifier que ces frais sont justifiés.",
    "points": [
     {
      "titre": "Une société de gestion agréée investit, un dépositaire conserve"

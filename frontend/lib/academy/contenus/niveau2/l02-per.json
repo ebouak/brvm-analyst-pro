@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Trois formules",
-   "contenu": "Le PER (price earnings ratio) se calcule à partir du bénéfice par action, le BPA. Les exemples ci-dessous sont pédagogiques.",
+   "contenu": "Le PER (price earnings ratio, ou rapport cours sur bénéfice) se calcule en deux temps. On ramène d’abord le bénéfice de la société à une seule action : c’est le bénéfice par action, le BPA. On compare ensuite ce BPA au cours de bourse.\nLe BPA se lit dans les comptes : résultat net de l’exercice divisé par le nombre d’actions qui composent le capital. Le cours, lui, change à chaque séance. Le PER bouge donc tous les jours, alors que le bénéfice ne change qu’à la publication de nouveaux comptes.\nL’inverse du PER, le rendement bénéficiaire, est souvent plus parlant. Un PER de 15 correspond à un rendement bénéficiaire d’environ 6,7 % : pour 100 FCFA payés, la société gagne environ 6,7 FCFA par an. Ce chiffre se compare facilement au taux d’une obligation. Les exemples ci-dessous sont fictifs.",
    "formules": [
     {
      "nom": "Bénéfice par action (BPA)",
@@ -31,7 +31,7 @@
   {
    "type": "importance",
    "titre": "Ce que le PER raconte",
-   "contenu": "Un PER de 15 signifie qu’au bénéfice actuel, il faudrait 15 ans de bénéfices pour « rembourser » le prix de l’action.\nUn PER élevé traduit souvent une attente de croissance ; un PER faible peut signaler une société délaissée, ou une société en difficulté. Le chiffre seul ne tranche pas.",
+   "contenu": "Un PER de 15 signifie qu’au bénéfice actuel, il faudrait 15 années de bénéfices pour « rembourser » le prix de l’action. Plus le PER est élevé, plus le marché paie cher chaque franc de bénéfice.\nPourquoi accepter de payer cher ? Parce que l’on attend une hausse du bénéfice. Si le bénéfice double en quelques années, un PER de 20 payé aujourd’hui redevient un PER de 10 sur ce bénéfice futur. À l’inverse, un PER faible peut refléter une société mature qui grandit peu, un secteur délaissé, ou un risque que le marché perçoit et que vous ne voyez pas encore.\nLes fourchettes ci-dessous sont des repères pédagogiques, pas des normes. Elles servent à poser la bonne question : pourquoi ce PER est-il à ce niveau ?",
    "stats": [
     {
      "label": "PER faible",
@@ -54,7 +54,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : trois opérateurs télécoms",
    "reel": true,
-   "contenu": "Comparer des sociétés du même secteur est la seule comparaison qui ait un sens. Les ratios ci-dessous sont recalculés à l’ouverture de la leçon, à partir du dernier cours et des derniers comptes publiés.",
+   "contenu": "Comparer des sociétés du même secteur est la seule comparaison qui ait vraiment un sens. Trois opérateurs de télécommunications ont des métiers proches : leurs PER peuvent être mis côte à côte.\nLes ratios ci-dessous sont recalculés à l’ouverture de la leçon, à partir du dernier cours et des derniers comptes publiés. Ils changent donc avec le marché. Demandez-vous si l’écart entre deux sociétés s’explique par la croissance de leurs bénéfices, par leurs pays d’activité ou par leur politique de dividende. Un écart n’est pas une erreur du marché tant que vous ne l’avez pas expliqué.\nSi une valeur manque, c’est que la donnée nécessaire n’est pas disponible en base : elle est signalée comme manquante plutôt que devinée.",
    "donnees_reelles": {
     "vue": "ratios",
     "codes": [
@@ -67,7 +67,7 @@
   {
    "type": "importance",
    "titre": "Les trois PER qu’on rencontre",
-   "contenu": "Le même mot recouvre des calculs différents. Toujours demander : sur quel bénéfice ?",
+   "contenu": "Le même mot recouvre plusieurs calculs. Avant de comparer deux PER, demandez toujours sur quel bénéfice ils reposent.\nLe PER historique utilise le dernier exercice publié et certifié. C’est le plus fiable, mais aussi le plus ancien : en milieu d’année, il repose sur des comptes clos depuis plusieurs mois. Le PER glissant utilise les quatre derniers trimestres publiés ; il est plus récent, mais les comptes intermédiaires sont moins détaillés. Le PER prévisionnel repose sur un bénéfice estimé, et aucune estimation n’est certifiée.\nUne autre question compte pour un groupe : le résultat consolidé, ou la part qui revient aux actionnaires de la société mère ? Quand des actionnaires minoritaires détiennent une partie des filiales, la part du groupe est plus petite que le résultat consolidé, et le PER calculé sur elle est plus élevé.",
    "tableau": {
     "colonnes": [
      "PER",
@@ -97,7 +97,7 @@
   {
    "type": "piege",
    "titre": "Quand le PER trompe",
-   "contenu": "Le PER est simple à calculer et facile à mal lire.",
+   "contenu": "Le PER est simple à calculer, et c’est justement pour cela qu’on le lit mal. Les cinq pièges ci-dessous reviennent le plus souvent.\nExemple fictif : une société gagne habituellement 2 milliards de FCFA. Une année, elle vend un terrain et encaisse 3 milliards de plus-value. Son résultat net passe à 5 milliards, et son PER est divisé par 2,5 du jour au lendemain. Rien n’a changé dans son activité : l’année suivante, sans cession, le PER retrouvera son niveau habituel. D’où la règle : vérifier que le résultat d’exploitation a suivi le résultat net.\nLe fractionnement est un piège plus mécanique. Quand une société divise la valeur de ses actions, le nombre de titres augmente et le BPA diminue dans la même proportion. Comparer un BPA ancien à un cours récent, sans corriger, donne un PER absurde.",
    "points": [
     {
      "titre": "Le bénéfice exceptionnel",
@@ -129,7 +129,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Le PER est un point de départ, pas un verdict.",
+   "contenu": "Le PER est un point de départ, pas un verdict. Il pose une question, celle du prix payé pour un franc de bénéfice, et oblige à chercher la réponse dans les comptes.\nRetenez le bon ordre : vérifier d’abord que le bénéfice est récurrent, comparer ensuite le PER au secteur et à l’histoire de la société, et seulement alors en tirer une opinion. Le PER ne dit rien de la solidité du bilan : la leçon suivante complète la lecture avec les fonds propres.",
    "points": [
     {
      "titre": "PER = cours ÷ bénéfice par action"

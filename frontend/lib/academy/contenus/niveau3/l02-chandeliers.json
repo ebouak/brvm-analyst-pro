@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "L’anatomie d’une bougie",
-   "contenu": "Chaque bougie représente une période : une séance, une semaine.",
+   "contenu": "Un chandelier, ou bougie, résume une période de cotation en quatre prix : l’ouverture, le plus haut, le plus bas et la clôture. Chaque bougie représente une période : une séance sur un graphique quotidien, une semaine sur un graphique hebdomadaire.\nLe corps est le rectangle entre l’ouverture et la clôture. Sa couleur indique le sens de la période : clair ou vert quand la clôture dépasse l’ouverture, sombre ou rouge dans le cas inverse. Les mèches sont les traits fins au-dessus et au-dessous du corps : elles montrent jusqu’où le cours est allé avant de revenir.\nExemple fictif : une action ouvre à 1 000 FCFA, monte jusqu’à 1 060, descend à 980 et clôture à 1 040. Sa bougie a un corps clair de 1 000 à 1 040, une mèche haute jusqu’à 1 060 et une mèche basse jusqu’à 980. On lit d’un coup d’œil une séance haussière, au cours de laquelle les vendeurs ont repris une partie de la hausse avant la clôture.",
    "points": [
     {
      "titre": "Le corps",
@@ -32,7 +32,7 @@
   {
    "type": "importance",
    "titre": "Quatre configurations connues",
-   "contenu": "Ces figures décrivent un comportement ; aucune n’est un signal fiable à elle seule.",
+   "contenu": "Les chandeliers ont été popularisés par des négociants japonais, qui ont donné aux figures des noms imagés. Ces figures décrivent le comportement des acheteurs et des vendeurs sur une ou deux périodes ; aucune n’est un signal fiable à elle seule.\nLe doji, dont l’ouverture et la clôture sont presque égales, montre une séance où aucun camp ne l’a emporté. Le marteau et l’étoile filante se lisent par leur longue mèche : elle montre l’attaque d’un camp, le petit corps montre qu’elle a été repoussée. L’avalement concerne deux bougies : le corps de la seconde englobe entièrement celui de la première, en sens inverse, ce qui traduit un changement de rapport de force.\nLe contexte compte autant que la forme. Un marteau après une longue baisse dit quelque chose ; le même marteau au milieu d’une séquence sans direction ne dit presque rien. C’est pourquoi on attend la confirmation de la séance suivante, et qu’on regarde le volume.",
    "tableau": {
     "colonnes": [
      "Configuration",
@@ -67,7 +67,7 @@
   {
    "type": "piege",
    "titre": "Les chandeliers à la BRVM",
-   "contenu": "Une bougie suppose une séance active, avec de nombreux échanges.",
+   "contenu": "Une bougie suppose une séance active, avec de nombreux échanges répartis dans la journée. Sur un grand marché, les mèches reflètent des milliers d’ordres. À la BRVM, une séance peut ne compter que quelques transactions sur une valeur.\nConséquence directe : la forme d’une bougie peut venir d’un seul ordre. Une longue mèche basse, qui ressemblerait à un marteau sur un marché liquide, peut n’être qu’un vendeur pressé qui a accepté un prix bas pour quelques titres. La forme est là ; l’information derrière est très mince.\nLes données posent une autre difficulté. Les sources publiques ne fournissent pas toujours le plus haut et le plus bas de chaque séance. Plutôt que de dessiner des mèches inventées, WestBourse affiche alors des courbes de clôture, et le signale sous le graphique. Une bougie sans vraies données derrière elle n’apprend rien et peut tromper.",
    "points": [
     {
      "titre": "Une bougie sans échange",
@@ -89,7 +89,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Une bougie raconte une séance ; elle ne prédit pas la suivante.",
+   "contenu": "Une bougie raconte une séance ; elle ne prédit pas la suivante. Elle permet de voir vite la bataille entre acheteurs et vendeurs, à condition qu’il y ait eu bataille.\nÀ la BRVM, prenez l’habitude de regarder le volume avant la forme. Une bougie construite sur quelques titres n’a pas la valeur d’une bougie portée par une séance active. Et une configuration, quelle qu’elle soit, ne devient intéressante qu’une fois confirmée par les séances suivantes.",
    "points": [
     {
      "titre": "Le corps : ouverture et clôture ; les mèches : les extrêmes"

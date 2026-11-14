@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Ce qu’une simulation est, et n’est pas",
-   "contenu": "Une simulation applique des hypothèses : un dividende, une croissance, un cours. Si une hypothèse change, le résultat change.\nElle sert à comparer des scénarios et à comprendre un mécanisme. Elle ne garantit aucun résultat.",
+   "contenu": "Une simulation applique des hypothèses : un dividende, une croissance de ce dividende, un cours. Elle en déduit un résultat. Si une hypothèse change, le résultat change, parfois beaucoup.\nElle est utile pour deux raisons. Elle rend visible un mécanisme qu’on sous-estime à l’œil nu, comme l’effet du réinvestissement des dividendes. Et elle oblige à écrire ses hypothèses : on découvre souvent qu’on attendait sans le dire un rendement très élevé, ou un cours qui ne baisse jamais.\nElle ne garantit aucun résultat. Ses chiffres sont toujours plus réguliers que la réalité, qui ajoute des frais, des impôts, des baisses de cours et des dividendes réduits que des hypothèses simples ignorent.",
    "points": [
     {
      "titre": "Elle aide à",
@@ -24,7 +24,7 @@
   {
    "type": "cas",
    "titre": "Réinvestir ses dividendes pendant 3 ans",
-   "contenu": "Hypothèses pédagogiques : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à racheter des actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.",
+   "contenu": "Hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à racheter des actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.\nLe mécanisme est celui des intérêts composés. La première année, les dividendes rachètent quelques actions. L’année suivante, ces actions nouvelles versent à leur tour un dividende, qui s’ajoute à celui des actions d’origine. Le nombre d’actions croît donc un peu plus vite chaque année.\nSur trois ans, l’effet reste modeste. Il devient important sur dix ou vingt ans : le réinvestissement est surtout un outil d’épargne longue. Notez les limites de l’exemple : un cours constant est une hypothèse commode, presque jamais vérifiée, et dans la réalité chaque rachat supporte des frais de courtage.",
    "simulation": {
     "type": "reinvestissement",
     "actions": 200,
@@ -37,7 +37,7 @@
   {
    "type": "cas",
    "titre": "Combien investir pour viser un revenu ?",
-   "contenu": "Hypothèse pédagogique : vous visez 600 000 FCFA de dividendes nets par an. La somme nécessaire dépend du rendement retenu. Plus le rendement visé est élevé, plus le risque d’un dividende réduit l’est aussi.",
+   "contenu": "Hypothèse fictive : vous visez 600 000 FCFA de dividendes nets par an. La somme à investir s’obtient en divisant le revenu visé par le rendement retenu.\nLe résultat montre un arbitrage. Plus le rendement retenu est élevé, plus la somme nécessaire est faible. Mais un rendement élevé est souvent associé à des sociétés dont le cours a baissé ou dont le dividende est fragile. Viser 9 % plutôt que 5 % réduit le capital nécessaire, et augmente le risque de voir le revenu réel baisser l’année où un dividende est réduit.\nUn calcul prudent retient un rendement modéré et prévoit une marge. Il vérifie aussi que le revenu visé est bien net d’impôt, puisque la retenue à la source réduit le dividende avant qu’il n’arrive sur votre compte.",
    "simulation": {
     "type": "objectif",
     "revenu_cible": 600000,
@@ -51,7 +51,7 @@
   {
    "type": "importance",
    "titre": "Trois portefeuilles d’exemple",
-   "contenu": "Trois répartitions pédagogiques de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.",
+   "contenu": "Trois répartitions fictives de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.\nLe profil prudent cherche des revenus stables et accepte une croissance plus lente : la moitié en obligations amortit les baisses du marché des actions. Le profil équilibré accepte des baisses temporaires en échange de revenus et de croissance. Le profil dynamique, entièrement en actions, vise la croissance du capital et doit supporter de fortes variations sans vendre au pire moment.\nUn profil ne se choisit pas sur le rendement espéré, mais sur deux questions : quand aurez-vous besoin de cet argent, et quelle baisse pourriez-vous supporter sans vendre ? Un épargnant qui vend tout à la première forte baisse n’a pas un profil dynamique, quelle que soit son ambition.",
    "tableau": {
     "colonnes": [
      "Profil",
@@ -85,7 +85,7 @@
   {
    "type": "importance",
    "titre": "Tester sans risque",
-   "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le meilleur moyen de vérifier qu’une stratégie tient sur la durée, et de connaître ses propres réactions face à une baisse.",
+   "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le moyen le plus simple de vérifier qu’une stratégie tient sur la durée.\nIl apprend aussi ce qu’aucune simulation ne montre : vos propres réactions. Voir une ligne perdre 15 % en quelques semaines, même avec de l’argent fictif, dit beaucoup de ce que vous ferez avec de l’argent réel. Notez ces réactions au fil des semaines.\nLes quatre étapes ci-dessous donnent un cadre. Trois mois sont un minimum pour traverser au moins une période de baisse. Gardez en tête que, sur une valeur peu échangée, le vrai marché ne permet pas toujours d’acheter ou de vendre au cours affiché.",
    "etapes": [
     {
      "titre": "Définir le profil et la somme",
@@ -109,7 +109,7 @@
   {
    "type": "piege",
    "titre": "Les illusions des simulations",
-   "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité.",
+   "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité. Trois écarts reviennent presque toujours.\nLes frais et l’impôt d’abord. Chaque achat et chaque vente supporte des frais de courtage, et les dividendes subissent une retenue à la source. Une simulation qui les ignore surestime le résultat, d’autant plus que les ordres sont petits et nombreux.\nLe cours constant ensuite. Si le cours baisse, les dividendes réinvestis achètent plus d’actions, ce qui est favorable à long terme, mais la valeur affichée du portefeuille diminue. Testez toujours un scénario défavorable à côté du scénario central.\nL’extrapolation enfin. Une croissance du dividende observée sur cinq ans ne se prolonge pas d’elle-même. Pour une hypothèse raisonnable, regardez la régularité passée du dividende, et retenez une croissance plus faible que celle observée.",
    "points": [
     {
      "titre": "Oublier les frais et l’impôt",
@@ -131,7 +131,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Simuler, c’est rendre ses hypothèses visibles.",
+   "contenu": "Simuler, c’est rendre ses hypothèses visibles. Une simulation honnête les affiche à côté de son résultat, et teste au moins un scénario défavorable.\nAvant d’engager de l’argent, posez la question inverse : si le dividende baissait d’un tiers et le cours de 20 %, que deviendrait votre plan ? Si la réponse vous inquiète, réduisez le montant ou allongez l’horizon.",
    "points": [
     {
      "titre": "Une simulation compare des scénarios, elle ne prédit pas"

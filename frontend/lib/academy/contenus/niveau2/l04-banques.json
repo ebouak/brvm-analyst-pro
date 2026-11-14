@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Le compte de résultat d’une banque",
-   "contenu": "Une banque gagne la différence entre ce que lui rapportent ses prêts et ce que lui coûtent ses ressources, plus des commissions.",
+   "contenu": "Une banque ne vend pas de produits. Elle collecte l’argent de ses déposants et emprunte sur le marché, puis prête cet argent aux entreprises et aux particuliers. Elle gagne la différence entre les intérêts reçus sur ses prêts et ceux qu’elle verse sur ses ressources : c’est la marge d’intérêts. Elle y ajoute des commissions sur ses services : tenue de compte, transferts, cartes, change.\nMarge d’intérêts et commissions forment le produit net bancaire. C’est l’équivalent du chiffre d’affaires, et le point de départ de toute analyse.\nDu produit net bancaire, on retire les frais généraux, puis le coût du risque, c’est-à-dire les pertes enregistrées sur les prêts qui ne seront probablement pas remboursés. Après l’impôt, il reste le résultat net. Les intitulés du plan comptable bancaire de l’UMOA diffèrent de ceux d’une société industrielle ; la logique, elle, est la même.",
    "flux": [
     {
      "titre": "Produit net bancaire",
@@ -36,7 +36,7 @@
   {
    "type": "importance",
    "titre": "Les quatre indicateurs d’une banque",
-   "contenu": "Les formules sont pédagogiques ; les banques publient elles-mêmes la plupart de ces indicateurs dans leur rapport d’activité.",
+   "contenu": "Quatre indicateurs suffisent pour une première lecture. Les formules sont pédagogiques ; la plupart des banques publient elles-mêmes ces indicateurs dans leur rapport d’activité, ce qui évite de les recalculer.\nLa solvabilité vient en premier, parce qu’elle mesure la capacité de la banque à absorber des pertes. Elle rapporte les fonds propres réglementaires aux risques pris. La réglementation prudentielle de l’UMOA fixe un minimum, dont le respect est contrôlé par la Commission bancaire : une banque saine le respecte avec une marge, pas de justesse.\nLe coefficient d’exploitation mesure l’efficacité : la part du produit net bancaire absorbée par les frais généraux. Le coût du risque mesure la qualité des prêts. Le ROE mesure la rentabilité pour l’actionnaire. Aucun ne suffit seul : une banque très rentable qui prête trop facilement finit souvent par le payer en coût du risque.",
    "formules": [
     {
      "nom": "Coefficient d’exploitation",
@@ -65,7 +65,7 @@
   {
    "type": "cas",
    "titre": "Un exemple publié : la SIB en 2025",
-   "contenu": "La Société Ivoirienne de Banque a publié ces indicateurs dans son rapport d’activité 2025 (avril 2026). Ce sont des chiffres datés : ils décrivent l’exercice 2025, pas la situation d’aujourd’hui.",
+   "contenu": "La Société Ivoirienne de Banque a publié ces indicateurs dans son rapport d’activité 2025, en avril 2026. Ce sont des chiffres datés : ils décrivent l’exercice 2025, pas la situation d’aujourd’hui.\nIls permettent d’appliquer la grille à un cas concret. Le produit net bancaire progresse : l’activité grandit. Le coefficient d’exploitation reste sous 40 % : moins de 40 FCFA de frais pour 100 FCFA de produit. Le coût du risque baisse nettement : la banque a eu moins de pertes à provisionner sur ses prêts. Le résultat net progresse donc plus vite que le produit net bancaire.\nUne question reste à poser devant une telle baisse du coût du risque : est-elle durable, ou s’agit-il d’une année favorable ? Comparer avec les exercices précédents permet d’y répondre, comme le rappellent les pièges plus bas.",
    "stats": [
     {
      "label": "Produit net bancaire 2025",
@@ -103,7 +103,7 @@
    "type": "cas",
    "titre": "Sur la BRVM : quatre banques comparées",
    "reel": true,
-   "contenu": "Pour une banque, le P/B est souvent plus parlant que le PER : ses actifs sont des prêts, inscrits au bilan à leur valeur. Les ratios sont recalculés à l’ouverture de la leçon.",
+   "contenu": "Pour une banque, le P/B est souvent plus parlant que le PER. Ses actifs sont surtout des prêts et des titres, inscrits au bilan à une valeur proche de leur valeur réelle, provisions déduites. La valeur comptable a donc un sens plus concret que pour une entreprise industrielle.\nLes ratios des quatre banques ci-dessous sont recalculés à l’ouverture de la leçon. Lisez-les avec la relation de la leçon précédente : une banque dont le ROE est élevé peut justifier un P/B supérieur à 1 ; une banque peu rentable cotera plus souvent sous sa valeur comptable. Pour aller plus loin, comparez le coefficient d’exploitation et le coût du risque publiés par chacune.",
    "donnees_reelles": {
     "vue": "ratios",
     "codes": [
@@ -117,7 +117,7 @@
   {
    "type": "piege",
    "titre": "Ce qu’il ne faut pas appliquer à une banque",
-   "contenu": "Plusieurs outils pensés pour l’industrie ne fonctionnent pas sur une banque.",
+   "contenu": "Plusieurs outils pensés pour l’industrie ne fonctionnent pas sur une banque. Les appliquer conduit à des conclusions fausses.\nLe premier concerne la dette. Les dépôts des clients sont, pour la banque, une dette : elle doit les rendre. Une banque a donc toujours beaucoup plus de dettes que de fonds propres, et c’est normal. Le ratio d’endettement d’une société industrielle n’a pas de sens ici : on regarde la solvabilité à la place.\nLe deuxième concerne la régularité. Le coût du risque varie beaucoup d’une année à l’autre. Une banque peut traverser une année calme avec peu de provisions, puis devoir constater d’un coup des pertes sur un gros client. Une seule année flatte ou noircit l’image ; la moyenne sur trois à cinq exercices est plus juste.\nEnfin, toutes les sociétés financières ne sont pas des banques. Une société de financement ou un assureur a d’autres métiers, d’autres comptes et d’autres ratios.",
    "points": [
     {
      "titre": "La dette n’est pas un défaut",
@@ -144,7 +144,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Pour une banque, quatre chiffres d’abord.",
+   "contenu": "Pour une banque, quatre chiffres d’abord, et la solidité avant la rentabilité.\nUne banque qui affiche un ROE très élevé avec une solvabilité juste au-dessus du minimum prend des risques que le chiffre de rentabilité ne montre pas. Une banque un peu moins rentable, mais largement solvable et régulière dans son coût du risque, traverse mieux les années difficiles. Ces indicateurs se trouvent dans les rapports d’activité publiés par les banques elles-mêmes.",
    "points": [
     {
      "titre": "Le produit net bancaire et sa progression"

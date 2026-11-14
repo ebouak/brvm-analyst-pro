@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Trois décisions à prendre avant l’achat",
-   "contenu": "Elles s’écrivent avant de passer l’ordre, jamais après.",
+   "contenu": "La gestion du risque compte davantage que le choix du moment d’achat. Personne ne sait si un achat sera bon ; chacun peut décider à l’avance combien il accepte de perdre s’il est mauvais.\nTrois décisions s’écrivent avant de passer l’ordre. Le niveau d’invalidation, souvent appelé stop, est le prix auquel votre raisonnement est faux : il se place à un niveau qui a un sens sur le graphique, sous un support ou sous la ligne de cou, et non à un pourcentage choisi au hasard. L’objectif est un niveau plausible de sortie. La taille de la position découle des deux premiers.\nLes écrire avant l’achat protège d’un biais bien connu : une fois la position ouverte, on trouve facilement des raisons de la garder quand elle perd. Une règle écrite à froid est plus fiable qu’une décision prise sous le coup de l’émotion.",
    "points": [
     {
      "titre": "Le niveau d’invalidation (stop)",
@@ -28,7 +28,7 @@
   {
    "type": "importance",
    "titre": "Les calculs",
-   "contenu": "Exemple pédagogique : portefeuille de 5 000 000 FCFA, risque accepté de 1 % par position.",
+   "contenu": "Exemple fictif : un portefeuille de 5 000 000 FCFA, et la règle de ne pas risquer plus de 1 % du portefeuille sur une position.\nLe raisonnement part du risque, pas de la somme à investir. On calcule d’abord la perte maximale acceptée : 1 % de 5 000 000, soit 50 000 FCFA. On mesure ensuite le risque par action, c’est-à-dire l’écart entre le prix d’achat et le stop : 200 FCFA. On en déduit le nombre d’actions : 250, soit 500 000 FCFA investis.\nLe résultat surprend souvent : on investit 10 % du portefeuille en ne risquant que 1 %. La perte possible n’est pas la somme investie, mais l’écart jusqu’au stop. Un stop éloigné impose une position plus petite ; un stop proche autorise une position plus grande, mais il sera touché plus souvent.\nLe taux de 1 % est un repère pédagogique, pas une règle réglementaire. Ce qui compte est de choisir un taux et de s’y tenir.",
    "formules": [
     {
      "nom": "Risque maximal par position",
@@ -50,7 +50,7 @@
   {
    "type": "cas",
    "titre": "Le rapport gain sur risque",
-   "contenu": "Exemple pédagogique : avec un stop à 1 800 et un objectif à 2 500 pour un achat à 2 000 FCFA.",
+   "contenu": "Exemple fictif : un achat à 2 000 FCFA, un stop à 1 800 et un objectif à 2 500. Le gain visé est de 500 FCFA par action pour un risque de 200 : le rapport gain sur risque vaut 2,5.\nCe rapport a une conséquence simple, souvent ignorée. Avec un rapport de 2,5, chaque opération gagnante rapporte deux fois et demie ce que coûte une opération perdante. Il suffit donc d’avoir raison un peu moins d’une fois sur trois pour ne pas perdre, hors frais. Avec un rapport de 1, il faut avoir raison plus d’une fois sur deux.\nL’objectif doit rester plausible. Le placer très haut pour obtenir un beau rapport sur le papier ne change rien : si le cours n’a aucune raison d’atteindre ce niveau, le rapport affiché est une illusion. Un objectif se justifie par un niveau visible sur le graphique, comme un ancien sommet.",
    "tableau": {
     "colonnes": [
      "Élément",
@@ -85,7 +85,7 @@
   {
    "type": "piege",
    "titre": "Les limites à la BRVM",
-   "contenu": "Un stop n’est pas une garantie de prix.",
+   "contenu": "Un stop n’est pas une garantie de prix, et c’est particulièrement vrai à la BRVM.\nLe règlement général de la BRVM prévoit deux types d’ordres selon le prix : au mieux et à cours limité. L’ordre stop, qui se déclencherait automatiquement à un seuil, n’en fait pas partie. Certaines SGI proposent un service de surveillance, d’autres non : renseignez-vous. Le plus souvent, votre stop est une règle que vous vous imposez, en surveillant le cours et en passant vous-même l’ordre de vente.\nMême exécutée, la vente peut se faire plus bas que prévu. Sur une valeur peu échangée, il n’y a pas forcément d’acheteur à votre niveau : le cours peut passer d’un coup en dessous, et la vente se fait au prix suivant disponible. Les frais de courtage, à l’achat comme à la vente, s’ajoutent à la perte.\nL’erreur la plus coûteuse reste humaine : reculer son stop quand le cours s’en approche, pour « laisser une chance ». Une perte limitée à 1 % du portefeuille devient alors une perte que plus rien ne limite.",
    "points": [
     {
      "titre": "Le stop n’est pas automatique partout",
@@ -112,7 +112,7 @@
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "On ne contrôle pas le marché ; on contrôle ce qu’on risque.",
+   "contenu": "On ne contrôle pas le marché ; on contrôle ce qu’on risque. La taille de la position, calculée à partir du stop, est la seule variable entièrement entre vos mains.\nAvant chaque achat, trois chiffres s’écrivent : le stop, l’objectif et la taille. Si vous ne savez pas où placer le stop, c’est que vous ne savez pas encore ce qui prouverait que vous avez tort : mieux vaut attendre. Sur une valeur peu liquide, prévoyez une marge, car le prix réel de sortie peut être moins bon que le niveau prévu.",
    "points": [
     {
      "titre": "Fixer le stop et l’objectif avant l’achat"
