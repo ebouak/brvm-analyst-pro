@@ -45,7 +45,7 @@ test('aucun `fait` ne contient de chiffre : la prose est sans chiffre à la sour
 
 test('le squelette ne porte que les numéros de panneaux et l’année d’exercice', () => {
   const sq = squeletteNeic();
-  assert.deepEqual([...sq.chiffres].sort((a, b) => a - b), [10, 11, 12, 2025]);
+  assert.deepEqual([...sq.chiffres].sort((a, b) => a - b), [11, 12, 20, 2025]);
   const texte = sq.sections.map((s) => s.texte).join(' ');
   assert.ok(!texte.includes('2750') && !texte.includes('5,11') && !texte.includes('1 925'), 'cours, rendement, volume doivent rester aux panneaux');
 });
@@ -55,20 +55,20 @@ test('le squelette passe son propre contrôle', () => {
   assert.deepEqual(validerProse(sq.sections, sq), sq.sections);
 });
 
-test('le squelette cite chaque force et chaque risque, et les panneaux 10, 11, 12', () => {
+test('le squelette cite chaque force et chaque risque, et les panneaux 11, 12, 20', () => {
   const d = dossierNeic();
   const n = construireNarratif(d);
   const lecture = construireSquelette(d, n).sections[0].texte;
   for (const a of [...n.forces, ...n.risques]) assert.ok(lecture.includes(a.fait), `manque : ${a.fait}`);
-  assert.match(lecture, /panneau 10/);
   assert.match(lecture, /panneau 11/);
   assert.match(lecture, /panneau 12/);
+  assert.match(lecture, /panneau 20/);
 });
 
 test('une reformulation fidèle est acceptée', () => {
   const sq = squeletteNeic();
   const candidate = [
-    { titre: sq.sections[0].titre, texte: "Sur l'exercice 2025, NEI CEDA CI présente un exercice bénéficiaire, une rentabilité élevée et un endettement faible (panneau 10) ; en regard, un bénéfice majoritairement non opérationnel et une liquidité faible appellent la vigilance (panneau 11). Les réserves sont au panneau 12." },
+    { titre: sq.sections[0].titre, texte: "Sur l'exercice 2025, NEI CEDA CI présente un exercice bénéficiaire, une rentabilité élevée et un endettement faible (panneau 11) ; en regard, un bénéfice majoritairement non opérationnel et une liquidité faible appellent la vigilance (panneau 12). Les réserves sont au panneau 20." },
     { titre: sq.sections[1].titre, texte: 'Le canal des vingt dernières séances encadre le cours entre support et résistance. La dernière clôture est à l’intérieur. Les niveaux décrivent la géométrie du canal, pas une prévision ; les valeurs sont dans le tableau.' },
   ];
   assert.ok(validerProse(candidate, sq));

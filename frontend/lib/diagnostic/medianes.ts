@@ -96,10 +96,24 @@ export interface LigneComparaison {
   lecture: 'favorable' | 'defavorable' | 'neutre' | null;
 }
 
+/** Une société du même secteur, nommée, avec ses ratios à la même échelle que les lignes. */
+export interface PairNomme {
+  code: string;
+  /** Libellé de ligne → valeur affichable ; null = non disponible pour cette société. */
+  valeurs: Record<string, number | null>;
+}
+
 export interface ComparaisonMedianes {
   groupe: string;
   nbSocietes: number;
   lignes: LigneComparaison[];
+  /**
+   * Sociétés du MÊME SECTEUR et de la même famille comptable (la société exclue),
+   * nommées, pour la lecture ligne à ligne en plus de la médiane. Peut compter
+   * moins de MIN_PAIRS sociétés : une médiane ne se calcule pas sur deux valeurs,
+   * mais deux sociétés se nomment très bien.
+   */
+  pairsNommes: PairNomme[];
 }
 
 export function mediane(valeurs: number[]): number | null {
@@ -171,5 +185,17 @@ export function comparerAuxMedianes(code: string, univers: Pair[]): ComparaisonM
     };
   });
 
-  return { groupe, nbSocietes: pairs.length, lignes };
+  const nommes = cible.secteur ? famille.filter((p) => p.secteur === cible.secteur) : [];
+  const pairsNommes = nommes
+    .map((p): PairNomme => {
+      const valeurs: Record<string, number | null> = {};
+      for (const d of RATIOS[cible.famille]) {
+        const v = nombre(p.metriques[d.cle]);
+        valeurs[d.libelle] = v == null || (d.multiple && v <= 0) ? null : v * d.facteur;
+      }
+      return { code: p.code, valeurs };
+    })
+    .sort((a, b) => a.code.localeCompare(b.code));
+
+  return { groupe, nbSocietes: pairs.length, lignes, pairsNommes };
 }
