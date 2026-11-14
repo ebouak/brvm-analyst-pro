@@ -107,7 +107,12 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
                     })()}
                   </td>
                   <td className="py-2 px-3 text-right">
-                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border ${s.cls}`}>{s.txt}</span>
+                    <span
+                      title={s.txt === 'Méthodes en désaccord' ? 'Les bénéfices et les fonds propres donnent deux valeurs de part et d’autre du cours : l’une dit l’action chère, l’autre bon marché. Aucun écart n’est affiché.' : undefined}
+                      className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border ${s.cls}`}
+                    >
+                      {s.txt}
+                    </span>
                   </td>
                 </tr>
               );
