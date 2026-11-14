@@ -153,6 +153,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/dashboard/reports/events/[id]', libelle: "Étude d'événement", rubrique: 'marche', parent: '/dashboard/reports/events', statut: 'parcours', raison: 'détail atteint depuis la liste des événements' },
   { chemin: '/premium/reports', libelle: 'Relevé mensuel', libelleMenu: 'Mon relevé', rubrique: 'portefeuille', statut: 'menu', premium: true },
   { chemin: '/premium/reports/[month]', libelle: 'Rapport mensuel', rubrique: 'portefeuille', parent: '/premium/reports', statut: 'parcours', raison: 'mois atteint depuis l’archive', premium: true, libelleParam: true },
+  { chemin: '/rapports/releve/[id]', libelle: 'Relevé mensuel', rubrique: 'portefeuille', parent: '/premium/reports', statut: 'parcours', raison: 'document imprimable du relevé, atteint depuis la bibliothèque (le robot d’impression y entre par un jeton à usage unique)', premium: true },
 
   // ── Apprendre ──────────────────────────────────────────────────────────────
   { chemin: '/debutant', libelle: 'Débuter', rubrique: 'apprendre', statut: 'menu' },

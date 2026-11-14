@@ -43,6 +43,7 @@ export async function GET() {
     formationInscriptions,
     emailsBienvenue,
     userEntitlements,
+    monthlyReports,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -79,6 +80,14 @@ export async function GET() {
     supabase.from('emails_bienvenue').select('*').eq('user_id', user.id),
     // Accès achetés à l'unité via Chariow (migration 0146).
     supabase.from('user_entitlements').select('*').eq('user_id', user.id),
+    // Relevés mensuels du portefeuille (migration 0233). Colonnes listées une à
+    // une, et SANS `rendu_jeton_hash` / `rendu_jeton_expire` : ce sont des
+    // secrets techniques d'impression, pas des données de la personne (leur
+    // SELECT est d'ailleurs refusé au propriétaire).
+    supabase
+      .from('monthly_reports')
+      .select('id, month, report_url, report_json, sent_at, created_at, updated_at')
+      .eq('user_id', user.id),
   ]);
 
   // Messages du formulaire de contact (migration 0158) : la table n'a aucune
@@ -169,6 +178,8 @@ export async function GET() {
     formation_inscriptions: formationInscriptions.data ?? [],
     emails_bienvenue: emailsBienvenue.data ?? [],
     user_entitlements: userEntitlements.data ?? [],
+    // Relevés mensuels : contenu figé du relevé (valeur, lignes, dividendes) et dates de génération / d'envoi.
+    monthly_reports: monthlyReports.data ?? [],
     // Messages envoyés via le formulaire de contact avec l'adresse du compte.
     contact_messages: contactMessages,
     // CRM : intérêt pour l'offre, relances et notes vous concernant, opposition.

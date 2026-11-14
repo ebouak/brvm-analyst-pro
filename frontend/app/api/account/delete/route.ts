@@ -116,6 +116,19 @@ export async function DELETE() {
     // Ne bloque pas l'effacement du compte ; l'échec est visible dans les logs de stockage.
   }
 
+  // 2septies. Relevés mensuels du portefeuille (0233) : les PDF vivent dans le
+  //          bucket PRIVÉ `releves` (<user_id>/<AAAA-MM>.pdf). La cascade FK
+  //          efface les lignes de monthly_reports mais PAS les objets de
+  //          stockage : sans cette purge, le portefeuille resterait lisible
+  //          (par URL signée) après l'effacement du compte.
+  try {
+    const { data: fichiers } = await admin.storage.from('releves').list(user.id, { limit: 1000 });
+    const aSupprimer = (fichiers ?? []).map((f) => `${user.id}/${f.name}`);
+    if (aSupprimer.length > 0) await admin.storage.from('releves').remove(aSupprimer);
+  } catch {
+    // Ne bloque pas l'effacement du compte ; l'échec est visible dans les logs de stockage.
+  }
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
