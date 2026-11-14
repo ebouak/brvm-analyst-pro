@@ -243,7 +243,11 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
     }
   }
   const libellePilier = new Map(d.suivi.piliers.map((p) => [p.cle as string, p.libelle]));
-  const pointsChiffres = chiffresDeLecture(n);
+  /* Feuille 3 bornée (lib/dossier/bornes.ts) : NSBC débordait de 12 px en CI
+     avec trois points par côté. Les autres restent listés aux panneaux 11 et 12,
+     et la feuille le dit. */
+  const pointsChiffres = chiffresDeLecture(n, BORNES.pointsLecture);
+  const pointsOmis = Math.max(0, n.forces.length - BORNES.pointsLecture) + Math.max(0, n.risques.length - BORNES.pointsLecture);
   const pl = d.placement;
   /* Notes variables du placement, par ordre d'importance, bornées pour que la
      feuille 8 tienne quel que soit leur nombre (lib/dossier/bornes.ts). */
@@ -346,7 +350,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         )}
       </PageEssentiel>
 
-      {/* ── Feuille 3 · Lecture d'ensemble, depuis la dernière édition, résumé et sommaire ── */}
+      {/* ── Feuille 3 · Lecture d'ensemble, résumé et sommaire (l'encadré « depuis la dernière édition » ouvre la feuille 5) ── */}
       <article className="dv-page" data-feuille="">
         <div className="dv-courant">
           <span>{nomComplet}</span>
@@ -377,42 +381,13 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
             </div>
           )}
           <p className="dv-source">
+            {pointsOmis > 0 && `${pointsOmis} autre${pointsOmis > 1 ? 's' : ''} point${pointsOmis > 1 ? 's' : ''} aux panneaux ${PANNEAU.appuis} et ${PANNEAU.vigilance}. `}
             {prose.source === 'polie'
               ? `Texte relu le ${fmtDateFR(prose.genere_le)}, établi à partir des panneaux de ce dossier. `
               : 'Texte établi à partir des panneaux de ce dossier. '}
             Il ne cite aucun chiffre : ceux qui le fondent sont lus à l’instant sur les mêmes mesures que les panneaux {PANNEAU.appuis} et {PANNEAU.vigilance}.
           </p>
         </section>
-
-        {depuis && (
-          <section className="dv-encadre dv-edition" aria-label="Depuis la dernière édition">
-            <h3>Depuis la dernière édition</h3>
-            <p className="dv-edition-date">Édition précédente : séance du {fmtDateFR(depuis.edition_precedente)}.</p>
-            <ul>
-              {depuis.variation_cours != null && (
-                <li>
-                  Cours : <strong className={tonDe(depuis.variation_cours) === 'hausse' ? 'dv-hausse' : tonDe(depuis.variation_cours) === 'baisse' ? 'dv-baisse' : undefined}>{pourcent(depuis.variation_cours)}</strong> depuis cette séance.
-                </li>
-              )}
-              {depuis.publications_parues != null && (
-                <li>
-                  {depuis.publications_parues === 0
-                    ? 'Aucune nouvelle publication en base.'
-                    : `${depuis.publications_parues} nouvelle${depuis.publications_parues > 1 ? 's' : ''} publication${depuis.publications_parues > 1 ? 's' : ''} en base.`}
-                </li>
-              )}
-              {depuis.piliers_changes.length === 0 ? (
-                <li>Aucun pilier de suivi n’a changé de constat.</li>
-              ) : (
-                depuis.piliers_changes.map((x) => (
-                  <li key={x.cle}>
-                    {libellePilier.get(x.cle) ?? x.cle} : {STATUT_PILIER[x.avant] ?? x.avant} → {STATUT_PILIER[x.apres] ?? x.apres}.
-                  </li>
-                ))
-              )}
-            </ul>
-          </section>
-        )}
 
         <section className="dv-resume" aria-label="En une page">
           <h2 className="dv-sous-titre">En une page</h2>
@@ -471,6 +446,36 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       <OuvertureSection numero={1} titre="L’entreprise et ses comptes" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
         sommaire={['L’entreprise en bref et ses chiffres clés', 'Trajectoire des résultats et valorisation', 'D’où vient le bénéfice, le dividende', 'Un million de FCFA investi, valorisation sur cinq ans']} />
       <Feuille d={d} page={5}>
+        {depuis && (
+          <section className="dv-encadre dv-edition" aria-label="Depuis la dernière édition">
+            <h3>Depuis la dernière édition</h3>
+            <p className="dv-edition-date">Édition précédente : séance du {fmtDateFR(depuis.edition_precedente)}.</p>
+            <ul>
+              {depuis.variation_cours != null && (
+                <li>
+                  Cours : <strong className={tonDe(depuis.variation_cours) === 'hausse' ? 'dv-hausse' : tonDe(depuis.variation_cours) === 'baisse' ? 'dv-baisse' : undefined}>{pourcent(depuis.variation_cours)}</strong> depuis cette séance.
+                </li>
+              )}
+              {depuis.publications_parues != null && (
+                <li>
+                  {depuis.publications_parues === 0
+                    ? 'Aucune nouvelle publication en base.'
+                    : `${depuis.publications_parues} nouvelle${depuis.publications_parues > 1 ? 's' : ''} publication${depuis.publications_parues > 1 ? 's' : ''} en base.`}
+                </li>
+              )}
+              {depuis.piliers_changes.length === 0 ? (
+                <li>Aucun pilier de suivi n’a changé de constat.</li>
+              ) : (
+                depuis.piliers_changes.map((x) => (
+                  <li key={x.cle}>
+                    {libellePilier.get(x.cle) ?? x.cle} : {STATUT_PILIER[x.avant] ?? x.avant} → {STATUT_PILIER[x.apres] ?? x.apres}.
+                  </li>
+                ))
+              )}
+            </ul>
+          </section>
+        )}
+
         <Panneau n={PANNEAU.entreprise} titre="L'entreprise en bref">
           <dl className="dv-grille">
             <Mesure libelle="Secteur" valeur={id.secteur} texte />

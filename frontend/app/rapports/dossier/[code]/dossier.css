@@ -442,7 +442,7 @@
 .dv-lecture-chiffres { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; margin: 2mm 0; }
 .dv-lecture-chiffres .dv-liste li { font-size: 9pt; padding-bottom: 1.2mm; }
 .dv-lecture-chiffres .dv-liste { gap: 1.2mm; }
-.dv-edition { padding: 2.5mm 4mm; }
+.dv-edition { padding: 2.5mm 4mm; margin-bottom: 4mm; }
 .dv-edition .dv-edition-date { margin: 0 0 1mm; font-size: 8.5pt; color: var(--dv-encre-douce); }
 .dv-edition ul { gap: 0.8mm; font-size: 9pt; }
 
