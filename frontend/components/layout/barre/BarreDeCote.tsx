@@ -90,7 +90,7 @@ function useApercus(connecte: boolean) {
 // ── Pièces ─────────────────────────────────────────────────────────────────
 
 const FILET = 'border-r border-border';
-const CELLULE = 'relative flex h-full items-center gap-2 whitespace-nowrap px-4 text-sm font-medium text-muted outline-none transition-colors hover:text-ivory focus-visible:bg-elevated focus-visible:text-ivory focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink';
+const CELLULE = 'relative flex h-full items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-muted outline-none xl:px-4 transition-colors hover:text-ivory focus-visible:bg-elevated focus-visible:text-ivory focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink';
 
 function Pastille({ seance }: { seance: EtatSeance | null }) {
   return (
@@ -319,8 +319,8 @@ export default function BarreDeCote() {
     <>
       <Pastille seance={seance} />
       <span className="tabular">
-        <span className="min-[1360px]:hidden">{seance?.court ?? 'Séance'}</span>
-        <span className="hidden min-[1360px]:inline">{seance?.libelle ?? 'Séance'}</span>
+        <span className="min-[1536px]:hidden">{seance?.court ?? 'Séance'}</span>
+        <span className="hidden min-[1536px]:inline">{seance?.libelle ?? 'Séance'}</span>
       </span>
     </>
   );
@@ -377,7 +377,7 @@ export default function BarreDeCote() {
             className={`${CELLULE} ${FILET} gap-2.5 text-ivory`}
           >
             <AnimatedLogo size={26} variant="mark" animate={false} />
-            <span className="font-display text-base font-semibold tracking-tight">WESTBOURSE</span>
+            <span className="hidden font-display text-base font-semibold tracking-tight xl:inline">WESTBOURSE</span>
           </Link>
 
           {cellule('aujourdhui', <>{seanceCellule}<ChevronDown aria-hidden className="h-3.5 w-3.5 shrink-0 opacity-60" /></>)}
@@ -406,13 +406,13 @@ export default function BarreDeCote() {
             className={`${CELLULE} border-l border-border ${FILET}`}
           >
             <Search aria-hidden className="h-4 w-4" />
-            <span className="hidden min-[1360px]:inline">Chercher une valeur</span>
-            <span className="sr-only min-[1360px]:hidden">Chercher une valeur</span>
+            <span className="hidden min-[1536px]:inline">Chercher une valeur</span>
+            <span className="sr-only min-[1536px]:hidden">Chercher une valeur</span>
             <kbd className="rounded-sm border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">{raccourci}</kbd>
           </button>
 
           {session !== 'connecte' && (
-            <div className={`${FILET} hidden items-center px-2 min-[1200px]:flex`}>
+            <div className={`${FILET} hidden items-center px-2 min-[1360px]:flex`}>
               <ThemeToggle className="!rounded-sm !border-0 !bg-transparent" />
             </div>
           )}
