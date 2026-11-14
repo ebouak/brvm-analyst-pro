@@ -61,3 +61,26 @@ describe('exemples réels — historique des dividendes', () => {
     expect(h2.lignes[0]!.versements).toBe(4);
   });
 });
+
+import { ratiosValeurs } from './donneesReelles';
+
+describe('ratiosValeurs', () => {
+  const cot = [{ code: 'AAA', cours: 1000, date: '2026-11-13' }, { code: 'BBB', cours: 500, date: '2026-11-13' }];
+  const fd = [
+    { code: 'AAA', year: 2024, net_income: 80, equity: 400 },
+    { code: 'AAA', year: 2025, net_income: 100, equity: 500 },
+    { code: 'AAA', year: 2026, net_income: 120, equity: null },
+    { code: 'BBB', year: 2025, net_income: -10, equity: 100 },
+  ];
+  it('dernier exercice complet, ratios exacts, perte sans PER, manquant nommé', () => {
+    const r = ratiosValeurs(['AAA', 'BBB', 'CCC'], {}, cot, fd, { AAA: 1, BBB: 1, CCC: 1 });
+    const a = r.lignes[0]!;
+    expect(a.exercice).toBe(2025);
+    expect(a.bpa).toBe(100);
+    expect(a.per).toBe(10);
+    expect(a.pb).toBe(2);
+    expect(a.roePct).toBe(20);
+    expect(r.lignes[1]!.per).toBeNull();
+    expect(r.manquants).toEqual(['CCC']);
+  });
+});

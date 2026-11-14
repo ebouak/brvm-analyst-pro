@@ -1,0 +1,236 @@
+{
+ "titre": "Leçon 5 — Diversification et allocation d’actifs",
+ "module": "Module 2 — Construire son portefeuille",
+ "categorie": "general",
+ "duree_min": 11,
+ "sous_titre": "Ne pas tout perdre à cause d’une seule société : combien de lignes, quels secteurs, quels pays.",
+ "resume": "Diversifier, c’est répartir son argent pour qu’une mauvaise nouvelle sur une société ne ruine pas tout le portefeuille. À la BRVM, la diversification a des limites particulières : peu de sociétés, des secteurs concentrés, une liquidité inégale. Cette leçon donne des règles simples et vérifiables.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Deux risques différents",
+   "contenu": "Le risque d’un portefeuille a deux sources. La diversification ne supprime que la première.",
+   "points": [
+    {
+     "titre": "Le risque propre à une société",
+     "detail": "Un mauvais résultat, un litige, un dirigeant qui part. Il se réduit en multipliant les lignes."
+    },
+    {
+     "titre": "Le risque de marché",
+     "detail": "Une crise régionale, une hausse des taux, un recul général. Il touche toutes les actions à la fois : la diversification ne l’efface pas."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Combien de lignes ?",
+   "contenu": "Les études menées sur les grands marchés montrent que l’essentiel du risque propre disparaît entre 10 et 20 lignes. Le graphique de la leçon illustre cette courbe avec des valeurs d’exemple.\nÀ la BRVM, avec une cinquantaine de sociétés et des secteurs concentrés, viser 8 à 15 lignes réparties sur plusieurs secteurs est un repère raisonnable."
+  },
+  {
+   "type": "importance",
+   "titre": "Les quatre dimensions de la répartition",
+   "contenu": "Une bonne répartition se vérifie sur quatre axes, pas seulement sur le nombre de lignes.",
+   "tableau": {
+    "colonnes": [
+     "Dimension",
+     "Question",
+     "Repère"
+    ],
+    "lignes": [
+     [
+      "Société",
+      "Quel poids pèse ma première ligne ?",
+      "Rarement plus de 15 à 20 % du portefeuille"
+     ],
+     [
+      "Secteur",
+      "Suis-je trop exposé aux banques ?",
+      "Pas plus d’un tiers sur un seul secteur"
+     ],
+     [
+      "Pays",
+      "Mes sociétés dépendent-elles d’une seule économie ?",
+      "Répartir entre plusieurs pays de l’UEMOA"
+     ],
+     [
+      "Classe d’actifs",
+      "Ai-je des obligations pour amortir les chocs ?",
+      "Selon l’horizon et la tolérance au risque"
+     ]
+    ],
+    "note": "Ces repères sont des ordres de grandeur pédagogiques, pas des règles réglementaires."
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : deux indices",
+   "reel": true,
+   "contenu": "L’indice BRVM Composite pondère les sociétés par leur capitalisation boursière : quelques grandes valeurs y pèsent lourd. Suivre un indice concentré n’est pas la même chose qu’être diversifié.",
+   "donnees_reelles": {
+    "vue": "indices",
+    "codes": [
+     "BRVMC",
+     "BRVM30"
+    ]
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les fausses diversifications",
+   "contenu": "Avoir beaucoup de lignes ne suffit pas.",
+   "points": [
+    {
+     "titre": "Dix banques, un seul risque",
+     "detail": "Dix lignes dans le même secteur réagissent ensemble à la même nouvelle.",
+     "verifier": "La répartition par secteur de votre portefeuille."
+    },
+    {
+     "titre": "Des lignes trop petites",
+     "detail": "Avec de petits montants, les frais minimum de courtage pèsent lourd sur chaque achat.",
+     "verifier": "Le coût total d’un ordre chez votre SGI."
+    },
+    {
+     "titre": "Oublier la liquidité",
+     "detail": "Certaines valeurs s’échangent peu : en cas de besoin, on peut ne pas réussir à vendre au prix affiché.",
+     "verifier": "La classe de liquidité de chaque valeur."
+    },
+    {
+     "titre": "Ne jamais rééquilibrer",
+     "detail": "Une ligne qui a beaucoup monté finit par peser trop lourd.",
+     "verifier": "Le poids de chaque ligne, une fois par an."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Diversifier, c’est accepter de moins gagner sur sa meilleure idée pour ne pas tout perdre sur la pire.",
+   "points": [
+    {
+     "titre": "La diversification réduit le risque propre, pas le risque de marché"
+    },
+    {
+     "titre": "Plusieurs secteurs et plusieurs pays valent mieux que beaucoup de lignes"
+    },
+    {
+     "titre": "Une ligne ne devrait pas dominer le portefeuille"
+    },
+    {
+     "titre": "Vérifier et rééquilibrer au moins une fois par an"
+    }
+   ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "line",
+   "titre": "Risque d’un portefeuille selon le nombre de lignes (exemple)",
+   "labels": [
+    "1",
+    "2",
+    "4",
+    "6",
+    "8",
+    "10",
+    "15",
+    "20"
+   ],
+   "valeurs": [
+    100,
+    74,
+    58,
+    52,
+    48,
+    46,
+    43,
+    42
+   ],
+   "unite": "base 100",
+   "note": "Valeurs d’exemple, pas des données de marché : risque du portefeuille, base 100 pour une seule action. La baisse est rapide pour les premières lignes, puis la courbe s’aplatit. Au-delà d’une quinzaine de lignes, il reste surtout le risque de marché, que la diversification ne supprime pas.",
+   "reel": false
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quel risque la diversification ne peut-elle pas supprimer ?",
+   "options": [
+    "Le risque propre à une société",
+    "Le risque de marché",
+    "Le risque d’un mauvais résultat",
+    "Le risque d’un litige"
+   ],
+   "correct": 1,
+   "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché."
+  },
+  {
+   "question": "Un portefeuille compte dix lignes, toutes des banques. Est-il bien diversifié ?",
+   "options": [
+    "Oui, dix lignes suffisent",
+    "Non, il reste exposé à un seul secteur",
+    "Oui, à condition que ce soit dix pays différents",
+    "La question n’a pas de sens"
+   ],
+   "correct": 1,
+   "explication": "Dix banques réagissent souvent ensemble aux mêmes nouvelles. La répartition par secteur compte autant que le nombre de lignes."
+  },
+  {
+   "question": "Pourquoi des lignes trop petites posent-elles problème ?",
+   "options": [
+    "Elles sont interdites",
+    "Les frais minimum de courtage pèsent alors lourd sur chaque ordre",
+    "Elles ne versent pas de dividende",
+    "Elles augmentent le risque de marché"
+   ],
+   "correct": 1,
+   "explication": "Les frais de courtage comportent souvent un minimum : sur un petit ordre, ils représentent un pourcentage élevé."
+  },
+  {
+   "question": "Une ligne a beaucoup monté et pèse désormais 40 % du portefeuille. Que suggère le principe de diversification ?",
+   "options": [
+    "Ne rien faire",
+    "Envisager de rééquilibrer pour réduire sa part",
+    "Acheter encore la même valeur",
+    "Vendre toutes les autres lignes"
+   ],
+   "correct": 1,
+   "explication": "Rééquilibrer ramène le portefeuille vers sa répartition cible et limite la dépendance à une seule société."
+  },
+  {
+   "question": "Pourquoi suivre l’indice BRVM Composite n’équivaut-il pas forcément à être diversifié ?",
+   "options": [
+    "Il ne contient qu’une société",
+    "Il pondère par la capitalisation : quelques grandes valeurs pèsent lourd",
+    "Il ne contient que des obligations",
+    "Il n’existe plus"
+   ],
+   "correct": 1,
+   "explication": "Un indice pondéré par la capitalisation peut être dominé par quelques grandes sociétés."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Mon portefeuille",
+   "href": "/portefeuille"
+  },
+  {
+   "label": "La liquidité de chaque valeur",
+   "href": "/liquidite"
+  },
+  {
+   "label": "Les secteurs",
+   "href": "/secteurs"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "qcm": {
+  "question": "Quel risque la diversification ne peut-elle pas supprimer ?",
+  "options": [
+   "Le risque propre à une société",
+   "Le risque de marché",
+   "Le risque d’un mauvais résultat",
+   "Le risque d’un litige"
+  ],
+  "correct": 1,
+  "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché."
+ }
+}

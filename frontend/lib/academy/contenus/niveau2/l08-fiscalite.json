@@ -1,0 +1,207 @@
+{
+ "titre": "Leçon 8 — La fiscalité des revenus boursiers",
+ "module": "Module 3 — Thèmes avancés",
+ "categorie": "income",
+ "duree_min": 9,
+ "sous_titre": "Ce que l’impôt retient sur un dividende ou un coupon, selon le pays de la société, et comment lire un montant « net ».",
+ "resume": "À la BRVM, l’impôt sur les dividendes est retenu à la source par la société, selon la loi de son pays : c’est l’IRVM. Le taux varie d’un pays à l’autre. Cette leçon montre les taux que WestBourse a vérifiés, la différence entre brut et net, et le cas des obligations.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "L’impôt est retenu avant le versement",
+   "contenu": "L’impôt sur le revenu des valeurs mobilières (IRVM) est prélevé par la société au moment du paiement. Vous recevez le dividende net : vous n’avez rien à verser vous-même pour cet impôt.\nLe taux dépend de la législation du pays de la société qui verse, pas de la SGI.",
+   "formules": [
+    {
+     "nom": "Dividende net",
+     "expression": "Dividende brut × (1 − taux d’IRVM)",
+     "exemple": "1 000 × (1 − 12 %) = 880 FCFA"
+    },
+    {
+     "nom": "Rendement net",
+     "expression": "Dividende net ÷ Cours",
+     "exemple": "880 ÷ 16 000 = 5,5 %"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les taux sur les dividendes d’actions cotées",
+   "contenu": "Taux applicables aux personnes physiques, tels que WestBourse les a vérifiés. Ils changent avec les lois de finances : la page Fiscalité du site fait foi et cite ses sources.",
+   "tableau": {
+    "colonnes": [
+     "Pays de la société",
+     "Taux sur les dividendes",
+     "Précision"
+    ],
+    "lignes": [
+     [
+      "Côte d’Ivoire",
+      "12 %",
+      "10 % pour les personnes morales, depuis l’annexe fiscale 2025"
+     ],
+     [
+      "Sénégal",
+      "10 %",
+      "—"
+     ],
+     [
+      "Burkina Faso",
+      "12,5 %",
+      "—"
+     ],
+     [
+      "Mali",
+      "7 %",
+      "Taux en vigueur depuis 2017"
+     ],
+     [
+      "Bénin",
+      "5 %",
+      "Taux réduit en vigueur depuis 2018"
+     ],
+     [
+      "Togo",
+      "3 %",
+      "Personnes physiques ; 7 % pour les personnes morales"
+     ],
+     [
+      "Niger, Guinée-Bissau",
+      "Non vérifié",
+      "WestBourse n’affiche pas de taux tant qu’il n’est pas confirmé"
+     ]
+    ],
+    "note": "Source : barème WestBourse (page Fiscalité), constitué à partir de sources publiques citées sur cette page."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Les obligations",
+   "contenu": "Les coupons des titres émis par les États de l’UEMOA et par les institutions régionales comme la BOAD ou la BIDC sont en principe exonérés. Les obligations de sociétés privées supportent une retenue, dont le taux varie selon le pays.\nC’est l’une des raisons pour lesquelles une obligation d’État peut rapporter plus, net, qu’un placement affiché à un taux supérieur."
+  },
+  {
+   "type": "piege",
+   "titre": "Les confusions fréquentes",
+   "contenu": "La plupart des erreurs viennent d’un mélange entre brut et net.",
+   "points": [
+    {
+     "titre": "Retirer l’impôt deux fois",
+     "detail": "Le calendrier officiel des dividendes de la BRVM publie souvent des montants déjà nets. Leur appliquer à nouveau l’IRVM sous-estime le rendement.",
+     "verifier": "La mention brut ou net du montant."
+    },
+    {
+     "titre": "Appliquer le taux de son propre pays",
+     "detail": "C’est le pays de la société qui verse qui détermine la retenue.",
+     "verifier": "Le pays de la société sur sa fiche."
+    },
+    {
+     "titre": "Oublier sa situation personnelle",
+     "detail": "Résidence fiscale, investissement depuis l’étranger, compte d’entreprise : votre SGI ou un conseiller fiscal tranche.",
+     "verifier": "Votre relevé de dividendes chez votre SGI."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Toujours savoir si un montant est brut ou net.",
+   "points": [
+    {
+     "titre": "L’IRVM est retenu à la source, selon le pays de la société"
+    },
+    {
+     "titre": "Les taux sur les dividendes vont de 3 % à 12,5 % selon les pays vérifiés"
+    },
+    {
+     "titre": "Les titres d’État et des institutions régionales sont en principe exonérés"
+    },
+    {
+     "titre": "Ne pas retirer l’impôt d’un montant déjà net"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une société ivoirienne verse un dividende brut de 1 500 FCFA. Avec un IRVM de 12 %, quel est le dividende net ?",
+   "options": [
+    "1 200 FCFA",
+    "1 320 FCFA",
+    "1 380 FCFA",
+    "1 500 FCFA"
+   ],
+   "correct": 1,
+   "explication": "1 500 × (1 − 0,12) = 1 320 FCFA."
+  },
+  {
+   "question": "Qui retient l’IRVM sur un dividende ?",
+   "options": [
+    "L’actionnaire, dans sa déclaration annuelle",
+    "La société, au moment du versement",
+    "La BRVM, à la fin de l’année",
+    "Personne"
+   ],
+   "correct": 1,
+   "explication": "L’IRVM est une retenue à la source : la société le prélève avant de verser le dividende net."
+  },
+  {
+   "question": "Quel pays détermine le taux d’IRVM d’un dividende ?",
+   "options": [
+    "Le pays de l’investisseur",
+    "Le pays de la société qui verse le dividende",
+    "Le pays de la SGI",
+    "Le pays de la banque de l’investisseur"
+   ],
+   "correct": 1,
+   "explication": "La retenue suit la législation du pays de la société émettrice."
+  },
+  {
+   "question": "Un montant publié est déjà net d’impôt. Que se passe-t-il si vous lui retirez encore l’IRVM ?",
+   "options": [
+    "Rien",
+    "Vous sous-estimez votre revenu et votre rendement",
+    "Vous surestimez votre revenu",
+    "Vous payez deux fois l’impôt"
+   ],
+   "correct": 1,
+   "explication": "Retirer l’impôt d’un montant déjà net donne un revenu calculé trop bas."
+  },
+  {
+   "question": "Les coupons des obligations d’État de l’UEMOA sont :",
+   "options": [
+    "Imposés au même taux que les dividendes",
+    "En principe exonérés",
+    "Imposés à 50 %",
+    "Interdits aux particuliers"
+   ],
+   "correct": 1,
+   "explication": "Les titres publics des États et des institutions régionales sont en principe exonérés."
+  }
+ ],
+ "liens": [
+  {
+   "label": "La fiscalité par pays",
+   "href": "/fiscalite"
+  },
+  {
+   "label": "Le calendrier des dividendes",
+   "href": "/dividendes/calendrier"
+  },
+  {
+   "label": "Les dividendes",
+   "href": "/dividendes"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une société ivoirienne verse un dividende brut de 1 500 FCFA. Avec un IRVM de 12 %, quel est le dividende net ?",
+  "options": [
+   "1 200 FCFA",
+   "1 320 FCFA",
+   "1 380 FCFA",
+   "1 500 FCFA"
+  ],
+  "correct": 1,
+  "explication": "1 500 × (1 − 0,12) = 1 320 FCFA."
+ }
+}

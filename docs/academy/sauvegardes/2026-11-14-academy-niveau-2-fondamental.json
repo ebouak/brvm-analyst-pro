@@ -1,0 +1,587 @@
+{
+ "glossaire": [
+  {
+   "definition": "État financier photographiant à un instant T les actifs, les passifs et les capitaux propres.",
+   "terme": "Bilan"
+  },
+  {
+   "definition": "Bénéfice final après toutes les charges, impôts et intérêts de la dette.",
+   "terme": "Résultat net"
+  },
+  {
+   "definition": "Cash généré par l'activité principale de l'entreprise.",
+   "terme": "Flux de trésorerie opérationnel"
+  },
+  {
+   "definition": "Résultat net / Chiffre d'affaires × 100. Mesure l'efficacité à convertir les ventes en profit.",
+   "terme": "Marge nette"
+  },
+  {
+   "definition": "Richesse nette appartenant aux actionnaires (actifs - dettes).",
+   "terme": "Capitaux propres"
+  },
+  {
+   "definition": "Price Earning Ratio = Cours / BPA. Combien de fois le bénéfice est payé dans le prix.",
+   "terme": "PER"
+  },
+  {
+   "definition": "Bénéfice Par Action = Résultat net / Nombre d'actions. Bénéfice attribuable à chaque action.",
+   "terme": "BPA"
+  },
+  {
+   "definition": "PER calculé avec le BPA estimé de l'exercice suivant.",
+   "terme": "PER prospectif"
+  },
+  {
+   "definition": "PER divisé par le taux de croissance du BPA. Ajuste le PER pour la croissance.",
+   "terme": "PEG ratio"
+  },
+  {
+   "definition": "Situation où une action se négocie sous sa valeur théorique ou sous la moyenne sectorielle.",
+   "terme": "Décote"
+  },
+  {
+   "definition": "Price to Book Ratio = Cours / Valeur comptable par action.",
+   "terme": "PBR"
+  },
+  {
+   "definition": "Capitaux propres / Nombre d'actions. Valeur nette des actifs par action selon la comptabilité.",
+   "terme": "Valeur comptable"
+  },
+  {
+   "definition": "Return on Equity = Résultat net / Capitaux propres × 100. Rentabilité des fonds propres.",
+   "terme": "ROE"
+  },
+  {
+   "definition": "Utilisation de la dette pour amplifier le ROE. Peut booster les bénéfices mais amplifie aussi les risques.",
+   "terme": "Levier financier"
+  },
+  {
+   "definition": "Mesure du degré de relation entre les variations de deux actifs. Une corrélation faible améliore la diversification.",
+   "terme": "Corrélation"
+  },
+  {
+   "definition": "Part (en %) d'un actif dans le portefeuille total.",
+   "terme": "Pondération"
+  },
+  {
+   "definition": "Ajustement périodique pour ramener chaque ligne à sa pondération cible.",
+   "terme": "Rééquilibrage"
+  },
+  {
+   "definition": "Risque d'avoir trop de capital sur trop peu d'actifs ou de secteurs.",
+   "terme": "Concentration"
+  },
+  {
+   "definition": "Droit Préférentiel de Souscription : droit accordé aux actionnaires lors d'une augmentation de capital.",
+   "terme": "DPS"
+  },
+  {
+   "definition": "Prix auquel les nouvelles actions sont proposées lors de l'augmentation de capital.",
+   "terme": "Prix d'émission"
+  },
+  {
+   "definition": "Diminution de la part de chaque actionnaire existant lors d'une émission de nouvelles actions.",
+   "terme": "Dilution"
+  },
+  {
+   "definition": "Nombre de nouvelles actions offertes pour chaque ancienne action détenue.",
+   "terme": "Ratio de souscription"
+  },
+  {
+   "definition": "Estimation des revenus futurs basée sur des hypothèses de croissance.",
+   "terme": "Projection"
+  },
+  {
+   "definition": "Test du portefeuille dans des conditions défavorables pour évaluer la résistance.",
+   "terme": "Scénario de stress"
+  },
+  {
+   "definition": "Yield global du portefeuille, pondéré par le poids de chaque ligne.",
+   "terme": "Yield moyen pondéré"
+  },
+  {
+   "definition": "Bourse Régionale des Valeurs Mobilières — marché financier commun des 8 pays UEMOA, créé en 1998 à Abidjan.",
+   "terme": "BRVM"
+  },
+  {
+   "definition": "Union Économique et Monétaire Ouest Africaine — 8 pays : Bénin, Burkina Faso, Côte d'Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo.",
+   "terme": "UEMOA"
+  },
+  {
+   "definition": "Société de Gestion et d'Intermédiation — courtier agréé par le CREPMF, intermédiaire obligatoire pour investir à la BRVM.",
+   "terme": "SGI"
+  },
+  {
+   "definition": "Conseil Régional de l'Épargne Publique et des Marchés Financiers — autorité de régulation du marché financier de l'UEMOA.",
+   "terme": "CREPMF"
+  },
+  {
+   "definition": "Titre de propriété représentant une fraction du capital d'une entreprise. Donne droit aux dividendes, au vote en AG et à la plus-value.",
+   "terme": "Action"
+  },
+  {
+   "definition": "Part des bénéfices d'une entreprise redistribuée aux actionnaires. Versé généralement une fois par an.",
+   "terme": "Dividende"
+  },
+  {
+   "definition": "Dividende Par Action — montant du dividende versé par action lors de la distribution annuelle.",
+   "terme": "DPA"
+  },
+  {
+   "definition": "Rendement dividende = DPA / Cours × 100. Mesure le revenu passif annuel pour chaque franc investi.",
+   "terme": "Yield"
+  },
+  {
+   "definition": "Gain réalisé lors de la revente d'une action à un prix supérieur au prix d'achat.",
+   "terme": "Plus-value"
+  },
+  {
+   "definition": "Relative Strength Index — oscillateur entre 0 et 100 mesurant la force relative des hausses vs baisses. > 70 surachat, < 30 survente.",
+   "terme": "RSI"
+  }
+ ],
+ "intro": "Niveau 2 — Analyse Fondamentale — parcours complet de la WestBourse Academy : 7 leçons interactives organisées par module, avec quiz, glossaire et suivi de progression. Cas et chiffres issus du marché BRVM.",
+ "lessons": [
+  {
+   "categorie": "fundamental",
+   "duree_min": 4,
+   "image": {
+    "alt": "Top view of financial charts with a smartphone calculator, magnifying glass, and pencils on a desk.",
+    "credit": "Photo : RDNE Stock project / Pexels",
+    "url": "https://images.pexels.com/photos/7947755/pexels-photo-7947755.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 2,
+    "explication": "Le tableau des flux de trésorerie opérationnel montre l'argent réellement encaissé et décaissé. Il est beaucoup plus difficile de le manipuler que le bénéfice comptable, qui dépend de nombreuses hypothèses et estimations.",
+    "options": [
+     "Le bilan consolidé",
+     "Le compte de résultat",
+     "Le tableau des flux de trésorerie opérationnel",
+     "L'annexe comptable"
+    ],
+    "question": "Dans un rapport annuel, quel état est le plus difficile à \"maquiller\" comptablement ?"
+   },
+   "resume": "Le rapport annuel est la bible de l'analyste fondamental. Bilan, compte de résultat et tableau des flux de trésorerie racontent ensemble la santé financière réelle d'une entreprise cotée à la BRVM.",
+   "sections": [
+    {
+     "contenu": "Lire un rapport annuel, c'est \"écouter\" une entreprise parler de sa santé financière dans son propre langage. Cette compétence est le fondement de toute décision d'investissement rigoureuse. Sans elle, vous achetez des noms — pas des valeurs.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le rapport annuel BRVM comprend 3 états financiers fondamentaux. Le bilan est la photographie de l'entreprise à un instant T : actifs (ce qu'elle possède) vs passifs (ce qu'elle doit) + capitaux propres (richesse nette des actionnaires). Le compte de résultat retrace l'activité sur l'exercice : CA → charges → résultat net. Le tableau des flux de trésorerie montre l'argent réellement entré et sorti — plus fiable que le bénéfice comptable pour détecter les entreprises qui \"fabriquent\" des profits sans vraiment générer de cash.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Une entreprise peut afficher un bénéfice comptable positif tout en ayant des difficultés de trésorerie réelles. Le tableau des flux révèle ce que le compte de résultat peut masquer. Des sociétés en difficulté ont parfois publié de \"beaux\" bénéfices comptables pendant des années avant que la réalité ne rattrape les chiffres.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les 5 lignes prioritaires du rapport annuel : 1. Croissance du CA (tendance sur 3 ans). 2. Marge bénéficiaire nette (Résultat net / CA × 100). 3. Évolution du DPA sur 3 ans (la politique de dividende révèle la confiance du management). 4. Ratio dette nette / fonds propres (en dessous de 1 = sain pour la plupart des secteurs). 5. Flux de trésorerie opérationnel (doit être positif et en croissance).Le rapport est publié chaque année (généralement avril-juin pour l'exercice précédent). Pour les sociétés cotées à la BRVM, les rapports sont accessibles sur le site officiel de la BRVM (brvm.org) et sur le site de chaque entreprise. Les communiqués de presse de résultats sont un format condensé du rapport annuel, publié dès la clôture des comptes.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Analyse du rapport annuel SIB CI 2022 : CA en hausse de +12% vs 2021. Résultat net : +18%. Marge nette : 23%. DPA : 950 FCFA (vs 855 FCFA en 2021, +11%). Flux de trésorerie opérationnel : positif et en croissance. Ratio dette/fonds propres : 0,6. Bilan : entreprise saine, en croissance, avec une politique de dividende généreuse et régulière. Signal : action à conserver, voire renforcer.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Se concentrer uniquement sur la croissance du résultat net et ignorer le tableau des flux de trésorerie. Des entreprises ont affiché des bénéfices croissants pendant plusieurs années grâce à des ajustements comptables, tandis que leur trésorerie réelle se détériorait. Le cash flow opérationnel est le signal le plus difficile à \"maquiller\".",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "3 états financiers clés : bilan (instantané), compte de résultat (activité), flux de trésorerie (cash réel).Le flux de trésorerie opérationnel est plus fiable que le bénéfice net pour évaluer la santé réelle.Les 5 lignes à regarder en premier : croissance CA, marge nette, évolution DPA, dette/fonds propres, cash flow.Les rapports BRVM sont disponibles gratuitement sur brvm.org.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 1 — Lire un rapport annuel"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 4,
+   "image": {
+    "alt": "Close-up of house keys, euro bills, and charts symbolizing real estate investment and finance.",
+    "credit": "Photo : Jakub Zerdzicki / Pexels",
+    "url": "https://images.pexels.com/photos/29799518/pexels-photo-29799518.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 1,
+    "explication": "PER = Cours / BPA (Bénéfice Par Action). Un PER de 10 signifie que le cours représente 10 ans de bénéfices. Plus le PER est bas, moins vous payez cher les bénéfices de l'entreprise.",
+    "options": [
+     "Le prix actuel de l'action en FCFA",
+     "Le nombre d'années de bénéfices nécessaires pour récupérer le prix payé (Cours / BPA)",
+     "La variation du cours sur 12 mois",
+     "Le montant total du dividende distribué"
+    ],
+    "question": "Qu'est-ce que le PER (Price Earning Ratio) ?"
+   },
+   "resume": "Le Price Earning Ratio (PER) mesure combien de fois le bénéfice annuel est intégré dans le prix de l'action. PER = Cours / BPA. Un PER faible suggère une sous-évaluation potentielle. C'est l'indicateur de valorisation le plus utilisé dans le monde.",
+   "sections": [
+    {
+     "contenu": "Le PER est souvent présenté comme \"le\" ratio à regarder pour évaluer une action. En réalité, c'est un outil puissant mais incomplet : un PER de 6 peut signifier \"occasion rare\" ou \"entreprise en déclin\". Son interprétation exige du contexte — secteur, tendance des bénéfices, conditions de marché.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "PER = Cours de l'action / Bénéfice Par Action (BPA). Exemple : action à 15 000 FCFA, BPA de 1 500 FCFA → PER = 10. Interprétation intuitive : il faudrait théoriquement 10 ans de bénéfices pour récupérer le prix payé. Plus le PER est bas, moins vous \"payez cher\" les bénéfices de l'entreprise. Sur la BRVM, les PER sont généralement plus bas qu'en Europe ou en Amérique du Nord — reflet d'un marché moins mature mais aussi d'opportunités de sous-évaluation.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sans le PER, vous ne pouvez pas comparer deux actions dans le même secteur. Une action à 20 000 FCFA n'est pas forcément \"plus chère\" qu'une à 5 000 FCFA si leurs BPA respectifs sont très différents. Le PER donne une base de comparaison objective.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Référentiels PER BRVM par secteur : Banques (PER moyen : 6-10) · Télécoms (PER moyen : 10-16) · Services publics (PER moyen : 8-14) · Industrie (PER moyen : 5-12). Un PER inférieur à la moyenne sectorielle est un premier signal à approfondir.Le PER prospectif utilise le BPA estimé pour l'exercice suivant (plutôt que le BPA passé). Il est plus pertinent dans les phases de croissance ou de retournement. Mais attention : les estimations peuvent être erronées si les résultats déçoivent.Le PEG ratio (PER / taux de croissance du BPA) raffine l'analyse : un PER de 15 avec une croissance de 15%/an (PEG = 1) est plus attractif qu'un PER de 15 avec une croissance de 5%/an (PEG = 3).",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "En 2021, ECOBANK CI affichait un PER de 7,2 alors que le PER moyen du secteur bancaire BRVM était de 9,1. BPA = 1 463 FCFA. Cours = 10 500 FCFA. Un analyste Value qui identifie cette décote de ~20% vs le secteur, vérifie la solidité des fondamentaux (bilan sain, dividende stable) et achète à 10 500 FCFA réalise une plus-value latente de 22% si le cours revient au PER sectoriel moyen (12 813 FCFA).",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Comparer le PER d'une banque avec celui d'une entreprise industrielle. Un PER de 8 pour une banque est normal ; le même PER pour une entreprise technologique en forte croissance serait anormalement bas. Comparez toujours le PER d'une action avec celui de ses comparables du même secteur, jamais avec le marché global.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "PER = Cours / BPA. Mesure combien de fois le bénéfice est \"payé\" dans le prix de l'action.Comparer toujours le PER au sein du même secteur — pas entre secteurs différents.Sur la BRVM, les PER sont généralement plus bas qu'en Europe — des opportunités existent.Un PER bas n'est pas toujours une opportunité : vérifiez toujours la qualité des bénéfices.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 2 — Le PER : évaluer la cherté d'une action"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 4,
+   "image": {
+    "alt": "Magnifying glass and colored pencils on financial trend graphs highlighting sales growth.",
+    "credit": "Photo : RDNE Stock project / Pexels",
+    "url": "https://images.pexels.com/photos/7948055/pexels-photo-7948055.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 1,
+    "explication": "Un PBR < 1 signifie que le cours de marché est inférieur à la valeur comptable nette des actifs par action. Potentiellement très attractif, mais vérifier la qualité des actifs avant de conclure à une opportunité.",
+    "options": [
+     "L'action est surévaluée",
+     "L'action se négocie en dessous de la valeur comptable nette des actifs",
+     "L'entreprise ne verse pas de dividendes",
+     "Le cours est inférieur à son niveau de l'an dernier"
+    ],
+    "question": "Que signifie un PBR inférieur à 1 ?"
+   },
+   "resume": "Le PBR compare le cours à la valeur comptable. Le ROE mesure l'efficacité des fonds propres. Ensemble avec le PER et le Yield, ils forment la grille d'analyse fondamentale complète d'un investisseur BRVM.",
+   "sections": [
+    {
+     "contenu": "L'investisseur Warren Buffett utilise 3 critères fondamentaux : un ROE élevé et stable, une dette maîtrisée et une valorisation raisonnable (PBR et PER). Cette combinaison identifie des entreprises de qualité achetées à bon prix — la définition du Value Investing appliqué à la BRVM.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "PBR (Price to Book Ratio) = Cours / Valeur comptable par action. Un PBR inférieur à 1 signifie que vous achetez l'entreprise moins cher que la valeur de ses actifs nets — potentiellement très attractif si les actifs sont de qualité. ROE (Return on Equity) = Résultat net / Capitaux propres × 100. Un ROE supérieur à 15% indique une entreprise qui génère efficacement de la valeur pour ses actionnaires.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le PER seul peut être trompeur dans certains contextes (entreprise avec beaucoup de dettes, BPA artificiellement gonflé). Le PBR et le ROE apportent une perspective différente et complémentaire — l'un sur la valeur des actifs, l'autre sur la rentabilité du capital. Ensemble, ils créent une image plus complète.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "La combinaison magique recherchée par les analystes de la BRVM : PER inférieur à la moyenne sectorielle + PBR inférieur à 1,5 + ROE supérieur à 15% + Yield supérieur à 8%. Une action réunissant ces 4 critères est une candidate d'achat sérieuse à approfondir.SONATEL illustre parfaitement un ROE de qualité : historiquement au-dessus de 20%, maintenu sur plus de 15 ans. Cela signifie que pour chaque 100 FCFA de fonds propres confiés à SONATEL, l'entreprise génère 20+ FCFA de bénéfice annuel — une performance remarquable qui justifie sa valorisation premium.Attention au PBR bas sur des entreprises avec des actifs de mauvaise qualité. Un PBR de 0,5 peut sembler très attractif, mais si les actifs sont des créances douteuses ou des stocks invendables, la valeur comptable n'est qu'une illusion comptable.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Grille d'analyse CORIS BANK 2022 : PER = 6,8 · PBR = 0,9 · ROE = 17,2% · Yield = 9,1%. Les 4 critères sont au vert. Résultat : action identifiée comme sous-évaluée par plusieurs analystes BRVM. Dans les 12 mois suivants, le cours a progressé de +28%. La grille multi-ratios a permis une détection précoce.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "S'arrêter à un seul ratio pour prendre une décision d'investissement. Chaque ratio a ses angles morts. Le PER ne dit rien sur la qualité des actifs. Le PBR ne dit rien sur la rentabilité. Le ROE peut être dopé par un fort endettement. Utilisez toujours au minimum 3 ratios complémentaires avant toute décision.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "PBR < 1 = action sous la valeur comptable des actifs — à vérifier de près.ROE > 15% = entreprise qui génère efficacement de la valeur pour ses actionnaires.Combinaison idéale : PER bas + PBR raisonnable + ROE élevé + Yield attractif.Jamais un seul ratio seul — au minimum 3 ratios complémentaires pour toute décision.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 3 — PBR, ROE et ratios complémentaires"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 3,
+   "image": {
+    "alt": "Hand holding pen, analyzing budget with charts and graph paper.",
+    "credit": "Photo : Kindel Media / Pexels",
+    "url": "https://images.pexels.com/photos/7054415/pexels-photo-7054415.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 2 — Construire son portefeuille",
+   "qcm": {
+    "correct": 1,
+    "explication": "Non. Une concentration de 75% dans un seul secteur expose fortement le portefeuille à une crise sectorielle. La règle générale : pas plus de 30-40% dans un seul secteur.",
+    "options": [
+     "Oui, les banques BRVM sont les plus solides du marché",
+     "Non — concentration excessive dans un seul secteur, vulnérabilité aux crises bancaires",
+     "Oui si on détient 8 banques différentes",
+     "La diversification sectorielle n'est pas importante à la BRVM"
+    ],
+    "question": "Un portefeuille exposé à 75% dans le secteur bancaire BRVM est-il bien diversifié ?"
+   },
+   "resume": "La diversification réduit le risque sans diminuer le rendement espéré. Un portefeuille BRVM bien construit répartit le capital sur 5 à 10 valeurs dans au moins 4 secteurs différents, avec une limite de 30% par secteur.",
+   "sections": [
+    {
+     "contenu": "Harry Markowitz a démontré mathématiquement en 1952 ce que les investisseurs expérimentés savaient intuitivement : combiner des actifs dont les performances ne sont pas parfaitement corrélées réduit le risque global du portefeuille sans sacrifier le rendement. C'est le seul \"repas gratuit\" en finance.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sur la BRVM, le secteur bancaire représente plus de 50% de la capitalisation totale. Un portefeuille concentré à 80% en banques BRVM est fortement exposé à une crise du secteur bancaire régional (hausse des créances douteuses, crise de liquidité). La diversification sectorielle protège contre ce scénario.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "La diversification est la compétence la plus concrète et la plus immédiatement applicable de ce niveau. Elle transforme un investisseur \"qui mise tout sur une carte\" en un investisseur institutionnel qui gère son risque comme un professionnel.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Exemple d'allocation diversifiée pour 200 000 FCFA : Banques 25% (50 000 F) : ECOBANK CI + SIB CI · Télécoms 25% (50 000 F) : ORANGE CI + SONATEL · Services publics 20% (40 000 F) : CIE CI + SODECI · Industrie 15% (30 000 F) : SAPH CI · Hydrocarbures 15% (30 000 F) : TOTAL CI. Ce portefeuille expose à 5 secteurs en 9 valeurs dans 3 pays (CI, Sénégal).La diversification géographique est également utile sur la BRVM. Valeurs ivoiriennes (CIE, SIB, ORANGE CI), sénégalaises (SONATEL, TOTAL SN), panafricaines (ECOBANK Transnational). En cas de choc politique ou économique localisé dans un pays, les valeurs d'autres pays atténuent l'impact.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Pendant la crise post-électorale ivoirienne de 2010-2011, les valeurs ivoiriennes ont fortement chuté. Les investisseurs ayant des valeurs sénégalaises (SONATEL, TOTAL SN) dans leur portefeuille ont vu leur perte globale divisée par 2 vs ceux qui étaient 100% concentrés sur des valeurs ivoiriennes. La diversification géographique a joué son rôle de protection.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Sur-diversifier au point de diluer les rendements. Avoir 30 lignes dans son portefeuille avec des montants insignifiants (<5 000 FCFA par ligne) ne réduit plus vraiment le risque et augmente considérablement les frais de suivi et de transaction. La zone optimale est 8 à 15 lignes bien réparties sectoriellement.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "La diversification sectorielle est la première règle d'un portefeuille professionnel.Ne pas dépasser 30% dans un seul secteur, 20% dans une seule valeur.8 à 15 lignes est la zone optimale : assez pour diversifier, assez peu pour bien suivre.La diversification géographique intra-BRVM réduit l'exposition au risque pays.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 5 — Diversification et allocation d'actifs"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 3,
+   "image": {
+    "alt": "Desk with calculator, financial report, and pen, suggesting business analysis.",
+    "credit": "Photo : Bia Limova / Pexels",
+    "url": "https://images.pexels.com/photos/33175667/pexels-photo-33175667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 2 — Construire son portefeuille",
+   "qcm": {
+    "correct": 2,
+    "explication": "Les DPS peuvent être vendus sur le marché secondaire pendant la période de souscription. Cette vente génère un revenu pour l'actionnaire sans qu'il ait à investir davantage. Ne jamais laisser expirer des DPS sans les avoir vendus.",
+    "options": [
+     "Ne rien faire — les DPS expirent sans valeur",
+     "Contacter la BRVM pour annuler les DPS",
+     "Vendre ses DPS sur le marché secondaire avant la date d'expiration",
+     "Revendre ses actions existantes et racheter après l'augmentation de capital"
+    ],
+    "question": "Que doit faire un actionnaire qui reçoit des DPS mais ne souhaite pas souscrire à de nouvelles actions ?"
+   },
+   "resume": "Lors d'une augmentation de capital, l'entreprise distribue des DPS à ses actionnaires existants. Vous pouvez les exercer (souscrire à de nouvelles actions à prix préférentiel) ou les revendre sur le marché pour encaisser un revenu supplémentaire.",
+   "sections": [
+    {
+     "contenu": "Les DPS sont un mécanisme peu connu mais précieux. Bien gérés, ils permettent soit d'augmenter sa participation dans une entreprise appréciée à un prix inférieur au marché, soit d'encaisser un revenu supplémentaire sans débourser un seul franc. Ne pas y prêter attention, c'est laisser de l'argent sur la table.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Formule de valorisation théorique d'un DPS : Valeur DPS = (Cours marché − Prix d'émission) × (Nb nouvelles actions / Nb total actions après l'opération). Exemple : cours marché 10 000 FCFA, prix d'émission 8 000 FCFA, ratio 1 nouvelle pour 4 anciennes. Valeur théorique DPS = (10 000 − 8 000) × (1/5) = 400 FCFA par DPS.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Ignorer un avis d'augmentation de capital de son entreprise peut avoir deux conséquences : subir une dilution de sa participation (si d'autres souscrivent et que vous ne faites rien) ou rater un revenu (si vous ne revendez pas vos DPS). Dans les deux cas, l'inaction a un coût réel.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "La procédure en pratique : la BRVM publie un avis d'augmentation de capital précisant le prix d'émission, le ratio, la période de souscription et la date de détachement des DPS. Votre SGI vous informe et crédite les DPS sur votre compte-titres à la date de détachement. Vous avez alors généralement 2 à 3 semaines pour décider : exercer, vendre, ou laisser expirer (dernière option = perte sèche).La décision d'exercer ou de vendre ses DPS dépend de votre conviction sur l'entreprise et de votre disponibilité de trésorerie. Si vous croyez au projet de l'entreprise et avez les liquidités, l'exercice à prix préférentiel est généralement avantageux. Sinon, vendez vos DPS — vous récupérez une valeur réelle sans rien débourser.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "En 2019, ECOBANK CI a réalisé une augmentation de capital. Les actionnaires ont reçu 1 DPS pour 6 actions détenues. Prix d'émission : 9 500 FCFA vs cours de marché à 11 200 FCFA. Valeur théorique DPS ≈ 245 FCFA. M. Sawadogo possédait 600 actions : il a reçu 600 DPS × 245 FCFA = 147 000 FCFA de valeur en DPS. Il a choisi de les vendre sur le marché secondaire, encaissant ce revenu supplémentaire sans débourser un centime.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Laisser expirer ses DPS par oubli ou inattention. À la date d'expiration, les DPS non exercés et non vendus deviennent nuls. Leur valeur est perdue définitivement. Surveillez votre boîte email et les communications de votre SGI lors de toute annonce d'augmentation de capital.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "DPS = droit de souscrire à de nouvelles actions à prix préférentiel lors d'une augmentation de capital.Option 1 : exercer ses DPS (investir davantage à prix avantageux). Option 2 : vendre ses DPS sur le marché.Ne jamais laisser expirer ses DPS — c'est une perte réelle de valeur.Votre SGI vous notifie automatiquement lors d'une augmentation de capital.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 6 — Les Droits Préférentiels de Souscription (DPS)"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 4,
+   "image": {
+    "alt": "A smartphone showing an investment app with green growth indicators, surrounded by credit cards, US dollars, and a passport.",
+    "credit": "Photo : DΛVΞ GΛRCIΛ / Pexels",
+    "url": "https://images.pexels.com/photos/33785776/pexels-photo-33785776.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 2 — Construire son portefeuille",
+   "qcm": {
+    "correct": 1,
+    "explication": "ROE = Résultat net / Capitaux propres × 100. Un ROE de 20% indique que pour chaque 100 FCFA de fonds propres, l'entreprise génère 20 FCFA de bénéfice. Un ROE > 15% est généralement le signe d'une entreprise bien gérée.",
+    "options": [
+     "A perdu 20% de sa valeur en bourse",
+     "Génère 20 FCFA de bénéfice pour chaque 100 FCFA de capitaux propres confiés",
+     "A un cours en hausse de 20%",
+     "Verse 20% de son CA en dividendes"
+    ],
+    "question": "Un ROE de 20% pour SONATEL signifie que l'entreprise :"
+   },
+   "resume": "Exercice pratique central du Niveau 2 : construire un portefeuille fictif de 500 000 FCFA, le diversifier, calculer les revenus dividendes projetés sur 3 ans et simuler l'effet du réinvestissement. Un cas concret complet de A à Z.",
+   "sections": [
+    {
+     "contenu": "La simulation est l'outil pédagogique le plus efficace pour ancrer les concepts dans la réalité. Construire un vrai portefeuille fictif avec de vraies valeurs BRVM, de vrais DPA et de vrais calculs transforme la théorie en pratique sans risque financier.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Méthodologie en 4 étapes : 1. Analyse (sélection des actions via PER, PBR, ROE, Yield). 2. Allocation (diversification sectorielle, pondérations). 3. Simulation (projection des dividendes et plus-values). 4. Ajustement (réinvestissement annuel et rééquilibrage).",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sans simulation pratique, les concepts restent abstraits. Cette leçon oblige l'apprenant à mobiliser toutes les compétences acquises depuis le début : analyse fondamentale, diversification, calcul des dividendes, gestion du risque. C'est la synthèse opérationnelle du Niveau 2.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Portefeuille de départ (500 000 FCFA) :SONATEL (Télécoms-SN) : 5 actions × 17 500 = 87 500 F (17,5%) · SIB CI (Banque) : 10 actions × 7 200 = 72 000 F (14,4%) · ORANGE CI (Télécoms) : 15 actions × 4 500 = 67 500 F (13,5%) · CIE CI (Énergie) : 25 actions × 2 590 = 64 750 F (13%) · ECOBANK CI (Banque) : 6 actions × 10 500 = 63 000 F (12,6%) · SODECI (Eau) : 9 actions × 6 200 = 55 800 F (11,2%) · TOTAL CI (Hydrocarbures) : 24 actions × 2 380 = 57 120 F (11,4%) · SAPH CI (Industrie) : 8 actions × 3 700 = 29 600 F (5,9%). Total : 497 270 FCFA.Projection dividendes Année 1 (yields estimés) : Total dividendes ≈ 52 000 FCFA (yield moyen ~10,5%). Réinvestissement : achat de nouvelles actions des meilleures valeurs. Année 2 : avec les nouvelles actions et une hausse moyenne de 5% des DPA : ~57 000 FCFA. Année 3 : ~63 000 FCFA. En 3 ans, le revenu annuel a augmenté de +21% sans apport supplémentaire.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "À vous : avec 300 000 FCFA fictifs, construisez votre propre portefeuille. Sélectionnez 5 à 8 actions. Respectez la diversification sectorielle (max 30% par secteur). Calculez votre revenu dividende annuel estimé. Simulez l'effet du réinvestissement sur 5 ans avec une hypothèse de croissance du DPA de 5%/an. Quelle est la valeur de votre portefeuille et votre revenu annuel en année 5 ?",
+     "titre": "Exercice d'application",
+     "type": "cas"
+    },
+    {
+     "contenu": "Biaiser la simulation en choisissant uniquement les meilleures performances passées. Le passé ne garantit pas l'avenir. Une simulation réaliste inclut des hypothèses prudentes (pas le meilleur scénario, mais le scénario central) et un scénario de stress (et si les dividendes baissent de 20% une année ?).",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "Méthodologie en 4 étapes : analyse → allocation → simulation → ajustement annuel.Un portefeuille de 500 000 FCFA diversifié génère environ 50 000 à 70 000 FCFA/an de dividendes.Le réinvestissement systématique augmente le revenu de 20% en 3 ans sans apport supplémentaire.Toujours simuler un scénario de stress pour tester la solidité du portefeuille.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 7 — Simulation de portefeuille sur 3 ans"
+  },
+  {
+   "categorie": "fundamental",
+   "duree_min": 3,
+   "image": {
+    "alt": "Mobile screen displaying stock market analysis with financial charts in the background.",
+    "credit": "Photo : StockRadars Co., / Pexels",
+    "url": "https://images.pexels.com/photos/28682356/pexels-photo-28682356.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Explorer les fondamentaux"
+    }
+   ],
+   "module": "Module 3 — Thèmes avancés",
+   "qcm": null,
+   "resume": "La fiscalité des revenus boursiers en zone UEMOA, les obligations d'État et d'entreprise cotées à la BRVM, et les OPCVM comme alternative à la gestion directe. Trois thèmes pour compléter la formation en analyse fondamentale.",
+   "sections": [
+    {
+     "contenu": "En zone UEMOA, les dividendes sont soumis à une retenue à la source prélevée à la source par l'entreprise distributrice avant versement aux actionnaires. Le taux varie selon les pays : 10% en Côte d'Ivoire, 10% au Sénégal, 12,5% au Burkina Faso, avec des exonérations possibles sous certaines conditions (durée de détention, statut fiscal). Les plus-values de cession d'actions peuvent être exonérées dans plusieurs pays UEMOA si les titres sont détenus depuis plus de 2 ans. Consultez un fiscaliste local pour optimiser votre structure d'investissement.",
+     "titre": "Leçon 8 — Fiscalité des revenus boursiers",
+     "type": "definition"
+    },
+    {
+     "contenu": "La BRVM cote également des obligations émises par les États membres de l'UEMOA (bons du Trésor, obligations d'État) et par des entreprises privées (obligations corporate). Une obligation est un titre de dette : l'émetteur s'engage à rembourser le nominal à l'échéance et à verser des coupons périodiques (intérêts). Les obligations d'État UEMOA offrent des rendements entre 5,5% et 7,5% avec un risque très faible. Elles sont idéales pour l'investisseur cherchant la stabilité absolue, au détriment d'une partie du rendement.",
+     "titre": "Leçon 9 — Les obligations cotées à la BRVM",
+     "type": "definition"
+    },
+    {
+     "contenu": "Les OPCVM (Organismes de Placement Collectif en Valeurs Mobilières) permettent d'investir en bourse via des fonds gérés par des professionnels agréés. En achetant des parts d'OPCVM, vous déléguez la sélection des titres à un gestionnaire qui mutualise les ressources de milliers d'investisseurs. Avantage : accès à une gestion professionnelle sans besoin d'expertise personnelle. Inconvénient : frais de gestion annuels (0,5% à 2%) prélevés sur la performance. Les OPCVM BRVM sont agréés par le CREPMF et leurs performances sont publiées mensuellement.",
+     "titre": "Leçon 10 — Les OPCVM : investir via des fonds collectifs",
+     "type": "definition"
+    },
+    {
+     "contenu": "Dividendes : retenue à la source de 10 à 12,5% selon les pays UEMOA.Obligations UEMOA : rendement 5,5-7,5%, risque quasi-nul — alternative défensive aux actions.OPCVM : gestion déléguée, idéal pour débuter sans expertise, mais frais de gestion à surveiller.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçons 8-10 — Fiscalité, Obligations BRVM et OPCVM"
+  }
+ ],
+ "niveau": "intermediaire",
+ "relatedLinks": [],
+ "titre": "Niveau 2 — Analyse Fondamentale"
+}

@@ -1,0 +1,276 @@
+{
+ "titre": "Leçon 9 — Les obligations cotées à la BRVM",
+ "module": "Module 3 — Thèmes avancés",
+ "categorie": "income",
+ "duree_min": 11,
+ "sous_titre": "Prêter à un État ou à une entreprise, recevoir un coupon, être remboursé : le fonctionnement et les pièges d’un marché peu liquide.",
+ "resume": "Une obligation est un prêt découpé en titres. L’émetteur verse un intérêt, le coupon, et rembourse le capital selon un calendrier fixé. La BRVM cote plus de deux cents emprunts, surtout d’États. Cette leçon explique le vocabulaire, le calcul du rendement et les précautions propres à ce marché.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Le vocabulaire d’une obligation",
+   "contenu": "Toutes les informations figurent dans la note d’information de l’emprunt.",
+   "points": [
+    {
+     "titre": "Le nominal",
+     "detail": "La valeur d’un titre, souvent 10 000 FCFA à la BRVM. Le coupon se calcule sur ce montant."
+    },
+    {
+     "titre": "Le taux nominal (coupon)",
+     "detail": "L’intérêt annuel, en pourcentage du nominal. Un titre de 10 000 FCFA à 6 % rapporte 600 FCFA par an avant impôt."
+    },
+    {
+     "titre": "La maturité",
+     "detail": "La date du dernier remboursement. Au-delà, le titre n’existe plus."
+    },
+    {
+     "titre": "L’amortissement",
+     "detail": "In fine : tout le capital est rendu à la fin. Constant : une part est rendue chaque année, souvent après un différé."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Prix, coupon couru et rendement",
+   "contenu": "Le prix d’une obligation varie : il baisse quand les taux du marché montent, et monte quand ils baissent. Le rendement réel dépend donc du prix payé. Exemples pédagogiques.",
+   "formules": [
+    {
+     "nom": "Coupon annuel",
+     "expression": "Nominal × Taux nominal",
+     "exemple": "10 000 × 6,5 % = 650 FCFA par an"
+    },
+    {
+     "nom": "Rendement courant",
+     "expression": "Coupon annuel ÷ Prix payé",
+     "exemple": "650 ÷ 9 800 = 6,6 %"
+    },
+    {
+     "nom": "Coupon couru",
+     "expression": "Coupon × Jours écoulés ÷ 365",
+     "exemple": "Payé en plus du prix à l’achat, rendu au prochain coupon"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Un emprunt amorti : exemple",
+   "contenu": "Exemple pédagogique : 100 titres de 10 000 FCFA à 6 %, sur 5 ans, avec remboursement constant du capital chaque année. Le coupon baisse à mesure que le capital restant diminue.",
+   "tableau": {
+    "colonnes": [
+     "Année",
+     "Capital restant dû",
+     "Coupon (6 %)",
+     "Capital remboursé",
+     "Total reçu"
+    ],
+    "lignes": [
+     [
+      "1",
+      "1 000 000",
+      "60 000",
+      "200 000",
+      "260 000"
+     ],
+     [
+      "2",
+      "800 000",
+      "48 000",
+      "200 000",
+      "248 000"
+     ],
+     [
+      "3",
+      "600 000",
+      "36 000",
+      "200 000",
+      "236 000"
+     ],
+     [
+      "4",
+      "400 000",
+      "24 000",
+      "200 000",
+      "224 000"
+     ],
+     [
+      "5",
+      "200 000",
+      "12 000",
+      "200 000",
+      "212 000"
+     ]
+    ],
+    "note": "Montants en FCFA, avant impôt. Sur cinq ans : 180 000 FCFA de coupons et le million rendu."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Les risques d’une obligation",
+   "contenu": "Une obligation est moins risquée qu’une action, pas sans risque.",
+   "points": [
+    {
+     "titre": "Le risque de défaut",
+     "detail": "L’émetteur peut payer en retard ou ne pas rembourser. Un État n’est pas à l’abri d’un rééchelonnement.",
+     "verifier": "La notation de l’émetteur, quand elle existe."
+    },
+    {
+     "titre": "Le risque de taux",
+     "detail": "Si les taux montent, le prix d’une obligation déjà émise baisse avant l’échéance.",
+     "verifier": "La durée restante : plus elle est longue, plus le prix est sensible."
+    },
+    {
+     "titre": "Le risque de liquidité",
+     "detail": "Beaucoup d’obligations s’échangent rarement. Revendre avant l’échéance peut prendre du temps, ou coûter une décote.",
+     "verifier": "Les volumes échangés récemment."
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "Les pièges propres à la BRVM",
+   "contenu": "Quelques réflexes évitent des erreurs coûteuses.",
+   "points": [
+    {
+     "titre": "Un cours affiché n’est pas une transaction",
+     "detail": "Sans échange, le cours d’une obligation reste souvent au pair pendant des mois. Il ne dit rien du prix auquel vous pourriez vendre.",
+     "verifier": "La date du dernier échange réel."
+    },
+    {
+     "titre": "Un titre listé peut être échu",
+     "detail": "Des emprunts arrivés à échéance depuis des années restent parfois affichés sur les listes publiques. WestBourse les retire de ses tableaux.",
+     "verifier": "La date de maturité."
+    },
+    {
+     "titre": "Confondre taux nominal et rendement",
+     "detail": "Acheter au-dessus du pair réduit le rendement réel sous le taux affiché.",
+     "verifier": "Le prix payé, coupon couru compris."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Une obligation se juge à quatre éléments.",
+   "points": [
+    {
+     "titre": "Qui emprunte, et sa capacité à rembourser"
+    },
+    {
+     "titre": "Le taux, comparé au prix payé"
+    },
+    {
+     "titre": "Le calendrier de remboursement : in fine ou amorti"
+    },
+    {
+     "titre": "La liquidité : pourrez-vous revendre avant l’échéance ?"
+    }
+   ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "bar",
+   "titre": "Ce que verse un emprunt amorti, année par année (exemple)",
+   "labels": [
+    "Année 1",
+    "Année 2",
+    "Année 3",
+    "Année 4",
+    "Année 5"
+   ],
+   "valeurs": [
+    260000,
+    248000,
+    236000,
+    224000,
+    212000
+   ],
+   "unite": "FCFA",
+   "note": "Exemple pédagogique : 1 000 000 FCFA prêtés à 6 % sur 5 ans, capital remboursé par cinquièmes. Le total reçu baisse chaque année, parce que le coupon se calcule sur un capital restant de plus en plus petit.",
+   "reel": false
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une obligation de nominal 10 000 FCFA verse un coupon de 7 %. Combien rapporte-t-elle par an, avant impôt ?",
+   "options": [
+    "70 FCFA",
+    "700 FCFA",
+    "7 000 FCFA",
+    "10 700 FCFA"
+   ],
+   "correct": 1,
+   "explication": "10 000 × 7 % = 700 FCFA."
+  },
+  {
+   "question": "Vous achetez cette obligation 10 500 FCFA. Son rendement courant est-il supérieur ou inférieur à 7 % ?",
+   "options": [
+    "Supérieur",
+    "Inférieur",
+    "Égal",
+    "Impossible à dire"
+   ],
+   "correct": 1,
+   "explication": "700 ÷ 10 500 ≈ 6,7 % : payer au-dessus du pair réduit le rendement."
+  },
+  {
+   "question": "Que se passe-t-il pour le prix d’une obligation existante quand les taux du marché montent ?",
+   "options": [
+    "Il monte",
+    "Il baisse",
+    "Il ne bouge pas",
+    "Le coupon augmente"
+   ],
+   "correct": 1,
+   "explication": "Les nouvelles émissions rapportent plus : le prix des anciennes baisse pour s’aligner."
+  },
+  {
+   "question": "Dans un emprunt à amortissement constant, le coupon versé chaque année :",
+   "options": [
+    "Augmente",
+    "Diminue, car le capital restant diminue",
+    "Reste identique",
+    "Est nul"
+   ],
+   "correct": 1,
+   "explication": "Le coupon se calcule sur le capital restant dû, qui baisse à chaque remboursement."
+  },
+  {
+   "question": "Une obligation affiche le même cours depuis des mois. Qu’en conclure ?",
+   "options": [
+    "Que le titre est très stable",
+    "Qu’il s’échange peut-être très peu : vérifier la date du dernier échange réel",
+    "Qu’il va bientôt monter",
+    "Qu’il est garanti par l’État"
+   ],
+   "correct": 1,
+   "explication": "Sans échange, le cours affiché ne bouge pas. Ce n’est pas un prix auquel on est sûr de vendre."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Le marché obligataire",
+   "href": "/obligations"
+  },
+  {
+   "label": "La fiscalité par pays",
+   "href": "/fiscalite"
+  },
+  {
+   "label": "L’agenda du marché",
+   "href": "/calendrier"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "qcm": {
+  "question": "Une obligation de nominal 10 000 FCFA verse un coupon de 7 %. Combien rapporte-t-elle par an, avant impôt ?",
+  "options": [
+   "70 FCFA",
+   "700 FCFA",
+   "7 000 FCFA",
+   "10 700 FCFA"
+  ],
+  "correct": 1,
+  "explication": "10 000 × 7 % = 700 FCFA."
+ }
+}

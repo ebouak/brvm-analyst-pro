@@ -1,0 +1,241 @@
+{
+ "titre": "Leçon 3 — P/B, ROE et rendement : les ratios complémentaires",
+ "module": "Module 1 — Lire et analyser une entreprise",
+ "categorie": "evaluation",
+ "duree_min": 11,
+ "sous_titre": "Ce que vaut l’entreprise dans ses livres, ce qu’elle rapporte sur ses fonds propres, et le lien entre les deux.",
+ "resume": "Le PER ne regarde que le bénéfice. Le P/B compare le cours aux fonds propres, le ROE mesure la rentabilité de ces fonds propres, et le rendement du dividende dit ce que vous touchez. Lus ensemble, ces ratios disent si un prix élevé est justifié.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Trois ratios, trois questions",
+   "contenu": "Les exemples chiffrés sont pédagogiques.",
+   "formules": [
+    {
+     "nom": "Price to book (P/B)",
+     "expression": "Capitalisation ÷ Fonds propres",
+     "exemple": "60 Md ÷ 40 Md = 1,5 : le marché paie 1,5 fois la valeur comptable"
+    },
+    {
+     "nom": "Rentabilité des fonds propres (ROE)",
+     "expression": "Résultat net ÷ Fonds propres",
+     "exemple": "8 Md ÷ 40 Md = 20 %"
+    },
+    {
+     "nom": "Rendement du dividende",
+     "expression": "Dividende par action ÷ Cours",
+     "exemple": "180 ÷ 3 000 = 6 %"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Le lien qui explique tout",
+   "contenu": "Ces ratios ne sont pas indépendants : le P/B est égal au PER multiplié par le ROE.\nUne société très rentable mérite un P/B élevé. Un P/B élevé avec un ROE faible, en revanche, demande une explication.",
+   "formules": [
+    {
+     "nom": "P/B = PER × ROE",
+     "expression": "(Cours ÷ BPA) × (BPA ÷ Fonds propres par action)",
+     "exemple": "PER 10 × ROE 25 % = P/B de 2,5"
+    }
+   ],
+   "stats": [
+    {
+     "label": "P/B inférieur à 1",
+     "valeur": "Sous la valeur comptable",
+     "detail": "Décote : actifs mal valorisés, ou rentabilité jugée faible"
+    },
+    {
+     "label": "ROE de 15 à 25 %",
+     "valeur": "Rentabilité solide",
+     "detail": "À comparer au secteur et au coût de la dette"
+    },
+    {
+     "label": "Taux de distribution",
+     "valeur": "Dividende ÷ Bénéfice",
+     "detail": "Proche de 100 % : peu de bénéfice gardé pour investir"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : des profils très différents",
+   "reel": true,
+   "contenu": "Une société peut afficher un P/B très élevé parce qu’elle distribue presque tout son bénéfice : ses fonds propres restent petits, et son ROE devient très élevé. Une autre cote sous sa valeur comptable. Les deux situations demandent une lecture, pas un réflexe.",
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "NTLC",
+     "PALC",
+     "SNTS",
+     "SGBC"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Une lecture croisée",
+   "contenu": "Exemple pédagogique : deux sociétés au même PER de 12 ne se valent pas.",
+   "tableau": {
+    "colonnes": [
+     "Ratio",
+     "Société A",
+     "Société B"
+    ],
+    "lignes": [
+     [
+      "PER",
+      "12",
+      "12"
+     ],
+     [
+      "ROE",
+      "25 %",
+      "6 %"
+     ],
+     [
+      "P/B (= PER × ROE)",
+      "3,0",
+      "0,7"
+     ],
+     [
+      "Lecture",
+      "Rentable : le P/B élevé se justifie",
+      "Peu rentable : la décote s’explique"
+     ]
+    ],
+    "note": "Le même PER cache deux réalités : c’est le ROE qui fait la différence."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les erreurs fréquentes",
+   "contenu": "Chaque ratio a son angle mort.",
+   "points": [
+    {
+     "titre": "Un ROE gonflé par la dette",
+     "detail": "Une société très endettée a peu de fonds propres : son ROE paraît excellent, son risque est élevé aussi.",
+     "verifier": "Le rapport dette financière ÷ fonds propres."
+    },
+    {
+     "titre": "Un rendement élevé par chute du cours",
+     "detail": "Le rendement monte quand le cours baisse. Un rendement de 12 % peut annoncer un dividende qui sera réduit.",
+     "verifier": "Le taux de distribution et la tendance du bénéfice."
+    },
+    {
+     "titre": "Un P/B lu pour une société de services",
+     "detail": "Une entreprise qui a peu d’actifs physiques a naturellement un P/B élevé.",
+     "verifier": "La nature des actifs du bilan."
+    },
+    {
+     "titre": "Des fonds propres négatifs",
+     "detail": "Après des pertes accumulées, P/B et ROE n’ont plus de sens.",
+     "verifier": "Le signe des capitaux propres."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Un ratio seul ne dit rien ; deux ratios ensemble commencent à raconter.",
+   "points": [
+    {
+     "titre": "P/B = capitalisation ÷ fonds propres"
+    },
+    {
+     "titre": "ROE = résultat ÷ fonds propres"
+    },
+    {
+     "titre": "P/B = PER × ROE : un P/B élevé se justifie par un ROE élevé"
+    },
+    {
+     "titre": "Un rendement très élevé se vérifie avant de se célébrer"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?",
+   "options": [
+    "5 %",
+    "20 %",
+    "50 %",
+    "500 %"
+   ],
+   "correct": 1,
+   "explication": "10 ÷ 50 = 20 %."
+  },
+  {
+   "question": "Une société a un PER de 8 et un ROE de 25 %. Quel est son P/B ?",
+   "options": [
+    "0,32",
+    "2",
+    "3,1",
+    "33"
+   ],
+   "correct": 1,
+   "explication": "P/B = PER × ROE = 8 × 0,25 = 2."
+  },
+  {
+   "question": "Une action cote 2 000 FCFA et verse 140 FCFA de dividende. Quel est son rendement ?",
+   "options": [
+    "1,4 %",
+    "7 %",
+    "14 %",
+    "70 %"
+   ],
+   "correct": 1,
+   "explication": "140 ÷ 2 000 = 7 %."
+  },
+  {
+   "question": "Pourquoi un ROE très élevé n’est-il pas toujours une bonne nouvelle ?",
+   "options": [
+    "Il est toujours faux",
+    "Il peut venir de fonds propres très faibles, à cause d’une dette importante ou de pertes passées",
+    "Il réduit le dividende",
+    "Il n’existe pas à la BRVM"
+   ],
+   "correct": 1,
+   "explication": "Un ROE élevé avec peu de fonds propres peut cacher un endettement important. Il faut regarder la structure du bilan."
+  },
+  {
+   "question": "Une action cote sous sa valeur comptable (P/B inférieur à 1). Que faut-il en conclure ?",
+   "options": [
+    "C’est forcément une affaire",
+    "Il faut chercher pourquoi : rentabilité faible, actifs douteux, ou simple désintérêt du marché",
+    "La société va faire faillite",
+    "Le ratio est faux"
+   ],
+   "correct": 1,
+   "explication": "Une décote peut être une opportunité ou refléter une rentabilité faible. Le ROE aide à trancher."
+  }
+ ],
+ "liens": [
+  {
+   "label": "La valorisation de toutes les valeurs",
+   "href": "/premium/valorisation"
+  },
+  {
+   "label": "Les dividendes",
+   "href": "/dividendes"
+  },
+  {
+   "label": "Les fondamentaux",
+   "href": "/fondamentaux"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?",
+  "options": [
+   "5 %",
+   "20 %",
+   "50 %",
+   "500 %"
+  ],
+  "correct": 1,
+  "explication": "10 ÷ 50 = 20 %."
+ }
+}
