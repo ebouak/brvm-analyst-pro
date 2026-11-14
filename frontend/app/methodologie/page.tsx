@@ -120,8 +120,8 @@ export default function MethodologiePage() {
               dot="bg-muted"
             />
             <SignalThreshold
-              signal="Signal baissier"
-              condition="score < −0,60"
+              signal="Signal baissier : plus émis"
+              condition="score < −0,60 : affiché, classé neutre depuis le 13/11/2026 (ces titres ont plus souvent rebondi que baissé)"
               cls="border-down/25 bg-down/[0.05] text-down"
               dot="bg-down"
             />
@@ -138,7 +138,7 @@ export default function MethodologiePage() {
           <ul className="space-y-2">
             {[
               'Entrée en position à la clôture du jour du signal d’achat',
-              'Sortie à la clôture du jour du signal de vente',
+              'Sortie à la clôture du jour du signal de vente (émis jusqu’au 13/11/2026 ; depuis, la position court jusqu’à la fin de la période)',
               'Frais appliqués à chaque transaction (achat + vente)',
               'Capital initial = 100 (normalisé)',
               'Une seule position à la fois (pas de levier)',

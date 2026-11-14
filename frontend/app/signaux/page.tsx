@@ -282,9 +282,10 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="SELL" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0,60</p>
+            <p className="tabular text-sm font-semibold text-ivory">Plus émis depuis le 13/11/2026</p>
             <p className="text-xs text-muted leading-relaxed">
-              Les facteurs techniques penchent nettement à la baisse.
+              Sur l’historique, les titres notés sous −0,60 ont plus souvent rebondi que baissé : le score reste
+              affiché, mais aucun signal de vente n’est donné.
             </p>
           </div>
         </div>
