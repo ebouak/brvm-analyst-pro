@@ -52,6 +52,37 @@ Regroupement À L'AFFICHAGE (`lib/evenements/regroupement.ts`) : une publication
 d'activités, attestation des commissaires aux comptes) sont listées sur la
 fiche. Libellés français uniques : `lib/evenements/libelles.ts`.
 
+### 4 bis. Événements et impact (lot 5, refonte Rapports)
+
+- **Liste** : une ligne par publication regroupée (date, société avec logo, type
+  en français, titre) et une colonne « Réaction à 5 séances » = écart du titre au
+  BRVM Composite, calculé UNIQUEMENT par le contrat commun
+  (`lib/reactionPublication.ts`). Un seul appel groupé pour la page
+  (`chargerReactions`), mis en cache une heure
+  (`reactionsCachees`, `lib/server/evenementsDonnees.ts`, clé = couples
+  code|date). « en cours » si la fenêtre n'est pas close, « — » si non mesurable ;
+  la réserve `RESERVE_REACTION` figure sous le tableau et sur la fiche.
+- **En-tête « Séance du jour »** : indices BRVMC et BRVM30, nombre de hausses et
+  de baisses (`souffleMarche`), publications de la dernière séance connue.
+- **Filtres** : type, période (30 j, 90 j, 12 mois, tout), code, « mes valeurs »
+  (listes de suivi + portefeuille, lus avec la SESSION de l'utilisateur, jamais
+  mis en cache partagé, affichés seulement à un utilisateur connecté).
+- **Fiche** : titre-constat dérivé de la mesure (`constatEvenement`, sans cause),
+  chiffre géant (écart à l'indice), courbe J−10/J+10 base 100 en J0
+  (`fenetreCourbe`, SVG serveur), tableau des horizons (`tableauHorizons`, via
+  `eventStudy`), lien vers la source officielle, historique de la réaction du
+  titre à ses publications du même type avec médiane (≥ 3 mesures).
+- **Saison des résultats** `/rapports/saison` : la période « en cours » est
+  celle qui a reçu le plus de publications de résultats sur 120 jours
+  (`periodeDeSaison`) ; « N sociétés sur M ont publié » avec M = sociétés actives
+  de `brvm_instruments`. Variation du CA et du résultat net seulement pour un
+  exercice annuel dont les deux exercices sont extraits (`variationsComptes`) ;
+  « non extrait » sinon (la base ne porte pas de comptes trimestriels).
+- **Cartes de partage 1080 × 1080** (`next/og`, route Edge, clé anonyme,
+  aucune donnée personnelle, 404 si l'objet n'existe pas) :
+  `/api/evenements/[id]/carte` et `/api/dossier/[code]/carte` (données de marché
+  publiques seulement, rien du contenu du dossier).
+
 ## 5. Textes générés
 
 `narrative.ts` (titre de l'étude) et `reportCommentary.ts` (constats) : accords
