@@ -12,6 +12,7 @@
  * et identique sur Telegram où le HTML n'aurait pas cours.
  */
 import type { Selection } from './selection.js';
+import type { RevueMiseAJour } from './revues.js';
 
 export interface Message {
   sujet: string;
@@ -93,7 +94,12 @@ export function composerRectificatif(sel: Selection, semaine: string, canal: 'em
   return { sujet, corps: lignes.join('\n') };
 }
 
-export function composerMessage(sel: Selection, semaine: string, canal: 'email' | 'telegram' | 'whatsapp'): Message {
+export function composerMessage(
+  sel: Selection,
+  semaine: string,
+  canal: 'email' | 'telegram' | 'whatsapp',
+  revues: RevueMiseAJour[] = [],
+): Message {
   const sujet = `Vos dossiers valeur — semaine du ${dateFR(semaine)}`;
 
   /* Telegram envoie un document par valeur, sans plafond : il annonce donc
@@ -122,6 +128,17 @@ export function composerMessage(sel: Selection, semaine: string, canal: 'email' 
   if (sel.exclues.length > 0) {
     lignes.push('', 'Non envoyés cette semaine :');
     for (const e of sel.exclues) lignes.push(`  • ${e.code} — ${e.designation} : ${e.raison}`);
+  }
+
+  /* Revues de résultats mises à jour depuis le précédent envoi : code, nom et
+     DATE de publication, aucun chiffre (ils sont dans la Revue). Les liens n'en
+     portent pas non plus : un code BRVM ne contient que des lettres. */
+  if (revues.length > 0) {
+    lignes.push('', 'Revues de résultats mises à jour cette semaine, suite à une publication :');
+    for (const r of revues) {
+      lignes.push(`  • ${r.code} — ${r.designation} — publication du ${dateFR(r.publie_le)}`);
+      lignes.push(`    https://www.westbourse.com/actions/${r.code}/revue`);
+    }
   }
 
   lignes.push(

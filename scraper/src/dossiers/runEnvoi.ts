@@ -28,6 +28,7 @@ import { sendEmail, sendTelegramDocument, sendTelegramText } from '../alerts/cha
 import { envoyerDocumentWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 import { cleSemaine, selectionnerLignes, type LigneCandidate, type Selection } from './selection.js';
+import { FENETRE_REVUES_JOURS, revuesMisesAJour, type PublicationResultats } from './revues.js';
 import { composerInvitation, composerMessage, composerRectificatif } from './message.js';
 
 const BUCKET = 'dossiers';
@@ -173,6 +174,40 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
     logger.info({ semaine, cibles: aRectifier.size }, 'rectificatif : envois à corriger');
   }
 
+  /* Publications de résultats ingérées depuis le précédent envoi (lecture seule).
+     Lecture impossible = liste vide : le message part sans cette rubrique, comme
+     avant, ce n'est pas une panne d'envoi. */
+  const publicationsRecentes: PublicationResultats[] = [];
+  try {
+    const depuis = new Date(maintenant.getTime() - FENETRE_REVUES_JOURS * 86_400_000).toISOString();
+    const { data: evts, error } = await sb
+      .from('market_events')
+      .select('id, event_date, instrument_code')
+      .eq('event_type', 'resultats')
+      .gte('created_at', depuis)
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    const evenements = (evts ?? []) as { id: string; event_date: string; instrument_code: string | null }[];
+    for (const e of evenements) {
+      if (e.instrument_code) publicationsRecentes.push({ code: e.instrument_code, date_evenement: e.event_date });
+    }
+    if (evenements.length > 0) {
+      const { data: piv, error: errPiv } = await sb
+        .from('market_event_instruments')
+        .select('event_id, instrument_code')
+        .in('event_id', evenements.map((e) => e.id));
+      if (errPiv) throw new Error(errPiv.message);
+      const dateDe = new Map(evenements.map((e) => [e.id, e.event_date]));
+      for (const l of (piv ?? []) as { event_id: string; instrument_code: string }[]) {
+        const d = dateDe.get(l.event_id);
+        if (d) publicationsRecentes.push({ code: l.instrument_code, date_evenement: d });
+      }
+    }
+  } catch (err) {
+    logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'revues mises à jour : lecture impossible, rubrique omise');
+    publicationsRecentes.length = 0;
+  }
+
   // Un PDF n'est téléchargé qu'une fois, même s'il est détenu par dix comptes.
   const cache = new Map<string, Buffer>();
   const telecharger = async (code: string): Promise<Buffer> => {
@@ -262,7 +297,7 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
         continue;
       }
 
-      const msg = rectificatif ? composerRectificatif(sel, semaine, canal) : composerMessage(sel, semaine, canal);
+      const msg = rectificatif ? composerRectificatif(sel, semaine, canal) : composerMessage(sel, semaine, canal, revuesMisesAJour(candidates, publicationsRecentes));
       const envoyees = canal === 'email' ? sel.pieces_jointes_email : sel.retenues;
       const codes = envoyees.map((l) => l.code);
       // Le rectificatif ne réécrit jamais le statut de l'envoi d'origine.
