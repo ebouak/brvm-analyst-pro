@@ -112,22 +112,22 @@
   {
    "type": "importance",
    "titre": "Ce que nous avons mesuré sur la BRVM",
-   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.\nCe résultat ne dit pas qu’une action qui a baissé va remonter : certaines ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil.",
+   "contenu": "WestBourse a rejoué son score technique sur 2008-2023, une période que la formule n’avait jamais vue : 109 634 notes, une par titre et par séance. Ces notes se chevauchent : pour juger un écart, seuls comptent les cas indépendants.\nLes titres les plus mal notés (score inférieur à −0,60 : 400 cas, dont 276 indépendants) ont fait en moyenne 8,4 % de mieux que le marché dans les 20 séances suivantes, avec un intervalle à 95 % de +5,5 % à +11,4 %. Les mieux notés n’ont pas fait mieux que le marché.\nSur 2024-2026, cet effet n’est pas confirmé à 60 séances. C’est une moyenne passée, sur un échantillon limité : certaines valeurs ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil, ni une prévision, et rien ne promet que cela se reproduise.",
    "stats": [
     {
-     "label": "Séances rejouées",
+     "label": "Notes rejouées",
      "valeur": "109 634",
-     "detail": "2008-2023, hors échantillon de construction"
+     "detail": "Une par titre et par séance, 2008-2023 : elles se chevauchent"
     },
     {
      "label": "Scores les plus bas, 20 séances après",
      "valeur": "+8,4 % face au marché",
-     "detail": "Moyenne, écart statistiquement établi"
+     "detail": "À 20 séances, 276 cas indépendants, 2008-2023 ; non confirmé sur 2024-2026 à 60 séances"
     },
     {
      "label": "Scores les plus hauts, 20 séances après",
      "valeur": "−1,5 % face au marché",
-     "detail": "Moyenne, écart non établi"
+     "detail": "À 20 séances, 305 cas indépendants, écart non établi"
     }
    ]
   },
@@ -166,9 +166,9 @@
   {
    "question": "Qu’est-ce qu’un support ?",
    "options": [
-    "Le cours le plus haut de l’année",
-    "Une zone où le cours a cessé de baisser plusieurs fois",
-    "Le dividende",
+    "Le cours le plus haut de l’année écoulée",
+    "Un niveau où la baisse a cessé plusieurs fois",
+    "Le cours moyen pondéré des vingt dernières séances",
     "Le volume moyen"
    ],
    "correct": 1,
@@ -188,24 +188,24 @@
   {
    "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?",
    "options": [
-    "Le prix exact du marché",
-    "Le dernier prix échangé, qui ne dit rien du prix actuel",
-    "Zéro",
-    "La moyenne du secteur"
+    "Le prix exact du marché aujourd’hui",
+    "Le dernier prix échangé, sans plus",
+    "Zéro, faute d’échange",
+    "La moyenne des cours de son secteur"
    ],
    "correct": 1,
    "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle."
   },
   {
-   "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés ?",
+   "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés dans les 20 séances suivantes ?",
    "options": [
-    "Ils ont continué à baisser",
-    "Ils ont fait mieux que le marché dans les semaines suivantes",
-    "Ils ont été radiés",
-    "Rien de mesurable"
+    "Ils ont continué à baisser en moyenne",
+    "Mieux que le marché, en moyenne",
+    "Ils ont tous été suspendus de cotation",
+    "Exactement comme le marché"
    ],
    "correct": 1,
-   "explication": "Sur seize ans, les excès à la baisse ont plutôt été suivis d’un rattrapage relatif. C’est une moyenne, pas une règle."
+   "explication": "Sur 2008-2023, 276 cas indépendants ont fait en moyenne 8,4 % de mieux que le marché à 20 séances. Sur 2024-2026, l’effet n’est pas confirmé à 60 séances. C’est une moyenne passée, ni une règle ni une promesse."
   }
  ],
  "liens": [

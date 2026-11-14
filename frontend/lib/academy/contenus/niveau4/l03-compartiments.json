@@ -20,7 +20,7 @@
      [
       "Prestige",
       "Les grandes sociétés établies",
-      "10 ans d’activité, 50 Md FCFA de capitalisation, flottant d’au moins 20 % et 4 millions de titres, information régulière, engagement RSE"
+      "10 ans d’activité, 50 Md FCFA de capitalisation, flottant d’au moins 20 % et nombre minimal de titres, information régulière, engagement RSE"
      ],
      [
       "Principal",
@@ -128,12 +128,12 @@
    "question": "Quel flottant minimum le compartiment Prestige exige-t-il ?",
    "options": [
     "5 % du capital",
-    "20 % du capital, et au moins 4 millions de titres",
+    "20 % du capital",
     "50 % du capital",
     "Aucun"
    ],
    "correct": 1,
-   "explication": "Le communiqué de la BRVM fixe un flottant d’au moins 20 % du capital, correspondant à au moins 4 millions de titres."
+   "explication": "Le communiqué de la BRVM fixe un flottant d’au moins 20 % du capital, assorti d’un nombre minimal de titres fixé par le règlement des compartiments."
   },
   {
    "question": "Que regroupe l’indice BRVM 30 ?",
@@ -160,10 +160,10 @@
   {
    "question": "Une société du compartiment Prestige est-elle un placement sans risque ?",
    "options": [
-    "Oui",
-    "Non : le compartiment décrit sa taille et sa transparence, pas l’évolution de son cours",
-    "Oui, si elle verse un dividende",
-    "Oui, pendant 10 ans"
+    "Oui, puisqu’elle est parmi les plus grandes",
+    "Non : le compartiment ne dit rien du cours",
+    "Oui, si elle verse un dividende régulier",
+    "Oui, pendant ses dix premières années"
    ],
    "correct": 1,
    "explication": "Le classement repose sur des critères de taille, de flottant et d’information, pas sur une garantie de performance."

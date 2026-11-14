@@ -36,8 +36,8 @@
     {
       "type": "cas",
       "reel": true,
-      "titre": "Revenu : des dividendes qui progressent",
-      "contenu": "Une stratégie de revenu recherche des distributions régulières, idéalement croissantes.\nLe tableau montre quatre valeurs de la BRVM dont le dividende a progressé ces dernières années. Le passé ne garantit pas la suite : la régularité se vérifie chaque année.",
+      "titre": "Revenu : des dividendes à suivre dans le temps",
+      "contenu": "Une stratégie de revenu recherche des distributions régulières, idéalement croissantes.\nLe tableau montre l’historique de quatre valeurs de la BRVM : repérez celles dont le dividende a progressé, et celles où il a reculé. Le passé ne garantit pas la suite : la régularité se vérifie chaque année.",
       "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "BOAB", "SGBC", "SIBC"] }
     },
     {
@@ -57,7 +57,7 @@
         "colonnes": ["Stratégie", "Objectif", "Horizon", "Profil"],
         "lignes": [
           ["Valeur", "Acheter sous la valeur", "3 à 5 ans", "Patient et analytique"],
-          ["Revenu", "Encaisser un revenu régulier", "5 ans et plus", "Débutant, retraité"],
+          ["Revenu", "Encaisser un revenu régulier", "5 ans et plus", "Recherche un revenu régulier"],
           ["Croissance", "Viser une plus-value", "5 ans et plus", "Tolérant à la volatilité"]
         ],
         "note": "Repères pédagogiques, pas des règles : votre situation personnelle prime."
@@ -80,7 +80,7 @@
       "contenu": "Cinq idées à garder en tête.",
       "points": [
         { "titre": "Trois approches : valeur, revenu, croissance", "detail": "Chacune a ses critères et son horizon." },
-        { "titre": "Le revenu est la plus accessible pour débuter", "detail": "Elle demande peu de suivi quotidien." },
+        { "titre": "La stratégie revenu demande le moins de suivi quotidien", "detail": "Elle repose sur des dividendes votés chaque année, pas sur le cours du jour." },
         { "titre": "PER = cours ÷ bénéfice par action", "detail": "À comparer au secteur, jamais seul." },
         { "titre": "Une stratégie se juge sur son horizon", "detail": "Cinq ans pour une action de rendement, pas trois mois." },
         { "titre": "Le passé ne garantit pas la suite", "detail": "Un dividende en hausse se revérifie chaque année." }
@@ -89,10 +89,10 @@
   ],
   "quiz": [
     {
-      "question": "Un débutant qui veut un revenu régulier choisit plutôt :",
+      "question": "Quelle stratégie vise d’abord un revenu régulier ?",
       "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
       "correct": 1,
-      "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien."
+      "explication": "La stratégie revenu vise des dividendes réguliers, encaissés ou réinvestis. Elle demande peu de suivi quotidien."
     },
     {
       "question": "Une action cote 12 000 FCFA et son bénéfice par action est de 1 500 FCFA. Quel est son PER ?",
@@ -103,9 +103,9 @@
     {
       "question": "Un PER très bas signifie-t-il toujours une bonne affaire ?",
       "options": [
-        "Oui, toujours",
-        "Non : il peut aussi refléter des bénéfices qui vont reculer",
-        "Oui, s’il est inférieur à 20",
+        "Oui, dans tous les cas",
+        "Non : les bénéfices peuvent reculer",
+        "Oui, dès qu’il est inférieur à 20",
         "Non, un PER bas est toujours mauvais signe"
       ],
       "correct": 1,
@@ -125,10 +125,10 @@
     }
   ],
   "qcm": {
-    "question": "Un débutant qui veut un revenu régulier choisit plutôt :",
+    "question": "Quelle stratégie vise d’abord un revenu régulier ?",
     "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
     "correct": 1,
-    "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien."
+    "explication": "La stratégie revenu vise des dividendes réguliers, encaissés ou réinvestis. Elle demande peu de suivi quotidien."
   },
   "liens": [
     { "label": "Screener des actions", "href": "/screener" },

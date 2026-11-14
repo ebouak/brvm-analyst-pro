@@ -14,14 +14,14 @@
         { "titre": "Banque à l’étranger", "detail": "Votre compte dans le pays de résidence.", "icone": "entreprise" },
         { "titre": "Virement international", "detail": "Vers le compte de votre SGI.", "icone": "paiement" },
         { "titre": "Compte chez une SGI", "detail": "Agréée par l’AMF-UMOA.", "icone": "decision" },
-        { "titre": "Achat d’actions", "detail": "En ligne, depuis n’importe où.", "icone": "graphique" },
+        { "titre": "Achat d’actions", "detail": "En ligne, quand la SGI le propose.", "icone": "graphique" },
         { "titre": "Dividendes", "detail": "Conservés en FCFA ou virés à l’étranger.", "icone": "piece" }
       ]
     },
     {
       "type": "importance",
       "titre": "Le change euro – franc CFA",
-      "contenu": "Le franc CFA est lié à l’euro par une parité fixe : 1 euro vaut 655,957 FCFA. Pour un résident de la zone euro, ce change ne fluctue pas.\nPour les autres devises, comme le dollar, le cours varie : le rendement final dépend aussi du change.",
+      "contenu": "Le franc CFA est lié à l’euro par une parité fixe : 1 euro vaut 655,957 FCFA. Pour un résident de la zone euro, ce change ne varie pas au jour le jour. Une modification de la parité reste possible, comme en 1994.\nPour les autres devises, comme le dollar, le cours varie : le rendement final dépend aussi du change.",
       "formules": [
         { "nom": "Conversion", "expression": "Montant en FCFA = Montant en euros × 655,957", "exemple": "500 € × 655,957 ≈ 327 979 FCFA" }
       ],
@@ -71,7 +71,7 @@
       "contenu": "Cinq idées à garder en tête.",
       "points": [
         { "titre": "On peut investir à la BRVM depuis l’étranger", "detail": "Par une SGI agréée qui ouvre des comptes à distance." },
-        { "titre": "1 € = 655,957 FCFA", "detail": "Une parité fixe : pas de risque de change depuis la zone euro." },
+        { "titre": "1 € = 655,957 FCFA", "detail": "Une parité fixe : le change ne varie pas au jour le jour depuis la zone euro. Une modification de parité reste possible, comme en 1994." },
         { "titre": "Les dividendes peuvent rester en FCFA ou être rapatriés", "detail": "Avec des frais et un délai de virement." },
         { "titre": "La fiscalité du pays de résidence compte", "detail": "Renseignez-vous avant le premier dividende." },
         { "titre": "Aucun agrément, aucun dépôt", "detail": "Vérifiez l’agrément de l’intermédiaire auprès de l’AMF-UMOA." }
@@ -89,7 +89,7 @@
       "question": "Pour un investisseur résidant dans la zone euro, la parité euro – franc CFA est :",
       "options": ["Flottante, révisée chaque jour", "Fixe", "Indexée sur le dollar", "Révisée chaque mois par la BRVM"],
       "correct": 1,
-      "explication": "La parité est fixe : 1 euro = 655,957 FCFA. Le change ne fait donc pas varier le rendement d’un investisseur de la zone euro."
+      "explication": "La parité est fixe : 1 euro = 655,957 FCFA. Le change ne varie donc pas au jour le jour pour un investisseur de la zone euro ; une modification de parité reste possible, comme en 1994."
     },
     {
       "question": "Qui doit être agréé pour vous permettre d’investir à la BRVM depuis l’étranger ?",
@@ -105,9 +105,9 @@
     {
       "question": "Une plateforme hors UEMOA vous propose des « actions africaines » sans agrément. Que faire ?",
       "options": [
-        "Investir un petit montant pour tester",
-        "Ne pas y déposer de fonds et vérifier les intermédiaires agréés",
-        "Y investir si le rendement promis est élevé",
+        "Investir un petit montant pour tester d’abord",
+        "Ne rien déposer, vérifier l’agrément",
+        "Y investir si le rendement promis est très élevé",
         "Demander à un proche d’investir à votre place"
       ],
       "correct": 1,
@@ -116,10 +116,10 @@
     {
       "question": "Les dividendes perçus par un investisseur résidant à l’étranger :",
       "options": [
-        "Sont toujours exonérés d’impôt",
-        "Peuvent aussi être imposés dans le pays de résidence, selon sa fiscalité",
-        "Ne peuvent jamais quitter l’UEMOA",
-        "Sont versés uniquement en euros"
+        "Sont toujours exonérés d’impôt dans tous les pays",
+        "Peuvent aussi être imposés là où vous résidez",
+        "Ne peuvent jamais être virés hors de l’UEMOA",
+        "Sont versés uniquement en euros, sans conversion"
       ],
       "correct": 1,
       "explication": "Après la retenue à la source du pays de la société, le pays de résidence peut aussi imposer le dividende, selon ses règles et les conventions fiscales."

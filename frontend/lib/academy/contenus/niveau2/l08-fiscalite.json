@@ -4,7 +4,7 @@
  "categorie": "income",
  "duree_min": 9,
  "sous_titre": "Ce que l’impôt retient sur un dividende ou un coupon, selon le pays de la société, et comment lire un montant « net ».",
- "resume": "À la BRVM, l’impôt sur les dividendes est retenu à la source par la société, selon la loi de son pays : c’est l’IRVM. Le taux varie d’un pays à l’autre. Cette leçon montre les taux que WestBourse a vérifiés, la différence entre brut et net, et le cas des obligations.",
+ "resume": "À la BRVM, l’impôt sur les dividendes est retenu à la source par la société, selon la loi de son pays : c’est l’IRVM. Le taux varie d’un pays à l’autre. Cette leçon montre les taux relevés par WestBourse et leur source, la différence entre brut et net, et le cas des obligations.",
  "sections": [
   {
    "type": "definition",
@@ -34,7 +34,7 @@
   {
    "type": "importance",
    "titre": "Les taux sur les dividendes d’actions cotées",
-   "contenu": "Les taux ci-dessous s’appliquent aux personnes physiques, tels que WestBourse les a vérifiés. Ils changent avec les lois de finances de chaque pays : la page Fiscalité du site fait foi et cite ses sources.\nLes écarts sont importants. Pour un même dividende brut, l’actionnaire d’une société togolaise et celui d’une société burkinabè ne reçoivent pas le même montant net. Comparer deux sociétés de pays différents sur leur rendement brut conduit donc à une erreur : comparez les rendements nets.\nQuand le taux d’un pays n’a pas pu être confirmé, WestBourse ne l’affiche pas. Une case « non vérifié » vaut mieux qu’un taux supposé, qui fausserait tous les calculs qui en dépendent.",
+   "contenu": "Les taux ci-dessous s’appliquent aux personnes physiques. Celui de la Côte d’Ivoire est tiré de la loi de finances 2025 ; les autres viennent d’une source publique de 2019 et restent à confirmer sur le code des impôts de chaque pays. Ils changent avec les lois de finances : la page Fiscalité du site fait foi et cite ses sources.\nLes écarts sont importants. Pour un même dividende brut, l’actionnaire d’une société togolaise et celui d’une société burkinabè ne reçoivent pas le même montant net. Comparer deux sociétés de pays différents sur leur rendement brut conduit donc à une erreur : comparez les rendements nets.\nQuand aucune source n’a été trouvée pour un pays, WestBourse n’affiche pas de taux. Une case « non vérifié » vaut mieux qu’un taux supposé, qui fausserait tous les calculs qui en dépendent.",
    "tableau": {
     "colonnes": [
      "Pays de la société",
@@ -45,32 +45,32 @@
      [
       "Côte d’Ivoire",
       "12 %",
-      "10 % pour les personnes morales, depuis l’annexe fiscale 2025"
+      "12 % pour les personnes physiques depuis l’annexe fiscale 2025 (10 % avant) ; 10 % pour les personnes morales"
      ],
      [
       "Sénégal",
       "10 %",
-      "—"
+      "Source publique de 2019, à confirmer"
      ],
      [
       "Burkina Faso",
       "12,5 %",
-      "—"
+      "Source publique de 2019, à confirmer"
      ],
      [
       "Mali",
       "7 %",
-      "Taux en vigueur depuis 2017"
+      "Source publique de 2019, à confirmer"
      ],
      [
       "Bénin",
       "5 %",
-      "Taux réduit en vigueur depuis 2018"
+      "Taux réduit ; source publique de 2019, à confirmer"
      ],
      [
       "Togo",
       "3 %",
-      "Personnes physiques ; 7 % pour les personnes morales"
+      "Personnes physiques, 7 % pour les personnes morales ; source publique de 2019, à confirmer"
      ],
      [
       "Niger, Guinée-Bissau",
@@ -78,7 +78,7 @@
       "WestBourse n’affiche pas de taux tant qu’il n’est pas confirmé"
      ]
     ],
-    "note": "Source : barème WestBourse (page Fiscalité), constitué à partir de sources publiques citées sur cette page."
+    "note": "Source : barème WestBourse (page Fiscalité), qui cite pour chaque pays le texte ou la publication utilisée."
    }
   },
   {

@@ -24,7 +24,7 @@
     {
       "type": "importance",
       "titre": "De votre ordre à vos titres",
-      "contenu": "Chaque achat suit la même chaîne. Vous ne parlez qu’à votre SGI ; les autres acteurs travaillent derrière elle.",
+      "contenu": "Chaque achat suit la même chaîne. Pour passer vos ordres, vous ne parlez qu’à votre SGI ; les autres acteurs travaillent derrière elle. La conservation des titres peut aussi être confiée à une banque teneur de compte-conservateur.",
       "flux": [
         { "titre": "Vous", "detail": "Vous passez votre ordre à votre SGI.", "icone": "decision" },
         { "titre": "Votre SGI", "detail": "Elle le transmet au système de cotation.", "icone": "entreprise" },
@@ -97,19 +97,19 @@
     },
     {
       "question": "Quel est le rôle du DC/BR ?",
-      "options": ["Fixer le prix des actions", "Tenir le registre des titres et régler les échanges", "Conseiller les investisseurs", "Organiser les assemblées générales"],
+      "options": ["Fixer chaque jour le prix des actions cotées", "Tenir les titres et régler les échanges", "Conseiller les investisseurs particuliers", "Organiser les assemblées générales"],
       "correct": 1,
       "explication": "Le Dépositaire Central / Banque de Règlement inscrit les titres et règle les espèces entre intermédiaires après chaque échange."
     },
     {
       "question": "Un « conseiller » vous propose sur WhatsApp un placement garanti à 15 % par mois. Que faites-vous ?",
-      "options": ["Vous versez une petite somme pour tester", "Vous refusez : aucun placement en actions n’est garanti", "Vous demandez une remise", "Vous attendez que l’offre expire pour décider"],
+      "options": ["Vous versez une petite somme pour tester", "Vous refusez : rien n’est garanti", "Vous demandez une remise sur les frais d’entrée", "Vous attendez que l’offre expire pour décider"],
       "correct": 1,
       "explication": "Un gain garanti et très élevé est le signe le plus sûr d’une escroquerie. Vérifiez aussi l’agrément sur la liste de l’AMF-UMOA."
     },
     {
       "question": "Où sont inscrites les actions que vous achetez ?",
-      "options": ["Sur votre compte-titres, tenu par votre SGI", "Sur un certificat papier envoyé chez vous", "Sur le site de la société", "Sur votre compte bancaire courant"],
+      "options": ["Sur votre compte-titres, chez votre SGI", "Sur un certificat papier envoyé chez vous", "Sur le site de la société", "Sur votre compte bancaire courant"],
       "correct": 0,
       "explication": "Les titres sont dématérialisés : ils sont inscrits sur votre compte-titres chez votre SGI, et enregistrés au dépositaire central."
     }

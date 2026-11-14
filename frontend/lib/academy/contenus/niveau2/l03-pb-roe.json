@@ -213,10 +213,10 @@
   {
    "question": "Pourquoi un ROE très élevé n’est-il pas toujours une bonne nouvelle ?",
    "options": [
-    "Il est toujours faux",
-    "Il peut venir de fonds propres très faibles, à cause d’une dette importante ou de pertes passées",
-    "Il réduit le dividende",
-    "Il n’existe pas à la BRVM"
+    "Il signifie que la société est surévaluée",
+    "Il peut venir de fonds propres trop faibles",
+    "Il réduit forcément le dividende versé",
+    "Il n’est pas publié par les sociétés de la BRVM"
    ],
    "correct": 1,
    "explication": "Un ROE élevé avec peu de fonds propres peut cacher un endettement important. Il faut regarder la structure du bilan."
@@ -224,10 +224,10 @@
   {
    "question": "Une action cote sous sa valeur comptable (P/B inférieur à 1). Que faut-il en conclure ?",
    "options": [
-    "C’est forcément une affaire",
-    "Il faut chercher pourquoi : rentabilité faible, actifs douteux, ou simple désintérêt du marché",
-    "La société va faire faillite",
-    "Le ratio est faux"
+    "C’est forcément une bonne affaire à saisir",
+    "Il faut chercher pourquoi",
+    "La société va bientôt faire faillite",
+    "Le ratio est faux, la valeur comptable aussi"
    ],
    "correct": 1,
    "explication": "Une décote peut être une opportunité ou refléter une rentabilité faible. Le ROE aide à trancher."

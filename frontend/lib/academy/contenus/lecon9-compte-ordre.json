@@ -20,7 +20,7 @@
     {
       "type": "importance",
       "titre": "Choisir sa SGI",
-      "contenu": "Les SGI se distinguent par leurs frais, leur plateforme et leur service. Parmi elles : CGF Bourse, Hudson & Cie, NSIA Finance, BOA Capital Securities, Société Générale Capital Securities West Africa (ex-SOGEBOURSE).",
+      "contenu": "Les SGI se distinguent par leurs frais, leur plateforme et leur service. Leur liste complète et à jour figure dans l’annuaire des SGI agréées, publié par la BRVM et par l’AMF-UMOA : vérifiez-y le nom exact de celle que vous choisissez.",
       "points": [
         {
           "titre": "L’agrément",
@@ -47,15 +47,15 @@
     {
       "type": "definition",
       "titre": "Deux types d’ordres",
-      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.",
+      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.\nLe règlement de la BRVM parle d’ordre « à cours limité » et d’ordre « au mieux ». Le détail des règles (validité, tout ou rien) est en leçon 6.",
       "points": [
         {
           "titre": "L’ordre à cours limité",
-          "detail": "Vous fixez un prix maximum. Pour un achat, l’ordre ne s’exécute qu’à ce prix ou en dessous ; sinon il attend.",
+          "detail": "Vous fixez un prix maximum. Pour un achat, l’ordre ne s’exécute qu’à ce prix ou en dessous ; sinon il reste en attente pendant sa durée de validité (une seule séance par défaut).",
           "verifier": "le dernier cours et les prix proposés avant de fixer votre limite."
         },
         {
-          "titre": "L’ordre au marché",
+          "titre": "L’ordre au mieux",
           "detail": "Vous acceptez le meilleur prix disponible au moment de l’exécution. Plus rapide, mais sans contrôle du prix.",
           "verifier": "les volumes échangés : sur une valeur peu liquide, le prix obtenu peut s’éloigner du dernier cours."
         }
@@ -75,14 +75,14 @@
       "reel": true,
       "titre": "Sur la BRVM : le prix de 20 actions",
       "contenu": "Le tableau donne le cours de la dernière séance de quatre valeurs. Pour estimer un premier achat, multipliez ce cours par la quantité visée, puis ajoutez les frais de votre SGI.",
-      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SIBC", "BOAB"], "actions": 20 }
+      "donnees_reelles": { "vue": "cours", "codes": ["SNTS", "ORAC", "SIBC", "BOAB"], "actions": 20 }
     },
     {
       "type": "piege",
       "titre": "Les erreurs à éviter",
       "contenu": "Quelques réflexes évitent l’essentiel des mauvaises surprises.",
       "points": [
-        { "titre": "Passer un ordre au marché sur une valeur peu échangée", "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché." },
+        { "titre": "Passer un ordre au mieux sur une valeur peu échangée", "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché." },
         { "titre": "Confier ses fonds à un intermédiaire non agréé", "detail": "Plateformes et « courtiers » non agréés sont une source fréquente d’arnaques." },
         { "titre": "Oublier les frais sur les petits ordres", "detail": "Mieux vaut regrouper ses achats que multiplier les très petits ordres." },
         { "titre": "Signer sans lire les conditions", "detail": "Frais, délais et modalités de retrait figurent dans la convention de compte." }
@@ -103,12 +103,12 @@
   ],
   "quiz": [
     {
-      "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?",
+      "question": "Quel type d’ordre permet de contrôler son prix d’achat ?",
       "options": [
-        "Ordre au marché, pour une exécution immédiate",
-        "Ordre à cours limité, pour contrôler son prix d’achat",
-        "Ordre stop, pour vendre automatiquement",
-        "Il n’y a pas de différence entre les deux"
+        "Ordre au mieux, pour être servi au plus vite",
+        "Ordre à cours limité, avec un prix maximum",
+        "Ordre stop, déclenché à un seuil de prix",
+        "Aucun : tous les ordres se valent"
       ],
       "correct": 1,
       "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides."
@@ -137,19 +137,19 @@
         "À 10 000 FCFA ou moins",
         "Seulement au-dessus de 10 000 FCFA",
         "Toujours immédiatement, quel que soit le prix",
-        "Jamais avant la séance suivante"
+        "Au cours d’ouverture, quel qu’il soit"
       ],
       "correct": 0,
-      "explication": "Pour un achat, la limite est un prix maximum : l’ordre s’exécute à 10 000 FCFA ou en dessous, sinon il attend."
+      "explication": "Pour un achat, la limite est un prix maximum : l’ordre s’exécute à 10 000 FCFA ou en dessous ; sinon il reste en attente pendant sa durée de validité."
     }
   ],
   "qcm": {
-    "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?",
+    "question": "Quel type d’ordre permet de contrôler son prix d’achat ?",
     "options": [
-      "Ordre au marché, pour une exécution immédiate",
-      "Ordre à cours limité, pour contrôler son prix d’achat",
-      "Ordre stop, pour vendre automatiquement",
-      "Il n’y a pas de différence entre les deux"
+      "Ordre au mieux, pour être servi au plus vite",
+      "Ordre à cours limité, avec un prix maximum",
+      "Ordre stop, déclenché à un seuil de prix",
+      "Aucun : tous les ordres se valent"
     ],
     "correct": 1,
     "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides."

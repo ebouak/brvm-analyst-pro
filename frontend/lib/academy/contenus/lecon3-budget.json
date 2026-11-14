@@ -82,7 +82,7 @@
     },
     {
       "question": "Une action cote 1 800 FCFA, une autre 30 000 FCFA. Que peut-on en conclure ?",
-      "options": ["La première est une meilleure affaire", "La seconde est de meilleure qualité", "Rien : le cours dépend surtout du nombre de titres de la société", "La première verse forcément un plus petit dividende"],
+      "options": ["La première est forcément la meilleure affaire", "La seconde est de meilleure qualité", "Rien : le cours dépend surtout du nombre de titres", "La première verse forcément un plus petit dividende"],
       "correct": 2,
       "explication": "Le cours d’une action ne dit rien de sa qualité ni de sa cherté. Pour juger, il faut rapporter le prix aux bénéfices ou aux dividendes."
     },
@@ -94,7 +94,7 @@
     },
     {
       "question": "Pourquoi éviter de multiplier les très petits ordres ?",
-      "options": ["La BRVM les refuse", "Le minimum de frais par ordre les rend très coûteux", "Ils ne donnent pas droit au dividende", "Ils sont exécutés en dernier"],
+      "options": ["La BRVM refuse les ordres de moins de dix titres", "Le minimum de frais par ordre pèse lourd", "Ils ne donnent pas droit au dividende", "Ils sont toujours exécutés en dernier"],
       "correct": 1,
       "explication": "Beaucoup de SGI appliquent un montant minimum de frais par ordre : sur un petit achat, ce minimum pèse lourd en pourcentage."
     }

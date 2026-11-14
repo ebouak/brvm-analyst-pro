@@ -97,7 +97,7 @@
       "question": "Pourquoi réduire la part en actions quelques années avant les études ?",
       "options": [
         "Parce que les dividendes cessent avant l’échéance",
-        "Pour ne pas devoir vendre pendant une baisse au moment où l’argent est nécessaire",
+        "Pour ne pas vendre en baisse au mauvais moment",
         "Parce que les SGI ferment les comptes des parents",
         "Pour payer moins de frais de courtage"
       ],
@@ -114,9 +114,9 @@
       "question": "Dans ce projet, à quoi sert le réinvestissement des dividendes ?",
       "options": [
         "À payer les frais de scolarité chaque année",
-        "À augmenter le nombre d’actions, donc les dividendes futurs",
-        "À éviter tout risque de baisse",
-        "À garantir le rendement"
+        "À accroître les dividendes futurs",
+        "À éviter tout risque de baisse du capital",
+        "À garantir le rendement du projet"
       ],
       "correct": 1,
       "explication": "Chaque dividende réinvesti achète de nouvelles actions, qui rapportent à leur tour : le revenu grandit d’année en année."

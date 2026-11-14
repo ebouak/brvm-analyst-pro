@@ -3,7 +3,7 @@
  "module": "Module 1 — Lire et analyser une entreprise",
  "categorie": "fundamental",
  "duree_min": 12,
- "sous_titre": "Une valeur sur trois à la BRVM est une banque ou une société financière. Elles se lisent avec leurs propres indicateurs.",
+ "sous_titre": "Les banques et sociétés financières forment une part importante de la cote de la BRVM. Elles se lisent avec leurs propres indicateurs.",
  "resume": "Une banque ne vend pas de produits : elle prête l’argent de ses déposants. Son chiffre d’affaires s’appelle le produit net bancaire, son risque principal le coût du risque, sa solidité se mesure par la solvabilité. Cette leçon donne la grille de lecture propre aux banques.",
  "sections": [
   {
@@ -195,10 +195,10 @@
   {
    "question": "Que mesure le coût du risque ?",
    "options": [
-    "Le prix de l’action",
-    "Les pertes probables sur les prêts accordés",
-    "Les salaires",
-    "Le dividende"
+    "Le prix de l’action sur la dernière année",
+    "Les pertes probables sur les prêts",
+    "Les salaires et frais généraux",
+    "Le dividende versé par action"
    ],
    "correct": 1,
    "explication": "Le coût du risque enregistre les prêts qui ne seront probablement pas remboursés."
@@ -206,10 +206,10 @@
   {
    "question": "Pourquoi un ratio d’endettement classique n’a-t-il pas de sens pour une banque ?",
    "options": [
-    "Les banques n’ont pas de dettes",
-    "Les dépôts des clients sont comptablement des dettes : c’est son métier",
-    "Il est interdit par la loi",
-    "Il est toujours nul"
+    "Les banques n’ont pas de dettes au bilan",
+    "Les dépôts sont des dettes : c’est son métier",
+    "Il est interdit de le publier pour une banque cotée",
+    "Il vaut toujours zéro pour une banque"
    ],
    "correct": 1,
    "explication": "Le métier de la banque consiste à collecter des ressources pour prêter. On mesure sa solidité par la solvabilité."

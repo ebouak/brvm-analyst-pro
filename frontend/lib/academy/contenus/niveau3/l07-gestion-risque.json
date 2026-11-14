@@ -97,8 +97,8 @@
    "contenu": "Un stop n’est pas une garantie de prix, et c’est particulièrement vrai à la BRVM.\nLe règlement général de la BRVM prévoit deux types d’ordres selon le prix : au mieux et à cours limité. L’ordre stop, qui se déclencherait automatiquement à un seuil, n’en fait pas partie. Certaines SGI proposent un service de surveillance, d’autres non : renseignez-vous. Le plus souvent, votre stop est une règle que vous vous imposez, en surveillant le cours et en passant vous-même l’ordre de vente.\nMême exécutée, la vente peut se faire plus bas que prévu. Sur une valeur peu échangée, il n’y a pas forcément d’acheteur à votre niveau : le cours peut passer d’un coup en dessous, et la vente se fait au prix suivant disponible. Les frais de courtage, à l’achat comme à la vente, s’ajoutent à la perte.\nL’erreur la plus coûteuse reste humaine : reculer son stop quand le cours s’en approche, pour « laisser une chance ». Une perte limitée à 1 % du portefeuille devient alors une perte que plus rien ne limite.",
    "points": [
     {
-     "titre": "Le stop n’est pas automatique partout",
-     "detail": "Selon les SGI, l’ordre stop n’existe pas toujours : il faut alors surveiller soi-même et passer l’ordre.",
+     "titre": "Le stop n’est pas un ordre de la BRVM",
+     "detail": "Le règlement ne prévoit pas d’ordre stop ; certaines SGI proposent une surveillance, sinon il faut surveiller soi-même et passer l’ordre.",
      "verifier": "Les types d’ordres proposés par votre SGI."
     },
     {
@@ -175,10 +175,10 @@
   {
    "question": "Pourquoi un stop ne garantit-il pas le prix de vente à la BRVM ?",
    "options": [
-    "Il est interdit",
-    "Sur une valeur peu liquide, le cours peut sauter le niveau du stop",
+    "Il s’exécute au cours de clôture de la veille",
+    "Le cours peut sauter le niveau du stop",
     "Les stops sont toujours exécutés au cours d’achat",
-    "La BRVM rembourse la différence"
+    "La BRVM rembourse la différence au vendeur"
    ],
    "correct": 1,
    "explication": "Sans contrepartie au niveau du stop, la vente se fait au prix suivant disponible."

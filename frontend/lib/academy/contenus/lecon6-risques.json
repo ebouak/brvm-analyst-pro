@@ -1,5 +1,5 @@
 {
- "titre": "Leçon 6 — Les risques : apprendre avant d'investir",
+ "titre": "Leçon 6 — Les risques : apprendre avant d’investir",
  "categorie": "general",
  "duree_min": 12,
  "sous_titre": "Anticiper une perte, protéger son capital, passer un ordre correctement, et décider calmement quand le marché baisse.",
@@ -30,9 +30,9 @@
   },
   {
    "type": "cas",
-   "titre": "Quand le dividende baisse : des cas réels",
+   "titre": "Le dividende varie : quatre historiques réels",
    "reel": true,
-   "contenu": "Un dividende dépend des bénéfices, de la trésorerie, des investissements à financer et de la décision de l’assemblée générale. Il n’est jamais garanti. Voici l’historique de quatre sociétés cotées, lu dans la base WestBourse à l’ouverture de la leçon.\nAvant de choisir une action pour son dividende, posez-vous quatre questions.",
+   "contenu": "Un dividende dépend des bénéfices, de la trésorerie, des investissements à financer et de la décision de l’assemblée générale. Il n’est jamais garanti. Voici l’historique de quatre sociétés cotées, lu dans la base WestBourse à l’ouverture de la leçon.\nRepérez les années où le dividende a baissé, et celles où il a progressé.\nAvant de choisir une action pour son dividende, posez-vous quatre questions.",
    "donnees_reelles": {
     "vue": "historique",
     "codes": [
@@ -65,7 +65,7 @@
    "points": [
     {
      "titre": "Diversifier",
-     "detail": "Répartir entre plusieurs sociétés et secteurs. Repères pédagogiques pour un débutant : pas plus de 20 % sur une société, 35 % sur un secteur.",
+     "detail": "Répartir entre plusieurs sociétés et secteurs. Repères pédagogiques pour un débutant : pas plus de 20 % sur une société, ni plus de 35 % sur un secteur.",
      "verifier": "Deux sociétés différentes peuvent dépendre de la même matière première ou du même marché."
     },
     {
@@ -400,9 +400,9 @@
   {
    "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
    "options": [
-    "Parce que les dividendes sont imposés",
+    "Parce que les dividendes y sont imposés à la source",
     "Parce que la bourse est réservée aux résidents ivoiriens",
-    "Parce qu’on peut avoir besoin de cet argent vite et devoir vendre pendant une baisse",
+    "Parce qu’il faudrait peut-être vendre en pleine baisse",
     "Parce que les SGI refusent les petits montants"
    ],
    "correct": 2,
@@ -433,10 +433,10 @@
   {
    "question": "Qu’appelle-t-on le risque de liquidité ?",
    "options": [
-    "La perte de valeur due à l’inflation",
-    "La difficulté à vendre rapidement sans faire baisser le prix",
+    "La perte de valeur due à l’inflation chaque année",
+    "La difficulté à vendre sans faire baisser le prix",
     "La faillite d’une société cotée",
-    "La variation du franc CFA"
+    "La variation du franc CFA face au dollar"
    ],
    "correct": 1,
    "explication": "Sur une valeur peu échangée, il peut y avoir peu d’acheteurs : il faut alors attendre, ou accepter un prix plus bas."
@@ -455,9 +455,9 @@
   {
    "question": "Vous passez un ordre d’achat à cours limité à 3 270 FCFA ; le vendeur le moins cher demande 3 280 FCFA. Que se passe-t-il ?",
    "options": [
-    "L’ordre est exécuté à 3 280 FCFA",
-    "L’ordre attend, selon sa validité, qu’un vendeur accepte 3 270 FCFA ou moins",
-    "L’ordre est exécuté à 3 270 FCFA quoi qu’il arrive",
+    "L’ordre est exécuté tout de suite à 3 280 FCFA",
+    "L’ordre attend un vendeur à 3 270 FCFA ou moins",
+    "L’ordre est exécuté à 3 270 FCFA, quoi qu’il arrive ensuite",
     "La BRVM rejette l’ordre"
    ],
    "correct": 1,
@@ -477,10 +477,10 @@
   {
    "question": "Vous ne précisez pas la durée de validité de votre ordre. Comment est-il considéré ?",
    "options": [
-    "Mensuel",
-    "Jour : présenté à la seule séance qui suit sa transmission",
-    "À exécution, pendant trois mois",
-    "Annulé"
+    "Mensuel, jusqu’à la fin du mois en cours",
+    "Jour : valable une seule séance",
+    "À exécution, valable pendant trois mois",
+    "Annulé avant même d’être transmis"
    ],
    "correct": 1,
    "explication": "Selon le règlement général de la BRVM, un ordre sans indication de validité est réputé « jour »."
@@ -489,9 +489,9 @@
  "qcm": {
   "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
   "options": [
-   "Parce que les dividendes sont imposés",
+   "Parce que les dividendes y sont imposés à la source",
    "Parce que la bourse est réservée aux résidents ivoiriens",
-   "Parce qu’on peut avoir besoin de cet argent vite et devoir vendre pendant une baisse",
+   "Parce qu’il faudrait peut-être vendre en pleine baisse",
    "Parce que les SGI refusent les petits montants"
   ],
   "correct": 2,

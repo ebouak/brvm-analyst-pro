@@ -24,7 +24,7 @@
   {
    "type": "cas",
    "titre": "Réinvestir ses dividendes pendant 3 ans",
-   "contenu": "Hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à racheter des actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.\nLe mécanisme est celui des intérêts composés. La première année, les dividendes rachètent quelques actions. L’année suivante, ces actions nouvelles versent à leur tour un dividende, qui s’ajoute à celui des actions d’origine. Le nombre d’actions croît donc un peu plus vite chaque année.\nSur trois ans, l’effet reste modeste. Il devient important sur dix ou vingt ans : le réinvestissement est surtout un outil d’épargne longue. Notez les limites de l’exemple : un cours constant est une hypothèse commode, presque jamais vérifiée, et dans la réalité chaque rachat supporte des frais de courtage.",
+   "contenu": "Hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à acheter de nouvelles actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.\nLe mécanisme est celui des intérêts composés. La première année, les dividendes rachètent quelques actions. L’année suivante, ces actions nouvelles versent à leur tour un dividende, qui s’ajoute à celui des actions d’origine. Le nombre d’actions croît donc un peu plus vite chaque année.\nSur trois ans, l’effet reste modeste. Il devient important sur dix ou vingt ans : le réinvestissement est surtout un outil d’épargne longue. Notez les limites de l’exemple : un cours constant est une hypothèse commode, presque jamais vérifiée, et dans la réalité chaque rachat supporte des frais de courtage.",
    "simulation": {
     "type": "reinvestissement",
     "actions": 200,
@@ -185,10 +185,10 @@
   {
    "question": "Pourquoi viser un rendement très élevé augmente-t-il le risque ?",
    "options": [
-    "Ce n’est pas le cas",
-    "Les rendements très élevés vont souvent avec des dividendes fragiles ou des cours en baisse",
-    "Les frais sont plus élevés",
-    "L’impôt est plus élevé"
+    "Ce n’est pas le cas sur un horizon long",
+    "Il va souvent avec un dividende fragile",
+    "Les frais de courtage sont alors plus élevés",
+    "L’impôt sur les dividendes est plus élevé"
    ],
    "correct": 1,
    "explication": "Un rendement élevé peut annoncer un dividende réduit. Il faut vérifier sa régularité."
@@ -196,10 +196,10 @@
   {
    "question": "À quoi sert le portefeuille virtuel ?",
    "options": [
-    "À investir de l’argent réel sans frais",
-    "À tester une stratégie aux cours réels, sans engager d’argent",
+    "À investir de l’argent réel, sans payer de frais",
+    "À tester une stratégie sans argent réel",
     "À obtenir des dividendes gratuits",
-    "À éviter l’impôt"
+    "À réduire l’impôt sur ses dividendes"
    ],
    "correct": 1,
    "explication": "Il reproduit les achats et ventes aux cours réels, sans argent engagé."

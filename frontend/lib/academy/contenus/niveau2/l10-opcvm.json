@@ -36,7 +36,7 @@
   {
    "type": "importance",
    "titre": "FCP et SICAV, et leurs acteurs",
-   "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.\nLe fonds commun de placement (FCP) est une copropriété de titres, sans personnalité juridique : une société de gestion agréée le gère pour le compte des porteurs de parts. La société d’investissement à capital variable (SICAV) est une société anonyme : en achetant ses actions, vous en devenez actionnaire, avec un droit de vote en assemblée.\nPour l’épargnant, la différence est surtout juridique. Dans les deux cas, on entre et on sort à la valeur liquidative, et un dépositaire, en général une banque, conserve les actifs. Cette séparation protège l’épargnant : les actifs du fonds ne se confondent pas avec ceux de la société de gestion.",
+   "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.\nLe fonds commun de placement (FCP) est une copropriété de titres, sans personnalité juridique : une société de gestion agréée le gère pour le compte des porteurs de parts. La société d’investissement à capital variable (SICAV) est une société anonyme : en achetant ses actions, vous en devenez actionnaire, avec un droit de vote en assemblée.\nPour l’épargnant, la différence est surtout juridique. Dans les deux cas, on entre et on sort à la valeur liquidative, et un dépositaire, distinct de la société de gestion, conserve les actifs. Cette séparation protège l’épargnant : les actifs du fonds ne se confondent pas avec ceux de la société de gestion.",
    "tableau": {
     "colonnes": [
      "Critère",
@@ -56,8 +56,8 @@
      ],
      [
       "Conservation",
-      "Un dépositaire, en général une banque",
-      "Un dépositaire, en général une banque"
+      "Un dépositaire, distinct du gérant",
+      "Un dépositaire, distinct du gérant"
      ],
      [
       "Pour l’épargnant",
@@ -197,7 +197,7 @@
    "question": "Qui conserve les actifs d’un OPCVM ?",
    "options": [
     "Le gérant, sur son propre compte",
-    "Un dépositaire, en général une banque",
+    "Un dépositaire",
     "La BRVM",
     "Chaque épargnant"
    ],
@@ -218,10 +218,10 @@
   {
    "question": "Un fonds investi en actions promet un rendement « garanti » de 15 % par an. Quelle est la bonne réaction ?",
    "options": [
-    "Souscrire vite",
-    "Se méfier : un fonds actions ne peut pas garantir un rendement élevé",
-    "Négocier les frais",
-    "Demander 20 %"
+    "Souscrire vite, avant la clôture de l’offre",
+    "Se méfier : rien ne garantit ce rendement",
+    "Négocier les frais d’entrée et de sortie",
+    "Demander une garantie écrite à 20 %"
    ],
    "correct": 1,
    "explication": "La valeur d’un fonds actions suit le marché : aucun rendement élevé ne peut y être garanti."

@@ -34,7 +34,7 @@
         { "titre": "Les ordres arrivent", "detail": "Votre SGI transmet votre ordre au système de cotation de la BRVM." },
         { "titre": "Ils se rencontrent", "detail": "Un ordre d’achat s’exécute face à un ordre de vente compatible en prix.", "cle": true },
         { "titre": "Le cours est publié", "detail": "Dernier prix échangé, volumes et variations, dans le Bulletin officiel de la cote." },
-        { "titre": "Les titres sont livrés", "detail": "Le Dépositaire central (DC/BR) inscrit les titres sur votre compte et règle les espèces." }
+        { "titre": "Les titres sont livrés", "detail": "Le Dépositaire central (DC/BR) dénoue l’échange entre intermédiaires ; votre SGI inscrit ensuite les titres sur votre compte-titres." }
       ],
       "etapes_style": "frise"
     },
@@ -42,7 +42,7 @@
       "type": "cas",
       "reel": true,
       "titre": "Les indices, thermomètre du marché",
-      "contenu": "Un indice résume en un chiffre l’évolution d’un ensemble d’actions. Le BRVM Composite suit toutes les actions cotées ; le BRVM 30 suit trente des valeurs les plus échangées.\nCes indices sont calculés sur les cours : les dividendes n’y entrent pas. Une année où l’indice stagne peut donc avoir rapporté de l’argent aux actionnaires qui ont touché leurs dividendes.",
+      "contenu": "Un indice résume en un chiffre l’évolution d’un ensemble d’actions. Le BRVM Composite suit toutes les actions cotées ; le BRVM 30 suit trente des valeurs les plus échangées.\nLe BRVM Composite et le BRVM 30 sont calculés sur les seuls cours : les dividendes n’y entrent pas. Une année où l’indice stagne peut donc avoir rapporté de l’argent aux actionnaires qui ont touché leurs dividendes.",
       "donnees_reelles": { "vue": "indices", "codes": ["BRVMC", "BRVM30"] }
     },
     {
@@ -99,7 +99,7 @@
     },
     {
       "question": "Le BRVM Composite progresse de 0 % sur une année. Les actionnaires ont-ils forcément gagné 0 % ?",
-      "options": ["Oui, l’indice dit tout", "Non : l’indice ne compte pas les dividendes versés", "Non : l’indice ne compte que les banques", "Oui, sauf pour les obligations"],
+      "options": ["Oui, l’indice mesure tout le gain", "Non : il ignore les dividendes", "Non : l’indice ne compte que les banques", "Oui, sauf pour les détenteurs d’obligations"],
       "correct": 1,
       "explication": "L’indice est calculé sur les seuls cours. Un actionnaire qui a touché ses dividendes a pu gagner de l’argent même si l’indice n’a pas bougé."
     },

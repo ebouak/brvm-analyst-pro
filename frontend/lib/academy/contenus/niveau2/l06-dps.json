@@ -4,12 +4,12 @@
  "categorie": "fundamental",
  "duree_min": 10,
  "sous_titre": "Quand une société augmente son capital, l’actionnaire en place reçoit un droit qui a une valeur. Le laisser expirer, c’est perdre de l’argent.",
- "resume": "Lors d’une augmentation de capital en numéraire, chaque action ancienne donne un droit préférentiel de souscription. Ce droit permet d’acheter des actions nouvelles à un prix réduit, ou se vend. Cette leçon explique le mécanisme, le calcul de sa valeur et les trois choix de l’actionnaire.",
+ "resume": "Lors d’une augmentation de capital en numéraire, chaque action ancienne donne un droit préférentiel de souscription. Ce droit permet d’acheter des actions nouvelles à un prix réduit, ou se vend ; l’assemblée générale peut aussi le supprimer, par exemple pour une augmentation réservée, et la note d’information l’indique. Cette leçon explique le mécanisme, le calcul de sa valeur et les trois choix de l’actionnaire.",
  "sections": [
   {
    "type": "definition",
    "titre": "Pourquoi un droit préférentiel ?",
-   "contenu": "Quand une société a besoin de capitaux, elle peut émettre des actions nouvelles. Pour attirer les souscripteurs, elle les propose en général sous le cours de bourse. Sans protection, l’actionnaire en place perdrait deux fois : sa part du capital diminuerait, et la valeur de ses titres baisserait, puisque de nouvelles actions entrent à prix réduit.\nLe droit préférentiel de souscription (DPS) compense cette perte. Chaque action ancienne reçoit un droit. Ces droits donnent la priorité aux actionnaires existants pour souscrire les actions nouvelles, et ils se négocient pendant la période de souscription : celui qui ne veut pas souscrire peut les vendre, celui qui veut souscrire davantage peut en acheter.\nLa parité indique combien de droits il faut pour une action nouvelle. « Une action nouvelle pour quatre anciennes » signifie qu’il faut quatre droits, donc détenir quatre actions, pour en souscrire une.",
+   "contenu": "Quand une société a besoin de capitaux, elle peut émettre des actions nouvelles. Pour attirer les souscripteurs, elle les propose en général sous le cours de bourse. Sans protection, l’actionnaire en place perdrait deux fois : sa part du capital diminuerait, et la valeur de ses titres baisserait, puisque de nouvelles actions entrent à prix réduit.\nLe droit préférentiel de souscription (DPS) compense cette perte. Chaque action ancienne reçoit un droit. Ces droits donnent la priorité aux actionnaires existants pour souscrire les actions nouvelles, et ils se négocient pendant la période de souscription : celui qui ne veut pas souscrire peut les vendre, celui qui veut souscrire davantage peut en acheter.\nLa parité indique combien de droits il faut pour une action nouvelle. « Une action nouvelle pour quatre anciennes » signifie qu’il faut quatre droits, donc détenir quatre actions, pour en souscrire une.\nCe droit n’est pas automatique dans tous les cas : l’assemblée générale peut le supprimer, par exemple pour une augmentation de capital réservée à certains investisseurs. La note d’information de l’opération l’indique.",
    "flux": [
     {
      "titre": "Annonce",
@@ -201,10 +201,10 @@
   {
    "question": "Le jour du détachement, le cours baisse d’un montant proche de la valeur du droit. Est-ce une perte pour l’actionnaire ?",
    "options": [
-    "Oui, une perte définitive",
-    "Non : cette baisse est compensée par la valeur du droit reçu",
+    "Oui, une perte définitive pour l’actionnaire",
+    "Non : la valeur du droit la compense",
     "Oui, sauf si le dividende est maintenu",
-    "Non, le cours ne bouge jamais"
+    "Non, le cours ne bouge jamais ce jour-là"
    ],
    "correct": 1,
    "explication": "La valeur se répartit entre l’action ex-droit et le droit. L’actionnaire ne s’appauvrit que s’il laisse le droit expirer."
@@ -212,10 +212,10 @@
   {
    "question": "Pourquoi lire l’objet d’une augmentation de capital avant de souscrire ?",
    "options": [
-    "Ce n’est pas utile",
-    "Financer un projet de croissance et combler des pertes ne présentent pas le même risque",
-    "Pour connaître la couleur du logo",
-    "Pour connaître le nom de la SGI"
+    "Ce n’est pas utile, seul le prix compte",
+    "Son usage change le risque pris",
+    "Pour connaître le nom de la SGI chef de file",
+    "Pour savoir si la société verse un dividende"
    ],
    "correct": 1,
    "explication": "L’usage des fonds levés dit beaucoup sur la situation de la société."

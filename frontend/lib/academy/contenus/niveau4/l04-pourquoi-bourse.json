@@ -4,7 +4,7 @@
  "categorie": "fundamental",
  "duree_min": 10,
  "sous_titre": "Lever des fonds, donner une valeur à l’entreprise, permettre à des actionnaires de sortir : les raisons, les coûts et les contraintes.",
- "resume": "Une introduction en bourse permet à une société de lever des capitaux ou à ses actionnaires de céder une partie de leurs titres au public. Elle apporte de la visibilité et une valeur de marché, mais impose transparence, coûts et contraintes durables. Cette leçon présente ces arbitrages, avec l’exemple de l’admission la plus récente à la BRVM.",
+ "resume": "Une introduction en bourse permet à une société de lever des capitaux ou à ses actionnaires de céder une partie de leurs titres au public. Elle apporte de la visibilité et une valeur de marché, mais impose transparence, coûts et contraintes durables. Cette leçon présente ces arbitrages, avec l’exemple de l’admission de Bridge Bank Group Côte d’Ivoire à la BRVM, en septembre 2026.",
  "sections": [
   {
    "type": "definition",
@@ -198,10 +198,10 @@
   {
    "question": "Une introduction très sursouscrite garantit-elle une hausse du cours ?",
    "options": [
-    "Oui",
-    "Non : la demande ne dit rien du niveau du prix ni de l’évolution future",
-    "Oui, la première année",
-    "Oui, si la société est une banque"
+    "Oui, au moins pendant la première année",
+    "Non : la demande ne fixe pas le cours futur",
+    "Oui, si la société cotée est une banque solide",
+    "Oui, dès la première séance de cotation"
    ],
    "correct": 1,
    "explication": "Une forte demande ne garantit rien. Le cours dépend ensuite des résultats et du prix payé."
