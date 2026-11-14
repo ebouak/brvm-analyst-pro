@@ -1,0 +1,243 @@
+{
+ "titre": "Leçon 6 — Les droits préférentiels de souscription (DPS)",
+ "module": "Module 2 — Construire son portefeuille",
+ "categorie": "fundamental",
+ "duree_min": 10,
+ "sous_titre": "Quand une société augmente son capital, l’actionnaire en place reçoit un droit qui a une valeur. Le laisser expirer, c’est perdre de l’argent.",
+ "resume": "Lors d’une augmentation de capital en numéraire, chaque action ancienne donne un droit préférentiel de souscription. Ce droit permet d’acheter des actions nouvelles à un prix réduit, ou se vend. Cette leçon explique le mécanisme, le calcul de sa valeur et les trois choix de l’actionnaire.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Pourquoi un droit préférentiel ?",
+   "contenu": "Les actions nouvelles sont émises sous le cours de bourse pour attirer les souscripteurs. Sans protection, l’actionnaire en place verrait sa part diluée et la valeur de ses titres baisser.\nLe DPS compense cette perte : il donne la priorité aux anciens actionnaires, et il a une valeur négociable pendant la période de souscription.",
+   "flux": [
+    {
+     "titre": "Annonce",
+     "detail": "Prix d’émission et parité fixés",
+     "icone": "decision"
+    },
+    {
+     "titre": "Détachement",
+     "detail": "Un DPS par action ancienne",
+     "icone": "calendrier"
+    },
+    {
+     "titre": "Souscription",
+     "detail": "Exercer, vendre ou acheter des droits",
+     "icone": "piece"
+    },
+    {
+     "titre": "Actions nouvelles",
+     "detail": "Livrées, puis cotées",
+     "icone": "actionnaires"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Calculer la valeur d’un droit",
+   "contenu": "Exemple pédagogique : l’action cote 6 000 FCFA, la société émet 1 action nouvelle pour 4 anciennes à 4 500 FCFA.",
+   "formules": [
+    {
+     "nom": "Valeur théorique du DPS",
+     "expression": "(Cours − Prix d’émission) ÷ (Parité + 1)",
+     "exemple": "(6 000 − 4 500) ÷ (4 + 1) = 300 FCFA par droit"
+    },
+    {
+     "nom": "Cours théorique après détachement",
+     "expression": "Cours − Valeur du DPS",
+     "exemple": "6 000 − 300 = 5 700 FCFA"
+    },
+    {
+     "nom": "Vérification",
+     "expression": "(4 × 6 000 + 4 500) ÷ 5",
+     "exemple": "28 500 ÷ 5 = 5 700 FCFA : la valeur se conserve"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Les trois choix de l’actionnaire",
+   "contenu": "Exemple pédagogique : vous détenez 400 actions, donc 400 droits. Il faut 4 droits pour souscrire 1 action nouvelle.",
+   "tableau": {
+    "colonnes": [
+     "Choix",
+     "Ce que vous faites",
+     "Résultat"
+    ],
+    "lignes": [
+     [
+      "Souscrire",
+      "Exercer 400 droits et payer 100 × 4 500 FCFA",
+      "500 actions ; votre part du capital est préservée"
+     ],
+     [
+      "Vendre les droits",
+      "Céder 400 droits à environ 300 FCFA",
+      "Environ 120 000 FCFA encaissés ; votre part est diluée"
+     ],
+     [
+      "Ne rien faire",
+      "Laisser les droits expirer",
+      "Perte d’environ 120 000 FCFA de valeur : à éviter"
+     ]
+    ],
+    "note": "Les montants réels dépendent du cours du droit pendant la période de souscription, et des frais de votre SGI."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Le calendrier d’une opération",
+   "contenu": "Les dates sont fixées par l’avis publié par la BRVM. Elles comptent : un droit non exercé à la clôture perd toute valeur.",
+   "etapes": [
+    {
+     "titre": "Avis de l’opération",
+     "detail": "Prix d’émission, parité, dates de souscription, publiés par la BRVM et par la société."
+    },
+    {
+     "titre": "Détachement du droit",
+     "detail": "Le cours de l’action s’ajuste ; le droit commence à se négocier.",
+     "cle": true
+    },
+    {
+     "titre": "Période de souscription",
+     "detail": "Vous transmettez votre choix à votre SGI : exercer, vendre, ou acheter des droits pour compléter."
+    },
+    {
+     "titre": "Clôture",
+     "detail": "Les droits non exercés ni vendus ne valent plus rien."
+    },
+    {
+     "titre": "Livraison des actions nouvelles",
+     "detail": "Elles s’ajoutent à votre compte-titres et deviennent négociables."
+    }
+   ],
+   "etapes_style": "frise"
+  },
+  {
+   "type": "piege",
+   "titre": "Les erreurs à éviter",
+   "contenu": "Les DPS sont rares, et c’est justement pour cela qu’on se trompe.",
+   "points": [
+    {
+     "titre": "Ignorer le courrier de sa SGI",
+     "detail": "Sans instruction de votre part, les droits peuvent expirer.",
+     "verifier": "La date de clôture de la souscription."
+    },
+    {
+     "titre": "Croire que le cours a « chuté »",
+     "detail": "Le jour du détachement, la baisse du cours correspond à la valeur du droit : ce n’est pas une perte.",
+     "verifier": "La valeur théorique du DPS."
+    },
+    {
+     "titre": "Souscrire sans comprendre l’opération",
+     "detail": "Une augmentation de capital peut financer un projet, ou combler des pertes. Ce n’est pas la même chose.",
+     "verifier": "L’objet de l’opération dans la note d’information."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Un DPS a toujours une valeur tant que la souscription est ouverte.",
+   "points": [
+    {
+     "titre": "Valeur théorique = (cours − prix d’émission) ÷ (parité + 1)"
+    },
+    {
+     "titre": "Trois choix : souscrire, vendre, ou acheter des droits pour compléter"
+    },
+    {
+     "titre": "Ne rien faire revient à perdre la valeur du droit"
+    },
+    {
+     "titre": "Lire l’objet de l’augmentation de capital avant de souscrire"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une action cote 8 000 FCFA. La société émet 1 action nouvelle pour 3 anciennes à 6 000 FCFA. Quelle est la valeur théorique du DPS ?",
+   "options": [
+    "250 FCFA",
+    "500 FCFA",
+    "667 FCFA",
+    "2 000 FCFA"
+   ],
+   "correct": 1,
+   "explication": "(8 000 − 6 000) ÷ (3 + 1) = 500 FCFA."
+  },
+  {
+   "question": "Dans le même exemple, quel est le cours théorique après détachement ?",
+   "options": [
+    "6 000 FCFA",
+    "7 500 FCFA",
+    "8 000 FCFA",
+    "8 500 FCFA"
+   ],
+   "correct": 1,
+   "explication": "8 000 − 500 = 7 500 FCFA. Vérification : (3 × 8 000 + 6 000) ÷ 4 = 7 500."
+  },
+  {
+   "question": "Que se passe-t-il si vous ne faites rien de vos droits ?",
+   "options": [
+    "Ils sont automatiquement exercés",
+    "Ils expirent sans valeur à la clôture",
+    "Ils se transforment en dividende",
+    "Ils sont remboursés au nominal"
+   ],
+   "correct": 1,
+   "explication": "Un droit non exercé et non vendu à la clôture perd toute valeur."
+  },
+  {
+   "question": "Le jour du détachement, le cours baisse d’un montant proche de la valeur du droit. Est-ce une perte pour l’actionnaire ?",
+   "options": [
+    "Oui, une perte définitive",
+    "Non : cette baisse est compensée par la valeur du droit reçu",
+    "Oui, sauf si le dividende est maintenu",
+    "Non, le cours ne bouge jamais"
+   ],
+   "correct": 1,
+   "explication": "La valeur se répartit entre l’action ex-droit et le droit. L’actionnaire ne s’appauvrit que s’il laisse le droit expirer."
+  },
+  {
+   "question": "Pourquoi lire l’objet d’une augmentation de capital avant de souscrire ?",
+   "options": [
+    "Ce n’est pas utile",
+    "Financer un projet de croissance et combler des pertes ne présentent pas le même risque",
+    "Pour connaître la couleur du logo",
+    "Pour connaître le nom de la SGI"
+   ],
+   "correct": 1,
+   "explication": "L’usage des fonds levés dit beaucoup sur la situation de la société."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les opérations sur titres",
+   "href": "/operations-titres"
+  },
+  {
+   "label": "L’agenda du marché",
+   "href": "/calendrier"
+  },
+  {
+   "label": "Mon portefeuille",
+   "href": "/portefeuille"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une action cote 8 000 FCFA. La société émet 1 action nouvelle pour 3 anciennes à 6 000 FCFA. Quelle est la valeur théorique du DPS ?",
+  "options": [
+   "250 FCFA",
+   "500 FCFA",
+   "667 FCFA",
+   "2 000 FCFA"
+  ],
+  "correct": 1,
+  "explication": "(8 000 − 6 000) ÷ (3 + 1) = 500 FCFA."
+ }
+}

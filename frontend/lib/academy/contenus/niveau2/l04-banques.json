@@ -1,0 +1,248 @@
+{
+ "titre": "Leçon 4 — Analyser une banque cotée",
+ "module": "Module 1 — Lire et analyser une entreprise",
+ "categorie": "fundamental",
+ "duree_min": 12,
+ "sous_titre": "Une valeur sur trois à la BRVM est une banque ou une société financière. Elles se lisent avec leurs propres indicateurs.",
+ "resume": "Une banque ne vend pas de produits : elle prête l’argent de ses déposants. Son chiffre d’affaires s’appelle le produit net bancaire, son risque principal le coût du risque, sa solidité se mesure par la solvabilité. Cette leçon donne la grille de lecture propre aux banques.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Le compte de résultat d’une banque",
+   "contenu": "Une banque gagne la différence entre ce que lui rapportent ses prêts et ce que lui coûtent ses ressources, plus des commissions.",
+   "flux": [
+    {
+     "titre": "Produit net bancaire",
+     "detail": "Marge d’intérêts + commissions : le « chiffre d’affaires »",
+     "icone": "piece"
+    },
+    {
+     "titre": "Frais généraux",
+     "detail": "Salaires, agences, informatique",
+     "icone": "entreprise"
+    },
+    {
+     "titre": "Coût du risque",
+     "detail": "Prêts qui ne seront pas remboursés",
+     "icone": "graphique"
+    },
+    {
+     "titre": "Résultat net",
+     "detail": "Après impôt",
+     "icone": "benefices"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les quatre indicateurs d’une banque",
+   "contenu": "Les formules sont pédagogiques ; les banques publient elles-mêmes la plupart de ces indicateurs dans leur rapport d’activité.",
+   "formules": [
+    {
+     "nom": "Coefficient d’exploitation",
+     "expression": "Frais généraux ÷ Produit net bancaire",
+     "exemple": "40 ÷ 100 = 40 % : plus il est bas, plus la banque est efficace"
+    },
+    {
+     "nom": "Coût du risque",
+     "expression": "Dotations nettes aux provisions pour créances douteuses",
+     "exemple": "Il se compare au produit net bancaire et à l’encours de crédits"
+    },
+    {
+     "nom": "ROE",
+     "expression": "Résultat net ÷ Fonds propres",
+     "exemple": "Une banque bien gérée vise souvent 15 à 25 %"
+    }
+   ],
+   "points": [
+    {
+     "titre": "La solvabilité",
+     "detail": "Les fonds propres réglementaires rapportés aux risques pris. La réglementation bancaire de l’UMOA fixe un minimum : une banque doit le respecter avec une marge.",
+     "verifier": "Le ratio publié dans le rapport d’activité."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Un exemple publié : la SIB en 2025",
+   "contenu": "La Société Ivoirienne de Banque a publié ces indicateurs dans son rapport d’activité 2025 (avril 2026). Ce sont des chiffres datés : ils décrivent l’exercice 2025, pas la situation d’aujourd’hui.",
+   "stats": [
+    {
+     "label": "Produit net bancaire 2025",
+     "valeur": "108,7 Md FCFA",
+     "detail": "Contre 102,8 Md en 2024 (+6 %)"
+    },
+    {
+     "label": "Coefficient d’exploitation",
+     "valeur": "38,59 %",
+     "detail": "Contre 39,05 % en 2024"
+    },
+    {
+     "label": "Coût du risque",
+     "valeur": "3,6 Md FCFA",
+     "detail": "Contre 5,2 Md en 2024 (−30 %)"
+    },
+    {
+     "label": "Résultat net 2025",
+     "valeur": "55,6 Md FCFA",
+     "detail": "Contre 50,2 Md en 2024 (+11 %)"
+    },
+    {
+     "label": "ROE publié",
+     "valeur": "27,16 %",
+     "detail": "Rapport d’activité 2025 de la SIB"
+    },
+    {
+     "label": "Solvabilité",
+     "valeur": "Supérieure à 14 %",
+     "detail": "Selon la banque, au-dessus du seuil réglementaire"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : quatre banques comparées",
+   "reel": true,
+   "contenu": "Pour une banque, le P/B est souvent plus parlant que le PER : ses actifs sont des prêts, inscrits au bilan à leur valeur. Les ratios sont recalculés à l’ouverture de la leçon.",
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SGBC",
+     "BOAC",
+     "NSBC",
+     "SIBC"
+    ]
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Ce qu’il ne faut pas appliquer à une banque",
+   "contenu": "Plusieurs outils pensés pour l’industrie ne fonctionnent pas sur une banque.",
+   "points": [
+    {
+     "titre": "La dette n’est pas un défaut",
+     "detail": "Les dépôts des clients sont, comptablement, une dette. Un ratio d’endettement « classique » n’a pas de sens.",
+     "verifier": "La solvabilité, à la place."
+    },
+    {
+     "titre": "Les scores de faillite industriels",
+     "detail": "Le score d’Altman ou le F-Score de Piotroski sont construits pour des sociétés non financières. WestBourse ne les affiche pas pour les banques.",
+     "verifier": "La mention « non applicable » sur la fiche."
+    },
+    {
+     "titre": "Un coût du risque anormalement bas",
+     "detail": "Une année sans provisions peut précéder une année de rattrapage.",
+     "verifier": "La moyenne sur trois à cinq ans."
+    },
+    {
+     "titre": "Banque et société de financement",
+     "detail": "Leurs métiers et leurs ratios diffèrent, même si elles sont classées dans le même secteur.",
+     "verifier": "L’activité exacte de la société."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Pour une banque, quatre chiffres d’abord.",
+   "points": [
+    {
+     "titre": "Le produit net bancaire et sa progression"
+    },
+    {
+     "titre": "Le coefficient d’exploitation : l’efficacité"
+    },
+    {
+     "titre": "Le coût du risque : la qualité des prêts"
+    },
+    {
+     "titre": "La solvabilité et le ROE : la solidité et la rentabilité"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Comment s’appelle le « chiffre d’affaires » d’une banque ?",
+   "options": [
+    "Le résultat d’exploitation",
+    "Le produit net bancaire",
+    "Le coût du risque",
+    "La capitalisation"
+   ],
+   "correct": 1,
+   "explication": "Le produit net bancaire regroupe la marge d’intérêts et les commissions."
+  },
+  {
+   "question": "Une banque a 120 Md de produit net bancaire et 48 Md de frais généraux. Quel est son coefficient d’exploitation ?",
+   "options": [
+    "25 %",
+    "40 %",
+    "60 %",
+    "250 %"
+   ],
+   "correct": 1,
+   "explication": "48 ÷ 120 = 40 %."
+  },
+  {
+   "question": "Que mesure le coût du risque ?",
+   "options": [
+    "Le prix de l’action",
+    "Les pertes probables sur les prêts accordés",
+    "Les salaires",
+    "Le dividende"
+   ],
+   "correct": 1,
+   "explication": "Le coût du risque enregistre les prêts qui ne seront probablement pas remboursés."
+  },
+  {
+   "question": "Pourquoi un ratio d’endettement classique n’a-t-il pas de sens pour une banque ?",
+   "options": [
+    "Les banques n’ont pas de dettes",
+    "Les dépôts des clients sont comptablement des dettes : c’est son métier",
+    "Il est interdit par la loi",
+    "Il est toujours nul"
+   ],
+   "correct": 1,
+   "explication": "Le métier de la banque consiste à collecter des ressources pour prêter. On mesure sa solidité par la solvabilité."
+  },
+  {
+   "question": "Pour comparer des banques cotées, quel ratio de valorisation est souvent le plus parlant ?",
+   "options": [
+    "Le P/B, lu avec le ROE",
+    "Le nombre d’agences",
+    "Le volume d’échanges",
+    "La date de création"
+   ],
+   "correct": 0,
+   "explication": "Les actifs d’une banque sont des prêts inscrits à leur valeur au bilan : le P/B, lu avec le ROE, est très utilisé."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les secteurs",
+   "href": "/secteurs"
+  },
+  {
+   "label": "La valorisation de toutes les valeurs",
+   "href": "/premium/valorisation"
+  },
+  {
+   "label": "Comparer des actions",
+   "href": "/actions/compare"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Comment s’appelle le « chiffre d’affaires » d’une banque ?",
+  "options": [
+   "Le résultat d’exploitation",
+   "Le produit net bancaire",
+   "Le coût du risque",
+   "La capitalisation"
+  ],
+  "correct": 1,
+  "explication": "Le produit net bancaire regroupe la marge d’intérêts et les commissions."
+ }
+}

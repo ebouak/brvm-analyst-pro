@@ -1,0 +1,233 @@
+{
+ "titre": "Leçon 2 — Le PER : évaluer la cherté d’une action",
+ "module": "Module 1 — Lire et analyser une entreprise",
+ "categorie": "evaluation",
+ "duree_min": 11,
+ "sous_titre": "Combien d’années de bénéfices vous payez en achetant une action, et pourquoi ce chiffre ne se lit jamais seul.",
+ "resume": "Le PER rapporte le cours d’une action à son bénéfice par action. Il dit combien le marché paie pour un franc de bénéfice. Cette leçon montre comment le calculer, comment le lire sur de vraies valeurs de la BRVM, et ses limites.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Trois formules",
+   "contenu": "Le PER (price earnings ratio) se calcule à partir du bénéfice par action, le BPA. Les exemples ci-dessous sont pédagogiques.",
+   "formules": [
+    {
+     "nom": "Bénéfice par action (BPA)",
+     "expression": "Résultat net ÷ Nombre d’actions",
+     "exemple": "2 000 000 000 ÷ 10 000 000 = 200 FCFA"
+    },
+    {
+     "nom": "PER",
+     "expression": "Cours de l’action ÷ BPA",
+     "exemple": "3 000 ÷ 200 = 15 (on dit « 15 fois les bénéfices »)"
+    },
+    {
+     "nom": "Rendement bénéficiaire",
+     "expression": "1 ÷ PER",
+     "exemple": "1 ÷ 15 ≈ 6,7 % : le bénéfice rapporté au prix payé"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que le PER raconte",
+   "contenu": "Un PER de 15 signifie qu’au bénéfice actuel, il faudrait 15 ans de bénéfices pour « rembourser » le prix de l’action.\nUn PER élevé traduit souvent une attente de croissance ; un PER faible peut signaler une société délaissée, ou une société en difficulté. Le chiffre seul ne tranche pas.",
+   "stats": [
+    {
+     "label": "PER faible",
+     "valeur": "Moins de 8",
+     "detail": "Décote, ou méfiance du marché : à expliquer"
+    },
+    {
+     "label": "PER intermédiaire",
+     "valeur": "8 à 15",
+     "detail": "Zone fréquente pour une société mature"
+    },
+    {
+     "label": "PER élevé",
+     "valeur": "Plus de 20",
+     "detail": "Croissance attendue, ou bénéfice temporairement bas"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : trois opérateurs télécoms",
+   "reel": true,
+   "contenu": "Comparer des sociétés du même secteur est la seule comparaison qui ait un sens. Les ratios ci-dessous sont recalculés à l’ouverture de la leçon, à partir du dernier cours et des derniers comptes publiés.",
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "ONTBF"
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Les trois PER qu’on rencontre",
+   "contenu": "Le même mot recouvre des calculs différents. Toujours demander : sur quel bénéfice ?",
+   "tableau": {
+    "colonnes": [
+     "PER",
+     "Bénéfice utilisé",
+     "Usage"
+    ],
+    "lignes": [
+     [
+      "Historique",
+      "Dernier exercice publié",
+      "Le plus fiable : chiffres certifiés"
+     ],
+     [
+      "Glissant (12 mois)",
+      "Quatre derniers trimestres publiés",
+      "Plus récent, quand la société publie des comptes intermédiaires"
+     ],
+     [
+      "Prévisionnel",
+      "Bénéfice estimé de l’année en cours",
+      "Rare à la BRVM : aucune estimation n’est certifiée"
+     ]
+    ],
+    "note": "WestBourse utilise le PER historique, sur le résultat consolidé quand la société publie des comptes consolidés."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Quand le PER trompe",
+   "contenu": "Le PER est simple à calculer et facile à mal lire.",
+   "points": [
+    {
+     "titre": "Le bénéfice exceptionnel",
+     "detail": "Une plus-value de cession gonfle le bénéfice d’une année : le PER paraît bas, à tort.",
+     "verifier": "Le résultat d’exploitation a-t-il suivi ?"
+    },
+    {
+     "titre": "La perte",
+     "detail": "Avec un résultat négatif, le PER n’a pas de sens : il ne faut pas le lire comme « très bas ».",
+     "verifier": "Le signe du résultat net."
+    },
+    {
+     "titre": "Le piège de la valeur",
+     "detail": "Un PER bas sur une société dont les bénéfices baissent d’année en année n’est pas une affaire.",
+     "verifier": "La tendance du bénéfice sur 3 à 5 ans."
+    },
+    {
+     "titre": "Comparer deux secteurs",
+     "detail": "Une banque et une société de distribution n’ont pas les mêmes PER « normaux ».",
+     "verifier": "La médiane du secteur."
+    },
+    {
+     "titre": "Le nombre d’actions qui change",
+     "detail": "Après un fractionnement, le BPA se divise : il faut le comparer avec le bon nombre de titres.",
+     "verifier": "Les opérations sur titres de la société."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Le PER est un point de départ, pas un verdict.",
+   "points": [
+    {
+     "titre": "PER = cours ÷ bénéfice par action"
+    },
+    {
+     "titre": "Il se compare dans un même secteur, et dans le temps pour une même société"
+    },
+    {
+     "titre": "Il n’a pas de sens en cas de perte"
+    },
+    {
+     "titre": "Un PER bas demande une explication avant d’être une opportunité"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?",
+   "options": [
+    "10",
+    "15",
+    "20",
+    "1 350"
+   ],
+   "correct": 1,
+   "explication": "4 500 ÷ 300 = 15."
+  },
+  {
+   "question": "Une société a gagné 5 milliards et compte 20 millions d’actions. Quel est son BPA ?",
+   "options": [
+    "25 FCFA",
+    "250 FCFA",
+    "2 500 FCFA",
+    "4 FCFA"
+   ],
+   "correct": 1,
+   "explication": "5 000 000 000 ÷ 20 000 000 = 250 FCFA par action."
+  },
+  {
+   "question": "Une société a un PER de 4, nettement sous ses concurrents. Quelle est la bonne réaction ?",
+   "options": [
+    "Acheter immédiatement",
+    "Chercher pourquoi : bénéfice exceptionnel, bénéfices en baisse, risque particulier",
+    "Vendre immédiatement",
+    "Ignorer le PER"
+   ],
+   "correct": 1,
+   "explication": "Un PER très bas peut être une opportunité, ou le signe d’un problème. Il faut l’expliquer avant de conclure."
+  },
+  {
+   "question": "Avec quelle société comparer le PER d’un opérateur télécom ?",
+   "options": [
+    "Une banque",
+    "Un autre opérateur télécom",
+    "Une société agricole",
+    "L’indice BRVM Composite seul"
+   ],
+   "correct": 1,
+   "explication": "Les PER « normaux » varient d’un secteur à l’autre. La comparaison utile se fait dans le même secteur."
+  },
+  {
+   "question": "Une société affiche une perte. Que vaut son PER ?",
+   "options": [
+    "Il est très attractif",
+    "Il n’a pas de sens",
+    "Il vaut zéro",
+    "Il vaut 100"
+   ],
+   "correct": 1,
+   "explication": "Avec un bénéfice négatif, le PER n’a pas de signification économique."
+  }
+ ],
+ "liens": [
+  {
+   "label": "La valorisation de toutes les valeurs",
+   "href": "/premium/valorisation"
+  },
+  {
+   "label": "Comparer des actions",
+   "href": "/actions/compare"
+  },
+  {
+   "label": "Les fondamentaux",
+   "href": "/fondamentaux"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?",
+  "options": [
+   "10",
+   "15",
+   "20",
+   "1 350"
+  ],
+  "correct": 1,
+  "explication": "4 500 ÷ 300 = 15."
+ }
+}

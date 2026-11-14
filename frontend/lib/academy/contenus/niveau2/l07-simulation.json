@@ -1,0 +1,235 @@
+{
+ "titre": "Leçon 7 — Simulation de portefeuille sur 3 ans",
+ "module": "Module 2 — Construire son portefeuille",
+ "categorie": "income",
+ "duree_min": 12,
+ "sous_titre": "Faire tourner des hypothèses avant d’engager son argent : dividendes réinvestis, objectif de revenu, et ce que les chiffres ne disent pas.",
+ "resume": "Une simulation ne prédit rien : elle montre l’effet de vos hypothèses. Cette leçon calcule le réinvestissement des dividendes sur trois ans, l’argent nécessaire pour viser un revenu, et propose de tester une stratégie sans risque avec le portefeuille virtuel.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Ce qu’une simulation est, et n’est pas",
+   "contenu": "Une simulation applique des hypothèses : un dividende, une croissance, un cours. Si une hypothèse change, le résultat change.\nElle sert à comparer des scénarios et à comprendre un mécanisme. Elle ne garantit aucun résultat.",
+   "points": [
+    {
+     "titre": "Elle aide à",
+     "detail": "Mesurer l’effet du réinvestissement, comparer des rendements, fixer un ordre de grandeur."
+    },
+    {
+     "titre": "Elle ne dit pas",
+     "detail": "Ce que fera le cours, si le dividende sera maintenu, ni ce que coûteront les frais et l’impôt dans votre situation."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Réinvestir ses dividendes pendant 3 ans",
+   "contenu": "Hypothèses pédagogiques : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à racheter des actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.",
+   "simulation": {
+    "type": "reinvestissement",
+    "actions": 200,
+    "dpa": 900,
+    "cours": 15000,
+    "croissance_pct": 3,
+    "annees": 3
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Combien investir pour viser un revenu ?",
+   "contenu": "Hypothèse pédagogique : vous visez 600 000 FCFA de dividendes nets par an. La somme nécessaire dépend du rendement retenu. Plus le rendement visé est élevé, plus le risque d’un dividende réduit l’est aussi.",
+   "simulation": {
+    "type": "objectif",
+    "revenu_cible": 600000,
+    "rendements_pct": [
+     5,
+     7,
+     9
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Trois portefeuilles d’exemple",
+   "contenu": "Trois répartitions pédagogiques de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.",
+   "tableau": {
+    "colonnes": [
+     "Profil",
+     "Répartition",
+     "Ce qu’il cherche",
+     "Ce qu’il accepte"
+    ],
+    "lignes": [
+     [
+      "Prudent",
+      "Moitié obligations, moitié actions à dividende régulier",
+      "Des revenus stables",
+      "Une croissance plus lente"
+     ],
+     [
+      "Équilibré",
+      "Un quart d’obligations, trois quarts d’actions de 4 secteurs",
+      "Revenus et croissance",
+      "Des baisses temporaires"
+     ],
+     [
+      "Dynamique",
+      "Actions seulement, 8 à 12 lignes",
+      "La croissance du capital",
+      "De fortes variations"
+     ]
+    ],
+    "note": "Exemples pédagogiques. La bonne répartition dépend de votre horizon, de vos besoins et de votre tolérance aux pertes."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Tester sans risque",
+   "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le meilleur moyen de vérifier qu’une stratégie tient sur la durée, et de connaître ses propres réactions face à une baisse.",
+   "etapes": [
+    {
+     "titre": "Définir le profil et la somme",
+     "detail": "Par exemple 3 000 000 FCFA, profil équilibré."
+    },
+    {
+     "titre": "Composer le portefeuille virtuel",
+     "detail": "En respectant les repères de diversification de la leçon 5."
+    },
+    {
+     "titre": "Le suivre trois mois",
+     "detail": "Noter ses réactions aux baisses, et l’arrivée des dividendes.",
+     "cle": true
+    },
+    {
+     "titre": "Comparer à l’indice",
+     "detail": "Le portefeuille fait-il mieux, ou moins bien, que le marché ?"
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "Les illusions des simulations",
+   "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité.",
+   "points": [
+    {
+     "titre": "Oublier les frais et l’impôt",
+     "detail": "Les frais de courtage et la retenue sur les dividendes réduisent le résultat réel.",
+     "verifier": "Si le dividende simulé est brut ou net."
+    },
+    {
+     "titre": "Supposer un cours constant",
+     "detail": "Le cours peut baisser ; réinvestir à un cours plus bas achète alors plus d’actions, mais le capital affiché diminue.",
+     "verifier": "Le résultat dans un scénario défavorable."
+    },
+    {
+     "titre": "Extrapoler le passé",
+     "detail": "Une croissance de dividende passée n’est pas une promesse.",
+     "verifier": "La régularité du dividende sur cinq ans."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Simuler, c’est rendre ses hypothèses visibles.",
+   "points": [
+    {
+     "titre": "Une simulation compare des scénarios, elle ne prédit pas"
+    },
+    {
+     "titre": "Le réinvestissement des dividendes accélère la croissance du nombre d’actions"
+    },
+    {
+     "titre": "Un rendement visé plus élevé demande moins de capital, et plus de risque"
+    },
+    {
+     "titre": "Le portefeuille virtuel teste une stratégie sans engager d’argent"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
+   "options": [
+    "3 200 000 FCFA",
+    "5 000 000 FCFA",
+    "8 000 000 FCFA",
+    "32 000 000 FCFA"
+   ],
+   "correct": 1,
+   "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA."
+  },
+  {
+   "question": "Vous détenez 100 actions à 10 000 FCFA ; le dividende est de 600 FCFA, entièrement réinvesti au même cours. Combien d’actions achetez-vous ?",
+   "options": [
+    "3",
+    "6",
+    "10",
+    "60"
+   ],
+   "correct": 1,
+   "explication": "100 × 600 = 60 000 FCFA, soit 6 actions à 10 000 FCFA."
+  },
+  {
+   "question": "Qu’est-ce qu’une simulation ne peut pas faire ?",
+   "options": [
+    "Comparer deux scénarios",
+    "Garantir le résultat futur",
+    "Montrer l’effet du réinvestissement",
+    "Donner un ordre de grandeur"
+   ],
+   "correct": 1,
+   "explication": "Une simulation applique des hypothèses ; elle ne garantit rien."
+  },
+  {
+   "question": "Pourquoi viser un rendement très élevé augmente-t-il le risque ?",
+   "options": [
+    "Ce n’est pas le cas",
+    "Les rendements très élevés vont souvent avec des dividendes fragiles ou des cours en baisse",
+    "Les frais sont plus élevés",
+    "L’impôt est plus élevé"
+   ],
+   "correct": 1,
+   "explication": "Un rendement élevé peut annoncer un dividende réduit. Il faut vérifier sa régularité."
+  },
+  {
+   "question": "À quoi sert le portefeuille virtuel ?",
+   "options": [
+    "À investir de l’argent réel sans frais",
+    "À tester une stratégie aux cours réels, sans engager d’argent",
+    "À obtenir des dividendes gratuits",
+    "À éviter l’impôt"
+   ],
+   "correct": 1,
+   "explication": "Il reproduit les achats et ventes aux cours réels, sans argent engagé."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Le portefeuille virtuel",
+   "href": "/premium/paper-trading"
+  },
+  {
+   "label": "Le simulateur",
+   "href": "/simulateur"
+  },
+  {
+   "label": "Les dividendes",
+   "href": "/dividendes"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
+  "options": [
+   "3 200 000 FCFA",
+   "5 000 000 FCFA",
+   "8 000 000 FCFA",
+   "32 000 000 FCFA"
+  ],
+  "correct": 1,
+  "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA."
+ }
+}

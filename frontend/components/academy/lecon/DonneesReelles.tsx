@@ -143,6 +143,53 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
     );
   }
 
+  if (donnees.vue === 'ratios') {
+    const { lignes, dateCours, manquants } = donnees;
+    if (lignes.length === 0) return <Manquants codes={manquants} />;
+    const fois = (n: number | null) => (n == null ? '—' : `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n)}x`);
+    return (
+      <figure className="lp-figure">
+        <Entete titre="Les ratios, calculés sur des valeurs de la BRVM" />
+        <div className="lp-table-wrap">
+          <table className="lp-table">
+            <caption className="sr-only">BPA, PER, P/B et ROE de valeurs de la BRVM</caption>
+            <thead>
+              <tr>
+                <th scope="col">Société</th>
+                <th scope="col" className="lp-num">Exercice</th>
+                <th scope="col" className="lp-num">BPA (FCFA)</th>
+                <th scope="col" className="lp-num">PER</th>
+                <th scope="col" className="lp-num">P/B</th>
+                <th scope="col" className="lp-num">ROE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lignes.map((l) => (
+                <tr key={l.code}>
+                  <th scope="row" className="lp-ligne-tete">
+                    {l.nom}
+                    <span className="lp-cellule-detail">{l.code}</span>
+                  </th>
+                  <td className="lp-num">{l.exercice}</td>
+                  <td className="lp-num">{nombre(Math.round(l.bpa))}</td>
+                  <td className="lp-num">{fois(l.per)}</td>
+                  <td className="lp-num">{fois(l.pb)}</td>
+                  <td className="lp-num">{l.roePct == null ? '—' : pct(Math.round(l.roePct * 10) / 10)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <ul className="lp-hypotheses">
+          {dateCours && <li>Cours de la séance du {dateFr(dateCours)} ; résultat et fonds propres du dernier exercice publié. Source : BRVM et comptes des sociétés, via la base WestBourse.</li>}
+          <li>Calculés à l’ouverture de la leçon, ils changent avec le cours. Un PER ne se compare qu’entre sociétés du même secteur.</li>
+          <li>« — » : ratio sans signification (résultat ou fonds propres négatifs).</li>
+        </ul>
+        <Manquants codes={manquants} />
+      </figure>
+    );
+  }
+
   if (donnees.vue === 'indices') {
     const { lignes, date, manquants } = donnees;
     if (lignes.length === 0) return <Manquants codes={manquants} />;

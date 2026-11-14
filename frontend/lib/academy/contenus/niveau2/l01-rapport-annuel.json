@@ -1,0 +1,262 @@
+{
+ "titre": "Leçon 1 — Lire un rapport annuel",
+ "module": "Module 1 — Lire et analyser une entreprise",
+ "categorie": "fundamental",
+ "duree_min": 12,
+ "sous_titre": "Trois tableaux, un rapport des commissaires aux comptes, et un ordre de lecture qui évite de se perdre.",
+ "resume": "Une société cotée publie chaque année ses états financiers : bilan, compte de résultat, tableau des flux de trésorerie et notes. Cette leçon montre où les trouver, ce que dit chaque tableau, dans quel ordre les lire et quels signaux doivent vous faire ralentir.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Les quatre pièces d’un rapport annuel",
+   "contenu": "Les sociétés de la BRVM tiennent leurs comptes selon le SYSCOHADA révisé ; les banques suivent le plan comptable bancaire de l’UMOA. Le vocabulaire diffère un peu, la logique est la même.\nChaque pièce répond à une question différente. Les lire ensemble évite les conclusions hâtives.",
+   "points": [
+    {
+     "titre": "Le bilan",
+     "detail": "Une photographie à la date de clôture : ce que la société possède (actif) et comment c’est financé (passif : fonds propres et dettes).",
+     "verifier": "Le total des capitaux propres, et sa variation d’une année sur l’autre."
+    },
+    {
+     "titre": "Le compte de résultat",
+     "detail": "Le film de l’année : chiffre d’affaires, charges, résultat d’exploitation, résultat net.",
+     "verifier": "Le résultat d’exploitation, avant les éléments hors activités ordinaires."
+    },
+    {
+     "titre": "Le tableau des flux de trésorerie",
+     "detail": "L’argent réellement entré et sorti : activité, investissements, financement (dont les dividendes versés).",
+     "verifier": "Le flux des activités opérationnelles : positif, et proche du résultat ?"
+    },
+    {
+     "titre": "Les notes et le rapport des commissaires",
+     "detail": "Les notes détaillent les postes ; le rapport des commissaires aux comptes dit si les comptes sont certifiés, avec ou sans réserve.",
+     "verifier": "Le mot « réserve » ou « observation » dans le rapport des commissaires."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Le mécanisme : du chiffre d’affaires au dividende",
+   "contenu": "Le résultat net appartient aux actionnaires. L’assemblée générale décide d’en distribuer une partie (le dividende) et de garder le reste en réserves, ce qui augmente les fonds propres.",
+   "flux": [
+    {
+     "titre": "Ventes",
+     "detail": "Chiffre d’affaires de l’année",
+     "icone": "entreprise"
+    },
+    {
+     "titre": "Résultat net",
+     "detail": "Après charges, intérêts et impôt",
+     "icone": "benefices"
+    },
+    {
+     "titre": "Assemblée générale",
+     "detail": "Vote l’affectation du résultat",
+     "icone": "decision"
+    },
+    {
+     "titre": "Dividende",
+     "detail": "Versé aux actionnaires",
+     "icone": "paiement"
+    },
+    {
+     "titre": "Réserves",
+     "detail": "Le reste renforce les fonds propres",
+     "icone": "actionnaires"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Un ordre de lecture en cinq étapes",
+   "contenu": "Lire de la première à la dernière page fait perdre l’essentiel. Cet ordre va du plus important au détail.",
+   "etapes": [
+    {
+     "titre": "Le rapport des commissaires aux comptes",
+     "detail": "Des comptes certifiés sans réserve sont le point de départ. Une réserve se lit avant tout le reste.",
+     "cle": true
+    },
+    {
+     "titre": "Le compte de résultat sur deux exercices",
+     "detail": "Le chiffre d’affaires progresse-t-il ? Le résultat suit-il, ou dépend-il d’un élément exceptionnel ?"
+    },
+    {
+     "titre": "Le tableau des flux",
+     "detail": "Un bénéfice qui ne devient jamais trésorerie est un signal : créances qui gonflent, stocks qui s’accumulent."
+    },
+    {
+     "titre": "Le bilan",
+     "detail": "Les fonds propres augmentent-ils ? La dette financière est-elle supportable face au résultat ?"
+    },
+    {
+     "titre": "L’affectation du résultat",
+     "detail": "Quelle part du bénéfice est distribuée, et quelle part est gardée pour investir."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Où trouver les comptes",
+   "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité trimestriels et semestriels. Les documents officiels sont diffusés par la BRVM.",
+   "tableau": {
+    "colonnes": [
+     "Document",
+     "Fréquence",
+     "Ce qu’on y trouve"
+    ],
+    "lignes": [
+     [
+      "États financiers annuels",
+      "Une fois par an",
+      "Bilan, compte de résultat, flux, affectation du résultat"
+     ],
+     [
+      "Rapport des commissaires aux comptes",
+      "Une fois par an",
+      "Certification des comptes, réserves éventuelles"
+     ],
+     [
+      "Rapport d’activité",
+      "Trimestre, semestre",
+      "Chiffre d’affaires, résultat, commentaires de la direction"
+     ],
+     [
+      "Avis et communiqués",
+      "Selon les événements",
+      "Dividende, assemblée générale, opération sur le capital"
+     ]
+    ],
+    "note": "Sur WestBourse, chaque fiche société regroupe ses comptes, ses publications et ses dividendes."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les pièges de lecture",
+   "contenu": "Un rapport annuel est un document que la société rédige sur elle-même. Les chiffres sont contrôlés ; les commentaires restent de la communication.",
+   "points": [
+    {
+     "titre": "Confondre provisoire et définitif",
+     "detail": "Certains états sont publiés « provisoires, non approuvés par l’assemblée générale ». Ils peuvent encore changer.",
+     "verifier": "La mention en tête du document."
+    },
+    {
+     "titre": "Prendre un résultat exceptionnel pour une tendance",
+     "detail": "Une cession d’actif gonfle le résultat d’une seule année. Le résultat d’exploitation la neutralise.",
+     "verifier": "La ligne « résultat hors activités ordinaires »."
+    },
+    {
+     "titre": "Comparer des périmètres différents",
+     "detail": "Comptes sociaux (la société seule) et comptes consolidés (avec ses filiales) ne se comparent pas.",
+     "verifier": "Le titre exact du document."
+    },
+    {
+     "titre": "Oublier l’unité",
+     "detail": "Certains tableaux sont en millions, d’autres en FCFA, plus rarement en devise étrangère.",
+     "verifier": "L’unité indiquée sous le titre du tableau."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Lire un rapport annuel, c’est répondre à quatre questions dans l’ordre.",
+   "points": [
+    {
+     "titre": "Les comptes sont-ils certifiés sans réserve ?"
+    },
+    {
+     "titre": "Le résultat vient-il de l’activité courante ?"
+    },
+    {
+     "titre": "Ce résultat devient-il de la trésorerie ?"
+    },
+    {
+     "titre": "Les fonds propres et la dette évoluent-ils dans le bon sens ?"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quel document indique si les comptes sont certifiés ?",
+   "options": [
+    "Le compte de résultat",
+    "Le rapport des commissaires aux comptes",
+    "Le rapport d’activité trimestriel",
+    "L’avis de convocation à l’assemblée générale"
+   ],
+   "correct": 1,
+   "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire."
+  },
+  {
+   "question": "Une société affiche un résultat net en forte hausse, mais son flux de trésorerie opérationnel est négatif. Que vérifier en priorité ?",
+   "options": [
+    "Rien, le résultat suffit",
+    "L’évolution des créances clients et des stocks",
+    "Le nombre d’administrateurs",
+    "Le cours de l’action"
+   ],
+   "correct": 1,
+   "explication": "Un bénéfice qui ne devient pas trésorerie vient souvent de créances ou de stocks qui augmentent. Ce n’est pas forcément grave, mais il faut comprendre pourquoi."
+  },
+  {
+   "question": "Que montre le bilan ?",
+   "options": [
+    "Les ventes de l’année",
+    "Ce que la société possède et comment c’est financé, à une date donnée",
+    "L’argent entré et sorti dans l’année",
+    "Le cours moyen de l’action"
+   ],
+   "correct": 1,
+   "explication": "Le bilan est une photographie à la date de clôture : actif d’un côté, fonds propres et dettes de l’autre."
+  },
+  {
+   "question": "Pourquoi regarder le résultat d’exploitation, pas seulement le résultat net ?",
+   "options": [
+    "Il est toujours plus élevé",
+    "Il exclut les éléments exceptionnels et financiers : il montre l’activité courante",
+    "Il inclut le dividende",
+    "Il est le seul certifié"
+   ],
+   "correct": 1,
+   "explication": "Le résultat d’exploitation reflète l’activité courante. Une cession exceptionnelle peut gonfler le résultat net d’une seule année."
+  },
+  {
+   "question": "Des états financiers publiés « provisoires, non approuvés par l’assemblée générale » :",
+   "options": [
+    "Ne peuvent plus changer",
+    "Peuvent encore être modifiés avant leur approbation",
+    "Sont toujours faux",
+    "Ne sont pas publics"
+   ],
+   "correct": 1,
+   "explication": "Des comptes provisoires peuvent évoluer jusqu’à l’assemblée générale. Ils sont utiles, à condition de le savoir."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fondamentaux de toutes les sociétés",
+   "href": "/fondamentaux"
+  },
+  {
+   "label": "Les dossiers valeur",
+   "href": "/rapports/dossiers"
+  },
+  {
+   "label": "Les sociétés cotées",
+   "href": "/societes"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Quel document indique si les comptes sont certifiés ?",
+  "options": [
+   "Le compte de résultat",
+   "Le rapport des commissaires aux comptes",
+   "Le rapport d’activité trimestriel",
+   "L’avis de convocation à l’assemblée générale"
+  ],
+  "correct": 1,
+  "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire."
+ }
+}

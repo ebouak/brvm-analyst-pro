@@ -1,0 +1,247 @@
+{
+ "titre": "Leçon 10 — Les OPCVM : investir par des fonds collectifs",
+ "module": "Module 3 — Thèmes avancés",
+ "categorie": "general",
+ "duree_min": 9,
+ "sous_titre": "Confier son épargne à un gérant professionnel : comment fonctionnent les FCP et les SICAV, ce qu’ils coûtent, et comment les comparer.",
+ "resume": "Un OPCVM réunit l’argent de nombreux épargnants et l’investit en actions, en obligations ou en placements monétaires. Il est géré par une société de gestion agréée par l’AMF-UMOA. Cette leçon explique la valeur liquidative, les frais, les catégories de fonds et les questions à poser avant de souscrire.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Le principe",
+   "contenu": "Vous achetez des parts du fonds. Le gérant investit l’ensemble selon une politique écrite dans le prospectus. La valeur de vos parts suit celle des placements du fonds.",
+   "flux": [
+    {
+     "titre": "Épargnants",
+     "detail": "Achètent des parts",
+     "icone": "actionnaires"
+    },
+    {
+     "titre": "Société de gestion",
+     "detail": "Agréée, décide des placements",
+     "icone": "decision"
+    },
+    {
+     "titre": "Placements",
+     "detail": "Actions, obligations, monétaire",
+     "icone": "graphique"
+    },
+    {
+     "titre": "Valeur liquidative",
+     "detail": "Prix d’une part, publié régulièrement",
+     "icone": "piece"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "FCP et SICAV, et leurs acteurs",
+   "contenu": "Les deux formes coexistent dans l’UEMOA, sous le contrôle de l’AMF-UMOA, qui a succédé au CREPMF.",
+   "tableau": {
+    "colonnes": [
+     "Critère",
+     "FCP",
+     "SICAV"
+    ],
+    "lignes": [
+     [
+      "Nature",
+      "Copropriété de titres, sans personnalité juridique",
+      "Société anonyme dont on devient actionnaire"
+     ],
+     [
+      "Gestion",
+      "Une société de gestion d’OPCVM agréée",
+      "La SICAV elle-même, ou un gérant délégué"
+     ],
+     [
+      "Conservation",
+      "Un dépositaire, en général une banque",
+      "Un dépositaire, en général une banque"
+     ],
+     [
+      "Pour l’épargnant",
+      "Achat et vente de parts à la valeur liquidative",
+      "Achat et vente d’actions de la SICAV à la valeur liquidative"
+     ]
+    ],
+    "note": "Dans les deux cas, le dépositaire conserve les actifs : ils sont séparés de ceux de la société de gestion."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que coûte un fonds",
+   "contenu": "Les frais réduisent directement la performance. Ils figurent dans le prospectus. Exemple pédagogique sur 1 000 000 FCFA.",
+   "formules": [
+    {
+     "nom": "Frais d’entrée",
+     "expression": "Somme investie × taux d’entrée",
+     "exemple": "1 000 000 × 2 % = 20 000 FCFA prélevés dès la souscription"
+    },
+    {
+     "nom": "Frais de gestion annuels",
+     "expression": "Encours × taux de gestion",
+     "exemple": "1 000 000 × 1,5 % = 15 000 FCFA par an"
+    },
+    {
+     "nom": "Valeur liquidative",
+     "expression": "Actif net du fonds ÷ Nombre de parts",
+     "exemple": "5 Md ÷ 500 000 parts = 10 000 FCFA la part"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Les grandes familles de fonds",
+   "contenu": "La politique d’investissement détermine le risque.",
+   "points": [
+    {
+     "titre": "Monétaire",
+     "detail": "Placements très courts. Faible risque, faible rendement, disponibilité rapide."
+    },
+    {
+     "titre": "Obligataire",
+     "detail": "Surtout des obligations. Revenus réguliers, sensibles aux taux."
+    },
+    {
+     "titre": "Diversifié",
+     "detail": "Un mélange d’actions et d’obligations, selon des bornes fixées par le prospectus."
+    },
+    {
+     "titre": "Actions",
+     "detail": "Surtout des actions de la BRVM. Le potentiel et les variations les plus forts."
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "Les questions à poser avant de souscrire",
+   "contenu": "Un fonds se choisit sur des faits écrits, pas sur une promesse.",
+   "points": [
+    {
+     "titre": "Le fonds est-il agréé ?",
+     "detail": "Un OPCVM doit être agréé par l’AMF-UMOA.",
+     "verifier": "La liste publiée par l’AMF-UMOA."
+    },
+    {
+     "titre": "Quels sont tous les frais ?",
+     "detail": "Entrée, sortie, gestion : additionnez-les sur votre horizon.",
+     "verifier": "Le prospectus."
+    },
+    {
+     "titre": "Quelle performance, sur quelle durée, comparée à quoi ?",
+     "detail": "Une bonne année isolée ne prouve rien.",
+     "verifier": "La performance sur trois à cinq ans, comparée à un indice."
+    },
+    {
+     "titre": "Méfiance devant un rendement garanti élevé",
+     "detail": "Un fonds investi en actions ne peut pas garantir un rendement élevé.",
+     "verifier": "Le mot « garanti » dans le document officiel."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Un OPCVM délègue le choix des titres, pas la responsabilité de choisir le fonds.",
+   "points": [
+    {
+     "titre": "Une société de gestion agréée investit, un dépositaire conserve"
+    },
+    {
+     "titre": "La valeur liquidative est le prix d’une part"
+    },
+    {
+     "titre": "Les frais réduisent directement la performance"
+    },
+    {
+     "titre": "Vérifier l’agrément et la performance sur plusieurs années"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Un fonds a un actif net de 2 milliards de FCFA et 400 000 parts. Quelle est sa valeur liquidative ?",
+   "options": [
+    "500 FCFA",
+    "5 000 FCFA",
+    "50 000 FCFA",
+    "800 FCFA"
+   ],
+   "correct": 1,
+   "explication": "2 000 000 000 ÷ 400 000 = 5 000 FCFA par part."
+  },
+  {
+   "question": "Vous investissez 2 000 000 FCFA avec 3 % de frais d’entrée. Combien est réellement investi ?",
+   "options": [
+    "1 400 000 FCFA",
+    "1 940 000 FCFA",
+    "2 000 000 FCFA",
+    "2 060 000 FCFA"
+   ],
+   "correct": 1,
+   "explication": "2 000 000 × 3 % = 60 000 FCFA de frais ; 1 940 000 FCFA sont investis."
+  },
+  {
+   "question": "Qui conserve les actifs d’un OPCVM ?",
+   "options": [
+    "Le gérant, sur son propre compte",
+    "Un dépositaire, en général une banque",
+    "La BRVM",
+    "Chaque épargnant"
+   ],
+   "correct": 1,
+   "explication": "Le dépositaire conserve les actifs, séparés de ceux de la société de gestion."
+  },
+  {
+   "question": "Quelle autorité agrée les OPCVM dans l’UEMOA ?",
+   "options": [
+    "La BCEAO",
+    "L’AMF-UMOA",
+    "La BRVM",
+    "Chaque SGI"
+   ],
+   "correct": 1,
+   "explication": "L’AMF-UMOA, qui a succédé au CREPMF, agrée et contrôle les OPCVM et leurs sociétés de gestion."
+  },
+  {
+   "question": "Un fonds investi en actions promet un rendement « garanti » de 15 % par an. Quelle est la bonne réaction ?",
+   "options": [
+    "Souscrire vite",
+    "Se méfier : un fonds actions ne peut pas garantir un rendement élevé",
+    "Négocier les frais",
+    "Demander 20 %"
+   ],
+   "correct": 1,
+   "explication": "La valeur d’un fonds actions suit le marché : aucun rendement élevé ne peut y être garanti."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Le marché obligataire",
+   "href": "/obligations"
+  },
+  {
+   "label": "Les secteurs",
+   "href": "/secteurs"
+  },
+  {
+   "label": "Le simulateur",
+   "href": "/simulateur"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Un fonds a un actif net de 2 milliards de FCFA et 400 000 parts. Quelle est sa valeur liquidative ?",
+  "options": [
+   "500 FCFA",
+   "5 000 FCFA",
+   "50 000 FCFA",
+   "800 FCFA"
+  ],
+  "correct": 1,
+  "explication": "2 000 000 000 ÷ 400 000 = 5 000 FCFA par part."
+ }
+}

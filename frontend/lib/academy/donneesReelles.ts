@@ -185,3 +185,70 @@ export function lectureIndices(codes: string[], lignes: LigneIndice[]): { date: 
   }
   return { date: out.map((l) => l.date).sort().at(-1) ?? null, lignes: out, manquants };
 }
+
+// ── Ratios d'évaluation (PER, P/B, ROE) ─────────────────────────────────
+
+export interface LigneFondamentale {
+  code: string;
+  year: number | null;
+  net_income: number | null;
+  equity: number | null;
+}
+
+export interface RatiosValeur {
+  code: string;
+  nom: string;
+  exercice: number;
+  cours: number;
+  dateCours: string;
+  /** Bénéfice par action (résultat ÷ titres). */
+  bpa: number;
+  /** null si le résultat est nul ou négatif : un PER n'a alors pas de sens. */
+  per: number | null;
+  /** Capitalisation ÷ fonds propres ; null si fonds propres ≤ 0. */
+  pb: number | null;
+  /** Résultat ÷ fonds propres, en %. */
+  roePct: number | null;
+}
+
+/**
+ * Ratios recalculés à partir de la base, jamais saisis : dernier exercice
+ * portant à la fois un résultat et des fonds propres, dernier cours, nombre
+ * de titres. Une valeur sans l'un des trois est NOMMÉE, jamais devinée.
+ */
+export function ratiosValeurs(
+  codes: string[],
+  noms: Record<string, string>,
+  cotations: Cotation[],
+  fondamentaux: LigneFondamentale[],
+  titres: Record<string, number | null>,
+): { dateCours: string | null; lignes: RatiosValeur[]; manquants: string[] } {
+  const lignes: RatiosValeur[] = [];
+  const manquants: string[] = [];
+  for (const code of codes) {
+    const c = cotations.find((x) => x.code === code && x.cours > 0);
+    const n = titres[code];
+    const f = fondamentaux
+      .filter((x) => x.code === code && x.year != null && x.net_income != null && x.equity != null)
+      .sort((a, b) => (b.year as number) - (a.year as number))[0];
+    if (!c || !n || n <= 0 || !f) {
+      manquants.push(code);
+      continue;
+    }
+    const resultat = f.net_income as number;
+    const fp = f.equity as number;
+    const bpa = resultat / n;
+    lignes.push({
+      code,
+      nom: noms[code] ?? code,
+      exercice: f.year as number,
+      cours: c.cours,
+      dateCours: c.date,
+      bpa,
+      per: bpa > 0 ? c.cours / bpa : null,
+      pb: fp > 0 ? (c.cours * n) / fp : null,
+      roePct: fp > 0 ? (resultat / fp) * 100 : null,
+    });
+  }
+  return { dateCours: lignes.map((l) => l.dateCours).sort().at(-1) ?? null, lignes, manquants };
+}
