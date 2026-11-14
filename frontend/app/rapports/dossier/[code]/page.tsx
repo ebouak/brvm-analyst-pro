@@ -12,6 +12,7 @@ import { PANNEAU, TOTAL_FEUILLES, TOTAL_PANNEAUX, SOMMAIRE, renvoi } from '@/lib
 import { comparerEditions, mesuresDuDossier } from '@/lib/dossier/instantane';
 import { libellePublication } from '@/lib/dossier/publications';
 import { dureeFr } from '@/lib/dossier/placement';
+import { BORNES, borner, phraseOmis } from '@/lib/dossier/bornes';
 import { RESERVE_REACTION } from '@/lib/reactionPublication';
 import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
@@ -244,6 +245,24 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const libellePilier = new Map(d.suivi.piliers.map((p) => [p.cle as string, p.libelle]));
   const pointsChiffres = chiffresDeLecture(n);
   const pl = d.placement;
+  /* Notes variables du placement, par ordre d'importance, bornées pour que la
+     feuille 8 tienne quel que soit leur nombre (lib/dossier/bornes.ts). */
+  const notesPlacement = borner(
+    pl
+      ? [
+          pl.periode_reduite ? `L’historique en base ne remonte pas à cinq ans : la période retenue est la plus longue disponible, soit ${dureeFr(pl.duree_jours)}.` : null,
+          pl.dividendes_exclus_base > 0
+            ? `${pl.dividendes_exclus_base} dividende${pl.dividendes_exclus_base > 1 ? 's' : ''} de la période dont la base fiscale (brute ou nette) n’est pas établie ${pl.dividendes_exclus_base > 1 ? 'ne sont pas comptés' : 'n’est pas compté'} : la valeur affichée peut être minorée.`
+            : null,
+          pl.dividendes_non_dates > 0
+            ? `${pl.dividendes_non_dates} dividende${pl.dividendes_non_dates > 1 ? 's' : ''} sans date de détachement, versé${pl.dividendes_non_dates > 1 ? 's' : ''} une année de bord de la période, ${pl.dividendes_non_dates > 1 ? 'ne sont pas comptés' : 'n’est pas compté'}.`
+            : null,
+          pl.indice_raison,
+        ].filter((x): x is string => !!x)
+      : [],
+    BORNES.notesPlacement,
+  );
+  const lacunesBornees = borner(d.lacunes, BORNES.lacunes);
   const bande = d.bande_per;
 
   /* Contrôles de cohérence : le worker d'impression lit cet attribut et REFUSE
@@ -771,16 +790,8 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                   <li>Entrée au cours de clôture du {fmtDateFR(pl.date_depart)} ({fmtNumber(pl.cours_depart, 0)} FCFA), sans frais de courtage, en nombre de titres fractionnaire.</li>
                   <li>Dividendes encaissés en numéraire et non réinvestis ; comptés nets d’impôt (un montant déjà net est repris tel quel, un montant brut est diminué de l’impôt{id.taux_irvm != null ? ` au taux de ${taux(id.taux_irvm)}` : ''}).</li>
                   <li>Cours ajustés des opérations sur titres.</li>
-                  {pl.periode_reduite && (
-                    <li>L’historique en base ne remonte pas à cinq ans : la période retenue est la plus longue disponible, soit {dureeFr(pl.duree_jours)}.</li>
-                  )}
-                  {pl.dividendes_exclus_base > 0 && (
-                    <li>{pl.dividendes_exclus_base} dividende{pl.dividendes_exclus_base > 1 ? 's' : ''} de la période dont la base fiscale (brute ou nette) n’est pas établie {pl.dividendes_exclus_base > 1 ? 'ne sont pas comptés' : 'n’est pas compté'} : la valeur affichée peut être minorée.</li>
-                  )}
-                  {pl.dividendes_non_dates > 0 && (
-                    <li>{pl.dividendes_non_dates} dividende{pl.dividendes_non_dates > 1 ? 's' : ''} sans date de détachement, versé{pl.dividendes_non_dates > 1 ? 's' : ''} une année de bord de la période, {pl.dividendes_non_dates > 1 ? 'ne sont pas comptés' : 'n’est pas compté'}.</li>
-                  )}
-                  {pl.indice_raison && <li>{pl.indice_raison}</li>}
+                  {notesPlacement.affichees.map((t) => <li key={t}>{t}</li>)}
+                  {notesPlacement.omis > 0 && <li>{phraseOmis(notesPlacement.omis, 'précision', 'f')} sur ce calcul, non affichée{notesPlacement.omis > 1 ? 's' : ''} faute de place.</li>}
                 </ul>
               </div>
             </>
@@ -805,7 +816,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                   ...(per.valeur != null ? [{ libelle: 'Actuel', valeur: per.valeur }] : []),
                 ]}
                 format={(v) => `${fmtNumber(v, 1)} ×`}
-                hauteur={190}
+                hauteur={150}
               />
               <p className="dv-prose" style={{ marginTop: '2mm' }}>
                 Sur les {bande.points.length} exercices retenus, le PER de fin d’exercice a varié de <strong>{fmtNumber(bande.min, 1)} ×</strong> à{' '}
@@ -821,7 +832,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               <p className="dv-chapo" style={{ marginBottom: 0 }}>
                 Cours de la dernière séance de chaque exercice, rapporté au bénéfice par action calculé sur le nombre d’actions actuel : un changement du nombre d’actions non ajusté dans les cours fausserait les exercices anciens.
                 {bande.ecartes.length > 0 &&
-                  ` ${bande.ecartes.length} exercice${bande.ecartes.length > 1 ? 's' : ''} écarté${bande.ecartes.length > 1 ? 's' : ''} (${bande.ecartes.map((e) => `${e.exercice}, ${e.raison === 'perte' ? 'perte' : 'cours de fin d’exercice absent'}`).join(' ; ')}).`}
+                  ` ${bande.ecartes.length} exercice${bande.ecartes.length > 1 ? 's' : ''} écarté${bande.ecartes.length > 1 ? 's' : ''} (${borner(bande.ecartes, BORNES.ecartesBande).affichees.map((e) => `${e.exercice}, ${e.raison === 'perte' ? 'perte' : 'cours de fin d’exercice absent'}`).join(' ; ')}${bande.ecartes.length > BORNES.ecartesBande ? ' ; …' : ''}).`}
               </p>
             </>
           ) : (
@@ -1316,8 +1327,8 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                     <tr key={h.famille.cle}>
                       <td>{h.famille.libelle}</td>
                       <td className="dv-num dv-dates">
-                        {h.dates.map((x) => fmtDateCourte(x)).join(' · ')}
-                        {h.total > h.dates.length ? ` · et ${h.total - h.dates.length} plus ancienne${h.total - h.dates.length > 1 ? 's' : ''}` : ''}
+                        {h.dates.slice(0, BORNES.datesParFamille).map((x) => fmtDateCourte(x)).join(' · ')}
+                        {h.total > BORNES.datesParFamille ? ` · et ${h.total - BORNES.datesParFamille} plus ancienne${h.total - BORNES.datesParFamille > 1 ? 's' : ''}` : ''}
                       </td>
                     </tr>
                   ))}
@@ -1365,9 +1376,10 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
             <h3>Ce que ce dossier ne dit pas</h3>
             {d.lacunes.length > 0 ? (
               <ul>
-                {d.lacunes.map((l) => (
+                {lacunesBornees.affichees.map((l) => (
                   <li key={l}>{l}</li>
                 ))}
+                {lacunesBornees.omis > 0 && <li>{phraseOmis(lacunesBornees.omis, 'réserve', 'f')}, non affichée{lacunesBornees.omis > 1 ? 's' : ''} faute de place.</li>}
               </ul>
             ) : (
               <p style={{ margin: 0 }}>
