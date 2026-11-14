@@ -1,0 +1,51 @@
+/* Revue de résultats : compléments au système de document (components/document/document.css). */
+
+.rv-actions {
+  width: 210mm; max-width: 100%; margin: 0 auto 14px;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 9.5pt; color: var(--doc-encre-douce);
+}
+.rv-actions a { color: var(--doc-encre-douce); text-decoration: underline; }
+.rv-actions a:hover { color: var(--doc-encre); }
+.rv-liens { display: flex; flex-wrap: wrap; gap: 14px; }
+.rv-bouton {
+  border: 1px solid var(--doc-encre); background: var(--doc-encre); color: #fff;
+  border-radius: 3px; padding: 6px 14px; font: inherit; cursor: pointer; transition: opacity 0.15s ease;
+}
+.rv-bouton:hover { opacity: 0.85; }
+.rv-bouton:focus-visible { outline: 2px solid var(--doc-accent); outline-offset: 2px; }
+
+/* Tableau de comparaison */
+.rv-table { width: 100%; border-collapse: collapse; margin-top: 7mm; font-size: 11pt; }
+.rv-table th { text-align: right; font-weight: 400; font-size: 9pt; color: var(--doc-faible); padding: 0 0 2mm 4mm; border-bottom: 1px solid var(--doc-encre); }
+.rv-table th:first-child { text-align: left; padding-left: 0; }
+.rv-table td { text-align: right; padding: 2mm 0 2mm 4mm; border-bottom: 1px solid var(--doc-trame); font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.rv-table td:first-child { text-align: left; padding-left: 0; font-family: inherit; color: var(--doc-encre-douce); }
+.rv-table .fort { font-weight: 600; color: var(--doc-encre); }
+.rv-table .hausse { color: var(--doc-hausse); }
+.rv-table .baisse { color: var(--doc-baisse); }
+
+.rv-alerte { margin-top: 6mm; padding: 3mm 4mm; background: #fbf3e4; font-size: 10pt; color: var(--doc-encre); }
+.rv-maj { margin: 5mm 0 0; font-size: 10pt; color: var(--doc-accent); font-weight: 600; }
+
+/* Texte de la section Activité */
+.rv-activite p { margin: 4mm 0 0; max-width: 70ch; }
+.rv-activite ul { margin: 3mm 0 0; padding-left: 5mm; font-size: 10.5pt; color: var(--doc-encre-douce); }
+.rv-activite li { margin-top: 1.5mm; }
+.rv-activite li b { color: var(--doc-encre); }
+
+/* Bloc final : passage vers le Dossier valeur */
+.rv-dossier { margin-top: auto; margin-bottom: 4mm; padding: 6mm 7mm; background: var(--doc-nuit); color: var(--doc-sur-nuit); }
+.rv-dossier h3 { margin: 0; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 17pt; line-height: 1.2; }
+.rv-dossier p { margin: 2mm 0 0; font-size: 10.5pt; color: rgba(245, 243, 237, 0.82); max-width: 62ch; }
+.rv-dossier a { display: inline-block; margin-top: 3mm; color: var(--doc-accent-nuit); font-weight: 600; text-decoration: underline; }
+
+.rv-vide { margin: 8mm 0 0; color: var(--doc-faible); font-style: italic; }
+
+@media screen and (max-width: 230mm) {
+  .rv-table { font-size: 10pt; }
+  .rv-actions { width: 100%; padding: 0 6mm; }
+}
+@media print {
+  .rv-actions { display: none; }
+}

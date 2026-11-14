@@ -100,3 +100,22 @@ describe('composerInvitation', () => {
     expect(composerInvitation([]).corps).not.toContain('•');
   });
 });
+
+describe('composerMessage : revues de résultats mises à jour', () => {
+  const revues = [{ code: 'NEIC', designation: 'NEI CEDA CI', publie_le: '2026-11-10' }];
+  it('annonce la Revue mise à jour avec la date de publication et le lien', () => {
+    const m = composerMessage(sel, '2026-11-09', 'email', revues);
+    expect(m.corps).toContain('Revues de résultats mises à jour');
+    expect(m.corps).toContain('publication du 10/11/2026');
+    expect(m.corps).toContain('https://www.westbourse.com/actions/NEIC/revue');
+  });
+  it('AUCUN chiffre hors dates, même avec la rubrique', () => {
+    for (const canal of ['email', 'telegram'] as const) {
+      const sansDates = composerMessage(sel, '2026-11-09', canal, revues).corps.replace(/\b\d{2}\/\d{2}\/\d{4}\b/g, '');
+      expect(sansDates).not.toMatch(/\d/);
+    }
+  });
+  it('sans mise à jour, aucune rubrique', () => {
+    expect(composerMessage(sel, '2026-11-09', 'email').corps).not.toContain('Revues de résultats');
+  });
+});
