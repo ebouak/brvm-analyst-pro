@@ -7,6 +7,8 @@ import { videosDisponibles } from '@/lib/academy/videos';
 import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
+import ApercuCours, { type LeconApercu } from '@/components/academy/ApercuCours';
+import { produitsActifs } from '@/lib/billing/chariow/catalogue';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +20,33 @@ async function getCard(slug: string) {
     .eq('published', true)
     .maybeSingle();
   return data as { titre: string; resume: string | null; published: boolean; niveau: string | null } | null;
+}
+
+/**
+ * Ce que l'aperçu montre d'un cours : titres, sous-titres, résumés, modules,
+ * durées et titres de sections. Le corps des sections n'est jamais lu ici.
+ */
+async function getContenuApercu(slug: string): Promise<{ intro: string | null; lessons: LeconApercu[] } | null> {
+  const { data } = await getServiceClient()
+    .from('academy_courses')
+    .select('content')
+    .eq('slug', slug)
+    .eq('published', true)
+    .maybeSingle();
+  const c = (data as { content: { intro?: unknown; lessons?: unknown } | null } | null)?.content;
+  if (!c || !Array.isArray(c.lessons)) return null;
+  const texte = (v: unknown) => (typeof v === 'string' ? v : null);
+  const lessons = (c.lessons as Record<string, unknown>[]).map((l) => ({
+    titre: texte(l.titre) ?? 'Leçon',
+    module: texte(l.module),
+    sous_titre: texte(l.sous_titre),
+    resume: texte(l.resume) ?? '',
+    duree_min: typeof l.duree_min === 'number' ? l.duree_min : null,
+    sections: Array.isArray(l.sections)
+      ? (l.sections as Record<string, unknown>[]).map((s) => ({ titre: texte(s.titre) ?? '' })).filter((s) => s.titre)
+      : [],
+  }));
+  return { intro: texte(c.intro), lessons };
 }
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -49,17 +78,37 @@ export default async function AcademyCoursePage(
   const gate = await peutSuivreNiveau(card.niveau);
   if (!gate.allowed) {
     const required = gate.acces.abonnement.required;
+    const n = Number.parseInt(searchParams.lecon ?? '1', 10);
+    const [content, formations, modules] = await Promise.all([
+      getContenuApercu(params.slug),
+      produitsActifs('formation'),
+      produitsActifs('module'),
+    ]);
+    // UNE seule offre : l'achat de la formation. Le bloc Premium ne sert plus
+    // que de secours, quand aucun produit n'est actif au catalogue (sinon le
+    // visiteur tomberait sur une page sans aucune offre).
+    const offreAchat = formations.length + modules.length > 0;
     return (
       <>
-        {/* Sans abonnement, la formation s'achète ici même (Chariow). */}
-        <div className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
-          <OffresNiveaux userId={gate.acces.userId} possedes={gate.acces.niveaux} retour={`/formations/academy/${params.slug}`} />
-        </div>
-        <AccessGate
-          required={required === 'free' ? 'premium' : required}
-          feature="La WestBourse Academy"
-          hint="Cours interactifs, progression, quiz et certificats."
+        <ApercuCours
+          titre={card.titre}
+          intro={content?.intro ?? null}
+          lecons={content?.lessons ?? []}
+          indexDemande={Number.isFinite(n) ? n - 1 : 0}
+          slug={params.slug}
         />
+        {offreAchat ? (
+          <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:px-6">
+            <OffresNiveaux userId={gate.acces.userId} possedes={gate.acces.niveaux} retour={`/formations/academy/${params.slug}`} />
+            <p className="mt-3 text-sm text-muted">La formation est aussi incluse dans l’abonnement Premium.</p>
+          </div>
+        ) : (
+          <AccessGate
+            required={required === 'free' ? 'premium' : required}
+            feature="La WestBourse Academy"
+            hint="Cours interactifs, progression, quiz et certificats."
+          />
+        )}
       </>
     );
   }
