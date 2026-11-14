@@ -2,7 +2,8 @@
  * Agenda des 30 prochains jours — module PUR et testé (spec §4.1).
  *
  * Statuts, dans la forme : `officiel` (paiement lu au Bulletin officiel
- * `brvm-boc`, ou AG dont l'avis vient de la BRVM ou de BDFIN), `annonce` (source tierce ; toutes les
+ * `brvm-boc`, AG du calendrier du Bulletin officiel `brvm-boc`, ou AG dont l'avis vient de la BRVM
+ * ou de BDFIN), `annonce` (source tierce ; toutes les
  * dates de détachement, qu'aucune source officielle ne publie), `fermeture`
  * (jour non ouvré du calendrier de marché). Aucune date estimée par nous.
  * Dividende PAR ACTION et TOTAL INDICATIF (quantité détenue aujourd'hui) sont
@@ -30,8 +31,8 @@ export interface AssembleeSource {
   code: string | null;
   /**
    * Date de la RÉUNION. Ne jamais y mettre market_events.event_date, qui est la date de
-   * publication de l'avis : tant qu'aucune date de réunion n'est disponible, l'appelant
-   * passe une liste vide.
+   * publication de l'avis. Source : calendrier des AG du Bulletin officiel
+   * (`boc_assemblees`, voir lib/boc/assemblees.ts).
    */
   date_reunion: string;
   title: string;
@@ -133,7 +134,8 @@ export function construireAgenda(e: {
     if (!dansFenetre(a.date_reunion)) continue;
     const code = a.code != null && a.code.trim() !== '' ? normCode(a.code) : null;
     ajouter(`assemblee|${code ?? a.title}|${a.date_reunion}`, {
-      date: a.date_reunion, type: 'assemblee', statut: a.source === 'bdfin' || a.source === 'BRVM' ? 'officiel' : 'annonce',
+      date: a.date_reunion, type: 'assemblee',
+      statut: a.source === 'bdfin' || a.source === 'BRVM' || a.source === 'brvm-boc' ? 'officiel' : 'annonce',
       code, titre: a.title, parAction: null, totalIndicatif: null, baseFiscale: 'inconnue',
       mienne: code != null && qte.get(code) != null, source: a.source,
     });

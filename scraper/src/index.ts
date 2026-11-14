@@ -811,6 +811,58 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
 
+    case 'boc:infos': {
+      // Calendrier des AG + page « Informations » du Bulletin Officiel de la Cote.
+      //   boc:infos                      dernier bulletin publié (cron quotidien)
+      //   boc:infos AAAA-MM-JJ           une séance précise, si encore listée
+      //   boc:infos --reprise            tous les bulletins listés sur brvm.org
+      //   boc:infos --fichier x.pdf      un bulletin local (répétable)
+      //   boc:infos --dossier dir/       tous les boc_AAAAMMJJ*.pdf d'un dossier
+      //   --forcer   relit un bulletin déjà journalisé   --a-blanc   n'écrit rien
+      const valeurs = (drapeau: string) =>
+        rest.flatMap((a, i) => (a === drapeau && rest[i + 1] && !rest[i + 1]!.startsWith('--') ? [rest[i + 1]!] : []));
+      const fichiers = valeurs('--fichier');
+      const dossier = valeurs('--dossier')[0];
+      const date = positional.find((a) => isIsoDate(a));
+      const { runBocInfos } = await import('./boc/runBocInfos.js');
+      const r = await monitored(
+        { code: 'boc-infos', label: 'Bulletin officiel : AG et informations' },
+        async () => {
+          const v = await runBocInfos({
+            date, fichiers, dossier,
+            reprise: rest.includes('--reprise'),
+            forcer: rest.includes('--forcer'),
+            aBlanc: rest.includes('--a-blanc'),
+          });
+          const lus = v.bulletins.filter((b) => !b.saute);
+          const lignes = lus.reduce((s, b) => s + b.assemblees + b.operations + b.avis, 0);
+          return {
+            value: v,
+            outcome: {
+              status: v.erreurs.length === 0 ? 'success' : lus.length > 0 ? 'partial' : 'failed',
+              rows_extracted: lignes,
+              rows_upserted: rest.includes('--a-blanc') ? 0 : lignes,
+              metadata: {
+                bulletins_lus: lus.map((b) => b.date),
+                bulletins_sautes: v.bulletins.filter((b) => b.saute).length,
+                non_rapproches: [...new Set(lus.flatMap((b) => b.nonRapproches))],
+                erreurs: v.erreurs,
+              },
+            },
+          };
+        },
+      );
+      for (const b of r.bulletins) {
+        console.log(b.saute
+          ? `${b.date}  déjà lu, sauté`
+          : `${b.date}  ${b.assemblees} AG · ${b.operations} opérations · ${b.avis} avis/communiqués`
+            + (b.nonRapproches.length ? ` · non rapprochés : ${b.nonRapproches.join(', ')}` : '')
+            + (b.rejets.length ? ` · ${b.rejets.length} ligne(s) écartée(s)` : ''));
+      }
+      for (const e of r.erreurs) console.error(`ÉCHEC ${e.date ?? '?'} (${e.source}) : ${e.message}`);
+      return r.erreurs.length > 0 ? 1 : 0;
+    }
+
     case 'dividends:boc': {
       // Dividendes de référence (Bulletin officiel). À BLANC sauf --ecrire.
       const { runDividendesBoc } = await import('./dividends/runDividendesBoc.js');

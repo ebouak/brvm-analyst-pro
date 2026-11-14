@@ -8,6 +8,9 @@ import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
 import CarnetOrdres, { dateSeanceLongue, type CarnetRow } from '@/components/CarnetOrdres';
+import BulletinSociete from '@/components/BulletinSociete';
+import { COLONNES_AG, type BocAssemblee } from '@/lib/boc/assemblees';
+import { COLONNES_AVIS, COLONNES_OPERATION, type BocAvis, type BocOperation } from '@/lib/boc/informations';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
@@ -38,8 +41,34 @@ interface PageProps {
   params: Promise<{ code: string }>;
 }
 
+/**
+ * AG, opérations et avis de la société lus au Bulletin officiel, et la date du
+ * dernier bulletin lu (le plus récent des deux tables : le calendrier des AG
+ * peut être vide en début d'année). Une table illisible rend des listes vides :
+ * le bloc disparaît, la fiche reste servie.
+ */
+async function getBulletin(supabase: ReturnType<typeof createPublicClient>, code: string) {
+  const [ag, ops, avis, derAg, derOp] = await Promise.all([
+    supabase.from('boc_assemblees').select(COLONNES_AG).eq('code', code).order('date_ag', { ascending: false }).limit(20),
+    supabase.from('boc_operations').select(COLONNES_OPERATION).eq('code', code).order('dernier_bulletin', { ascending: false }).limit(10),
+    supabase.from('boc_avis').select(COLONNES_AVIS).eq('code', code).order('date_bulletin', { ascending: false }).limit(10),
+    supabase.from('boc_assemblees').select('dernier_bulletin').order('dernier_bulletin', { ascending: false }).limit(1),
+    supabase.from('boc_operations').select('dernier_bulletin').order('dernier_bulletin', { ascending: false }).limit(1),
+  ]);
+  const dates = [derAg.data?.[0], derOp.data?.[0]]
+    .map((r) => (r as { dernier_bulletin?: string } | undefined)?.dernier_bulletin)
+    .filter((d): d is string => typeof d === 'string');
+  return {
+    assemblees: (ag.data ?? []) as BocAssemblee[],
+    operations: (ops.data ?? []) as BocOperation[],
+    avis: (avis.data ?? []) as BocAvis[],
+    dernierBulletin: dates.length ? dates.sort().at(-1)! : null,
+  };
+}
+
 async function getCompany(code: string) {
   const supabase = createPublicClient();
+  const bulletinP = getBulletin(supabase, code); // en parallèle du reste
 
   const [{ data: instrument }, { data: hist }, { data: sig }, { data: funds }, { data: divs }, { data: news }, { data: diag }, { data: carnet }] =
     await Promise.all([
@@ -95,6 +124,7 @@ async function getCompany(code: string) {
     ]);
 
   return {
+    bulletin: await bulletinP,
     carnet: (carnet ?? null) as CarnetRow | null,
     instrument: instrument as {
       code: string; designation: string; secteur: string | null; pays: string | null;
@@ -156,7 +186,7 @@ export default async function CompanyPage(props: PageProps) {
   // Conséquence assumée : cette page publique et indexée ne montre JAMAIS
   // l'analyse, même à un abonné connecté — la lecture complète reste sur
   // /actions/[code], qui peut se permettre d'être dynamique.
-  const [{ instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet }, { required: accesLectureSeance }] =
+  const [{ instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet, bulletin }, { required: accesLectureSeance }] =
     await Promise.all([getCompany(code), requiredAccess('lecture_seance')]);
 
   if (!instrument) notFound();
@@ -393,6 +423,13 @@ export default async function CompanyPage(props: PageProps) {
 
       <CarnetOrdres carnet={carnet} />
 
+      <BulletinSociete
+        assemblees={bulletin.assemblees}
+        operations={bulletin.operations}
+        avis={bulletin.avis}
+        dernierBulletin={bulletin.dernierBulletin}
+        aujourdhui={new Date().toISOString().slice(0, 10)}
+      />
       {/* Estimateur de liquidité : sans objet sur une valeur suspendue (aucun échange possible). */}
       {!suspendue && liquidite?.valeur_moyenne_30j != null && (
         <div className="mb-6">

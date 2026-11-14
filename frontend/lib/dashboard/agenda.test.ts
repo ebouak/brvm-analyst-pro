@@ -237,3 +237,13 @@ describe('construireAgenda', () => {
     expect(a.find((i) => i.code === 'BBB')!.statut).toBe('annonce');
   });
 });
+
+describe('AG du Bulletin officiel', () => {
+  it('une AG lue au calendrier du Bulletin officiel est « officielle »', () => {
+    const a = construireAgenda({
+      ...base,
+      assemblees: [{ code: 'SNTS', date_reunion: '2026-10-20', title: 'Assemblée générale extraordinaire SNTS à 15 h', source: 'brvm-boc' }],
+    });
+    expect(a.find((i) => i.type === 'assemblee')).toMatchObject({ statut: 'officiel', code: 'SNTS', date: '2026-10-20' });
+  });
+});

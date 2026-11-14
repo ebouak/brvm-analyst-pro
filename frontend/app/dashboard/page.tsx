@@ -16,7 +16,7 @@ import { metriquesDepuisSeance, estSeanceClose, INDICES_SECTORIELS } from '@/lib
 import { preparerPublications } from '@/lib/dashboard/publications';
 import { detaillerAlertes, depuisAlertesRecentes, ALERTES_RECENTES_JOURS, type AlerteDeclenchee } from '@/lib/dashboard/alertes';
 import { lignesPerfDepuis, variationsDuJour } from '@/lib/dashboard/portefeuilleBloc';
-import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite, chargerTrajectoires, chargerCompteSignaux, chargerActualites, chargerAfrique, chargerCompteMotifs } from '@/lib/dashboard/chargement';
+import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerAssemblees, chargerPublications, chargerLiquidite, chargerTrajectoires, chargerCompteSignaux, chargerActualites, chargerAfrique, chargerCompteMotifs } from '@/lib/dashboard/chargement';
 import { titreSeance, chapoSeance } from '@/lib/dashboard/recit';
 import Ouverture, { fmtIndice, fmtMd, type Chiffre } from '@/components/dashboard/surface/Ouverture';
 import { GrilleInterne, Cellule, Bloc, TeteBloc } from '@/components/dashboard/surface/Grille';
@@ -329,12 +329,13 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, assembleesBoc, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
     veut('agenda') ? chargerDividendes(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('agenda') ? chargerFermetures(supa, aujourdhui, finAgenda) : Promise.resolve([]),
+    veut('agenda') ? chargerAssemblees(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('publications') ? chargerPublications(supa, depuisPublications) : Promise.resolve([]),
     veut('liquidite') ? chargerLiquidite(supa) : Promise.resolve(null),
     veut('seance') ? chargerTrajectoires(supa, indices[0]?.date_marche ?? lastDate) : Promise.resolve(null),
@@ -361,7 +362,9 @@ export default async function Dashboard() {
     : construireAgenda({
         aujourdhui,
         dividendes,
-        assemblees: [], // spec §4.1 : vide tant qu'aucune date de RÉUNION n'est collectée
+        // Dates de RÉUNION lues au Bulletin officiel. Table illisible (migration
+        // 0209 pas encore appliquée) : l'agenda reste servi, sans les AG.
+        assemblees: assembleesBoc ?? [],
         fermetures,
         positions: titresDetenus.map((p) => ({ code: p.code, quantite: p.quantite })),
       });

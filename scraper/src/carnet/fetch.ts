@@ -10,7 +10,8 @@ import { parseCarnet, type FragmentPdf, type LigneCarnet } from './parse.js';
  */
 
 const BASE = 'https://www.brvm.org';
-const LISTE = `${BASE}/fr/bulletins-officiels-de-la-cote/0`;
+/** Page de liste n°`page` (0 = la plus récente). */
+const LISTE = (page = 0) => `${BASE}/fr/bulletins-officiels-de-la-cote/${page}`;
 const UA = 'WESTBOURSE-boc/1.0 (+https://www.westbourse.com ; contact ebouak@gmail.com)';
 
 /** Bulletin publié : sa date de séance et l'URL de son PDF. */
@@ -52,8 +53,8 @@ async function texte(url: string): Promise<string> {
   return r.text();
 }
 
-export async function listerBulletins(): Promise<BulletinPublie[]> {
-  return bulletinsDepuisHtml(await texte(LISTE));
+export async function listerBulletins(page = 0): Promise<BulletinPublie[]> {
+  return bulletinsDepuisHtml(await texte(LISTE(page)));
 }
 
 /**

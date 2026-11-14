@@ -33,6 +33,8 @@ export interface FragmentPdf {
   /** Ordonnée : deux fragments de même y appartiennent à la même ligne. */
   y: number;
   texte: string;
+  /** Largeur rendue par pdfjs, si connue : sert à recoller un mot coupé. */
+  largeur?: number;
 }
 
 export interface LigneCarnet {
