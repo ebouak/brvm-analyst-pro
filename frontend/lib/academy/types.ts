@@ -76,6 +76,8 @@ export const pointSchema = z.object({
  * Simulation CALCULÉE au rendu (lib/academy/simulations.ts) à partir de ces
  * hypothèses — jamais des données de marché.
  */
+const secteurAllocSchema = z.object({ nom: z.string().min(1).max(40), pct: z.number().min(0).max(100) });
+
 export const simulationSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('reinvestissement'),
@@ -90,7 +92,39 @@ export const simulationSchema = z.discriminatedUnion('type', [
     revenu_cible: z.number().positive(),
     rendements_pct: z.array(z.number().positive().max(50)).min(2).max(5),
   }),
-]);
+  /** Atelier d'ordre (lib/academy/carnet.ts) : carnet FICTIF côté vente + carnet réel optionnel. */
+  z.object({
+    type: z.literal('carnet'),
+    niveaux: z.array(z.object({ prix: z.number().positive(), quantite: z.number().int().positive() })).min(2).max(8),
+    quantite_defaut: z.number().int().positive().max(1_000_000),
+    /** Valeurs proposées pour le « carnet réel » (Bulletin officiel de la cote). */
+    codes: z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).max(6).optional().default([]),
+  }),
+  /** Répartition par secteur (lib/academy/allocation.ts). */
+  z.object({
+    type: z.literal('allocation'),
+    capital: z.number().positive().max(1_000_000_000),
+    secteurs: z.array(secteurAllocSchema).min(2).max(8),
+    seuil_secteur_pct: z.number().min(10).max(100).optional().default(35),
+  }),
+  /** Scénarios de baisse (lib/academy/allocation.ts) : paramètres par défaut. */
+  z.object({
+    type: z.literal('scenario_baisse'),
+    capital: z.number().positive().max(1_000_000_000),
+    rendement_pct: z.number().min(0).max(30),
+    secteurs: z.array(secteurAllocSchema).min(2).max(8),
+  }),
+]).superRefine((s, ctx) => {
+  if (s.type === 'scenario_baisse' || s.type === 'allocation') {
+    const total = s.secteurs.reduce((t, x) => t + x.pct, 0);
+    if (s.type === 'scenario_baisse' && Math.abs(total - 100) > 0.01) {
+      ctx.addIssue({ code: 'custom', message: 'la répartition par défaut du scénario doit totaliser 100 %' });
+    }
+    if (new Set(s.secteurs.map((x) => x.nom)).size !== s.secteurs.length) {
+      ctx.addIssue({ code: 'custom', message: 'les noms de secteurs doivent être distincts' });
+    }
+  }
+});
 export type Simulation = z.infer<typeof simulationSchema>;
 
 /**
@@ -135,6 +169,8 @@ export const sectionSchema = z.object({
   /** `frise` : étapes en frise horizontale sur ordinateur (verticale sur mobile). */
   etapes_style: z.enum(['liste', 'frise']).optional().default('liste'),
   simulation: simulationSchema.nullable().optional(),
+  /** Simulations supplémentaires, rendues après `simulation` (ex. répartition puis scénario). */
+  simulations: z.array(simulationSchema).max(3).optional().default([]),
   donnees_reelles: donneesReellesSchema.nullable().optional(),
 });
 

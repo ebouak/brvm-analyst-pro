@@ -99,7 +99,63 @@
      ]
     ],
     "note": "Exemple pédagogique : cinq lignes de même montant et de même rendement ; une seule divise son dividende par deux. La diversification n’empêche pas les mauvaises nouvelles, elle évite qu’une seule les fasse toutes subir."
-   }
+   },
+   "simulations": [
+    {
+     "type": "allocation",
+     "capital": 1000000,
+     "secteurs": [
+      {
+       "nom": "Banques",
+       "pct": 20
+      },
+      {
+       "nom": "Télécoms",
+       "pct": 20
+      },
+      {
+       "nom": "Agro-industrie",
+       "pct": 20
+      },
+      {
+       "nom": "Distribution",
+       "pct": 20
+      },
+      {
+       "nom": "Énergie",
+       "pct": 20
+      }
+     ],
+     "seuil_secteur_pct": 35
+    },
+    {
+     "type": "scenario_baisse",
+     "capital": 1000000,
+     "rendement_pct": 8,
+     "secteurs": [
+      {
+       "nom": "Banques",
+       "pct": 20
+      },
+      {
+       "nom": "Télécoms",
+       "pct": 20
+      },
+      {
+       "nom": "Agro-industrie",
+       "pct": 20
+      },
+      {
+       "nom": "Distribution",
+       "pct": 20
+      },
+      {
+       "nom": "Énergie",
+       "pct": 20
+      }
+     ]
+    }
+   ]
   },
   {
    "type": "importance",
@@ -216,7 +272,32 @@
      "detail": "Jour, mensuel, à exécution ou date limite ?"
     }
    ],
-   "etapes_style": "frise"
+   "etapes_style": "frise",
+   "simulation": {
+    "type": "carnet",
+    "niveaux": [
+     {
+      "prix": 3280,
+      "quantite": 3500
+     },
+     {
+      "prix": 3290,
+      "quantite": 4500
+     },
+     {
+      "prix": 3300,
+      "quantite": 5500
+     }
+    ],
+    "quantite_defaut": 5000,
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "ORAC",
+     "PALC",
+     "SPHC"
+    ]
+   }
   },
   {
    "type": "importance",

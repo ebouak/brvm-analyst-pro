@@ -24,10 +24,14 @@ const SEUIL_HEARTBEAT_MIN = 45;   // en séance, au-delà = plus « live »
 const SEUIL_DECROCHAGE_MIN = 120; // en séance, au-delà = collecte vraiment arrêtée
 
 /** La BRVM cote lundi-vendredi ~09-15 GMT. On tolère jusqu'à 16 h (fixing/retards). */
+/** Fenêtre de séance (UTC), source unique : `estEnSeance` et la barre de cote la lisent. */
+export const HEURE_OUVERTURE_UTC = 9;
+export const HEURE_FIN_SEANCE_UTC = 16;
+
 export function estEnSeance(maintenant: Date): boolean {
   const jour = maintenant.getUTCDay();     // 0=dim, 6=sam
   const heure = maintenant.getUTCHours();
-  return jour >= 1 && jour <= 5 && heure >= 9 && heure < 16;
+  return jour >= 1 && jour <= 5 && heure >= HEURE_OUVERTURE_UTC && heure < HEURE_FIN_SEANCE_UTC;
 }
 
 /** Dernier jour de semaine (lun-ven) à la date de `maintenant` ou avant. */
