@@ -407,7 +407,7 @@ export function commenterSeance(entree: {
     if (s != null) signalPenche = s > 0.05 ? 'hausse' : s < -0.05 ? 'baisse' : 'aucun';
 
     const positionScore = s == null ? '' :
-      ` Score : ${dec(s)} sur une échelle de −1 à +1 ; un signal d'achat exige plus de +${dec(SEUIL_ACHAT, 1)}, un signal de vente moins de −${dec(Math.abs(SEUIL_VENTE), 1)}.`;
+      ` Score : ${dec(s)} sur une échelle de −1 à +1 ; un signal d'achat exige plus de +${dec(SEUIL_ACHAT, 1)} ; sous −${dec(Math.abs(SEUIL_VENTE), 1)}, aucun signal de vente n'est plus émis, ces situations ayant plus souvent précédé un rebond qu'une baisse.`;
 
     constats.push({
       origine: 'signal',
