@@ -49,3 +49,13 @@
 @media print {
   .rv-actions { display: none; }
 }
+
+/* Resserrement : les feuilles 3 et 4 ont une hauteur fixe, rien ne doit être rogné. */
+.rv-table { margin-top: 4mm; }
+.rv-table td { padding-top: 1.4mm; padding-bottom: 1.4mm; }
+.rv-activite h3 { margin-top: 4mm !important; }
+.rv-activite p { margin-top: 2mm; }
+.rv-dossier { padding: 4mm 6mm; margin-bottom: 8mm; }
+.rv-dossier h3 { font-size: 14pt; }
+.rv-dossier p { font-size: 10pt; }
+@media print { .doc-duo { margin-top: 5mm; } }

@@ -11,6 +11,7 @@ import { perAffichable, distributionAffichable, evolutionResultat, dividendeCour
 import { phraseDetachement } from '@/lib/reports/detachementRevue';
 import { constatSerie } from '@/lib/document/constats';
 import { photoActivite } from '@/lib/document/activite';
+import { planActivite, LIGNES_FACULTATIVES } from '@/lib/revue/gabarit';
 import { periodePrincipale, constatPeriode, chiffreGeantPeriode, lignesComparaison, variationPct } from '@/lib/revue/periode';
 import { phraseMiseAJour } from '@/lib/revue/miseAJour';
 import { chargerDerniereMiseAJour } from '@/lib/revue/chargerMiseAJour';
@@ -115,7 +116,8 @@ export default async function RevuePage(props: Props) {
   // Rapport d'activité antérieur aux comptes : il passe en fin de document.
   const hl = d.highlights && (d.highlights.synthese || d.highlights.items.length > 0) ? d.highlights : null;
   const hlAncien = !!(hl?.exercice && latest && hl.exercice < Number(latest.periode));
-  const activite = hl && (
+  const plan = hl ? planActivite(hl.synthese, hl.items) : null;
+  const activite = hl && plan && (
     <div className="rv-activite">
       <h3 style={{ margin: '8mm 0 0', fontSize: '11pt' }}>
         {hlAncien ? `Activité : dernier rapport disponible (exercice ${hl.exercice})` : 'Activité : ce qui se passe dans l’entreprise'}
@@ -123,12 +125,13 @@ export default async function RevuePage(props: Props) {
       {hlAncien && latest && (
         <p className="doc-note">Ce rapport porte sur l’exercice {hl.exercice}, antérieur aux comptes {latest.periode} présentés dans cette revue : aucun rapport d’activité plus récent n’est disponible.</p>
       )}
-      {hl.synthese && <p>{hl.synthese}</p>}
+      {plan.synthese && <p>{plan.synthese}</p>}
       <ul>
-        {hl.items.slice(0, 3).map((it, i) => (
+        {plan.items.map((it, i) => (
           <li key={i}><b>{it.titre}</b>{it.titre && it.detail ? ' : ' : ''}{it.detail}</li>
         ))}
       </ul>
+      {plan.omis > 0 && <p className="doc-note">Extrait : le rapport d’activité complet est disponible à la source.</p>}
       {hl.source_libelle && (
         <p className="doc-note">
           Source : {hl.source_url
@@ -223,7 +226,7 @@ export default async function RevuePage(props: Props) {
                 </tr>
               </thead>
               <tbody>
-                {lignesAnnuel.map((r) => {
+                {lignesAnnuel.filter((r) => !(hl && !hlAncien && LIGNES_FACULTATIVES.has(r.libelle))).map((r) => {
                   const bpa = r.libelle === 'BPA';
                   const evo = EN_MOTS.has(r.libelle) ? evolutionResultat(r.cur, r.prv) : pctSigne(variationPct(r.cur, r.prv));
                   return (
@@ -248,7 +251,7 @@ export default async function RevuePage(props: Props) {
                 <div>
                   <h3>Chiffre d’affaires</h3>
                   <GraphiqueBarres
-                    titre="Chiffre d’affaires par exercice" largeur={300} hauteur={260}
+                    titre="Chiffre d’affaires par exercice" largeur={300} hauteur={200}
                     points={anciens.map((y) => ({ libelle: y.periode, valeur: y.revenu }))}
                     format={(v) => fmtFcfa(v)}
                   />
@@ -256,7 +259,7 @@ export default async function RevuePage(props: Props) {
                 <div>
                   <h3>Résultat net</h3>
                   <GraphiqueBarres
-                    titre="Résultat net par exercice" largeur={300} hauteur={260}
+                    titre="Résultat net par exercice" largeur={300} hauteur={200}
                     points={anciens.map((y) => ({ libelle: y.periode, valeur: y.resultatNet }))}
                     format={(v) => fmtFcfa(v)}
                   />
