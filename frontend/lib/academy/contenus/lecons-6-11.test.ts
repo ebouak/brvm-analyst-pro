@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { lessonSchema, type Lesson } from '../types';
 import { capitalPourObjectif, simulerReinvestissement } from '../simulations';
+import { executerOrdre } from '../carnet';
+import { analyserAllocation, simulerScenario } from '../allocation';
 import l6 from './lecon6-risques.json';
 import l7 from './lecon7-scolarite.json';
 import l8 from './lecon8-strategies.json';
@@ -16,6 +18,21 @@ import l11 from './lecon11-comparaison.json';
  * un index de bonne réponse décalé passerait le schéma sans rien signaler.
  */
 const LECONS: [number, unknown][] = [[6, l6], [7, l7], [8, l8], [9, l9], [10, l10], [11, l11]];
+/** Calcule une simulation quelle qu'elle soit : doit aller au bout sans lever. */
+function calculer(sm: Lesson['sections'][number]['simulation']) {
+  if (!sm) return;
+  if (sm.type === 'carnet') {
+    const r = executerOrdre(sm.niveaux, { sens: 'achat', quantite: sm.quantite_defaut, limite: 'au_mieux', condition: 'sans', validite: 'jour' });
+    expect(r.statut).toBe('execute');
+  }
+  if (sm.type === 'allocation') expect(analyserAllocation(sm.secteurs, sm.capital, sm.seuil_secteur_pct).totalPct).toBe(100);
+  if (sm.type === 'scenario_baisse') {
+    const p = { capital: sm.capital, rendement_pct: sm.rendement_pct, lignes: sm.secteurs };
+    expect(simulerScenario(p, { type: 'marche', baisse_pct: 10 }).capitalApres).toBeGreaterThan(0);
+    expect(simulerScenario(p, { type: 'secteur', nom: sm.secteurs[0]!.nom, baisse_pct: 30 }).capitalApres).toBeGreaterThan(0);
+    expect(simulerScenario(p, { type: 'dividende', nom: sm.secteurs[0]!.nom, facteur: 0.5 }).revenuApres).toBeGreaterThan(0);
+  }
+}
 const parse = (brut: unknown): Lesson => lessonSchema.parse(brut);
 const bonne = (l: Lesson, i: number) => l.quiz![i]!.options[l.quiz![i]!.correct];
 const APP = fileURLToPath(new URL('../../../app/', import.meta.url));
@@ -45,6 +62,7 @@ describe.each(LECONS)('leçon %i — règles éditoriales', (n, brut) => {
 
   it('les simulations se calculent', () => {
     for (const s of l.sections) {
+      for (const sm of [s.simulation, ...s.simulations]) calculer(sm);
       if (s.simulation?.type === 'reinvestissement') expect(simulerReinvestissement(s.simulation).length).toBe(s.simulation.annees);
       if (s.simulation?.type === 'objectif') expect(capitalPourObjectif(s.simulation.revenu_cible, s.simulation.rendements_pct).length).toBeGreaterThan(0);
     }
@@ -83,5 +101,29 @@ describe('réponses de calcul : la bonne option est bien le bon résultat', () =
   it('leçon 11 — (400 + 10 600 − 10 000) ÷ 10 000 = 10 %', () => {
     expect(((400 + 10_600 - 10_000) / 10_000) * 100).toBe(10);
     expect(bonne(parse(l11), 1)).toBe('10 %');
+  });
+});
+
+describe('leçon 6 — simulateurs interactifs', () => {
+  const l = parse(l6);
+  const toutes = l.sections.flatMap((s) => [s.simulation, ...s.simulations]).filter((x) => x != null);
+
+  it('porte les trois simulateurs, dans huit sections au plus', () => {
+    expect(l.sections.length).toBeLessThanOrEqual(8);
+    expect(toutes.map((x) => x!.type).sort()).toEqual(['allocation', 'carnet', 'scenario_baisse']);
+  });
+
+  it('le carnet de la leçon reproduit les exemples de la mise en situation (3 283 de moyenne)', () => {
+    const c = toutes.find((x) => x!.type === 'carnet') as Extract<NonNullable<(typeof toutes)[number]>, { type: 'carnet' }>;
+    expect(c.quantite_defaut).toBe(5000);
+    expect(executerOrdre(c.niveaux, { sens: 'achat', quantite: 5000, limite: 'au_mieux', condition: 'sans', validite: 'jour' }).prixMoyen).toBe(3283);
+    expect(executerOrdre(c.niveaux, { sens: 'achat', quantite: 5000, limite: { prix: 3270 }, condition: 'sans', validite: 'jour' }).quantiteServie).toBe(0);
+    expect(executerOrdre(c.niveaux, { sens: 'achat', quantite: 10_000, limite: { prix: 3290 }, condition: 'tout_ou_rien', validite: 'jour' }).quantiteServie).toBe(0);
+  });
+
+  it('le scénario par défaut reproduit le tableau de la leçon : dividende divisé par deux sur une ligne de 20 % = −10 % de revenu', () => {
+    const sc = toutes.find((x) => x!.type === 'scenario_baisse') as Extract<NonNullable<(typeof toutes)[number]>, { type: 'scenario_baisse' }>;
+    const r = simulerScenario({ capital: sc.capital, rendement_pct: sc.rendement_pct, lignes: sc.secteurs }, { type: 'dividende', nom: sc.secteurs[0]!.nom, facteur: 0.5 });
+    expect([r.revenuAvant, r.revenuApres, r.variationRevenuPct]).toEqual([80_000, 72_000, -10]);
   });
 });
