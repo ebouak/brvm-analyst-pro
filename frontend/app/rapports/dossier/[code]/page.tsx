@@ -7,7 +7,12 @@ import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { buildDossier, type DossierValeur } from '@/lib/dossier/build';
-import { construireNarratif } from '@/lib/dossier/narratif';
+import { construireNarratif, chiffresDeLecture } from '@/lib/dossier/narratif';
+import { PANNEAU, TOTAL_FEUILLES, TOTAL_PANNEAUX, SOMMAIRE, renvoi } from '@/lib/dossier/structure';
+import { comparerEditions, mesuresDuDossier } from '@/lib/dossier/instantane';
+import { libellePublication } from '@/lib/dossier/publications';
+import { dureeFr } from '@/lib/dossier/placement';
+import { RESERVE_REACTION } from '@/lib/reactionPublication';
 import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
@@ -16,7 +21,7 @@ import { perAffichable, distributionAffichable, horsExploitation, dividendeCoura
 import Link from 'next/link';
 import { documentsFiche } from '@/components/sousPage/SousPageNav';
 import ImprimerDossier from './ImprimerDossier';
-import { CouverturePhoto, PageEssentiel, OuvertureSection } from '@/components/document/Document';
+import { CouverturePhoto, PageEssentiel, OuvertureSection, GraphiqueBarres } from '@/components/document/Document';
 import { photoActivite } from '@/lib/document/activite';
 import { constatCouverture, declarationEssentiel, constatIntermediaire } from '@/lib/document/constats';
 import brvmLogos from '@/lib/brvmLogos.json';
@@ -41,32 +46,14 @@ import './dossier.css';
 
 export const dynamic = 'force-dynamic';
 
-const TOTAL_PANNEAUX = 16;
-/* Neuf feuilles. Les sixième (appréciations) et septième (niveaux et
-   réserves) ne tiennent pas ensemble sur un A4 — vérifié sur NEIC, 12 lignes
-   d’appréciation plus le tableau des niveaux débordaient de 11 %. Les huitième et neuvième
-   (2026-10-11) portent le suivi : titre en bourse, dernière publication
-   intermédiaire, comparables, piliers. ⚠️ Le worker (video/dossiers.mjs,
-   FEUILLES_ATTENDUES) vérifie ce nombre : les deux changent ensemble. */
-const TOTAL_FEUILLES = 14;
-/* Refonte du 2026-11-12 (lot 3) : couverture photo (1), « L'essentiel » (2),
-   présentation et sommaire (3), puis trois sections ouvertes chacune par une
-   page d'ouverture (4, 8, 12). Les panneaux gardent leur numéro et leur ordre :
-   la prose polie y renvoie (« panneau 12 »). */
+/* Numéros de panneaux, nombre de feuilles et sommaire : lib/dossier/structure.ts.
+   Une seule source, vérifiée par test contre le worker d'impression
+   (video/dossiers.mjs, FEUILLES_ATTENDUES). Dix-sept feuilles : couverture (1),
+   « L'essentiel » (2), lecture d'ensemble et sommaire (3), puis trois sections
+   ouvertes chacune par une page d'ouverture (4, 9, 13). Contrainte de
+   l'impression : chaque feuille a une hauteur FIXE de 297 mm, un contenu qui
+   déborde est refusé par le worker. Ne rien ajouter à une feuille sans mesurer. */
 const LOGOS = brvmLogos as Record<string, string>;
-
-/* Sommaire : [titre, numéros des panneaux, feuille]. ⚠️ Suit la répartition des
-   feuilles ci-dessous ; à tenir avec TOTAL_FEUILLES. */
-const SOMMAIRE: [string, string, number][] = [
-  ['Identité et chiffres clés', '02-03', 5],
-  ['Trajectoire et valorisation', '04-05', 6],
-  ['Origine du bénéfice et dividende', '06-07', 7],
-  ['Détachement, cours et niveaux', '08-09', 9],
-  ['Appréciation, appuis et vigilance', '10-11', 10],
-  ['Niveaux et réserves', '12', 11],
-  ['Titre en bourse, publication, comparables', '13-15', 13],
-  ['Piliers et rendez-vous', '16', 14],
-];
 
 const STATUT_PILIER: Record<string, string> = {
   tenu: 'Seuil atteint',
@@ -235,6 +222,30 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const evolution = traj.length >= 2 ? evolutionResultat(traj[traj.length - 1]!.resultat_net, traj[traj.length - 2]!.resultat_net) : null;
   const dette = c.dette_perimetre === 'long_terme' ? 'dette à plus d’un an' : 'dette financière';
 
+  /* « Depuis la dernière édition » : l'édition courante (mesures vivantes) contre
+     l'édition STRICTEMENT antérieure figée en base. Sans édition antérieure, ou
+     table absente, ou version différente : pas d'encadré (jamais un « 0 % »). */
+  let depuis: ReturnType<typeof comparerEditions> = null;
+  if (c.date_cours) {
+    try {
+      const { data: prec } = await sbLecture
+        .from('dossier_instantanes')
+        .select('edition, version, mesures')
+        .eq('code', id.code)
+        .lt('edition', c.date_cours)
+        .order('edition', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      depuis = comparerEditions(mesuresDuDossier(d), (prec as { edition: string; version: number; mesures: unknown } | null) ?? null);
+    } catch {
+      depuis = null;
+    }
+  }
+  const libellePilier = new Map(d.suivi.piliers.map((p) => [p.cle as string, p.libelle]));
+  const pointsChiffres = chiffresDeLecture(n);
+  const pl = d.placement;
+  const bande = d.bande_per;
+
   /* Contrôles de cohérence : le worker d'impression lit cet attribut et REFUSE
      de ranger le PDF s'il n'est pas vide (comme pour un débordement). */
   const anomalies = controlerDossier(d);
@@ -243,7 +254,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const entete = `Dossier valeur · édition du ${fmtDateCourte(d.genere_le)}`;
   const photo = photoActivite(id.code, id.secteur);
   const precedent = traj.length >= 2 ? traj[traj.length - 2]! : null;
-  // Dernière publication intermédiaire (plus récente que l'exercice annuel), même lecture que le panneau 14.
+  // Dernière publication intermédiaire (plus récente que l'exercice annuel), même lecture que le panneau 16.
   const inter = d.suivi.intermediaire;
   const varInter = (a: number | null, b: number | null) => (a != null && b != null && b > 0 ? pourcent((a - b) / b) : null);
   const separe = (v: number | null): { valeur: string | null; unite?: string } => {
@@ -311,49 +322,78 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               <div><dt>Chiffre d’affaires</dt><dd>{inter.revenu != null ? `${fmtFcfa(inter.revenu)} FCFA` : 'non publié'}</dd>{varInter(inter.revenu, inter.revenuPrecedent) && <small>{varInter(inter.revenu, inter.revenuPrecedent)} sur la même période</small>}</div>
               <div><dt>Résultat net</dt><dd>{inter.resultatNet != null ? `${fmtFcfa(inter.resultatNet)} FCFA` : 'non publié'}</dd>{varInter(inter.resultatNet, inter.resultatNetPrecedent) && <small>{varInter(inter.resultatNet, inter.resultatNetPrecedent)} sur la même période</small>}</div>
             </dl>
-            <p className="doc-recent-note">Comparé {/^\d/.test(inter.libellePrecedent) ? 'aux' : 'au'} {inter.libellePrecedent}. Détail au panneau 14.</p>
+            <p className="doc-recent-note">Comparé {/^\d/.test(inter.libellePrecedent) ? 'aux' : 'au'} {inter.libellePrecedent}. Détail au {renvoi('intermediaire')}.</p>
           </section>
         )}
       </PageEssentiel>
 
-      {/* ── Feuille 3 · Présentation, résumé et sommaire ─────────────────── */}
+      {/* ── Feuille 3 · Lecture d'ensemble, depuis la dernière édition, résumé et sommaire ── */}
       <article className="dv-page" data-feuille="">
         <div className="dv-courant">
           <span>{nomComplet}</span>
           <span>Dossier valeur · {id.code}</span>
         </div>
-        <Panneau
-          n={1}
-          titre="Ce que dit ce dossier"
-          chapo="Les panneaux qui suivent sont construits à partir de la base : cotations, états financiers, dividendes et signaux. Toute approximation y est nommée comme telle ; ce qui manque est déclaré au panneau 12."
-        >
-          <dl className="dv-grille">
-            <Mesure
-              libelle="Exercice couvert"
-              valeur={c.exercice}
-              note="Dernier exercice dont les états financiers sont en base."
-            />
-            <Mesure
-              libelle="Séances analysées"
-              valeur={d.technique.serie.length > 0 ? `${d.technique.serie.length}` : null}
-              note="Clôtures réelles, zéros de collecte exclus."
-            />
-            <Mesure
-              libelle="Lecture technique"
-              valeur={d.technique.signal ? (VERDICT[d.technique.signal] ?? d.technique.signal) : null}
-              note={
-                d.technique.date_signal
-                  ? `Signal du ${fmtDateFR(d.technique.date_signal)}. ${zoneRsi(d.technique.rsi) ?? ''} Mesure de tendance, pas une recommandation.`.replace('  ', ' ')
-                  : "Aucun signal calculé pour cette valeur."
-              }
-            />
-            <Mesure
-              libelle="Points non établis"
-              valeur={`${d.lacunes.length}`}
-              note="Réserves détaillées au panneau 12. Une mesure sans donnée est en outre marquée « non disponible » dans son panneau."
-            />
-          </dl>
-        </Panneau>
+
+        <section className="dv-panneau">
+          <h2 className="dv-titre">{lecture!.titre}</h2>
+          <p className="dv-prose">{lecture!.texte}</p>
+          {(pointsChiffres.forces.length > 0 || pointsChiffres.risques.length > 0) && (
+            <div className="dv-lecture-chiffres">
+              {pointsChiffres.forces.length > 0 && (
+                <div>
+                  <h3 className="dv-sous-titre">Points d’appui</h3>
+                  <ul className="dv-liste dv-liste--forces">
+                    {pointsChiffres.forces.map((t) => <li key={t}><span>{t}</span></li>)}
+                  </ul>
+                </div>
+              )}
+              {pointsChiffres.risques.length > 0 && (
+                <div>
+                  <h3 className="dv-sous-titre">Points de vigilance</h3>
+                  <ul className="dv-liste dv-liste--risques">
+                    {pointsChiffres.risques.map((t) => <li key={t}><span>{t}</span></li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          <p className="dv-source">
+            {prose.source === 'polie'
+              ? `Texte relu le ${fmtDateFR(prose.genere_le)}, établi à partir des panneaux de ce dossier. `
+              : 'Texte établi à partir des panneaux de ce dossier. '}
+            Il ne cite aucun chiffre : ceux qui le fondent sont lus à l’instant sur les mêmes mesures que les panneaux {PANNEAU.appuis} et {PANNEAU.vigilance}.
+          </p>
+        </section>
+
+        {depuis && (
+          <section className="dv-encadre dv-edition" aria-label="Depuis la dernière édition">
+            <h3>Depuis la dernière édition</h3>
+            <p className="dv-edition-date">Édition précédente : séance du {fmtDateFR(depuis.edition_precedente)}.</p>
+            <ul>
+              {depuis.variation_cours != null && (
+                <li>
+                  Cours : <strong className={tonDe(depuis.variation_cours) === 'hausse' ? 'dv-hausse' : tonDe(depuis.variation_cours) === 'baisse' ? 'dv-baisse' : undefined}>{pourcent(depuis.variation_cours)}</strong> depuis cette séance.
+                </li>
+              )}
+              {depuis.publications_parues != null && (
+                <li>
+                  {depuis.publications_parues === 0
+                    ? 'Aucune nouvelle publication en base.'
+                    : `${depuis.publications_parues} nouvelle${depuis.publications_parues > 1 ? 's' : ''} publication${depuis.publications_parues > 1 ? 's' : ''} en base.`}
+                </li>
+              )}
+              {depuis.piliers_changes.length === 0 ? (
+                <li>Aucun pilier de suivi n’a changé de constat.</li>
+              ) : (
+                depuis.piliers_changes.map((x) => (
+                  <li key={x.cle}>
+                    {libellePilier.get(x.cle) ?? x.cle} : {STATUT_PILIER[x.avant] ?? x.avant} → {STATUT_PILIER[x.apres] ?? x.apres}.
+                  </li>
+                ))
+              )}
+            </ul>
+          </section>
+        )}
 
         <section className="dv-resume" aria-label="En une page">
           <h2 className="dv-sous-titre">En une page</h2>
@@ -402,21 +442,17 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           </ol>
         </nav>
 
-        <p className="dv-chapo" style={{ margin: 0 }}>
-          Établi le {fmtDateFR(d.genere_le)} · Document d&apos;information. Il ne constitue ni un conseil en
-          investissement, ni une incitation à intervenir sur le titre.
-        </p>
         <div className="dv-pied">
           <span>Document d&apos;information : ne constitue pas un conseil en investissement.</span>
           <span>3 / {TOTAL_FEUILLES}</span>
         </div>
       </article>
 
-      {/* ── Feuille 2 · Identité et chiffres clés ──────────────────────── */}
+      {/* ── Section 1 · feuilles 4 à 8 ─────────────────────────────────── */}
       <OuvertureSection numero={1} titre="L’entreprise et ses comptes" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
-        sommaire={['L’entreprise en bref et ses chiffres clés', 'Trajectoire des résultats et valorisation', 'D’où vient le bénéfice, le dividende']} />
+        sommaire={['L’entreprise en bref et ses chiffres clés', 'Trajectoire des résultats et valorisation', 'D’où vient le bénéfice, le dividende', 'Un million de FCFA investi, valorisation sur cinq ans']} />
       <Feuille d={d} page={5}>
-        <Panneau n={2} titre="L'entreprise en bref">
+        <Panneau n={PANNEAU.entreprise} titre="L'entreprise en bref">
           <dl className="dv-grille">
             <Mesure libelle="Secteur" valeur={id.secteur} texte />
             <Mesure libelle="Pays" valeur={id.pays} />
@@ -457,7 +493,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
 
         <Panneau
-          n={3}
+          n={PANNEAU.chiffresCles}
           titre={`Chiffres clés${c.exercice ? ` — exercice ${c.exercice}` : ''}`}
           chapo="Montants tels que publiés par la société, repris des états financiers en base."
         >
@@ -509,7 +545,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       {/* ── Feuille 3 · Trajectoire et valorisation ────────────────────── */}
       <Feuille d={d} page={6}>
         <Panneau
-          n={4}
+          n={PANNEAU.trajectoire}
           titre="Trajectoire des résultats"
           chapo="Chiffre d'affaires et résultat net par exercice, à la même échelle : les deux sont en FCFA, la comparaison est directe."
         >
@@ -517,13 +553,21 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
 
         <Panneau
-          n={5}
+          n={PANNEAU.valorisation}
           titre="Valorisation"
           chapo="Ce que le marché paie aujourd'hui pour les résultats et les capitaux propres publiés."
         >
           <dl className="dv-grille">
             <Mesure libelle="Bénéfice par action" valeur={nb(r?.bpa, 2)} note="Résultat net ÷ actions en circulation." />
             <Mesure libelle="PER" valeur={fois(per.valeur)} motif={per.motif} note="Cours ÷ bénéfice par action." />
+            {d.per_glissant && (
+              <Mesure
+                libelle="PER sur douze mois"
+                valeur={fois(d.per_glissant.valeur)}
+                motif={d.per_glissant.valeur == null ? 'résultat glissant nul ou négatif' : undefined}
+                note={`Cours ÷ bénéfice par action des ${d.per_glissant.libelle}.`}
+              />
+            )}
             <Mesure libelle="Cours / capitaux propres" valeur={fois(r?.pb)} />
             <Mesure libelle="Cours / chiffre d'affaires" valeur={fois(r?.ps)} />
             <Mesure
@@ -557,7 +601,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       {/* ── Feuille 4 · Qualité du résultat et dividende ───────────────── */}
       <Feuille d={d} page={7}>
         <Panneau
-          n={6}
+          n={PANNEAU.benefice}
           titre="D'où vient le bénéfice"
           chapo="Un résultat net ne dit pas s'il est reproductible. Ce panneau sépare ce qui vient de l'exploitation de ce qui vient d'ailleurs."
         >
@@ -593,7 +637,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           )}
         </Panneau>
 
-        <Panneau n={7} titre="Dividende">
+        <Panneau n={PANNEAU.dividende} titre="Dividende">
           {div.montant != null && div.montant > 0 ? (
             <>
               <dl className="dv-grille">
@@ -611,13 +655,13 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                 <Mesure libelle="Exercice" valeur={div.exercice != null ? String(div.exercice) : null} />
                 {/* Une date que la baisse du cours ne confirme pas n'est pas un fait :
                     le dossier SNTS l'affichait ici sans réserve, la désavouait au
-                    panneau 12, et l'Ascension (14/05/2026) n'avait aucune séance. */}
+                    panneau 20, et l'Ascension (14/05/2026) n'avait aucune séance. */}
                 {d.suivi.ex_date_controle === 'a_verifier' && div.ex_date ? (
                   <Mesure
                     libelle="Détachement"
                     valeur="Non établi"
                     texte
-                    note={`Date enregistrée : ${fmtDateFR(div.ex_date)}. Le cours ne la confirme pas (panneau 8).`}
+                    note={`Date enregistrée : ${fmtDateFR(div.ex_date)}. Le cours ne la confirme pas (${renvoi('detachement')}).`}
                   />
                 ) : (
                   <Mesure libelle="Détachement" valeur={div.ex_date ? fmtDateFR(div.ex_date) : null} />
@@ -681,12 +725,119 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
       </Feuille>
 
-      {/* ── Feuille 5 · Détachement et cours ───────────────────────────── */}
-      <OuvertureSection numero={2} titre="Le cours et sa lecture" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
-        sommaire={['La journée de détachement', 'Cours et niveaux', 'Appréciation, points d’appui et de vigilance', 'Niveaux et réserves']} />
-      <Feuille d={d} page={9}>
+      {/* ── Feuille 8 · Placement sur cinq ans et bande de PER ─────────── */}
+      <Feuille d={d} page={8}>
         <Panneau
-          n={8}
+          n={PANNEAU.placement}
+          titre="Un million de FCFA investi"
+          chapo={
+            pl
+              ? `Ce que vaudrait aujourd’hui un million de FCFA placé sur ce titre le ${fmtDateFR(pl.date_depart)}, il y a ${dureeFr(pl.duree_jours)}.`
+              : 'Ce que vaudrait aujourd’hui un million de FCFA placé sur ce titre, il y a cinq ans.'
+          }
+        >
+          {pl ? (
+            <>
+              <dl className="dv-grille">
+                <Mesure
+                  libelle="Valeur aujourd’hui"
+                  valeur={cfa(pl.valeur_totale)}
+                  ton={pl.rendement_total >= 0 ? 'hausse' : 'baisse'}
+                  note={`${pourcent(pl.rendement_total)} avec les dividendes nets reçus.`}
+                />
+                <Mesure
+                  libelle="Cours seul"
+                  valeur={cfa(pl.valeur_cours)}
+                  ton={pl.variation_cours >= 0 ? 'hausse' : 'baisse'}
+                  note={`${pourcent(pl.variation_cours)} : de ${fmtNumber(pl.cours_depart, 0)} à ${fmtNumber(pl.cours_fin, 0)} FCFA.`}
+                />
+                <Mesure
+                  libelle="Dividendes nets reçus"
+                  valeur={pl.nb_dividendes > 0 ? cfa(pl.dividendes_nets) : null}
+                  motif={pl.nb_dividendes === 0 ? 'aucun dividende compté' : undefined}
+                  note={pl.nb_dividendes > 0 ? `${pl.nb_dividendes} versement${pl.nb_dividendes > 1 ? 's' : ''}, nets d’impôt.` : undefined}
+                />
+                <Mesure
+                  libelle="BRVM Composite"
+                  valeur={pl.variation_indice != null ? pourcent(pl.variation_indice) : null}
+                  ton={tonDe(pl.variation_indice)}
+                  motif={pl.variation_indice == null ? 'comparaison non disponible' : undefined}
+                  note={pl.variation_indice != null ? 'Indice de cours, dividendes non inclus, sur la même période.' : undefined}
+                />
+              </dl>
+              <div className="dv-encadre" style={{ marginTop: '3mm' }}>
+                <h3>Hypothèses</h3>
+                <ul>
+                  <li>Entrée au cours de clôture du {fmtDateFR(pl.date_depart)} ({fmtNumber(pl.cours_depart, 0)} FCFA), sans frais de courtage, en nombre de titres fractionnaire.</li>
+                  <li>Dividendes encaissés en numéraire et non réinvestis ; comptés nets d’impôt (un montant déjà net est repris tel quel, un montant brut est diminué de l’impôt{id.taux_irvm != null ? ` au taux de ${taux(id.taux_irvm)}` : ''}).</li>
+                  <li>Cours ajustés des opérations sur titres.</li>
+                  {pl.periode_reduite && (
+                    <li>L’historique en base ne remonte pas à cinq ans : la période retenue est la plus longue disponible, soit {dureeFr(pl.duree_jours)}.</li>
+                  )}
+                  {pl.dividendes_exclus_base > 0 && (
+                    <li>{pl.dividendes_exclus_base} dividende{pl.dividendes_exclus_base > 1 ? 's' : ''} de la période dont la base fiscale (brute ou nette) n’est pas établie {pl.dividendes_exclus_base > 1 ? 'ne sont pas comptés' : 'n’est pas compté'} : la valeur affichée peut être minorée.</li>
+                  )}
+                  {pl.dividendes_non_dates > 0 && (
+                    <li>{pl.dividendes_non_dates} dividende{pl.dividendes_non_dates > 1 ? 's' : ''} sans date de détachement, versé{pl.dividendes_non_dates > 1 ? 's' : ''} une année de bord de la période, {pl.dividendes_non_dates > 1 ? 'ne sont pas comptés' : 'n’est pas compté'}.</li>
+                  )}
+                  {pl.indice_raison && <li>{pl.indice_raison}</li>}
+                </ul>
+              </div>
+            </>
+          ) : (
+            <p className="dv-vide">
+              Moins de six mois de cotation en base, ou historique illisible : la valeur d’un million de FCFA investi n’est pas calculée.
+            </p>
+          )}
+        </Panneau>
+
+        <Panneau
+          n={PANNEAU.bandePer}
+          titre="Valorisation sur cinq ans"
+          chapo="PER à la clôture de chaque exercice bénéficiaire, et PER actuel situé dans cette fourchette."
+        >
+          {bande ? (
+            <>
+              <GraphiqueBarres
+                titre="PER à la clôture de chaque exercice, puis PER actuel"
+                points={[
+                  ...bande.points.map((p) => ({ libelle: String(p.exercice), valeur: p.per })),
+                  ...(per.valeur != null ? [{ libelle: 'Actuel', valeur: per.valeur }] : []),
+                ]}
+                format={(v) => `${fmtNumber(v, 1)} ×`}
+                hauteur={190}
+              />
+              <p className="dv-prose" style={{ marginTop: '2mm' }}>
+                Sur les {bande.points.length} exercices retenus, le PER de fin d’exercice a varié de <strong>{fmtNumber(bande.min, 1)} ×</strong> à{' '}
+                <strong>{fmtNumber(bande.max, 1)} ×</strong>, pour une médiane de <strong>{fmtNumber(bande.mediane, 1)} ×</strong>.{' '}
+                {bande.situation == null
+                  ? 'Le PER actuel n’est pas calculable : il n’est pas situé dans la fourchette.'
+                  : bande.situation === 'dans'
+                    ? `Le PER actuel (${fmtNumber(per.valeur ?? 0, 1)} ×) se situe dans cette fourchette, à ${fmtNumber((bande.position ?? 0) * 100, 0)} % de son amplitude à partir du plus bas.`
+                    : bande.situation === 'sous'
+                      ? `Le PER actuel (${fmtNumber(per.valeur ?? 0, 1)} ×) est inférieur au plus bas de ces exercices.`
+                      : `Le PER actuel (${fmtNumber(per.valeur ?? 0, 1)} ×) est supérieur au plus haut de ces exercices.`}
+              </p>
+              <p className="dv-chapo" style={{ marginBottom: 0 }}>
+                Cours de la dernière séance de chaque exercice, rapporté au bénéfice par action calculé sur le nombre d’actions actuel : un changement du nombre d’actions non ajusté dans les cours fausserait les exercices anciens.
+                {bande.ecartes.length > 0 &&
+                  ` ${bande.ecartes.length} exercice${bande.ecartes.length > 1 ? 's' : ''} écarté${bande.ecartes.length > 1 ? 's' : ''} (${bande.ecartes.map((e) => `${e.exercice}, ${e.raison === 'perte' ? 'perte' : 'cours de fin d’exercice absent'}`).join(' ; ')}).`}
+              </p>
+            </>
+          ) : (
+            <p className="dv-vide">
+              Moins de trois exercices bénéficiaires avec un cours en fin d’exercice : la bande de PER sur cinq ans n’est pas établie.
+            </p>
+          )}
+        </Panneau>
+      </Feuille>
+
+      {/* ── Section 2 · feuilles 9 à 12 ────────────────────────────────── */}
+      <OuvertureSection numero={2} titre="Le cours et sa lecture" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
+        sommaire={['La journée de détachement', 'Cours et niveaux', 'Points d’appui et de vigilance', 'Niveaux et réaction aux publications']} />
+      <Feuille d={d} page={10}>
+        <Panneau
+          n={PANNEAU.detachement}
           titre="La journée de détachement"
           chapo="Le jour où le dividende se détache, le cours baisse mécaniquement du montant versé. Tout ce qui dépasse est un mouvement de marché, et se dit comme tel."
         >
@@ -771,7 +922,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
 
         <Panneau
-          n={9}
+          n={PANNEAU.cours}
           titre="Cours et niveaux"
           chapo={`Clôtures réelles sur ${d.technique.serie.length} séances. Support et résistance sont les bornes du canal des 20 séances précédentes : aucun niveau n'est saisi à la main.`}
         >
@@ -789,20 +940,10 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
       </Feuille>
 
-      {/* ── Feuille 6 · Appréciation ───────────────────────────────────── */}
-      <Feuille d={d} page={10}>
-        <section className="dv-panneau">
-          <h2 className="dv-titre">{lecture!.titre}</h2>
-          <p className="dv-prose">{lecture!.texte}</p>
-          <p className="dv-source">
-            {prose.source === 'polie'
-              ? `Texte relu le ${fmtDateFR(prose.genere_le)}, établi à partir des panneaux de ce dossier. Il ne cite aucun chiffre : tous figurent dans les panneaux.`
-              : 'Texte établi à partir des panneaux de ce dossier. Il ne cite aucun chiffre : tous figurent dans les panneaux.'}
-          </p>
-        </section>
-
+      {/* ── Feuille 11 · Points d'appui et de vigilance (la lecture d'ensemble est en page 3) ── */}
+      <Feuille d={d} page={11}>
         <Panneau
-          n={10}
+          n={PANNEAU.appuis}
           titre="Points d'appui"
           chapo="Chaque ligne porte le chiffre qui la fonde. Une appréciation sans mesure n'en est pas une."
         >
@@ -817,12 +958,12 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           ) : (
             <p className="dv-vide">
               Aucun point d&apos;appui mesurable ne ressort des données disponibles. Cela ne signifie pas qu&apos;il
-              n&apos;y en a pas : voir les points non établis, panneau 12.
+              n&apos;y en a pas : voir les points non établis, panneau {PANNEAU.methode}.
             </p>
           )}
         </Panneau>
 
-        <Panneau n={11} titre="Points de vigilance">
+        <Panneau n={PANNEAU.vigilance} titre="Points de vigilance">
           {n.risques.length > 0 ? (
             <ul className="dv-liste dv-liste--risques">
               {n.risques.map((a) => (
@@ -840,18 +981,18 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         </Panneau>
       </Feuille>
 
-      {/* ── Feuille 7 · Niveaux et réserves ────────────────────────────── */}
-      <Feuille d={d} page={11}>
+      {/* ── Feuille 12 · Niveaux et réaction aux publications ──────────── */}
+      <Feuille d={d} page={12}>
         <Panneau
-          n={12}
-          titre="Niveaux et réserves"
-          chapo="Les objectifs ci-dessous sont des extensions géométriques du canal, pas des prévisions. Ils disent où le mouvement porterait s'il se prolongeait, rien de plus."
+          n={PANNEAU.niveaux}
+          titre="Niveaux"
+          chapo="Les bornes ci-dessous prolongent la géométrie du canal des 20 séances : l’amplitude est l’écart entre la résistance et le support. Ce ne sont ni des prévisions ni des cibles de cours : elles disent où le mouvement porterait s’il se prolongeait, rien de plus."
         >
           <h3 className="dv-sous-titre">{scenarios!.titre}</h3>
           <p className="dv-prose">{scenarios!.texte}</p>
           {lv ? (
             <div className="dv-tableau-cadre">
-              <table className="dv-tableau">
+              <table className="dv-tableau dv-tableau--serre">
                 <thead>
                   <tr>
                     <th scope="col">Niveau</th>
@@ -861,8 +1002,8 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                 </thead>
                 <tbody>
                   {[
-                    ['Extension haussière 2', lv.objectif2],
-                    ['Extension haussière 1', lv.objectif1],
+                    ['Borne haute + 2 amplitudes', lv.objectif2],
+                    ['Borne haute + 1 amplitude', lv.objectif1],
                     ['Résistance', lv.resistance],
                     ['Dernière clôture', lv.dernier],
                     ['Support', lv.support],
@@ -888,38 +1029,58 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               Moins de 22 séances cotées disponibles : aucun canal ne peut être établi, donc aucun niveau.
             </p>
           )}
+        </Panneau>
 
-          <div className="dv-encadre dv-encadre--reserve" style={{ marginTop: '4mm' }}>
-            <h3>Ce que ce dossier ne dit pas</h3>
-            {d.lacunes.length > 0 ? (
-              <ul>
-                {d.lacunes.map((l) => (
-                  <li key={l}>{l}</li>
-                ))}
-              </ul>
-            ) : (
-              <p style={{ margin: 0 }}>
-                Toutes les données attendues sont présentes pour cette valeur. Les limites générales de la méthode
-                restent valables : la BRVM ne publie que la meilleure limite de chaque côté du carnet d&apos;ordres,
-                pas sa profondeur complète, et les comptes intermédiaires ne sont pas audités comme les comptes
-                annuels.
+        <Panneau
+          n={PANNEAU.reaction}
+          titre="Comment le titre a réagi à ses publications"
+          chapo="Les huit dernières publications de résultats : écart entre la variation du titre et celle du BRVM Composite sur les cinq séances qui suivent la date de publication."
+        >
+          {d.reactions ? (
+            <>
+              <div className="dv-tableau-cadre">
+                <table className="dv-tableau dv-tableau--serre">
+                  <thead>
+                    <tr>
+                      <th scope="col">Publication</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Écart à l’indice, 5 séances</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.reactions.lignes.map((l) => (
+                      <tr key={`${l.date}${l.titre}`}>
+                        <td>{libellePublication(l.periode, l.titre)}</td>
+                        <td className="dv-num">{fmtDateCourte(l.date)}</td>
+                        <td className={`dv-num ${l.enCours || l.ecartIndicePct == null ? 'dv-absent' : l.ecartIndicePct > 0 ? 'dv-hausse' : l.ecartIndicePct < 0 ? 'dv-baisse' : ''}`}>
+                          {l.enCours ? 'en cours' : l.ecartIndicePct == null ? 'non mesurable' : `${l.ecartIndicePct >= 0 ? '+' : '−'}${fmtNumber(Math.abs(l.ecartIndicePct), 1)} pt`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="dv-prose" style={{ marginTop: '2mm' }}>
+                {d.reactions.resume.mediane != null
+                  ? <>Médiane des {d.reactions.resume.nMesurees} réactions mesurées : <strong>{d.reactions.resume.mediane >= 0 ? '+' : '−'}{fmtNumber(Math.abs(d.reactions.resume.mediane), 1)} pt</strong>.</>
+                  : <>{d.reactions.resume.nMesurees} réaction{d.reactions.resume.nMesurees > 1 ? 's' : ''} mesurée{d.reactions.resume.nMesurees > 1 ? 's' : ''} sur ses cinq séances : il en faut au moins trois pour calculer une médiane, qui n’est donc pas donnée.</>}
+                {d.reactions.resume.nNonMesurables > 0 && ' Une publication antérieure au début de l’historique de l’indice en base n’est pas mesurable.'}
               </p>
-            )}
-          </div>
-
-          <p className="dv-chapo" style={{ marginTop: '4mm', marginBottom: 0 }}>
-            Établi le {fmtDateFR(d.genere_le)} à partir des données Westbourse. Document d&apos;information : il ne
-            constitue ni un conseil en investissement, ni une incitation à intervenir sur le titre, et ne tient
-            compte ni de votre situation ni de vos objectifs.
-          </p>
+              <p className="dv-chapo" style={{ marginBottom: 0 }}>{RESERVE_REACTION}</p>
+            </>
+          ) : (
+            <p className="dv-vide">
+              Aucune publication de résultats enregistrée pour cette société, ou cours illisibles : la réaction du titre n’est pas mesurée.
+            </p>
+          )}
         </Panneau>
       </Feuille>
 
-      {/* ── Feuille 8 : suivi ─────────────────────────────────────────────── */}
+      {/* ── Section 3 · feuilles 14 à 17 ───────────────────────────────── */}
       <OuvertureSection numero={3} titre="Suivi du titre" photo={photo?.fichier ?? null} entete={entete} societe={nomComplet}
-        sommaire={['Le titre en bourse', 'Dernière publication intermédiaire', 'Face aux sociétés comparables', 'Piliers et rendez-vous']} />
-      <Feuille d={d} page={13}>
-        <Panneau n={13} titre="Le titre en bourse" chapo="Évolution du cours et facilité à traiter le titre, mesurées sur les séances réelles.">
+        sommaire={['Le titre en bourse', 'Dernière publication intermédiaire', 'Face aux sociétés comparables', 'Piliers et rendez-vous', 'Historique des publications, méthode et réserves']} />
+      <Feuille d={d} page={14}>
+        <Panneau n={PANNEAU.titre} titre="Le titre en bourse" chapo="Évolution du cours et facilité à traiter le titre, mesurées sur les séances réelles.">
           <dl className="dv-grille">
             <Mesure libelle="Sur un mois" valeur={pourcent(d.suivi.performance.var_1m)} ton={tonDe(d.suivi.performance.var_1m)} note="Vingt et une séances." />
             <Mesure libelle="Depuis le 1er janvier" valeur={pourcent(d.suivi.performance.var_ytd)} ton={tonDe(d.suivi.performance.var_ytd)} note="Base : dernière clôture de l'année précédente." />
@@ -933,7 +1094,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               valeur={d.suivi.liquidite?.score != null ? `${d.suivi.liquidite.score} / 100${d.suivi.liquidite.classe ? ` · ${d.suivi.liquidite.classe}` : ''}` : null}
               note={
                 d.suivi.liquidite?.spread_pct != null
-                  ? `Écart achat-vente ${d.suivi.liquidite.spread_source === 'carnet' ? 'mesuré sur le carnet' : 'estimé (≈)'} : ${fmtNumber(d.suivi.liquidite.spread_pct, 2)} %.`
+                  ? `Fourchette entre meilleures limites ${d.suivi.liquidite.spread_source === 'carnet' ? 'mesurée sur le carnet' : 'estimée (≈)'} : ${fmtNumber(d.suivi.liquidite.spread_pct, 2)} %.`
                   : undefined
               }
             />
@@ -945,7 +1106,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           </dl>
         </Panneau>
 
-        <Panneau n={14} titre="Dernière publication intermédiaire" chapo="Comparée à la même période de l’année précédente, jamais à une période d’une autre durée.">
+        <Panneau n={PANNEAU.intermediaire} titre="Dernière publication intermédiaire" chapo="Comparée à la même période de l’année précédente, jamais à une période d’une autre durée.">
           {d.suivi.intermediaire ? (
             <div className="dv-tableau-cadre">
               <table className="dv-tableau">
@@ -986,8 +1147,12 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           )}
         </Panneau>
 
+      </Feuille>
+
+      {/* ── Feuille 15 · Comparables ─────────────────────────────────────── */}
+      <Feuille d={d} page={15}>
         <Panneau
-          n={15}
+          n={PANNEAU.comparables}
           titre="Face aux sociétés comparables"
           chapo={d.suivi.medianes ? `Médianes du groupe : ${d.suivi.medianes.groupe}, la société elle-même exclue.` : undefined}
         >
@@ -1022,15 +1187,68 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           ) : (
             <p className="dv-vide">Aucun calcul de comparaison disponible pour cette valeur : la comparaison n’est pas faite.</p>
           )}
+          <h3 className="dv-sous-titre" style={{ marginTop: '6mm' }}>Les sociétés du même secteur</h3>
+          {id.secteur && (
+            <p className="dv-chapo">
+              Sociétés cotées du secteur « {id.secteur} », nommées une à une, avec les mêmes ratios et les mêmes unités que la médiane ci-dessus.
+            </p>
+          )}
+          {d.suivi.comparables_nommes.length > 0 ? (
+            <div className="dv-tableau-cadre">
+              <table className="dv-tableau">
+                <thead>
+                  <tr>
+                    <th scope="col">Société</th>
+                    <th scope="col">PER</th>
+                    <th scope="col">Cours / valeur comptable</th>
+                    <th scope="col">ROE</th>
+                    <th scope="col">Rendement du dividende</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.suivi.comparables_nommes.slice(0, 8).map((p) => {
+                    const cellule = (libelle: string, unite: '%' | 'x') => {
+                      const v = p.valeurs[libelle];
+                      return v == null ? <span className="dv-absent">non disponible</span> : fmtRatio(v, unite);
+                    };
+                    return (
+                      <tr key={p.code}>
+                        <td>{p.designation ?? p.code} <span className="dv-absent">({p.code})</span></td>
+                        <td className="dv-num">{cellule('PER', 'x')}</td>
+                        <td className="dv-num">{cellule('Cours / valeur comptable', 'x')}</td>
+                        <td className="dv-num">{cellule('ROE', '%')}</td>
+                        <td className="dv-num">{cellule('Rendement du dividende', '%')}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr>
+                    <td><strong>{nomComplet}</strong> <span className="dv-absent">({id.code})</span></td>
+                    <td className="dv-num">{fmtRatio(ratioPropre(r, 'PER'), 'x') ?? <span className="dv-absent">non disponible</span>}</td>
+                    <td className="dv-num">{fmtRatio(ratioPropre(r, 'Cours / valeur comptable'), 'x') ?? <span className="dv-absent">non disponible</span>}</td>
+                    <td className="dv-num">{fmtRatio(ratioPropre(r, 'ROE'), '%') ?? <span className="dv-absent">non disponible</span>}</td>
+                    <td className="dv-num">{fmtRatio(ratioPropre(r, 'Rendement du dividende'), '%') ?? <span className="dv-absent">non disponible</span>}</td>
+                  </tr>
+                </tbody>
+              </table>
+              {d.suivi.comparables_nommes.length > 8 && (
+                <p className="dv-chapo" style={{ marginTop: '2mm', marginBottom: 0 }}>
+                  {d.suivi.comparables_nommes.length - 8} autre{d.suivi.comparables_nommes.length - 8 > 1 ? 's' : ''} société{d.suivi.comparables_nommes.length - 8 > 1 ? 's' : ''} du secteur non affichée{d.suivi.comparables_nommes.length - 8 > 1 ? 's' : ''}, comprise{d.suivi.comparables_nommes.length - 8 > 1 ? 's' : ''} dans la médiane.
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="dv-vide">
+              Aucune autre société cotée du même secteur et de la même famille comptable n’a de ratios calculés : seule la médiane du groupe est donnée.
+            </p>
+          )}
         </Panneau>
       </Feuille>
 
-      {/* ── Feuille 9 : piliers et rendez-vous ────────────────────────────────
-          Séparée de la 8 : les quatre panneaux de suivi débordaient d'une A4
-          de 300 à 480 px selon la valeur (mesuré en local, 8 valeurs). */}
-      <Feuille d={d} page={14}>
+      {/* ── Feuille 16 · Piliers et rendez-vous ─────────────────────────────
+          Séparée de la 14 : les panneaux de suivi débordaient d'une A4. */}
+      <Feuille d={d} page={16}>
         <Panneau
-          n={16}
+          n={PANNEAU.piliers}
           titre="Piliers de suivi"
           chapo="Six mesures et le seuil auquel on les lit. Un seuil atteint n’est pas une recommandation : c’est un repère pour suivre la valeur dans le temps."
         >
@@ -1071,8 +1289,101 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               ))}
             </ul>
           ) : (
-            <p className="dv-vide">Aucune date à venir annoncée en base. Aucune n’est estimée.</p>
+            <p className="dv-vide">
+              Aucun rendez-vous daté n’est annoncé en base, et aucune date n’est estimée. L’historique des publications est au {renvoi('publications')}.
+            </p>
           )}
+        </Panneau>
+      </Feuille>
+      {/* ── Feuille 17 · Historique des publications, méthode et réserves ── */}
+      <Feuille d={d} page={17}>
+        <Panneau
+          n={PANNEAU.publications}
+          titre="Historique des publications"
+          chapo="Dates de publication des trois dernières années, par type de document. C’est un historique : il ne dit pas quand paraîtra la prochaine publication, et aucune date n’est estimée."
+        >
+          {d.historique_publications.length > 0 ? (
+            <div className="dv-tableau-cadre">
+              <table className="dv-tableau dv-tableau--serre">
+                <thead>
+                  <tr>
+                    <th scope="col">Type de document</th>
+                    <th scope="col">Dates, de la plus récente à la plus ancienne</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.historique_publications.map((h) => (
+                    <tr key={h.famille.cle}>
+                      <td>{h.famille.libelle}</td>
+                      <td className="dv-num dv-dates">
+                        {h.dates.map((x) => fmtDateCourte(x)).join(' · ')}
+                        {h.total > h.dates.length ? ` · et ${h.total - h.dates.length} plus ancienne${h.total - h.dates.length > 1 ? 's' : ''}` : ''}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="dv-vide">Aucune publication enregistrée en base pour cette société sur les trois dernières années.</p>
+          )}
+        </Panneau>
+
+        <Panneau
+          n={PANNEAU.methode}
+          titre="Méthode et réserves"
+          chapo={`Les panneaux sont construits à partir de la base : cotations, états financiers, dividendes et signaux. Toute approximation y est nommée comme telle ; ce qui manque est déclaré ci-dessous.`}
+        >
+          <dl className="dv-grille">
+            <Mesure
+              libelle="Exercice couvert"
+              valeur={c.exercice}
+              note="Dernier exercice dont les états financiers sont en base."
+            />
+            <Mesure
+              libelle="Séances analysées"
+              valeur={d.technique.serie.length > 0 ? `${d.technique.serie.length}` : null}
+              note="Clôtures réelles, zéros de collecte exclus."
+            />
+            <Mesure
+              libelle="Lecture technique"
+              valeur={d.technique.signal ? (VERDICT[d.technique.signal] ?? d.technique.signal) : null}
+              note={
+                d.technique.date_signal
+                  ? `Signal du ${fmtDateFR(d.technique.date_signal)}. ${zoneRsi(d.technique.rsi) ?? ''} Mesure de tendance, pas une recommandation.`.replace('  ', ' ')
+                  : "Aucun signal calculé pour cette valeur."
+              }
+            />
+            <Mesure
+              libelle="Points non établis"
+              valeur={`${d.lacunes.length}`}
+              note="Détaillés ci-dessous. Une mesure sans donnée est en outre marquée « non disponible » dans son panneau."
+            />
+          </dl>
+
+          <div className="dv-encadre dv-encadre--reserve" style={{ marginTop: '4mm' }}>
+            <h3>Ce que ce dossier ne dit pas</h3>
+            {d.lacunes.length > 0 ? (
+              <ul>
+                {d.lacunes.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ margin: 0 }}>
+                Toutes les données attendues sont présentes pour cette valeur. Les limites générales de la méthode
+                restent valables : la BRVM ne publie que la meilleure limite de chaque côté du carnet d&apos;ordres,
+                pas sa profondeur complète, et les comptes intermédiaires ne sont pas audités comme les comptes
+                annuels.
+              </p>
+            )}
+          </div>
+
+          <p className="dv-chapo" style={{ marginTop: '4mm', marginBottom: 0 }}>
+            Établi le {fmtDateFR(d.genere_le)} à partir des données Westbourse. Document d&apos;information : il ne
+            constitue ni un conseil en investissement, ni une incitation à intervenir sur le titre, et ne tient
+            compte ni de votre situation ni de vos objectifs.
+          </p>
         </Panneau>
       </Feuille>
     </div>

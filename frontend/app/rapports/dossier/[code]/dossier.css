@@ -437,3 +437,18 @@
 .dv-sommaire li { break-inside: avoid; padding: 0.6mm 0; }
 .dv-sommaire li span { font-variant-numeric: tabular-nums; color: var(--dv-encre-douce); margin-right: 1.5mm; }
 .dv-sommaire li em { font-style: normal; color: var(--dv-encre-douce); }
+
+/* Feuille 3 : lecture d'ensemble chiffrée et encadré « Depuis la dernière édition ». */
+.dv-lecture-chiffres { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; margin: 2mm 0; }
+.dv-lecture-chiffres .dv-liste li { font-size: 9pt; padding-bottom: 1.2mm; }
+.dv-lecture-chiffres .dv-liste { gap: 1.2mm; }
+.dv-edition { padding: 2.5mm 4mm; }
+.dv-edition .dv-edition-date { margin: 0 0 1mm; font-size: 8.5pt; color: var(--dv-encre-douce); }
+.dv-edition ul { gap: 0.8mm; font-size: 9pt; }
+
+/* Feuille 17 : liste de dates en continu, sans chasse fixe forcée. */
+.dv-tableau td.dv-dates { text-align: left; font-size: 8.5pt; line-height: 1.5; }
+
+/* Feuille 12 : deux tableaux sur une même A4, lignes resserrées. */
+.dv-tableau--serre th, .dv-tableau--serre td { padding-top: 0.9mm; padding-bottom: 0.9mm; }
+.dv-tableau--serre td.dv-dates { padding-top: 0.6mm; padding-bottom: 0.6mm; }

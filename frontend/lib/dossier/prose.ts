@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { assertNoForeignNumber, assertNoCausalClaim } from '@/lib/hebdo/narrative';
 import type { DossierValeur } from './build';
 import type { Narratif } from './narratif';
+import { renvoi } from './structure';
 
 /**
  * Prose du dossier — squelette PUR, puis version polie sous garde-fou.
@@ -64,18 +65,18 @@ export function construireSquelette(d: DossierValeur, n: Narratif): Squelette {
       : `Ce dossier lit ${nom} sur les séances récentes ; aucun exercice comptable complet n'est en base.`,
   );
   if (forces.length > 0) {
-    phrases.push(`Du côté des points d'appui, le dossier relève : ${enumerer(forces)} (panneau 10).`);
+    phrases.push(`Du côté des points d'appui, le dossier relève : ${enumerer(forces)} (${renvoi('appuis')}).`);
   } else {
-    phrases.push("Aucun point d'appui mesurable ne ressort des données disponibles (panneau 10).");
+    phrases.push(`Aucun point d'appui mesurable ne ressort des données disponibles (${renvoi('appuis')}).`);
   }
   if (risques.length > 0) {
-    phrases.push(`En regard, les points de vigilance sont : ${enumerer(risques)} (panneau 11).`);
+    phrases.push(`En regard, les points de vigilance sont : ${enumerer(risques)} (${renvoi('vigilance')}).`);
   } else {
-    phrases.push("Aucun point de vigilance mesurable ne ressort des données disponibles — ce qui n'est pas une absence de risque (panneau 11).");
+    phrases.push(`Aucun point de vigilance mesurable ne ressort des données disponibles — ce qui n'est pas une absence de risque (${renvoi('vigilance')}).`);
   }
   if (d.lacunes.length > 0) {
     phrases.push(
-      `Ce que le dossier ne peut pas établir est listé au panneau 12 ; ces réserves font partie de la lecture, pas de sa marge.`,
+      `Ce que le dossier ne peut pas établir est listé au ${renvoi('methode')} ; ces réserves font partie de la lecture, pas de sa marge.`,
     );
   }
   phrases.push('Les chiffres qui fondent chaque point figurent dans les panneaux correspondants.');
