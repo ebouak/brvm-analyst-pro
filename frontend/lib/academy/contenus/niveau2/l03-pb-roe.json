@@ -105,6 +105,28 @@
      ]
     ],
     "note": "Le même PER cache deux réalités : c’est le ROE qui fait la différence."
+   },
+   "simulation": {
+    "type": "pb_roe",
+    "consigne": "Modifiez le ROE de chaque société à PER égal, puis vérifiez le lien sur une valeur cotée.",
+    "societes": [
+     {
+      "nom": "Société A",
+      "per": 12,
+      "roe_pct": 25
+     },
+     {
+      "nom": "Société B",
+      "per": 12,
+      "roe_pct": 6
+     }
+    ],
+    "codes": [
+     "NTLC",
+     "PALC",
+     "SNTS",
+     "SGBC"
+    ]
    }
   },
   {

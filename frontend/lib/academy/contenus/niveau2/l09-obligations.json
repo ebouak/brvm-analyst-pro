@@ -49,7 +49,17 @@
      "expression": "Coupon × Jours écoulés ÷ 365",
      "exemple": "Payé en plus du prix à l’achat, rendu au prochain coupon"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "obligation",
+    "consigne": "Changez le prix payé ou le taux des nouveaux emprunts : le rendement réel dépend du prix, et le prix des taux.",
+    "nominal": 10000,
+    "taux_nominal_pct": 6.5,
+    "prix": 9800,
+    "annees_restantes": 5,
+    "jours_ecoules": 0,
+    "taux_marche_pct": 7
+   }
   },
   {
    "type": "cas",

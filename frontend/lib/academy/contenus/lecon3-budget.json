@@ -32,7 +32,8 @@
         { "titre": "Le courtage", "detail": "La rémunération de la SGI, en pourcentage de l’ordre, souvent avec un minimum.", "verifier": "la grille tarifaire de votre SGI." },
         { "titre": "Les commissions de marché", "detail": "Celles de la bourse et du dépositaire central, communes à toutes les SGI." },
         { "titre": "La tenue de compte", "detail": "Certaines SGI facturent des frais annuels de tenue de compte ou de conservation." }
-      ]
+      ],
+      "simulation": { "type": "frais_ordre", "consigne": "Modifiez la quantité et ajoutez un minimum de frais : sur un petit ordre, le minimum pèse bien plus que le taux affiché.", "cours": 2500, "quantite": 10, "taux_frais_pct": 1.5, "minimum_fcfa": 0 }
     },
     {
       "type": "cas",

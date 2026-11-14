@@ -59,6 +59,33 @@
      ]
     ],
     "note": "Ces repères sont des ordres de grandeur pédagogiques, pas des règles réglementaires."
+   },
+   "simulation": {
+    "type": "allocation",
+    "capital": 3000000,
+    "secteurs": [
+     {
+      "nom": "Banques",
+      "pct": 60
+     },
+     {
+      "nom": "Télécoms",
+      "pct": 10
+     },
+     {
+      "nom": "Distribution",
+      "pct": 10
+     },
+     {
+      "nom": "Agro-industrie",
+      "pct": 10
+     },
+     {
+      "nom": "Services publics",
+      "pct": 10
+     }
+    ],
+    "seuil_secteur_pct": 33
    }
   },
   {

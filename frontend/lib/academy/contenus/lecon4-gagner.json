@@ -24,7 +24,8 @@
         { "nom": "Revenu du dividende", "expression": "Nombre d’actions × Dividende par action", "exemple": "300 × 1 000 = 300 000 FCFA" },
         { "nom": "Plus-value", "expression": "(Prix de revente − Prix d’achat) × Nombre d’actions", "exemple": "(5 600 − 5 000) × 200 = 120 000 FCFA" },
         { "nom": "Rendement total", "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie", "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %" }
-      ]
+      ],
+      "simulation": { "type": "rendement_total", "consigne": "Les trois formules réunies : changez le prix de revente ou le dividende, et regardez la part de chacun dans le résultat.", "prix_achat": 5000, "prix_vente": 5600, "actions": 200, "dividendes_par_action": 400, "annees": 1 }
     },
     {
       "type": "cas",

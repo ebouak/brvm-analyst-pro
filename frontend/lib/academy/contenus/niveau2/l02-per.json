@@ -48,7 +48,20 @@
      "valeur": "Plus de 20",
      "detail": "Croissance attendue, ou bénéfice temporairement bas"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "per",
+    "consigne": "Fixez une progression du bénéfice : un PER de 20 payé aujourd’hui redevient un PER de 10 si le bénéfice double. Essayez aussi une valeur cotée.",
+    "cours": 4000,
+    "bpa": 200,
+    "croissance_pct": 0,
+    "annees": 3,
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "ONTBF"
+    ]
+   }
   },
   {
    "type": "cas",

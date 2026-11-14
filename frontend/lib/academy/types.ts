@@ -73,9 +73,16 @@ export const pointSchema = z.object({
 });
 
 /**
- * Simulation CALCULÉE au rendu (lib/academy/simulations.ts) à partir de ces
- * hypothèses — jamais des données de marché.
+ * Simulation CALCULÉE au rendu (lib/academy/simulations.ts, simulateurs.ts,
+ * simTechnique.ts) à partir de ces hypothèses — jamais des données de marché.
+ * Seuls `technique` (clôtures) et le mode réel de `per`/`pb_roe` lisent la base,
+ * par des routes en lecture seule, et affichent date et source.
  */
+/** Phrase d'introduction au simulateur (facultative), affichée au-dessus des champs. */
+const consigneSchema = z.string().min(1).max(300).optional();
+/** Valeurs proposées pour le mode « données réelles » (lues en base, jamais saisies). */
+const codesSchema = z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).max(6).optional().default([]);
+
 const secteurAllocSchema = z.object({ nom: z.string().min(1).max(40), pct: z.number().min(0).max(100) });
 
 export const simulationSchema = z.discriminatedUnion('type', [
@@ -114,7 +121,175 @@ export const simulationSchema = z.discriminatedUnion('type', [
     rendement_pct: z.number().min(0).max(30),
     secteurs: z.array(secteurAllocSchema).min(2).max(8),
   }),
+  // ── Simulateurs des leçons (lib/academy/simulateurs.ts, simTechnique.ts) ──
+  // Valeurs par défaut = hypothèses écrites dans la leçon ; le lecteur les modifie.
+  /** Frais d'un ordre et seuil de rentabilité d'un aller-retour. */
+  z.object({
+    type: z.literal('frais_ordre'),
+    consigne: consigneSchema,
+    cours: z.number().positive().max(10_000_000),
+    quantite: z.number().int().positive().max(1_000_000),
+    taux_frais_pct: z.number().min(0).max(10),
+    minimum_fcfa: z.number().min(0).max(1_000_000).optional().default(0),
+  }),
+  /** Rendement total : dividendes + variation du cours. */
+  z.object({
+    type: z.literal('rendement_total'),
+    consigne: consigneSchema,
+    prix_achat: z.number().positive().max(10_000_000),
+    prix_vente: z.number().positive().max(10_000_000),
+    actions: z.number().int().positive().max(1_000_000),
+    dividendes_par_action: z.number().min(0).max(10_000_000),
+    annees: z.number().int().min(1).max(30),
+  }),
+  /** Valeur future d'une épargne (capital de départ + versements mensuels). */
+  z.object({
+    type: z.literal('valeur_future'),
+    consigne: consigneSchema,
+    capital_initial: z.number().min(0).max(1_000_000_000),
+    versement_mensuel: z.number().min(0).max(100_000_000).optional().default(0),
+    taux_pct: z.number().min(0).max(30),
+    annees: z.number().int().min(1).max(40),
+    objectif: z.number().min(0).max(10_000_000_000).optional().default(0),
+  }),
+  /** PER et rendement bénéficiaire ; `codes` ouvre le mode « données réelles ». */
+  z.object({
+    type: z.literal('per'),
+    consigne: consigneSchema,
+    cours: z.number().positive().max(10_000_000),
+    bpa: z.number().positive().max(10_000_000),
+    croissance_pct: z.number().min(-49).max(50).optional().default(0),
+    annees: z.number().int().min(1).max(10).optional().default(3),
+    codes: codesSchema,
+  }),
+  /** P/B = PER × ROE, sur une à trois sociétés fictives ; `codes` pour le réel. */
+  z.object({
+    type: z.literal('pb_roe'),
+    consigne: consigneSchema,
+    societes: z.array(z.object({
+      nom: z.string().min(1).max(40),
+      per: z.number().positive().max(200),
+      roe_pct: z.number().min(-99).max(100),
+    })).min(1).max(3),
+    codes: codesSchema,
+  }),
+  /** Banque : coefficient d'exploitation, coût du risque. */
+  z.object({
+    type: z.literal('banque'),
+    consigne: consigneSchema,
+    pnb: z.number().positive().max(1e13),
+    frais_generaux: z.number().min(0).max(1e13),
+    cout_risque: z.number().min(0).max(1e13),
+    unite: z.string().min(1).max(20).optional().default('FCFA'),
+  }),
+  /** Droit préférentiel de souscription. */
+  z.object({
+    type: z.literal('dps'),
+    consigne: consigneSchema,
+    cours: z.number().positive().max(10_000_000),
+    prix_emission: z.number().positive().max(10_000_000),
+    parite: z.number().int().min(1).max(100),
+    actions: z.number().int().positive().max(1_000_000),
+  }),
+  /** Rendement net d'IRVM, par pays (barème lib/tax, jamais recodé). */
+  z.object({
+    type: z.literal('rendement_net'),
+    consigne: consigneSchema,
+    dividende_brut: z.number().positive().max(10_000_000),
+    cours: z.number().positive().max(10_000_000),
+    pays: z.enum(['BJ', 'BF', 'CI', 'GW', 'ML', 'NE', 'SN', 'TG']).optional().default('CI'),
+    /** Affiche aussi le net en euros (parité fixe), pour la diaspora. */
+    euros: z.boolean().optional().default(false),
+  }),
+  /** Obligation : rendement courant, actuariel (lib/bonds), coupon couru. */
+  z.object({
+    type: z.literal('obligation'),
+    consigne: consigneSchema,
+    nominal: z.number().positive().max(10_000_000),
+    taux_nominal_pct: z.number().min(0).max(30),
+    prix: z.number().positive().max(10_000_000),
+    annees_restantes: z.number().int().min(1).max(30),
+    jours_ecoules: z.number().int().min(0).max(364).optional().default(0),
+    taux_marche_pct: z.number().positive().max(30),
+  }),
+  /** Frais d'un OPCVM sur la durée de placement. */
+  z.object({
+    type: z.literal('opcvm_frais'),
+    consigne: consigneSchema,
+    montant: z.number().positive().max(1_000_000_000),
+    annees: z.number().int().min(1).max(30),
+    frais_entree_pct: z.number().min(0).max(10),
+    frais_gestion_pct: z.number().min(0).max(10),
+    frais_sortie_pct: z.number().min(0).max(10).optional().default(0),
+    performance_pct: z.number().min(-20).max(20).optional().default(0),
+  }),
+  /** Taille de position selon le risque accepté et le stop. */
+  z.object({
+    type: z.literal('position'),
+    consigne: consigneSchema,
+    portefeuille: z.number().positive().max(10_000_000_000),
+    risque_pct: z.number().positive().max(20),
+    prix_achat: z.number().positive().max(10_000_000),
+    stop: z.number().positive().max(10_000_000),
+    objectif: z.number().min(0).max(10_000_000).optional().default(0),
+  }),
+  /** Souscription à une introduction : réduction proportionnelle des ordres. */
+  z.object({
+    type: z.literal('souscription_ipo'),
+    consigne: consigneSchema,
+    titres_offerts: z.number().int().positive().max(10_000_000_000),
+    prix: z.number().positive().max(10_000_000),
+    taux_souscription_pct: z.number().positive().max(2000),
+    demande: z.number().int().positive().max(10_000_000),
+  }),
+  /** Affectation du résultat : bénéfice par action, dividende, réserves. */
+  z.object({
+    type: z.literal('distribution'),
+    consigne: consigneSchema,
+    resultat_net: z.number().positive().max(1e13),
+    actions: z.number().int().positive().max(10_000_000_000),
+    taux_distribution_pct: z.number().min(0).max(150),
+  }),
+  /** Change euro – franc CFA (parité fixe) et frais de transfert. */
+  z.object({
+    type: z.literal('change'),
+    consigne: consigneSchema,
+    montant_eur: z.number().positive().max(10_000_000),
+    frais_pct: z.number().min(0).max(20).optional().default(0),
+    frais_fixes_eur: z.number().min(0).max(10_000).optional().default(0),
+    cours_action: z.number().min(0).max(10_000_000).optional().default(0),
+  }),
+  /** Indicateur technique sur une SÉRIE RÉELLE (/api/academy/serie). */
+  z.object({
+    type: z.literal('technique'),
+    consigne: consigneSchema,
+    indicateur: z.enum(['variation', 'moyennes', 'rsi', 'macd']),
+    codes: z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).min(1).max(6),
+    courte: z.number().int().min(2).max(100).optional().default(20),
+    longue: z.number().int().min(3).max(200).optional().default(50),
+    periode: z.number().int().min(2).max(50).optional().default(14),
+    seuil_haut: z.number().min(50).max(95).optional().default(70),
+    seuil_bas: z.number().min(5).max(50).optional().default(30),
+  }),
+  /** Chandelier japonais construit à partir de quatre prix saisis. */
+  z.object({
+    type: z.literal('chandelier'),
+    consigne: consigneSchema,
+    ouverture: z.number().positive().max(10_000_000),
+    haut: z.number().positive().max(10_000_000),
+    bas: z.number().positive().max(10_000_000),
+    cloture: z.number().positive().max(10_000_000),
+  }),
 ]).superRefine((s, ctx) => {
+  if (s.type === 'position' && !(s.stop < s.prix_achat)) {
+    ctx.addIssue({ code: 'custom', message: 'le stop doit être sous le prix d’achat' });
+  }
+  if (s.type === 'chandelier' && (s.haut < Math.max(s.ouverture, s.cloture) || s.bas > Math.min(s.ouverture, s.cloture))) {
+    ctx.addIssue({ code: 'custom', message: 'bougie impossible : plus haut / plus bas incohérents' });
+  }
+  if (s.type === 'technique' && !(s.longue > s.courte)) {
+    ctx.addIssue({ code: 'custom', message: 'la moyenne longue doit compter plus de séances que la courte' });
+  }
   if (s.type === 'scenario_baisse' || s.type === 'allocation') {
     const total = s.secteurs.reduce((t, x) => t + x.pct, 0);
     if (s.type === 'scenario_baisse' && Math.abs(total - 100) > 0.01) {

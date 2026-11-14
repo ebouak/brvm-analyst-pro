@@ -45,7 +45,16 @@
      "expression": "Risque maximal ÷ Risque par action",
      "exemple": "50 000 ÷ 200 = 250 actions, soit 500 000 FCFA investis"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "position",
+    "consigne": "Déplacez le stop ou le risque accepté : la taille de la position en découle, et l’objectif donne le rapport gain sur risque.",
+    "portefeuille": 5000000,
+    "risque_pct": 1,
+    "prix_achat": 2000,
+    "stop": 1800,
+    "objectif": 2500
+   }
   },
   {
    "type": "cas",

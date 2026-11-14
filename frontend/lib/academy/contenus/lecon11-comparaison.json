@@ -38,7 +38,8 @@
           "expression": "(Dividendes + Cours final − Cours initial) ÷ Cours initial × 100",
           "exemple": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 %"
         }
-      ]
+      ],
+      "simulation": { "type": "rendement_total", "consigne": "Comparez avec et sans dividende, puis allongez la durée : le rendement annuel moyen se compare d’un placement à l’autre.", "prix_achat": 10000, "prix_vente": 10600, "actions": 1, "dividendes_par_action": 400, "annees": 1 }
     },
     {
       "type": "importance",

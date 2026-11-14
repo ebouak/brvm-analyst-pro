@@ -4,6 +4,8 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import type { Simulation } from '@/lib/academy/types';
 import { capitalPourObjectif, simulerReinvestissement } from '@/lib/academy/simulations';
 import SimulationInteractive from './SimulationsInteractives';
+import SimulateurLecon from './SimulateursLecon';
+import SimulateurTechnique from './SimulateurTechnique';
 
 /**
  * Simulations pédagogiques d'une leçon : calculées au rendu à partir des
@@ -152,5 +154,7 @@ function Objectif({ sim }: { sim: Extract<Simulation, { type: 'objectif' }> }) {
 export default function SimulationLecon({ sim }: { sim: Simulation }) {
   if (sim.type === 'reinvestissement') return <Reinvestissement sim={sim} />;
   if (sim.type === 'objectif') return <Objectif sim={sim} />;
-  return <SimulationInteractive sim={sim} />;
+  if (sim.type === 'carnet' || sim.type === 'allocation' || sim.type === 'scenario_baisse') return <SimulationInteractive sim={sim} />;
+  if (sim.type === 'technique') return <SimulateurTechnique sim={sim} />;
+  return <SimulateurLecon sim={sim} />;
 }

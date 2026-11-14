@@ -85,7 +85,15 @@
      "valeur": "24 septembre 2026",
      "detail": "48e société cotée de la BRVM"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "souscription_ipo",
+    "consigne": "Chiffres publiés de l’offre BBGC. Indiquez le nombre de titres que vous auriez demandés : la réduction suit ici une règle proportionnelle.",
+    "titres_offerts": 10000000,
+    "prix": 6750,
+    "taux_souscription_pct": 142,
+    "demande": 100
+   }
   },
   {
    "type": "cas",

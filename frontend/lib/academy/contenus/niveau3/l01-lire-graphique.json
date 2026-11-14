@@ -59,6 +59,17 @@
      ]
     ],
     "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+   },
+   "simulation": {
+    "type": "technique",
+    "indicateur": "variation",
+    "consigne": "Choisissez une valeur : sa variation est mesurée sur quatre horizons, à partir de ses clôtures réelles.",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "ORAC",
+     "PALC"
+    ]
    }
   },
   {

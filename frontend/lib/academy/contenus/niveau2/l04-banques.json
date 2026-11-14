@@ -97,7 +97,15 @@
      "valeur": "Supérieure à 14 %",
      "detail": "Selon la banque, au-dessus du seuil réglementaire"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "banque",
+    "consigne": "Chiffres publiés par la SIB pour 2025 ; les frais généraux sont déduits du coefficient publié (38,59 % de 108,7 Md). Faites varier le coût du risque.",
+    "pnb": 108.7,
+    "frais_generaux": 41.9,
+    "cout_risque": 3.6,
+    "unite": "Md FCFA"
+   }
   },
   {
    "type": "cas",

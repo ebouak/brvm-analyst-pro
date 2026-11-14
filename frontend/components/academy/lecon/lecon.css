@@ -369,3 +369,19 @@
 @media (prefers-reduced-motion: no-preference) {
   .lp-bouton { transition: background-color 120ms ease; }
 }
+
+/* ── Simulateurs des leçons (frais, PER, DPS, obligation, technique…) ──── */
+.lp-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0 1.25rem; margin-top: 0.4rem; }
+.lp-champs .lp-champ { max-width: none; }
+.lp-unite { color: var(--lp-doux); }
+.lp-champ-aide { font-size: 0.78rem; color: var(--lp-doux); }
+.lp-societes { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 1.5rem; }
+.lp-table tr.lp-ligne-choisie th, .lp-table tr.lp-ligne-choisie td { background: var(--lp-accent-clair); font-weight: 600; }
+.lp-bougie-atelier { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; }
+.lp-bougie { display: block; max-width: 100%; height: auto; }
+.lp-curseur--seul { margin-top: 0.9rem; }
+.lp-bloc-court { margin-top: 0.75rem; }
+@media (max-width: 640px) {
+  .lp-bougie-atelier { grid-template-columns: 1fr; justify-items: center; }
+  .lp-bougie-atelier .lp-champs { width: 100%; }
+}

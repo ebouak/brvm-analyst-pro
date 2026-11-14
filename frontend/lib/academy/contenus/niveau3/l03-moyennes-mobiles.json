@@ -43,7 +43,21 @@
      "valeur": "Hésitation",
      "detail": "Tendances courte et longue divergentes"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "technique",
+    "indicateur": "moyennes",
+    "consigne": "Raccourcissez ou allongez les moyennes sur une série réelle : plus elles sont courtes, plus elles suivent le cours de près.",
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "SGBC",
+     "ETIT",
+     "SIBC"
+    ],
+    "courte": 20,
+    "longue": 50
+   }
   },
   {
    "type": "cas",
