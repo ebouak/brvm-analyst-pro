@@ -9,6 +9,7 @@
     "publie": "node publie.mjs",
     "seance": "node genere.mjs && node publie.mjs",
     "dossiers": "node dossiers.mjs",
+    "releves": "node releves.mjs",
     "test": "node --test"
   },
   "dependencies": {

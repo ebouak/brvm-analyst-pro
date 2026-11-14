@@ -1,0 +1,129 @@
+name: Relevé mensuel du portefeuille
+
+# Le 2 de chaque mois, 08:00 UTC, pour le MOIS ÉCOULÉ :
+#   1. génère le relevé de chaque compte Premium (scraper : npm run monthly-reports) —
+#      calcul pur sur les positions, AUCUN appel de modèle de langage ;
+#   2. imprime chaque relevé en PDF A4 (video/releves.mjs) et le range dans le
+#      bucket PRIVÉ `releves` (<compte>/<AAAA-MM>.pdf) ;
+#   3. envoie le PDF aux comptes qui l'ont demandé (notification_prefs.releve_email /
+#      releve_telegram, décochés par défaut) : npm run releve:envoi.
+#
+# DONNÉES PRIVÉES. Aucun secret partagé n'ouvre la page d'un relevé : pour chaque
+# relevé, le worker tire un jeton aléatoire à usage unique (5 minutes), le
+# présente dans l'en-tête `x-releve-render` et l'efface en base quoi qu'il arrive.
+# Le jeton n'est jamais dans une URL ni dans les journaux.
+#
+# Le 2 et non le 1er : la séance du dernier jour du mois et les cours qui la
+# suivent doivent être en base ; le relevé se lit au dernier cours connu.
+#
+# Idempotent : un relevé déjà envoyé n'est pas régénéré ni renvoyé ; un PDF déjà
+# prêt n'est pas réimprimé ; relancer à la main ne renvoie rien à personne.
+#
+# Secrets requis (tous déjà utilisés par les workflows dossier / alertes —
+# AUCUN nouveau) : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY,
+# ALERTS_EMAIL_FROM, TELEGRAM_BOT_TOKEN. Variable facultative : DOSSIER_SITE_URL
+# (défaut https://www.westbourse.com). ⚠️ La page /rapports/releve/[id] doit être
+# DÉPLOYÉE en production avant le premier passage.
+
+on:
+  schedule:
+    - cron: '0 8 2 * *'
+  workflow_dispatch:
+    inputs:
+      mois:
+        description: 'Mois visé AAAA-MM (vide = mois précédent)'
+        type: string
+        default: ''
+      envoyer:
+        description: 'Envoyer les relevés aux comptes abonnés (décocher pour générer et imprimer seulement)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: releves
+  cancel-in-progress: false
+
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
+jobs:
+  releves:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      MOIS_SAISI: ${{ inputs.mois }}
+      LOG_LEVEL: info
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Mois visé
+        id: mois
+        run: |
+          if [ -n "$MOIS_SAISI" ]; then
+            MOIS="$MOIS_SAISI"
+          else
+            MOIS=$(date -u -d "$(date -u +%Y-%m-01) -1 month" +%Y-%m)
+          fi
+          case "$MOIS" in
+            [0-9][0-9][0-9][0-9]-0[1-9]|[0-9][0-9][0-9][0-9]-1[0-2]) ;;
+            *) echo "::error::mois invalide : $MOIS (attendu AAAA-MM)"; exit 1 ;;
+          esac
+          echo "mois=$MOIS" >> "$GITHUB_OUTPUT"
+          echo "Mois visé : $MOIS"
+
+      - name: Installer les dépendances du scraper
+        working-directory: scraper
+        run: npm ci
+
+      - name: Générer les relevés
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run monthly-reports -- ${{ steps.mois.outputs.mois }}
+
+      - name: Vérifier la génération
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/verify-data.ts monthly "${{ steps.mois.outputs.mois }}"
+
+      - name: Polices
+        # Le rendu est un navigateur : sans polices, Chromium retombe sur une
+        # fonte de secours et la mise en page A4 mesurée en test ne tient plus.
+        run: sudo apt-get install -y fonts-liberation fonts-dejavu-core
+
+      - name: Installer les dépendances d'impression
+        working-directory: video
+        run: npm ci
+
+      - name: Installer Chromium
+        working-directory: video
+        run: npx playwright install chromium --with-deps
+
+      - name: Imprimer et ranger les PDF
+        working-directory: video
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DOSSIER_SITE_URL: ${{ vars.DOSSIER_SITE_URL }}
+        run: node releves.mjs "${{ steps.mois.outputs.mois }}"
+
+      - name: Envoyer les relevés aux comptes abonnés
+        # APRÈS l'impression : seuls les relevés dont le PDF est rangé partent.
+        # Un échec reste visible en rouge sur l'étape.
+        if: inputs.envoyer != false
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: npm run releve:envoi -- ${{ steps.mois.outputs.mois }}

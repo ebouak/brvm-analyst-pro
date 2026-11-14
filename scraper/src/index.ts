@@ -28,9 +28,10 @@
  *   tsx src/index.ts backfill SNTS ETIT    # backfill codes spécifiques
  *   tsx src/index.ts backfill --from=2022-01-01  # depuis une date
  *   tsx src/index.ts backfill --dry-run    # simuler sans écrire
- *   tsx src/index.ts monthly-reports       # générer rapports PDF mensuels
+ *   tsx src/index.ts monthly-reports       # générer les relevés mensuels (report_json)
  *   tsx src/index.ts monthly-reports 2026-06  # mois spécifique
- *   tsx src/index.ts monthly-reports --dry-run # mode test (sans email/DB)
+ *   tsx src/index.ts monthly-reports --dry-run # mode test (rien n'est écrit)
+ *   tsx src/index.ts releve:envoi [AAAA-MM]  # envoyer les relevés dont le PDF est prêt
  *   tsx src/index.ts paper-trading:auto    # ouvrir positions depuis signaux forts
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
@@ -75,7 +76,6 @@ import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 import { runBrief } from './brief/runBrief.js';
 import { runVeille } from './runners/runVeille.js';
 import { runForumTrending } from './crons/forum-trending.js';
-// runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
 import { withMonitoring, type MonitoredResult, type SourceRef } from './monitoring/recordRun.js';
@@ -1270,32 +1270,55 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
     case 'monthly-reports': {
+      // Relevé mensuel du portefeuille (lot 6) : calcul pur sur les positions,
+      // aucun appel LLM. Le PDF est imprimé par video/releves.mjs, l'envoi par
+      // `releve:envoi`.
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
-      const { runMonthlyReports } = await import('./runners/runMonthlyReports.js');
+      const { runReleves } = await import('./releve/runReleves.js');
       const res = await monitored(
-        { code: 'monthly-reports', label: 'Rapports mensuels (par portefeuille)' },
+        { code: 'monthly-reports', label: 'Relevés mensuels (portefeuille)' },
         async () => {
-          const r = await runMonthlyReports({ month, dryRun });
+          const r = await runReleves({ month, dryRun });
           return {
             value: r,
             outcome: {
               status: r.status,
-              rows_extracted: r.usersProcessed,
-              rows_upserted: r.reportsGenerated,
+              rows_extracted: r.comptes,
+              rows_upserted: r.generes,
               metadata: {
-                status: r.status,
-                reportsGenerated: r.reportsGenerated,
-                skipped: r.skipped,
-                errors: r.errors.length,
-                month: month ?? 'auto',
+                month: r.month,
+                generes: r.generes,
+                ignores: r.ignores,
+                dejaEnvoyes: r.dejaEnvoyes,
+                erreurs: r.erreurs,
               },
             },
           };
         },
       );
-      logger.info(res, 'Monthly reports generation complete');
+      logger.info(res, 'Génération des relevés mensuels terminée');
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'releve:envoi': {
+      const month = positional[0];
+      const { runEnvoiReleves } = await import('./releve/runEnvoiReleves.js');
+      const res = await monitored(
+        { code: 'releve-envoi', label: 'Envoi des relevés mensuels' },
+        async () => {
+          const r = await runEnvoiReleves({ month, mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.comptes,
+              rows_upserted: r.envoyes,
+              metadata: { month: r.month, envoyes: r.envoyes, ignores: r.ignores, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      return res.echecs > 0 ? 1 : 0;
     }
     case 'paper-trading:auto': {
       const res = await runPaperTradingAuto();
@@ -1335,7 +1358,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | forum-trending | publications | backfill | validate | notations | details | news | veille | monthly-reports',
+        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | forum-trending | publications | backfill | validate | notations | details | news | veille | monthly-reports | releve:envoi',
       );
       return 1;
   }

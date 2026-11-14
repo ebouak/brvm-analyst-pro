@@ -70,6 +70,8 @@
     "brief:whatsapp:mock": "tsx src/index.ts brief:whatsapp --mock",
     "monthly-reports": "tsx src/index.ts monthly-reports",
     "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run",
+    "releve:envoi": "tsx src/index.ts releve:envoi",
+    "releve:envoi:mock": "tsx src/index.ts releve:envoi --mock",
     "bdfin:instruments": "tsx src/index.ts bdfin:instruments",
     "bdfin:market": "tsx src/index.ts bdfin:market",
     "bdfin:market:date": "tsx src/index.ts bdfin:market:date",

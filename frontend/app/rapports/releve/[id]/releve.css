@@ -1,0 +1,39 @@
+/* Relevé mensuel : compléments au système de document (`.doc-*`). Préfixe `rl-`. */
+
+.rl-actions {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  max-width: 210mm; margin: 0 auto 14px; font-size: 13px; color: var(--doc-encre-douce);
+}
+.rl-actions a { color: var(--doc-accent); text-decoration: none; }
+.rl-bouton {
+  font: inherit; font-size: 13px; padding: 7px 14px; border: 1px solid var(--doc-encre);
+  background: var(--doc-papier); color: var(--doc-encre); cursor: pointer;
+}
+.rl-bouton:hover { background: var(--doc-encre); color: var(--doc-papier); }
+@media print { .rl-actions { display: none; } }
+
+.rl-titre { margin-top: 8mm; }
+.rl-chapo { margin: 2mm 0 0; font-size: 11pt; color: var(--doc-encre-douce); max-width: 60ch; }
+
+.rl-hausse { color: var(--doc-hausse); }
+.rl-baisse { color: var(--doc-baisse); }
+
+.rl-table { width: 100%; border-collapse: collapse; margin-top: 6mm; font-size: 10pt; table-layout: fixed; }
+.rl-table th {
+  text-align: left; font-weight: 600; font-size: 9pt; color: var(--doc-faible);
+  padding: 0 2mm 2mm 0; border-bottom: 1px solid var(--doc-encre);
+}
+.rl-table td { padding: 2.2mm 2mm 2.2mm 0; border-bottom: 1px solid var(--doc-trame); vertical-align: top; overflow-wrap: anywhere; }
+.rl-table .rl-n { text-align: right; padding-right: 0; padding-left: 2mm; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rl-table th.rl-n { padding-left: 2mm; }
+.rl-table small { display: block; font-size: 9pt; color: var(--doc-faible); font-weight: 400; }
+.rl-table tfoot td { border-bottom: 0; border-top: 1px solid var(--doc-encre); font-weight: 600; }
+.rl-exclue td { color: var(--doc-faible); font-style: italic; }
+.rl-clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.rl-vide { margin: 8mm 0 0; font-size: 11pt; color: var(--doc-encre-douce); max-width: 56ch; }
+.rl-resume { margin: 5mm 0 0; font-size: 10pt; color: var(--doc-encre-douce); }
+.rl-resume strong { color: var(--doc-encre); font-weight: 600; }
+.rl-sous-titre { margin: 8mm 0 0; font-size: 12pt; font-weight: 600; }
+
+.rl-erreur { max-width: 210mm; margin: 40px auto; padding: 24px; background: var(--doc-papier); color: var(--doc-encre); }

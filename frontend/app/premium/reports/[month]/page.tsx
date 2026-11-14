@@ -1,122 +1,57 @@
-import { createClient } from '@/lib/supabase/server';
-import { MonthlyReportViewer } from '@/components/MonthlyReportViewer';
-import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { SectionHeader } from '@/components/ui/premium';
+import { libelleMois, lireReleve } from '@/lib/releve/affichage';
 
 export const metadata = {
-  title: 'Rapport Mensuel',
+  title: 'Relevé mensuel',
 };
 
-interface MonthlyReport {
-  id: string;
-  month: string;
-  report_url: string | null;
-  report_json: Record<string, any> | null;
-  sent_at: string | null;
-  created_at: string;
-}
+export const dynamic = 'force-dynamic';
 
-export default async function ReportDetailPage(props: { params: Promise<{ month: string }> }) {
-  const params = await props.params;
-  const supabase = await createClient();
+/**
+ * Ancienne adresse d'un rapport par mois. Un relevé au nouveau format est
+ * redirigé vers sa page (`/rapports/releve/[id]`) ; un ancien rapport (sans
+ * `version` 2, produit sur le portefeuille simulé) n'a plus de page : il
+ * affichait des « signaux du mois » et des « recommandations » que le produit
+ * ne délivre plus.
+ */
+export default async function RapportParMoisPage(props: { params: Promise<{ month: string }> }) {
+  const { month } = await props.params;
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) notFound();
 
-  // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-        <p className="text-muted">Veuillez vous connecter pour accéder à ce rapport.</p>
+        <p className="text-muted">Veuillez vous connecter pour accéder à ce relevé.</p>
       </div>
     );
   }
 
-  // Validate month format (YYYY-MM)
-  if (!/^\d{4}-\d{2}$/.test(params.month)) {
-    notFound();
-  }
-
-  // Fetch report for current user
-  const { data: report, error } = await supabase
+  const { data: ligne } = await supabase
     .from('monthly_reports')
-    .select('id, month, report_url, report_json, sent_at, created_at')
+    .select('id, month, report_json')
     .eq('user_id', user.id)
-    .eq('month', params.month)
-    .single();
+    .eq('month', month)
+    .maybeSingle();
+  if (!ligne) notFound();
 
-  if (error || !report) {
-    notFound();
-  }
-
-  const reportData = report as MonthlyReport;
-  const monthName = new Intl.DateTimeFormat('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(`${params.month}-01`));
-
-  // Handle missing report_json
-  if (!reportData.report_json) {
-    return (
-      <div className="min-h-screen bg-bg">
-        <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-xs text-muted mb-8">
-            <Link href="/premium/reports" className="hover:text-gold transition">
-              Rapports
-            </Link>
-            <span>/</span>
-            <span className="capitalize">{monthName}</span>
-          </nav>
-
-          <EmptyStatePremium
-            title="Rapport en cours de génération"
-            hint="Veuillez patienter quelques instants ou revenir plus tard"
-            icon="⏳"
-          />
-        </div>
-      </div>
-    );
-  }
+  if (lireReleve(ligne.report_json)) redirect(`/rapports/releve/${ligne.id}`);
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs text-muted mb-8">
-          <Link href="/premium/reports" className="hover:text-gold transition">
-            Rapports
-          </Link>
-          <span>/</span>
-          <span className="capitalize">{monthName}</span>
-        </nav>
-
-        {/* Page title */}
-        <SectionHeader
-          title={monthName}
-          subtitle="Vos performances du mois, les signaux marquants et les événements de marché."
-        />
-
-        {/* Report viewer component */}
-        <div className="mt-8 sm:mt-12">
-          <MonthlyReportViewer
-            report={reportData.report_json as any}
-            pdfUrl={reportData.report_url || undefined}
-          />
-        </div>
-
-        {/* Footer navigation */}
-        <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
-          <Link href="/premium/reports" className="text-sm text-gold hover:text-gold/80 transition">
-            ← Retour à l&apos;archive
-          </Link>
-          <p className="text-xs text-muted">
-            Généré le {new Date(reportData.created_at).toLocaleDateString('fr-FR')}
-          </p>
-        </div>
+      <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+        <SectionHeader title={`Relevé de ${libelleMois(month)}`} subtitle="Ancien format (portefeuille simulé)." />
+        <p className="mt-6 text-sm text-muted">
+          Ce rapport a été produit avant la refonte du relevé mensuel : il n’a pas de version détaillée ni de PDF.
+          Les relevés suivants portent sur votre portefeuille réel.
+        </p>
+        <p className="mt-4 text-sm">
+          <Link href="/premium/reports" className="text-accent-ink hover:underline">Retour à mes relevés</Link>
+        </p>
       </div>
     </div>
   );
