@@ -12,8 +12,14 @@ import { ancienScore, ecartHautBas, entreeSeance, spearman, variantesScore, type
  * relatif au marché (constat A3 : garder les composantes dont le signe est
  * prouvé). Rien n'est écrit en base ; aucun seuil n'est changé ici.
  */
-const DEBUT_HISTO = '2023-01-01'; // de quoi calculer RSI, MACD et moyennes avant le premier score
-const DEBUT_SCORES = '2024-01-01';
+// Période rejouée : par défaut 2024 → aujourd'hui. REJEU_DEBUT / REJEU_FIN (AAAA-MM-JJ)
+// permettent un test HORS ÉCHANTILLON sur l'historique antérieur (2008-2023), que
+// la formule n'a jamais vu. Les cours restent lus après REJEU_FIN, pour que les
+// horizons de 5 à 60 séances des derniers signaux soient mesurables.
+const DEBUT_SCORES = process.env.REJEU_DEBUT ?? '2024-01-01';
+const FIN_SCORES = process.env.REJEU_FIN ?? '9999-12-31';
+// Un an avant le premier score : de quoi calculer RSI, MACD et moyennes.
+const DEBUT_HISTO = `${Number(DEBUT_SCORES.slice(0, 4)) - 1}${DEBUT_SCORES.slice(4)}`;
 const HORIZONS_CORR = [5, 10, 20];
 
 export async function runRejeuSignaux(): Promise<{ rapport: string }> {
@@ -52,7 +58,7 @@ export async function runRejeuSignaux(): Promise<{ rapport: string }> {
   const comp: { code: string; date: string; pos: number; variation: number; volume: number; macd: number; rsi: number; tendance: number; nouveau: number; ancien: number }[] = [];
   for (const [, histo] of parCode) {
     for (let i = 0; i < histo.length; i++) {
-      if (histo[i]!.date < DEBUT_SCORES) continue;
+      if (histo[i]!.date < DEBUT_SCORES || histo[i]!.date > FIN_SCORES) continue;
       const r = computeScore(entreeSeance(histo, i, liquidite.get(`${histo[i]!.code}|${histo[i]!.date}`) ?? null));
       if (r.inputs.incomplet) continue;
       const ancien = ancienScore(r);

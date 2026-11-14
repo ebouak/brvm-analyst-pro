@@ -56,7 +56,9 @@ export const SCORING_PARAMS = {
    * Aucun signal de vente n'est émis (2026-11-13). Le banc l'a mesuré sur
    * 31 666 séances (docs/signaux/rejeu-2026-11-13.md) : les titres notés sous
    * −0,45 font MIEUX que le marché (+1,90 % à 5 séances, +2,22 % à 20, prouvé),
-   * et sous −0,60 le sens est le même sans être prouvé. Le score devient négatif
+   * et sous −0,60 le sens est le même sans être prouvé. Confirmé HORS ÉCHANTILLON
+   * sur 2008-2023 (109 634 séances, docs/signaux/rejeu-2008-2023.md) : sous −0,60,
+   * +6,2 % / +8,4 % / +9,0 % face au marché à 5 / 20 / 60 séances, tous prouvés. Le score devient négatif
    * après une forte baisse, souvent suivie d'un rebond à la BRVM : « vendre »
    * pousserait à vendre au plus bas. Le score reste calculé et publié ; le signal
    * redevient « neutre ». À rouvrir seulement sur un verdict « prouvé : sous-performe ».
