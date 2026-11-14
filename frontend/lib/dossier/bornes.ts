@@ -16,6 +16,8 @@ export const BORNES = {
   notesPlacement: 1,
   /** Feuille 8 : exercices écartés nommés sous la bande de PER. */
   ecartesBande: 3,
+  /** Feuille 3 : points d'appui et de vigilance chiffrés, par côté, sous la lecture d'ensemble. */
+  pointsLecture: 2,
 } as const;
 
 export interface ListeBornee<T> {
