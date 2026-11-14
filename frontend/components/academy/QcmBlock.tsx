@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import type { Qcm } from '@/lib/academy/types';
+import { melangerQcm } from '@/lib/academy/melange';
 
 /** Même seuil que les examens de niveau : 70 %. */
 const SEUIL = 0.7;
@@ -15,7 +16,7 @@ const SEUIL = 0.7;
  * passage. « Recommencer » permet de rejouer.
  */
 export default function QcmBlock({
-  questions,
+  questions: brutes,
   alreadyPassed,
   onAnswer,
 }: {
@@ -23,6 +24,8 @@ export default function QcmBlock({
   alreadyPassed: boolean | null;
   onAnswer: (passed: boolean) => void;
 }) {
+  // Options permutées (lib/academy/melange.ts) : la bonne réponse n'est plus toujours en B.
+  const questions = useMemo(() => brutes.map((q) => melangerQcm(q)), [brutes]);
   const [reponses, setReponses] = useState<(number | null)[]>(() => questions.map(() => null));
   const total = questions.length;
   const repondues = reponses.filter((r) => r !== null).length;

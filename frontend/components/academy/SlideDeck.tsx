@@ -1,5 +1,6 @@
 'use client';
 
+import { melangerQcm } from '@/lib/academy/melange';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Star, X } from 'lucide-react';
 import type { CourseContent } from '@/lib/academy/types';
@@ -365,7 +366,7 @@ function QuizSlide({
 }) {
   const [choice, setChoice] = useState<number | null>(null);
   const letters = ['A', 'B', 'C', 'D', 'E'];
-  const q = slide.qcm;
+  const q = melangerQcm(slide.qcm);
 
   return (
     <div className="flex h-full flex-col" style={{ background: NAVY, color: '#fff' }}>
