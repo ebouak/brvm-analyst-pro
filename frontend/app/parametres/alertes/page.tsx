@@ -6,6 +6,7 @@ import WhatsAppPrefs from '@/components/settings/WhatsAppPrefs';
 import RecontactPrefs from '@/components/settings/RecontactPrefs';
 import TelegramPrefs from '@/components/settings/TelegramPrefs';
 import DossiersPrefs from '@/components/settings/DossiersPrefs';
+import RelevePrefs from '@/components/settings/RelevePrefs';
 import BriefPrefs from '@/components/settings/BriefPrefs';
 import RecapPrefs from '@/components/settings/RecapPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
@@ -65,6 +66,10 @@ export default async function AlertesPage() {
       <RecapPrefs userId={user.id} />
 
       {gate.allowed && <DossiersPrefs userId={user.id} />}
+
+      {/* Relevé mensuel du portefeuille (0233) : même condition que les dossiers.
+          Se masque de lui-même tant que la migration n'est pas appliquée. */}
+      {gate.allowed && <RelevePrefs userId={user.id} />}
       {ouvert ? (
         <AlertsManager
           alerts={(alerts ?? []) as UserAlert[]}

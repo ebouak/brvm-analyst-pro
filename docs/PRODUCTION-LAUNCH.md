@@ -145,7 +145,7 @@ Expected successful runs:
 - `Cours intraday BRVM` — ~6 runs/hour ✅
 - `Intraday Watchdog` — ~13 runs/day ✅
 - `Paper Trading Auto` — 1/day (10:00) ✅
-- `Monthly Reports Generation` — 1/month (1st @ 08:00) ✅
+- `Relevé mensuel du portefeuille` (releve.yml) — 1/month (le 2 @ 08:00 UTC) ✅
 
 ### Supabase Logs
 **Check:** PostgreSQL queries
