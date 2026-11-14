@@ -54,7 +54,7 @@ const SECRET = lire('DOSSIER_RENDER_SECRET');
 const SITE = (lire('DOSSIER_SITE_URL') || 'https://www.westbourse.com').replace(/\/$/, '');
 const BUCKET = 'dossiers';
 const DRY = lire('DOSSIER_DRY') === '1';
-const FEUILLES_ATTENDUES = 14; // ⚠️ = TOTAL_FEUILLES de app/rapports/dossier/[code]/page.tsx
+const FEUILLES_ATTENDUES = 17; // ⚠️ = TOTAL_FEUILLES de frontend/lib/dossier/structure.ts (structure.test.ts les compare)
 const OCTETS_MIN = 30_000;
 
 const manquants = [['SUPABASE_URL', URL_SB], ['SUPABASE_SERVICE_ROLE_KEY', SERVICE], ['DOSSIER_RENDER_SECRET', SECRET]]

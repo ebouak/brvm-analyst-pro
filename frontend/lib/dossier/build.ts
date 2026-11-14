@@ -22,6 +22,18 @@ import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fisca
 import { exerciceRetenu, memesComptes, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
 import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
+import { chargerReactions } from '@/lib/server/reactionsPublications';
+import { placement, type ResultatPlacement, type PointSerie } from './placement';
+import { bandePer, perGlissant, type BandePer } from './per';
+import {
+  historiquePublications,
+  publicationsDeResultats,
+  resumeReactions,
+  type HistoriqueFamille,
+  type LigneReaction,
+  type ResumeReactions,
+} from './publications';
+import type { EvenementBrut } from '@/lib/evenements/regroupement';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -195,6 +207,18 @@ export interface DossierValeur {
   lacunes: string[];
   /** Feuille « Suivi » : tout est mesuré, rien n'est recommandé. */
   suivi: Suivi;
+  /** PER sur douze mois glissants, quand la dernière publication intermédiaire le permet. */
+  per_glissant: { valeur: number | null; libelle: string } | null;
+  /** PER de fin d'exercice sur cinq ans, avec le PER actuel situé dans la fourchette. */
+  bande_per: BandePer | null;
+  /** Un million de FCFA placé il y a cinq ans (ou sur la plus longue période disponible). */
+  placement: ResultatPlacement | null;
+  /** Réaction du cours aux huit dernières publications de résultats ; null si les cours n'ont pu être lus. */
+  reactions: { lignes: LigneReaction[]; resume: ResumeReactions } | null;
+  /** Dates de publication des trois dernières années, par type de document. */
+  historique_publications: HistoriqueFamille[];
+  /** Nombre de publications connues en base pour la société (tous types, toutes dates). */
+  nb_publications: number | null;
 }
 
 export interface Suivi {
@@ -212,11 +236,37 @@ export interface Suivi {
   } | null;
   /** Médianes des sociétés comparables (dernier calcul Combined Alpha), si fournies. */
   medianes: ComparaisonMedianes | null;
+  /** Sociétés du même secteur, nommées, avec leurs ratios (mêmes lignes et mêmes unités que les médianes). */
+  comparables_nommes: { code: string; designation: string | null; valeurs: Record<string, number | null> }[];
   piliers: Pilier[];
   /** Rendez-vous DATÉS et à venir connus en base — jamais une date estimée. */
   rendez_vous: { date: string; libelle: string }[];
   /** Le jour du détachement a-t-il vu une baisse cohérente avec le dividende ? */
   ex_date_controle: 'coherente' | 'a_verifier' | null;
+}
+
+
+// ── Lectures paginées ───────────────────────────────────────────────────────
+
+/** PostgREST tronque à 1 000 lignes EN SILENCE : toute série longue se lit par tranches. */
+const TRANCHE = 1000;
+
+async function lireTout<T>(
+  requete: (de: number, a: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+  nom: string,
+): Promise<T[] | null> {
+  const out: T[] = [];
+  for (let de = 0; ; de += TRANCHE) {
+    const { data, error } = await requete(de, de + TRANCHE - 1);
+    if (error) {
+      console.error(`[dossier] lecture ${nom} impossible : ${error.message}`);
+      return null;
+    }
+    const lot = (data ?? []) as T[];
+    out.push(...lot);
+    if (lot.length < TRANCHE) break;
+  }
+  return out;
 }
 
 // ── Construction ────────────────────────────────────────────────────────────
@@ -282,7 +332,8 @@ export async function buildDossier(
     // NULL et sortent de la fenêtre. Même piège que dans briefTools.ts.
     sb.from('dividends').select('exercice, montant, ex_date, payment_date, base_fiscale, source').eq('code', CODE).order('ex_date', { ascending: false, nullsFirst: false }).limit(12),
     sb.from('fundamentals').select('year, revenue, net_income, equity, debt').eq('code', CODE).order('year', { ascending: false }).limit(6),
-    sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_avant_impots, resultat_net').eq('code', CODE).order('periode', { ascending: false }).limit(14),
+    // 40 lignes : cinq exercices annuels ET leurs intermédiaires (≈ 4 lignes par an).
+    sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_avant_impots, resultat_net').eq('code', CODE).order('periode', { ascending: false }).limit(40),
   ]);
 
   if (!instr) return null;
@@ -519,6 +570,107 @@ export async function buildDossier(
   }
   const liqRow = liq as Suivi['liquidite'];
 
+  /* ── Historique long : placement sur cinq ans, bande de PER, réactions ──────
+     Une seule lecture paginée des clôtures depuis décembre de l'année qui
+     précède de six ans la dernière séance : elle sert au placement (cinq ans en
+     arrière) ET au cours de fin d'exercice de chaque année de la bande de PER. */
+  const anneeFin = derniere?.date_marche ? Number(derniere.date_marche.slice(0, 4)) : null;
+  const depuisLong = anneeFin != null ? `${anneeFin - 6}-12-01` : null;
+  let serieLongue: PointSerie[] = [];
+  let serieIndice: PointSerie[] = [];
+  let divsLongs: { exercice: number | null; montant: number | null; ex_date: string | null; payment_date: string | null; base_fiscale: 'brut' | 'net' | 'inconnu' | null }[] = [];
+  let lectureLongueOk = false;
+  if (depuisLong) {
+    const [cl, ix, dv] = await Promise.all([
+      lireTout<{ date_marche: string; cours_jour: number | null }>(
+        (de, a) => sb.from('brvm_actions_daily').select('date_marche, cours_jour').eq('code', CODE).gte('date_marche', depuisLong).gt('cours_jour', 0).order('date_marche', { ascending: true }).range(de, a),
+        'brvm_actions_daily (historique long)',
+      ),
+      lireTout<{ date_marche: string; valeur: number | null }>(
+        (de, a) => sb.from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC').gte('date_marche', depuisLong).order('date_marche', { ascending: true }).range(de, a),
+        'brvm_indices_daily (BRVMC)',
+      ),
+      sb.from('dividends').select('exercice, montant, ex_date, payment_date, base_fiscale').eq('code', CODE).limit(200),
+    ]);
+    if (cl) {
+      lectureLongueOk = true;
+      serieLongue = cl.filter((r) => r.cours_jour != null && r.cours_jour > 0).map((r) => ({ date: r.date_marche, close: Number(r.cours_jour) }));
+    }
+    serieIndice = (ix ?? []).filter((r) => r.valeur != null && r.valeur > 0).map((r) => ({ date: r.date_marche, close: Number(r.valeur) }));
+    divsLongs = ((dv.data ?? []) as typeof divsLongs);
+  }
+  const placementCalcule = lectureLongueOk
+    ? placement({ investi: 1_000_000, serie: serieLongue, serieIndice, dividendes: divsLongs, tauxIrvm: fisc.taux, annees: 5 })
+    : null;
+  if (!placementCalcule) {
+    lacunes.push(
+      lectureLongueOk
+        ? 'Moins de six mois de cotation en base : la valeur d’un million de FCFA investi n’est pas calculable.'
+        : 'L’historique long des cours n’a pas pu être lu : le placement sur cinq ans et la bande de PER ne sont pas calculés.',
+    );
+  }
+
+  const interR = lectureIntermediaire(exercices);
+  const perGl = interR?.glissant ? { valeur: perGlissant({ cours, titres: actions, resultatGlissant: interR.glissant.resultatNet }), libelle: interR.glissant.libelle } : null;
+  const bande = lectureLongueOk
+    ? bandePer({
+        exercices: annuels.map((e) => ({ periode: e.periode, resultat_net: e.resultat_net })),
+        titres: actions,
+        serie: serieLongue,
+        perActuel: ratios?.per ?? null,
+      })
+    : null;
+  if (lectureLongueOk && !bande) {
+    lacunes.push('Moins de trois exercices bénéficiaires avec un cours en fin d’exercice : la bande de PER sur cinq ans n’est pas établie.');
+  }
+
+  /* Publications : une lecture pour l'historique par type (trois ans) et le
+     nombre de publications connues (instantané d'édition). */
+  const { data: pubRows, count: nbPub } = await sb
+    .from('publications')
+    .select('date_publication, type_publication', { count: 'exact' })
+    .eq('code', CODE)
+    .order('date_publication', { ascending: false })
+    .range(0, 999);
+  const aujourdhuiDate = derniere?.date_marche ?? new Date().toISOString().slice(0, 10);
+  const historique = historiquePublications((pubRows ?? []) as { date_publication: string | null; type_publication: string | null }[], aujourdhuiDate);
+
+  /* Réaction du cours aux publications de résultats : le contrat commun
+     (lib/server/reactionsPublications) charge les clôtures UNE fois et mesure
+     chaque publication ; ici on ne fait que choisir lesquelles. */
+  let reactions: DossierValeur['reactions'] = null;
+  {
+    const { data: evts } = await sb
+      .from('market_events')
+      .select('id, event_date, title, event_type, instrument_code, source_url')
+      .eq('instrument_code', CODE)
+      .eq('event_type', 'resultats')
+      .order('event_date', { ascending: false })
+      .limit(150);
+    const publis = publicationsDeResultats((evts ?? []) as EvenementBrut[], 8);
+    if (publis.length > 0) {
+      try {
+        const mesures = await chargerReactions(sb, publis.map((p) => ({ code: CODE, date: p.date })));
+        const lignes: LigneReaction[] = publis.map((p) => {
+          const m = mesures.get(`${CODE}|${p.date}`);
+          return { date: p.date, titre: p.titre, periode: p.periode, ecartIndicePct: m?.ecartIndicePct ?? null, enCours: m?.enCours ?? true };
+        });
+        reactions = { lignes, resume: resumeReactions(lignes) };
+      } catch (e) {
+        console.error(`[dossier] réaction aux publications impossible : ${(e as Error).message}`);
+        lacunes.push('Les cours autour des publications n’ont pas pu être lus : la réaction du titre à ses publications n’est pas mesurée.');
+      }
+    }
+  }
+
+  /* Comparables nommés : sociétés du même secteur, avec leur désignation. */
+  const pairsNommes = medianes?.pairsNommes ?? [];
+  const { data: designations } = pairsNommes.length
+    ? await sb.from('brvm_instruments').select('code, designation').in('code', pairsNommes.map((p) => p.code))
+    : { data: [] as { code: string; designation: string | null }[] };
+  const designationDe = new Map(((designations ?? []) as { code: string; designation: string | null }[]).map((x) => [x.code, x.designation]));
+  const comparablesNommes = pairsNommes.map((p) => ({ code: p.code, designation: designationDe.get(p.code) ?? null, valeurs: p.valeurs }));
+
   const s = sig as { date_marche?: string; signal?: string; score_total?: number; confiance?: number; explication?: string; inputs?: Record<string, number | null> } | null;
   const inputs = s?.inputs ?? {};
   const cpPrecedent = fondaRows[1]?.equity ?? null;
@@ -602,13 +754,20 @@ export async function buildDossier(
     lacunes,
     suivi: {
       famille,
-      intermediaire: lectureIntermediaire(exercices),
+      intermediaire: interR,
       performance,
       liquidite: liqRow ?? null,
       medianes,
       piliers,
       rendez_vous,
       ex_date_controle,
+      comparables_nommes: comparablesNommes,
     },
+    per_glissant: perGl,
+    bande_per: bande,
+    placement: placementCalcule,
+    reactions,
+    historique_publications: historique,
+    nb_publications: nbPub ?? null,
   };
 }

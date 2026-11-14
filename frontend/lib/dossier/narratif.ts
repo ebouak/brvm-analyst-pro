@@ -1,5 +1,6 @@
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import { dividendeCourant, horsExploitation } from '@/lib/fiche/affichage';
+import { lireCodePeriode, MOIS } from '@/lib/financials/interim';
 import type { DossierValeur } from './build';
 
 /**
@@ -69,7 +70,42 @@ const SEUILS = {
   CA_RECUL: -0.1,
   /** Sous ce nombre de titres échangés, l'exécution devient un vrai sujet. */
   VOLUME_FAIBLE: 5000,
+  /**
+   * Hausse du cours depuis le 1er janvier qui dépasse de plus de dix points celle
+   * du résultat net du dernier exercice : en dessous, l'écart est du bruit.
+   */
+  ECART_COURS_BENEFICE: 0.1,
+  /** Position dans la plage 52 semaines à partir de laquelle le cours est dans le quart haut. */
+  QUART_HAUT: 0.75,
+  /** Part du capital au flottant sous laquelle peu de titres sont réellement échangeables. */
+  FLOTTANT_FAIBLE: 0.25,
+  /** Ancienneté (en mois) des derniers comptes au-delà de laquelle ils sont jugés anciens. */
+  COMPTES_ANCIENS_MOIS: 18,
 } as const;
+
+/**
+ * Ancienneté, en mois pleins, des DERNIERS COMPTES publiés : la fin de la période
+ * intermédiaire la plus récente si elle existe, sinon la clôture de l'exercice
+ * annuel (31 décembre, convention du plan comptable de la zone). null si aucune
+ * période n'est exploitable. Pure et testée.
+ */
+export function ancienneteComptesMois(exercice: string | null, periodeIntermediaire: string | null, aujourdhui: string): number | null {
+  let fin: string | null = null;
+  const inter = periodeIntermediaire ? lireCodePeriode(periodeIntermediaire) : null;
+  if (inter) {
+    const mois = MOIS[inter.code];
+    const dernierJour = new Date(Date.UTC(inter.annee, mois, 0)).getUTCDate();
+    fin = `${inter.annee}-${String(mois).padStart(2, '0')}-${String(dernierJour).padStart(2, '0')}`;
+  } else if (exercice && /^\d{4}$/.test(exercice)) {
+    fin = `${exercice}-12-31`;
+  }
+  if (!fin) return null;
+  const [a1, m1, j1] = fin.split('-').map(Number) as [number, number, number];
+  const [a2, m2, j2] = aujourdhui.split('-').map(Number) as [number, number, number];
+  let mois = (a2 - a1) * 12 + (m2 - m1);
+  if (j2 < j1) mois -= 1;
+  return mois < 0 ? null : mois;
+}
 
 export function construireNarratif(d: DossierValeur): Narratif {
   const forces: Appreciation[] = [];
@@ -215,8 +251,11 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   /* Une chute mal expliquée par le détachement est un fait de marché, pas un
-     ajustement mécanique. Le distinguer évite de rassurer à tort. */
-  if (d.detachement?.part_expliquee != null && d.detachement.part_expliquee < 0.9) {
+     ajustement mécanique. Le distinguer évite de rassurer à tort. Quand la date
+     elle-même n'est pas confirmée, c'est la constatation plus bas qui parle :
+     deux lignes pour un même fait se contrediraient. */
+  const dateNonConfirmee = d.suivi?.ex_date_controle === 'a_verifier';
+  if (d.detachement?.part_expliquee != null && d.detachement.part_expliquee < 0.9 && !dateNonConfirmee) {
     risques.push({
       texte:
         `Le détachement du ${fmtDateFR(d.detachement.ex_date)} n'explique que ` +
@@ -227,9 +266,83 @@ export function construireNarratif(d: DossierValeur): Narratif {
     });
   }
 
+  // ── Constats de marché et de fraîcheur (chacun porte son chiffre) ───────
+  /* Un titre qui a davantage monté que le bénéfice publié : les deux mesures ne
+     portent pas sur la même période (cours depuis le 1er janvier, résultat net du
+     dernier exercice), et le texte le dit — on rapproche deux ordres de grandeur,
+     on n'en tire aucune cause. */
+  const ytd = d.suivi?.performance?.var_ytd ?? null;
+  const traj = d.trajectoire ?? [];
+  const dernierRn = traj.length >= 2 ? traj[traj.length - 1]!.resultat_net : null;
+  const precedentRn = traj.length >= 2 ? traj[traj.length - 2]!.resultat_net : null;
+  if (ytd != null && dernierRn != null && precedentRn != null && precedentRn > 0 && dernierRn > 0) {
+    const croissanceRn = dernierRn / precedentRn - 1;
+    if (ytd > 0 && ytd - croissanceRn >= SEUILS.ECART_COURS_BENEFICE) {
+      risques.push({
+        texte:
+          `Le cours a progressé de ${pct(ytd, 1)} depuis le 1er janvier, contre ${pct(croissanceRn, 1)} pour le résultat net ` +
+          `de l'exercice ${traj[traj.length - 1]!.exercice} : le titre a davantage monté que le bénéfice publié (périodes différentes)`,
+        fait: 'une hausse du cours supérieure à celle du bénéfice publié',
+        mesure: ytd - croissanceRn,
+      });
+    }
+  }
+
+  const position52 = d.suivi?.performance?.position_52s ?? null;
+  if (position52 != null && position52 >= SEUILS.QUART_HAUT) {
+    const { bas52, haut52 } = d.suivi.performance;
+    risques.push({
+      texte:
+        `Le cours se situe à ${nb(position52 * 100, 0)} % de sa plage sur 52 semaines` +
+        (bas52 != null && haut52 != null ? ` (de ${nb(bas52, 0)} à ${nb(haut52, 0)} FCFA)` : ''),
+      fait: 'un cours dans le quart haut de sa plage annuelle',
+      mesure: position52,
+    });
+  }
+
+  const { flottant, actions } = d.identite;
+  if (flottant != null && actions != null && actions > 0 && flottant / actions < SEUILS.FLOTTANT_FAIBLE) {
+    risques.push({
+      texte: `Flottant de ${nb((flottant / actions) * 100, 1)} % du capital : peu de titres sont réellement échangeables`,
+      fait: 'un flottant inférieur au quart du capital',
+      mesure: flottant / actions,
+    });
+  }
+
+  if (dateNonConfirmee && d.detachement) {
+    risques.push({
+      texte:
+        `La date de détachement enregistrée (${fmtDateFR(d.detachement.ex_date_officielle)}) n'est pas confirmée : ` +
+        `le cours a baissé de ${nb(d.detachement.baisse_fcfa, 0)} FCFA pour un dividende de ${nb(d.detachement.dividende, 2)} FCFA`,
+      fait: 'une date de détachement que le cours ne confirme pas',
+      mesure: d.detachement.baisse_fcfa,
+    });
+  }
+
+  const anciennete = ancienneteComptesMois(c.exercice, d.suivi?.intermediaire?.periode ?? null, d.genere_le);
+  if (anciennete != null && anciennete > SEUILS.COMPTES_ANCIENS_MOIS) {
+    risques.push({
+      texte: `Les derniers comptes publiés datent de ${anciennete} mois${c.exercice ? ` (exercice ${c.exercice})` : ''}`,
+      fait: 'des derniers comptes publiés anciens',
+      mesure: anciennete,
+    });
+  }
+
   return {
     forces,
     risques,
     incomplet: forces.length === 0 || risques.length === 0,
   };
+}
+
+/**
+ * Les appréciations AVEC leur chiffre, pour la lecture d'ensemble. La prose du
+ * dossier ne porte aucun nombre par construction (voir prose.ts : un chiffre
+ * poli le samedi serait contredit lundi) ; la lecture d'ensemble le cite donc
+ * dessous, lu à l'instant à partir des mêmes appréciations que les panneaux de
+ * points d'appui et de vigilance. Un seul calcul, deux emplacements : ils ne
+ * peuvent pas diverger.
+ */
+export function chiffresDeLecture(n: Narratif, max = 3): { forces: string[]; risques: string[] } {
+  return { forces: n.forces.slice(0, max).map((a) => a.texte), risques: n.risques.slice(0, max).map((a) => a.texte) };
 }
