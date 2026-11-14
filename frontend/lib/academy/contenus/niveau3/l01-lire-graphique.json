@@ -1,0 +1,227 @@
+{
+ "titre": "Leçon 1 — Lire un graphique de cours",
+ "module": "Module 1 — Graphiques et tendances",
+ "categorie": "technical",
+ "duree_min": 10,
+ "sous_titre": "Tendance, supports, résistances et volume : les quatre choses à repérer avant tout indicateur.",
+ "resume": "L’analyse technique étudie le cours et les volumes pour décrire le comportement du marché. Avant tout indicateur, il faut savoir lire un graphique : identifier une tendance, repérer les niveaux où le cours a déjà rebondi, et vérifier si les mouvements sont portés par des échanges réels. Cette leçon pose ces bases, et leurs limites à la BRVM.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Quatre notions de base",
+   "contenu": "Un graphique de cours montre l’histoire des prix. Il se lit avant de se calculer.",
+   "points": [
+    {
+     "titre": "La tendance",
+     "detail": "Haussière si les sommets et les creux sont de plus en plus hauts ; baissière dans le cas inverse ; sans tendance sinon.",
+     "verifier": "Les trois derniers creux et sommets."
+    },
+    {
+     "titre": "Le support",
+     "detail": "Une zone de prix où le cours a cessé de baisser plusieurs fois : des acheteurs y sont apparus."
+    },
+    {
+     "titre": "La résistance",
+     "detail": "Une zone où le cours a cessé de monter plusieurs fois : des vendeurs y sont apparus."
+    },
+    {
+     "titre": "Le volume",
+     "detail": "Le nombre de titres échangés. Un mouvement sans volume est fragile.",
+     "verifier": "Le volume du jour comparé à sa moyenne."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les trois échelles de temps",
+   "contenu": "Une même action peut monter sur un mois et baisser sur un an. Toujours préciser l’horizon.",
+   "tableau": {
+    "colonnes": [
+     "Horizon",
+     "Graphique utile",
+     "Question"
+    ],
+    "lignes": [
+     [
+      "Court terme",
+      "Quelques semaines, cours quotidien",
+      "Le mouvement récent est-il confirmé par le volume ?"
+     ],
+     [
+      "Moyen terme",
+      "Quelques mois",
+      "La tendance est-elle intacte ?"
+     ],
+     [
+      "Long terme",
+      "Plusieurs années",
+      "Où se situe le cours dans son histoire ?"
+     ]
+    ],
+    "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les limites propres à la BRVM",
+   "contenu": "L’analyse technique a été développée sur des marchés très liquides. La BRVM ne l’est pas toujours.",
+   "points": [
+    {
+     "titre": "Des cours qui ne bougent pas",
+     "detail": "Une valeur peut rester plusieurs séances sans échange : son cours reste figé, sans information.",
+     "verifier": "Le volume des dernières séances."
+    },
+    {
+     "titre": "Une variation encadrée",
+     "detail": "La BRVM limite la variation d’un cours en une séance : un mouvement fort peut s’étaler sur plusieurs jours.",
+     "verifier": "Les règles de cotation publiées par la BRVM."
+    },
+    {
+     "titre": "Une suspension",
+     "detail": "Une valeur suspendue garde son dernier cours affiché : ce n’est pas un prix auquel on peut traiter.",
+     "verifier": "La mention « suspendue » sur la fiche."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : une lecture du jour",
+   "reel": true,
+   "contenu": "Le cours de quatre valeurs, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.",
+   "donnees_reelles": {
+    "vue": "technique",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "ORAC",
+     "PALC"
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que nous avons mesuré sur la BRVM",
+   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+   "stats": [
+    {
+     "label": "Séances rejouées",
+     "valeur": "109 634",
+     "detail": "2008-2023, hors échantillon de construction"
+    },
+    {
+     "label": "Scores les plus bas, 20 séances après",
+     "valeur": "+8,4 % face au marché",
+     "detail": "Moyenne, écart statistiquement établi"
+    },
+    {
+     "label": "Scores les plus hauts, 20 séances après",
+     "valeur": "−1,5 % face au marché",
+     "detail": "Moyenne, écart non établi"
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Lire avant de calculer.",
+   "points": [
+    {
+     "titre": "Une tendance se lit aux sommets et aux creux successifs"
+    },
+    {
+     "titre": "Supports et résistances sont des zones, pas des prix exacts"
+    },
+    {
+     "titre": "Un mouvement sans volume est fragile, surtout à la BRVM"
+    },
+    {
+     "titre": "Un cours figé ou suspendu ne dit rien du prix réel"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+   "options": [
+    "Baissière",
+    "Haussière",
+    "Sans tendance",
+    "Impossible à dire"
+   ],
+   "correct": 1,
+   "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+  },
+  {
+   "question": "Qu’est-ce qu’un support ?",
+   "options": [
+    "Le cours le plus haut de l’année",
+    "Une zone où le cours a cessé de baisser plusieurs fois",
+    "Le dividende",
+    "Le volume moyen"
+   ],
+   "correct": 1,
+   "explication": "Un support est une zone de prix où des acheteurs sont apparus à plusieurs reprises."
+  },
+  {
+   "question": "Un cours monte de 5 % avec un volume très faible. Comment lire ce mouvement ?",
+   "options": [
+    "Comme très solide",
+    "Comme fragile : peu d’échanges l’ont produit",
+    "Comme une garantie de hausse",
+    "Comme une erreur"
+   ],
+   "correct": 1,
+   "explication": "Sans volume, un mouvement peut venir de quelques ordres isolés."
+  },
+  {
+   "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?",
+   "options": [
+    "Le prix exact du marché",
+    "Le dernier prix échangé, qui ne dit rien du prix actuel",
+    "Zéro",
+    "La moyenne du secteur"
+   ],
+   "correct": 1,
+   "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle."
+  },
+  {
+   "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés ?",
+   "options": [
+    "Ils ont continué à baisser",
+    "Ils ont fait mieux que le marché dans les semaines suivantes",
+    "Ils ont été radiés",
+    "Rien de mesurable"
+   ],
+   "correct": 1,
+   "explication": "Sur seize ans, les excès à la baisse ont plutôt été suivis d’un rattrapage relatif. C’est une moyenne, pas une règle."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "Notre méthodologie des signaux",
+   "href": "/methodologie"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+  "options": [
+   "Baissière",
+   "Haussière",
+   "Sans tendance",
+   "Impossible à dire"
+  ],
+  "correct": 1,
+  "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+ }
+}

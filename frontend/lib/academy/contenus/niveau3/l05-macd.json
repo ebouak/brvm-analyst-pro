@@ -1,0 +1,220 @@
+{
+ "titre": "Leçon 5 — Le MACD : l’élan d’une tendance",
+ "module": "Module 2 — Indicateurs",
+ "categorie": "technical",
+ "duree_min": 9,
+ "sous_titre": "Deux moyennes exponentielles, leur écart, et le signal qui en découle : un indicateur de dynamique.",
+ "resume": "Le MACD mesure l’écart entre une moyenne exponentielle courte et une longue. Quand l’écart grandit, la tendance accélère ; quand il se resserre, elle ralentit. Cette leçon explique ses trois composantes et ce qu’on peut, ou non, en tirer.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Trois composantes",
+   "contenu": "Les paramètres usuels sont 12, 26 et 9 séances.",
+   "formules": [
+    {
+     "nom": "Ligne MACD",
+     "expression": "Moyenne exponentielle 12 − Moyenne exponentielle 26",
+     "exemple": "105 − 102 = +3 : la tendance courte est au-dessus de la longue"
+    },
+    {
+     "nom": "Ligne de signal",
+     "expression": "Moyenne exponentielle sur 9 séances de la ligne MACD",
+     "exemple": "Elle lisse la ligne MACD"
+    },
+    {
+     "nom": "Histogramme",
+     "expression": "Ligne MACD − Ligne de signal",
+     "exemple": "Positif et croissant : l’élan haussier se renforce"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Moyenne exponentielle : pourquoi ?",
+   "contenu": "Une moyenne exponentielle donne plus de poids aux séances récentes qu’une moyenne simple. Elle réagit plus vite, au prix de plus de bruit.\nLe MACD n’est pas borné comme le RSI : sa valeur dépend du niveau du cours, et ne se compare pas d’une action à l’autre."
+  },
+  {
+   "type": "cas",
+   "titre": "Lire l’histogramme",
+   "contenu": "Exemple pédagogique : l’histogramme décrit l’accélération ou le ralentissement de la tendance.",
+   "tableau": {
+    "colonnes": [
+     "Histogramme",
+     "Lecture"
+    ],
+    "lignes": [
+     [
+      "Positif et croissant",
+      "La tendance haussière s’accélère"
+     ],
+     [
+      "Positif et décroissant",
+      "La hausse ralentit"
+     ],
+     [
+      "Négatif et décroissant",
+      "La tendance baissière s’accélère"
+     ],
+     [
+      "Négatif et croissant",
+      "La baisse ralentit"
+     ]
+    ],
+    "note": "Le passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Ce que le MACD ne fait pas",
+   "contenu": "Le MACD hérite des défauts des moyennes mobiles.",
+   "points": [
+    {
+     "titre": "Il est en retard",
+     "detail": "Construit sur des moyennes, il confirme plus qu’il n’anticipe.",
+     "verifier": "Le moment du croisement par rapport au mouvement du cours."
+    },
+    {
+     "titre": "Il ne se compare pas entre actions",
+     "detail": "Un MACD de +50 sur une action à 30 000 FCFA n’a rien à voir avec +50 sur une action à 500 FCFA.",
+     "verifier": "L’écart rapporté au cours."
+    },
+    {
+     "titre": "Il trompe sans tendance",
+     "detail": "Dans un marché qui oscille, les croisements se multiplient.",
+     "verifier": "La pente des moyennes."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Le MACD mesure un élan, pas une destination.",
+   "points": [
+    {
+     "titre": "MACD = moyenne exponentielle 12 − moyenne exponentielle 26"
+    },
+    {
+     "titre": "Signal = moyenne exponentielle 9 du MACD ; histogramme = leur écart"
+    },
+    {
+     "titre": "L’histogramme décrit l’accélération ou le ralentissement"
+    },
+    {
+     "titre": "Il ne se compare pas d’une action à l’autre"
+    }
+   ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "bar",
+   "titre": "Un histogramme de MACD (exemple)",
+   "labels": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8"
+   ],
+   "valeurs": [
+    -3,
+    -2,
+    -0.5,
+    1,
+    2.5,
+    3,
+    2,
+    0.5
+   ],
+   "unite": "",
+   "note": "Valeurs d’exemple. Négatif et croissant (S1 à S3) : la baisse ralentit. Il devient positif à S4 (croisement), grandit jusqu’à S6 (la hausse accélère), puis diminue (la hausse ralentit). Aucune de ces phases ne dit combien de temps durera la suivante.",
+   "reel": false
+  }
+ ],
+ "quiz": [
+  {
+   "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?",
+   "options": [
+    "−10",
+    "+10",
+    "490",
+    "250"
+   ],
+   "correct": 1,
+   "explication": "250 − 240 = +10."
+  },
+  {
+   "question": "L’histogramme est positif et croissant. Que décrit-il ?",
+   "options": [
+    "Une baisse qui accélère",
+    "Une hausse qui accélère",
+    "Une suspension",
+    "Un dividende"
+   ],
+   "correct": 1,
+   "explication": "Positif et croissant : la tendance haussière s’accélère."
+  },
+  {
+   "question": "Pourquoi ne pas comparer le MACD de deux actions différentes ?",
+   "options": [
+    "Il est confidentiel",
+    "Sa valeur dépend du niveau du cours",
+    "Il est toujours égal",
+    "Il est borné de 0 à 100"
+   ],
+   "correct": 1,
+   "explication": "Le MACD s’exprime en points de cours : il dépend du prix de l’action."
+  },
+  {
+   "question": "Qu’est-ce qui distingue une moyenne exponentielle d’une moyenne simple ?",
+   "options": [
+    "Elle ignore les séances récentes",
+    "Elle donne plus de poids aux séances récentes",
+    "Elle ne se calcule que sur les dividendes",
+    "Rien"
+   ],
+   "correct": 1,
+   "explication": "Les séances récentes pèsent plus : la moyenne réagit plus vite."
+  },
+  {
+   "question": "Quels sont les paramètres usuels du MACD ?",
+   "options": [
+    "5, 10, 15",
+    "12, 26, 9",
+    "14, 70, 30",
+    "20, 50, 200"
+   ],
+   "correct": 1,
+   "explication": "12 et 26 pour les moyennes, 9 pour la ligne de signal."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "Notre méthodologie des signaux",
+   "href": "/methodologie"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "qcm": {
+  "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?",
+  "options": [
+   "−10",
+   "+10",
+   "490",
+   "250"
+  ],
+  "correct": 1,
+  "explication": "250 − 240 = +10."
+ }
+}

@@ -1,0 +1,244 @@
+{
+ "titre": "Leçon 4 — Le RSI : mesurer les excès de marché",
+ "module": "Module 2 — Indicateurs",
+ "categorie": "technical",
+ "duree_min": 10,
+ "sous_titre": "Un indicateur borné de 0 à 100 qui compare les hausses et les baisses récentes, et ce qu’il vaut sur un marché peu liquide.",
+ "resume": "Le RSI (relative strength index) compare l’ampleur des hausses et des baisses sur les dernières séances, en général 14. Au-dessus de 70, on parle de surachat ; sous 30, de survente. Cette leçon explique son calcul, sa lecture et ce que les mesures faites sur la BRVM disent de ces excès.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Le calcul",
+   "contenu": "Le RSI ramène le rapport entre hausses et baisses moyennes sur une échelle de 0 à 100. Exemple pédagogique.",
+   "formules": [
+    {
+     "nom": "Force relative (RS)",
+     "expression": "Hausse moyenne ÷ Baisse moyenne, sur 14 séances",
+     "exemple": "2 ÷ 1 = 2"
+    },
+    {
+     "nom": "RSI",
+     "expression": "100 − 100 ÷ (1 + RS)",
+     "exemple": "100 − 100 ÷ 3 ≈ 66,7"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les trois zones",
+   "contenu": "Les seuils de 70 et 30 sont des conventions, pas des lois.",
+   "stats": [
+    {
+     "label": "RSI supérieur à 70",
+     "valeur": "Surachat",
+     "detail": "Les hausses récentes dominent nettement"
+    },
+    {
+     "label": "RSI entre 30 et 70",
+     "valeur": "Zone neutre",
+     "detail": "Pas d’excès marqué"
+    },
+    {
+     "label": "RSI inférieur à 30",
+     "valeur": "Survente",
+     "detail": "Les baisses récentes dominent nettement"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : le RSI du jour",
+   "reel": true,
+   "contenu": "Le RSI sur 14 séances de cinq valeurs, recalculé à l’ouverture de la leçon. Un RSI en zone extrême décrit un mouvement récent ; il ne dit pas quand il s’arrêtera.",
+   "donnees_reelles": {
+    "vue": "technique",
+    "codes": [
+     "SNTS",
+     "BOAC",
+     "NTLC",
+     "SDCC",
+     "TTLC"
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que nous avons mesuré sur la BRVM",
+   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.",
+   "stats": [
+    {
+     "label": "Séances rejouées",
+     "valeur": "109 634",
+     "detail": "2008-2023, hors échantillon de construction"
+    },
+    {
+     "label": "Scores les plus bas, 20 séances après",
+     "valeur": "+8,4 % face au marché",
+     "detail": "Moyenne, écart statistiquement établi"
+    },
+    {
+     "label": "Scores les plus hauts, 20 séances après",
+     "valeur": "−1,5 % face au marché",
+     "detail": "Moyenne, écart non établi"
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "Les mauvaises lectures du RSI",
+   "contenu": "Le RSI est populaire, et souvent mal utilisé.",
+   "points": [
+    {
+     "titre": "« Surachat » ne veut pas dire « vendre »",
+     "detail": "Dans une forte tendance, le RSI peut rester au-dessus de 70 longtemps.",
+     "verifier": "La tendance de fond, sur la moyenne longue."
+    },
+    {
+     "titre": "Peu d’échanges, RSI extrême",
+     "detail": "Sur une valeur peu liquide, deux ou trois séances suffisent à pousser le RSI vers un extrême.",
+     "verifier": "Les volumes des séances qui ont fait bouger le RSI."
+    },
+    {
+     "titre": "Un indicateur parmi d’autres",
+     "detail": "Le RSI ne dit rien de la société : ni de ses comptes, ni de son dividende.",
+     "verifier": "Les fondamentaux, avant toute décision."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Le RSI mesure un excès récent, pas une valeur.",
+   "points": [
+    {
+     "titre": "RSI = 100 − 100 ÷ (1 + RS), en général sur 14 séances"
+    },
+    {
+     "titre": "Au-dessus de 70 : surachat ; sous 30 : survente"
+    },
+    {
+     "titre": "Une zone extrême peut durer dans une tendance forte"
+    },
+    {
+     "titre": "À la BRVM, les excès ont plutôt eu tendance à se corriger en moyenne"
+    }
+   ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "line",
+   "titre": "Un RSI qui traverse ses zones (exemple)",
+   "labels": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "S10"
+   ],
+   "valeurs": [
+    48,
+    55,
+    63,
+    72,
+    76,
+    71,
+    60,
+    44,
+    29,
+    35
+   ],
+   "unite": "RSI",
+   "note": "Valeurs d’exemple. Le RSI passe en surachat (au-dessus de 70) aux séances 4 à 6, revient en zone neutre, puis touche la survente (sous 30) à la séance 9. Ces passages décrivent l’intensité du mouvement ; ils ne datent pas le retournement.",
+   "reel": false
+  }
+ ],
+ "quiz": [
+  {
+   "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?",
+   "options": [
+    "25",
+    "50",
+    "75",
+    "300"
+   ],
+   "correct": 2,
+   "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75."
+  },
+  {
+   "question": "Un RSI de 25 se situe dans quelle zone ?",
+   "options": [
+    "Surachat",
+    "Neutre",
+    "Survente",
+    "Hors échelle"
+   ],
+   "correct": 2,
+   "explication": "Sous 30, on parle de survente."
+  },
+  {
+   "question": "Un RSI reste au-dessus de 70 pendant des semaines. Est-ce possible ?",
+   "options": [
+    "Non, c’est impossible",
+    "Oui, dans une forte tendance haussière",
+    "Seulement pour les obligations",
+    "Seulement les jours fériés"
+   ],
+   "correct": 1,
+   "explication": "Une tendance forte peut maintenir le RSI en zone de surachat."
+  },
+  {
+   "question": "Pourquoi le RSI d’une valeur peu liquide est-il à lire avec prudence ?",
+   "options": [
+    "Il ne se calcule pas",
+    "Quelques séances avec peu d’échanges suffisent à le pousser vers un extrême",
+    "Il vaut toujours 50",
+    "Il est interdit"
+   ],
+   "correct": 1,
+   "explication": "Avec peu d’échanges, quelques ordres font bouger le cours, et donc le RSI."
+  },
+  {
+   "question": "Que dit le RSI sur les comptes d’une société ?",
+   "options": [
+    "Tout",
+    "Rien : il ne mesure que les mouvements de cours",
+    "Son bénéfice",
+    "Son dividende"
+   ],
+   "correct": 1,
+   "explication": "Le RSI est calculé sur les cours seulement."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "Notre méthodologie des signaux",
+   "href": "/methodologie"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "qcm": {
+  "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?",
+  "options": [
+   "25",
+   "50",
+   "75",
+   "300"
+  ],
+  "correct": 2,
+  "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75."
+ }
+}

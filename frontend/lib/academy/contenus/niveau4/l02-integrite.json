@@ -1,0 +1,209 @@
+{
+ "titre": "Leçon 2 — L’information et l’intégrité du marché",
+ "module": "Module 1 — Régulation et intégrité du marché",
+ "categorie": "regulatory",
+ "duree_min": 11,
+ "sous_titre": "Ce que les sociétés doivent publier, ce qu’est une information privilégiée, et les abus que la réglementation sanctionne.",
+ "resume": "Un marché ne fonctionne que si tous les investisseurs disposent de la même information au même moment. Les sociétés cotées ont donc des obligations de publication, périodiques et permanentes, et l’usage d’une information privilégiée est interdit. Cette leçon décrit ces obligations, les principaux abus de marché et les réflexes à adopter.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Deux obligations d’information",
+   "contenu": "Une société cotée informe le marché selon un calendrier, et chaque fois qu’un fait important survient.",
+   "points": [
+    {
+     "titre": "L’information périodique",
+     "detail": "États financiers annuels certifiés, rapports d’activité trimestriels et semestriels, publiés dans des délais fixés."
+    },
+    {
+     "titre": "L’information permanente",
+     "detail": "Tout fait nouveau susceptible d’influencer sensiblement le cours doit être rendu public sans délai : résultat inattendu, contrat majeur, litige, changement de dirigeant."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "L’information privilégiée",
+   "contenu": "Une information est dite privilégiée quand elle réunit trois caractères. Celui qui la détient ne doit ni s’en servir pour opérer, ni la communiquer, tant qu’elle n’est pas publique.",
+   "points": [
+    {
+     "titre": "Précise",
+     "detail": "Elle porte sur un fait ou un événement déterminé, pas sur une rumeur vague."
+    },
+    {
+     "titre": "Non publique",
+     "detail": "Elle n’a pas encore été diffusée au marché par les canaux officiels."
+    },
+    {
+     "titre": "Susceptible d’influencer le cours",
+     "detail": "Un investisseur raisonnable en tiendrait compte pour décider."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Les principaux abus de marché",
+   "contenu": "Les comportements visés par la réglementation, résumés à titre pédagogique.",
+   "tableau": {
+    "colonnes": [
+     "Abus",
+     "En quoi il consiste",
+     "Exemple pédagogique"
+    ],
+    "lignes": [
+     [
+      "Délit d’initié",
+      "Opérer ou faire opérer grâce à une information privilégiée",
+      "Un salarié achète avant l’annonce d’un résultat exceptionnel"
+     ],
+     [
+      "Communication illicite",
+      "Transmettre une information privilégiée hors du cadre de ses fonctions",
+      "Un conseiller confie l’annonce à venir à un proche"
+     ],
+     [
+      "Manipulation de cours",
+      "Passer des ordres pour fixer artificiellement un cours",
+      "Des achats répétés en fin de séance pour gonfler la clôture"
+     ],
+     [
+      "Fausse information",
+      "Diffuser une information trompeuse pour influencer le cours",
+      "Une rumeur inventée de rachat publiée sur les réseaux"
+     ]
+    ],
+    "note": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Pourquoi cela concerne aussi le petit investisseur",
+   "contenu": "Les abus de marché ne sont pas réservés aux initiés. Relayer une rumeur de rachat dans un groupe de discussion, ou acheter sur la foi d’un « tuyau » venu de l’intérieur d’une société, expose à des risques réels.\nSur un marché peu liquide, quelques ordres suffisent à déplacer un cours : la vigilance y est d’autant plus nécessaire."
+  },
+  {
+   "type": "piege",
+   "titre": "Les bons réflexes",
+   "contenu": "Quelques règles simples protègent votre épargne et votre responsabilité.",
+   "points": [
+    {
+     "titre": "Se fier aux publications officielles",
+     "detail": "Les avis de la BRVM et les communiqués des sociétés font foi, pas les rumeurs.",
+     "verifier": "La source et la date de l’information."
+    },
+    {
+     "titre": "Se méfier des « tuyaux »",
+     "detail": "Une information présentée comme confidentielle et sûre est soit fausse, soit interdite d’usage.",
+     "verifier": "Si elle est publique."
+    },
+    {
+     "titre": "Signaler un abus",
+     "detail": "Un comportement suspect peut être signalé à l’AMF-UMOA.",
+     "verifier": "Les canaux de réclamation de l’AMF-UMOA."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Même information, au même moment, pour tous.",
+   "points": [
+    {
+     "titre": "Information périodique et permanente : deux obligations des sociétés cotées"
+    },
+    {
+     "titre": "Information privilégiée : précise, non publique, et pouvant influencer le cours"
+    },
+    {
+     "titre": "Délit d’initié, manipulation, fausse information : des abus sanctionnés"
+    },
+    {
+     "titre": "Ne décider que sur des informations publiques et officielles"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quels sont les trois caractères d’une information privilégiée ?",
+   "options": [
+    "Ancienne, publique, sans effet",
+    "Précise, non publique, susceptible d’influencer le cours",
+    "Vague, publique, chiffrée",
+    "Officielle, ancienne, confidentielle"
+   ],
+   "correct": 1,
+   "explication": "Une information privilégiée est précise, non encore publique, et susceptible d’influencer sensiblement le cours."
+  },
+  {
+   "question": "Une société signe un contrat majeur. Que lui impose l’information permanente ?",
+   "options": [
+    "D’attendre le rapport annuel",
+    "De le rendre public sans délai s’il peut influencer le cours",
+    "De n’en parler qu’aux grands actionnaires",
+    "Rien"
+   ],
+   "correct": 1,
+   "explication": "Tout fait susceptible d’influencer sensiblement le cours doit être publié sans délai."
+  },
+  {
+   "question": "Des achats répétés en fin de séance pour gonfler le cours de clôture relèvent :",
+   "options": [
+    "D’une stratégie normale",
+    "De la manipulation de cours",
+    "D’une information périodique",
+    "D’un dividende"
+   ],
+   "correct": 1,
+   "explication": "Fixer artificiellement un cours par ses ordres est une manipulation."
+  },
+  {
+   "question": "Un ami salarié d’une société cotée vous annonce un excellent résultat, pas encore publié. Que faire ?",
+   "options": [
+    "Acheter avant l’annonce",
+    "Ne pas opérer sur cette base : l’information est privilégiée",
+    "La relayer à d’autres",
+    "Vendre à découvert"
+   ],
+   "correct": 1,
+   "explication": "Utiliser ou transmettre une information privilégiée est interdit, pour lui comme pour vous."
+  },
+  {
+   "question": "Qui enquête et sanctionne les abus de marché dans l’UMOA ?",
+   "options": [
+    "La BRVM seule",
+    "L’AMF-UMOA",
+    "Chaque SGI",
+    "Personne"
+   ],
+   "correct": 1,
+   "explication": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les sociétés cotées",
+   "href": "/societes"
+  },
+  {
+   "label": "Les opérations sur titres",
+   "href": "/operations-titres"
+  },
+  {
+   "label": "La qualité de nos données",
+   "href": "/qualite-donnees"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement ni un avis juridique. Les règles citées sont résumées ; seuls les textes officiels de l’AMF-UMOA et de la BRVM font foi.",
+ "charts": [],
+ "qcm": {
+  "question": "Quels sont les trois caractères d’une information privilégiée ?",
+  "options": [
+   "Ancienne, publique, sans effet",
+   "Précise, non publique, susceptible d’influencer le cours",
+   "Vague, publique, chiffrée",
+   "Officielle, ancienne, confidentielle"
+  ],
+  "correct": 1,
+  "explication": "Une information privilégiée est précise, non encore publique, et susceptible d’influencer sensiblement le cours."
+ }
+}

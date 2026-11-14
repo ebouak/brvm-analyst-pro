@@ -1,0 +1,193 @@
+{
+ "titre": "Leçon 2 — Les chandeliers japonais",
+ "module": "Module 1 — Graphiques et tendances",
+ "categorie": "technical",
+ "duree_min": 9,
+ "sous_titre": "Ouverture, plus haut, plus bas, clôture : ce qu’une bougie raconte d’une séance, et ce qu’elle ne raconte pas.",
+ "resume": "Un chandelier résume une séance en quatre prix. Sa couleur dit si le cours a fini plus haut ou plus bas qu’à l’ouverture ; ses mèches montrent les extrêmes atteints. Cette leçon apprend à lire une bougie et quelques configurations connues, avec une prudence particulière à la BRVM.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "L’anatomie d’une bougie",
+   "contenu": "Chaque bougie représente une période : une séance, une semaine.",
+   "points": [
+    {
+     "titre": "Le corps",
+     "detail": "L’écart entre l’ouverture et la clôture. Clair (ou vert) : clôture au-dessus de l’ouverture. Sombre (ou rouge) : en dessous."
+    },
+    {
+     "titre": "La mèche haute",
+     "detail": "Le plus haut atteint pendant la période."
+    },
+    {
+     "titre": "La mèche basse",
+     "detail": "Le plus bas atteint pendant la période."
+    },
+    {
+     "titre": "La taille",
+     "detail": "Un grand corps traduit un mouvement net ; un petit corps, de l’hésitation."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Quatre configurations connues",
+   "contenu": "Ces figures décrivent un comportement ; aucune n’est un signal fiable à elle seule.",
+   "tableau": {
+    "colonnes": [
+     "Configuration",
+     "À quoi elle ressemble",
+     "Ce qu’elle suggère"
+    ],
+    "lignes": [
+     [
+      "Doji",
+      "Ouverture et clôture presque égales",
+      "Hésitation entre acheteurs et vendeurs"
+     ],
+     [
+      "Marteau",
+      "Petit corps en haut, longue mèche basse",
+      "Les vendeurs ont poussé, les acheteurs ont repris le dessus"
+     ],
+     [
+      "Étoile filante",
+      "Petit corps en bas, longue mèche haute",
+      "Les acheteurs ont poussé, les vendeurs ont repris le dessus"
+     ],
+     [
+      "Avalement",
+      "Un corps qui englobe entièrement le précédent",
+      "Un changement de rapport de force"
+     ]
+    ],
+    "note": "Une configuration se confirme par la séance suivante et par le volume."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les chandeliers à la BRVM",
+   "contenu": "Une bougie suppose une séance active, avec de nombreux échanges.",
+   "points": [
+    {
+     "titre": "Une bougie sans échange",
+     "detail": "Sans transaction, ouverture, plus haut, plus bas et clôture sont identiques : la bougie est plate et ne dit rien.",
+     "verifier": "Le volume de la séance."
+    },
+    {
+     "titre": "Peu d’ordres, beaucoup de forme",
+     "detail": "Avec quelques échanges, une longue mèche peut venir d’un seul ordre isolé.",
+     "verifier": "Le nombre de titres échangés."
+    },
+    {
+     "titre": "Des données incomplètes",
+     "detail": "Les sources publiques ne fournissent pas toujours le plus haut et le plus bas de chaque séance. WestBourse affiche alors des courbes de clôture plutôt que des bougies inventées.",
+     "verifier": "La mention de la source sous le graphique."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Une bougie raconte une séance ; elle ne prédit pas la suivante.",
+   "points": [
+    {
+     "titre": "Le corps : ouverture et clôture ; les mèches : les extrêmes"
+    },
+    {
+     "titre": "Doji, marteau, étoile filante, avalement : des indices, pas des signaux"
+    },
+    {
+     "titre": "Toujours vérifier le volume"
+    },
+    {
+     "titre": "À la BRVM, une bougie sans échange ne dit rien"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?",
+   "options": [
+    "La clôture est sous l’ouverture",
+    "La clôture est au-dessus de l’ouverture",
+    "Il n’y a pas eu d’échange",
+    "Le cours a atteint un record"
+   ],
+   "correct": 1,
+   "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture."
+  },
+  {
+   "question": "Que représente la mèche basse ?",
+   "options": [
+    "La clôture",
+    "Le plus bas atteint pendant la période",
+    "Le dividende",
+    "Le volume"
+   ],
+   "correct": 1,
+   "explication": "La mèche basse descend jusqu’au plus bas de la période."
+  },
+  {
+   "question": "Un doji traduit plutôt :",
+   "options": [
+    "Une forte hausse",
+    "Une hésitation entre acheteurs et vendeurs",
+    "Une suspension",
+    "Un dividende"
+   ],
+   "correct": 1,
+   "explication": "Ouverture et clôture presque égales : aucun camp ne l’a emporté."
+  },
+  {
+   "question": "Une valeur n’a eu aucun échange dans la séance. À quoi ressemble sa bougie ?",
+   "options": [
+    "À un marteau",
+    "À un trait plat, sans information",
+    "À un avalement",
+    "À une étoile filante"
+   ],
+   "correct": 1,
+   "explication": "Sans transaction, les quatre prix sont identiques."
+  },
+  {
+   "question": "Comment confirmer une configuration de chandeliers ?",
+   "options": [
+    "Par la couleur du logo",
+    "Par la séance suivante et par le volume",
+    "Par le PER",
+    "Elle n’a pas besoin de confirmation"
+   ],
+   "correct": 1,
+   "explication": "Une configuration isolée est un indice ; la suite des cours et le volume la confirment ou non."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "La liquidité de chaque valeur",
+   "href": "/liquidite"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?",
+  "options": [
+   "La clôture est sous l’ouverture",
+   "La clôture est au-dessus de l’ouverture",
+   "Il n’y a pas eu d’échange",
+   "Le cours a atteint un record"
+  ],
+  "correct": 1,
+  "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture."
+ }
+}

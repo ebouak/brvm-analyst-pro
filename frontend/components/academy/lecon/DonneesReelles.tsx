@@ -190,6 +190,52 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
     );
   }
 
+  if (donnees.vue === 'technique') {
+    const { lignes, date, manquants } = donnees;
+    if (lignes.length === 0) return <Manquants codes={manquants} />;
+    const zone = { surachat: 'en surachat (70 ou plus)', survente: 'en survente (30 ou moins)', neutre: 'en zone neutre' } as const;
+    return (
+      <figure className="lp-figure">
+        <Entete titre="Moyennes mobiles et RSI, sur des valeurs de la BRVM" />
+        <div className="lp-table-wrap">
+          <table className="lp-table">
+            <caption className="sr-only">Cours, moyennes mobiles 20 et 50 séances et RSI 14 de valeurs de la BRVM</caption>
+            <thead>
+              <tr>
+                <th scope="col">Société</th>
+                <th scope="col" className="lp-num">Cours (FCFA)</th>
+                <th scope="col" className="lp-num">Moyenne 20 séances</th>
+                <th scope="col" className="lp-num">Moyenne 50 séances</th>
+                <th scope="col" className="lp-num">RSI 14</th>
+                <th scope="col">Lecture</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lignes.map((l) => (
+                <tr key={l.code}>
+                  <th scope="row" className="lp-ligne-tete">
+                    {l.nom}
+                    <span className="lp-cellule-detail">{l.code}</span>
+                  </th>
+                  <td className="lp-num">{nombre(l.cours)}</td>
+                  <td className="lp-num">{nombre(Math.round(l.mm20))}</td>
+                  <td className="lp-num">{nombre(Math.round(l.mm50))}</td>
+                  <td className="lp-num">{nombre(Math.round(l.rsi14))}</td>
+                  <td>Cours {l.position} moyennes ; RSI {zone[l.zoneRsi]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <ul className="lp-hypotheses">
+          {date && <li>Calculés sur les clôtures réelles jusqu’à la séance du {dateFr(date)}. Source : BRVM, via la base WestBourse.</li>}
+          <li>Une description de la situation, pas un signal : à la BRVM, des séances sans échange peuvent figer un cours et fausser ces indicateurs.</li>
+        </ul>
+        <Manquants codes={manquants} />
+      </figure>
+    );
+  }
+
   if (donnees.vue === 'indices') {
     const { lignes, date, manquants } = donnees;
     if (lignes.length === 0) return <Manquants codes={manquants} />;

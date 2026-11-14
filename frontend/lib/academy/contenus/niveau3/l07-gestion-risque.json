@@ -1,0 +1,216 @@
+{
+ "titre": "Leçon 7 — Stop-loss, objectif et taille de position",
+ "module": "Module 3 — Figures et gestion du risque",
+ "categorie": "technical",
+ "duree_min": 11,
+ "sous_titre": "Décider avant d’acheter combien on accepte de perdre, et en déduire combien acheter.",
+ "resume": "La gestion du risque compte davantage que le choix du point d’entrée. Elle consiste à fixer à l’avance le niveau où l’on reconnaît s’être trompé, à en déduire la taille de la position, et à comparer le gain visé au risque pris. Cette leçon donne les calculs et leurs limites sur un marché peu liquide.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Trois décisions à prendre avant l’achat",
+   "contenu": "Elles s’écrivent avant de passer l’ordre, jamais après.",
+   "points": [
+    {
+     "titre": "Le niveau d’invalidation (stop)",
+     "detail": "Le prix auquel votre raisonnement est faux : sous un support, sous la ligne de cou."
+    },
+    {
+     "titre": "L’objectif",
+     "detail": "Un niveau plausible de sortie : une résistance, un sommet précédent."
+    },
+    {
+     "titre": "La taille de la position",
+     "detail": "Calculée pour qu’une sortie au stop ne coûte qu’une petite part du portefeuille."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les calculs",
+   "contenu": "Exemple pédagogique : portefeuille de 5 000 000 FCFA, risque accepté de 1 % par position.",
+   "formules": [
+    {
+     "nom": "Risque maximal par position",
+     "expression": "Portefeuille × % de risque accepté",
+     "exemple": "5 000 000 × 1 % = 50 000 FCFA"
+    },
+    {
+     "nom": "Risque par action",
+     "expression": "Prix d’achat − Stop",
+     "exemple": "2 000 − 1 800 = 200 FCFA"
+    },
+    {
+     "nom": "Nombre d’actions",
+     "expression": "Risque maximal ÷ Risque par action",
+     "exemple": "50 000 ÷ 200 = 250 actions, soit 500 000 FCFA investis"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Le rapport gain sur risque",
+   "contenu": "Exemple pédagogique : avec un stop à 1 800 et un objectif à 2 500 pour un achat à 2 000 FCFA.",
+   "tableau": {
+    "colonnes": [
+     "Élément",
+     "Calcul",
+     "Résultat"
+    ],
+    "lignes": [
+     [
+      "Risque par action",
+      "2 000 − 1 800",
+      "200 FCFA"
+     ],
+     [
+      "Gain visé par action",
+      "2 500 − 2 000",
+      "500 FCFA"
+     ],
+     [
+      "Rapport gain sur risque",
+      "500 ÷ 200",
+      "2,5"
+     ],
+     [
+      "Taux de réussite nécessaire pour ne pas perdre",
+      "1 ÷ (1 + 2,5)",
+      "Environ 29 %"
+     ]
+    ],
+    "note": "Avec un rapport de 2,5, il suffit d’avoir raison un peu moins d’une fois sur trois pour ne pas perdre, hors frais."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les limites à la BRVM",
+   "contenu": "Un stop n’est pas une garantie de prix.",
+   "points": [
+    {
+     "titre": "Le stop n’est pas automatique partout",
+     "detail": "Selon les SGI, l’ordre stop n’existe pas toujours : il faut alors surveiller soi-même et passer l’ordre.",
+     "verifier": "Les types d’ordres proposés par votre SGI."
+    },
+    {
+     "titre": "Le prix peut sauter le stop",
+     "detail": "Sur une valeur peu liquide, le cours peut passer d’un coup sous votre niveau : la vente se fait plus bas.",
+     "verifier": "La liquidité de la valeur avant d’acheter."
+    },
+    {
+     "titre": "Les frais",
+     "detail": "Courtage à l’achat et à la vente réduisent le gain et augmentent la perte.",
+     "verifier": "Le barème de votre SGI."
+    },
+    {
+     "titre": "Déplacer son stop vers le bas",
+     "detail": "Le reculer pour « laisser une chance » transforme une petite perte en grande perte.",
+     "verifier": "Votre règle écrite avant l’achat."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "On ne contrôle pas le marché ; on contrôle ce qu’on risque.",
+   "points": [
+    {
+     "titre": "Fixer le stop et l’objectif avant l’achat"
+    },
+    {
+     "titre": "Taille de position = risque accepté ÷ risque par action"
+    },
+    {
+     "titre": "Viser un rapport gain sur risque d’au moins 2"
+    },
+    {
+     "titre": "À la BRVM, le stop est une intention : la liquidité décide du prix réel"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?",
+   "options": [
+    "4 000 FCFA",
+    "40 000 FCFA",
+    "400 000 FCFA",
+    "20 000 FCFA"
+   ],
+   "correct": 1,
+   "explication": "2 000 000 × 2 % = 40 000 FCFA."
+  },
+  {
+   "question": "Achat à 3 000 FCFA, stop à 2 700 FCFA, risque maximal de 30 000 FCFA. Combien d’actions acheter ?",
+   "options": [
+    "10",
+    "100",
+    "300",
+    "1 000"
+   ],
+   "correct": 1,
+   "explication": "Risque par action : 300 FCFA ; 30 000 ÷ 300 = 100 actions."
+  },
+  {
+   "question": "Stop à 900, achat à 1 000, objectif à 1 300. Quel est le rapport gain sur risque ?",
+   "options": [
+    "1",
+    "2",
+    "3",
+    "13"
+   ],
+   "correct": 2,
+   "explication": "Gain visé 300, risque 100 : rapport de 3."
+  },
+  {
+   "question": "Pourquoi un stop ne garantit-il pas le prix de vente à la BRVM ?",
+   "options": [
+    "Il est interdit",
+    "Sur une valeur peu liquide, le cours peut sauter le niveau du stop",
+    "Les stops sont toujours exécutés au cours d’achat",
+    "La BRVM rembourse la différence"
+   ],
+   "correct": 1,
+   "explication": "Sans contrepartie au niveau du stop, la vente se fait au prix suivant disponible."
+  },
+  {
+   "question": "Quelle est l’erreur la plus coûteuse avec un stop ?",
+   "options": [
+    "Le fixer avant d’acheter",
+    "Le reculer vers le bas quand le cours s’en approche",
+    "Calculer la taille de position",
+    "Noter son raisonnement"
+   ],
+   "correct": 1,
+   "explication": "Reculer son stop transforme une perte contrôlée en perte non contrôlée."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Le portefeuille virtuel",
+   "href": "/premium/paper-trading"
+  },
+  {
+   "label": "Choisir sa SGI",
+   "href": "/comparateur-sgi"
+  },
+  {
+   "label": "La liquidité de chaque valeur",
+   "href": "/liquidite"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?",
+  "options": [
+   "4 000 FCFA",
+   "40 000 FCFA",
+   "400 000 FCFA",
+   "20 000 FCFA"
+  ],
+  "correct": 1,
+  "explication": "2 000 000 × 2 % = 40 000 FCFA."
+ }
+}

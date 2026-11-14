@@ -1,0 +1,222 @@
+{
+ "titre": "Leçon 3 — Les moyennes mobiles",
+ "module": "Module 2 — Indicateurs",
+ "categorie": "technical",
+ "duree_min": 10,
+ "sous_titre": "Lisser le bruit des séances pour voir la tendance : moyenne courte, moyenne longue, et leurs croisements.",
+ "resume": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, recalculée à chaque séance. Elle lisse les variations et révèle la tendance. Cette leçon explique le calcul, la lecture du cours face à ses moyennes, et pourquoi les croisements arrivent toujours en retard.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Le calcul",
+   "contenu": "Exemple pédagogique sur cinq séances.",
+   "formules": [
+    {
+     "nom": "Moyenne mobile simple sur N séances",
+     "expression": "(Somme des N dernières clôtures) ÷ N",
+     "exemple": "(100 + 102 + 101 + 105 + 107) ÷ 5 = 103"
+    },
+    {
+     "nom": "Écart à la moyenne",
+     "expression": "(Cours − Moyenne) ÷ Moyenne",
+     "exemple": "(107 − 103) ÷ 103 ≈ +3,9 %"
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Moyenne courte et moyenne longue",
+   "contenu": "Une moyenne courte (20 séances, environ un mois) suit le cours de près. Une moyenne longue (50 séances ou plus) décrit la tendance de fond.\nLe graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne.",
+   "stats": [
+    {
+     "label": "Cours au-dessus des deux moyennes",
+     "valeur": "Tendance haussière",
+     "detail": "Description de la situation, pas une prévision"
+    },
+    {
+     "label": "Cours sous les deux moyennes",
+     "valeur": "Tendance baissière",
+     "detail": "Idem"
+    },
+    {
+     "label": "Cours entre les deux",
+     "valeur": "Hésitation",
+     "detail": "Tendances courte et longue divergentes"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : le cours face à ses moyennes",
+   "reel": true,
+   "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.",
+   "donnees_reelles": {
+    "vue": "technique",
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "SGBC",
+     "ETIT",
+     "SIBC"
+    ]
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Le retard, défaut inévitable",
+   "contenu": "Une moyenne mobile regarde en arrière : elle confirme une tendance quand celle-ci est déjà installée.",
+   "points": [
+    {
+     "titre": "Les croisements arrivent tard",
+     "detail": "Quand la moyenne courte croise la longue, une bonne partie du mouvement a souvent eu lieu.",
+     "verifier": "L’écart du cours à sa moyenne au moment du croisement."
+    },
+    {
+     "titre": "Les faux signaux en marché sans tendance",
+     "detail": "Quand le cours oscille, les moyennes se croisent sans cesse.",
+     "verifier": "La pente de la moyenne longue."
+    },
+    {
+     "titre": "Des séances sans échange",
+     "detail": "Une moyenne calculée sur des cours figés paraît stable sans l’être.",
+     "verifier": "Le nombre de séances réellement échangées."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Une moyenne mobile décrit, elle ne prévoit pas.",
+   "points": [
+    {
+     "titre": "Moyenne mobile = moyenne des N dernières clôtures"
+    },
+    {
+     "titre": "Courte pour le mouvement récent, longue pour la tendance de fond"
+    },
+    {
+     "titre": "Le cours face à ses deux moyennes décrit la tendance"
+    },
+    {
+     "titre": "Les croisements arrivent en retard et se trompent sans tendance"
+    }
+   ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "line",
+   "titre": "Un cours qui repasse au-dessus de sa moyenne (exemple)",
+   "labels": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "S10"
+   ],
+   "valeurs": [
+    100,
+    98,
+    97,
+    99,
+    102,
+    105,
+    107,
+    106,
+    109,
+    112
+   ],
+   "unite": "FCFA",
+   "note": "Valeurs d’exemple. Moyenne sur 5 séances : 99,2 à la séance 5, 105,8 à la séance 9, 107,8 à la séance 10. Le cours passe au-dessus de sa moyenne à partir de la séance 5 et y reste : la moyenne confirme la hausse, avec retard.",
+   "reel": false
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+   "options": [
+    "200",
+    "205",
+    "210",
+    "820"
+   ],
+   "correct": 1,
+   "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
+  },
+  {
+   "question": "Le cours est au-dessus de sa moyenne sur 20 séances et de sa moyenne sur 50 séances. Comment le décrire ?",
+   "options": [
+    "Tendance baissière",
+    "Tendance haussière",
+    "Valeur suspendue",
+    "Achat garanti"
+   ],
+   "correct": 1,
+   "explication": "Un cours au-dessus de ses deux moyennes décrit une tendance haussière, sans rien garantir."
+  },
+  {
+   "question": "Pourquoi un croisement de moyennes arrive-t-il en retard ?",
+   "options": [
+    "Parce que les moyennes regardent les cours passés",
+    "Parce que la BRVM publie tard",
+    "Parce que le volume est faible",
+    "Il n’arrive jamais en retard"
+   ],
+   "correct": 0,
+   "explication": "Une moyenne se calcule sur des cours passés : elle réagit après le mouvement."
+  },
+  {
+   "question": "Dans un marché sans tendance, les croisements de moyennes :",
+   "options": [
+    "Sont très fiables",
+    "Se multiplient et donnent beaucoup de faux signaux",
+    "Disparaissent",
+    "Annoncent un dividende"
+   ],
+   "correct": 1,
+   "explication": "Quand le cours oscille, les moyennes se croisent souvent sans tendance réelle."
+  },
+  {
+   "question": "Un cours vaut 110 et sa moyenne 100. Quel est son écart à la moyenne ?",
+   "options": [
+    "+1 %",
+    "+10 %",
+    "+110 %",
+    "−10 %"
+   ],
+   "correct": 1,
+   "explication": "(110 − 100) ÷ 100 = +10 %."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "Notre méthodologie des signaux",
+   "href": "/methodologie"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "qcm": {
+  "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+  "options": [
+   "200",
+   "205",
+   "210",
+   "820"
+  ],
+  "correct": 1,
+  "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
+ }
+}

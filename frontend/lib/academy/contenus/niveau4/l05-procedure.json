@@ -1,0 +1,229 @@
+{
+ "titre": "Leçon 5 — La procédure d’introduction à la BRVM",
+ "module": "Module 2 — Marché primaire et introduction en bourse",
+ "categorie": "regulatory",
+ "duree_min": 10,
+ "sous_titre": "De la décision des actionnaires à la première cotation : les étapes, les acteurs et les documents d’une introduction en bourse.",
+ "resume": "Une introduction en bourse suit une procédure encadrée. La société, accompagnée d’une SGI chef de file, prépare une note d’information que l’AMF-UMOA vise ; l’offre est ouverte au public ; les ordres sont alloués ; la BRVM admet ensuite les titres à la cote. Cette leçon détaille ces étapes et les documents que l’investisseur doit lire.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Les acteurs d’une introduction",
+   "contenu": "Chacun engage sa responsabilité sur une partie du processus.",
+   "points": [
+    {
+     "titre": "La société émettrice",
+     "detail": "Décide de l’opération en assemblée, fournit ses comptes et répond de l’exactitude des informations."
+    },
+    {
+     "titre": "La SGI chef de file",
+     "detail": "Conduit l’opération, organise le placement auprès du public et centralise les ordres avec les autres SGI."
+    },
+    {
+     "titre": "L’AMF-UMOA",
+     "detail": "Examine le dossier et vise la note d’information avant toute offre au public."
+    },
+    {
+     "titre": "La BRVM",
+     "detail": "Se prononce sur l’admission des titres à la cote et organise la première cotation."
+    }
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les étapes",
+   "contenu": "L’ordre des étapes est constant ; leurs durées varient selon les opérations.",
+   "etapes": [
+    {
+     "titre": "Décision et préparation",
+     "detail": "Assemblée générale, choix de la SGI chef de file et des conseils, audit des comptes."
+    },
+    {
+     "titre": "Note d’information",
+     "detail": "Document décrivant la société, ses comptes, ses risques et l’opération."
+    },
+    {
+     "titre": "Visa de l’AMF-UMOA",
+     "detail": "Aucune offre au public ne peut être ouverte avant ce visa.",
+     "cle": true
+    },
+    {
+     "titre": "Période de souscription",
+     "detail": "Les investisseurs transmettent leurs ordres par l’intermédiaire d’une SGI."
+    },
+    {
+     "titre": "Allocation et résultats",
+     "detail": "En cas de sursouscription, les ordres sont réduits selon les règles annoncées."
+    },
+    {
+     "titre": "Admission et première cotation",
+     "detail": "La BRVM inscrit les titres à la cote ; les échanges commencent."
+    }
+   ],
+   "etapes_style": "frise"
+  },
+  {
+   "type": "importance",
+   "titre": "Ce qu’il faut lire dans une note d’information",
+   "contenu": "C’est le seul document de référence de l’offre. Il est long : ces rubriques suffisent à se faire une opinion.",
+   "tableau": {
+    "colonnes": [
+     "Rubrique",
+     "La question à se poser"
+    ],
+    "lignes": [
+     [
+      "Structure de l’opération",
+      "Qui vend, combien, et à qui va l’argent ?"
+     ],
+     [
+      "Facteurs de risque",
+      "Qu’est-ce qui pourrait faire baisser les résultats ?"
+     ],
+     [
+      "Comptes historiques",
+      "Le résultat est-il régulier sur plusieurs années ?"
+     ],
+     [
+      "Prix et valorisation",
+      "Quel PER et quel P/B le prix d’offre implique-t-il ?"
+     ],
+     [
+      "Politique de dividende",
+      "Un engagement de distribution est-il annoncé, et sur quelle base ?"
+     ],
+     [
+      "Règles d’allocation",
+      "Comment les ordres seront-ils servis en cas de forte demande ?"
+     ]
+    ],
+    "note": "Le visa de l’AMF-UMOA atteste que l’information est complète et compréhensible ; il ne juge pas l’intérêt de l’investissement."
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les malentendus fréquents",
+   "contenu": "Trois idées fausses reviennent souvent.",
+   "points": [
+    {
+     "titre": "Le visa n’est pas une recommandation",
+     "detail": "Il porte sur la qualité de l’information, pas sur l’opportunité d’acheter.",
+     "verifier": "La mention exacte du visa sur la note."
+    },
+    {
+     "titre": "Souscrire n’est pas recevoir",
+     "detail": "En cas de sursouscription, vous ne recevez qu’une partie des titres demandés.",
+     "verifier": "Les règles d’allocation."
+    },
+    {
+     "titre": "Le prix d’offre n’est pas un plancher",
+     "detail": "Après la première cotation, le cours peut passer sous le prix d’offre.",
+     "verifier": "La valorisation implicite du prix."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Un visa, une note d’information, une SGI : trois repères.",
+   "points": [
+    {
+     "titre": "Pas d’offre au public sans visa de l’AMF-UMOA"
+    },
+    {
+     "titre": "La note d’information est le document de référence"
+    },
+    {
+     "titre": "Les ordres passent par une SGI ; l’allocation peut les réduire"
+    },
+    {
+     "titre": "Le visa atteste l’information, pas l’intérêt de l’investissement"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quelle étape doit précéder toute offre au public ?",
+   "options": [
+    "La première cotation",
+    "Le visa de l’AMF-UMOA sur la note d’information",
+    "Le versement d’un dividende",
+    "L’allocation des titres"
+   ],
+   "correct": 1,
+   "explication": "Aucune offre au public ne peut être ouverte avant le visa de l’AMF-UMOA."
+  },
+  {
+   "question": "Que signifie le visa de l’AMF-UMOA ?",
+   "options": [
+    "Que l’investissement est recommandé",
+    "Que l’information est complète et compréhensible",
+    "Que le cours montera",
+    "Que la société est garantie par l’État"
+   ],
+   "correct": 1,
+   "explication": "Le visa porte sur l’information, pas sur l’opportunité d’investir."
+  },
+  {
+   "question": "Qui conduit l’opération et organise le placement auprès du public ?",
+   "options": [
+    "La BCEAO",
+    "La SGI chef de file",
+    "Le Dépositaire central",
+    "Chaque investisseur"
+   ],
+   "correct": 1,
+   "explication": "La SGI chef de file pilote l’opération et centralise les ordres."
+  },
+  {
+   "question": "Vous demandez 1 000 titres dans une offre sursouscrite à 200 %, avec une réduction proportionnelle. Combien en recevez-vous ?",
+   "options": [
+    "250",
+    "500",
+    "1 000",
+    "2 000"
+   ],
+   "correct": 1,
+   "explication": "À 200 %, chaque ordre est servi à moitié : 500 titres."
+  },
+  {
+   "question": "Le cours peut-il passer sous le prix d’offre après la première cotation ?",
+   "options": [
+    "Non, jamais",
+    "Oui : le prix d’offre n’est pas un plancher",
+    "Seulement le premier jour",
+    "Seulement pour les PME"
+   ],
+   "correct": 1,
+   "explication": "Après la cotation, le cours résulte de l’offre et de la demande."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les opérations sur titres",
+   "href": "/operations-titres"
+  },
+  {
+   "label": "Choisir sa SGI",
+   "href": "/comparateur-sgi"
+  },
+  {
+   "label": "Les fondamentaux",
+   "href": "/fondamentaux"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement ni un avis juridique. Les règles citées sont résumées ; seuls les textes officiels de l’AMF-UMOA et de la BRVM font foi.",
+ "charts": [],
+ "qcm": {
+  "question": "Quelle étape doit précéder toute offre au public ?",
+  "options": [
+   "La première cotation",
+   "Le visa de l’AMF-UMOA sur la note d’information",
+   "Le versement d’un dividende",
+   "L’allocation des titres"
+  ],
+  "correct": 1,
+  "explication": "Aucune offre au public ne peut être ouverte avant le visa de l’AMF-UMOA."
+ }
+}

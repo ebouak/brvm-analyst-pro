@@ -1,0 +1,229 @@
+{
+ "titre": "Leçon 4 — Pourquoi une société entre en bourse",
+ "module": "Module 2 — Marché primaire et introduction en bourse",
+ "categorie": "fundamental",
+ "duree_min": 10,
+ "sous_titre": "Lever des fonds, donner une valeur à l’entreprise, permettre à des actionnaires de sortir : les raisons, les coûts et les contraintes.",
+ "resume": "Une introduction en bourse permet à une société de lever des capitaux ou à ses actionnaires de céder une partie de leurs titres au public. Elle apporte de la visibilité et une valeur de marché, mais impose transparence, coûts et contraintes durables. Cette leçon présente ces arbitrages, avec l’exemple de l’admission la plus récente à la BRVM.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Deux façons d’entrer en bourse",
+   "contenu": "Ce qui est vendu au public détermine à qui va l’argent.",
+   "tableau": {
+    "colonnes": [
+     "Opération",
+     "Ce qui est vendu",
+     "À qui va l’argent"
+    ],
+    "lignes": [
+     [
+      "Augmentation de capital",
+      "Des actions nouvelles",
+      "À la société, qui peut investir"
+     ],
+     [
+      "Offre publique de vente (OPV)",
+      "Des actions existantes",
+      "Aux actionnaires qui cèdent leurs titres"
+     ],
+     [
+      "Opération mixte",
+      "Les deux à la fois",
+      "En partie à la société, en partie aux vendeurs"
+     ]
+    ],
+    "note": "Lire la note d’information pour savoir qui reçoit l’argent levé : c’est une indication sur le projet."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que la société gagne, ce qu’elle accepte",
+   "contenu": "L’introduction est un arbitrage durable, pas un événement d’un jour.",
+   "points": [
+    {
+     "titre": "Gains",
+     "detail": "Accès à l’épargne du public, valeur de marché quotidienne, notoriété, possibilité de lever à nouveau des fonds plus tard."
+    },
+    {
+     "titre": "Contraintes",
+     "detail": "Publication régulière des comptes et des faits importants, contrôle de l’AMF-UMOA, assemblées ouvertes à de nombreux actionnaires."
+    },
+    {
+     "titre": "Coûts",
+     "detail": "Rémunération des conseils et de la SGI chef de file, frais d’admission et de cotation, coûts de communication financière."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Un exemple récent : Bridge Bank Group Côte d’Ivoire",
+   "contenu": "Bridge Bank Group Côte d’Ivoire (code BBGC) est devenue la 48e société cotée de la BRVM, avec une première cotation le 24 septembre 2026. Les chiffres de l’offre sont ceux publiés à l’issue de l’opération.",
+   "stats": [
+    {
+     "label": "Type d’opération",
+     "valeur": "Offre publique de vente",
+     "detail": "Cession d’actions existantes au public"
+    },
+    {
+     "label": "Titres offerts",
+     "valeur": "10 millions d’actions",
+     "detail": "Selon les résultats publiés de l’offre"
+    },
+    {
+     "label": "Prix de l’offre",
+     "valeur": "6 750 FCFA",
+     "detail": "Par action"
+    },
+    {
+     "label": "Taux de souscription",
+     "valeur": "142 %",
+     "detail": "La demande a dépassé l’offre : les ordres ont été servis en partie"
+    },
+    {
+     "label": "Première cotation",
+     "valeur": "24 septembre 2026",
+     "detail": "48e société cotée de la BRVM"
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : le cours aujourd’hui",
+   "reel": true,
+   "contenu": "Le dernier cours de BBGC, lu en base à l’ouverture de la leçon, à comparer au prix de l’offre de 6 750 FCFA. Un écart dans un sens ou dans l’autre ne dit rien de la qualité de la société : il dit ce que le marché paie aujourd’hui.",
+   "donnees_reelles": {
+    "vue": "cours",
+    "codes": [
+     "BBGC"
+    ],
+    "actions": 100
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Les illusions de l’introduction",
+   "contenu": "Une introduction attire l’attention ; elle mérite la même analyse que n’importe quel achat.",
+   "points": [
+    {
+     "titre": "« Sursouscrite, donc bonne affaire »",
+     "detail": "Une forte demande dit que l’offre plaît, pas que le prix est bas. Elle réduit aussi la part servie à chacun.",
+     "verifier": "La valorisation implicite du prix d’offre."
+    },
+    {
+     "titre": "Oublier qui vend",
+     "detail": "Dans une offre publique de vente, l’argent va aux vendeurs, pas à la société.",
+     "verifier": "La structure de l’opération dans la note d’information."
+    },
+    {
+     "titre": "Ignorer la liquidité après la cotation",
+     "detail": "Une valeur nouvelle peut s’échanger peu une fois l’enthousiasme passé.",
+     "verifier": "Les volumes des premières semaines."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Une introduction se juge comme un achat : sur les comptes et sur le prix.",
+   "points": [
+    {
+     "titre": "Augmentation de capital : l’argent va à la société ; OPV : aux vendeurs"
+    },
+    {
+     "titre": "La cotation apporte fonds et visibilité, contre transparence et coûts"
+    },
+    {
+     "titre": "Une offre sursouscrite n’est pas forcément bon marché"
+    },
+    {
+     "titre": "Lire la note d’information avant de souscrire"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Dans une offre publique de vente, à qui va l’argent des souscripteurs ?",
+   "options": [
+    "À la société",
+    "Aux actionnaires qui cèdent leurs titres",
+    "À la BRVM",
+    "À l’AMF-UMOA"
+   ],
+   "correct": 1,
+   "explication": "Une OPV porte sur des actions existantes : le produit va aux vendeurs."
+  },
+  {
+   "question": "Une offre de 10 millions d’actions reçoit des demandes pour 14,2 millions. Quel est le taux de souscription ?",
+   "options": [
+    "70 %",
+    "100 %",
+    "142 %",
+    "242 %"
+   ],
+   "correct": 2,
+   "explication": "14,2 ÷ 10 = 142 %."
+  },
+  {
+   "question": "Dans le même cas, si toutes les demandes sont réduites de façon égale, quelle part de sa demande chacun reçoit-il ?",
+   "options": [
+    "Environ 50 %",
+    "Environ 70 %",
+    "100 %",
+    "142 %"
+   ],
+   "correct": 1,
+   "explication": "10 ÷ 14,2 ≈ 70 % de la demande servie."
+  },
+  {
+   "question": "Quelle contrainte durable accepte une société en entrant en bourse ?",
+   "options": [
+    "Ne plus jamais verser de dividende",
+    "Publier régulièrement ses comptes et les faits importants",
+    "Fermer son capital",
+    "Changer de pays"
+   ],
+   "correct": 1,
+   "explication": "La cotation impose une information périodique et permanente, sous le contrôle de l’AMF-UMOA."
+  },
+  {
+   "question": "Une introduction très sursouscrite garantit-elle une hausse du cours ?",
+   "options": [
+    "Oui",
+    "Non : la demande ne dit rien du niveau du prix ni de l’évolution future",
+    "Oui, la première année",
+    "Oui, si la société est une banque"
+   ],
+   "correct": 1,
+   "explication": "Une forte demande ne garantit rien. Le cours dépend ensuite des résultats et du prix payé."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les opérations sur titres",
+   "href": "/operations-titres"
+  },
+  {
+   "label": "Les sociétés cotées",
+   "href": "/societes"
+  },
+  {
+   "label": "L’agenda du marché",
+   "href": "/calendrier"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement ni un avis juridique. Les règles citées sont résumées ; seuls les textes officiels de l’AMF-UMOA et de la BRVM font foi.",
+ "charts": [],
+ "qcm": {
+  "question": "Dans une offre publique de vente, à qui va l’argent des souscripteurs ?",
+  "options": [
+   "À la société",
+   "Aux actionnaires qui cèdent leurs titres",
+   "À la BRVM",
+   "À l’AMF-UMOA"
+  ],
+  "correct": 1,
+  "explication": "Une OPV porte sur des actions existantes : le produit va aux vendeurs."
+ }
+}

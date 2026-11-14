@@ -1,0 +1,210 @@
+{
+ "titre": "Leçon 6 — Les figures chartistes classiques",
+ "module": "Module 3 — Figures et gestion du risque",
+ "categorie": "technical",
+ "duree_min": 10,
+ "sous_titre": "Double creux, tête-épaules, triangles : des formes que le cours dessine, et la discipline qu’il faut pour ne pas en voir partout.",
+ "resume": "Les figures chartistes sont des formes récurrentes du cours, associées à une continuation ou à un retournement de tendance. Cette leçon présente les principales, la façon de les confirmer, et le risque de les voir là où il n’y a que du bruit.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Retournement ou continuation",
+   "contenu": "Les figures se classent selon ce qu’elles suggèrent.",
+   "tableau": {
+    "colonnes": [
+     "Figure",
+     "Famille",
+     "Description",
+     "Confirmation"
+    ],
+    "lignes": [
+     [
+      "Double creux",
+      "Retournement haussier",
+      "Deux creux au même niveau, séparés d’un sommet",
+      "Cassure du sommet intermédiaire"
+     ],
+     [
+      "Double sommet",
+      "Retournement baissier",
+      "Deux sommets au même niveau, séparés d’un creux",
+      "Cassure du creux intermédiaire"
+     ],
+     [
+      "Tête-épaules",
+      "Retournement baissier",
+      "Trois sommets, celui du milieu le plus haut",
+      "Cassure de la ligne de cou"
+     ],
+     [
+      "Triangle",
+      "Continuation, le plus souvent",
+      "Des oscillations qui se resserrent",
+      "Sortie du triangle avec du volume"
+     ],
+     [
+      "Canal",
+      "Continuation",
+      "Le cours évolue entre deux droites parallèles",
+      "Rebonds répétés sur les bornes"
+     ]
+    ],
+    "note": "Une figure n’existe vraiment qu’une fois confirmée ; avant, ce n’est qu’une hypothèse."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "La méthode : attendre la cassure",
+   "contenu": "La règle commune à toutes les figures : ne rien conclure avant la confirmation.",
+   "etapes": [
+    {
+     "titre": "Repérer la forme",
+     "detail": "Sur un horizon suffisant : quelques semaines au moins."
+    },
+    {
+     "titre": "Identifier le niveau clé",
+     "detail": "Le sommet intermédiaire, la ligne de cou, la borne du triangle."
+    },
+    {
+     "titre": "Attendre la cassure",
+     "detail": "Une clôture au-delà du niveau clé, pas une simple mèche.",
+     "cle": true
+    },
+    {
+     "titre": "Vérifier le volume",
+     "detail": "Une cassure sans volume est suspecte, surtout à la BRVM."
+    },
+    {
+     "titre": "Fixer d’avance où l’on s’est trompé",
+     "detail": "Le niveau qui invaliderait la figure : c’est la leçon suivante."
+    }
+   ],
+   "etapes_style": "frise"
+  },
+  {
+   "type": "piege",
+   "titre": "Voir des figures partout",
+   "contenu": "L’œil humain trouve des formes même dans le hasard.",
+   "points": [
+    {
+     "titre": "Conclure avant la cassure",
+     "detail": "Une figure non confirmée échoue souvent.",
+     "verifier": "La clôture au-delà du niveau clé."
+    },
+    {
+     "titre": "Choisir l’horizon qui arrange",
+     "detail": "En changeant d’échelle, on trouve presque toujours une figure.",
+     "verifier": "La même lecture sur un autre horizon."
+    },
+    {
+     "titre": "Ignorer la liquidité",
+     "detail": "Sur une valeur peu échangée, une « cassure » peut venir d’un seul ordre.",
+     "verifier": "Le volume du jour de cassure."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Une figure est une hypothèse jusqu’à sa confirmation.",
+   "points": [
+    {
+     "titre": "Double creux, double sommet, tête-épaules : des retournements"
+    },
+    {
+     "titre": "Triangles et canaux : plutôt des continuations"
+    },
+    {
+     "titre": "Attendre une clôture au-delà du niveau clé, avec du volume"
+    },
+    {
+     "titre": "Savoir d’avance ce qui invaliderait la figure"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Une tête-épaules suggère plutôt :",
+   "options": [
+    "Une continuation haussière",
+    "Un retournement baissier",
+    "Un dividende",
+    "Une suspension"
+   ],
+   "correct": 1,
+   "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier."
+  },
+  {
+   "question": "Quand une figure est-elle confirmée ?",
+   "options": [
+    "Dès qu’on la voit",
+    "Quand le cours clôture au-delà du niveau clé, avec du volume",
+    "Quand le RSI vaut 50",
+    "Jamais"
+   ],
+   "correct": 1,
+   "explication": "La cassure du niveau clé, en clôture et avec du volume, confirme la figure."
+  },
+  {
+   "question": "Un double creux se confirme par :",
+   "options": [
+    "La cassure du creux le plus bas",
+    "La cassure du sommet intermédiaire",
+    "Une baisse du volume",
+    "Un nouveau dividende"
+   ],
+   "correct": 1,
+   "explication": "Le double creux est confirmé quand le cours dépasse le sommet entre les deux creux."
+  },
+  {
+   "question": "Pourquoi une cassure sur une valeur peu liquide est-elle suspecte ?",
+   "options": [
+    "Elle est interdite",
+    "Elle peut venir d’un seul ordre isolé",
+    "Elle est toujours fiable",
+    "Elle n’existe pas"
+   ],
+   "correct": 1,
+   "explication": "Avec peu d’échanges, un ordre isolé suffit à franchir un niveau."
+  },
+  {
+   "question": "Un triangle est le plus souvent une figure de :",
+   "options": [
+    "Retournement",
+    "Continuation",
+    "Liquidation",
+    "Dividende"
+   ],
+   "correct": 1,
+   "explication": "Le triangle traduit le plus souvent une pause avant la reprise de la tendance."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les fiches valeur et leurs graphiques",
+   "href": "/actions"
+  },
+  {
+   "label": "Le scanner technique",
+   "href": "/scanner"
+  },
+  {
+   "label": "La liquidité de chaque valeur",
+   "href": "/liquidite"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+ "charts": [],
+ "qcm": {
+  "question": "Une tête-épaules suggère plutôt :",
+  "options": [
+   "Une continuation haussière",
+   "Un retournement baissier",
+   "Un dividende",
+   "Une suspension"
+  ],
+  "correct": 1,
+  "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier."
+ }
+}

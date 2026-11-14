@@ -1,0 +1,448 @@
+{
+ "glossaire": [
+  {
+   "definition": "Représentation graphique d'une période incluant Open, High, Low, Close.",
+   "terme": "Chandelier japonais"
+  },
+  {
+   "definition": "Partie rectangulaire du chandelier (écart ouverture/clôture).",
+   "terme": "Corps"
+  },
+  {
+   "definition": "Extensions au-dessus et en dessous du corps indiquant les extrêmes de la séance.",
+   "terme": "Mèche (ombre)"
+  },
+  {
+   "definition": "Niveau de prix où la demande est historiquement forte et le cours rebondit.",
+   "terme": "Support"
+  },
+  {
+   "definition": "Niveau de prix où l'offre est forte et le cours bute régulièrement.",
+   "terme": "Résistance"
+  },
+  {
+   "definition": "Moyenne calculée sur N périodes glissantes. Lisse les cours pour révéler la tendance.",
+   "terme": "Moyenne mobile (MM)"
+  },
+  {
+   "definition": "MM50 passe au-dessus de MM200. Signal haussier fort à long terme.",
+   "terme": "Golden Cross"
+  },
+  {
+   "definition": "MM50 passe sous MM200. Signal baissier fort à long terme.",
+   "terme": "Death Cross"
+  },
+  {
+   "definition": "Indicateur qui confirme une tendance déjà engagée plutôt que de la prédire.",
+   "terme": "Indicateur retardé"
+  },
+  {
+   "definition": "Relative Strength Index. Oscillateur mesurant la force relative des hausses vs baisses sur 14 périodes.",
+   "terme": "RSI"
+  },
+  {
+   "definition": "RSI > 70 : le marché a peut-être monté trop vite, correction possible.",
+   "terme": "Surachat"
+  },
+  {
+   "definition": "RSI < 30 : le marché a peut-être trop baissé, rebond possible.",
+   "terme": "Survente"
+  },
+  {
+   "definition": "Désaccord entre le cours (qui fait un nouveau extrême) et le RSI (qui ne le confirme pas).",
+   "terme": "Divergence"
+  },
+  {
+   "definition": "Figure de retournement baissier avec 3 sommets (épaule, tête, épaule).",
+   "terme": "Tête-Épaules"
+  },
+  {
+   "definition": "Ligne de support horizontale ou légèrement inclinée reliant les creux d'une Tête-Épaules.",
+   "terme": "Neckline (ligne de cou)"
+  },
+  {
+   "definition": "Figure de compression entre support et résistance convergents. La cassure donne la direction.",
+   "terme": "Triangle"
+  },
+  {
+   "definition": "Figure de continuation : pause (consolidation) après une forte impulsion directionnelle.",
+   "terme": "Drapeau"
+  },
+  {
+   "definition": "Prix cible calculé à partir de l'amplitude de la figure chartiste.",
+   "terme": "Objectif de cours"
+  },
+  {
+   "definition": "Ordre de vente automatique déclenché si le cours atteint un niveau prédéfini de perte maximale.",
+   "terme": "Stop-loss"
+  },
+  {
+   "definition": "Ordre de vente automatique déclenché si le cours atteint un niveau cible de gain.",
+   "terme": "Take-profit"
+  },
+  {
+   "definition": "Ne jamais risquer plus de 2% du capital total sur une seule position.",
+   "terme": "Règle des 2%"
+  },
+  {
+   "definition": "Ratio Risque/Rendement. Un ratio 1:2 signifie que le gain visé est le double du risque accepté.",
+   "terme": "Ratio R/R"
+  },
+  {
+   "definition": "Stop-loss qui se remonte automatiquement quand le cours monte, protégeant les gains latents.",
+   "terme": "Trailing stop"
+  },
+  {
+   "definition": "Bourse Régionale des Valeurs Mobilières — marché financier commun des 8 pays UEMOA, créé en 1998 à Abidjan.",
+   "terme": "BRVM"
+  },
+  {
+   "definition": "Union Économique et Monétaire Ouest Africaine — 8 pays : Bénin, Burkina Faso, Côte d'Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo.",
+   "terme": "UEMOA"
+  },
+  {
+   "definition": "Titre de propriété représentant une fraction du capital d'une entreprise. Donne droit aux dividendes, au vote en AG et à la plus-value.",
+   "terme": "Action"
+  },
+  {
+   "definition": "Price Earning Ratio = Cours / BPA. Mesure combien de fois le bénéfice annuel est intégré dans le prix de l'action.",
+   "terme": "PER"
+  }
+ ],
+ "intro": "Niveau 3 — Analyse Technique — parcours complet de la WestBourse Academy : 5 leçons interactives organisées par module, avec quiz, glossaire et suivi de progression. Cas et chiffres issus du marché BRVM.",
+ "lessons": [
+  {
+   "categorie": "technical",
+   "duree_min": 4,
+   "image": {
+    "alt": "Detailed financial trading screen with colorful charts and data representing market fluctuations.",
+    "credit": "Photo : Rômulo Queiroz / Pexels",
+    "url": "https://images.pexels.com/photos/16594725/pexels-photo-16594725.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/scanner",
+     "label": "Scanner technique"
+    }
+   ],
+   "module": "Module 1 — Graphiques et tendances",
+   "qcm": {
+    "correct": 2,
+    "explication": "Une bougie verte (ou creuse) signifie que le cours de clôture est supérieur au cours d'ouverture : les acheteurs ont dominé sur la période et le cours a monté.",
+    "options": [
+     "Le cours a baissé sur la période",
+     "Le volume des échanges est élevé",
+     "Le cours a monté (clôture supérieure à l'ouverture)",
+     "L'action est en zone de surachat RSI"
+    ],
+    "question": "Que représente une bougie verte sur un graphique en chandeliers japonais ?"
+   },
+   "resume": "Un chandelier résume 4 données en une image : ouverture, clôture, plus haut, plus bas. Une bougie verte = les acheteurs ont dominé. Une bougie rouge = les vendeurs. En apprenant à \"lire\" ces bougies, vous lisez le rapport de forces en temps réel.",
+   "sections": [
+    {
+     "contenu": "Les chandeliers japonais ont été utilisés par les marchands de riz au Japon dès le XVIIe siècle. Ils sont aujourd'hui universels sur tous les marchés du monde, y compris la BRVM. Leur avantage sur les graphiques en bâton ordinaires : ils révèlent la psychologie des acheteurs et vendeurs, pas seulement le prix.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Anatomie d'un chandelier : Corps (rectangle) = écart entre ouverture et clôture. Mèche haute = plus haut atteint au-dessus du corps. Mèche basse = plus bas atteint en dessous du corps. Bougie vert/blanche = clôture > ouverture (journée haussière). Bougie rouge/noire = clôture < ouverture (journée baissière). Un long corps = forte conviction directionnelle. Des mèches longues = incertitude, hésitation.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sans les chandeliers, les graphiques de cours sont muets. Avec les chandeliers, chaque journée de marché raconte une histoire : qui a gagné le bras de fer entre acheteurs et vendeurs, à quel niveau les résistances ont été testées, où se situent les zones d'accumulation ou de distribution.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Configurations importantes : Le Marteau (hammer) : petite bougie avec une longue mèche basse. Apparaît après une baisse — signal de retournement haussier potentiel. Le Doji : ouverture = clôture (corps quasi-inexistant). Signal d'indécision — ni acheteurs ni vendeurs ne dominent. Avaler haussier (bullish engulfing) : une grande bougie verte \"avale\" la bougie rouge précédente. Signal haussier fort en bas de tendance.Support et résistance : Un niveau de support est un prix où la demande est historiquement forte — le cours rebondit plusieurs fois à ce niveau. Un niveau de résistance est l'inverse : un plafond où les vendeurs sont suffisamment nombreux pour stopper la hausse. Ces niveaux sont des guides précieux pour placer des ordres.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sur le graphique journalier SAPH CI en septembre 2022 : après une baisse de 3 semaines, une configuration \"Marteau\" s'est formée à 3 200 FCFA (proche d'un support historique). Le cours a rebondi dans les 5 séances suivantes jusqu'à 3 650 FCFA (+14%). Un trader ayant identifié ce signal et placé un ordre d'achat à 3 250 FCFA avec un stop à 3 100 FCFA aurait réalisé un gain de +400 FCFA/action pour un risque de 150 FCFA — ratio R/R de 2,7.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Interpréter chaque chandelier en isolation. Un \"Marteau\" en plein milieu d'une tendance haussière n'a pas la même signification qu'un \"Marteau\" au bas d'une tendance baissière prolongée. Le contexte (tendance principale, niveau de support/résistance, volume) est indispensable à toute interprétation chartiste.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "Bougie verte = acheteurs ont dominé. Bougie rouge = vendeurs ont dominé.Mèches longues = incertitude du marché. Corps long = forte conviction directionnelle.Toujours analyser un chandelier dans son contexte (tendance + support/résistance + volume).Configurations clés : Marteau, Doji, Avaler haussier/baissier.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 1 — Les chandeliers japonais"
+  },
+  {
+   "categorie": "technical",
+   "duree_min": 4,
+   "image": {
+    "alt": "Close-up of a cryptocurrency trading chart displayed on a monitor, showing market trends and analysis.",
+    "credit": "Photo : AlphaTradeZone / Pexels",
+    "url": "https://images.pexels.com/photos/5831252/pexels-photo-5831252.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/scanner",
+     "label": "Scanner technique"
+    }
+   ],
+   "module": "Module 1 — Graphiques et tendances",
+   "qcm": {
+    "correct": 1,
+    "explication": "Les moyennes mobiles sont des indicateurs retardés : elles confirment une tendance existante plutôt qu'elles ne la prédisent. Elles sont très utiles pour éviter les faux signaux mais entrent toujours en retard sur le marché.",
+    "options": [
+     "Trop complexes à calculer manuellement",
+     "Indicateurs retardés qui confirment une tendance déjà engagée",
+     "Ne fonctionnent que pour les actions américaines",
+     "Ne prennent pas en compte le volume d'échanges"
+    ],
+    "question": "Quelle est la principale limitation des moyennes mobiles ?"
+   },
+   "resume": "La moyenne mobile lisse les cours pour révéler la tendance de fond. MM20 (court terme), MM50 (moyen terme), MM200 (long terme). Le Golden Cross (MM courte passe au-dessus de MM longue) est le signal haussier le plus suivi par les professionnels.",
+   "sections": [
+    {
+     "contenu": "La moyenne mobile est l'indicateur technique le plus utilisé au monde, par les traders du jour aux gestionnaires de fonds institutionnels. Sa simplicité est sa force : elle réduit le \"bruit\" quotidien des cours et révèle la direction de fond avec une clarté remarquable.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "MM20 = moyenne des 20 derniers cours de clôture. Recalculée chaque jour : on ajoute le dernier cours et on supprime le plus ancien. Le résultat \"glisse\" dans le temps — d'où le nom \"moyenne mobile\". Quand le cours est au-dessus de sa MM20, la tendance à court terme est haussière. En dessous, elle est baissière. La MM200 est la grande référence : les gestionnaires de fonds institutionnels mondial utilisent ce niveau comme filtre de tendance à long terme.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sans MM, un chartiste débutant se perd dans les mouvements quotidiens et confond une correction temporaire avec un retournement de tendance. La MM donne le contexte : suis-je dans une tendance haussière, baissière ou neutre ? Cette information conditionne toutes les décisions de trading.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Deux signaux majeurs basés sur les croisements de MM : Golden Cross = la MM50 monte au-dessus de la MM200. Signal haussier de long terme — les acheteurs ont repris le contrôle. Ce signal a précédé de nombreux rallyes boursiers historiques. Death Cross = la MM50 passe sous la MM200. Signal baissier de long terme — les vendeurs ont pris le dessus durablement.Cas du Document MAF (Dominique Poincelot) — Action Carrefour : En mars 2011, la MM50 de Carrefour a croisé la MM200 vers le bas (Death Cross). Le cours a continué de chuter dans les semaines suivantes, confirmant ce signal. En juin 2011, le RSI est tombé sous 25 (survente extrême), annonçant un rebond technique potentiel. Cette séquence — Death Cross suivi d'un RSI en survente extrême — est un pattern classique de \"capitulation\" qui précède souvent un rebond.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Sur l'action SONATEL en 2020 (crise COVID) : le cours a cassé sa MM200 en mars 2020 (signal baissier). Les analystes techniques ont anticipé une poursuite de la baisse. Le cours a en effet continué de baisser pendant 2 mois supplémentaires. Quand le cours a franchi à nouveau la MM200 vers le haut en juin 2020 (signal d'achat), le titre a progressé de +35% dans les 8 mois suivants.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Confondre vitesse et précision avec les MM courtes. Plus une MM est courte (MM5, MM10), plus elle est réactive aux mouvements récents — mais plus elle génère de faux signaux. Une MM200 ne se déclenche que quelques fois par an, mais ses signaux sont beaucoup plus fiables. Pour les décisions long terme, utilisez des MM longues.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "MM20 = tendance court terme. MM50 = moyen terme. MM200 = long terme.Cours au-dessus de sa MM = tendance haussière. En dessous = tendance baissière.Golden Cross (MM50 > MM200) = signal haussier fort. Death Cross = signal baissier fort.Les MM sont des indicateurs retardés — elles confirment, elles ne prédisent pas.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 2 — Les Moyennes Mobiles (MM)"
+  },
+  {
+   "categorie": "technical",
+   "duree_min": 4,
+   "image": {
+    "alt": "Person analyzing cryptocurrency trends on a tablet with digital pen.",
+    "credit": "Photo : Jakub Zerdzicki / Pexels",
+    "url": "https://images.pexels.com/photos/32396586/pexels-photo-32396586.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/scanner",
+     "label": "Scanner technique"
+    }
+   ],
+   "module": "Module 1 — Graphiques et tendances",
+   "qcm": {
+    "correct": 2,
+    "explication": "RSI < 30 = survente. Le marché a peut-être trop baissé trop vite. Un rebond est potentiellement proche. Mais ce signal doit toujours être combiné avec l'analyse de la tendance et des niveaux de support.",
+    "options": [
+     "Surachetée — signal de vente prioritaire",
+     "En tendance haussière forte",
+     "Survendue — potentiel signal de rebond à vérifier",
+     "En zone neutre, aucun signal"
+    ],
+    "question": "Un RSI de 25 indique que l'action est :"
+   },
+   "resume": "Le Relative Strength Index (RSI) oscille entre 0 et 100. Au-dessus de 70 : surachat (possible correction). En dessous de 30 : survente (possible rebond). Les divergences RSI/cours sont les signaux les plus puissants de l'analyse technique.",
+   "sections": [
+    {
+     "contenu": "Welles Wilder a créé le RSI en 1978. Il reste 47 ans plus tard l'un des indicateurs les plus fiables pour mesurer l'\"énergie\" du marché. En zone UEMOA, où les volumes sont plus faibles, le RSI est particulièrement pertinent pour détecter les mouvements de capitaux concentrés sur quelques valeurs.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Formule RSI : 100 − (100 / (1 + RS)). RS = Moyenne des hausses sur 14 jours / Moyenne des baisses sur 14 jours. Un RSI à 75 signifie que les hausses ont été beaucoup plus fortes que les baisses sur les 14 dernières séances — le marché a peut-être trop monté trop vite. Zones d'action : RSI > 70 = surachat (prudence). RSI < 30 = survente (opportunité potentielle). RSI entre 40 et 60 = zone neutre, signal peu significatif.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "La divergence RSI est l'un des signaux les plus précieux en analyse technique. Elle annonce souvent un retournement AVANT que le cours ne le confirme, donnant à l'investisseur attentif un avantage temporel précieux. Peu d'outils offrent cette capacité d'anticipation.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Divergence haussière (signal d'achat potentiel) : le cours fait un nouveau plus bas, mais le RSI ne confirme pas ce nouveau plus bas (il reste au-dessus du niveau RSI précédent). La pression vendeuse s'essouffle — un rebond est probable. Divergence baissière (signal de vente potentiel) : le cours fait un nouveau plus haut, mais le RSI fait un plus haut inférieur au précédent. La force haussière s'affaiblit — une correction est probable.Le RSI en zone de surachat (>70) ne signifie pas nécessairement \"vendre immédiatement\". Sur des valeurs en forte tendance haussière, le RSI peut rester au-dessus de 70 pendant des semaines. C'est la combinaison RSI en surachat + formation baissière sur le graphique en chandeliers + résistance forte qui constitue un signal de vente fiable.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "En juin 2011, le RSI de l'action Carrefour est descendu sous 25 (survente extrême). Le cours avait baissé de plus de 40% en quelques mois. Cette survente extrême, combinée à un niveau de support historique fort, a précédé un rebond de +18% dans les 6 semaines suivantes. Les analystes du MAF avaient identifié ce signal de divergence haussière comme signal d'achat spéculatif à court terme.",
+     "titre": "Cas réel (Document MAF Carrefour)",
+     "type": "cas"
+    },
+    {
+     "contenu": "Utiliser le RSI seul pour prendre des décisions de trading. \"RSI sous 30 = acheter\" est une simplification dangereuse. Une action peut rester en survente pendant des semaines si les fondamentaux se détériorent (profit warning, crise sectorielle). Utilisez toujours le RSI en combinaison avec la tendance (MM) et les niveaux de prix (support/résistance).",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "RSI > 70 = surachat (possible correction). RSI < 30 = survente (possible rebond).La divergence (cours vs RSI) est le signal le plus puissant — elle anticipe les retournements.Ne jamais utiliser le RSI seul — toujours le combiner avec la tendance et les niveaux de prix.Sur des tendances très fortes, le RSI peut rester en surachat/survente pendant plusieurs semaines.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 3 — Le RSI : mesurer les excès de marché"
+  },
+  {
+   "categorie": "technical",
+   "duree_min": 4,
+   "image": {
+    "alt": "A home office setup featuring multiple monitors displaying trading charts and data analysis.",
+    "credit": "Photo : AlphaTradeZone / Pexels",
+    "url": "https://images.pexels.com/photos/5833747/pexels-photo-5833747.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/scanner",
+     "label": "Scanner technique"
+    }
+   ],
+   "module": "Module 2 — Figures et signaux avancés",
+   "qcm": {
+    "correct": 2,
+    "explication": "La Tête-Épaules est la figure de retournement baissier classique. Elle se forme après une tendance haussière avec 3 sommets (épaule gauche, tête, épaule droite). La cassure de la neckline déclenche le signal de vente.",
+    "options": [
+     "Le Triangle ascendant",
+     "Le Double Fond",
+     "La Tête-Épaules",
+     "Le Drapeau haussier"
+    ],
+    "question": "Quelle figure chartiste signale un retournement baissier après une tendance haussière ?"
+   },
+   "resume": "Les figures chartistes (Tête-Épaules, Double Sommet, Triangles, Drapeaux) se répètent sur tous les marchés du monde. Elles révèlent les batailles psychologiques récurrentes entre acheteurs et vendeurs, et permettent d'anticiper les cassures directionnelles.",
+   "sections": [
+    {
+     "contenu": "Les figures chartistes sont le langage visuel de la psychologie de marché. Elles se forment parce que les comportements humains face à l'incertitude financière sont universellement répétitifs. La peur, l'avidité et l'hésitation génèrent les mêmes patterns graphiques en 2024 à Abidjan qu'en 1990 à New York.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Tête-Épaules : figure de retournement baissier. Après une tendance haussière, 3 sommets se forment (épaule gauche, tête, épaule droite). La cassure de la \"ligne de cou\" (neckline) déclenche le signal de vente. Objectif de cours : neckline − (hauteur de la tête − neckline). Double Sommet : le cours atteint 2 fois le même niveau de résistance sans le dépasser — signal de retournement baissier. Double Fond : le cours touche 2 fois le même support sans le casser — signal de retournement haussier.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Les figures chartistes offrent des points d'entrée et de sortie avec des objectifs de cours quantifiables. Elles transforment l'analyse graphique intuitive (\"je sens que ça va monter\") en une démarche structurée avec un signal clair, un objectif de prix et un niveau de stop-loss prédéfini.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les Triangles : le prix se comprime entre deux lignes convergentes (support oblique et résistance oblique). Triangle ascendant (résistance horizontale + support montant = biais haussier). Triangle descendant (support horizontal + résistance descendante = biais baissier). Triangle symétrique (neutre — la direction de la cassure détermine le biais). La cassure d'un triangle en forte hausse de volume constitue un signal d'entrée de haute probabilité.Drapeaux et fanions : figures de continuation. Après une forte impulsion directionnelle (le mât du drapeau), le cours entre dans une phase de consolidation courte en légère contre-tendance (le drapeau). La reprise de la tendance principale après cette pause génère souvent une impulsion de même amplitude que le mât initial.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Action CIE CI, 2022 : formation d'un triangle ascendant sur le graphique hebdomadaire entre mars et juillet. Résistance horizontale à 2 750 FCFA. Support montant à partir de 2 400 FCFA. En août, cassure de la résistance à 2 750 FCFA en volume élevé. Cours objectif calculé : 2 750 + (2 750 − 2 400) = 3 100 FCFA. Objectif atteint en octobre 2022. Un investisseur ayant identifié cette figure aurait réalisé un gain de +12,7% en 2 mois.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Identifier des figures partout, même quand les données sont insuffisantes. Une \"Tête-Épaules\" nécessite une tendance haussière préalable bien établie pour être valide. Une \"figure\" formée sur seulement 3 à 4 séances n'a pas la même fiabilité qu'une figure qui s'est développée sur 3 à 6 mois. La durée de formation renforce la signification de la cassure.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "Figures de retournement : Tête-Épaules (baissier), Double Sommet (baissier), Double Fond (haussier).Figures de continuation : Triangles, Drapeaux, Fanions.Toujours attendre la cassure confirmée (en volume élevé) avant d'agir sur une figure.L'objectif de cours d'une figure se calcule à partir de l'amplitude de la formation.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 4 — Figures chartistes classiques"
+  },
+  {
+   "categorie": "technical",
+   "duree_min": 4,
+   "image": {
+    "alt": "Business person reviews financial data and graphs on a mobile device surrounded by reports.",
+    "credit": "Photo : berdikari  sastra / Pexels",
+    "url": "https://images.pexels.com/photos/37232243/pexels-photo-37232243.png?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/scanner",
+     "label": "Scanner technique"
+    }
+   ],
+   "module": "Module 2 — Figures et signaux avancés",
+   "qcm": {
+    "correct": 1,
+    "explication": "Règle des 2% : risque max par trade = 2% du capital total. 300 000 × 2% = 6 000 FCFA. Si votre stop-loss est à 300 FCFA sous le prix d'achat, vous pouvez acheter au maximum 20 actions (20 × 300 = 6 000 FCFA de risque).",
+    "options": [
+     "3 000 FCFA",
+     "6 000 FCFA",
+     "9 000 FCFA",
+     "30 000 FCFA"
+    ],
+    "question": "Avec un capital de 300 000 FCFA et la règle des 2%, quel est le risque maximum par trade ?"
+   },
+   "resume": "Ne jamais risquer plus de 2% de son capital sur une seule position. Le stop-loss limite automatiquement les pertes. Le take-profit sécurise les gains. Le ratio risque/rendement minimum visé est 1:2 — pour chaque franc risqué, viser 2 francs de gain.",
+   "sections": [
+    {
+     "contenu": "La gestion du risque est la compétence la plus importante du trader — plus que l'identification des signaux. Le meilleur système de signaux du monde ne peut pas compenser une mauvaise gestion du risque. Les traders professionnels perdent sur 40 à 50% de leurs trades — et restent rentables grâce à une gestion du risque rigoureuse.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Règle des 2% : ne jamais risquer plus de 2% de son capital total sur une seule position. Capital de 500 000 FCFA → risque maximum par trade = 10 000 FCFA. Si votre stop-loss est à 500 FCFA en dessous du prix d'achat, vous ne pouvez acheter que 20 actions maximum (20 × 500 = 10 000 FCFA de risque). Ratio R/R (Risque/Rendement) : ratio minimum recommandé = 1:2. Vous risquez 10 000 FCFA pour viser 20 000 FCFA de gain minimum.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Un investisseur qui applique la règle des 2% et un ratio R/R de 1:2 peut se permettre de perdre 6 trades sur 10 et rester rentable sur l'ensemble. C'est mathématiquement prouvé. Sans cette discipline, même un bon \"taux de réussite\" de 60% peut conduire à des pertes si les pertes sont démesurément plus grandes que les gains.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Comment placer un stop-loss : Positionnez-le en dessous d'un niveau de support clé (pour un achat) ou au-dessus d'une résistance (pour une vente à découvert). Évitez les stops trop serrés (qui sautent sur le \"bruit\" normal du marché) et trop larges (qui exposent à des pertes trop importantes). La règle : le stop doit invalider votre scénario d'analyse — si le cours casse ce niveau, votre thèse était probablement fausse.Comment placer un take-profit : Utilisez l'objectif calculé à partir de la figure chartiste identifiée, ou un niveau de résistance/support important au-delà du prix d'entrée. Ne déplacez jamais un take-profit vers le bas (vous priverait d'un gain annoncé). En revanche, vous pouvez remonter votre stop-loss progressivement pour protéger vos gains latents (trailing stop).",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Capital : 300 000 FCFA. Signal : cassure de résistance à 4 000 FCFA sur SAPH CI. Stop-loss : 3 750 FCFA (sous le support). Risque par action : 250 FCFA. Risque max (2%) : 6 000 FCFA. Nombre d'actions : 6 000 / 250 = 24 actions. Take-profit (R/R 1:2) : 4 000 + (2 × 250) = 4 500 FCFA. Si le trade fonctionne : gain = 24 × 500 = 12 000 FCFA. Si le stop saute : perte = 24 × 250 = 6 000 FCFA (2% du capital). Le capital global n'est jamais menacé.",
+     "titre": "Exemple de trade géré",
+     "type": "cas"
+    },
+    {
+     "contenu": "Déplacer son stop-loss vers le bas \"parce que l'action va remonter\". C'est la première cause de pertes catastrophiques. Le stop-loss a été placé pour protéger votre capital. Le déplacer sous la pression de la peur (refus d'accepter une perte) transforme une petite perte maîtrisée en une grosse perte incontrôlée. Le stop est là pour être respecté.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "Règle des 2% : risque maximum de 2% du capital total par trade.Ratio R/R minimum : 1:2 (viser le double du risque accepté).Le stop-loss protège votre capital — ne jamais le déplacer vers le bas.Avec un ratio 1:2 et 40% de trades gagnants, on est rentable.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 5 — Stop-loss, Take-profit et gestion du risque en trading"
+  }
+ ],
+ "niveau": "avance",
+ "relatedLinks": [],
+ "titre": "Niveau 3 — Analyse Technique"
+}

@@ -1,0 +1,199 @@
+{
+ "titre": "Leçon 3 — Les compartiments et les indices de la BRVM",
+ "module": "Module 2 — Marché primaire et introduction en bourse",
+ "categorie": "general",
+ "duree_min": 9,
+ "sous_titre": "Prestige, Principal, Croissance : comment la BRVM classe ses valeurs depuis 2023, et ce que mesurent ses indices.",
+ "resume": "Depuis le 2 janvier 2023, le marché des actions de la BRVM est organisé en trois compartiments : Prestige, Principal et Croissance. Les critères tiennent à l’ancienneté, à la taille, au flottant et à la qualité de l’information. De nouveaux indices sont nés en même temps. Cette leçon explique ces classements et ce qu’on peut en lire.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Trois compartiments",
+   "contenu": "La réorganisation est entrée en vigueur le 2 janvier 2023, selon le communiqué publié par la BRVM ce jour-là.",
+   "tableau": {
+    "colonnes": [
+     "Compartiment",
+     "Pour qui",
+     "Critères publiés"
+    ],
+    "lignes": [
+     [
+      "Prestige",
+      "Les grandes sociétés établies",
+      "10 ans d’activité, 50 Md FCFA de capitalisation, flottant d’au moins 20 % et 4 millions de titres, information régulière, engagement RSE"
+     ],
+     [
+      "Principal",
+      "Les sociétés cotées qui ne relèvent pas du Prestige",
+      "Les critères d’admission généraux de la BRVM"
+     ],
+     [
+      "Croissance",
+      "Les PME et les entreprises à fort potentiel de croissance",
+      "Des conditions d’accès allégées, avec un accompagnement spécifique"
+     ]
+    ],
+    "note": "Source : communiqué de la BRVM du 2 janvier 2023. Le règlement de la BRVM fait foi pour le détail des critères."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Les indices de la BRVM",
+   "contenu": "Un indice résume l’évolution d’un groupe de valeurs. Depuis 2023, la BRVM publie notamment trois indices de référence.",
+   "points": [
+    {
+     "titre": "BRVM Composite",
+     "detail": "Toutes les sociétés cotées, pondérées par leur capitalisation."
+    },
+    {
+     "titre": "BRVM 30",
+     "detail": "Les trente valeurs les plus échangées sur un trimestre ; il a remplacé le BRVM 10."
+    },
+    {
+     "titre": "BRVM Prestige",
+     "detail": "Les valeurs du compartiment Prestige ; sa composition est révisée chaque année."
+    }
+   ]
+  },
+  {
+   "type": "cas",
+   "titre": "Sur la BRVM : les indices à la dernière séance",
+   "reel": true,
+   "contenu": "Les valeurs des principaux indices, lues en base à l’ouverture de la leçon.",
+   "donnees_reelles": {
+    "vue": "indices",
+    "codes": [
+     "BRVMC",
+     "BRVM30",
+     "BRVMPRES",
+     "BRVMPRIN"
+    ]
+   }
+  },
+  {
+   "type": "piege",
+   "titre": "Ce qu’un compartiment ne dit pas",
+   "contenu": "Un classement décrit des caractéristiques, pas une qualité d’investissement.",
+   "points": [
+    {
+     "titre": "Prestige ne veut pas dire « sans risque »",
+     "detail": "Une grande société peut voir ses résultats baisser et son cours reculer.",
+     "verifier": "Les comptes et la valorisation de la société."
+    },
+    {
+     "titre": "Croissance ne veut pas dire « croissance assurée »",
+     "detail": "Le compartiment accueille des entreprises jeunes, souvent plus risquées et moins liquides.",
+     "verifier": "La liquidité et l’historique de la valeur."
+    },
+    {
+     "titre": "Un indice pondéré par la capitalisation est concentré",
+     "detail": "Quelques grandes valeurs y pèsent lourd.",
+     "verifier": "Le poids des premières valeurs dans l’indice."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Classer n’est pas recommander.",
+   "points": [
+    {
+     "titre": "Trois compartiments depuis le 2 janvier 2023 : Prestige, Principal, Croissance"
+    },
+    {
+     "titre": "Prestige : 10 ans, 50 Md FCFA de capitalisation, 20 % de flottant"
+    },
+    {
+     "titre": "BRVM Composite, BRVM 30, BRVM Prestige : trois indices de référence"
+    },
+    {
+     "titre": "Un compartiment décrit une société, il ne juge pas son action"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Depuis quand le marché des actions de la BRVM est-il organisé en compartiments Prestige, Principal et Croissance ?",
+   "options": [
+    "1998",
+    "2 janvier 2023",
+    "1er octobre 2022",
+    "2026"
+   ],
+   "correct": 1,
+   "explication": "La réorganisation est entrée en vigueur le 2 janvier 2023."
+  },
+  {
+   "question": "Quel flottant minimum le compartiment Prestige exige-t-il ?",
+   "options": [
+    "5 % du capital",
+    "20 % du capital, et au moins 4 millions de titres",
+    "50 % du capital",
+    "Aucun"
+   ],
+   "correct": 1,
+   "explication": "Le communiqué de la BRVM fixe un flottant d’au moins 20 % du capital, correspondant à au moins 4 millions de titres."
+  },
+  {
+   "question": "Que regroupe l’indice BRVM 30 ?",
+   "options": [
+    "Les 30 plus grandes capitalisations",
+    "Les 30 valeurs les plus échangées sur un trimestre",
+    "Les 30 plus anciennes sociétés",
+    "30 obligations"
+   ],
+   "correct": 1,
+   "explication": "Le BRVM 30 regroupe les trente valeurs les plus échangées sur un trimestre."
+  },
+  {
+   "question": "À qui s’adresse le compartiment Croissance ?",
+   "options": [
+    "Aux banques uniquement",
+    "Aux PME et aux entreprises à fort potentiel de croissance",
+    "Aux États",
+    "Aux OPCVM"
+   ],
+   "correct": 1,
+   "explication": "Le compartiment Croissance est destiné aux PME et aux entreprises à fort potentiel de croissance."
+  },
+  {
+   "question": "Une société du compartiment Prestige est-elle un placement sans risque ?",
+   "options": [
+    "Oui",
+    "Non : le compartiment décrit sa taille et sa transparence, pas l’évolution de son cours",
+    "Oui, si elle verse un dividende",
+    "Oui, pendant 10 ans"
+   ],
+   "correct": 1,
+   "explication": "Le classement repose sur des critères de taille, de flottant et d’information, pas sur une garantie de performance."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Les secteurs et les indices",
+   "href": "/secteurs"
+  },
+  {
+   "label": "Les sociétés cotées",
+   "href": "/societes"
+  },
+  {
+   "label": "La liquidité de chaque valeur",
+   "href": "/liquidite"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement ni un avis juridique. Les règles citées sont résumées ; seuls les textes officiels de l’AMF-UMOA et de la BRVM font foi.",
+ "charts": [],
+ "qcm": {
+  "question": "Depuis quand le marché des actions de la BRVM est-il organisé en compartiments Prestige, Principal et Croissance ?",
+  "options": [
+   "1998",
+   "2 janvier 2023",
+   "1er octobre 2022",
+   "2026"
+  ],
+  "correct": 1,
+  "explication": "La réorganisation est entrée en vigueur le 2 janvier 2023."
+ }
+}
