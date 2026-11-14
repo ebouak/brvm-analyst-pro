@@ -1650,7 +1650,7 @@ export default async function InstrumentPage(
                 {[
                   { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: Download, external: true },
                   { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: History },
-                  { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: FileText, external: true },
+                  { href: `/rapports/dossier/${code}`, label: 'Dossier valeur (A4)', icon: FileText, external: true },
                   { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: MessageSquareText },
                 ].map(({ href, label, icon: Icone, external }) => {
                   const cls =

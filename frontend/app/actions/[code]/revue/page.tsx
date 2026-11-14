@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getRevue, type YearRow } from '@/lib/reports/server';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import BoutonImprimer from '@/components/revue/BoutonImprimer';
 import SousPageNav from '@/components/sousPage/SousPageNav';
 import { PriceChart, FinancialsBars } from '@/components/reports/RevueCharts';
@@ -7,6 +9,8 @@ import CascadeResultat from '@/components/revue/CascadeResultat';
 import { fmtFcfa, fmtNumber, fmtDateCourte } from '@/lib/format';
 import { classeValeur } from '@/lib/fiche/prose';
 import { reperesSurCourbe } from '@/lib/reports/reperes';
+import { phraseDetachement } from '@/lib/reports/detachementRevue';
+import { nomPays } from '@/lib/crm/geo';
 import { perAffichable, distributionAffichable, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, dividendeCourant } from '@/lib/fiche/affichage';
 
 export const dynamic = 'force-dynamic';
@@ -34,6 +38,17 @@ export default async function RevuePage(props: Props) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const d = await getRevue(code).catch(() => null);
   if (!d) notFound();
+  // Après le 404 : un code inconnu doit rester une 404, pas un écran d'offre en 200.
+  const gate = await canAccess('revues_resultats');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Les Revues de résultats"
+        hint="Les derniers comptes de chaque société lus pour vous : chiffre d'affaires, résultat, dividende et ratios, comparés à l'exercice précédent."
+      />
+    );
+  }
 
   const { latest, prev, profil } = d;
   const today = new Date(d.generatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -101,7 +116,7 @@ export default async function RevuePage(props: Props) {
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-strong pb-3">
           <div>
             <h1 className="font-display text-2xl text-ivory">Revue de résultats · {d.designation}</h1>
-            <p className="mt-0.5 text-sm text-muted">{[d.code, d.secteur, d.pays].filter(Boolean).join(' · ')} · {profil.label}</p>
+            <p className="mt-0.5 text-sm text-muted">{[d.code, d.secteur, d.pays ? nomPays(d.pays) : null].filter(Boolean).join(' · ')}</p>
           </div>
           <div className="space-y-2 text-right text-xs text-muted">
             <p>Générée le {today}</p>
@@ -301,9 +316,10 @@ export default async function RevuePage(props: Props) {
           </p>
           <p className="mb-2 text-sm leading-relaxed text-muted">
             {divCourant
-              ? `Dernier versement connu : ${fcfa(divCourant.montant)} par action, au titre de l'exercice ${divCourant.exercice}${divCourant.ancien ? `, soit plus d'un exercice avant le dernier exercice publié (${latest?.periode}) : ce dividende n'est pas un point d'appui pour l'avenir` : ''}. Rendement au cours actuel : ${rendementDiv != null ? nf2(rendementDiv) + ' %' : '—'} (exercice ${divCourant.exercice}). Taux de distribution : ${distribution.valeur != null ? `environ ${fmtNumber(distribution.valeur, 0)} % du bénéfice` : distribution.motif}. Le détachement du dividende (à l'AGO) provoque mécaniquement une baisse technique du cours égale au coupon : l'actionnaire reçoit en cash ce que le cours perd, sans destruction de valeur. Sur la durée, la trajectoire du cours suit surtout la progression des résultats.`
+              ? `Dernier versement connu : ${fcfa(divCourant.montant)} par action, au titre de l'exercice ${divCourant.exercice}${divCourant.ancien ? `, soit plus d'un exercice avant le dernier exercice publié (${latest?.periode}) : ce dividende n'est pas un point d'appui pour l'avenir` : ''}. Rendement au cours actuel : ${rendementDiv != null ? nf2(rendementDiv) + ' %' : '—'} (exercice ${divCourant.exercice}). Taux de distribution : ${distribution.valeur != null ? `environ ${fmtNumber(distribution.valeur, 0)} % du bénéfice` : distribution.motif}.`
               : 'Aucun dividende récent enregistré pour cette valeur.'}
           </p>
+          {d.detachement && <p className="mb-2 text-sm leading-relaxed text-muted">{phraseDetachement(d.detachement)}</p>}
         </div>
 
         {/* Avant la prochaine publication (earnings preview qualitatif) */}

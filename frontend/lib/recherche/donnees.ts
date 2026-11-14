@@ -3,7 +3,6 @@ import { chargerUniversActions } from '@/lib/universActions';
 import type { DonneesSociete } from './instantane';
 
 /** Faits par société, depuis la base ; null si aucune séance n'est connue. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function chargerDonneesRecherche(supabase: SupabaseClient<any, any, any>): Promise<{ donnees: DonneesSociete[]; dateSeance: string } | null> {
   const [{ univers, dateSeance }, liquidite] = await Promise.all([
     chargerUniversActions(supabase),

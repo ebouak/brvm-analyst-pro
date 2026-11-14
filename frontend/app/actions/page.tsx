@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
+import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
@@ -40,8 +42,10 @@ async function getData(withMetrics: boolean) {
 
   const [{ data: actions, error: actionsError }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
+    // Signaux : lus AVEC la session (F-04). La table n'est plus lisible sans
+    // compte ; `withMetrics` n'est vrai que pour un compte autorisé.
     withMetrics
-      ? supabase.from('signals_daily').select('*').eq('date_marche', lastDate)
+      ? createClient().from('signals_daily').select('*').eq('date_marche', lastDate)
       : Promise.resolve({ data: null }),
     supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
@@ -186,6 +190,12 @@ export default async function ActionsPage(props: { searchParams?: Promise<{ sect
           <time dateTime={lastDate}>{fmtSeance(lastDate)}</time>
           {' '}· variation par rapport au cours précédent · volume en titres, valeur échangée en FCFA
         </LigneSource>
+        <p className="mt-4 text-sm text-muted">
+          Voir aussi&nbsp;:{' '}
+          <Link href="/premium/classements" className="text-accent-ink underline underline-offset-2">Palmarès des actions</Link>
+          {' · '}
+          <Link href="/actions/compare" className="text-accent-ink underline underline-offset-2">Comparer des titres</Link>
+        </p>
       </div>
     </div>
   );

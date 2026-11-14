@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fmtDateCourte } from '@/lib/format';
 import { libelleClasse } from '@/lib/fiche/quantTextes';
 import { SectionHeader, PremiumPanel, MetricCard, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 
-export const revalidate = 300;
+// Verrou par utilisateur (feature_flags.combined_alpha) : rendu dynamique, plus de cache partagé.
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Combined Alpha — classement quant BRVM' };
 
 function signalCls(c: string): string {
@@ -23,6 +26,16 @@ function tone(v: number | null): string {
 }
 
 export default async function CombinedAlphaPage() {
+  const gate = await canAccess('combined_alpha');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Combined Alpha"
+        hint="Le classement quantitatif des valeurs cotées : valeur, qualité des résultats, solidité financière, dividende et dynamique de cours."
+      />
+    );
+  }
   const supabase = createPublicClient();
   const { data: run } = await supabase.from('quant_model_runs').select('*').eq('model_code','WB_COMBINED_ALPHA').order('calculation_date',{ascending:false}).limit(1).maybeSingle();
   type Row = { security_id:string; combined_alpha_score:number|null; value_score:number|null; earnings_quality_score:number|null; financial_strength_score:number|null; dividend_quality_score:number|null; price_momentum_score:number|null; rank_global:number|null; classification:string; confidence_level:string };
@@ -31,6 +44,19 @@ export default async function CombinedAlphaPage() {
     const { data } = await supabase.from('quant_model_scores').select('security_id,combined_alpha_score,value_score,earnings_quality_score,financial_strength_score,dividend_quality_score,price_momentum_score,rank_global,classification,confidence_level').eq('run_id', (run as {id:string}).id).order('combined_alpha_score',{ascending:false,nullsFirst:true}).limit(60);
     rows = ((data as Row[] | null) ?? []).sort((a,b)=> (b.combined_alpha_score??-1)-(a.combined_alpha_score??-1));
   }
+  // Le calcul porte sur les actions marquées actives, dont certaines n'ont plus coté depuis
+  // des années (SVOC : dernière cotation le 10/05/2019). On n'affiche que les titres présents
+  // à la dernière séance, et on nomme ceux qui sont écartés plutôt que de les taire.
+  const { data: derniere } = await supabase.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1).maybeSingle();
+  let ecartes: string[] = [];
+  if (derniere && rows.length) {
+    const { data: cotes } = await supabase.from('brvm_actions_daily').select('code').eq('date_marche', (derniere as { date_marche: string }).date_marche);
+    const presents = new Set(((cotes ?? []) as { code: string }[]).map((c) => c.code));
+    if (presents.size > 0) {
+      ecartes = rows.filter((r) => !presents.has(r.security_id)).map((r) => r.security_id).sort();
+      rows = rows.filter((r) => presents.has(r.security_id));
+    }
+  }
   let labels: Record<string,string> = {};
   if (rows.length) {
     const { data: insts } = await supabase.from('brvm_instruments').select('code,designation').in('code', rows.map(r=>r.security_id));
@@ -38,8 +64,8 @@ export default async function CombinedAlphaPage() {
   }
   const runDate = run ? String((run as {calculation_date:string}).calculation_date) : null;
   const runVer = run ? String((run as {model_version:string}).model_version) : null;
-  const elig = run ? Number((run as {eligible_securities:number}).eligible_securities) : 0;
-  const tot = run ? Number((run as {total_securities:number}).total_securities) : 0;
+  const elig = rows.filter((r) => r.combined_alpha_score != null).length;
+  const tot = rows.length;
   const top = rows.find(r=> r.combined_alpha_score!=null)?.combined_alpha_score ?? null;
   const buys = rows.filter(r=> r.classification==='Buy Quant'||r.classification==='Strong Buy Quant').length;
 
@@ -50,7 +76,7 @@ export default async function CombinedAlphaPage() {
       {!run ? <EmptyStatePremium icon="◈" title="Aucun calcul disponible" hint="Lancez un run via POST /api/admin/quant/run (admin)." /> : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <MetricCard label="Univers BRVM" value={String(tot)} unit="titres" accent="neutral" />
+            <MetricCard label="Univers BRVM" value={String(tot)} unit="titres" delta={ecartes.length ? `hors ${ecartes.join(', ')}, sans cotation à la dernière séance` : undefined} deltaDir="flat" accent="neutral" />
             <MetricCard label="Score calculable" value={String(elig)} unit="titres" accent="gold" />
             <MetricCard label="Profils quant favorables" value={String(buys)} unit="titres" accent="emerald" />
             <MetricCard label="Meilleur score" value={top!=null?String(top):'—'} unit="/ 100" accent={top!=null&&top>=70?'emerald':'neutral'} />

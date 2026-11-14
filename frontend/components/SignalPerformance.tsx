@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { BacktestStats, RecentRealSignal } from '@/lib/signals/backtest';
+import { FRAIS_ALLER_RETOUR_PCT, FENETRE_EPISODE_JOURS } from '@/lib/signals/trackRecord';
 import { fmtDateFR, fmtNumber, fmtPctSigne } from '@/lib/format';
 
 /**
@@ -36,7 +37,9 @@ export default function SignalPerformance({
   backtest: BacktestStats;
   recentReal: RecentRealSignal[];
 }) {
-  const perfs = recentReal.map((s) => s.perfPct).filter((v): v is number => v != null);
+  // Tout le bloc « réels » est exprimé NET de frais (0,6 % × 2) : c'est ce
+  // qu'un investisseur aurait réellement obtenu, pas le mouvement du cours.
+  const perfs = recentReal.map((s) => s.perfNettePct).filter((v): v is number => v != null);
   const moyenne = perfs.length ? perfs.reduce((a, b) => a + b, 0) / perfs.length : null;
   const med = mediane(perfs);
   const enHausse = perfs.filter((v) => v > 0).length;
@@ -47,11 +50,11 @@ export default function SignalPerformance({
       {/* ── Bloc 2 : signaux réels récents ─────────────────────────────── */}
       {recentReal.length > 0 && (
         <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-3">
-          <h2 className={TITRE}>Derniers signaux d&apos;achat réels</h2>
+          <h2 className={TITRE}>Derniers signaux haussiers réels</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Chiffre valeur={String(recentReal.length)} legende="signaux d'achat réels" />
-            <Chiffre valeur={moyenne != null ? fmtPctSigne(moyenne) : '—'} legende="performance moyenne à ce jour" />
-            <Chiffre valeur={med != null ? fmtPctSigne(med) : '—'} legende="performance médiane à ce jour" />
+            <Chiffre valeur={String(recentReal.length)} legende="épisodes de signal haussier" />
+            <Chiffre valeur={moyenne != null ? fmtPctSigne(moyenne) : '—'} legende="moyenne à ce jour, nette de frais" />
+            <Chiffre valeur={med != null ? fmtPctSigne(med) : '—'} legende="médiane à ce jour, nette de frais" />
             <Chiffre valeur={`${enHausse} / ${enBaisse}`} legende="en hausse / en baisse" />
           </div>
           <ul className="md:hidden divide-y divide-border/40">
@@ -59,8 +62,8 @@ export default function SignalPerformance({
               <li key={`m-${s.code}-${s.dateSignal}`} className="py-2.5 space-y-0.5">
                 <div className="flex items-center justify-between gap-2">
                   <Link href={`/actions/${s.code}`} className="font-medium text-sm text-white hover:text-info">{s.code}</Link>
-                  <span className={`tabular text-sm font-medium ${s.perfPct != null && s.perfPct >= 0 ? 'text-up' : 'text-down'}`}>
-                    {s.perfPct != null ? fmtPctSigne(s.perfPct) : '—'}
+                  <span className={`tabular text-sm font-medium ${s.perfNettePct != null && s.perfNettePct >= 0 ? 'text-up' : 'text-down'}`}>
+                    {s.perfNettePct != null ? fmtPctSigne(s.perfNettePct) : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 text-xs text-muted">
@@ -81,7 +84,8 @@ export default function SignalPerformance({
                   <th className="px-2 py-2 text-left">Émis le</th>
                   <th className="px-2 py-2 text-right">Cours signal</th>
                   <th className="px-2 py-2 text-right">Cours actuel</th>
-                  <th className="px-2 py-2 text-right">Perf. à ce jour</th>
+                  <th className="px-2 py-2 text-right">Cours</th>
+                  <th className="px-2 py-2 text-right">Nette de frais</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,8 +105,11 @@ export default function SignalPerformance({
                     <td className="px-2 py-2 text-right tabular">
                       {s.coursActuel != null ? s.coursActuel.toLocaleString('fr-FR') : '—'}
                     </td>
-                    <td className={`px-2 py-2 text-right tabular font-medium ${s.perfPct != null && s.perfPct >= 0 ? 'text-up' : 'text-down'}`}>
+                    <td className="px-2 py-2 text-right tabular text-muted">
                       {s.perfPct != null ? fmtPctSigne(s.perfPct) : '—'}
+                    </td>
+                    <td className={`px-2 py-2 text-right tabular font-medium ${s.perfNettePct != null && s.perfNettePct >= 0 ? 'text-up' : 'text-down'}`}>
+                      {s.perfNettePct != null ? fmtPctSigne(s.perfNettePct) : '—'}
                     </td>
                   </tr>
                 ))}
@@ -110,7 +117,9 @@ export default function SignalPerformance({
             </table>
           </div>
           <p className="text-[11px] text-faint italic">
-            Signaux réellement émis en production (pas de backtest), performance mesurée depuis la date d&apos;émission,
+            Signaux réellement émis en production (pas de backtest). Un titre signalé plusieurs jours de suite ne compte
+            qu&apos;une fois, à sa première émission (un épisode = signaux espacés de moins de {FENETRE_EPISODE_JOURS} jours).
+            Performance mesurée depuis cette date, nette d&apos;un aller-retour de frais de {fmtNumber(FRAIS_ALLER_RETOUR_PCT, 1)} %,
             sur un horizon encore court pour les plus récents.
           </p>
         </div>
@@ -119,10 +128,10 @@ export default function SignalPerformance({
       {/* ── Bloc 1 : backtest rétroactif de la méthode ─────────────────── */}
       <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-4">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2 className={TITRE}>Mesure historique : backtest rétroactif de la méthode</h2>
+          <h2 className={TITRE}>Simulation : la méthode appliquée après coup à l&apos;historique</h2>
           {backtest.n > 0 && (
             <span className="text-[11px] text-faint">
-              {backtest.n} signaux d&apos;achat sur 24 mois
+              {backtest.n} signaux haussiers sur 24 mois
             </span>
           )}
         </div>
@@ -131,9 +140,10 @@ export default function SignalPerformance({
           <p className="text-sm text-muted">Backtest non encore calculé.</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <Chiffre valeur={String(backtest.n)} legende="signaux d'achat analysés" />
-              <Chiffre valeur={backtest.avgPerfPct != null ? fmtPctSigne(backtest.avgPerfPct) : '—'} legende="performance moyenne à ~30j" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Chiffre valeur={String(backtest.n)} legende="signaux haussiers analysés" />
+              <Chiffre valeur={backtest.avgPerfPct != null ? fmtPctSigne(backtest.avgPerfPct) : '—'} legende="moyenne à ~30 j, avant frais" />
+              <Chiffre valeur={backtest.avgPerfPct != null ? fmtPctSigne(backtest.avgPerfPct - FRAIS_ALLER_RETOUR_PCT) : '—'} legende="moyenne à ~30 j, nette de frais" />
               <Chiffre valeur={backtest.pctPositive != null ? `${fmtNumber(backtest.pctPositive, 0)} %` : '—'} legende="de signaux positifs" />
             </div>
 
@@ -142,7 +152,9 @@ export default function SignalPerformance({
               ces chiffres proviennent d&apos;un <span className="text-white">backtest rétroactif</span> : la méthode
               de scoring actuelle appliquée à l&apos;historique des cours ({backtest.periodFrom ? fmtDateFR(backtest.periodFrom) : '—'} →{' '}
               {backtest.periodTo ? fmtDateFR(backtest.periodTo) : '—'}), pas des signaux réellement émis en temps réel
-              à l&apos;époque. Aucun frais de courtage ni slippage n&apos;est pris en compte. Les performances passées
+              à l&apos;époque. Les signaux d&apos;un même épisode y sont comptés séparément, et l&apos;écart d&apos;exécution
+              (slippage) n&apos;est pas pris en compte ; la moyenne nette ne retire que les frais. Elle ne se compare
+              donc pas directement aux signaux réels ci-dessus. Les performances passées
               ne garantissent pas les performances futures.
             </div>
           </>

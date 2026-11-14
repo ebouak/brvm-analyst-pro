@@ -7,7 +7,7 @@ import SignalOffre from '@/components/crm/SignalOffre';
 
 export const metadata: Metadata = {
   title: 'Tarifs',
-  description: 'Formules Gratuit, Premium et Platinium de WESTBOURSE : cours, signaux, rapports et alertes sur la BRVM.',
+  description: 'Formules Gratuit et Premium de WESTBOURSE : cours, signaux, dossiers valeur et alertes sur la BRVM.',
 };
 export const revalidate = 300;
 

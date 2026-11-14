@@ -31,7 +31,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Sonder les fournisseurs LLM
         working-directory: scraper
@@ -70,3 +70,15 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           LOG_LEVEL: info
         run: npx tsx src/index.ts sante:reseaux
+
+      # Membres du canal Telegram public, une ligne datée par jour
+      # (communaute_releves, 0218). Rouge si Telegram ou la base refuse.
+      - name: Relever la communauté Telegram
+        if: always()
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts communaute

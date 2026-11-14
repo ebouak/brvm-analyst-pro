@@ -31,12 +31,8 @@ export async function GET(request: NextRequest) {
         .eq('code', code)
         .order('date_marche', { ascending: false })
         .limit(30),
-      supabase
-        .from('signals_daily')
-        .select('score_total, confiance')
-        .eq('code', code)
-        .order('date_marche', { ascending: false })
-        .limit(1),
+      // Note publique seule (F-04).
+      supabase.rpc('signaux_publics', { p_code: code }),
     ]);
     if (instr?.designation) {
       designation = instr.designation;

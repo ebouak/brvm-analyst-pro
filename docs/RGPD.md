@@ -9,8 +9,8 @@ Audit initial : 2026-06-16.
 
 | Table | Données perso | Finalité | Base légale | Conservation | Export | Suppression |
 |---|---|---|---|---|---|---|
-| `auth.users` (Supabase) | email, hash mdp | Authentification | Contrat | Vie du compte | ✅ (account) | Support/worker service-role |
-| `profiles` | email, profil/horizon investisseur, mode_debutant | Compte + personnalisation (profiling léger) | Contrat | Vie du compte | ✅ | Liée au compte auth (support) |
+| `auth.users` (Supabase) | email, hash mdp | Authentification | Contrat | Vie du compte | ✅ (account) | ✅ `DELETE /api/account/delete` (service-role) |
+| `profiles` | email, profil/horizon investisseur, mode_debutant | Compte + personnalisation (profiling léger) | Contrat | Vie du compte | ✅ | ✅ cascade à la suppression du compte |
 | `newsletter_subscribers` | email, confirm_token | Marketing (newsletter) | **Consentement** (double opt-in) | Confirmés : jusqu'au désabonnement · **non confirmés : 30 j après le dernier email de confirmation** (0133, cron mensuel) | ⬜ (à ajouter) | ✅ par email |
 | `watchlists` / `watchlist_items` | user_id, libellés | Suivi de valeurs | Contrat | Vie du compte | ✅ | ✅ |
 | `portfolios_positions` | user_id, lignes | Portefeuille | Contrat | Vie du compte | ✅ | ✅ |
@@ -19,7 +19,7 @@ Audit initial : 2026-06-16.
 | `report_snapshots` / `backtest_runs` | user_id | Sauvegardes utilisateur | Contrat | Vie du compte | ✅ | ✅ |
 | `push_subscriptions` | user_id, endpoint navigateur | Notifications push | Consentement | Jusqu'au retrait | ✅ | ✅ |
 | `paper_trading_accounts` / `_positions` | user_id, positions fictives | Entraînement | Contrat | Vie du compte | ✅ | ✅ |
-| `subscriptions` | user_id, plan, statut | Abonnement | Contrat | Durée légale comptable | ✅ | ❌ (obligation légale) |
+| `subscriptions` | user_id, plan, statut | Abonnement | Contrat | Vie du compte | ✅ | ✅ cascade (le justificatif de paiement reste dans `billing_transactions`, anonymisé) |
 | `billing_transactions` | user_id, montant, provider | Facturation | **Obligation légale** (compta) | ~10 ans (selon juridiction) | ✅ | ❌ (obligation légale) |
 | `admin_audit_logs` | actor/target user_id, **ip_address**, **user_agent** | Sécurité / traçabilité admin | Intérêt légitime | 12 mois (recommandé) | n/a (admin) | Purge planifiée (à mettre en place) |
 | `forum_topics` / `forum_posts` | pseudonyme (`display_name`), contenu des messages, horodatage | Discussion communautaire | Intérêt légitime + action volontaire de l'utilisateur | Jusqu'à suppression par l'auteur ou masquage admin | ✅ (`/api/account/export`) | Anonymisation automatique à la suppression du compte (`author_id` → NULL, affichage « Utilisateur supprimé ») |
@@ -34,11 +34,22 @@ Audit initial : 2026-06-16.
 - **Accès / portabilité** : `GET /api/account/export` → JSON de toutes les tables
   user-scopées (profil, watchlists, portefeuille, alertes, notifications, paper
   trading, push, abonnements, transactions). ✅ étendu le 2026-06-16.
-- **Suppression** : `DELETE /api/account/delete` → purge les données révocables
-  (watchlists, portefeuille, alertes, notifications, rapports, backtests, push,
-  paper trading) + désabonnement newsletter (par email). **Exclus** : `subscriptions`
-  / `billing_transactions` (conservation légale comptable) ; `profiles` + compte
-  `auth.users` (nécessite la `service_role` → support/worker dédié).
+- **Suppression** : `DELETE /api/account/delete` (lu dans le code le 2026-11-11) :
+  1. purge explicite des tables user-scopées (watchlists, portefeuille, alertes,
+     notifications, rapports, backtests, push, paper trading, thèses, Academy :
+     progression, notes, examens, certificats) ;
+  2. en `service_role` : newsletter (par e-mail), `notification_prefs`, conversations et
+     codes d'appairage WhatsApp/Telegram, CRM (`crm_actions`, `leads_brvm` — par adresse
+     seulement si elle est confirmée), photo de profil du bucket `newsletter-assets` ;
+  3. **suppression du compte `auth.users`** (`auth.admin.deleteUser`) → cascade FK sur
+     `profiles`, `subscriptions` et les tables rattachées. `billing_transactions.user_id`
+     passe à NULL : justificatif conservé, anonymisé (obligation comptable).
+  **Conservés volontairement** : justificatifs de paiement anonymisés ; `crm_oppositions`
+  (liste d'opposition, art. 21). Les lignes `subscriptions` partent avec la cascade du
+  compte (elles ne sont plus rattachées à une personne) — la mention « Durée légale
+  comptable » du tableau ne s'applique qu'à `billing_transactions`.
+  ⚠️ Cette section décrivait auparavant `profiles` et `auth.users` comme EXCLUS de la
+  suppression : c'était périmé, la suppression est automatique (constat 4 ci-dessous).
 - **Rectification** : profil éditable (`/account`, onboarding). Email via Supabase Auth.
 - **Information** : `/mentions-legales`, `/cgu`, `/confidentialite` + bannière cookies.
 
@@ -289,3 +300,33 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - **Conservation** : tant que la fonction est exercée ; une ligne périmée est remplacée, pas archivée.
 - **Droits** : une personne concernée peut demander la rectification ou le retrait par le formulaire de contact. La table n'est pas rattachée à un compte utilisateur : elle n'entre pas dans l'export ni dans la suppression de compte.
 - **Sécurité** : lecture publique, écriture service_role seule. Écriture testée à la clé publique : 42501.
+
+## 7. Destinataires, transferts et durées (mise à jour 2026-11-11, audit F-10)
+
+La politique publique `/confidentialite` énumère désormais, d'après le code : Supabase, Vercel,
+Resend, Cloudflare (e-mail et Turnstile), Hetzner, DeepSeek / Google Gemini / xAI (cascade de
+rédaction), Mistral AI (import de relevés, OCR de publications), PostHog (UE, après consentement),
+Sentry (collecte `ingest.de`), CinetPay, Chariow, Telegram, WhatsApp (Meta), TypeSafe (Jev),
+synthèse vocale (Microsoft Edge TTS, ElevenLabs — textes de marché uniquement, sans donnée personnelle).
+
+Transferts de données personnelles vers des fournisseurs d'IA :
+- `app/api/ai/chat/route.ts` : si la question évoque le portefeuille, positions (code, quantité, PRU),
+  valorisation et plus-value latente sont ajoutées à la requête LLM (`buildPortfolioContext`).
+- `app/api/import-releve/route.ts` : texte ou images du relevé de SGI envoyés à DeepSeek, Mistral ou xAI
+  (cascade `lib/import/llmProviders.ts`). Rate-limit par IP, fail-closed depuis le lot D.
+
+Pays : UE (Mistral, PostHog, Sentry DE, Hetzner DE) ; États-Unis (Vercel, Resend, Cloudflare, Google,
+xAI, Meta) ; Chine (DeepSeek) ; **à préciser** : Supabase (région), TypeSafe, Telegram, CinetPay,
+Chariow. Les conditions de réutilisation/entraînement de chaque fournisseur d'IA restent **à vérifier**.
+
+Durées (source : `purge_rgpd_retention()`, migration 0193, et les migrations citées plus haut) :
+`admin_audit_logs`, `notifications_log`, `auth_events`, `payment_webhook_events`, `contact_messages` :
+12 mois ; `crm_actions` : 24 mois ; `crm_signaux`, `dossier_envois`, `*_conversations` (liées),
+`whatsapp_aiguillages` : 90 jours ; conversations WhatsApp sans compte : 30 jours ;
+`academy_exam_sessions` : 7 jours ; cache de recherche : 24 h ; quotas : 30 jours ;
+`formation_inscriptions` : 3 ans après la session. **Non trouvées dans le code** (déclarées
+« à préciser » sur la page publique) : durée de conservation chez PostHog et Sentry, durée
+comptable précise des justificatifs.
+
+Autorité de réclamation : celle du pays de résidence (ARTCI, CDP, APDP, CNIL…) ; l'autorité chef
+de file dépend de la raison sociale du responsable de traitement, encore à renseigner.

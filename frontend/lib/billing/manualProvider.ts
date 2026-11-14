@@ -21,6 +21,7 @@ export const manualProvider: PaymentProvider = {
       .from('subscription_plans')
       .select('id, price_monthly, price_quarterly, price_yearly, currency')
       .eq('code', req.planCode)
+      .eq('is_active', true) // plan retiré de la vente : plus achetable, même par lien direct
       .maybeSingle();
     if (planErr || !plan) return { ok: false, status: 'error', message: 'Plan introuvable.' };
 

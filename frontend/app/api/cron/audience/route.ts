@@ -5,8 +5,8 @@
 //             entonnoir Academy, intérêt formation et lien vers le rapport imprimable.
 // Échec PostHog, destinataire absent ou envoi refusé : 500, jamais un succès silencieux.
 // Auth : bearer CRON_SECRET, temps constant. Journaux : codes seulement. Agrégats seulement.
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
-import { autorise } from '@/lib/crm/passageSequences';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 import { sendEmail } from '@/lib/server/email';
 import { bornesPeriode, libelleFenetre } from '@/lib/audience/periodes';
@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  if (!autorise(process.env.CRON_SECRET, req.headers.get('authorization'))) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  if (!cronAutorise(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   const periode = new URL(req.url).searchParams.get('periode');
   const maintenant = new Date();
 

@@ -2,10 +2,10 @@
 import assert from 'node:assert';
 import { technicalVerdict } from './technicalSummary.ts';
 
-// Achat fort : majorité nette de haussiers.
+// Très haussier : majorité nette de haussiers.
 let v = technicalVerdict({ bullCount: 6, bearCount: 0, neutCount: 1 });
 assert.equal(v.tone, 'strong-buy');
-assert.equal(v.label, 'Achat fort');
+assert.equal(v.label, 'Très haussier'); // libellé sans vocabulaire d'achat (audit lot B)
 assert.ok(v.position > 0.8, `position attendue > 0.8, obtenu ${v.position}`);
 
 // Vente forte : majorité nette de baissiers.

@@ -59,18 +59,18 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
           </div>
 
           <div>
-            <label htmlFor="am-type" className="block text-sm font-medium mb-1">Type d'alerte *</label>
+            <label htmlFor="am-type" className="block text-sm font-medium mb-1">Type d&apos;alerte *</label>
             <select id="am-type" value={alertType}
               onChange={(e) => setAlertType(e.target.value as AlertType)}
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm">
               <optgroup label="Prix">
-                <option value="prix_au_dessus">↑ Au-dessus d'un prix</option>
-                <option value="prix_en_dessous">↓ En-dessous d'un prix</option>
+                <option value="prix_au_dessus">↑ Au-dessus d&apos;un prix</option>
+                <option value="prix_en_dessous">↓ En-dessous d&apos;un prix</option>
                 <option value="variation">↕ Variation en %</option>
               </optgroup>
               <optgroup label="Intelligentes">
-                <option value="signal_achat">Signal passe à ACHAT</option>
-                <option value="signal_vente">Signal passe à VENTE</option>
+                <option value="signal_achat">Signal devient haussier</option>
+                <option value="signal_vente">Signal devient baissier</option>
                 <option value="rsi_survente">RSI en survente</option>
                 <option value="rsi_surachat">RSI en surachat</option>
                 <option value="dividende_proche">Détachement de dividende proche</option>

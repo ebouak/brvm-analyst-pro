@@ -66,7 +66,7 @@ const UNIVERS: Univers[] = [
       { label: 'Simulateur', href: '/simulateur', desc: 'Et si vous aviez investi ? Dividendes inclus' },
       { label: 'Simulateur budget', href: '/simulateur-budget', desc: 'Construire un plan à partir de votre épargne' },
       { label: 'Paper trading', href: '/premium/paper-trading', desc: 'Capital virtuel, conditions réelles' },
-      { label: 'Backtesting', href: '/premium/backtesting', desc: 'Rejouer une stratégie sur l’historique' },
+      { label: 'Backtesting', href: '/backtest', desc: 'Rejouer une stratégie sur l’historique' },
     ],
   },
   {

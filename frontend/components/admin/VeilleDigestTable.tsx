@@ -63,7 +63,7 @@ export default function VeilleDigestTable({
   if (digest.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-lg p-8 text-center text-muted">
-        Aucune donnée de veille disponible pour aujourd'hui.
+        Aucune donnée de veille disponible pour aujourd&apos;hui.
       </div>
     );
   }

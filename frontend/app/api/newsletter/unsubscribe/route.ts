@@ -10,14 +10,15 @@ function page(message: string): NextResponse {
   return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get('token');
-  if (!token) return page('Lien de désabonnement invalide.');
+type Resultat = { ok: true } | { ok: false; message: string; status: number };
+
+async function desabonner(token: string | null): Promise<Resultat> {
+  if (!token) return { ok: false, message: 'Lien de désabonnement invalide.', status: 400 };
   let db;
   try {
     db = getServiceClient();
   } catch {
-    return page('Service indisponible.');
+    return { ok: false, message: 'Service indisponible.', status: 503 };
   }
   // .select('id') (pas 'email') : on a juste besoin de savoir si une ligne a matché.
   const { data, error } = await db
@@ -25,7 +26,23 @@ export async function GET(req: NextRequest) {
     .update({ confirmed: false })
     .eq('confirm_token', token)
     .select('id');
-  if (error) return page('Une erreur est survenue. Réessayez plus tard.');
-  if (!data || data.length === 0) return page('Lien de désabonnement inconnu ou déjà utilisé.');
-  return page('Vous êtes désabonné de la newsletter. À bientôt.');
+  if (error) return { ok: false, message: 'Une erreur est survenue. Réessayez plus tard.', status: 500 };
+  if (!data || data.length === 0) return { ok: false, message: 'Lien de désabonnement inconnu ou déjà utilisé.', status: 404 };
+  return { ok: true };
+}
+
+export async function GET(req: NextRequest) {
+  const r = await desabonner(req.nextUrl.searchParams.get('token'));
+  return page(r.ok ? 'Vous êtes désabonné de la newsletter. À bientôt.' : r.message);
+}
+
+/**
+ * Désabonnement en un clic (RFC 8058) : le client de messagerie envoie
+ * `List-Unsubscribe=One-Click` en POST sur l'URL de l'en-tête List-Unsubscribe.
+ * Le jeton reste dans la query string de cette URL.
+ */
+export async function POST(req: NextRequest) {
+  const r = await desabonner(req.nextUrl.searchParams.get('token'));
+  if (!r.ok) return NextResponse.json({ error: r.message }, { status: r.status });
+  return NextResponse.json({ ok: true });
 }

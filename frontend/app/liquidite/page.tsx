@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { fmtFcfa } from '@/lib/format';
+import { fmtFcfa, fmtPctAbs, fmtPctSigne } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, EmptyStatePremium } from '@/components/ui/premium';
 import { fromDailyRow, LIQUIDITY_LABELS, type LiquidityDailyRow } from '@/lib/liquidity';
@@ -100,7 +100,7 @@ export default async function LiquiditePage() {
                         {/* Le « ≈ » n'apparaît que sur une estimation : une fourchette
                             mesurée au carnet publié ne doit pas se lire comme un calcul. */}
                         {(r.spread_pct ?? r.spread_roll_pct) != null
-                          ? `${r.spread_source === 'carnet' ? '' : '≈ '}${Number(r.spread_pct ?? r.spread_roll_pct).toFixed(2)} %`
+                          ? `${r.spread_source === 'carnet' ? '' : '≈ '}${fmtPctAbs(Number(r.spread_pct ?? r.spread_roll_pct))}`
                           : '—'}
                       </td>
                       <td
@@ -109,7 +109,7 @@ export default async function LiquiditePage() {
                         }`}
                       >
                         {r.flux_net_pct != null
-                          ? `${Number(r.flux_net_pct) > 0 ? '+' : ''}${Number(r.flux_net_pct).toFixed(0)} %`
+                          ? fmtPctSigne(Number(r.flux_net_pct), 0)
                           : '—'}
                       </td>
                     </tr>

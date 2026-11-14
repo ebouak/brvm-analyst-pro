@@ -1,6 +1,6 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { ADMIN_EMAILS } from './admin-emails';
+import { isAdminEmail } from './admin-emails';
 
 /**
  * Garde unique des fonctionnalités : accès (free / premium / désactivée) ET
@@ -39,7 +39,7 @@ export type GateResult =
   | { allowed: true; used: number; quota: number | null }
   | { allowed: false; status: 403 | 429; reason: string };
 
-/** Lit un flag. `null` si inconnu (une feature non déclarée n'est pas gatée). */
+/** Lit un flag. `null` si inconnu (checkFeature refuse alors). */
 export async function getFlag(code: FeatureCode): Promise<FeatureFlag | null> {
   const db = getServiceClient();
   const { data } = await db
@@ -65,14 +65,22 @@ export async function checkFeature(
   const { consume = true } = opts;
 
   // Les super-admins ne sont ni bloqués ni décomptés (support et diagnostic).
-  if (user.email && ADMIN_EMAILS.includes(user.email)) {
+  if (isAdminEmail(user.email)) {
     return { allowed: true, used: 0, quota: null };
   }
 
   const flag = await getFlag(code);
-  // Feature non déclarée : on ne bloque pas (évite qu'un oubli de seed coupe
-  // une fonctionnalité en production).
-  if (!flag) return { allowed: true, used: 0, quota: null };
+  // Feature non déclarée (ou flag illisible) : REFUS. Une garde qui s'ouvre
+  // quand elle ne sait pas contourne le kill switch et le budget LLM. Toutes les
+  // clés appelées dans le code sont déclarées en migration (audit lot D).
+  if (!flag) {
+    console.error(`checkFeature : fonctionnalité « ${code} » non déclarée dans feature_flags — refus.`);
+    return {
+      allowed: false,
+      status: 403,
+      reason: 'Cette fonctionnalité est indisponible pour le moment.',
+    };
+  }
 
   if (flag.acces === 'disabled') {
     return {
@@ -139,6 +147,14 @@ export async function checkFeature(
   }
 
   const used = await increment(user.id, code);
+  if (used === null) {
+    // Quota impossible à décompter : on refuse plutôt que de laisser passer sans limite.
+    return {
+      allowed: false,
+      status: 429,
+      reason: 'Le décompte de votre quota est momentanément indisponible. Réessayez dans un instant.',
+    };
+  }
   if (used > quota) {
     return { allowed: false, status: 429, reason: quotaMessage(flag.label, quota) };
   }
@@ -150,16 +166,16 @@ function quotaMessage(label: string, quota: number): string {
 }
 
 /** Incrément atomique côté base (deux appels simultanés ne s'écrasent pas). */
-async function increment(userId: string, code: FeatureCode): Promise<number> {
+async function increment(userId: string, code: FeatureCode): Promise<number | null> {
   const db = getServiceClient();
   const { data, error } = await db.rpc('feature_usage_increment', {
     p_user_id: userId,
     p_feature: code,
   });
   if (error) {
-    // On ne coupe pas le service pour un incident de comptage, mais on le trace.
+    // Le décompte a échoué : on le trace, l'appelant décide (refus si quota borné).
     console.error('feature_usage_increment a échoué :', error.message);
-    return 0;
+    return null;
   }
-  return typeof data === 'number' ? data : 0;
+  return typeof data === 'number' ? data : null;
 }

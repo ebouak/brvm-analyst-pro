@@ -79,7 +79,7 @@ jobs:
 
       - name: Installer les dépendances
         if: steps.reste.outputs.nombre != '0'
-        run: npm install
+        run: npm ci
 
       - name: Installer Chromium
         if: steps.reste.outputs.nombre != '0'

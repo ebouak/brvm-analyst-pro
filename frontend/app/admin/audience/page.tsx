@@ -23,7 +23,7 @@ function Section({ titre, note, children }: { titre: string; note?: string; chil
     </section>
   );
 }
-const Indispo = () => <p className="text-sm text-muted">Indisponible : PostHog n'a pas répondu pour ce bloc. Les autres blocs restent valides.</p>;
+const Indispo = () => <p className="text-sm text-muted">Indisponible : PostHog n&apos;a pas répondu pour ce bloc. Les autres blocs restent valides.</p>;
 const Vide = ({ t }: { t: string }) => <p className="text-sm text-muted">{t}</p>;
 function Tab({ cols, lignes }: { cols: string[]; lignes: ReactNode[][] }) {
   return (

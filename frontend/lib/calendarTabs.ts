@@ -4,5 +4,5 @@ import type { ViewTab } from '@/components/ViewTabs';
 export const CALENDAR_TABS: ViewTab[] = [
   { href: '/calendrier', label: "Vue d'ensemble" },
   { href: '/dividendes/calendrier', label: 'Dividendes (annuel)' },
-  { href: '/premium/calendrier', label: 'Dates clés', premium: true },
+  { href: '/premium/calendrier', label: 'Agenda des dates clés', premium: true },
 ];

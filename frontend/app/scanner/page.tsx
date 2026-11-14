@@ -1,6 +1,9 @@
 import { Crosshair } from 'lucide-react';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
+import SECTEURS_PAR_CODE from '@/lib/brvmSectors.json';
 import { smaSeries, rsiSeries, macdSeries } from '@/lib/indicators';
 import {
   parseCriteriaFromSearchParams,
@@ -29,8 +32,21 @@ interface PageProps {
 
 export default async function ScannerPage(props: PageProps) {
   const searchParams = await props.searchParams;
+  const gate = await canAccess('scanner_technique');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Le Scanner technique"
+        hint="Filtrez les 48 valeurs sur la tendance, le RSI, le MACD et les moyennes mobiles."
+      />
+    );
+  }
   const criteria = parseCriteriaFromSearchParams(searchParams);
-  const filtersActive = hasAnyCriteria(criteria);
+  // « Lancer le scan » sans critère soumet le formulaire avec des champs vides :
+  // on montre alors tout l'univers au lieu d'un écran vide sans explication.
+  const formulaireSoumis = 'signal' in searchParams;
+  const filtersActive = hasAnyCriteria(criteria) || formulaireSoumis;
 
   const supabase = createClient();
 
@@ -41,9 +57,15 @@ export default async function ScannerPage(props: PageProps) {
     .not('secteur', 'is', null)
     .order('secteur');
 
+  // La colonne `secteur` des cotations est vide : le référentiel curé
+  // (lib/brvmSectors.json) sert de repli, sinon le filtre n'offrait que « Tous ».
+  const secteurParCode = SECTEURS_PAR_CODE as Record<string, string>;
   const secteurs = [
-    ...new Set((secteurRows ?? []).map((r: { secteur: string | null }) => r.secteur).filter(Boolean) as string[]),
-  ];
+    ...new Set([
+      ...((secteurRows ?? []).map((r: { secteur: string | null }) => r.secteur).filter(Boolean) as string[]),
+      ...Object.values(secteurParCode),
+    ]),
+  ].sort((a, b) => a.localeCompare(b, 'fr'));
 
   // ── Dernière séance par code ───────────────────────────────────────────────
   const { data: latestRows } = await supabase
@@ -149,7 +171,7 @@ export default async function ScannerPage(props: PageProps) {
     const row: ScanRow = {
       code,
       designation: latest.designation,
-      secteur: latest.secteur,
+      secteur: latest.secteur ?? secteurParCode[code] ?? null,
       cours_jour: latest.cours_jour,
       variation_pct: latest.variation_pct,
       volume: latest.volume,
@@ -168,9 +190,24 @@ export default async function ScannerPage(props: PageProps) {
     allRows.push(row);
   }
 
+  // ── Valeurs suspendues (« SP » au Bulletin officiel) ──────────────────────
+  // Leur cours est figé : RSI, MACD et moyennes mobiles y décriraient une
+  // séance qui n'a pas eu lieu. Elles sortent du scan, et c'est annoncé.
+  const suspendues = new Set<string>();
+  const { data: derniereCote } = await supabase
+    .from('boc_cote_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const dateCote = (derniereCote?.[0] as { date_marche: string } | undefined)?.date_marche;
+  if (dateCote) {
+    const { data: sp } = await supabase.from('boc_cote_daily').select('code').eq('date_marche', dateCote).eq('statut', 'suspendu');
+    for (const r of (sp ?? []) as { code: string }[]) suspendues.add(r.code);
+  }
+
   // ── Filtrage ───────────────────────────────────────────────────────────────
   const filteredRows = filtersActive
-    ? allRows.filter((r) => matchesCriteria(r, criteria))
+    ? allRows.filter((r) => !suspendues.has(r.code) && matchesCriteria(r, criteria))
     : [];
 
   return (
@@ -202,9 +239,9 @@ export default async function ScannerPage(props: PageProps) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             <StatPill tone="neutral">
-              <span className="tabular">{codes.length}</span>&nbsp;titres dans l'univers
+              <span className="tabular">{codes.length}</span>&nbsp;titres dans l&apos;univers
             </StatPill>
-            <StatPill tone="gold">200 séances d'historique</StatPill>
+            <StatPill tone="gold">200 séances d&apos;historique</StatPill>
           </div>
         </div>
       ) : (
@@ -217,6 +254,11 @@ export default async function ScannerPage(props: PageProps) {
               Scan actif
             </StatPill>
           </div>
+          {suspendues.size > 0 && (
+            <p className="text-xs text-faint">
+              Hors scan, cotation suspendue au Bulletin officiel du {dateCote} : {[...suspendues].sort().join(', ')}.
+            </p>
+          )}
           <PremiumPanel>
             <ScannerResults rows={filteredRows} />
           </PremiumPanel>
@@ -236,15 +278,15 @@ export default async function ScannerPage(props: PageProps) {
             Zone surachetée
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium">ACHAT</span>
-            Signal haussier confirmé
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium">Haussier</span>
+            Indicateurs orientés à la hausse
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-down/15 text-down font-medium">VENTE</span>
-            Signal baissier confirmé
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-down/15 text-down font-medium">Baissier</span>
+            Indicateurs orientés à la baisse
           </span>
           <span className="text-faint">
-            Score : sous-score agrégé · Confiance entre parenthèses
+            Score composite de −1 à +1 (signal au-delà de ±0,60) · confiance du signal entre parenthèses
           </span>
         </div>
       </div>

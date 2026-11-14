@@ -3,7 +3,8 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { identifiantsClient } from '@/lib/server/social';
 import { siteUrl } from '@/lib/email/templates';
 import { ENV_CLIENT, LIBELLE_RESEAU, RESEAUX, cheminRetour, joursRestants, type Reseau } from '@/lib/social/oauth';
-import { basculerReseau, deconnecterReseau } from './actions';
+import { basculerReseau, deconnecterReseau, enregistrerReleve } from './actions';
+import { RESEAUX_COMMUNAUTE } from '@/lib/communaute';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Réseaux sociaux — Administration' };
@@ -36,6 +37,9 @@ export default async function ReseauxPage(props: { searchParams: Promise<{ ok?: 
     db.from('social_tokens').select('reseau, expire_le, refresh_expire_le, compte_nom, actif, maj_le'),
     db.from('publications_sociales').select('cible, cible_id, reseau, statut, erreur, lance_le').order('lance_le', { ascending: false }).limit(20),
   ]);
+  const { data: relevesRows } = await db.from('communaute_releves').select('reseau, releve_le, abonnes, source').order('releve_le', { ascending: false }).limit(100);
+  const dernierReleve = new Map<string, { releve_le: string; abonnes: number; source: string }>();
+  for (const r of (relevesRows ?? []) as { reseau: string; releve_le: string; abonnes: number; source: string }[]) if (!dernierReleve.has(r.reseau)) dernierReleve.set(r.reseau, r);
   const parReseau = new Map(((jetons ?? []) as Jeton[]).map((j) => [j.reseau, j]));
   const maintenant = new Date();
   const base = siteUrl();
@@ -141,6 +145,34 @@ export default async function ReseauxPage(props: { searchParams: Promise<{ ok?: 
             </tbody>
           </table>
         )}
+      </section>
+
+      <section className="rounded-panel border border-border bg-surface p-5">
+        <h2 className="text-sm font-semibold text-ivory">Communauté : abonnés par réseau</h2>
+        <p className="mt-1 text-xs text-muted">
+          Chiffres affichés sur l&apos;accueil avec leur date, écartés au-delà de 45 jours. Telegram est relevé
+          automatiquement chaque matin ; saisissez les autres depuis chaque application. Une seconde saisie le même jour
+          remplace la première.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {RESEAUX_COMMUNAUTE.map((r) => {
+            const d = dernierReleve.get(r.reseau);
+            return (
+              <form key={r.reseau} action={enregistrerReleve} className="flex flex-wrap items-end gap-2 rounded-lg border border-border/60 p-3">
+                <input type="hidden" name="reseau" value={r.reseau} />
+                <label className="grid flex-1 gap-1 text-xs text-muted">
+                  {r.libelle}
+                  <input name="abonnes" type="number" min={0} step={1} required inputMode="numeric" defaultValue={d?.abonnes ?? undefined}
+                    className="tabular min-h-[40px] rounded-lg border border-border bg-bg px-3 text-sm text-ivory" />
+                </label>
+                <button type="submit" className="min-h-[40px] rounded-lg bg-accent px-3 text-sm font-semibold text-bg">Enregistrer</button>
+                <p className="w-full text-[11px] text-faint">
+                  {d ? `Dernier relevé : ${d.releve_le.split('-').reverse().join('/')} (${d.source === 'auto' ? 'automatique' : 'saisi'})` : 'Aucun relevé : rien n’est affiché sur l’accueil.'}
+                </p>
+              </form>
+            );
+          })}
+        </div>
       </section>
     </div>
   );

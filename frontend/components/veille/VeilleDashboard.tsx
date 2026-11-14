@@ -389,7 +389,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         </button>
         {/* AUJOURD'HUI — non filtrable */}
         <div className="bg-surface border border-border rounded-lg p-3 text-center" title="Articles publiés aujourd'hui">
-          <p className="text-xs text-muted">AUJOURD'HUI</p>
+          <p className="text-xs text-muted">AUJOURD&apos;HUI</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#3fe18b]">{stats.today}</p>
         </div>
         {/* ALERTES — filtrable */}

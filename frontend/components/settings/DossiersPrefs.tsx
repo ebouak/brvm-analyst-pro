@@ -111,7 +111,8 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
       <h2 className="font-display text-lg text-ivory">Dossiers valeur du samedi</h2>
       <p className="mt-1.5 text-sm leading-relaxed text-muted">
         Chaque samedi, le dossier PDF de chaque valeur de votre portefeuille. Rien
-        n&apos;est envoyé si votre portefeuille est vide.
+        n&apos;est envoyé si votre portefeuille est vide. Réservé aux abonnés Premium :
+        sans abonnement, vous recevez à la place un e-mail qui explique comment y accéder.
       </p>
 
       <div className="mt-4 space-y-3">

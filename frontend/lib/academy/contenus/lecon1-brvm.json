@@ -1,0 +1,124 @@
+{
+  "titre": "Leçon 1 — Qu’est-ce que la BRVM et comment ça marche ?",
+  "categorie": "general",
+  "duree_min": 9,
+  "sous_titre": "Une bourse commune à huit pays, des sociétés que vous connaissez, et un prix qui se forme chaque jour.",
+  "resume": "La BRVM est la bourse commune aux huit pays de l’UEMOA.\nCette leçon explique ce qu’on y achète, comment le prix d’une action se forme, ce que mesurent les indices et les réflexes à prendre avant d’y placer le moindre franc.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Une bourse commune à huit pays",
+      "contenu": "La Bourse Régionale des Valeurs Mobilières (BRVM), installée à Abidjan, fonctionne depuis 1998. C’est un marché unique pour les huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo.\nOn y échange des actions et des obligations, en francs CFA. Le marché est supervisé par l’Autorité des Marchés Financiers de l’UMOA (AMF-UMOA).",
+      "flux": [
+        { "titre": "Une entreprise", "detail": "Elle ouvre son capital pour se financer.", "icone": "entreprise" },
+        { "titre": "Des actions", "detail": "Son capital est découpé en parts cotées à la BRVM.", "icone": "piece" },
+        { "titre": "Des investisseurs", "detail": "Ils achètent ces parts et deviennent actionnaires.", "icone": "actionnaires" }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Acheter une action, c’est devenir copropriétaire",
+      "contenu": "Une action est une fraction du capital d’une entreprise réelle. En la détenant, vous acquérez des droits, mais aucune garantie.",
+      "points": [
+        { "titre": "Une part des bénéfices, si l’assemblée la distribue", "detail": "Le dividende est voté chaque année par l’assemblée générale. Il peut monter, baisser ou disparaître.", "verifier": "l’historique des dividendes de la société sur plusieurs exercices." },
+        { "titre": "Une voix en assemblée générale", "detail": "Les actionnaires votent sur les comptes, la distribution du bénéfice et la nomination des administrateurs." },
+        { "titre": "La possibilité de revendre", "detail": "Vous pouvez revendre vos titres par votre SGI. Le prix n’est pas garanti, et sur une valeur peu échangée, trouver un acheteur peut prendre du temps.", "verifier": "les volumes échangés de la valeur avant d’acheter." }
+      ]
+    },
+    {
+      "type": "definition",
+      "titre": "Comment se forme le prix d’une action",
+      "contenu": "Le prix naît de la rencontre des ordres d’achat et de vente transmis par les SGI. Quand les acheteurs sont plus pressés que les vendeurs, le cours monte ; dans le cas inverse, il baisse.\nLa variation d’un titre sur une séance est encadrée par les règles du marché. Le cours de clôture de chaque valeur est publié chaque jour dans le Bulletin officiel de la cote.",
+      "etapes": [
+        { "titre": "Les ordres arrivent", "detail": "Votre SGI transmet votre ordre au système de cotation de la BRVM." },
+        { "titre": "Ils se rencontrent", "detail": "Un ordre d’achat s’exécute face à un ordre de vente compatible en prix.", "cle": true },
+        { "titre": "Le cours est publié", "detail": "Dernier prix échangé, volumes et variations, dans le Bulletin officiel de la cote." },
+        { "titre": "Les titres sont livrés", "detail": "Le Dépositaire central (DC/BR) inscrit les titres sur votre compte et règle les espèces." }
+      ],
+      "etapes_style": "frise"
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Les indices, thermomètre du marché",
+      "contenu": "Un indice résume en un chiffre l’évolution d’un ensemble d’actions. Le BRVM Composite suit toutes les actions cotées ; le BRVM 30 suit trente des valeurs les plus échangées.\nCes indices sont calculés sur les cours : les dividendes n’y entrent pas. Une année où l’indice stagne peut donc avoir rapporté de l’argent aux actionnaires qui ont touché leurs dividendes.",
+      "donnees_reelles": { "vue": "indices", "codes": ["BRVMC", "BRVM30"] }
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Des sociétés que vous connaissez",
+      "contenu": "On trouve à la BRVM des banques, des opérateurs de télécommunications, des distributeurs d’énergie, des industriels et des groupes agricoles, souvent présents dans votre quotidien.\nLe tableau donne le dernier cours de six d’entre elles. Le prix d’une action ne dit rien de sa qualité : il dépend surtout du nombre de titres en circulation.",
+      "donnees_reelles": { "vue": "cours", "codes": ["SNTS", "ORAC", "SGBC", "CIEC", "TTLC", "SPHC"] }
+    },
+    {
+      "type": "piege",
+      "titre": "Quatre erreurs de débutant",
+      "contenu": "Ces erreurs coûtent plus cher que n’importe quel mauvais choix de valeur.",
+      "points": [
+        { "titre": "Chercher un gain rapide", "detail": "La bourse récompense surtout la patience. Un horizon de plusieurs années laisse le temps aux dividendes et à la croissance des sociétés de travailler." },
+        { "titre": "Placer de l’argent dont on aura besoin", "detail": "Loyer, scolarité, urgence médicale : cet argent ne va pas en actions. Constituez d’abord une épargne de précaution." },
+        { "titre": "Vendre sans regarder le calendrier", "detail": "Vendre avant la date de détachement fait perdre le dividende de l’année.", "verifier": "le calendrier des dividendes de vos valeurs." },
+        { "titre": "Passer par un intermédiaire non agréé", "detail": "Seules les SGI agréées peuvent acheter des actions pour vous à la BRVM.", "verifier": "la liste des SGI agréées publiée par l’AMF-UMOA." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "Un marché unique pour huit pays", "detail": "La BRVM sert toute l’UEMOA, sous la supervision de l’AMF-UMOA." },
+        { "titre": "Une action est une part d’entreprise", "detail": "Elle donne droit au dividende voté, au vote en assemblée et à la revente." },
+        { "titre": "Le prix vient de l’offre et de la demande", "detail": "Il change à chaque séance, dans des limites fixées par le marché." },
+        { "titre": "Les indices mesurent les cours, pas les dividendes", "detail": "Le BRVM Composite suit toutes les actions, le BRVM 30 trente des plus échangées." },
+        { "titre": "Tout passe par une SGI agréée", "detail": "C’est votre intermédiaire obligatoire et votre premier interlocuteur." }
+      ]
+    }
+  ],
+  "chart": null,
+  "charts": [],
+  "quiz": [
+    {
+      "question": "Combien de pays partagent la BRVM ?",
+      "options": ["Trois", "Cinq", "Huit", "Quinze"],
+      "correct": 2,
+      "explication": "La BRVM est commune aux huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo."
+    },
+    {
+      "question": "Qui supervise le marché financier régional ?",
+      "options": ["La BRVM elle-même", "L’AMF-UMOA", "Chaque SGI pour ses clients", "Le ministère des Finances de chaque pays"],
+      "correct": 1,
+      "explication": "L’Autorité des Marchés Financiers de l’UMOA agrée les intermédiaires, contrôle le marché et protège les investisseurs. La BRVM, elle, organise les séances."
+    },
+    {
+      "question": "Pour acheter une action cotée à la BRVM, par qui faut-il passer ?",
+      "options": ["Directement par la BRVM", "Par une SGI agréée", "Par n’importe quelle banque", "Par la société émettrice"],
+      "correct": 1,
+      "explication": "Un particulier ne peut pas passer d’ordre directement : il passe par une Société de Gestion et d’Intermédiation agréée, qui transmet l’ordre et conserve les titres."
+    },
+    {
+      "question": "Le BRVM Composite progresse de 0 % sur une année. Les actionnaires ont-ils forcément gagné 0 % ?",
+      "options": ["Oui, l’indice dit tout", "Non : l’indice ne compte pas les dividendes versés", "Non : l’indice ne compte que les banques", "Oui, sauf pour les obligations"],
+      "correct": 1,
+      "explication": "L’indice est calculé sur les seuls cours. Un actionnaire qui a touché ses dividendes a pu gagner de l’argent même si l’indice n’a pas bougé."
+    },
+    {
+      "question": "Lequel de ces droits une action ne donne-t-elle PAS ?",
+      "options": ["Voter en assemblée générale", "Percevoir le dividende voté", "Revendre ses titres", "Un revenu garanti chaque année"],
+      "correct": 3,
+      "explication": "Le dividende est voté chaque année : il n’est jamais garanti. Une action comporte un risque de perte en capital."
+    }
+  ],
+  "qcm": {
+    "question": "Combien de pays partagent la BRVM ?",
+    "options": ["Trois", "Cinq", "Huit", "Quinze"],
+    "correct": 2,
+    "explication": "La BRVM est commune aux huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo."
+  },
+  "liens": [
+    { "label": "Les indices et la séance du jour", "href": "/dashboard" },
+    { "label": "Les cours de toutes les actions", "href": "/actions" },
+    { "label": "Comparer les SGI agréées", "href": "/comparateur-sgi" }
+  ]
+}

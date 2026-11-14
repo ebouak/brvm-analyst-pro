@@ -186,6 +186,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         <div>
           <h2 className="text-sm font-semibold text-ivory">Questions sur la BRVM</h2>
           <p className="text-xs text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
+          <p className="text-xs text-muted">Vous échangez avec une IA. Ses réponses peuvent être inexactes.</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (
@@ -305,7 +306,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={symbole ? `Question sur ${symbole}…` : 'Analysez PALC, screener opportunités, rapport hebdo…'}
+            placeholder={symbole ? `Question sur ${symbole}…` : 'Lecture de PALC, filtre technique, bilan hebdo…'}
             disabled={loading}
             className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-ivory text-sm placeholder:text-faint focus:outline-none focus:border-gold/40 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50"
           />

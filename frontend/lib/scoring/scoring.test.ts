@@ -68,3 +68,17 @@ describe('computeAltmanZ', () => {
     expect(r.zone).toBe('distress');
   });
 });
+
+describe('sociétés financières non bancaires (SAFC, 2026-11-13)', () => {
+  it('Altman non applicable à une société de financement classée « general »', async () => {
+    const { computeAltmanZ } = await import('./altman');
+    const r = computeAltmanZ({ total_actifs: 100, total_actif_circulant: 50, passif_courant: 40, reserves_benefices_non_repartis: 5, resultat_exploitation: 3, total_capitaux_propres: 10, famille: 'general', financiere: true });
+    expect(r.applicable).toBe(false);
+    expect(r.note).toMatch(/financement/);
+  });
+  it('société industrielle : Altman calculé', async () => {
+    const { computeAltmanZ } = await import('./altman');
+    const r = computeAltmanZ({ total_actifs: 100, total_actif_circulant: 50, passif_courant: 40, reserves_benefices_non_repartis: 5, resultat_exploitation: 3, total_capitaux_propres: 10, famille: 'general' });
+    expect(r.applicable).toBe(true);
+  });
+});

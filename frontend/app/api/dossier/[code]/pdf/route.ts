@@ -8,12 +8,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { canAccess } from '@/lib/server/featureAccess';
 
 export const dynamic = 'force-dynamic';
 
 const DUREE_SECONDES = 600;
 
-export async function GET(_req: Request, props: { params: Promise<{ code: string }> }) {
+export async function GET(req: Request, props: { params: Promise<{ code: string }> }) {
   const params = await props.params;
   const code = params.code.toUpperCase();
   if (!/^[A-Z0-9]{2,8}$/.test(code)) {
@@ -23,6 +24,14 @@ export async function GET(_req: Request, props: { params: Promise<{ code: string
   const sb = createClient();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 });
+
+  /* Réservé Premium (`dossiers_valeur`, lu en base). Le lien vit dans des pages
+     ouvertes à tout compte (portefeuille, fiche action) : plutôt qu'une erreur
+     JSON, on renvoie vers la page du dossier, qui affiche l'offre. */
+  const gate = await canAccess('dossiers_valeur');
+  if (!gate.allowed) {
+    return NextResponse.redirect(new URL(`/rapports/dossier/${code}`, req.url), { status: 303, headers: { 'Cache-Control': 'no-store' } });
+  }
 
   const admin = getServiceClient();
   const { data, error } = await admin.storage.from('dossiers').createSignedUrl(`${code}/dernier.pdf`, DUREE_SECONDES, {

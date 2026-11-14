@@ -3,6 +3,7 @@ import type { CompanyValuation } from '@/lib/valuation/server';
 import type { CompanyScoring } from '@/lib/scoring/server';
 import type { AltmanZone } from '@/lib/scoring/altman';
 import { fmtFcfa } from '@/lib/format';
+import { ecartAffiche } from '@/lib/valuation/verdict';
 
 function pct(v: number | null, d = 0): string {
   if (v == null) return '—';
@@ -16,6 +17,8 @@ const STANCE_STYLE: Record<CompanyValuation['verdict']['stance'], string> = {
   decote: 'text-up border-up/30 bg-up/[0.04]',
   surcote: 'text-down border-down/30 bg-down/[0.04]',
   proche: 'text-warn border-warn/30 bg-warn/[0.04]',
+  desaccord: 'text-muted border-border bg-surface',
+  non_estimable: 'text-muted border-border bg-surface',
   indisponible: 'text-muted border-border bg-surface',
 };
 
@@ -56,11 +59,20 @@ export default function ValuationPanel({ v, scoring, rendementDividende, masquer
         </div>
 
         {/* Juste-valeur vs cours */}
-        {fv.fairValue != null && v.price != null && (
+        {fv.fairValue != null && v.price != null && ['decote', 'surcote', 'proche', 'desaccord'].includes(verdict.stance) && (
           <div className="grid grid-cols-3 gap-3">
             <Cell label="Cours" value={fmtFcfa(v.price)} unit="FCFA" />
-            <Cell label="Juste-valeur est." value={fmtFcfa(fv.fairValue)} unit="FCFA" accent />
-            <Cell label="Potentiel" value={pct(fv.upside, 0)} cls={(fv.upside ?? 0) >= 0 ? 'text-up' : 'text-down'} />
+            {/* Une fourchette quand les méthodes divergent : la moyenne cacherait le désaccord. */}
+            {verdict.stance === 'desaccord' && fv.basse != null && fv.haute != null ? (
+              <Cell label="Valeur estimée" value={`${fmtFcfa(fv.basse)} – ${fmtFcfa(fv.haute)}`} unit="FCFA, selon la méthode" accent />
+            ) : (
+              <Cell label="Valeur estimée" value={fmtFcfa(fv.fairValue)} unit="FCFA" accent />
+            )}
+            {verdict.stance === 'desaccord' ? (
+              <Cell label="Écart au cours" value="—" />
+            ) : (
+              <Cell label="Écart au cours" value={ecartAffiche(fv.upside ?? 0)} cls={(fv.upside ?? 0) >= 0 ? 'text-up' : 'text-down'} />
+            )}
           </div>
         )}
 
@@ -76,8 +88,17 @@ export default function ValuationPanel({ v, scoring, rendementDividende, masquer
         </div>
 
         {/* Santé financière : Piotroski F-Score + Altman Z */}
-        {scoring && (scoring.fscore?.reliable || scoring.altman?.applicable) && (
+        {scoring && (scoring.fscore?.reliable || scoring.altman?.applicable || scoring.fscoreNonApplicable) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {scoring.fscoreNonApplicable && (
+              <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-faint">Piotroski F-Score</span>
+                  <span className="text-[11px] text-faint">non applicable</span>
+                </div>
+                <p className="mt-1.5 text-[11px] text-faint">Le F-Score repose sur la marge brute, la liquidité et la rotation de l’actif : il ne s’applique pas à un bilan bancaire.</p>
+              </div>
+            )}
             {scoring.fscore?.reliable && (
               <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
                 <div className="flex items-center justify-between mb-1">
@@ -103,7 +124,7 @@ export default function ValuationPanel({ v, scoring, rendementDividende, masquer
                   <span className="text-[11px] text-faint">non applicable</span>
                 )}
               </div>
-              <p className="mt-1.5 text-[11px] text-faint">{scoring.altman?.note ?? 'Risque de détresse financière (modèle Z″ marchés émergents).'}</p>
+              <p className="mt-1.5 text-[11px] text-faint">{scoring.altman?.note ?? 'Risque de détresse financière (modèle Z″ marchés émergents) : au-dessus de 2,6 zone saine, de 1,1 à 2,6 zone grise, sous 1,1 risque de détresse. Inadapté aux sociétés financières.'}</p>
             </div>
           </div>
         )}

@@ -33,7 +33,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       # Test à blanc du calendrier officiel : il décide du repli. RichBourse refuse
       # les robots, il n'est donc interrogé que si le calendrier est KO.
@@ -141,7 +141,7 @@ jobs:
           node-version: '22'
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
       - name: Run flottant
         working-directory: scraper
         env:

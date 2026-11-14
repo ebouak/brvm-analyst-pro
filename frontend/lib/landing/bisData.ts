@@ -5,6 +5,7 @@
  * page, pas ici — un âge figé dans le cache serait faux dès la 2e visite.
  */
 import { unstable_cache } from 'next/cache';
+import { signauxPublicsDeLaSeance, type LigneSignalPublic } from '@/lib/signals/publics';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getLastMarketDate } from '@/lib/marketDate';
 import { sparklinePath } from '@/lib/landing/sparkline';
@@ -90,6 +91,10 @@ export interface LandingBisData {
   spotlightSignal: (SignalDaily & { code: string }) | null;
   /** Dernier dossier d’analyse réellement généré, ou null. */
   latestDiagnostic: LatestDiagnostic | null;
+  /** Notes publiques de la dernière séance scorée (signal et score), pour les démonstrations de l'accueil. */
+  signauxSeance: { code: string; signal: string; score_total: number; date_marche: string }[];
+  /** Désignation par code (brvm_instruments), déjà lue pour les palmarès. */
+  noms: Record<string, string | null>;
 }
 
 const LABELS: Record<string, string> = {
@@ -130,6 +135,8 @@ async function load(): Promise<LandingBisData> {
     spotlightSignal: null,
     latestDiagnostic: null,
     sgi: { nb: 0, nbGrilles: 0, pays: [] },
+    signauxSeance: [],
+    noms: {},
   };
 
   const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic, sgiDir, sgiFrais] = await Promise.all([
@@ -161,8 +168,9 @@ async function load(): Promise<LandingBisData> {
     db.from('brvm_indices_daily').select('code, valeur, variation_pct, valeur_precedente').eq('date_marche', dateMarche),
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).limit(250),
-    // Dernière séance SCORÉE (≤ séance courante) : en séance, le scoring du jour n'existe pas encore.
-    db.from('signals_daily').select('*').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).order('score_total', { ascending: false }).limit(1).maybeSingle(),
+    // Note publique seule (F-04) : dernière note de chaque valeur par la
+    // fonction bornée. La séance retenue est choisie plus bas.
+    db.rpc('signaux_publics'),
   ]);
 
   const noms = new Map<string, string | null>((instRes.data ?? []).map((i) => [String(i.code), (i.designation as string | null) ?? null]));
@@ -233,8 +241,17 @@ async function load(): Promise<LandingBisData> {
     brvmSectors as Record<string, string>,
   );
 
-  const sig = sigRes.data as (SignalDaily & { code: string }) | null;
+  // Dernière séance SCORÉE (≤ séance courante) : en séance, le scoring du jour
+  // n'existe pas encore. Puis la meilleure note de cette séance.
+  const lignesSig = ((sigRes.data ?? []) as LigneSignalPublic[]).filter((l) => l.date_marche <= dateMarche);
+  const seanceScoree = lignesSig.reduce<string | null>((m, l) => (m == null || l.date_marche > m ? l.date_marche : m), null);
+  const sig = seanceScoree
+    ? signauxPublicsDeLaSeance(lignesSig, seanceScoree).sort((a, b) => b.score_total - a.score_total)[0] ?? null
+    : null;
   const spotlightSignal = sig ?? null;
+  const signauxSeance = seanceScoree
+    ? signauxPublicsDeLaSeance(lignesSig, seanceScoree).map((x) => ({ code: String(x.code), signal: String(x.signal), score_total: Number(x.score_total), date_marche: String(x.date_marche) }))
+    : [];
   const topNote: TopNote | null = sig
     ? { code: String(sig.code), nom: noms.get(String(sig.code)) ?? null, score: sig.score_total == null ? null : Number(sig.score_total), signal: (sig.signal as string | null) ?? null, grade: scoreToRating(sig.score_total == null ? null : Number(sig.score_total), sig.confiance == null ? null : Number(sig.confiance)).note }
     : null;
@@ -244,6 +261,7 @@ async function load(): Promise<LandingBisData> {
     coursSeed: rows.map((r) => ({ code: r.code, cours_jour: r.cours, variation_pct: r.variation, volume: r.volume, valeur_echangee: r.valeur, nb_transactions: r.tx })),
     brvmC,
     topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, bandeaux: pubs, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
+    signauxSeance, noms: Object.fromEntries(noms),
   };
 }
 

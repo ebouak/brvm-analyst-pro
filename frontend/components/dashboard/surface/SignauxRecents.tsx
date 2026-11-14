@@ -5,7 +5,7 @@ import { TeteBloc } from './Grille';
 
 const note = (x: number) => x.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' });
 
-const LIB: Record<string, string> = { BUY: 'Achat', SELL: 'Vente', HOLD: 'Attente' };
+const LIB: Record<string, string> = { BUY: 'Haussier', SELL: 'Baissier', HOLD: 'Neutre' };
 
 /** Signaux récents (premium) au style de la surface ; un libellé et un lien vers l'explication, pas d'incitation. */
 export default function SignauxRecents({ signaux, notes = [] }: { signaux: SignalDaily[]; notes?: NoteSeance[] }) {
@@ -48,7 +48,7 @@ export default function SignauxRecents({ signaux, notes = [] }: { signaux: Signa
             <li key={`${s.code}-${i}`} className="flex items-baseline gap-3 border-t border-border py-2 text-sm first:border-t-0">
               <Link href={`/actions/${s.code}`} className="tabular font-semibold text-ivory hover:text-accent-ink">{s.code}</Link>
               <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${s.signal === 'BUY' ? 'border-up/40 text-up' : 'border-down/40 text-down'}`}>{LIB[s.signal] ?? s.signal}</span>
-              <span className="tabular ml-auto text-xs text-muted">Conf : {s.confiance != null ? `${Math.round(s.confiance * 100)} %` : '—'}</span>
+              <span className="tabular ml-auto text-xs text-muted">Données : {s.confiance != null ? `${Math.round(s.confiance * 100)} %` : '—'}</span>
             </li>
           ))}
         </ul>

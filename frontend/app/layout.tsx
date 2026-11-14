@@ -12,6 +12,7 @@ import { CookieBanner } from '@/components/consent/CookieBanner';
 import PostHogInit from '@/components/analytics/PostHogInit';
 import { createClient } from '@/lib/supabase/server';
 import { jsonLdScript } from '@/lib/jsonLd';
+import { classesPolices } from '@/lib/vitrine/polices';
 
 // URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
 // via NEXT_PUBLIC_SITE_URL (mettre l'URL RÉELLEMENT servie tant que le domaine
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     template: '%s | WESTBOURSE',
   },
   description:
-    "Plateforme d'analyse BRVM : cours toutes les 15 min, notation A–F sur les actions, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit.",
+    "Plateforme d'analyse BRVM : cours environ toutes les 15 minutes en séance, notation A–F sur les actions, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit.",
   keywords: [
     'BRVM', 'bourse BRVM', 'cours BRVM', 'investir BRVM', 'BRVM en direct',
     'actions UEMOA', 'bourse UEMOA', 'investissement Afrique de l’Ouest',
@@ -79,18 +80,20 @@ export const metadata: Metadata = {
     siteName: 'WESTBOURSE',
     title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
     description:
-      'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
+      'Cours BRVM environ toutes les 15 minutes en séance, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
     // og:image généré automatiquement par app/opengraph-image.tsx (1200×630).
   },
   twitter: {
     card: 'summary_large_image',
     title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
     description:
-      'Cours BRVM toutes les 15 min, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
+      'Cours BRVM environ toutes les 15 minutes en séance, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
     // twitter:image = fallback sur og:image (généré par opengraph-image.tsx).
   },
+  // Pas de canonical ici : hérité par toutes les pages, il déclarait /analyses, /pricing,
+  // /methodologie, etc. comme doublons de l'accueil. Chaque page pose le sien ; à défaut,
+  // le moteur retient l'URL de la page.
   alternates: {
-    canonical: SITE_URL,
     types: { 'application/rss+xml': [{ url: `${SITE_URL}/api/rss`, title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
   },
 };
@@ -126,9 +129,12 @@ const jsonLd = {
         'https://www.linkedin.com/company/westbourse',
         // Profil personnel du fondateur — renforce l'ancrage humain de la marque.
         'https://www.linkedin.com/in/westbourse-lt-745473422/',
-        // À AJOUTER dès leur création :
+        // Page Facebook (communiquée par l'exploitant le 2026-11-13).
+        'https://www.facebook.com/profile.php?id=61593099424531',
+        // TikTok, compte de publication des vidéos de séance.
+        'https://www.tiktok.com/@westbourse7',
+        // À AJOUTER dès sa création :
         // 'https://x.com/westbourse',
-        // 'https://www.facebook.com/westbourse',
       ],
       areaServed: [
         { '@type': 'Country', name: "Côte d'Ivoire" },
@@ -168,7 +174,7 @@ const jsonLd = {
       browserRequirements: 'Requires JavaScript. Requires HTML5.',
       inLanguage: 'fr',
       description:
-        "Cours BRVM toutes les 15 minutes, notation A–F, fondamentaux vérifiés, rendement réel après impôt et inflation, comparateur de SGI et brief quotidien.",
+        "Cours BRVM environ toutes les 15 minutes en séance, notation A–F, fondamentaux vérifiés, rendement réel après impôt et inflation, comparateur de SGI et brief quotidien.",
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -272,7 +278,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" className={`dark ${classesPolices}`}>
       <head>
         {/* Anti-flash mode clair/sombre : pose data-theme AVANT le premier
             paint (script synchrone, pas de defer/async) — sinon flash du
@@ -284,19 +290,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: `(function(){try{var t=localStorage.getItem('westbourse-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`,
           }}
         />
-        {/* Polices chargées en <link> (découverte immédiate) plutôt qu'en @import
-            CSS render-blocking. preconnect réchauffe les connexions → meilleur FCP. */}
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
-        />
+        {/* Polices : Geist, Geist Mono et Instrument Serif, servies depuis notre
+            domaine par next/font (lib/vitrine/polices.ts), sans feuille externe. */}
       </head>
       <body className="text-white antialiased font-sans">
         {/* JSON-LD Schema.org (rich snippets) */}

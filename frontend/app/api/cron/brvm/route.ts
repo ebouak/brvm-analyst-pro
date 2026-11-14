@@ -1,52 +1,19 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-const execAsync = promisify(exec);
+/**
+ * ROUTE RETIRÉE (410 Gone) — audit F-13.
+ *
+ * Elle lançait `exec('cd scraper && npm run daily:full')` depuis le serveur web.
+ * Aucun workflow GitHub ni `vercel.json` ne l'appelait (vérifié) : la collecte
+ * tourne dans les workflows `.github/workflows/*.yml`. Une route qui exécute un
+ * shell sur le serveur est une surface d'attaque sans usage ; sa suppression
+ * pure exige l'accord de l'exploitant, d'où ce 410 documenté en attendant.
+ */
+const gone = () =>
+  NextResponse.json(
+    { error: 'Route retirée. La collecte est exécutée par les workflows GitHub Actions.' },
+    { status: 410 },
+  );
 
-export async function GET(request: NextRequest) {
-  // Verify Authorization header
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '');
-
-  if (!token || token !== process.env.CRON_SECRET) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 },
-    );
-  }
-
-  try {
-    console.log('[CRON] Starting daily BRVM scrape at', new Date().toISOString());
-
-    // Execute scraper daily run
-    const { stdout, stderr } = await execAsync(
-      'cd scraper && npm run daily:full',
-      { timeout: 3600000 }, // 1 hour timeout
-    );
-
-    console.log('[CRON] Scraper output:', stdout);
-    if (stderr) console.warn('[CRON] Warnings:', stderr);
-
-    return NextResponse.json(
-      {
-        status: 'success',
-        message: 'Daily BRVM scrape completed',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 200 },
-    );
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error('[CRON] Scrape failed:', errorMsg);
-
-    return NextResponse.json(
-      {
-        status: 'failed',
-        error: errorMsg,
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 },
-    );
-  }
-}
+export const GET = gone;
+export const POST = gone;

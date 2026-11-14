@@ -40,7 +40,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
                 <span className="text-xs text-muted truncate max-w-[120px]">{s.designation}</span>
               )}
               <span className="ml-auto text-xs text-muted tabular">
-                Conf: {s.confiance != null ? Math.round(s.confiance * 100) + '%' : '—'}
+                Données : {s.confiance != null ? Math.round(s.confiance * 100) + '%' : '—'}
               </span>
             </div>
             <p className="text-xs text-muted line-clamp-2 mb-2">

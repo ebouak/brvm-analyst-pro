@@ -17,12 +17,12 @@ export function CookieBanner() {
       {needsChoice && (
         // Jetons du thème (suit clair/sombre). « Refuser » et « Tout accepter » :
         // même style, même taille (CNIL : refuser aussi simple qu'accepter).
-        <div className="print:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:py-4">
+        <div data-bandeau-cookies="" className="print:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:py-4">
           <div className="mx-auto flex max-w-4xl flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <p className="text-xs leading-snug text-ivory sm:text-sm">
               Nous utilisons des cookies strictement nécessaires au fonctionnement du site.
               Vous pouvez accepter la mesure d&apos;audience pour nous aider à l&apos;améliorer.{' '}
-              <Link href="/confidentialite" className="underline hover:text-ivory">En savoir plus</Link>.
+              <Link href="/confidentialite" className="-my-2 inline-block py-2 underline hover:text-ivory">En savoir plus</Link>.
             </p>
             <div className="flex w-full shrink-0 flex-wrap items-stretch gap-2 sm:w-auto">
               <button type="button" onClick={() => save(defaultDenied())} className={CHOIX}>Refuser</button>

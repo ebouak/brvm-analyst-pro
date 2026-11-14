@@ -37,7 +37,7 @@ import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
  *
  * RÈGLE : un champ absent vaut `null` et se dit. Aucune estimation, jamais.
  *
- * Complète `lib/reports.ts` (`buildInstrumentReport`), qui couvre la série de
+ * Complète la fiche action, qui couvre la série de
  * cours, les indicateurs canoniques et les événements, mais ni les
  * fondamentaux, ni les ratios, ni le dividende, ni la qualité du résultat.
  */

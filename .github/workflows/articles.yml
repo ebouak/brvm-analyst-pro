@@ -34,7 +34,7 @@ jobs:
 
       - name: Install scraper deps
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Détecter, rédiger, publier, diffuser
         working-directory: scraper

@@ -46,7 +46,7 @@ export function classer(boc: DividendeBoc, base: LigneRapport['base'], aujourdhu
   return base.payment_date === boc.date_paiement ? 'concordant' : 'date_manquante';
 }
 
-async function itemsDesPages(pdf: Uint8Array): Promise<ItemPdf[][]> {
+export async function itemsDesPages(pdf: Uint8Array): Promise<ItemPdf[][]> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const doc = await pdfjs.getDocument({ data: pdf }).promise;
   const pages: ItemPdf[][] = [];

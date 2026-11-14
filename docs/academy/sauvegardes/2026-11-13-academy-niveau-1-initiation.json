@@ -1,0 +1,2772 @@
+{
+ "glossaire": [
+  {
+   "definition": "Bourse Régionale des Valeurs Mobilières, marché boursier commun des 8 pays UEMOA.",
+   "terme": "BRVM"
+  },
+  {
+   "definition": "Union Économique et Monétaire Ouest Africaine (Bénin, Burkina, CI, Guinée-Bissau, Mali, Niger, Sénégal, Togo).",
+   "terme": "UEMOA"
+  },
+  {
+   "definition": "Société de Gestion et d'Intermédiation : courtier agréé par le CREPMF.",
+   "terme": "SGI"
+  },
+  {
+   "definition": "Conseil Régional de l'Épargne Publique et des Marchés Financiers : le régulateur.",
+   "terme": "CREPMF"
+  },
+  {
+   "definition": "Indice mesurant la performance de l'ensemble des actions cotées.",
+   "terme": "BRVM Composite"
+  },
+  {
+   "definition": "Dépositaire Central / Banque de Règlement : conserve les titres et règle les transactions.",
+   "terme": "DC/BR"
+  },
+  {
+   "definition": "Autorisation officielle du CREPMF permettant à une SGI d'exercer sur la BRVM.",
+   "terme": "Agrément"
+  },
+  {
+   "definition": "Commission prélevée par la SGI sur chaque transaction (environ 1 à 2%).",
+   "terme": "Frais de courtage"
+  },
+  {
+   "definition": "Prix auquel votre action doit monter pour couvrir les frais de transaction aller-retour.",
+   "terme": "Point mort"
+  },
+  {
+   "definition": "Ensemble des valeurs mobilières détenues par un investisseur.",
+   "terme": "Portefeuille"
+  },
+  {
+   "definition": "Répartition du capital sur plusieurs actions pour réduire le risque.",
+   "terme": "Diversification"
+  },
+  {
+   "definition": "Dividende Par Action : montant versé par action chaque année.",
+   "terme": "DPA"
+  },
+  {
+   "definition": "Gain réalisé en vendant une action plus cher qu'on ne l'a achetée.",
+   "terme": "Plus-value"
+  },
+  {
+   "definition": "Droit Préférentiel de Souscription : droit prioritaire lors d'une augmentation de capital.",
+   "terme": "DPS"
+  },
+  {
+   "definition": "Date à partir de laquelle le cours intègre la distribution du dividende.",
+   "terme": "Date de détachement"
+  },
+  {
+   "definition": "Date à laquelle vous devez posséder l'action pour recevoir le dividende.",
+   "terme": "Date record"
+  },
+  {
+   "definition": "DPA / Cours de l'action × 100. Mesure le retour sur investissement annuel via dividendes.",
+   "terme": "Yield (rendement dividende)"
+  },
+  {
+   "definition": "Mécanisme par lequel les intérêts génèrent eux-mêmes des intérêts sur les périodes suivantes.",
+   "terme": "Effet composé"
+  },
+  {
+   "definition": "Action de racheter des titres avec les revenus perçus plutôt que de les consommer.",
+   "terme": "Réinvestissement"
+  },
+  {
+   "definition": "Distribution ponctuelle supplémentaire en plus du dividende ordinaire annuel.",
+   "terme": "Dividende exceptionnel"
+  },
+  {
+   "definition": "Amplitude des variations de cours d'une action dans le temps. Plus c'est volatile, plus c'est risqué à court terme.",
+   "terme": "Volatilité"
+  },
+  {
+   "definition": "Risque propre à une entreprise, réductible par la diversification.",
+   "terme": "Risque spécifique"
+  },
+  {
+   "definition": "Risque de marché global, non éliminable par la diversification.",
+   "terme": "Risque systématique"
+  },
+  {
+   "definition": "Épargne liquide couvrant 3 à 6 mois de dépenses, à constituer avant d'investir en bourse.",
+   "terme": "Fonds d'urgence"
+  },
+  {
+   "definition": "Durée pendant laquelle vous prévoyez de conserver vos investissements.",
+   "terme": "Horizon d'investissement"
+  },
+  {
+   "definition": "Estimation des revenus futurs basée sur des hypothèses de croissance du dividende.",
+   "terme": "Projection"
+  },
+  {
+   "definition": "Stratégie d'achat d'actifs sous-évalués par rapport à leur valeur intrinsèque réelle.",
+   "terme": "Value Investing"
+  },
+  {
+   "definition": "Stratégie centrée sur la génération de revenus passifs via des dividendes réguliers.",
+   "terme": "Income Investing"
+  },
+  {
+   "definition": "Stratégie ciblant des entreprises à forte croissance du chiffre d'affaires et des bénéfices.",
+   "terme": "Growth Investing"
+  },
+  {
+   "definition": "Valeur réelle estimée d'une entreprise, indépendamment de son cours de bourse.",
+   "terme": "Valeur intrinsèque"
+  },
+  {
+   "definition": "Ordre conditionné à un prix maximum (achat) ou minimum (vente).",
+   "terme": "Ordre à cours limité"
+  },
+  {
+   "definition": "Ordre exécuté immédiatement au meilleur prix disponible.",
+   "terme": "Ordre au marché"
+  },
+  {
+   "definition": "Compte dédié à la détention de valeurs mobilières (actions, obligations).",
+   "terme": "Compte-titres"
+  },
+  {
+   "definition": "Montant minimum à verser pour activer un compte-titres.",
+   "terme": "Dépôt initial"
+  },
+  {
+   "definition": "Personne domiciliée hors de la zone UEMOA mais autorisée à investir à la BRVM.",
+   "terme": "Non-résident"
+  },
+  {
+   "definition": "Transfert des revenus (dividendes, plus-values) vers un compte bancaire hors UEMOA.",
+   "terme": "Rapatriement"
+  },
+  {
+   "definition": "Protocole international de virement bancaire utilisé pour les dépôts depuis l'étranger.",
+   "terme": "Virement SWIFT"
+  },
+  {
+   "definition": "Plus-value + dividendes perçus sur une période. La mesure la plus juste de la performance.",
+   "terme": "Rendement total"
+  },
+  {
+   "definition": "Facilité à convertir un actif en cash rapidement et sans perte de valeur.",
+   "terme": "Liquidité"
+  },
+  {
+   "definition": "Répartition du patrimoine entre différentes classes d'actifs (actions, immobilier, épargne).",
+   "terme": "Allocation d'actifs"
+  }
+ ],
+ "intro": "Niveau 1 — Initiation à la BRVM — parcours complet de la WestBourse Academy : 11 leçons interactives organisées par module, avec quiz, glossaire et suivi de progression. Cas et chiffres issus du marché BRVM.",
+ "lessons": [
+  {
+   "categorie": "general",
+   "chart": null,
+   "charts": [
+    {
+     "labels": [
+      "Services financiers",
+      "Industriels",
+      "Conso. de base",
+      "Services publics",
+      "Énergie",
+      "Télécoms",
+      "Conso. discrétionnaire"
+     ],
+     "note": "Les Services financiers (banques, assurances, Ecobank, SGBCI, BOA) dominent avec 37 % des sociétés cotées, suivis des Industriels (18 %, BTP, matériaux, agro-industrie). Source : BRVM · AMF-UMOA · données au 17.07.2026.",
+     "reel": true,
+     "titre": "Répartition sectorielle des 49 sociétés cotées (nomenclature 2026)",
+     "type": "pie",
+     "unite": "%",
+     "valeurs": [
+      37,
+      18,
+      14,
+      10,
+      8,
+      8,
+      5
+     ]
+    },
+    {
+     "labels": [
+      "1998",
+      "2015",
+      "2020",
+      "2024",
+      "2026"
+     ],
+     "note": "De 836 Md FCFA en 1998 à 18 488 Md FCFA en juillet 2026 : ×22 en 28 ans (+2 100 %), avec une accélération de +94 % entre 2020 et 2026. Source : BRVM · AMF-UMOA · données au 17.07.2026.",
+     "reel": true,
+     "titre": "Capitalisation boursière 1998 → 2026 (milliards FCFA)",
+     "type": "line",
+     "unite": "Md FCFA",
+     "valeurs": [
+      836,
+      6800,
+      9500,
+      14200,
+      18488
+     ]
+    }
+   ],
+   "duree_min": 10,
+   "exercice_id": null,
+   "image": {
+    "alt": "Bâtiment de la Bourse Régionale des Valeurs Mobilières (BRVM) à Abidjan",
+    "credit": "Photo : Wikimedia Commons (BRVM, Abidjan)",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/BRVM.jpg/960px-BRVM.jpg"
+   },
+   "imageQuery": null,
+   "liens": [
+    {
+     "href": "/dashboard",
+     "label": "Indices en direct sur le dashboard"
+    },
+    {
+     "href": "/comparateur-sgi",
+     "label": "Comparer les SGI (frais réels)"
+    }
+   ],
+   "module": "Module 1 : Comprendre la Bourse BRVM",
+   "qcm": {
+    "correct": 2,
+    "explication": "La capitalisation atteint 18 488 Md FCFA au 17 juillet 2026, contre 836 Md FCFA en 1998, soit une multiplication par plus de 22 en 28 ans (+2 100 %). Chiffre officiel BRVM.",
+    "options": [
+     "Environ 1 000 milliards FCFA",
+     "Environ 10 000 milliards FCFA",
+     "Environ 18 500 milliards FCFA"
+    ],
+    "question": "Quelle était la capitalisation boursière de la BRVM en juillet 2026 ?"
+   },
+   "resume": "Une infrastructure financière, pas un casino. On y voit comment fonctionne le marché régional des 8 pays de l’UEMOA : capitalisation, actionnariat, formation des prix, indices, rôle des SGI, et les trois pièges dans lesquels tombent souvent les débutants.",
+   "sections": [
+    {
+     "contenu": "La BRVM (Bourse Régionale des Valeurs Mobilières) est un système organisé et strictement réglementé. Elle permet à n’importe qui, salarié, commerçant, étudiant ou fonctionnaire, d’investir de façon sécurisée dans de vraies entreprises de l’UEMOA. C’est un marché unique pour 8 pays, supervisé par l’AMF-UMOA.\nEn 28 ans, la capitalisation a été multipliée par plus de 22 (+2 100 %), et la hausse s’est nettement accélérée depuis 2020 (+94 % en 6 ans).",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "contre 836 Md FCFA en 1998, ×22 en 28 ans",
+       "label": "Capitalisation 2026",
+       "valeur": "18 488 Md FCFA"
+      },
+      {
+       "detail": "nomenclature 2026",
+       "label": "Sociétés cotées",
+       "valeur": "49"
+      },
+      {
+       "detail": "des banques aux télécoms",
+       "label": "Secteurs",
+       "valeur": "7"
+      },
+      {
+       "detail": "un seul marché commun",
+       "label": "Pays UEMOA",
+       "valeur": "8"
+      }
+     ],
+     "titre": "Une infrastructure financière, pas un casino",
+     "type": "definition"
+    },
+    {
+     "contenu": "Une action est une fraction d’une entreprise réelle. La loi vous garantit trois droits :\n1. Percevoir des dividendes : votre part des bénéfices, versée en espèces sur votre compte-titres. En 2025, Sonatel a versé 1 700 FCFA net par action.\n2. Voter en assemblée générale, sur la nomination des dirigeants, la distribution des bénéfices ou les fusions. Une action donne une voix.\n3. Revendre vos titres quand vous voulez, sur le marché secondaire, via votre SGI. Vous n’êtes jamais bloqué : la revente fait partie du contrat.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Acheter une action, c’est devenir copropriétaire",
+     "type": "importance"
+    },
+    {
+     "contenu": "La BRVM cote du lundi au vendredi, de 9h00 à 15h00 GMT, en 4 phases.\nLe prix se forme par confrontation de l’offre et de la demande : quand la demande dépasse l’offre, le cours monte ; quand l’offre l’emporte, il baisse. L’AMF-UMOA veille à l’équité de chaque séance.",
+     "etapes": [
+      {
+       "cle": false,
+       "detail": "Les ordres s’accumulent dans le carnet. Aucun échange n’est encore exécuté.",
+       "titre": "9h00 → 9h45, Pré-ouverture"
+      },
+      {
+       "cle": false,
+       "detail": "Premier cours d’équilibre calculé.",
+       "titre": "9h45, Fixing d’ouverture"
+      },
+      {
+       "cle": true,
+       "detail": "Le cœur de la séance : les cours évoluent en temps réel selon la loi de l’offre et de la demande.",
+       "titre": "9h45 → 14h55, Négociation continue"
+      },
+      {
+       "cle": false,
+       "detail": "Cours de référence du jour fixé et publié.",
+       "titre": "15h00, Fixing de clôture"
+      }
+     ],
+     "stats": [],
+     "titre": "Comment se forme le prix d’une action ?",
+     "type": "importance"
+    },
+    {
+     "contenu": "Deux indices mesurent la santé d’ensemble du marché. Quand un indice monte, les valeurs qui le composent ont progressé en moyenne.\n• BRVM Composite : toutes les actions cotées. C’est le baromètre officiel, mesuré sur les seuls cours : les dividendes n’y entrent pas. Pour les intégrer, le Bulletin officiel de la cote publie depuis janvier 2026 le BRVM Composite Total Return, qui les suppose réinvestis.\n• BRVM 30 : les 30 valeurs les plus liquides. Il remplace le BRVM 10 depuis 2023 pour une lecture plus large.",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "toutes les actions · clôture 17.07.2026",
+       "label": "BRVM Composite",
+       "valeur": "478,53 pts"
+      },
+      {
+       "detail": "les 30 plus liquides · clôture 17.07.2026",
+       "label": "BRVM 30",
+       "valeur": "227,70 pts"
+      }
+     ],
+     "titre": "Les indices, thermomètre du marché",
+     "type": "importance"
+    },
+    {
+     "contenu": "Vous ne pouvez pas passer un ordre directement à la BRVM. Il faut passer par une Société de Gestion et d’Intermédiation (SGI), qui doit disposer d’un capital minimum d’un milliard de FCFA. Comparez les frais avant de choisir : sur de petits montants, ils pèsent lourd.",
+     "etapes": [],
+     "stats": [],
+     "tableau": {
+      "colonnes": [
+       "SGI",
+       "Dépôt min.",
+       "Courtage",
+       "Spécificités"
+      ],
+      "lignes": [
+       [
+        "CGF Bourse",
+        "100 000 FCFA",
+        "0,8 %",
+        "Historique + app mobile · large panel d’analystes"
+       ],
+       [
+        "Hudson & Cie",
+        "50 000 FCFA",
+        "1,0 %",
+        "Accessibilité petits porteurs · onboarding rapide"
+       ],
+       [
+        "NSIA Finance",
+        "200 000 FCFA",
+        "0,7 %",
+        "Adossée à un assureur régional · SAV réputé"
+       ],
+       [
+        "BOA Capital",
+        "150 000 FCFA",
+        "0,9 %",
+        "Réseau bancaire dense · virements internationaux fluides"
+       ],
+       [
+        "Sogebourse",
+        "500 000 FCFA",
+        "0,6 %",
+        "Investisseurs confirmés · gestion sous mandat"
+       ]
+      ],
+      "note": "Frais communs à toutes les SGI, en plus du courtage : commission BRVM 0,2 % + dépositaire DC/BR 0,1 % + TVA 18 %. Grilles indicatives 2026."
+     },
+     "titre": "Impossible d’acheter en direct : passer par une SGI est obligatoire",
+     "type": "cas"
+    },
+    {
+     "contenu": "En mars 2026, M. Diallo, développeur web d’origine ivoirienne installé à Lyon, a ouvert un compte-titres depuis l’application mobile de sa SGI, avec un premier dépôt de 100 000 FCFA. Ce qu’il en retient : la diaspora peut investir sur son marché d’origine sans se déplacer. (Témoignage anonymisé.)",
+     "etapes": [
+      {
+       "cle": false,
+       "detail": "CNI + justificatif de domicile envoyés depuis l’app mobile de la SGI.",
+       "titre": "Ouverture 100 % à distance"
+      },
+      {
+       "cle": false,
+       "detail": "10 actions CIE CI (services publics) + 5 actions TOTAL CI (énergie).",
+       "titre": "Achat de 2 valeurs sectorielles"
+      },
+      {
+       "cle": false,
+       "detail": "Relevés par email, positions consultables à tout moment. Tout est opérationnel 3 semaines après l’ouverture.",
+       "titre": "Suivi mobile 24h/24"
+      }
+     ],
+     "stats": [],
+     "titre": "« La distance ne m’a pas empêché d’investir » (M. Diallo, Lyon)",
+     "type": "cas"
+    },
+    {
+     "contenu": "1. L’illusion du jackpot : confondre investissement et spéculation. La BRVM n’est pas faite pour « faire ×10 en 3 jours ». Le bon réflexe : viser un horizon d’au moins 3 à 5 ans et laisser les intérêts composés travailler.\n2. L’argent qu’on ne peut pas perdre : la bourse comporte un vrai risque de perte en capital. Le loyer, la scolarité ou une urgence médicale ne vont jamais en actions. Le bon réflexe : constituer d’abord 3 à 6 mois d’épargne de précaution, et seulement ensuite investir.\n3. L’oubli du calendrier : les résultats sont publiés de février à avril, votés en assemblée générale de mars à juin, puis versés à la date de détachement. Vendre avant cette date fait perdre le dividende. Le bon réflexe : noter les dates clés de vos titres, que la BRVM publie à l’avance.",
+     "etapes": [],
+     "stats": [],
+     "titre": "3 erreurs qui font perdre plus vite qu’elles ne rapportent",
+     "type": "piege"
+    },
+    {
+     "contenu": "1. Un marché unique et réglementé : la BRVM sert les 8 pays de l’UEMOA, sous la supervision de l’AMF-UMOA.\n2. Une capitalisation multipliée par 22 en 28 ans, de 836 à 18 488 milliards de FCFA, avec une accélération depuis 2020.\n3. Être actionnaire, c’est être copropriétaire, avec trois droits : dividendes, vote, revente.\n4. Toute transaction passe par une SGI agréée, votre interlocuteur unique.\n5. Le BRVM Composite (478,53 pts) et le BRVM 30 (227,70 pts) donnent la température du marché.",
+     "etapes": [],
+     "stats": [],
+     "titre": "5 idées à emporter de cette leçon",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Qu’est-ce que la BRVM et comment ça marche ?"
+  },
+  {
+   "categorie": "regulatory",
+   "chart": null,
+   "charts": [],
+   "duree_min": 8,
+   "exercice_id": null,
+   "image": {
+    "alt": "Hands folded over stock market documents with calculator and cash on desk.",
+    "credit": "Photo : Hanna Pad / Pexels",
+    "url": "https://images.pexels.com/photos/6801681/pexels-photo-6801681.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "imageQuery": null,
+   "liens": [
+    {
+     "href": "/comparateur-sgi",
+     "label": "Comparateur des SGI agréées"
+    },
+    {
+     "href": "/debutant",
+     "label": "Guide débutant"
+    }
+   ],
+   "module": "Module 1 : Comprendre la Bourse BRVM",
+   "qcm": {
+    "correct": 1,
+    "explication": "Une SGI applique la procédure KYC standard : identité, adresse, formulaire signé et versement d’ouverture. Aucun diplôme ni parrainage n’est demandé. (Source : CREPMF, SGI agréées 2026.)",
+    "options": [
+     "Uniquement un relevé bancaire",
+     "CNI ou passeport + justificatif de domicile + formulaire + dépôt initial",
+     "Uniquement un contrat de travail et des diplômes",
+     "Une recommandation d’un actionnaire actuel de la SGI"
+    ],
+    "question": "Quels documents sont généralement requis pour ouvrir un compte-titres à la BRVM ?"
+   },
+   "resume": "BRVM, CREPMF, SGI, DC/BR : qui fait quoi, et à qui s’adresser quand un problème survient. Bien comprendre l’écosystème vous évite des erreurs coûteuses et vous protège des fraudes.",
+   "sections": [
+    {
+     "contenu": "Chaque acteur a un rôle précis et complémentaire. Confondre ces rôles peut coûter cher : on s’adresse à la mauvaise porte, on se méfie à tort d’une institution, ou pire, on tombe sur une escroquerie.",
+     "etapes": [],
+     "stats": [],
+     "tableau": {
+      "colonnes": [
+       "Acteur",
+       "Rôle",
+       "Ce qu’il fait pour vous"
+      ],
+      "lignes": [
+       [
+        "BRVM",
+        "Opérateur",
+        "Organise les séances, publie les cours, administre les indices. Contact : infos générales, calendriers, statistiques."
+       ],
+       [
+        "CREPMF",
+        "Régulateur",
+        "L’« AMF / SEC » de l’UEMOA : protège les investisseurs, agrée les SGI, sanctionne les abus. Site : crepmf.org."
+       ],
+       [
+        "SGI",
+        "Votre intermédiaire",
+        "Interlocuteur direct et obligatoire : exécute vos ordres, conserve vos actions, émet vos relevés."
+       ],
+       [
+        "DC/BR",
+        "Dépositaire",
+        "Dépositaire Central + Banque de Règlement : conserve tous les titres, règle-livre les transactions."
+       ]
+      ],
+      "note": "Ex. de SGI agréées : CGF Bourse · Hudson & Cie · NSIA Finance · BOA Capital · Sogebourse. Source : AMF-UMOA, fiches institutionnelles 2026."
+     },
+     "titre": "4 acteurs, 4 rôles distincts",
+     "type": "definition"
+    },
+    {
+     "contenu": "Chaque achat suit la même chaîne, surveillée d’un bout à l’autre par le CREPMF, qui peut sanctionner tout manquement. Le délai habituel est de J+3.",
+     "etapes": [
+      {
+       "cle": false,
+       "detail": "Auprès de votre SGI, par téléphone, email ou application mobile.",
+       "titre": "Vous passez un ordre"
+      },
+      {
+       "cle": false,
+       "detail": "Vers le système de cotation de la BRVM.",
+       "titre": "La SGI transmet l’ordre"
+      },
+      {
+       "cle": false,
+       "detail": "Achat et vente se rencontrent selon la règle de l’offre et de la demande.",
+       "titre": "La BRVM confronte les ordres"
+      },
+      {
+       "cle": true,
+       "detail": "Votre compte-titres est crédité : vous êtes officiellement actionnaire.",
+       "titre": "Le DC/BR règle-livre les titres"
+      }
+     ],
+     "stats": [],
+     "titre": "De votre ordre à vos titres : 4 étapes",
+     "type": "importance"
+    },
+    {
+     "contenu": "En 2021, Mme Ouédraogo n’a pas reçu son dividende ECOBANK CI. Son premier appel a tout changé.\n✗ Mauvais réflexe : appeler la BRVM. Elle est renvoyée vers sa SGI, car la BRVM n’a pas la main sur les comptes-titres individuels. Résultat : 5 jours ouvrés perdus, pour rien.\n✓ Bon réflexe : appeler directement sa SGI (NSIA Finance). Vérification du relevé, un RIB erroné repéré tout de suite, dividende versé sous 48 heures.\nÀ retenir : pour tout problème, votre premier appel va à votre SGI, pas à la BRVM ni au CREPMF. (Témoignage anonymisé, 2021.)",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "appel BRVM → redirection → attente",
+       "label": "Mauvais réflexe",
+       "valeur": "5 jours"
+      },
+      {
+       "detail": "appel SGI → RIB corrigé → dividende versé",
+       "label": "Bon réflexe",
+       "valeur": "48 heures"
+      }
+     ],
+     "titre": "Cas réel, le bon interlocuteur, c’est votre SGI",
+     "type": "cas"
+    },
+    {
+     "contenu": "Des plateformes non agréées par le CREPMF se font passer pour des opportunités « exceptionnelles » sur les réseaux sociaux et WhatsApp. Elles sont illégales, non régulées et souvent frauduleuses. Trois signaux doivent vous alerter :\n1. Des promesses de gains garantis au-dessus de 20 % par mois : aucun placement légal ne garantit un tel rendement.\n2. Un démarchage par WhatsApp ou des groupes Telegram : les vraies SGI ne prospectent pas de cette façon.\n3. Aucun numéro d’agrément CREPMF : toute SGI légale figure sur la liste officielle du régulateur.\nLe réflexe à avoir : vérifier la liste officielle sur crepmf.org avant d’ouvrir un compte ou de verser de l’argent.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Alerte fraude, les fausses « opportunités » boursières",
+     "type": "piege"
+    },
+    {
+     "contenu": "• BRVM : Bourse Régionale des Valeurs Mobilières, l’opérateur du marché.\n• CREPMF / AMF-UMOA : le régulateur régional du marché financier.\n• SGI : Société de Gestion et d’Intermédiation, le courtier agréé par lequel il faut passer.\n• DC/BR : Dépositaire Central / Banque de Règlement, qui conserve les titres et règle les transactions.\n• KYC : la procédure d’identification standard (identité, adresse, formulaire, dépôt initial).\n• Règlement-livraison : l’échange simultané des titres contre les espèces, à J+3.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Lexique de l’écosystème",
+     "type": "lexique"
+    },
+    {
+     "contenu": "1. Quatre acteurs, quatre rôles : la BRVM organise, le CREPMF régule, votre SGI exécute, le DC/BR conserve. Ne les confondez pas.\n2. Un problème ? Appelez votre SGI en premier, jamais la BRVM ni le CREPMF. Dans le cas ci-dessus, le délai est passé de 5 jours à 48 heures.\n3. Vérifiez l’agrément avant d’ouvrir un compte : si la SGI ne figure pas sur la liste du CREPMF (crepmf.org), passez votre chemin.",
+     "etapes": [],
+     "stats": [],
+     "titre": "3 piliers à ne jamais oublier",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Les 4 acteurs clés du marché"
+  },
+  {
+   "categorie": "evaluation",
+   "chart": null,
+   "charts": [
+    {
+     "labels": [
+      "UNIWAX",
+      "TOTAL CI",
+      "CIE CI",
+      "SAPH",
+      "ECOBANK CI",
+      "SMB CI",
+      "SONATEL"
+     ],
+     "note": "Le ticket d’entrée varie de 1 695 FCFA (UNIWAX, textile) à 17 500 FCFA (SONATEL, télécoms). Le prix ne dit rien de la qualité : chaque secteur a sa dynamique. Source : BRVM · AMF-UMOA · données au 17.07.2026.",
+     "reel": true,
+     "titre": "Prix indicatifs de 7 actions BRVM (FCFA, 17.07.2026)",
+     "type": "bar",
+     "unite": "FCFA",
+     "valeurs": [
+      1695,
+      2380,
+      2590,
+      3700,
+      10500,
+      14500,
+      17500
+     ]
+    },
+    {
+     "labels": [
+      "10 × CIE CI",
+      "3 × SODECI",
+      "2 × TOTAL CI"
+     ],
+     "note": "49 260 FCFA investis sur 3 sociétés et 3 secteurs (électricité, eau, énergie), rendement dividende estimé ≈ 4 800 FCFA/an (9,7 %). Simulation pédagogique sur cours réels du 17.07.2026.",
+     "reel": true,
+     "titre": "Portefeuille type 50 000 FCFA, répartition (FCFA investis)",
+     "type": "pie",
+     "unite": "FCFA",
+     "valeurs": [
+      25900,
+      18600,
+      4760
+     ]
+    }
+   ],
+   "duree_min": 9,
+   "exercice_id": null,
+   "image": {
+    "alt": "Close-up of a tablet displaying stock market analysis with colorful graphs.",
+    "credit": "Photo : Burak The Weekender / Pexels",
+    "url": "https://images.pexels.com/photos/186461/pexels-photo-186461.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "imageQuery": null,
+   "liens": [
+    {
+     "href": "/simulateur-budget",
+     "label": "Simulateur budget"
+    },
+    {
+     "href": "/comparateur-sgi",
+     "label": "Comparer les frais des SGI"
+    },
+    {
+     "href": "/actions",
+     "label": "Cours des actions en direct"
+    }
+   ],
+   "module": "Module 1 : Comprendre la Bourse BRVM",
+   "qcm": {
+    "correct": 2,
+    "explication": "50 000 FCFA permet 3 à 5 actions dans des secteurs différents et maintient les frais sous 3 % du capital. 5 000 FCFA est trop faible (frais > 10 %) ; 500 000 et 5 M correspondent à des profils confirmés.",
+    "options": [
+     "5 000 000 FCFA",
+     "500 000 FCFA",
+     "50 000 FCFA",
+     "5 000 FCFA"
+    ],
+    "question": "Avec quel budget minimum est-il recommandé de débuter à la BRVM ?"
+   },
+   "resume": "La barrière à l’entrée est surtout dans les têtes, pas dans les prix : certaines actions coûtent 1 695 FCFA, et un premier portefeuille diversifié tient dans 50 000 FCFA. On y voit les seuils, les frais réels et un portefeuille type.",
+   "sections": [
+    {
+     "contenu": "Sous 20 000 FCFA, les frais grignotent votre capital. Entre 50 000 et 500 000 FCFA, vous pouvez construire un portefeuille cohérent. Au-delà, la démarche devient plus professionnelle.\nPourquoi 50 000 FCFA ? Pas parce que les actions coûtent cher, mais parce que ce montant permet à la fois de répartir sur 3 à 5 actions et d’absorber les frais. La règle : les frais fixes ne doivent pas dépasser 2 à 3 % de votre capital de départ.\nLe mythe à casser, c’est que « la bourse, c’est pour les riches ». C’est faux : avec un salaire de fonctionnaire de l’UEMOA, un premier portefeuille se monte en 3 mois.",
+     "etapes": [],
+     "stats": [],
+     "tableau": {
+      "colonnes": [
+       "Budget",
+       "Verdict",
+       "Réalité"
+      ],
+      "lignes": [
+       [
+        "5 000 FCFA",
+        "✗ Trop faible",
+        "Frais > 10 % du capital. Aucune diversification."
+       ],
+       [
+        "20 000 FCFA",
+        "Minimal",
+        "1 action possible. Aucune marge d’erreur."
+       ],
+       [
+        "50 000 FCFA",
+        "⭐ Zone idéale",
+        "3 à 5 actions possibles. Diversification sectorielle réelle."
+       ],
+       [
+        "500 000 FCFA",
+        "✓ Confirmé",
+        "10+ actions. Large diversification."
+       ],
+       [
+        "5 000 000 FCFA",
+        "Expert",
+        "Portefeuille structuré. Gestion multi-classes."
+       ]
+      ],
+      "note": "Budget recommandé pour débuter : 50 000 FCFA. Source : BRVM, guide investisseur débutant 2026."
+     },
+     "titre": "De 5 000 à 5 M FCFA : à chaque budget, sa réalité",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le prix d’une action ne dit rien de sa qualité. UNIWAX à 1 695 FCFA n’est pas « moins bonne » que SONATEL à 17 500 FCFA : chaque secteur a sa propre dynamique. Le graphique ci-dessous donne les cours indicatifs au 17.07.2026, d’UNIWAX (textile) jusqu’à SONATEL (télécoms).",
+     "etapes": [],
+     "stats": [],
+     "titre": "Des actions dès 1 695 FCFA",
+     "type": "cas"
+    },
+    {
+     "contenu": "Voici où part votre argent :\n• Courtage de la SGI : 1 à 2 %, soit la rémunération de votre intermédiaire (environ 500 à 1 000 FCFA sur 50 000).\n• Droits de marché : 0,5 %, qui regroupent la commission BRVM (0,2 %), le dépositaire DC/BR (0,1 %) et la TVA sur les frais (environ 250 FCFA sur 50 000).\nLe point mort : votre placement devient rentable quand le cours dépasse votre prix d’achat de 2,5 %. C’est le minimum à viser avant de revendre.",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "fourchette réelle 1 000 à 1 500 FCFA selon la SGI",
+       "label": "Frais totaux moyens",
+       "valeur": "≈ 1 250 FCFA"
+      },
+      {
+       "detail": "49 000 FCFA sur un ordre de 50 000",
+       "label": "Net investi",
+       "valeur": "98 %"
+      },
+      {
+       "detail": "seuil de rentabilité au-dessus du prix d’achat",
+       "label": "Point mort",
+       "valeur": "+2,5 %"
+      }
+     ],
+     "titre": "Un ordre de 50 000 FCFA : où va vraiment votre argent ?",
+     "type": "importance"
+    },
+    {
+     "contenu": "Simulation pédagogique, aux cours du 17.07.2026 : 49 260 FCFA investis sur les 50 000 disponibles.\n• 10 actions CIE CI : 25 900 FCFA (services publics, électricité), soit 52,6 % du portefeuille.\n• 3 actions SODECI : 18 600 FCFA (services publics, eau), soit 37,8 %.\n• 2 actions TOTAL CI : 4 760 FCFA (énergie, distribution), soit 9,7 %.\nAu total : actionnaire de 3 entreprises réparties sur 3 secteurs.",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "sur 50 000 disponibles",
+       "label": "Capital investi",
+       "valeur": "49 260 FCFA"
+      },
+      {
+       "detail": "électricité · eau · énergie",
+       "label": "Diversification",
+       "valeur": "3 secteurs"
+      },
+      {
+       "detail": "soit 9,7 % de rendement",
+       "label": "Dividende estimé",
+       "valeur": "≈ 4 800 FCFA/an"
+      }
+     ],
+     "titre": "Portefeuille type : 50 000 FCFA, 3 secteurs, 15 actions",
+     "type": "cas"
+    },
+    {
+     "contenu": "Scénario A, concentré et risqué : 50 000 FCFA sur une seule action. Si elle baisse de 20 %, tout votre capital baisse avec elle : 10 000 FCFA de perte, rien pour amortir.\nScénario B, diversifié et recommandé : 30 % CIE CI, 25 % SODECI, 20 % TOTAL CI, 15 % SONATEL, 10 % UNIWAX. Une baisse de 20 % sur UNIWAX ne coûte que 1 000 FCFA, soit 2 % du portefeuille : les autres positions encaissent le choc.\nLa règle : au moins 3 valeurs dans 3 secteurs différents, même avec 50 000 FCFA.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Ne jamais mettre tous ses œufs dans le même panier",
+     "type": "piege"
+    },
+    {
+     "contenu": "1. Certaines actions sont accessibles dès 1 695 FCFA (UNIWAX CI, TOTAL CI, CIE CI, entre autres).\n2. Budget conseillé pour débuter : 50 000 FCFA, le seuil qui permet de diversifier sur 3 à 5 actions tout en absorbant les frais.\n3. Le courtage représente 1 à 2 % par ordre, auxquels s’ajoutent 0,3 % de commissions BRVM et DC/BR, plus la TVA.\n4. Jamais tout son capital sur une seule action : au moins 3 valeurs dans 3 secteurs distincts.",
+     "etapes": [],
+     "stats": [],
+     "titre": "4 vérités à garder en tête",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Combien faut-il pour investir à la BRVM ?"
+  },
+  {
+   "categorie": "income",
+   "chart": null,
+   "charts": [
+    {
+     "labels": [
+      "2019",
+      "2023"
+     ],
+     "note": "De 2 500 à 14 500 FCFA en 5 ans : ×5,8 (+460 %). 100 000 FCFA investis en 2019 valaient 580 000 FCFA fin 2023. Rappel : performance exceptionnelle, pas la norme, visez 5 à 10 % par an. Source : historique BRVM SMB CI 2019-2023.",
+     "reel": true,
+     "titre": "SMB CI : cours 2019 → 2023 (FCFA)",
+     "type": "line",
+     "unite": "FCFA",
+     "valeurs": [
+      2500,
+      14500
+     ]
+    },
+    {
+     "labels": [
+      "10 × SONATEL",
+      "50 × ECOBANK CI",
+      "100 × CIE CI"
+     ],
+     "note": "DPA 2025 : SONATEL 1 700 FCFA (rapport annuel) ; ECOBANK CI 750 FCFA et CIE CI 220 FCFA (estimations). Revenu = DPA × nombre d’actions détenues. Source : BRVM · Sonatel rapport annuel 2025.",
+     "reel": true,
+     "titre": "Revenu dividende annuel simulé (exercice 2025, FCFA)",
+     "type": "bar",
+     "unite": "FCFA",
+     "valeurs": [
+      17000,
+      37500,
+      22000
+     ]
+    }
+   ],
+   "duree_min": 10,
+   "exercice_id": null,
+   "image": {
+    "alt": "Close-up of a live cryptocurrency trading chart screen displaying dynamic market trends and analysis.",
+    "credit": "Photo : Alesia  Kozik / Pexels",
+    "url": "https://images.pexels.com/photos/6781273/pexels-photo-6781273.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "imageQuery": null,
+   "liens": [
+    {
+     "href": "/dividendes",
+     "label": "Dividendes BRVM (montants réels)"
+    },
+    {
+     "href": "/dividendes/calendrier",
+     "label": "Calendrier des dividendes"
+    },
+    {
+     "href": "/rendement-vrai",
+     "label": "Rendement réel après inflation"
+    }
+   ],
+   "module": "Module 1 : Comprendre la Bourse BRVM",
+   "qcm": {
+    "correct": 3,
+    "explication": "Investir en actions comporte un risque de perte en capital : aucun État, ni l’UEMOA, ni le CREPMF, ni la BRVM, ne garantit le capital investi. C’est votre diversification qui protège votre argent.",
+    "options": [
+     "Les dividendes versés annuellement",
+     "Les plus-values lors de la revente des actions",
+     "Les Droits Préférentiels de Souscription (DPS)",
+     "Le remboursement automatique du capital par l’État"
+    ],
+    "question": "Parmi ces gains, lequel n’existe PAS à la BRVM ?"
+   },
+   "resume": "Dividendes, plus-values, DPS : les trois moteurs du rendement. La plupart des débutants ne pensent qu’à la plus-value ; en tenant compte des trois, vous ouvrez de nouvelles stratégies.",
+   "sections": [
+    {
+     "contenu": "1. Le dividende, un revenu passif : chaque année, l’entreprise reverse une partie de ses bénéfices à ses actionnaires. C’est automatique, vous n’avez rien à faire. Exemple : SONATEL verse un dividende sans interruption depuis 1998.\n2. La plus-value, le gain à la revente : acheter à 5 000 et revendre à 8 000 rapporte 3 000 FCFA. Le potentiel est plus élevé, mais moins prévisible. Exemple : SMB CI est passée de 2 500 à 14 500 FCFA entre 2019 et 2023 (+460 %).\n3. Les DPS (Droits Préférentiels de Souscription) : lors d’une augmentation de capital, la priorité donnée aux actionnaires en place pour souscrire à prix réduit. Ce que peu de gens savent : les DPS se revendent sur le marché.\nEn combinant ces trois sources, un petit capital peut produire un revenu réel, sans jamais vendre une seule action.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Trois moteurs, un même véhicule",
+     "type": "definition"
+    },
+    {
+     "contenu": "Trois profils types, avec pour chacun une répartition différente entre dividendes (stables) et plus-values (potentielles). Ces allocations sont pédagogiques et seulement indicatives.",
+     "etapes": [],
+     "stats": [],
+     "tableau": {
+      "colonnes": [
+       "Profil",
+       "Qui",
+       "Allocation",
+       "Valeurs typiques"
+      ],
+      "lignes": [
+       [
+        "Income (prudent)",
+        "Retraité · > 55 ans · horizon court",
+        "80 % div. / 20 % PV",
+        "SONATEL · SIB CI · CIE CI · SODECI, payeuses régulières"
+       ],
+       [
+        "Équilibré ⭐",
+        "Salarié · 30-50 ans · horizon 10 ans",
+        "50 % div. / 50 % PV",
+        "50 % rentiers (SONATEL, CIE) · 50 % croissance (SMB, ECOBANK)"
+       ],
+       [
+        "Growth (dynamique)",
+        "Jeune actif · < 35 ans · horizon 15+ ans",
+        "30 % div. / 70 % PV",
+        "SMB CI · SAPH CI · valeurs de croissance industrielles/agro"
+       ]
+      ],
+      "note": "Objectifs : Income = revenu récurrent, faible volatilité · Équilibré = patrimoine progressif · Growth = capitalisation forte long terme."
+     },
+     "titre": "Votre âge et votre horizon dictent votre stratégie",
+     "type": "importance"
+    },
+    {
+     "contenu": "La formule est simple : dividende par action (DPA) multiplié par le nombre d’actions détenues égale votre revenu annuel. Par exemple, 1 000 FCFA × 300 actions donnent 300 000 FCFA par an. C’est prévisible, annuel et calculable au FCFA près, ce qui en fait la source de revenu la plus stable. Le graphique ci-dessous en donne trois simulations sur les dividendes 2025.",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "net par action, rapport annuel",
+       "label": "DPA (ex. Sonatel 2025)",
+       "valeur": "1 700 FCFA"
+      },
+      {
+       "detail": "portefeuille exemple",
+       "label": "× actions détenues",
+       "valeur": "300"
+      },
+      {
+       "detail": "avec un DPA de 1 000 FCFA",
+       "label": "= revenu annuel",
+       "valeur": "300 000 FCFA"
+      }
+     ],
+     "titre": "Le dividende, c’est une multiplication",
+     "type": "importance"
+    },
+    {
+     "contenu": "M. Konaté, cadre bancaire à Abidjan, a acheté 200 actions SONATEL à 14 000 FCFA en 2015, soit 2 800 000 FCFA investis. En 2023, le cours atteint 17 000 FCFA.\nCe que montre ce cas : sur cette période, les dividendes lui ont rapporté environ six fois plus que la plus-value. En gardant un titre longtemps, même une valeur tranquille finit par produire un revenu important. (Simulation sur l’historique SONATEL 2015-2023.)",
+     "etapes": [],
+     "stats": [
+      {
+       "detail": "200 × (17 000 − 14 000) · soit +21,4 %",
+       "label": "Plus-value latente",
+       "valeur": "+600 000 FCFA"
+      },
+      {
+       "detail": "≈ 18 000 FCFA/action × 200 · soit +128,6 %",
+       "label": "Dividendes cumulés 8 ans",
+       "valeur": "+3 600 000 FCFA"
+      },
+      {
+       "detail": "4,2 M FCFA de gains sur 2,8 M investis",
+       "label": "Rendement total",
+       "valeur": "+150 %"
+      }
+     ],
+     "titre": "Cas réel, M. Konaté : +150 % en 8 ans sur SONATEL",
+     "type": "cas"
+    },
+    {
+     "contenu": "Quand une entreprise cotée lève de nouveaux fonds, ses actionnaires reçoivent des DPS. Vous avez alors trois choix :\n• Option A, exercer vos DPS : souscrire aux nouvelles actions à prix réduit (souvent 15 à 25 % sous le cours). Effet : vous renforcez votre participation.\n• Option B, revendre vos DPS sur le marché (l’option la plus maligne) : les DPS se négocient eux-mêmes à la BRVM. Effet : de l’argent tout de suite, sans rien débourser, et votre participation ne bouge pas.\n• Option C, ne rien faire (à éviter) : les DPS ont une durée de vie limitée et finissent par expirer sans valeur. Effet : vous perdez de l’argent, tout simplement.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Une augmentation de capital : 3 options pour vous",
+     "type": "importance"
+    },
+    {
+     "contenu": "Vendre juste avant la date de détachement revient à renoncer au dividende. Notez ces cinq dates, que la BRVM publie à l’avance.\nAutre point : les +460 % de SMB CI en 5 ans restent un cas exceptionnel, pas la norme. Visez plutôt 5 à 10 % par an.",
+     "etapes": [
+      {
+       "cle": false,
+       "detail": "L’entreprise dévoile ses bénéfices de l’exercice écoulé.",
+       "titre": "Février → avril, Publication des résultats annuels"
+      },
+      {
+       "cle": false,
+       "detail": "Le Conseil d’Administration propose un montant à distribuer.",
+       "titre": "Mars → mai, Proposition de dividende par le CA"
+      },
+      {
+       "cle": false,
+       "detail": "Les actionnaires approuvent (ou modifient) le montant.",
+       "titre": "Mars → juin, Vote en Assemblée Générale"
+      },
+      {
+       "cle": true,
+       "detail": "Vous devez détenir l’action AVANT cette date pour recevoir le dividende.",
+       "titre": "Détachement du dividende, LA date clé"
+      },
+      {
+       "cle": false,
+       "detail": "Votre SGI crédite les FCFA sur votre compte-titres.",
+       "titre": "J+15 → J+30, Mise en paiement"
+      }
+     ],
+     "stats": [],
+     "titre": "Le calendrier du dividende : 5 dates à connaître",
+     "type": "piege"
+    },
+    {
+     "contenu": "1. Il existe trois sources de revenu : les dividendes (passifs, annuels), les plus-values (à la revente) et les DPS (lors des augmentations de capital).\n2. Les dividendes sont la source la plus stable, prévisibles et calculables ; SONATEL en verse sans interruption depuis 1998.\n3. Les plus-values sont plus élevées mais moins sûres : visez 5 à 10 % par an.\n4. Les DPS se revendent : ne les laissez jamais expirer. Soit vous les exercez, soit vous les revendez, mais ne les gaspillez pas.\nVous êtes prêt : vérifiez la liste des SGI agréées sur crepmf.org, ouvrez un compte-titres, choisissez votre profil (Income, Équilibré ou Growth) et construisez un portefeuille diversifié dès 50 000 FCFA, sur au moins 3 secteurs.",
+     "etapes": [],
+     "stats": [],
+     "titre": "Ce qu’il faut emporter avec vous",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Les 3 façons de gagner à la BRVM"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "income",
+   "charts": [],
+   "duree_min": 9,
+   "image": {
+    "alt": "Hands carefully holding a stack of US dollar bills, representing finance and currency.",
+    "credit": "Photo : www.kaboompics.com / Pexels",
+    "url": "https://images.pexels.com/photos/7680623/pexels-photo-7680623.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/dividendes",
+     "label": "Espace dividendes"
+    }
+   ],
+   "module": "Module 2 — Dividendes et investissement pratique",
+   "qcm": {
+    "correct": 2,
+    "explication": "Le réinvestissement des dividendes crée l'effet boule de neige. Les nouvelles actions achetées génèrent leurs propres dividendes l'année suivante, qui permettent d'acheter encore plus d'actions.",
+    "options": [
+     "Vendre ses actions dès réception du dividende",
+     "Placer les dividendes sur un compte bancaire",
+     "Réinvestir les dividendes en achetant de nouvelles actions",
+     "Attendre 5 ans avant de toucher à son portefeuille"
+    ],
+    "question": "Quelle stratégie amplifie vos dividendes par effet boule de neige ?"
+   },
+   "quiz": [
+    {
+     "correct": 2,
+     "explication": "Revenu brut = nombre d’actions × dividende par action : 200 × 1 500 = 300 000 FCFA.",
+     "options": [
+      "30 000 FCFA",
+      "150 000 FCFA",
+      "300 000 FCFA",
+      "3 000 000 FCFA"
+     ],
+     "question": "Vous détenez 200 actions et la société verse 1 500 FCFA par action. Quel est votre revenu brut ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Rendement = dividende ÷ cours × 100 : 1 200 ÷ 20 000 × 100 = 6 %.",
+     "options": [
+      "1,2 %",
+      "6 %",
+      "12 %",
+      "16,7 %"
+     ],
+     "question": "Une action cote 20 000 FCFA et verse un dividende annuel de 1 200 FCFA. Quel est son rendement ?"
+    },
+    {
+     "correct": 2,
+     "explication": "Les actions achetées avec le dividende rapportent à leur tour un dividende l’année suivante, qui permet d’en acheter davantage.",
+     "options": [
+      "Vendre ses actions dès réception du dividende",
+      "Placer les dividendes sur un compte bancaire",
+      "Réinvestir les dividendes en achetant de nouvelles actions",
+      "Attendre 5 ans avant de toucher à son portefeuille"
+     ],
+     "question": "Quelle stratégie amplifie vos dividendes par effet boule de neige ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Il faut détenir l’action la veille du détachement. Acheter le jour du détachement ou après ne donne pas droit au dividende en cours.",
+     "options": [
+      "Le jour du paiement",
+      "La veille de la date de détachement",
+      "Le jour de l’assemblée générale",
+      "Un an avant le paiement"
+     ],
+     "question": "Pour percevoir le prochain dividende, jusqu’à quand faut-il détenir l’action ?"
+    },
+    {
+     "correct": 2,
+     "explication": "Un rendement très élevé est un signal à vérifier, pas une garantie : il peut venir d’un cours qui a chuté, ou d’un dividende que le marché juge intenable.",
+     "options": [
+      "C’est forcément un excellent placement",
+      "Le dividende va augmenter l’an prochain",
+      "Il faut vérifier : un cours en chute ou un dividende menacé peuvent expliquer ce chiffre",
+      "La société est sûrement la plus rentable du marché"
+     ],
+     "question": "Une action affiche un rendement de 15 %, bien au-dessus des autres. Que peut-on en conclure ?"
+    },
+    {
+     "correct": 2,
+     "explication": "Capital = revenu visé ÷ rendement : 600 000 ÷ 8 % = 7 500 000 FCFA. À 6 %, il en faudrait 10 000 000.",
+     "options": [
+      "48 000 FCFA",
+      "4 800 000 FCFA",
+      "7 500 000 FCFA",
+      "10 000 000 FCFA"
+     ],
+     "question": "Quel capital faut-il pour viser 600 000 FCFA de dividendes bruts par an, à 8 % de rendement hypothétique ?"
+    }
+   ],
+   "resume": "Un dividende est la part du bénéfice qu’une société cotée verse à ses actionnaires.\nBien compris, il peut devenir une source de revenus régulière — à condition de savoir le calculer, le lire et en mesurer les limites.",
+   "sections": [
+    {
+     "contenu": "Quand une société réalise un bénéfice, son assemblée générale décide d’en verser une partie aux actionnaires : c’est le dividende.\nLe reste est conservé pour financer l’activité. Une société bénéficiaire peut aussi choisir de ne rien distribuer.",
+     "flux": [
+      {
+       "detail": "Réalise un bénéfice sur l’exercice.",
+       "icone": "entreprise",
+       "titre": "Entreprise"
+      },
+      {
+       "detail": "La part qui peut être versée.",
+       "icone": "benefices",
+       "titre": "Bénéfice distribuable"
+      },
+      {
+       "detail": "Votée en assemblée générale.",
+       "icone": "decision",
+       "titre": "Décision de distribution"
+      },
+      {
+       "detail": "Reçoivent le dividende, par action détenue.",
+       "icone": "actionnaires",
+       "titre": "Actionnaires"
+      }
+     ],
+     "formules": [
+      {
+       "exemple": "300 × 1 000 FCFA = 300 000 FCFA",
+       "expression": "Nombre d’actions × Dividende par action",
+       "nom": "Revenu brut"
+      },
+      {
+       "exemple": "1 000 ÷ 10 000 × 100 = 10 %",
+       "expression": "Dividende annuel par action ÷ Cours de l’action × 100",
+       "nom": "Rendement du dividende"
+      }
+     ],
+     "titre": "Comprendre le dividende",
+     "type": "definition"
+    },
+    {
+     "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques : ils ne décrivent aucune société cotée.\nLe tableau qui suit applique le même calcul à quatre valeurs de la BRVM : dernier dividende enregistré, cours de la dernière séance, rendement, et revenu pour 300 actions.",
+     "donnees_reelles": {
+      "actions": 300,
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SGBC",
+       "SDCC"
+      ],
+      "vue": "rendement"
+     },
+     "stats": [
+      {
+       "label": "Actions détenues",
+       "valeur": "300"
+      },
+      {
+       "label": "Dividende par action",
+       "valeur": "1 000 FCFA"
+      },
+      {
+       "label": "Revenu brut annuel",
+       "valeur": "300 000 FCFA"
+      },
+      {
+       "detail": "au cours de 10 000 FCFA",
+       "label": "Rendement brut",
+       "valeur": "10 %"
+      }
+     ],
+     "titre": "Un exemple chiffré",
+     "type": "cas"
+    },
+    {
+     "contenu": "Plutôt que de dépenser le dividende, on peut s’en servir pour acheter de nouvelles actions. L’année suivante, ces actions rapportent à leur tour un dividende.\nAnnée 1 : 300 actions × 1 000 FCFA = 300 000 FCFA, réinvestis à 10 000 FCFA l’action, soit 30 actions de plus. Année 2 : 330 actions × 1 050 FCFA = 346 500 FCFA.\nLe graphique compare ce choix avec des dividendes conservés en espèces, sous les hypothèses écrites dessous.",
+     "simulation": {
+      "actions": 300,
+      "annees": 6,
+      "cours": 10000,
+      "croissance_pct": 5,
+      "dpa": 1000,
+      "type": "reinvestissement"
+     },
+     "titre": "Réinvestir ses dividendes",
+     "type": "cas"
+    },
+    {
+     "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger.\nCommencez par la régularité : le tableau montre les dividendes de quatre valeurs de la BRVM sur cinq exercices. Repérez celles qui progressent et celles qui ont connu une baisse.",
+     "donnees_reelles": {
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SGBC",
+       "SPHC"
+      ],
+      "vue": "historique"
+     },
+     "points": [
+      {
+       "detail": "Une société qui verse chaque année, sans interruption, inspire plus de confiance qu’une distribution exceptionnelle.",
+       "titre": "Régularité des distributions",
+       "verifier": "les dividendes versés sur au moins cinq exercices."
+      },
+      {
+       "detail": "Le dividende est payé par le bénéfice. Un bénéfice qui recule finit par peser sur la distribution.",
+       "titre": "Capacité bénéficiaire",
+       "verifier": "l’évolution du résultat net sur plusieurs années."
+      },
+      {
+       "detail": "C’est la part du bénéfice versée aux actionnaires. Proche ou au-delà de 100 %, la société distribue plus qu’elle ne gagne.",
+       "titre": "Taux de distribution",
+       "verifier": "dividendes totaux ÷ résultat net."
+      },
+      {
+       "detail": "Le rendement dépend du prix payé : le même dividende rapporte moins si l’action a été achetée plus cher.",
+       "titre": "Rendement au cours de référence",
+       "verifier": "le rendement au cours du jour, et non au cours d’il y a un an."
+      },
+      {
+       "detail": "Un rendement très élevé peut traduire une action dont le cours a chuté, parce que le marché doute de la suite.",
+       "titre": "Valorisation et risques",
+       "verifier": "le PER, l’endettement et l’actualité de la société."
+      }
+     ],
+     "titre": "Analyser une action à dividendes",
+     "type": "importance"
+    },
+    {
+     "contenu": "Trois dates encadrent chaque dividende. Pour l’investisseur, la plus importante est la date de détachement.\nIl faut détenir l’action la veille du détachement pour percevoir le dividende. Acheter le jour du détachement ou après ne donne pas droit au dividende en cours : il revient au vendeur.",
+     "etapes": [
+      {
+       "detail": "L’assemblée générale approuve le montant du dividende.",
+       "titre": "Décision de distribution"
+      },
+      {
+       "cle": true,
+       "detail": "Seuls les détenteurs de la veille y ont droit ; le cours est ajusté du dividende.",
+       "titre": "Date de détachement"
+      },
+      {
+       "detail": "Le dividende est versé sur le compte titres, par l’intermédiaire de la SGI.",
+       "titre": "Date de paiement"
+      }
+     ],
+     "etapes_style": "frise",
+     "titre": "Les dates qui comptent",
+     "type": "importance"
+    },
+    {
+     "contenu": "Cinq erreurs reviennent souvent chez les investisseurs qui découvrent les dividendes.",
+     "points": [
+      {
+       "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou du cours.",
+       "titre": "Choisir sur le seul rendement"
+      },
+      {
+       "detail": "Au détachement, le cours est ajusté du dividende : le gain n’est pas gratuit.",
+       "titre": "Acheter juste avant le détachement pour « toucher » le dividende"
+      },
+      {
+       "detail": "Le dividende est versé après retenue à la source, et chaque ordre coûte des frais de courtage.",
+       "titre": "Oublier les impôts et les frais"
+      },
+      {
+       "detail": "Il est voté chaque année : il peut baisser, ou disparaître.",
+       "titre": "Supposer que le dividende se répétera"
+      },
+      {
+       "detail": "Une société, un secteur ou un pays peut traverser une mauvaise année. Répartir réduit ce risque.",
+       "titre": "Tout miser sur une seule valeur"
+      }
+     ],
+     "titre": "Les erreurs à éviter",
+     "type": "piege"
+    },
+    {
+     "contenu": "Pour viser un revenu annuel, on divise ce revenu par le rendement espéré : on obtient le capital à investir.\nPour 600 000 FCFA de dividendes bruts par an, il faut 10 000 000 FCFA à 6 % de rendement, et 7 500 000 FCFA à 8 %. Ces rendements sont des hypothèses, pas des promesses.",
+     "formules": [
+      {
+       "exemple": "600 000 ÷ 6 % = 10 000 000 FCFA",
+       "expression": "Revenu annuel visé ÷ Rendement",
+       "nom": "Capital nécessaire"
+      }
+     ],
+     "simulation": {
+      "rendements_pct": [
+       6,
+       8
+      ],
+      "revenu_cible": 600000,
+      "type": "objectif"
+     },
+     "titre": "Calculer un objectif de revenus",
+     "type": "cas"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "Voté chaque année, il n’est jamais garanti.",
+       "titre": "Le dividende est une part du bénéfice"
+      },
+      {
+       "detail": "300 actions × 1 000 FCFA = 300 000 FCFA bruts.",
+       "titre": "Revenu = actions × dividende par action"
+      },
+      {
+       "detail": "Il dépend du prix payé pour l’action.",
+       "titre": "Rendement = dividende ÷ cours × 100"
+      },
+      {
+       "detail": "Les actions achetées produisent à leur tour un dividende.",
+       "titre": "Réinvestir accroît les revenus futurs"
+      },
+      {
+       "detail": "Il faut détenir l’action la veille de la date de détachement.",
+       "titre": "Le détachement décide du droit au dividende"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Comprendre le mécanisme, calculer son rendement et mesurer l’effet du réinvestissement.",
+   "titre": "Leçon 5 — Les dividendes : construire un revenu passif grâce à la BRVM"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [],
+   "duree_min": 7,
+   "image": {
+    "alt": "A close-up image of stacked coins with a blurred clock, symbolizing time and money relationship.",
+    "credit": "Photo : Pixabay / Pexels",
+    "url": "https://images.pexels.com/photos/128867/coins-currency-investment-insurance-128867.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/liquidite",
+     "label": "Classement de liquidité"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Espace dividendes"
+    }
+   ],
+   "module": "Module 2 — Dividendes et investissement pratique",
+   "qcm": {
+    "correct": 2,
+    "explication": "L’épargne d’urgence doit rester disponible. Vendre en urgence pendant une baisse transforme une baisse temporaire en perte définitive.",
+    "options": [
+     "Car les dividendes sont imposés",
+     "Car la bourse n’est accessible qu’aux résidents ivoiriens",
+     "Car on peut avoir besoin de cet argent rapidement et devoir vendre pendant une baisse",
+     "Car les SGI refusent les petits montants"
+    ],
+    "question": "Pourquoi ne pas investir son épargne d’urgence en bourse ?"
+   },
+   "quiz": [
+    {
+     "correct": 2,
+     "explication": "L’épargne d’urgence doit rester disponible. Vendre en urgence pendant une baisse transforme une baisse temporaire en perte définitive.",
+     "options": [
+      "Car les dividendes sont imposés",
+      "Car la bourse n’est accessible qu’aux résidents ivoiriens",
+      "Car on peut avoir besoin de cet argent rapidement et devoir vendre pendant une baisse",
+      "Car les SGI refusent les petits montants"
+     ],
+     "question": "Pourquoi ne pas investir son épargne d’urgence en bourse ?"
+    },
+    {
+     "correct": 2,
+     "explication": "Chaque société apporte un cinquième du revenu, soit 20 %. Elle en perd la moitié : le revenu total baisse de 10 %.",
+     "options": [
+      "−50 %",
+      "−20 %",
+      "−10 %",
+      "−5 %"
+     ],
+     "question": "Votre revenu de dividendes vient à parts égales de cinq sociétés. L’une divise son dividende par deux. De combien baisse votre revenu ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Répartir son capital limite l’effet d’un problème propre à une société. Une baisse générale du marché, elle, touche toutes les valeurs.",
+     "options": [
+      "Le risque de marché",
+      "Le risque spécifique à une entreprise",
+      "Le risque de change",
+      "Tous les risques à la fois"
+     ],
+     "question": "Quel risque la diversification réduit-elle le mieux ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Sur une valeur peu échangée, il peut manquer d’acheteurs : vendre vite oblige alors à accepter un prix plus bas.",
+     "options": [
+      "La perte de valeur due à l’inflation",
+      "La difficulté à vendre rapidement sans faire baisser le prix",
+      "La faillite d’une société cotée",
+      "La variation du franc CFA"
+     ],
+     "question": "Qu’appelle-t-on le risque de liquidité ?"
+    },
+    {
+     "correct": 1,
+     "explication": "200 000 FCFA × 6 mois = 1 200 000 FCFA, à garder disponibles avant d’investir en bourse.",
+     "options": [
+      "600 000 FCFA",
+      "1 200 000 FCFA",
+      "2 000 000 FCFA",
+      "200 000 FCFA"
+     ],
+     "question": "Vos charges mensuelles sont de 200 000 FCFA. Quelle épargne de précaution sur six mois ?"
+    }
+   ],
+   "resume": "Investir en bourse, c’est accepter un risque de perte. Bien compris, ce risque se mesure et se réduit.\nCette leçon présente les trois risques principaux et les trois protections de l’investisseur : diversifier, voir loin, se former.",
+   "sections": [
+    {
+     "contenu": "Un bon investisseur ne fuit pas le risque : il le connaît et le limite.\nTrois risques reviennent sur tout marché d’actions, et la BRVM ne fait pas exception.",
+     "points": [
+      {
+       "detail": "Une baisse générale, due à une crise économique ou à un choc extérieur. Elle touche presque toutes les actions en même temps.",
+       "titre": "Le risque de marché",
+       "verifier": "comment votre portefeuille réagirait si tout le marché baissait de 20 %."
+      },
+      {
+       "detail": "Un problème propre à une société : résultats en recul, mauvaise gestion, perte d’un marché. Il ne touche qu’une valeur.",
+       "titre": "Le risque spécifique",
+       "verifier": "la part de votre capital placée sur une seule société."
+      },
+      {
+       "detail": "La difficulté à vendre vite sans faire baisser le prix. Sur la BRVM, certaines valeurs s’échangent peu.",
+       "titre": "Le risque de liquidité",
+       "verifier": "les volumes échangés de la valeur avant d’acheter."
+      }
+     ],
+     "titre": "Trois risques à connaître",
+     "type": "definition"
+    },
+    {
+     "contenu": "Un dividende n’est jamais acquis. Il dépend chaque année des résultats et de la décision des actionnaires.\nLe tableau suit quatre valeurs de la BRVM sur cinq exercices : l’une progresse régulièrement, d’autres ont fortement réduit leur distribution.",
+     "donnees_reelles": {
+      "codes": [
+       "SNTS",
+       "PALC",
+       "NTLC",
+       "SPHC"
+      ],
+      "vue": "historique"
+     },
+     "reel": true,
+     "titre": "Quand le dividende baisse : des cas réels",
+     "type": "cas"
+    },
+    {
+     "contenu": "On ne supprime pas le risque, on le répartit et on lui laisse du temps.",
+     "points": [
+      {
+       "detail": "Répartir son capital sur plusieurs sociétés et plusieurs secteurs : banques, télécoms, agro-industrie, distribution. Une mauvaise année sur une valeur pèse alors peu.",
+       "titre": "Diversifier",
+       "verifier": "qu’aucune valeur ne dépasse une part importante de votre portefeuille."
+      },
+      {
+       "detail": "N’investir que l’argent dont vous n’aurez pas besoin avant plusieurs années. À court terme, les cours sont imprévisibles.",
+       "titre": "Voir loin",
+       "verifier": "la date à laquelle vous pourriez avoir besoin de ces fonds."
+      },
+      {
+       "detail": "Un investisseur informé lit les résultats, repère plus tôt les signaux d’alerte et panique moins lors des baisses.",
+       "titre": "Se former",
+       "verifier": "les dernières publications de chaque société détenue."
+      }
+     ],
+     "titre": "Trois protections",
+     "type": "importance"
+    },
+    {
+     "contenu": "Prenons 1 000 000 FCFA placés à 8 % de rendement, soit 80 000 FCFA de dividendes par an. Une des sociétés divise son dividende par deux.\nSur une seule valeur, le revenu chute de moitié. Réparti sur cinq valeurs égales, il ne baisse que d’un dixième.",
+     "tableau": {
+      "colonnes": [
+       "Portefeuille",
+       "Revenu avant",
+       "Revenu après",
+       "Variation"
+      ],
+      "lignes": [
+       [
+        "Une seule valeur",
+        "80 000 FCFA",
+        "40 000 FCFA",
+        "−50 %"
+       ],
+       [
+        "Cinq valeurs égales",
+        "80 000 FCFA",
+        "72 000 FCFA",
+        "−10 %"
+       ]
+      ],
+      "note": "Exemple pédagogique : 1 000 000 FCFA à 8 % de rendement ; une société sur cinq divise son dividende par deux."
+     },
+     "titre": "Diversifier : l’effet d’une mauvaise nouvelle",
+     "type": "cas"
+    },
+    {
+     "contenu": "Avant d’acheter une action, mettez de côté de quoi faire face à un imprévu : santé, loyer, scolarité.\nCette épargne reste sur un compte disponible. Elle vous évite de vendre vos actions au mauvais moment.",
+     "formules": [
+      {
+       "exemple": "250 000 FCFA × 6 = 1 500 000 FCFA",
+       "expression": "Charges mensuelles × 3 à 6 mois",
+       "nom": "Épargne de précaution"
+      }
+     ],
+     "titre": "D’abord, une épargne de précaution",
+     "type": "importance"
+    },
+    {
+     "contenu": "La plupart des pertes réelles viennent de quelques erreurs, toujours les mêmes.",
+     "points": [
+      {
+       "detail": "Si un imprévu oblige à vendre pendant une baisse, la perte devient définitive.",
+       "titre": "Investir son épargne d’urgence"
+      },
+      {
+       "detail": "Une baisse temporaire ne devient une perte que si l’on vend. Revenez aux fondamentaux de la société avant de décider.",
+       "titre": "Vendre dans la panique"
+      },
+      {
+       "detail": "Une seule mauvaise nouvelle suffit alors à faire chuter tout le portefeuille.",
+       "titre": "Tout concentrer sur une valeur"
+      },
+      {
+       "detail": "Sur une valeur peu échangée, un ordre passé sans limite de prix peut s’exécuter loin du dernier cours.",
+       "titre": "Ignorer la liquidité"
+      }
+     ],
+     "titre": "Les erreurs qui coûtent cher",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "Chacun appelle une réponse différente.",
+       "titre": "Trois risques : marché, spécifique, liquidité"
+      },
+      {
+       "detail": "Elle ne protège pas d’une baisse générale du marché.",
+       "titre": "La diversification réduit le risque spécifique"
+      },
+      {
+       "detail": "Les cas réels de la BRVM le montrent : rien n’est acquis.",
+       "titre": "Un dividende peut baisser"
+      },
+      {
+       "detail": "Trois à six mois de charges, disponibles à tout moment.",
+       "titre": "L’épargne de précaution passe avant la bourse"
+      },
+      {
+       "detail": "Investir à long terme, c’est accepter les creux.",
+       "titre": "La panique transforme une baisse en perte"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Identifier les risques d’un placement en actions, et les trois protections qui les réduisent.",
+   "titre": "Leçon 6 — Les risques : apprendre avant d'investir"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "income",
+   "charts": [],
+   "duree_min": 7,
+   "image": {
+    "alt": "Mobile screen displaying stock market analysis with financial charts in the background.",
+    "credit": "Photo : StockRadars Co., / Pexels",
+    "url": "https://images.pexels.com/photos/28682356/pexels-photo-28682356.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/simulateur-budget",
+     "label": "Simulateur de budget"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Espace dividendes"
+    }
+   ],
+   "module": "Module 2 — Dividendes et investissement pratique",
+   "qcm": {
+    "correct": 1,
+    "explication": "(200 × 1 200) + (100 × 400) = 240 000 + 40 000 = 280 000 FCFA.",
+    "options": [
+     "160 000 FCFA",
+     "280 000 FCFA",
+     "320 000 FCFA",
+     "1 600 FCFA"
+    ],
+    "question": "Vous détenez 200 actions versant 1 200 FCFA et 100 actions versant 400 FCFA. Quel est votre revenu annuel de dividendes ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "(200 × 1 200) + (100 × 400) = 240 000 + 40 000 = 280 000 FCFA.",
+     "options": [
+      "160 000 FCFA",
+      "280 000 FCFA",
+      "320 000 FCFA",
+      "1 600 FCFA"
+     ],
+     "question": "Vous détenez 200 actions versant 1 200 FCFA et 100 actions versant 400 FCFA. Quel est votre revenu annuel de dividendes ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Capital = revenu visé ÷ rendement : 1 000 000 ÷ 8 % = 12 500 000 FCFA.",
+     "options": [
+      "8 000 000 FCFA",
+      "12 500 000 FCFA",
+      "80 000 FCFA",
+      "125 000 000 FCFA"
+     ],
+     "question": "Quel capital faut-il pour recevoir 1 000 000 FCFA par an, à 8 % de rendement hypothétique ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Près de l’échéance, on ne peut plus attendre qu’un cours remonte : sécuriser progressivement évite de vendre au plus bas.",
+     "options": [
+      "Parce que les dividendes cessent avant l’échéance",
+      "Pour ne pas devoir vendre pendant une baisse au moment où l’argent est nécessaire",
+      "Parce que les SGI ferment les comptes des parents",
+      "Pour payer moins de frais de courtage"
+     ],
+     "question": "Pourquoi réduire la part en actions quelques années avant les études ?"
+    },
+    {
+     "correct": 1,
+     "explication": "1 000 × 1,10 ^ 10 ≈ 2 594 FCFA : les gains de chaque année produisent à leur tour des gains.",
+     "options": [
+      "2 000 FCFA",
+      "2 594 FCFA",
+      "1 100 FCFA",
+      "10 000 FCFA"
+     ],
+     "question": "1 000 FCFA placés à 10 % par an pendant 10 ans deviennent environ :"
+    },
+    {
+     "correct": 1,
+     "explication": "Chaque dividende réinvesti achète de nouvelles actions, qui rapportent à leur tour : le revenu grandit d’année en année.",
+     "options": [
+      "À payer les frais de scolarité chaque année",
+      "À augmenter le nombre d’actions, donc les dividendes futurs",
+      "À éviter tout risque de baisse",
+      "À garantir le rendement"
+     ],
+     "question": "Dans ce projet, à quoi sert le réinvestissement des dividendes ?"
+    }
+   ],
+   "resume": "Les études supérieures se préparent des années à l’avance : c’est un objectif idéal pour un placement de long terme.\nCette leçon chiffre honnêtement ce qu’un capital de départ peut produire, et ce qu’il ne suffit pas à financer seul.",
+   "sections": [
+    {
+     "contenu": "Vous savez aujourd’hui que, dans 10 ou 15 ans, il faudra payer des études. C’est le profil d’un objectif de long terme.\nLe principe : investir tôt, réinvestir les dividendes, et laisser le nombre d’actions grandir jusqu’à l’échéance.",
+     "flux": [
+      {
+       "detail": "Un budget et une année d’entrée en études.",
+       "icone": "calendrier",
+       "titre": "Objectif daté"
+      },
+      {
+       "detail": "Un premier achat, puis des versements réguliers.",
+       "icone": "piece",
+       "titre": "Capital investi"
+      },
+      {
+       "detail": "Ils achètent de nouvelles actions chaque année.",
+       "icone": "graphique",
+       "titre": "Dividendes réinvestis"
+      },
+      {
+       "detail": "Les dividendes et le capital financent les études.",
+       "icone": "paiement",
+       "titre": "Revenu à l’échéance"
+      }
+     ],
+     "titre": "Un objectif connu à l’avance",
+     "type": "definition"
+    },
+    {
+     "contenu": "Hypothèse pédagogique : 200 000 FCFA placés dans une action à 5 000 FCFA, soit 40 actions, versant 400 FCFA par action (8 % de rendement).\nAvec les dividendes réinvestis pendant dix ans, le revenu annuel progresse nettement. Il reste pourtant loin d’une année d’études : un capital de départ seul ne suffit pas.",
+     "simulation": {
+      "actions": 40,
+      "annees": 10,
+      "cours": 5000,
+      "croissance_pct": 5,
+      "dpa": 400,
+      "type": "reinvestissement"
+     },
+     "titre": "Ce que 200 000 FCFA peuvent produire",
+     "type": "cas"
+    },
+    {
+     "contenu": "Pour qu’un portefeuille verse 1 000 000 FCFA par an, montant pris comme hypothèse pour une année d’études, il faut diviser ce revenu par le rendement.\nLe résultat montre pourquoi l’épargne régulière et le temps font l’essentiel du travail.",
+     "formules": [
+      {
+       "exemple": "1 000 000 ÷ 8 % = 12 500 000 FCFA",
+       "expression": "Revenu annuel visé ÷ Rendement",
+       "nom": "Capital nécessaire"
+      }
+     ],
+     "simulation": {
+      "rendements_pct": [
+       6,
+       8,
+       10
+      ],
+      "revenu_cible": 1000000,
+      "type": "objectif"
+     },
+     "titre": "Le capital nécessaire, sans détour",
+     "type": "cas"
+    },
+    {
+     "contenu": "Les mêmes calculs s’appliquent aux valeurs cotées. Le tableau montre, pour quatre sociétés, le dernier dividende enregistré, le cours de la dernière séance et le revenu de 100 actions.",
+     "donnees_reelles": {
+      "actions": 100,
+      "codes": [
+       "SNTS",
+       "SIBC",
+       "ORAC",
+       "BOAB"
+      ],
+      "vue": "rendement"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : ce que rapportent 100 actions",
+     "type": "cas"
+    },
+    {
+     "contenu": "Un objectif daté se prépare comme un projet : chaque étape a son moment.",
+     "etapes": [
+      {
+       "detail": "Combien, et pour quelle rentrée.",
+       "titre": "Fixer le budget et la date"
+      },
+      {
+       "detail": "Auprès d’une SGI agréée.",
+       "titre": "Ouvrir un compte titres"
+      },
+      {
+       "cle": true,
+       "detail": "Chaque mois ou chaque trimestre, même un petit montant.",
+       "titre": "Investir régulièrement"
+      },
+      {
+       "detail": "Jusqu’à quelques années de l’échéance.",
+       "titre": "Réinvestir les dividendes"
+      },
+      {
+       "detail": "Réduire la part en actions deux à trois ans avant les études.",
+       "titre": "Sécuriser avant l’échéance"
+      }
+     ],
+     "etapes_style": "frise",
+     "titre": "Un plan en cinq étapes",
+     "type": "importance"
+    },
+    {
+     "contenu": "Le temps est l’allié de ce projet : chaque année perdue réduit l’effet du réinvestissement.",
+     "formules": [
+      {
+       "exemple": "1 000 × 1,10 ^ 10 ≈ 2 594 FCFA",
+       "expression": "Montant × (1 + taux) ^ années",
+       "nom": "Valeur future d’un montant placé"
+      }
+     ],
+     "points": [
+      {
+       "detail": "Il n’existe pas. Commencer tôt, même petit, compte davantage que choisir le bon jour.",
+       "titre": "Attendre le moment parfait"
+      },
+      {
+       "detail": "Un dividende peut baisser. Construisez votre plan sur une hypothèse prudente.",
+       "titre": "Surestimer le rendement"
+      },
+      {
+       "detail": "Un projet de dix ans traversera de mauvaises années : répartissez sur plusieurs valeurs.",
+       "titre": "Tout miser sur un seul titre"
+      },
+      {
+       "detail": "Une baisse juste avant la rentrée obligerait à vendre au mauvais moment.",
+       "titre": "Rester tout en actions jusqu’au dernier jour"
+      }
+     ],
+     "titre": "Les erreurs à éviter",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "À condition de commencer des années à l’avance.",
+       "titre": "Un objectif daté convient bien à la bourse"
+      },
+      {
+       "detail": "Les versements réguliers font l’essentiel de l’effort.",
+       "titre": "Un capital de départ seul ne suffit pas"
+      },
+      {
+       "detail": "À 8 %, 1 000 000 FCFA par an demandent 12 500 000 FCFA.",
+       "titre": "Capital nécessaire = revenu visé ÷ rendement"
+      },
+      {
+       "detail": "Chaque dividende réinvesti rapporte à son tour.",
+       "titre": "Réinvestir multiplie les actions"
+      },
+      {
+       "detail": "On réduit le risque quand la date approche.",
+       "titre": "Sécuriser avant l’échéance"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Partir d’un objectif daté, mesurer l’effort réel, et laisser le temps travailler.",
+   "titre": "Leçon 7 — Cas pratique : financer la scolarité de vos enfants"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [],
+   "duree_min": 7,
+   "image": {
+    "alt": "Stock report with charts, calculator, and magnifying glass for financial analysis.",
+    "credit": "Photo : RDNE Stock project / Pexels",
+    "url": "https://images.pexels.com/photos/7947707/pexels-photo-7947707.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/screener",
+     "label": "Screener des actions"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Espace dividendes"
+    }
+   ],
+   "module": "Module 3 — Stratégies et compte",
+   "qcm": {
+    "correct": 1,
+    "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien.",
+    "options": [
+     "La stratégie valeur",
+     "La stratégie revenu",
+     "La stratégie croissance",
+     "Le trading quotidien"
+    ],
+    "question": "Un débutant qui veut un revenu régulier choisit plutôt :"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien.",
+     "options": [
+      "La stratégie valeur",
+      "La stratégie revenu",
+      "La stratégie croissance",
+      "Le trading quotidien"
+     ],
+     "question": "Un débutant qui veut un revenu régulier choisit plutôt :"
+    },
+    {
+     "correct": 1,
+     "explication": "PER = cours ÷ bénéfice par action = 12 000 ÷ 1 500 = 8.",
+     "options": [
+      "5",
+      "8",
+      "18",
+      "0,125"
+     ],
+     "question": "Une action cote 12 000 FCFA et son bénéfice par action est de 1 500 FCFA. Quel est son PER ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un PER bas peut signaler une décote… ou une société en difficulté. Il se compare au secteur et à l’historique de la société.",
+     "options": [
+      "Oui, toujours",
+      "Non : il peut aussi refléter des bénéfices qui vont reculer",
+      "Oui, s’il est inférieur à 20",
+      "Non, un PER bas est toujours mauvais signe"
+     ],
+     "question": "Un PER très bas signifie-t-il toujours une bonne affaire ?"
+    },
+    {
+     "correct": 2,
+     "explication": "Une stratégie de revenu se juge sur la régularité des dividendes, donc sur plusieurs années.",
+     "options": [
+      "Une semaine",
+      "Trois mois",
+      "Cinq ans environ",
+      "Un jour"
+     ],
+     "question": "Sur quel horizon juger une action achetée pour son dividende ?"
+    },
+    {
+     "correct": 2,
+     "explication": "La stratégie croissance mise sur la progression de l’activité et du cours, au prix d’une volatilité plus forte.",
+     "options": [
+      "La stratégie valeur",
+      "La stratégie revenu",
+      "La stratégie croissance",
+      "Aucune"
+     ],
+     "question": "Quelle stratégie accepte de recevoir peu de dividendes en échange d’un potentiel de plus-value ?"
+    }
+   ],
+   "resume": "Trois grandes approches structurent l’investissement en actions : acheter sous la valeur, viser un revenu régulier, ou miser sur la croissance.\nAucune n’est gagnante en soi : la bonne dépend de votre objectif, de votre horizon et de votre tolérance au risque.",
+   "sections": [
+    {
+     "contenu": "Une stratégie dit quoi acheter, quand, et comment réagir à une baisse. Sans elle, chaque décision est improvisée.",
+     "points": [
+      {
+       "detail": "Acheter une société dont le cours paraît inférieur à ce qu’elle vaut, en attendant que le marché le reconnaisse.",
+       "titre": "Valeur (« value »)",
+       "verifier": "le PER, la rentabilité des capitaux propres et l’endettement."
+      },
+      {
+       "detail": "Constituer un portefeuille de sociétés qui versent un dividende régulier, et réinvestir ce revenu.",
+       "titre": "Revenu (« income »)",
+       "verifier": "la régularité du dividende sur au moins cinq exercices."
+      },
+      {
+       "detail": "Miser sur des sociétés dont l’activité progresse vite, quitte à recevoir peu de dividendes et à subir plus de volatilité.",
+       "titre": "Croissance (« growth »)",
+       "verifier": "la progression du chiffre d’affaires et des bénéfices sur plusieurs années."
+      }
+     ],
+     "titre": "Trois approches",
+     "type": "definition"
+    },
+    {
+     "contenu": "Beaucoup d’investisseurs achètent ce dont on parle, vendent dès que ça baisse et rachètent quand ça monte. Ils manquent les dividendes et cristallisent leurs pertes.\nUne stratégie fixée à l’avance protège de la peur et de l’euphorie : elle donne un critère clair à chaque décision.",
+     "titre": "Pourquoi choisir avant d’acheter",
+     "type": "importance"
+    },
+    {
+     "contenu": "Une stratégie de revenu recherche des distributions régulières, idéalement croissantes.\nLe tableau montre quatre valeurs de la BRVM dont le dividende a progressé ces dernières années. Le passé ne garantit pas la suite : la régularité se vérifie chaque année.",
+     "donnees_reelles": {
+      "codes": [
+       "SNTS",
+       "BOAB",
+       "SGBC",
+       "SIBC"
+      ],
+      "vue": "historique"
+     },
+     "reel": true,
+     "titre": "Revenu : des dividendes qui progressent",
+     "type": "cas"
+    },
+    {
+     "contenu": "Le PER compare le prix d’une action au bénéfice qu’elle génère. Un PER de 8 signifie que l’on paie l’action 8 fois son bénéfice annuel.\nUn PER bas peut signaler une décote à saisir, ou une société en difficulté. Il se compare toujours à celui du secteur et à son propre historique.",
+     "formules": [
+      {
+       "exemple": "10 000 ÷ 1 250 = 8",
+       "expression": "Cours de l’action ÷ Bénéfice par action",
+       "nom": "PER"
+      }
+     ],
+     "titre": "Valeur : lire le PER",
+     "type": "cas"
+    },
+    {
+     "contenu": "Chaque approche a son rythme. Juger une action de rendement sur trois mois, c’est la juger sur le mauvais critère.",
+     "tableau": {
+      "colonnes": [
+       "Stratégie",
+       "Objectif",
+       "Horizon",
+       "Profil"
+      ],
+      "lignes": [
+       [
+        "Valeur",
+        "Acheter sous la valeur",
+        "3 à 5 ans",
+        "Patient et analytique"
+       ],
+       [
+        "Revenu",
+        "Encaisser un revenu régulier",
+        "5 ans et plus",
+        "Débutant, retraité"
+       ],
+       [
+        "Croissance",
+        "Viser une plus-value",
+        "5 ans et plus",
+        "Tolérant à la volatilité"
+       ]
+      ],
+      "note": "Repères pédagogiques, pas des règles : votre situation personnelle prime."
+     },
+     "titre": "Associer stratégie et horizon",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les mêmes erreurs reviennent quand la stratégie n’est pas tenue.",
+     "points": [
+      {
+       "detail": "Acheter une action pour son dividende, puis la vendre trois mois après parce que le cours n’a pas bougé.",
+       "titre": "Mélanger les approches sans cohérence"
+      },
+      {
+       "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou refléter un cours en chute.",
+       "titre": "Choisir sur le seul rendement"
+      },
+      {
+       "detail": "Un PER bas peut traduire des bénéfices qui vont reculer.",
+       "titre": "Confondre PER bas et bonne affaire"
+      },
+      {
+       "detail": "Ce dont tout le monde parle est souvent déjà dans le prix.",
+       "titre": "Suivre la rumeur"
+      }
+     ],
+     "titre": "Les erreurs à éviter",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "Chacune a ses critères et son horizon.",
+       "titre": "Trois approches : valeur, revenu, croissance"
+      },
+      {
+       "detail": "Elle demande peu de suivi quotidien.",
+       "titre": "Le revenu est la plus accessible pour débuter"
+      },
+      {
+       "detail": "À comparer au secteur, jamais seul.",
+       "titre": "PER = cours ÷ bénéfice par action"
+      },
+      {
+       "detail": "Cinq ans pour une action de rendement, pas trois mois.",
+       "titre": "Une stratégie se juge sur son horizon"
+      },
+      {
+       "detail": "Un dividende en hausse se revérifie chaque année.",
+       "titre": "Le passé ne garantit pas la suite"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Valeur, revenu ou croissance : choisir une approche, et l’horizon qui va avec.",
+   "titre": "Leçon 8 — Trois stratégies d’investissement à la BRVM"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [],
+   "duree_min": 7,
+   "image": {
+    "alt": "Close-up of a laptop showing cryptocurrency market charts in a trading environment.",
+    "credit": "Photo : Rafael Minguet Delgado / Pexels",
+    "url": "https://images.pexels.com/photos/38375325/pexels-photo-38375325.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/comparateur-sgi",
+     "label": "Comparateur de SGI"
+    },
+    {
+     "href": "/liquidite",
+     "label": "Classement de liquidité"
+    }
+   ],
+   "module": "Module 3 — Stratégies et compte",
+   "qcm": {
+    "correct": 1,
+    "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides.",
+    "options": [
+     "Ordre au marché, pour une exécution immédiate",
+     "Ordre à cours limité, pour contrôler son prix d’achat",
+     "Ordre stop, pour vendre automatiquement",
+     "Il n’y a pas de différence entre les deux"
+    ],
+    "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides.",
+     "options": [
+      "Ordre au marché, pour une exécution immédiate",
+      "Ordre à cours limité, pour contrôler son prix d’achat",
+      "Ordre stop, pour vendre automatiquement",
+      "Il n’y a pas de différence entre les deux"
+     ],
+     "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Seules les Sociétés de Gestion et d’Intermédiation agréées peuvent transmettre des ordres au marché de la BRVM.",
+     "options": [
+      "Sa banque, directement au guichet",
+      "Une SGI agréée",
+      "N’importe quelle plateforme en ligne",
+      "La BCEAO"
+     ],
+     "question": "Par qui faut-il passer pour acheter des actions à la BRVM ?"
+    },
+    {
+     "correct": 1,
+     "explication": "L’Autorité des Marchés Financiers de l’UMOA, qui a succédé au CREPMF, agrée et contrôle les SGI.",
+     "options": [
+      "La BCEAO",
+      "L’AMF-UMOA (ex-CREPMF)",
+      "La BRVM elle-même",
+      "Le ministère des Finances de chaque pays"
+     ],
+     "question": "Quelle autorité agrée les SGI de l’UMOA ?"
+    },
+    {
+     "correct": 1,
+     "explication": "20 × 10 000 = 200 000 FCFA, plus 1 % de frais (2 000 FCFA) : 202 000 FCFA.",
+     "options": [
+      "200 000 FCFA",
+      "202 000 FCFA",
+      "220 000 FCFA",
+      "200 100 FCFA"
+     ],
+     "question": "Vous achetez 20 actions à 10 000 FCFA avec 1 % de frais. Quel est le coût total ?"
+    },
+    {
+     "correct": 0,
+     "explication": "Pour un achat, la limite est un prix maximum : l’ordre s’exécute à 10 000 FCFA ou en dessous, sinon il attend.",
+     "options": [
+      "À 10 000 FCFA ou moins",
+      "Seulement au-dessus de 10 000 FCFA",
+      "Toujours immédiatement, quel que soit le prix",
+      "Jamais avant la séance suivante"
+     ],
+     "question": "Un ordre d’achat à cours limité à 10 000 FCFA s’exécute :"
+    }
+   ],
+   "resume": "Pour acheter des actions à la BRVM, il faut passer par une Société de Gestion et d’Intermédiation (SGI) agréée.\nCette leçon détaille l’ouverture du compte, le dépôt et le premier ordre, avec les réflexes qui évitent les mauvaises surprises.",
+   "sections": [
+    {
+     "contenu": "Un particulier n’achète pas directement en bourse : il passe par une SGI, qui transmet ses ordres au marché et conserve ses titres.\nDe nombreuses SGI permettent aujourd’hui d’ouvrir un compte en ligne.",
+     "flux": [
+      {
+       "detail": "Agréée par l’autorité de régulation, l’AMF-UMOA.",
+       "icone": "entreprise",
+       "titre": "Choisir une SGI"
+      },
+      {
+       "detail": "Pièce d’identité, justificatif de domicile, formulaire.",
+       "icone": "decision",
+       "titre": "Constituer le dossier"
+      },
+      {
+       "detail": "Virement ou dépôt sur le compte espèces.",
+       "icone": "paiement",
+       "titre": "Déposer des fonds"
+      },
+      {
+       "detail": "Choisir la valeur, la quantité et le prix.",
+       "icone": "graphique",
+       "titre": "Passer un ordre"
+      }
+     ],
+     "titre": "Le parcours en quatre étapes",
+     "type": "definition"
+    },
+    {
+     "contenu": "Les SGI se distinguent par leurs frais, leur plateforme et leur service. Parmi elles : CGF Bourse, Hudson & Cie, NSIA Finance, BOA Capital Securities, SOGEBOURSE.",
+     "points": [
+      {
+       "detail": "Seules les SGI agréées peuvent exécuter vos ordres à la BRVM.",
+       "titre": "L’agrément",
+       "verifier": "la liste des SGI agréées publiée par l’AMF-UMOA (ex-CREPMF)."
+      },
+      {
+       "detail": "Frais de courtage à chaque ordre, frais de tenue de compte, commissions : ils pèsent lourd sur les petits montants.",
+       "titre": "Les frais",
+       "verifier": "la grille tarifaire complète, avant d’ouvrir le compte."
+      },
+      {
+       "detail": "Ordres en ligne, suivi du portefeuille, réactivité en cas de question.",
+       "titre": "La plateforme et le service",
+       "verifier": "les moyens de passer un ordre : en ligne, par téléphone, en agence."
+      },
+      {
+       "detail": "Il varie d’une SGI à l’autre.",
+       "titre": "Le dépôt minimum",
+       "verifier": "le montant exigé à l’ouverture."
+      }
+     ],
+     "titre": "Choisir sa SGI",
+     "type": "importance"
+    },
+    {
+     "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.",
+     "points": [
+      {
+       "detail": "Vous fixez un prix maximum. Pour un achat, l’ordre ne s’exécute qu’à ce prix ou en dessous ; sinon il attend.",
+       "titre": "L’ordre à cours limité",
+       "verifier": "le dernier cours et les prix proposés avant de fixer votre limite."
+      },
+      {
+       "detail": "Vous acceptez le meilleur prix disponible au moment de l’exécution. Plus rapide, mais sans contrôle du prix.",
+       "titre": "L’ordre au marché",
+       "verifier": "les volumes échangés : sur une valeur peu liquide, le prix obtenu peut s’éloigner du dernier cours."
+      }
+     ],
+     "titre": "Deux types d’ordres",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le coût d’un ordre ne se limite pas au cours de l’action : il faut y ajouter les frais.\nExemple pédagogique avec 1 % de frais : 20 actions à 10 000 FCFA coûtent 202 000 FCFA. Sur un très petit ordre, des frais minimums peuvent peser bien plus.",
+     "formules": [
+      {
+       "exemple": "20 × 10 000 + 1 % = 202 000 FCFA",
+       "expression": "Quantité × Cours + Frais",
+       "nom": "Coût total d’un achat"
+      }
+     ],
+     "titre": "Le coût réel d’un premier achat",
+     "type": "cas"
+    },
+    {
+     "contenu": "Le tableau donne le cours de la dernière séance de quatre valeurs. Pour estimer un premier achat, multipliez ce cours par la quantité visée, puis ajoutez les frais de votre SGI.",
+     "donnees_reelles": {
+      "actions": 20,
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SIBC",
+       "BOAB"
+      ],
+      "vue": "rendement"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : le prix de 20 actions",
+     "type": "cas"
+    },
+    {
+     "contenu": "Quelques réflexes évitent l’essentiel des mauvaises surprises.",
+     "points": [
+      {
+       "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché.",
+       "titre": "Passer un ordre au marché sur une valeur peu échangée"
+      },
+      {
+       "detail": "Plateformes et « courtiers » non agréés sont une source fréquente d’arnaques.",
+       "titre": "Confier ses fonds à un intermédiaire non agréé"
+      },
+      {
+       "detail": "Mieux vaut regrouper ses achats que multiplier les très petits ordres.",
+       "titre": "Oublier les frais sur les petits ordres"
+      },
+      {
+       "detail": "Frais, délais et modalités de retrait figurent dans la convention de compte.",
+       "titre": "Signer sans lire les conditions"
+      }
+     ],
+     "titre": "Les erreurs à éviter",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "L’agrément se vérifie auprès de l’AMF-UMOA.",
+       "titre": "On investit à la BRVM par une SGI agréée"
+      },
+      {
+       "detail": "Choisir la SGI, constituer le dossier, déposer, passer l’ordre.",
+       "titre": "Quatre étapes"
+      },
+      {
+       "detail": "C’est le réflexe recommandé pour débuter.",
+       "titre": "L’ordre à cours limité protège votre prix"
+      },
+      {
+       "detail": "Les frais comptent, surtout sur les petits montants.",
+       "titre": "Coût total = quantité × cours + frais"
+      },
+      {
+       "detail": "Aucun agrément, aucun dépôt.",
+       "titre": "Méfiance envers les plateformes non agréées"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Quatre étapes, les bons documents, et le type d’ordre qui protège votre prix.",
+   "titre": "Leçon 9 — Ouvrir un compte et passer son premier ordre"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [],
+   "duree_min": 6,
+   "image": {
+    "alt": "A woman points at a stock market chart on a whiteboard, explaining financial trends.",
+    "credit": "Photo : www.kaboompics.com / Pexels",
+    "url": "https://images.pexels.com/photos/7876494/pexels-photo-7876494.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/comparateur-sgi",
+     "label": "Comparateur de SGI"
+    },
+    {
+     "href": "/fiscalite",
+     "label": "Fiscalité des placements"
+    }
+   ],
+   "module": "Module 3 — Stratégies et compte",
+   "qcm": {
+    "correct": 0,
+    "explication": "1 000 × 655,957 = 655 957 FCFA, selon la parité fixe entre l’euro et le franc CFA.",
+    "options": [
+     "655 957 FCFA",
+     "65 596 FCFA",
+     "1 000 000 FCFA",
+     "6 559 570 FCFA"
+    ],
+    "question": "1 000 € correspondent à combien de francs CFA ?"
+   },
+   "quiz": [
+    {
+     "correct": 0,
+     "explication": "1 000 × 655,957 = 655 957 FCFA, selon la parité fixe entre l’euro et le franc CFA.",
+     "options": [
+      "655 957 FCFA",
+      "65 596 FCFA",
+      "1 000 000 FCFA",
+      "6 559 570 FCFA"
+     ],
+     "question": "1 000 € correspondent à combien de francs CFA ?"
+    },
+    {
+     "correct": 1,
+     "explication": "La parité est fixe : 1 euro = 655,957 FCFA. Le change ne fait donc pas varier le rendement d’un investisseur de la zone euro.",
+     "options": [
+      "Flottante, révisée chaque jour",
+      "Fixe",
+      "Indexée sur le dollar",
+      "Révisée chaque mois par la BRVM"
+     ],
+     "question": "Pour un investisseur résidant dans la zone euro, la parité euro – franc CFA est :"
+    },
+    {
+     "correct": 1,
+     "explication": "Seule une SGI agréée par l’AMF-UMOA peut transmettre vos ordres à la BRVM, où que vous résidiez.",
+     "options": [
+      "Votre banque étrangère",
+      "La SGI, par l’AMF-UMOA",
+      "N’importe quel courtier en ligne international",
+      "Personne, aucun agrément n’est nécessaire"
+     ],
+     "question": "Qui doit être agréé pour vous permettre d’investir à la BRVM depuis l’étranger ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Sans agrément, aucun recours : ces plateformes sont une source fréquente d’arnaques visant la diaspora.",
+     "options": [
+      "Investir un petit montant pour tester",
+      "Ne pas y déposer de fonds et vérifier les intermédiaires agréés",
+      "Y investir si le rendement promis est élevé",
+      "Demander à un proche d’investir à votre place"
+     ],
+     "question": "Une plateforme hors UEMOA vous propose des « actions africaines » sans agrément. Que faire ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Après la retenue à la source du pays de la société, le pays de résidence peut aussi imposer le dividende, selon ses règles et les conventions fiscales.",
+     "options": [
+      "Sont toujours exonérés d’impôt",
+      "Peuvent aussi être imposés dans le pays de résidence, selon sa fiscalité",
+      "Ne peuvent jamais quitter l’UEMOA",
+      "Sont versés uniquement en euros"
+     ],
+     "question": "Les dividendes perçus par un investisseur résidant à l’étranger :"
+    }
+   ],
+   "resume": "Il n’est pas nécessaire de vivre dans l’UEMOA pour investir à la BRVM : de nombreuses SGI ouvrent des comptes à distance.\nCette leçon décrit le parcours, le change et les précautions propres aux investisseurs de la diaspora.",
+   "sections": [
+    {
+     "contenu": "Le parcours ressemble à une ouverture locale. Seuls changent les documents de résidence et le transfert des fonds, par virement international.",
+     "flux": [
+      {
+       "detail": "Votre compte dans le pays de résidence.",
+       "icone": "entreprise",
+       "titre": "Banque à l’étranger"
+      },
+      {
+       "detail": "Vers le compte de votre SGI.",
+       "icone": "paiement",
+       "titre": "Virement international"
+      },
+      {
+       "detail": "Agréée par l’AMF-UMOA.",
+       "icone": "decision",
+       "titre": "Compte chez une SGI"
+      },
+      {
+       "detail": "En ligne, depuis n’importe où.",
+       "icone": "graphique",
+       "titre": "Achat d’actions"
+      },
+      {
+       "detail": "Conservés en FCFA ou virés à l’étranger.",
+       "icone": "piece",
+       "titre": "Dividendes"
+      }
+     ],
+     "titre": "Le parcours à distance",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le franc CFA est lié à l’euro par une parité fixe : 1 euro vaut 655,957 FCFA. Pour un résident de la zone euro, ce change ne fluctue pas.\nPour les autres devises, comme le dollar, le cours varie : le rendement final dépend aussi du change.",
+     "formules": [
+      {
+       "exemple": "500 € × 655,957 ≈ 327 979 FCFA",
+       "expression": "Montant en FCFA = Montant en euros × 655,957",
+       "nom": "Conversion"
+      }
+     ],
+     "titre": "Le change euro – franc CFA",
+     "type": "importance"
+    },
+    {
+     "contenu": "Chaque SGI fixe sa liste de pièces. Les plus courantes sont les suivantes.",
+     "points": [
+      {
+       "detail": "Carte d’identité ou passeport, parfois avec une copie certifiée.",
+       "titre": "Une pièce d’identité valide"
+      },
+      {
+       "detail": "Récent, dans votre pays d’accueil.",
+       "titre": "Un justificatif de résidence"
+      },
+      {
+       "detail": "Souvent transmis sous forme numérisée.",
+       "titre": "Le formulaire d’ouverture signé"
+      },
+      {
+       "detail": "Comptez de quelques jours à quelques semaines selon la banque et la SGI.",
+       "titre": "Un premier virement",
+       "verifier": "les frais de virement facturés par votre banque et par la SGI."
+      }
+     ],
+     "titre": "Documents et délais",
+     "type": "importance"
+    },
+    {
+     "contenu": "Deux options : les garder sur votre compte en FCFA pour les réinvestir, ou les faire virer sur votre compte à l’étranger, avec des frais et un délai.\nLe dividende est versé après la retenue à la source du pays de la société. Votre pays de résidence peut aussi l’imposer : renseignez-vous sur sa fiscalité et sur les conventions fiscales applicables.",
+     "titre": "Recevoir ses dividendes",
+     "type": "importance"
+    },
+    {
+     "contenu": "Le tableau montre, pour quatre valeurs, le dernier dividende enregistré et le revenu de 50 actions. Pour l’exprimer en euros, divisez le montant en FCFA par 655,957.",
+     "donnees_reelles": {
+      "actions": 50,
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SGBC",
+       "BOAB"
+      ],
+      "vue": "rendement"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : ce que rapportent 50 actions",
+     "type": "cas"
+    },
+    {
+     "contenu": "La distance rend certaines arnaques plus faciles. Quelques réflexes suffisent à s’en protéger.",
+     "points": [
+      {
+       "detail": "Des sites hors UEMOA proposent des « actions africaines » sans agrément : ce sont souvent des arnaques.",
+       "titre": "Passer par une plateforme non agréée"
+      },
+      {
+       "detail": "Un proche ou un « agent » qui investit à votre place n’offre aucune garantie.",
+       "titre": "Confier ses fonds à un intermédiaire informel"
+      },
+      {
+       "detail": "Les frais bancaires internationaux peuvent absorber le rendement des petits montants.",
+       "titre": "Multiplier les petits virements"
+      },
+      {
+       "detail": "Les dividendes peuvent y être déclarés et imposés.",
+       "titre": "Ignorer la fiscalité du pays de résidence"
+      }
+     ],
+     "titre": "Les erreurs à éviter",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "Par une SGI agréée qui ouvre des comptes à distance.",
+       "titre": "On peut investir à la BRVM depuis l’étranger"
+      },
+      {
+       "detail": "Une parité fixe : pas de risque de change depuis la zone euro.",
+       "titre": "1 € = 655,957 FCFA"
+      },
+      {
+       "detail": "Avec des frais et un délai de virement.",
+       "titre": "Les dividendes peuvent rester en FCFA ou être rapatriés"
+      },
+      {
+       "detail": "Renseignez-vous avant le premier dividende.",
+       "titre": "La fiscalité du pays de résidence compte"
+      },
+      {
+       "detail": "Vérifiez l’agrément de l’intermédiaire auprès de l’AMF-UMOA.",
+       "titre": "Aucun agrément, aucun dépôt"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Ouvrir un compte à distance, transférer ses fonds, recevoir ses dividendes.",
+   "titre": "Leçon 10 — Investir depuis l’étranger (diaspora)"
+  },
+  {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [],
+   "duree_min": 7,
+   "image": {
+    "alt": "Close-up of stock market trading screen displaying financial growth and charts.",
+    "credit": "Photo : Alesia  Kozik / Pexels",
+    "url": "https://images.pexels.com/photos/6770610/pexels-photo-6770610.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/rendement-vrai",
+     "label": "Rendement réel et vrai"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Espace dividendes"
+    }
+   ],
+   "module": "Module 3 — Stratégies et compte",
+   "qcm": {
+    "correct": 0,
+    "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution.",
+    "options": [
+     "L’épargne bancaire",
+     "L’immobilier",
+     "Un commerce",
+     "Aucun des trois"
+    ],
+    "question": "Quel placement offre la liquidité la plus immédiate ?"
+   },
+   "quiz": [
+    {
+     "correct": 0,
+     "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution.",
+     "options": [
+      "L’épargne bancaire",
+      "L’immobilier",
+      "Un commerce",
+      "Aucun des trois"
+     ],
+     "question": "Quel placement offre la liquidité la plus immédiate ?"
+    },
+    {
+     "correct": 2,
+     "explication": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 % : 4 % de dividende et 6 % de hausse du cours.",
+     "options": [
+      "4 %",
+      "6 %",
+      "10 %",
+      "16 %"
+     ],
+     "question": "Vous achetez une action 10 000 FCFA. Un an plus tard, elle cote 10 600 FCFA et vous avez reçu 400 FCFA de dividende. Quel est votre rendement total ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Sur une seule année, le hasard pèse lourd. Une longue période donne une image plus fidèle du rendement.",
+     "options": [
+      "Parce que les dividendes ne sont versés qu’au bout de cinq ans",
+      "Parce qu’une seule année peut être exceptionnellement bonne ou mauvaise",
+      "Parce que la BRVM ne publie ses cours qu’une fois par an",
+      "Parce que l’immobilier ne se vend qu’après dix ans"
+     ],
+     "question": "Pourquoi comparer les placements sur cinq à dix ans ?"
+    },
+    {
+     "correct": 0,
+     "explication": "Rendement de dividende = dividende ÷ cours × 100. Il ne tient pas compte de la variation du cours, qui s’ajoute au rendement total.",
+     "options": [
+      "Le dividende divisé par le cours, hors variation du cours",
+      "La hausse du cours sur un an",
+      "Le bénéfice de la société divisé par son chiffre d’affaires",
+      "Le rendement total garanti par la société"
+     ],
+     "question": "Qu’est-ce que le rendement de dividende d’une action ?"
+    },
+    {
+     "correct": 2,
+     "explication": "L’épargne de précaution couvre les imprévus : elle évite de devoir vendre ses actions ou son bien au mauvais moment.",
+     "options": [
+      "Un portefeuille d’actions",
+      "Un bien immobilier",
+      "Une épargne de précaution disponible",
+      "Un commerce"
+     ],
+     "question": "Par quoi commencer pour bâtir un patrimoine ?"
+    }
+   ],
+   "resume": "Il n’existe pas de placement idéal pour tout : chaque support a ses forces et ses contraintes.\nCette leçon compare la BRVM à l’épargne bancaire, à l’immobilier et au commerce, puis montre les rendements de dividende réels du marché.",
+   "sections": [
+    {
+     "contenu": "Comparer des placements, c’est regarder quatre critères à la fois : ce qu’ils rapportent, la vitesse à laquelle on récupère son argent, le risque, et le temps qu’ils demandent.",
+     "tableau": {
+      "colonnes": [
+       "Placement",
+       "Rendement",
+       "Liquidité",
+       "Risque",
+       "Effort"
+      ],
+      "lignes": [
+       [
+        "Épargne bancaire",
+        "Faible, connu d’avance",
+        "Immédiate",
+        "Très faible",
+        "Aucun"
+       ],
+       [
+        "Actions BRVM",
+        "Dividendes et variation du cours, non garantis",
+        "Rapide si la valeur s’échange",
+        "Moyen à élevé à court terme",
+        "Faible"
+       ],
+       [
+        "Immobilier",
+        "Loyers et valeur du bien",
+        "Faible : des mois pour vendre",
+        "Moyen",
+        "Élevé : gestion, entretien"
+       ],
+       [
+        "Commerce propre",
+        "Très variable",
+        "Très faible",
+        "Élevé",
+        "Très élevé"
+       ]
+      ],
+      "note": "Repères qualitatifs : les rendements réels varient selon les périodes, les produits et les situations."
+     },
+     "titre": "Quatre placements, quatre profils",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le tableau donne le rendement de dividende de six valeurs de la BRVM, calculé sur le dernier dividende enregistré et le cours de la dernière séance.\nCe rendement n’est qu’une partie du rendement total : le cours peut monter ou baisser.",
+     "donnees_reelles": {
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "SGBC",
+       "STBC",
+       "BOAB",
+       "CIEC"
+      ],
+      "vue": "rendement"
+     },
+     "reel": true,
+     "titre": "Les rendements de dividende réels du marché",
+     "type": "cas"
+    },
+    {
+     "contenu": "Une seule année peut être exceptionnellement bonne ou mauvaise. Comparez sur cinq à dix ans, et toujours dividendes compris.\nLe rendement total additionne les dividendes et la variation du cours.",
+     "formules": [
+      {
+       "exemple": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 %",
+       "expression": "(Dividendes + Cours final − Cours initial) ÷ Cours initial × 100",
+       "nom": "Rendement total sur un an"
+      }
+     ],
+     "titre": "Comparer sur la bonne durée",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les placements ne s’opposent pas : ils se complètent, dans un ordre logique.",
+     "etapes": [
+      {
+       "cle": true,
+       "detail": "Trois à six mois de charges, disponibles immédiatement.",
+       "titre": "Épargne de précaution"
+      },
+      {
+       "detail": "Actions BRVM diversifiées, pour l’argent dont on n’a pas besoin avant plusieurs années.",
+       "titre": "Placements de long terme"
+      },
+      {
+       "detail": "Immobilier ou activité propre, selon ses moyens et son temps.",
+       "titre": "Actifs réels"
+      }
+     ],
+     "etapes_style": "frise",
+     "titre": "Bâtir un patrimoine par étapes",
+     "type": "importance"
+    },
+    {
+     "contenu": "Face à l’immobilier ou au commerce, la bourse se distingue sur deux points : la liquidité et le peu de temps qu’elle exige.",
+     "points": [
+      {
+       "detail": "Une action qui s’échange se vend en séance, quand un bien immobilier peut demander des mois.",
+       "titre": "Liquidité"
+      },
+      {
+       "detail": "Ni locataire, ni stock, ni salarié : le suivi se limite aux publications et au portefeuille.",
+       "titre": "Peu de gestion"
+      },
+      {
+       "detail": "On peut investir des montants modestes, et répartir sur plusieurs sociétés.",
+       "titre": "Fractionnement"
+      },
+      {
+       "detail": "Le cours varie chaque jour : la bourse convient à l’argent dont on n’a pas besoin à court terme.",
+       "titre": "En contrepartie, la volatilité",
+       "verifier": "votre horizon de placement avant d’investir."
+      }
+     ],
+     "titre": "Ce que la bourse apporte, et ce qu’elle demande",
+     "type": "importance"
+    },
+    {
+     "contenu": "Une comparaison mal posée conduit à de mauvaises décisions.",
+     "points": [
+      {
+       "detail": "« La bourse a baissé cette année » ne dit rien du rendement sur dix ans.",
+       "titre": "Juger sur une seule année"
+      },
+      {
+       "detail": "Ne regarder que le cours sous-estime le rendement des actions.",
+       "titre": "Oublier les dividendes"
+      },
+      {
+       "detail": "Rendements de dividendes, loyers et intérêts se comparent après impôts et frais.",
+       "titre": "Comparer un brut à un net"
+      },
+      {
+       "detail": "Un patrimoine solide combine plusieurs placements.",
+       "titre": "Tout mettre sur un seul support"
+      }
+     ],
+     "titre": "Les erreurs de comparaison",
+     "type": "piege"
+    },
+    {
+     "contenu": "Cinq idées à garder en tête.",
+     "points": [
+      {
+       "detail": "Chacun a son rendement, sa liquidité, son risque et son effort.",
+       "titre": "Aucun placement n’est idéal pour tout"
+      },
+      {
+       "detail": "En échange d’une volatilité à court terme.",
+       "titre": "La bourse offre liquidité et peu de gestion"
+      },
+      {
+       "detail": "Le rendement de dividende n’en est qu’une partie.",
+       "titre": "Rendement total = dividendes + variation du cours"
+      },
+      {
+       "detail": "Et toujours dans les mêmes conditions : brut avec brut, net avec net.",
+       "titre": "On compare sur cinq à dix ans"
+      },
+      {
+       "detail": "Avant la bourse, avant l’immobilier.",
+       "titre": "L’épargne de précaution vient en premier"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Rendement, risque, liquidité et effort : situer la bourse dans un patrimoine.",
+   "titre": "Leçon 11 — BRVM ou autres placements : une comparaison objective"
+  }
+ ],
+ "niveau": "debutant",
+ "relatedLinks": [],
+ "titre": "Niveau 1 — Initiation à la BRVM"
+}

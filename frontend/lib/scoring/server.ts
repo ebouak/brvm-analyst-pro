@@ -5,6 +5,8 @@ import { computeAltmanZ, type AltmanResult } from './altman';
 export interface CompanyScoring {
   code: string;
   fscore: FScoreResult | null;
+  /** Le F-Score ne s'applique pas à un bilan bancaire (B5, 2026-11-13). */
+  fscoreNonApplicable?: boolean;
   altman: AltmanResult | null;
 }
 
@@ -31,10 +33,19 @@ function buildYear(inc: IncRow | null, bal: BalRow | null, cf: CfRow | null): FS
   };
 }
 
-function compute(code: string, inc: IncRow[], bal: BalRow[], cf: CfRow[], famille: string | null): CompanyScoring {
+/** Secteur des banques et des sociétés de financement : Altman et F-Score ne s'y appliquent pas. */
+const SECTEUR_FINANCIER = 'Services financiers';
+
+function compute(code: string, inc: IncRow[], bal: BalRow[], cf: CfRow[], famille: string | null, secteur: string | null = null): CompanyScoring {
   const i = latestTwo(inc), b = latestTwo(bal), c = latestTwo(cf);
   let fscore: FScoreResult | null = null;
-  if (i.curr && i.prev && b.curr && b.prev) {
+  // Piotroski repose sur la marge brute, la liquidité générale et la rotation de
+  // l'actif : des notions sans objet pour une banque. Sept banques affichaient
+  // « 1/9 » ; elles affichent désormais « non applicable ».
+  // Toute société financière (banque OU société de financement comme SAFC, classée
+  // « general » pour ses états financiers) : le F-Score ne s'applique pas.
+  const banque = (famille ?? '').toLowerCase() === 'banque' || secteur === SECTEUR_FINANCIER;
+  if (!banque && i.curr && i.prev && b.curr && b.prev) {
     fscore = computeFScore(buildYear(i.curr, b.curr, c.curr), buildYear(i.prev, b.prev, c.prev));
   }
   let altman: AltmanResult | null = null;
@@ -47,9 +58,10 @@ function compute(code: string, inc: IncRow[], bal: BalRow[], cf: CfRow[], famill
       resultat_exploitation: i.curr?.resultat_exploitation ?? null,
       total_capitaux_propres: b.curr.total_capitaux_propres,
       famille,
+      financiere: banque,
     });
   }
-  return { code, fscore, altman };
+  return { code, fscore, fscoreNonApplicable: banque, altman };
 }
 
 const INC_SEL = 'code, periode, revenu_total, marge_brute, resultat_net, actions_en_circulation, resultat_exploitation';
@@ -62,9 +74,10 @@ export async function getScoring(code: string): Promise<CompanyScoring> {
     sb.from('income_statements').select(INC_SEL).eq('code', code),
     sb.from('balance_sheets').select(BAL_SEL).eq('code', code),
     sb.from('cash_flow_statements').select('code, periode, flux_exploitation').eq('code', code),
-    sb.from('brvm_instruments').select('famille_comptable').eq('code', code).maybeSingle(),
+    sb.from('brvm_instruments').select('famille_comptable, secteur').eq('code', code).maybeSingle(),
   ]);
-  return compute(code, (inc ?? []) as IncRow[], (bal ?? []) as BalRow[], (cf ?? []) as CfRow[], (instr as { famille_comptable: string | null } | null)?.famille_comptable ?? null);
+  const i = instr as { famille_comptable: string | null; secteur: string | null } | null;
+  return compute(code, (inc ?? []) as IncRow[], (bal ?? []) as BalRow[], (cf ?? []) as CfRow[], i?.famille_comptable ?? null, i?.secteur ?? null);
 }
 
 /** Scoring de tout le marché (pour le screener). */
@@ -74,7 +87,7 @@ export async function getMarketScoring(): Promise<Map<string, CompanyScoring>> {
     sb.from('income_statements').select(INC_SEL),
     sb.from('balance_sheets').select(BAL_SEL),
     sb.from('cash_flow_statements').select('code, periode, flux_exploitation'),
-    sb.from('brvm_instruments').select('code, famille_comptable'),
+    sb.from('brvm_instruments').select('code, famille_comptable, secteur'),
   ]);
   const group = <T extends { code: string }>(rows: T[]) => {
     const m = new Map<string, T[]>();
@@ -85,11 +98,15 @@ export async function getMarketScoring(): Promise<Map<string, CompanyScoring>> {
   const balBy = group((bal ?? []) as BalRow[]);
   const cfBy = group((cf ?? []) as CfRow[]);
   const famBy = new Map<string, string | null>();
-  for (const i of (instr ?? []) as { code: string; famille_comptable: string | null }[]) famBy.set(i.code, i.famille_comptable);
+  const secBy = new Map<string, string | null>();
+  for (const i of (instr ?? []) as { code: string; famille_comptable: string | null; secteur: string | null }[]) {
+    famBy.set(i.code, i.famille_comptable);
+    secBy.set(i.code, i.secteur);
+  }
 
   const out = new Map<string, CompanyScoring>();
   for (const code of incBy.keys()) {
-    out.set(code, compute(code, incBy.get(code) ?? [], balBy.get(code) ?? [], cfBy.get(code) ?? [], famBy.get(code) ?? null));
+    out.set(code, compute(code, incBy.get(code) ?? [], balBy.get(code) ?? [], cfBy.get(code) ?? [], famBy.get(code) ?? null, secBy.get(code) ?? null));
   }
   return out;
 }

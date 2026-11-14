@@ -47,7 +47,7 @@ export function SectionHeader({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">{title}</h1>
+          <h1 className="font-display text-[34px] md:text-[44px] font-semibold leading-[1.04] tracking-[-0.04em] text-ivory">{title}</h1>
           {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -120,9 +120,9 @@ export function MetricCard({
 /* ── SignalBadge : pastille BUY/HOLD/SELL statutaire ─────────────────────── */
 export function SignalBadge({ signal }: { signal: 'BUY' | 'HOLD' | 'SELL' | string }) {
   const map: Record<string, { cls: string; label: string }> = {
-    BUY: { cls: 'border-up/30 bg-up/5 text-up', label: 'Achat' },
-    SELL: { cls: 'border-down/30 bg-down/5 text-down', label: 'Vente' },
-    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'Attente' },
+    BUY: { cls: 'border-up/30 bg-up/5 text-up', label: 'Signal haussier' },
+    SELL: { cls: 'border-down/30 bg-down/5 text-down', label: 'Signal baissier' },
+    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'Neutre' },
   };
   const m = map[signal] ?? { cls: 'border-border bg-elevated text-muted', label: libelleSignal(signal) };
   return (

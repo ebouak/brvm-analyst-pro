@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { rediger } from '@/lib/server/redacteur';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 import { parseCopilotQuery, findSociete, normalize, type CopilotIntent, type InstrumentRef } from '@/lib/copilot/parse';
 import { loadPerTrapDataset, loadDividendDataset } from '@/lib/citable/page';
 import { NAV_GROUPS, PALETTE_EXTRA } from '@/lib/nav';
@@ -166,7 +167,12 @@ export async function POST(req: NextRequest) {
   if (intent) return NextResponse.json(await executeIntent(intent));
 
   // 2. LLM : choix d'outil typé (la requête seule est transmise).
-  const call = await llmChooseTool(q);
+  // Chaque repli LLM est facturé : au plus 30 par heure et par compte. Au-delà,
+  // on renvoie la réponse de repli prévue, sans appeler le fournisseur.
+  const { allowed } = await checkRateLimit({
+    route: 'copilot-llm', ip: `user:${user.id}`, maxHits: 30, windowSeconds: 3600,
+  });
+  const call = allowed ? await llmChooseTool(q) : null;
   if (call) return NextResponse.json(await executeTool(call, refs, q));
 
   // 3. Repli : l'assistant conversationnel.

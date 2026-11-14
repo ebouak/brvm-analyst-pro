@@ -10,6 +10,7 @@ import BriefPrefs from '@/components/settings/BriefPrefs';
 import RecapPrefs from '@/components/settings/RecapPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
+import { limiteAlertesCourante } from '@/lib/server/alertesLimite';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Mes alertes' };
@@ -25,8 +26,11 @@ export default async function AlertesPage() {
   // connecté : lier WhatsApp ouvre l'essai gratuit de l'assistant (lot D). Seuls
   // les alertes personnalisées et les dossiers dépendent de ce niveau d'accès.
   const gate = await canAccess('alertes');
+  // Gratuit : une alerte de prix (quota du drapeau). La page s'ouvre, avec sa limite.
+  const { limite } = await limiteAlertesCourante();
+  const ouvert = gate.allowed || (limite ?? 0) > 0;
 
-  const [{ data: alerts }, { data: instruments }] = gate.allowed ? await Promise.all([
+  const [{ data: alerts }, { data: instruments }] = ouvert ? await Promise.all([
     supabase
       .from('alerts')
       .select('id, code, type, seuil, actif, declenchee_le, created_at')
@@ -60,15 +64,13 @@ export default async function AlertesPage() {
 
       <RecapPrefs userId={user.id} />
 
-      {gate.allowed ? (
-        <>
-          <DossiersPrefs userId={user.id} />
-
-          <AlertsManager
-            alerts={(alerts ?? []) as UserAlert[]}
-            instruments={(instruments ?? []) as { code: string; designation: string | null }[]}
-          />
-        </>
+      {gate.allowed && <DossiersPrefs userId={user.id} />}
+      {ouvert ? (
+        <AlertsManager
+          alerts={(alerts ?? []) as UserAlert[]}
+          instruments={(instruments ?? []) as { code: string; designation: string | null }[]}
+          limite={gate.allowed ? null : limite}
+        />
       ) : (
         <AccessGate
           required={gate.required === 'free' ? 'premium' : gate.required}

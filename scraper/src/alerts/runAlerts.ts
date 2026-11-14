@@ -63,7 +63,23 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
     const { data: alerts, error } = await sb
       .from('alerts').select('*').eq('actif', true);
     if (error) throw new Error(error.message);
-    const rows = (alerts ?? []) as AlertRow[];
+    let rows = (alerts ?? []) as AlertRow[];
+    /* Alertes réservées au Premium (feature_flags.alertes, même réglage que le
+       site, décision du 2026-11-13). Une alerte d'un compte non autorisé reste
+       en base, intacte : elle repart si le compte passe Premium. Drapeau
+       illisible = Premium, jamais une ouverture par défaut ; « disabled » coupe tout. */
+    const { data: drapeau } = await sb.from('feature_flags').select('acces').eq('code', 'alertes').maybeSingle();
+    const accesAlertes = (drapeau as { acces: string } | null)?.acces ?? 'premium';
+    if (accesAlertes === 'disabled') rows = [];
+    else if (accesAlertes !== 'free' && rows.length > 0) {
+      const ids = [...new Set(rows.map((r) => r.user_id))];
+      const { data: pr, error: ePr } = await sb.from('profiles').select('id, is_premium').in('id', ids);
+      if (ePr) throw new Error(`profiles : ${ePr.message}`);
+      const autorises = new Set(((pr ?? []) as { id: string; is_premium: boolean | null }[]).filter((p) => p.is_premium).map((p) => p.id));
+      const avant = rows.length;
+      rows = rows.filter((r) => autorises.has(r.user_id));
+      if (rows.length !== avant) logger.info({ ignorees: avant - rows.length }, 'alertes de comptes non Premium ignorées');
+    }
     if (rows.length === 0) return { status: 'success', evaluated: 0, triggered: 0, message: null };
 
     // Derniers cours/variation par code.

@@ -3,6 +3,7 @@
 // intégrés (option B) et la stocke dans rapport_highlights. Alimente la « Revue
 // de résultats ». Protégé par CRON_SECRET. Sans ?code, traite toutes les sociétés
 // disposant d'un rapport (par lots). Tolérant : une société en échec n'arrête pas le lot.
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { resolveApiKey } from '@/lib/server/apiKeys';
@@ -125,10 +126,7 @@ async function processCode(admin: ReturnType<typeof getServiceClient>, code: str
 }
 
 export async function GET(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const provided = bearer ?? req.headers.get('x-cron-secret') ?? new URL(req.url).searchParams.get('secret');
-  if (!secret || provided !== secret) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
+  if (!cronAutorise(req)) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
 
   const [geminiKey, mistralKey] = await Promise.all([resolveApiKey('gemini'), resolveApiKey('mistral')]);
   if (!geminiKey && !mistralKey) {

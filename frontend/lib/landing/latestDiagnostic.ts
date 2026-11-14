@@ -1,5 +1,6 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
 
 /**
  * Dernier dossier d’analyse réellement généré, pour l'exemple de la
@@ -43,6 +44,8 @@ export async function getLatestDiagnostic(): Promise<LatestDiagnostic | null> {
       .from('diagnostic_reports')
       .select('code, generated_at, markdown_content')
       .in('code', eligibles)
+      // Jamais en vitrine un rapport de l'ancien prompt (verdict, objectif, stop).
+      .eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC)
       .order('generated_at', { ascending: false })
       .limit(1)
       .maybeSingle();

@@ -1,0 +1,56 @@
+{
+  "telecoms": {
+    "fichier": "/documents/activites/telecoms.jpg",
+    "photographe": "Umang & Meet",
+    "source": "https://www.pexels.com/photo/silhouette-of-a-telecommunication-tower-during-sunset-14523439/",
+    "licence": "Pexels"
+  },
+  "banque": {
+    "fichier": "/documents/activites/banque.jpg",
+    "photographe": "Paul Uchechukwu 🇳🇬",
+    "source": "https://www.pexels.com/photo/modern-skyscraper-view-in-lagos-skyline-39393241/",
+    "licence": "Pexels"
+  },
+  "plantations": {
+    "fichier": "/documents/activites/plantations.jpg",
+    "photographe": "Pok Rie",
+    "source": "https://www.pexels.com/photo/lush-palm-trees-growing-in-tropical-forest-4669542/",
+    "licence": "Pexels"
+  },
+  "agroalimentaire": {
+    "fichier": "/documents/activites/agroalimentaire.jpg",
+    "photographe": "cottonbro studio",
+    "source": "https://www.pexels.com/photo/stainless-steel-and-black-machine-5532717/",
+    "licence": "Pexels"
+  },
+  "energie": {
+    "fichier": "/documents/activites/energie.jpg",
+    "photographe": "LJs Journey",
+    "source": "https://www.pexels.com/photo/gas-station-at-night-18686327/",
+    "licence": "Pexels"
+  },
+  "electricite": {
+    "fichier": "/documents/activites/electricite.jpg",
+    "photographe": "Will Chen",
+    "source": "https://www.pexels.com/photo/sunset-silhouette-of-power-lines-in-taiwan-36490689/",
+    "licence": "Pexels"
+  },
+  "industrie": {
+    "fichier": "/documents/activites/industrie.jpg",
+    "photographe": "Felipe Silva",
+    "source": "https://www.pexels.com/photo/interior-of-factory-27102102/",
+    "licence": "Pexels"
+  },
+  "logistique": {
+    "fichier": "/documents/activites/logistique.jpg",
+    "photographe": "Jeeva K Vinoy",
+    "source": "https://www.pexels.com/photo/industrial-port-crane-at-a-busy-harbor-33885284/",
+    "licence": "Pexels"
+  },
+  "distribution": {
+    "fichier": "/documents/activites/distribution.jpg",
+    "photographe": "Nasiru othman",
+    "source": "https://www.pexels.com/photo/vibrant-outdoor-african-market-with-various-spices-40082919/",
+    "licence": "Pexels"
+  }
+}

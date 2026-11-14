@@ -73,9 +73,12 @@ Tout passe AA (4,5) dans les deux thèmes. Texte `bg` posé sur fond `accent-ink
 
 | Famille | Variable / classe | Usage |
 |---|---|---|
-| Bespoke Serif | `--font-display`, `font-display` (repli Georgia) | titres de page et de section, titres d'état vide |
-| Supreme | `--font-sans`, `font-sans` (repli Helvetica Neue, system-ui) | tout le texte courant |
-| JetBrains Mono | `--font-mono`, `.tabular` | chiffres uniquement (`tabular-nums`, interlettrage -0,01em) |
+| Geist | `--font-display`, `font-display` (interlettrage -0,025em) | titres de page et de section, titres d'état vide |
+| Geist | `--font-sans`, `font-sans` (repli Helvetica Neue, system-ui) | tout le texte courant |
+| Geist Mono | `--font-mono`, `.tabular` | chiffres uniquement (`tabular-nums`, interlettrage -0,01em) |
+| Instrument Serif italique | `--font-accent`, `.font-accent` | un mot souligné dans un titre, jamais un paragraphe |
+
+Depuis le 2026-11-12, la charte de la page d'accueil (`docs/CHARTE.md` §4) vaut pour tout le site : polices chargées par `next/font` (`lib/vitrine/polices.ts`), posées sur `<html>`, sans feuille externe. Titres de page (`SectionHeader`, `EnTeteCote`) : Geist 600, 34 à 44 px, interlettrage -0,04em. Bespoke Serif, Supreme et JetBrains Mono ne sont plus chargées.
 
 Le monospace est réservé aux chiffres : pas d'étiquette mono, pas de capitales espacées (retiré le 2026-11-05, `globals.css:186-190`).
 
@@ -148,6 +151,14 @@ En-tête de site (`SiteHeader`) : `sticky top-0 z-40`, `bg-surface/90` + `backdr
 ## 6. Signature : la source et l'heure du relevé
 
 Toute donnée de marché affichée dit d'où elle vient et quand elle a été relevée : source nommée (BRVM, Bulletin officiel de la cote, calendrier BRVM…), date de séance en toutes lettres, heure du relevé pour l'intraday. En `text-xs` `faint` (5,2 à 5,8 : lisible), sous la donnée, jamais en infobulle seule. Une donnée périmée est signalée comme telle (« séance précédente »), jamais présentée comme actuelle. Pas de mention, pas de chiffre.
+
+## 6 bis. Page d'accueil (vitrine)
+
+La page d'accueil (`app/page.tsx`) suit sa propre charte : **`docs/CHARTE.md`** (Geist, Instrument Serif, Geist Mono ; bandes sombres et claires alternées quel que soit le thème), et la maquette `docs/maquettes/maquette-accueil-westbourse.html`. La mise en page est portée par `.vitrine` (`components/vitrine/vitrine.css`) ; les polices, elles, sont communes à tout le site (§3). Les bandes `.bande-sombre` / `.bande-claire` redéclarent les jetons localement.
+
+Briques de mouvement (`components/vitrine/mouvement/`) : `Apparition` (entrée au défilement), `TitreMots` (titre mot par mot), `Compteur`, `TraceCourbe`, `Vague` / `VagueElement` (entrée décalée d'une liste), `BarreQuiPousse` (échelle, jamais la largeur), `Bandeau` (boucle CSS, pause au survol), `Sequence` (film de séance).
+
+Règle `useArme` (`mouvement/useArme.ts`) : le HTML serveur et le premier rendu montrent **toujours l'état final**. Une entrée n'est armée qu'après le montage, et seulement pour un bloc alors sous la ligne de flottaison ; ce qui est déjà à l'écran ne disparaît jamais pour réapparaître. `prefers-reduced-motion` = état final partout. Ni formulaire ni encart publicitaire n'est animé.
 
 ## 7. Interdits
 

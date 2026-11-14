@@ -103,6 +103,77 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
     );
   }
 
+  if (donnees.vue === 'cours') {
+    const { lignes, dateCours, manquants } = donnees;
+    if (lignes.length === 0) return <Manquants codes={manquants} />;
+    const actions = lignes[0]?.cout != null ? Math.round(lignes[0].cout / lignes[0].cours) : null;
+    return (
+      <figure className="lp-figure">
+        <Entete titre="Le prix d’une action, sur des valeurs de la BRVM" />
+        <div className="lp-table-wrap">
+          <table className="lp-table">
+            <caption className="sr-only">Dernier cours de valeurs de la BRVM</caption>
+            <thead>
+              <tr>
+                <th scope="col">Société</th>
+                <th scope="col" className="lp-num">Cours d’une action (FCFA)</th>
+                {actions && <th scope="col" className="lp-num">Pour {nombre(actions)} actions, hors frais (FCFA)</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {lignes.map((l) => (
+                <tr key={l.code}>
+                  <th scope="row" className="lp-ligne-tete">
+                    {l.nom}
+                    <span className="lp-cellule-detail">{l.code}</span>
+                  </th>
+                  <td className="lp-num">{nombre(l.cours)}</td>
+                  {actions && <td className="lp-num">{l.cout != null ? nombre(l.cout) : '—'}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <ul className="lp-hypotheses">
+          {dateCours && <li>Dernier cours enregistré, séance du {dateFr(dateCours)}. Source : BRVM, via la base WestBourse.</li>}
+          <li>Un cours bas ne signifie pas une action bon marché : il dépend du nombre de titres de la société.</li>
+        </ul>
+        <Manquants codes={manquants} />
+      </figure>
+    );
+  }
+
+  if (donnees.vue === 'indices') {
+    const { lignes, date, manquants } = donnees;
+    if (lignes.length === 0) return <Manquants codes={manquants} />;
+    return (
+      <figure className="lp-figure">
+        <Entete titre="Les indices à la dernière séance" />
+        <dl className="lp-chiffres">
+          {lignes.map((l) => (
+            <div key={l.code} className="lp-chiffre">
+              <dt>
+                {l.libelle}
+                {l.variationPct != null && (
+                  <span className="lp-chiffre-detail">
+                    {l.variationPct > 0 ? '+' : l.variationPct < 0 ? '−' : ''}
+                    {pct(Math.abs(l.variationPct))} sur la séance
+                  </span>
+                )}
+              </dt>
+              <dd>{nombre(l.valeur)} pts</dd>
+            </div>
+          ))}
+        </dl>
+        <ul className="lp-hypotheses">
+          {date && <li>Séance du {dateFr(date)}. Source : BRVM, via la base WestBourse.</li>}
+          <li>Un indice mesure les cours : les dividendes n’y entrent pas.</li>
+        </ul>
+        <Manquants codes={manquants} />
+      </figure>
+    );
+  }
+
   const { exercices, lignes, manquants } = donnees;
   if (lignes.length === 0) return <Manquants codes={manquants} />;
   const nonVerifiee = lignes.some((l) => l.montants.some((m) => m.montant != null && !m.baseNette));

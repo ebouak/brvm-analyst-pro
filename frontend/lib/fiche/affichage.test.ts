@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
+  perAffichable, roeAffichable, montantDividende, dividendesAffichables, distributionAffichable, evolutionResultat, horsExploitation,
   dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, moisAnnee, insecable, libelleEvenement,
 } from './affichage';
 
@@ -9,6 +9,38 @@ const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
 describe('perAffichable', () => {
   it('non calculable si BPA ≤ 0', () => expect(perAffichable(-271.42, -7.18)).toEqual({ valeur: null, motif: 'non calculable, perte' }));
   it('rend le PER si BPA > 0', () => expect(perAffichable(12.3, 40)).toEqual({ valeur: 12.3, motif: null }));
+});
+
+describe('perAffichable : non significatif (audit 2026-11-13)', () => {
+  it('n.s. au-delà de 100', () => expect(perAffichable(519.4, 3)).toEqual({ valeur: null, motif: 'n.s., bénéfice très faible' }));
+  it('100 exactement reste affiché', () => expect(perAffichable(100, 10)).toEqual({ valeur: 100, motif: null }));
+  it('PER négatif = perte, même sans BPA fourni', () => expect(perAffichable(-62.7, null)).toEqual({ valeur: null, motif: 'non calculable, perte' }));
+});
+
+describe('roeAffichable', () => {
+  it('n.s. si capitaux propres négatifs (UNLC)', () => expect(roeAffichable(-0.06, -10.66e9)).toEqual({ valeur: null, motif: 'n.s., capitaux propres négatifs' }));
+  it('rend le ROE sinon', () => expect(roeAffichable(0.296, 1399e9)).toEqual({ valeur: 0.296, motif: null }));
+  it('non disponible sans ROE', () => expect(roeAffichable(null, null)).toEqual({ valeur: null, motif: 'non disponible' }));
+});
+
+describe('montantDividende', () => {
+  it('garde les décimales officielles', () => {
+    expect(sp(montantDividende(597.53))).toBe('597,53 FCFA');
+    expect(sp(montantDividende(0.92))).toBe('0,92 FCFA');
+  });
+  it('entier sans décimales', () => expect(sp(montantDividende(174))).toBe('174 FCFA'));
+});
+
+describe('dividendesAffichables', () => {
+  it('écarte sans exercice et montant nul, trie par exercice décroissant', () => {
+    const r = dividendesAffichables([
+      { exercice: null, montant: 121 },
+      { exercice: 2024, montant: 0 },
+      { exercice: 2023, montant: 206 },
+      { exercice: 2025, montant: 201.52 },
+    ]);
+    expect(r.map((l) => l.exercice)).toEqual([2025, 2023]);
+  });
 });
 
 describe('distributionAffichable', () => {
@@ -74,22 +106,26 @@ describe('volumeAuDessusMoyenne', () => {
 });
 
 describe('ligneVerdict', () => {
-  it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal Attente · score 0,44. Séance en hausse de 5,41 %.'));
-  it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal Vente · score −0,70. Séance en baisse de 2,00 %.'));
+  it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal neutre · score 0,44. Séance en hausse de 5,41 %.'));
+  it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal baissier · score −0,70. Séance en baisse de 2,00 %.'));
   it('null sans signal', () => expect(ligneVerdict(null, null, 1)).toBeNull());
-  it('variation absente : aucune phrase de séance', () => expect(ligneVerdict('HOLD', 0.4412, null)).toBe('Signal Attente · score 0,44.'));
-  it('variation nulle : séance stable', () => expect(ligneVerdict('HOLD', 0.4412, 0)).toBe('Signal Attente · score 0,44. Séance stable.'));
-  it('score arrondi à zéro : pas de −0,00', () => expect(ligneVerdict('HOLD', -0.001, 1)).toBe('Signal Attente · score 0,00. Séance en hausse de 1,00 %.'));
+  it('variation absente : aucune phrase de séance', () => expect(ligneVerdict('HOLD', 0.4412, null)).toBe('Signal neutre · score 0,44.'));
+  it('variation nulle : séance stable', () => expect(ligneVerdict('HOLD', 0.4412, 0)).toBe('Signal neutre · score 0,44. Séance stable.'));
+  it('score arrondi à zéro : pas de −0,00', () => expect(ligneVerdict('HOLD', -0.001, 1)).toBe('Signal neutre · score 0,00. Séance en hausse de 1,00 %.'));
 });
 
 describe('syntheseExercice', () => {
   it('STAC 2025', () => {
     expect(syntheseExercice({ croissanceCaPct: 116.3, evolution: evolutionResultatDetail(-96.6e6, -348.2e6), resultatExploitation: -772e6, horsExpl: 776.3e6 }))
-      .toBe("Le chiffre d'affaires a plus que doublé et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
+      .toBe("Le chiffre d'affaires a plus que doublé (+116,3 %) et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
   });
   it('hausse', () => {
     expect(sp(syntheseExercice({ croissanceCaPct: 10, evolution: evolutionResultatDetail(120, 100), resultatExploitation: 5, horsExpl: 0 })))
-      .toBe("Le chiffre d'affaires progresse et le résultat net progresse de 20,0 %.");
+      .toBe("Le chiffre d'affaires progresse de 10,0 % et le résultat net de 20,0 %.");
+  });
+  it('sens opposés : chaque membre garde son verbe', () => {
+    expect(sp(syntheseExercice({ croissanceCaPct: 8.3, evolution: evolutionResultatDetail(95, 100), resultatExploitation: 5, horsExpl: 0 })))
+      .toBe("Le chiffre d'affaires progresse de 8,3 % et le résultat net recule de 5,0 %.");
   });
   it('exactement 100 % : a doublé', () => {
     expect(syntheseExercice({ croissanceCaPct: 100, evolution: null, resultatExploitation: null, horsExpl: null })).toBe("Le chiffre d'affaires a doublé.");
@@ -189,7 +225,7 @@ describe('insecable', () => {
 describe('libelleEvenement', () => {
   it('accentue les types bruts', () => {
     expect(libelleEvenement('resultats')).toBe('Résultats');
-    expect(libelleEvenement('assemblee')).toBe('Assemblée');
+    expect(libelleEvenement('assemblee')).toBe('Assemblée générale');
   });
   it('type inconnu : première lettre en capitale, tirets en espaces', () => expect(libelleEvenement('opération_titres')).toBe('Opération titres'));
 });

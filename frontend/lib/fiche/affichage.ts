@@ -5,10 +5,56 @@ const moins = (s: string) => s.replace('-', '−'); // U+2212, comme le reste du
 
 export interface Affichable { valeur: number | null; motif: string | null }
 
+/**
+ * Au-delà de ce PER, le bénéfice est trop faible pour que le ratio mesure une
+ * valorisation : BNBC 519×, UNLC 670×, SEMC 837× (audit du 2026-11-13). On
+ * l'écrit « n.s. » plutôt que d'afficher un chiffre qui ne dit rien.
+ */
+export const PER_NON_SIGNIFICATIF = 100;
+
 export function perAffichable(per: number | null, bpa: number | null): Affichable {
   if (bpa != null && bpa <= 0) return { valeur: null, motif: 'non calculable, perte' };
+  if (per != null && per < 0) return { valeur: null, motif: 'non calculable, perte' };
   if (per == null) return { valeur: null, motif: 'non disponible' };
+  if (per > PER_NON_SIGNIFICATIF) return { valeur: null, motif: 'n.s., bénéfice très faible' };
   return { valeur: per, motif: null };
+}
+
+/** ROE : sans objet quand les capitaux propres sont négatifs (le signe du ratio n'aurait plus de sens). */
+export function roeAffichable(roe: number | null, capitauxPropres: number | null): Affichable {
+  if (capitauxPropres != null && capitauxPropres <= 0) return { valeur: null, motif: 'n.s., capitaux propres négatifs' };
+  if (roe == null) return { valeur: null, motif: 'non disponible' };
+  return { valeur: roe, motif: null };
+}
+
+/**
+ * Dividende retenu pour le rendement de la fiche société : le plus récent qui a
+ * une date de détachement vérifiée, sinon le dernier affichable (exercice connu,
+ * montant > 0). Source UNIQUE, partagée par la fiche et le contrôle quotidien des
+ * écarts avec le Bulletin officiel (`lib/boc/ecarts.ts`) : deux règles voisines
+ * finiraient par comparer deux rendements différents.
+ * `lignes` doit être trié par exercice décroissant, nulls en dernier.
+ */
+export function dividendePourRendement<T extends { exercice: number | null; montant: number; ex_date: string | null }>(lignes: T[]): T | null {
+  return lignes.find((d) => d.ex_date && d.montant > 0) ?? dividendesAffichables(lignes)[0] ?? null;
+}
+
+/** Montant de dividende : décimales gardées quand le montant officiel en a (597,53 ; 0,92), entier sinon. */
+export function montantDividende(montant: number): string {
+  const entier = Math.abs(montant - Math.round(montant)) < 0.005;
+  return `${nf(montant, entier ? 0 : 2)} FCFA`;
+}
+
+/**
+ * Lignes de dividende affichables dans un historique : une ligne sans exercice
+ * n'est pas datable, et un montant nul ou négatif n'est pas un versement. Ces
+ * lignes restent en base (leur fausseté n'est pas prouvée, voir CLAUDE.md
+ * 2026-09-08) mais ne s'affichent plus, triées par exercice décroissant.
+ */
+export function dividendesAffichables<T extends { exercice: number | null; montant: number }>(lignes: T[]): T[] {
+  return lignes
+    .filter((l) => l.exercice != null && l.montant > 0)
+    .sort((a, b) => (b.exercice as number) - (a.exercice as number));
 }
 
 /** BPA, source unique : résultat net ÷ nombre de titres, arrondi à 2 décimales. */
@@ -81,7 +127,9 @@ export function ligneVerdict(signal: string | null, score: number | null, variat
   if (!signal) return null;
   const sc = score != null ? (Math.round(score * 100) === 0 ? 0 : score) : null;
   const s = sc != null ? ` · score ${moins(nf(sc, 2))}` : '';
-  const base = `Signal ${libelleSignal(signal)}${s}.`;
+  // « Signal haussier », « Signal neutre » : jamais « Signal Signal baissier » (libellés du lot B).
+  const lib = libelleSignal(signal);
+  const base = `${lib.toLowerCase().startsWith('signal ') ? lib : `Signal ${lib.toLowerCase()}`}${s}.`;
   if (variationPct == null) return base;
   if (Math.round(variationPct * 100) === 0) return `${base} Séance stable.`;
   return `${base} Séance en ${variationPct > 0 ? 'hausse' : 'baisse'} de ${nf(Math.abs(variationPct), 2)} %.`;
@@ -102,12 +150,29 @@ const PHRASE_EVOLUTION = (d: EvolutionDetail): string => {
 
 /** Synthèse d'un exercice construite uniquement sur quatre valeurs déjà affichées. */
 export function syntheseExercice(p: { croissanceCaPct: number | null; evolution: ReturnType<typeof evolutionResultatDetail>; resultatExploitation: number | null; horsExpl: number | null }): string | null {
+  // Chaque membre porte son chiffre ; quand les deux vont dans le même sens, le
+  // verbe n'est pas répété (« progresse de 8,3 % et le résultat net de 5,1 % »).
   const morceaux: string[] = [];
+  let sensCa: 'hausse' | 'baisse' | null = null;
   if (p.croissanceCaPct != null) {
     const c = p.croissanceCaPct;
-    morceaux.push(c > 100 ? "le chiffre d'affaires a plus que doublé" : c === 100 ? "le chiffre d'affaires a doublé" : c >= 0 ? "le chiffre d'affaires progresse" : "le chiffre d'affaires recule");
+    const v = `${nf(Math.abs(c), 1)} %`;
+    if (c > 100) morceaux.push(`le chiffre d'affaires a plus que doublé (+${v})`);
+    else if (c === 100) morceaux.push("le chiffre d'affaires a doublé");
+    else if (Math.abs(c) < 0.05) morceaux.push("le chiffre d'affaires est stable");
+    else {
+      sensCa = c > 0 ? 'hausse' : 'baisse';
+      morceaux.push(`le chiffre d'affaires ${c > 0 ? 'progresse' : 'recule'} de ${v}`);
+    }
   }
-  if (p.evolution) morceaux.push(PHRASE_EVOLUTION(p.evolution));
+  if (p.evolution) {
+    const e = p.evolution;
+    morceaux.push(
+      (e.type === 'hausse' || e.type === 'baisse') && e.type === sensCa && e.pct != null
+        ? `le résultat net de ${nf(e.pct, 1)} %`
+        : PHRASE_EVOLUTION(e),
+    );
+  }
   let s = morceaux.join(' et ');
   if (p.resultatExploitation != null && p.resultatExploitation < 0 && p.horsExpl != null && p.horsExpl > 0) {
     s += (s ? ', mais ' : '') + "l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation";
@@ -178,18 +243,5 @@ export function insecable(texte: string): string {
   return texte.replace(/(\d) (?=(?:Md|M|k|FCFA|%))/g, '$1 ').replace(/( (?:Md|M|k)) (?=FCFA)/g, '$1 ');
 }
 
-const TYPES_EVENEMENT: Record<string, string> = {
-  resultats: 'Résultats', resultat: 'Résultat', assemblee: 'Assemblée', dividende: 'Dividende', dividendes: 'Dividendes',
-  operation: 'Opération', operations: 'Opérations', publication: 'Publication', communique: 'Communiqué',
-  notation: 'Notation', nomination: 'Nomination', autre: 'Autre',
-};
-
-/** Type d'événement brut (« resultats ») → libellé accentué (« Résultats »). */
-export function libelleEvenement(type: string | null | undefined): string {
-  const t = (type ?? '').trim();
-  if (!t) return '';
-  const cle = t.toLowerCase();
-  if (TYPES_EVENEMENT[cle]) return TYPES_EVENEMENT[cle]!;
-  const propre = t.replace(/[_-]+/g, ' ');
-  return propre.charAt(0).toUpperCase() + propre.slice(1);
-}
+/** Table unique des libellés d'événements : voir lib/evenements/libelles.ts. */
+export { libelleEvenement } from '@/lib/evenements/libelles';

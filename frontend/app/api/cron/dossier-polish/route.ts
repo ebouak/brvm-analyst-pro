@@ -10,8 +10,8 @@
 //
 // Auth : bearer CRON_SECRET (convention Vercel Cron). PAS de secret en query
 // string — il finirait dans les journaux d'accès.
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { rediger } from '@/lib/server/redacteur';
 import { buildDossier } from '@/lib/dossier/build';
@@ -21,14 +21,7 @@ import { construireSquelette, validerProse, type SectionProse, type Squelette } 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-function autorise(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!secret || !bearer) return false;
-  const a = Buffer.from(secret, 'utf8');
-  const b = Buffer.from(bearer, 'utf8');
-  return a.length === b.length && timingSafeEqual(a, b);
-}
+const autorise = (req: Request): boolean => cronAutorise(req);
 
 /**
  * Même contrat que scraper/src/hebdo/polish.ts : reformuler, sans rien

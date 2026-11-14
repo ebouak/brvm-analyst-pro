@@ -11,16 +11,16 @@ export interface FSInputs {
   peers: Record<string,(number|null)[]>; sectorPeers?: Record<string,(number|null)[]>;
 }
 function pct(v:number|null,arr:(number|null)[]|undefined,hib:boolean){ if(!arr) return null; return calculatePercentile(v,arr,hib); }
-function useArr(inp:FSInputs,k:string){ const sp=inp.sectorPeers?.[k]; if(sp && sp.filter((x)=>x!=null && isFiniteNumber(x as number)).length>=5) return sp; return inp.peers[k]; }
+function pairsUtiles(inp:FSInputs,k:string){ const sp=inp.sectorPeers?.[k]; if(sp && sp.filter((x)=>x!=null && isFiniteNumber(x as number)).length>=5) return sp; return inp.peers[k]; }
 export function computeFinancialStrengthScore(inp:FSInputs): { score:number|null; factors:Record<string,FactorScore>; notes:string[] }{
   const notes:string[]=[]; const isBank=inp.sector==='banks'; const isIns=inp.sector==='insurance';
   let factors:Record<string,FactorScore>={};
   if(isBank){
-    const caPct=pct(inp.capitalAdequacy??null,useArr(inp,'capitalAdequacy'),true);
-    const nplPct=pct(inp.nplRatio??null,useArr(inp,'nplRatio'),false);
-    const covPct=pct(inp.nplCoverage??null,useArr(inp,'nplCoverage'),true);
-    const liqPct=pct(inp.liquidityRatio??null,useArr(inp,'liquidityRatio'),true);
-    const depPct=pct(inp.depositGrowth??null,useArr(inp,'depositGrowth'),true);
+    const caPct=pct(inp.capitalAdequacy??null,pairsUtiles(inp,'capitalAdequacy'),true);
+    const nplPct=pct(inp.nplRatio??null,pairsUtiles(inp,'nplRatio'),false);
+    const covPct=pct(inp.nplCoverage??null,pairsUtiles(inp,'nplCoverage'),true);
+    const liqPct=pct(inp.liquidityRatio??null,pairsUtiles(inp,'liquidityRatio'),true);
+    const depPct=pct(inp.depositGrowth??null,pairsUtiles(inp,'depositGrowth'),true);
     const hasPrud = caPct!=null || nplPct!=null;
     if(!hasPrud){ notes.push('Données prudentielles insuffisantes: score plafonné à 70'); }
     factors={
@@ -36,10 +36,10 @@ export function computeFinancialStrengthScore(inp:FSInputs): { score:number|null
     let score=clamp(Math.round(sum),0,100); if(!hasPrud) score=Math.min(score,70); return {score,factors,notes};
   }
   if(isIns){
-    const solvPct=pct(inp.solvencyRatio??null,useArr(inp,'solvencyRatio'),true);
-    const crPct=pct(inp.combinedRatio??null,useArr(inp,'combinedRatio'),false);
-    const provPct=pct(inp.provisionCoverage??null,useArr(inp,'provisionCoverage'),true);
-    const liqPct=pct(inp.liquidityRatio??null,useArr(inp,'liquidityRatio'),true);
+    const solvPct=pct(inp.solvencyRatio??null,pairsUtiles(inp,'solvencyRatio'),true);
+    const crPct=pct(inp.combinedRatio??null,pairsUtiles(inp,'combinedRatio'),false);
+    const provPct=pct(inp.provisionCoverage??null,pairsUtiles(inp,'provisionCoverage'),true);
+    const liqPct=pct(inp.liquidityRatio??null,pairsUtiles(inp,'liquidityRatio'),true);
     const hasPrud=solvPct!=null;
     if(!hasPrud) notes.push('Solvabilité indisponible: score plafonné à 70');
     factors={
@@ -53,11 +53,11 @@ export function computeFinancialStrengthScore(inp:FSInputs): { score:number|null
     const wSum=avail.reduce((a,f)=>a+f.weight,0); let sum=avail.reduce((a,f)=>a+(f.percentile!*(f.weight/wSum)),0);
     let score=clamp(Math.round(sum),0,100); if(!hasPrud) score=Math.min(score,70); return {score,factors,notes};
   }
-  const icPct=pct(inp.interestCoverage??null,useArr(inp,'interestCoverage'),true);
-  const ndPct=pct(inp.netDebtToEbitda??null,useArr(inp,'netDebtToEbitda'),false);
-  const dePct=pct(inp.debtToEquity??null,useArr(inp,'debtToEquity'),false);
-  const crPct=pct(inp.currentRatio??null,useArr(inp,'currentRatio'),true);
-  const fcfPct=pct(inp.fcfToDebt??null,useArr(inp,'fcfToDebt'),true);
+  const icPct=pct(inp.interestCoverage??null,pairsUtiles(inp,'interestCoverage'),true);
+  const ndPct=pct(inp.netDebtToEbitda??null,pairsUtiles(inp,'netDebtToEbitda'),false);
+  const dePct=pct(inp.debtToEquity??null,pairsUtiles(inp,'debtToEquity'),false);
+  const crPct=pct(inp.currentRatio??null,pairsUtiles(inp,'currentRatio'),true);
+  const fcfPct=pct(inp.fcfToDebt??null,pairsUtiles(inp,'fcfToDebt'),true);
   factors={
     interestCoverage:{value:inp.interestCoverage??null,percentile:icPct,weight:0.30,weightedScore:icPct!=null?icPct*0.30:null,source:'IC',notes:[]},
     netDebtToEbitda:{value:inp.netDebtToEbitda??null,percentile:ndPct,weight:0.25,weightedScore:ndPct!=null?ndPct*0.25:null,source:'ND/EBITDA',notes:[]},

@@ -6,7 +6,8 @@ import LiquiditeSaison from '@/components/seasonality/LiquiditeSaison';
 import { habitudes } from '@/lib/seasonality/frise';
 import FriseEvenements from '@/components/seasonality/FriseEvenements';
 import FenetreEvenement from '@/components/seasonality/FenetreEvenement';
-import ConfrontationMois, { phraseConfrontation } from '@/components/seasonality/ConfrontationMois';
+import ConfrontationMois from '@/components/seasonality/ConfrontationMois';
+import { phraseConfrontation } from '@/lib/seasonality/phrase';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
 import { canAccess } from '@/lib/server/featureAccess';
 import { EnTeteCote } from '@/components/marche/EnTeteCote';
@@ -25,10 +26,28 @@ export default async function SaisonnalitePage(props: { searchParams?: Promise<{
 
   const sb = createPublicClient();
   // Actions ET obligations : l'essai gratuit doit pouvoir porter sur l'un ou l'autre.
-  const { data: instr } = await sb
-    .from('brvm_instruments').select('code, designation, type')
-    .in('type', ['action', 'obligation']).order('code');
-  const instruments = (instr ?? []) as { code: string; designation: string | null; type: string }[];
+  // Sans filtre, la liste proposait 331 titres, dont des obligations échues depuis 2017
+  // (`actif` ne les distingue pas : toutes y sont à true). On écarte les obligations
+  // dont la maturité publiée à la dernière séance est passée ; une maturité absente
+  // ne prouve rien, la ligne reste. Actions d'abord, puis obligations.
+  const [{ data: instr }, { data: derniereObl }] = await Promise.all([
+    sb.from('brvm_instruments').select('code, designation, type')
+      .in('type', ['action', 'obligation']).eq('actif', true).order('code'),
+    sb.from('brvm_obligations_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  const aujourdHui = new Date().toISOString().slice(0, 10);
+  const { data: echues } = derniereObl
+    ? await sb.from('brvm_obligations_daily').select('code')
+        .eq('date_marche', (derniereObl as { date_marche: string }).date_marche).lt('maturite', aujourdHui)
+    : { data: [] };
+  const codesEchus = new Set(((echues ?? []) as { code: string }[]).map((e) => e.code));
+  const instruments = ((instr ?? []) as { code: string; designation: string | null; type: string }[])
+    .filter((i) => !(i.type === 'obligation' && codesEchus.has(i.code)))
+    .sort((a, b) => (a.type === b.type ? 0 : a.type === 'action' ? -1 : 1));
+  const groupes = [
+    { libelle: 'Actions', titres: instruments.filter((i) => i.type === 'action') },
+    { libelle: 'Obligations', titres: instruments.filter((i) => i.type === 'obligation') },
+  ].filter((g) => g.titres.length > 0);
 
   const code = (searchParams?.code ?? instruments[0]?.code ?? 'PALC').toUpperCase();
   const saison = await getSaisonValeur(code).catch(() => null);
@@ -64,7 +83,11 @@ export default async function SaisonnalitePage(props: { searchParams?: Promise<{
             disabled={preview}
             className="mt-1 block min-h-[44px] min-w-0 max-w-full rounded-lg border border-border bg-bg px-3 text-sm text-ivory transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {instruments.map((i) => <option key={i.code} value={i.code}>{i.code}{i.designation ? `, ${i.designation}` : ''}</option>)}
+            {groupes.map((g) => (
+              <optgroup key={g.libelle} label={g.libelle}>
+                {g.titres.map((i) => <option key={i.code} value={i.code}>{i.code}{i.designation ? `, ${i.designation}` : ''}</option>)}
+              </optgroup>
+            ))}
           </select>
         </label>
         {preview ? (
@@ -147,7 +170,7 @@ export default async function SaisonnalitePage(props: { searchParams?: Promise<{
           inachevé, les mois sans échange, les reprises et les variations non expliquées sont exclus. La fiabilité de chaque
           mois est calculée : la plupart des régularités par valeur ne se distinguent pas du hasard et ne se sont pas
           répétées l’année suivante. Ce n’est pas un conseil en investissement.{' '}
-          <Link href="/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
+          <Link href="/premium/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
         </LigneSource>
       </section>
     </div>

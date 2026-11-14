@@ -14,7 +14,6 @@ export interface ActionUnivers extends SimAction {
  * Toute métrique manquante reste `null` — jamais inventée. Partagé par le
  * simulateur de budget et la recherche des sociétés : un seul calcul.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function chargerUniversActions(supabase: SupabaseClient<any, any, any>): Promise<{ univers: ActionUnivers[]; dateSeance: string | null }> {
   const { data: lastRow } = await supabase
     .from('brvm_actions_daily')

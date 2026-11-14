@@ -109,7 +109,7 @@ export default function IntraDayMonitoringDashboard({
 
       {hasHighErrorRate && !hasFailures && (
         <div className="rounded-panel border border-warn/30 bg-warn/10 p-4">
-          <span className="font-semibold text-warn">Taux d'erreur élevé : {errorRate.toFixed(0)}%</span>
+          <span className="font-semibold text-warn">Taux d&apos;erreur élevé : {errorRate.toFixed(0)}%</span>
         </div>
       )}
 

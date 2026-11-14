@@ -1,6 +1,7 @@
 import { getAnomaliesData } from '@/lib/premium/anomalies';
 import { AnomalieCharts } from '@/components/premium/AnomalieCharts';
 import { SectionHeader, StatPill, PremiumPanel, MetricCard, EmptyStatePremium } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export default async function AnomaliesPage() {
   const data = await getAnomaliesData();
@@ -49,14 +50,14 @@ export default async function AnomaliesPage() {
           accent="gold"
         />
         <MetricCard
-          label="Opportunités ACHAT"
+          label="Écarts haussiers détectés"
           value={String(buyCount)}
           deltaDir="up"
           delta="BUY"
           accent="emerald"
         />
         <MetricCard
-          label="Alertes VENTE"
+          label="Écarts baissiers détectés"
           value={String(sellCount)}
           deltaDir="down"
           delta="SELL"
@@ -75,15 +76,15 @@ export default async function AnomaliesPage() {
         <span className="text-xs font-semibold text-faint">Légende</span>
         <span className="flex items-center gap-1.5 text-xs text-up">
           <span className="w-2 h-2 rounded-full bg-up inline-block" />
-          Achat
+          Haussier
         </span>
         <span className="flex items-center gap-1.5 text-xs text-warn">
           <span className="w-2 h-2 rounded-full bg-warn inline-block" />
-          Conserver
+          Neutre
         </span>
         <span className="flex items-center gap-1.5 text-xs text-down">
           <span className="w-2 h-2 rounded-full bg-down inline-block" />
-          Vente
+          Baissier
         </span>
       </div>
 
@@ -101,6 +102,11 @@ export default async function AnomaliesPage() {
           icon="◈"
         />
       )}
+      <EtMaintenant suites={[
+              { href: '/premium/correlations', titre: 'Corrélations', detail: 'Comment les valeurs évoluent ensemble.' },
+              { href: '/premium/outils', titre: 'Outils Pro', detail: 'Les autres outils d’analyse.' },
+              { href: '/actions', titre: 'Le marché', detail: 'Les valeurs cotées à la BRVM.' },
+            ]} />
 
     </div>
   );

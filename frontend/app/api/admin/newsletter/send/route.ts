@@ -8,7 +8,7 @@ import {
   sendNewsletter,
   type NewsletterTopic,
 } from '@/lib/newsletter/send';
-import { siteUrl } from '@/lib/email/templates';
+import { UNSUB_PLACEHOLDER } from '@/lib/newsletter/unsubscribe';
 
 const VALID_TOPICS: NewsletterTopic[] = [
   'weekly_commodity',
@@ -57,24 +57,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // Construire le lien de désinscription (token = placeholder, table sans token ici)
-  const base = siteUrl();
-  const unsubscribeUrl = `${base}/unsubscribe`;
-
+  // Le lien de désabonnement est propre à chaque destinataire : posé à l'envoi.
   // Construire le HTML email
   const htmlBody = buildWeeklyHtml({
     titre: report.titre,
     resume: report.resume,
     slug: report.slug,
     tickerCodes: report.ticker_codes,
-    unsubscribeUrl,
+    unsubscribeUrl: UNSUB_PLACEHOLDER,
   });
 
   const subject = `[WESTBOURSE] ${report.titre}`;
   const previewText = report.resume ?? report.titre;
 
   // Récupérer les destinataires
-  let recipients: string[];
+  let recipients: Awaited<ReturnType<typeof getRecipients>>;
   try {
     recipients = await getRecipients(topic);
   } catch (e) {

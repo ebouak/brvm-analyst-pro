@@ -81,10 +81,10 @@ export function LoginMarketBar({ asOf, ticks, candles }: { asOf: string | null; 
   const doubled = [...ticks, ...ticks];
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col overflow-hidden">
       {/* Ticker des cours du jour */}
       <div
-        className="border-b border-white/5 bg-black/40 py-2 backdrop-blur-sm"
+        className="overflow-hidden border-b border-white/5 bg-black/40 py-2 backdrop-blur-sm"
         style={{ maskImage: 'linear-gradient(90deg,transparent,black 5%,black 95%,transparent)', WebkitMaskImage: 'linear-gradient(90deg,transparent,black 5%,black 95%,transparent)' }}
       >
         <div className="flex w-max animate-ticker gap-7 whitespace-nowrap px-4 font-mono">

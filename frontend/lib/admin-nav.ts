@@ -11,6 +11,7 @@ export interface AdminNavItem {
 export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin', label: "Vue d'ensemble" },
   { href: '/admin/controle', label: 'Tour de contrôle', permission: 'scraping.read' },
+  { href: '/admin/controle/boc', label: 'Écarts BOC', permission: 'scraping.read' },
   { href: '/admin/users', label: 'Utilisateurs', permission: 'users.read' },
   { href: '/admin/organizations', label: 'Organisations', permission: 'users.read' },
   { href: '/admin/subscriptions', label: 'Abonnements', permission: 'subscriptions.read' },

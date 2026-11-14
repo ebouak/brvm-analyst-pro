@@ -27,10 +27,25 @@ const nextConfig = {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
       { source: '/premium/backtesting', destination: '/backtest', permanent: true },
+      // Seconde version du tableau de bord retirée le 2026-11-11 : ses deux apports
+      // (verdict à règle affichée, cote sur un axe unique) sont repris dans
+      // /dashboard, bloc « Lecture de la séance ».
+      { source: '/dashboard/v2', destination: '/dashboard', permanent: true },
       // /rendement-reel fusionné dans /rendement-vrai (vue « cours seul · réel »).
       // 308 edge — les query params entrants (code, annees) sont conservés et
       // fusionnés avec mode=reel. Consolide le SEO des deux anciennes URL.
       { source: '/rendement-reel', destination: '/rendement-vrai?mode=reel', permanent: true },
+      // Refonte de l'espace Rapports (2026-11-12, lot 2) : quatre produits restent
+      // (Dossier valeur, Revue de résultats, Événements, Relevé mensuel). Les
+      // anciennes pages redirigent pour qu'aucun lien ne casse.
+      { source: '/reports', destination: '/dashboard/reports/events', permanent: true },
+      { source: '/dashboard/reports', destination: '/dashboard/reports/events', permanent: true },
+      { source: '/dashboard/reports/market/daily', destination: '/dashboard/reports/events', permanent: true },
+      { source: '/dashboard/reports/sector/:sector', destination: '/dashboard/reports/events', permanent: true },
+      { source: '/dashboard/reports/instrument/:code', destination: '/actions/:code', permanent: true },
+      { source: '/rapports/builder', destination: '/rapports/dossiers', permanent: true },
+      { source: '/rapports/print', destination: '/rapports/dossiers', permanent: true },
+      { source: '/actions/:code/rapport', destination: '/rapports/dossier/:code', permanent: true },
     ];
   },
   // En-têtes de sécurité HTTP sur toutes les routes. (Étaient définis dans un

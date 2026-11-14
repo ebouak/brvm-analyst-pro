@@ -1,0 +1,86 @@
+name: Contrôle quotidien BOC (cote officielle et écarts)
+
+# 1. Collecte la cote officielle du dernier Bulletin Officiel de la Cote
+#    (statut SP, clôture, référence, PER, dernier dividende) dans boc_cote_daily.
+# 2. Appelle /api/cron/controle-boc : PER et rendement du site recalculés au
+#    cours du bulletin, alerte Telegram exploitant au-delà de 3 % d'écart.
+#
+# Le bulletin paraît après la clôture, parfois le lendemain : passage le matin
+# suivant, après celui du carnet (07:30 UTC). La collecte est idempotente.
+# Le job devient ROUGE si la collecte échoue, si la base ne contient pas la
+# séance attendue ou si la route ne répond pas 200 (un run vert doit prouver
+# que la donnée est arrivée, pas seulement que le script a tourné).
+# Secrets : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET.
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    - cron: '10 8 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Séance à rattraper (AAAA-MM-JJ). Vide = dernier bulletin publié.'
+        required: false
+
+concurrency:
+  group: controle-boc
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  controle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+
+      - name: Collecte de la cote officielle
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts boc:cote ${{ inputs.date }}
+
+      - name: Vérifier ce qui a été écrit
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node -e "
+          const u = process.env.SUPABASE_URL, k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const h = { apikey: k, 'User-Agent': 'westbourse-ci' };
+          fetch(u + '/rest/v1/boc_cote_daily?select=date_marche&order=date_marche.desc&limit=1', { headers: h })
+            .then(r => r.json())
+            .then(async (rows) => {
+              const d = rows[0] && rows[0].date_marche;
+              if (!d) { console.error('aucune cote officielle en base'); process.exit(1); }
+              const r = await fetch(u + '/rest/v1/boc_cote_daily?select=code&date_marche=eq.' + d, { headers: { ...h, Prefer: 'count=exact' } });
+              const n = Number((r.headers.get('content-range') || '').split('/')[1] || 0);
+              console.log('dernière séance ' + d + ' : ' + n + ' valeurs');
+              if (n < 40) { console.error('cote officielle anormalement courte'); process.exit(1); }
+            })
+            .catch((e) => { console.error(e); process.exit(1); });
+          "
+
+      - name: Contrôle des écarts
+        env:
+          SITE: https://www.westbourse.com
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : contrôle NON exécuté."; exit 1; fi
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/controle-boc")
+          code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"; echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::Contrôle BOC : HTTP $code"; exit 1; }

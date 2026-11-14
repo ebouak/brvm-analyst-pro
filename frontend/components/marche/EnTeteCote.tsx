@@ -44,7 +44,7 @@ export function EnTeteCote({
     <header>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">{titre}</h1>
+          <h1 className="font-display text-[34px] md:text-[44px] font-semibold leading-[1.04] tracking-[-0.04em] text-ivory">{titre}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{description}</p>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

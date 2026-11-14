@@ -21,7 +21,7 @@ const SIGNAL_CSV_COLUMNS: CsvColumn<SignalRow>[] = [
   { header: 'Date', accessor: (r) => r.date_marche },
   { header: 'Signal', accessor: (r) => r.signal },
   { header: 'Score', accessor: (r) => r.score_total ?? '' },
-  { header: 'Confiance', accessor: (r) => r.confiance != null ? Number((r.confiance * 100).toFixed(1)) : '' },
+  { header: 'Complétude des données', accessor: (r) => r.confiance != null ? Number((r.confiance * 100).toFixed(1)) : '' },
   { header: 'Explication', accessor: (r) => r.explication ?? '' },
   { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
   { header: 'Pays', accessor: (r) => r.pays ?? '' },
@@ -46,9 +46,9 @@ const SIG_PILLS: {
   idleCls: string;
 }[] = [
   { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-up/10 text-up border-up/40', idleCls: 'border-up/20 text-up' },
-  { value: 'HOLD', key: 'hold', label: 'Attente', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-down/10 text-down border-down/40', idleCls: 'border-down/20 text-down' },
+  { value: 'BUY', key: 'buy', label: 'Haussier', activeCls: 'bg-up/10 text-up border-up/40', idleCls: 'border-up/20 text-up' },
+  { value: 'HOLD', key: 'hold', label: 'Neutre', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'SELL', key: 'sell', label: 'Baissier', activeCls: 'bg-down/10 text-down border-down/40', idleCls: 'border-down/20 text-down' },
 ];
 
 // ─── Composante principale ─────────────────────────────────────────────────
@@ -176,11 +176,11 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
         {/* Slider confiance */}
         <div className="flex items-center gap-3">
           <label className="text-xs text-muted whitespace-nowrap">
-            Confiance min : <span className="tabular text-white font-medium">{minConf} %</span>
+            Complétude min : <span className="tabular text-white font-medium">{minConf} %</span>
           </label>
           <input
             type="range" min={0} max={100} step={5}
-            aria-label="Confiance minimum"
+            aria-label="Complétude des données minimum"
             value={minConf}
             onChange={(e) => { setMinConf(Number(e.target.value)); setPage(1); }}
             className="flex-1 h-1 accent-[#00c853]"
@@ -196,7 +196,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
             Réinitialiser
           </button>
           <span className="text-xs text-muted self-center ml-auto">
-            {filtered.length} signal{filtered.length !== 1 ? 's' : ''}
+            {filtered.length} signa{filtered.length !== 1 ? 'ux' : 'l'}
           </span>
           <ExportButton<SignalRow>
             filename={`signaux_${new Date().toISOString().slice(0, 10)}.csv`}
@@ -233,7 +233,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
                       Score {sortKey === 'score_total' && (asc ? '▲' : '▼')}
                     </th>
                     <th onClick={() => toggleSort('confiance')} className="px-3 py-2 text-right cursor-pointer hover:text-white">
-                      Confiance {sortKey === 'confiance' && (asc ? '▲' : '▼')}
+                      Complétude {sortKey === 'confiance' && (asc ? '▲' : '▼')}
                     </th>
                     <th className="px-3 py-2 text-right">Cours</th>
                     <th className="px-3 py-2 text-center w-16">Détail</th>

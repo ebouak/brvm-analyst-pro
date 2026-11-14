@@ -1,5 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
+import { DISCLAIMER_METHODOLOGIE } from '@/lib/legal/disclaimer';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const metadata = { title: 'Méthodologie' };
 
@@ -93,7 +95,7 @@ export default function MethodologiePage() {
               { label: 'score_volume',          desc: 'Volume relatif à la moyenne 20j',            weight: '30 %', tone: 'sapphire' as const },
               { label: 'score_rsi',             desc: 'Position RSI (survente / surachat)',          weight: '30 %', tone: 'sapphire' as const },
               { label: 'bonus_tendance',        desc: 'Bonus si golden cross ou breakout',           weight: '+bonus', tone: 'gold' as const },
-              { label: 'penalite_liquidite',    desc: 'Malus si volume < seuil minimum',             weight: '−malus', tone: 'neutral' as const },
+              { label: 'penalite_liquidite',    desc: 'Rapproche le score de zéro si la liquidité est faible', weight: 'atténue', tone: 'neutral' as const },
             ].map(({ label, desc, weight, tone }) => (
               <div key={label} className="flex items-center gap-4 px-5 py-3">
                 <code className="text-xs text-ivory font-mono shrink-0 w-44">{label}</code>
@@ -106,20 +108,20 @@ export default function MethodologiePage() {
           {/* Seuils de signal */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SignalThreshold
-              signal="Achat"
+              signal="Signal haussier"
               condition="score > +0,60"
               cls="border-up/25 bg-up/[0.05] text-up"
               dot="bg-up"
             />
             <SignalThreshold
-              signal="Attente"
+              signal="Neutre"
               condition="−0,60 ≤ score ≤ +0,60"
               cls="border-border/60 bg-elevated/40 text-muted"
               dot="bg-muted"
             />
             <SignalThreshold
-              signal="Vente"
-              condition="score < −0,60"
+              signal="Signal baissier : plus émis"
+              condition="score < −0,60 : affiché, classé neutre depuis le 13/11/2026 (ces titres ont plus souvent rebondi que baissé)"
               cls="border-down/25 bg-down/[0.05] text-down"
               dot="bg-down"
             />
@@ -136,7 +138,7 @@ export default function MethodologiePage() {
           <ul className="space-y-2">
             {[
               'Entrée en position à la clôture du jour du signal d’achat',
-              'Sortie à la clôture du jour du signal de vente',
+              'Sortie à la clôture du jour du signal de vente (émis jusqu’au 13/11/2026 ; depuis, la position court jusqu’à la fin de la période)',
               'Frais appliqués à chaque transaction (achat + vente)',
               'Capital initial = 100 (normalisé)',
               'Une seule position à la fois (pas de levier)',
@@ -174,18 +176,16 @@ export default function MethodologiePage() {
       <div className="rounded-panel border border-warn/20 bg-warn/[0.03] px-5 py-4 shadow-card space-y-2">
         <div className="flex items-center gap-2">
           <AlertTriangle aria-hidden className="h-3.5 w-3.5 text-warn" />
-          <h3 className="text-sm font-medium text-warn">Avertissement légal · COSUMAF</h3>
+          <h3 className="text-sm font-medium text-warn">Avertissement légal</h3>
         </div>
-        <p className="text-xs text-faint leading-relaxed">
-          Les données, analyses, signaux et résultats de backtesting fournis par WESTBOURSE sont à titre{' '}
-          <span className="text-muted font-medium">informatif uniquement</span> et ne constituent pas un conseil en
-          investissement au sens de la réglementation COSUMAF (Commission de Surveillance du Marché Financier de
-          l&apos;Afrique Centrale) ni de l&apos;UMOA. Les performances passées ne préjugent pas des performances
-          futures. Tout investissement sur le marché financier comporte des risques, y compris la perte du capital
-          investi. Consultez un conseiller en investissement agréé avant toute décision.
-        </p>
+        <p className="text-xs text-faint leading-relaxed">{DISCLAIMER_METHODOLOGIE}</p>
       </div>
 
+      <EtMaintenant suites={[
+        { href: '/signaux', titre: 'Les signaux', detail: 'Voir la méthode à l’œuvre sur la séance.' },
+        { href: '/formations', titre: 'Se former', detail: 'Les parcours pour comprendre les notions.' },
+        { href: '/societes', titre: 'Les sociétés', detail: 'Les fiches des valeurs cotées.' },
+      ]} />
     </div>
   );
 }

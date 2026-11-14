@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import CompaniesExplorer, { type CompanyCard } from '@/components/public/CompaniesExplorer';
 import { ApercuFrame, ApercuNav } from '@/components/apercu-app/ApercuFrame';
@@ -11,7 +12,8 @@ async function getCompanies(): Promise<{ companies: CompanyCard[]; asOf: string 
   const [{ data: instruments }, { data: lastQuotes }, { data: signals }] = await Promise.all([
     supabase.from('brvm_instruments').select('code, designation, secteur, pays').eq('type', 'action').eq('actif', true).order('code'),
     supabase.from('brvm_actions_daily').select('code, cours_jour, variation_pct, date_marche').order('date_marche', { ascending: false }).limit(200),
-    supabase.from('signals_daily').select('code, score_total, confiance, date_marche').order('date_marche', { ascending: false }).limit(200),
+    // Note publique seule (F-04).
+    supabase.rpc('signaux_publics'),
   ]);
   const quoteByCode = new Map<string, { cours_jour: number | null; variation_pct: number | null; date_marche: string }>();
   for (const q of lastQuotes ?? []) if (!quoteByCode.has(q.code)) quoteByCode.set(q.code, q as never);
@@ -32,7 +34,7 @@ export default async function ApercuSocietesPage() {
     <ApercuFrame title="Aperçu — Sociétés" subtitle="Annuaire BRVM — même explorer que prod, isolé sous .apv (noindex).">
       <ApercuNav />
       <SeanceStrip asOf={asOf} nbActions={companies.length} href="/apercu/societes" />
-      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Grille sombre hybride. <a href="/societes" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</a></p>
+      <p style={{ fontSize: 11, color: 'rgb(var(--color-faint))' }}>Grille sombre hybride. <Link href="/societes" style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>Ouvrir prod</Link></p>
       <div style={{ background: 'rgb(var(--color-surface))', border: '1px solid rgb(var(--color-border))', borderRadius: 14, padding: 12 }}>
         {companies.length === 0 ? <p style={{ color: 'rgb(var(--color-muted))', fontSize: 13 }}>Annuaire vide.</p> : <CompaniesExplorer companies={companies} />}
       </div>

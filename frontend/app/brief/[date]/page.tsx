@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { urlSure } from '@/lib/urlSure';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -60,7 +61,7 @@ async function getRecentBriefs(exclude: string) {
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
-  const title = `Note de conjoncture BRVM — séance du ${fmtDateFR(params.date)}`;
+  const title = `Brief de séance BRVM du ${fmtDateFR(params.date)}`;
   const description =
     'Tendance du marché, hausses et baisses, valeur des transactions, capitalisations et actualités de la séance BRVM.';
   return {
@@ -117,7 +118,7 @@ export default async function BriefDatePage(props: PageProps) {
   const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
-    headline: `Note de conjoncture BRVM — séance du ${fmtDateFR(brief.date_marche)}`,
+    headline: `Brief de séance BRVM du ${fmtDateFR(brief.date_marche)}`,
     datePublished: brief.sent_at ?? `${brief.date_marche}T18:00:00+00:00`,
     dateModified: brief.sent_at ?? `${brief.date_marche}T18:00:00+00:00`,
     inLanguage: 'fr',
@@ -161,7 +162,7 @@ export default async function BriefDatePage(props: PageProps) {
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">
-              Note de conjoncture BRVM · séance du {fmtDateCourte(brief.date_marche)}
+              Brief de séance BRVM du {fmtDateCourte(brief.date_marche)}
             </h1>
             {t && (
               <p className={`mt-2 inline-flex items-center gap-2 text-sm font-semibold ${t.tone}`}>
@@ -268,8 +269,8 @@ export default async function BriefDatePage(props: PageProps) {
                 <ul className="space-y-3">
                   {d.actualites.map((n, i) => (
                     <li key={i} className="border-t border-border/40 first:border-0 pt-3 first:pt-0">
-                      {n.source_url ? (
-                        <a href={n.source_url} target="_blank" rel="noopener noreferrer"
+                      {urlSure(n.source_url) ? (
+                        <a href={urlSure(n.source_url) ?? undefined} target="_blank" rel="noopener noreferrer"
                           className="text-sm text-ivory hover:text-accent-ink transition-colors leading-snug block">
                           {n.titre}
                         </a>
@@ -293,6 +294,7 @@ export default async function BriefDatePage(props: PageProps) {
                 <audio controls preload="none" src={brief.audio_url} className="w-full">
                   Votre navigateur ne lit pas l&apos;audio : le texte complet est ci-dessous.
                 </audio>
+                <p className="mt-2 text-xs text-faint">Voix de synthèse</p>
               </div>
             )}
             <pre className="whitespace-pre-wrap text-sm text-ivory/90 leading-relaxed font-sans">{brief.contenu}</pre>

@@ -94,7 +94,7 @@ export default async function Page(
           hint={run.statut === 'en_cours' ? 'Les résultats arriveront à la fin du passage.' : run.statut === 'erreur_infra' ? "Les tests n'ont pas pu s'exécuter : voir le motif ci-dessus." : undefined}
         />
       ) : (
-        <PremiumPanel className="overflow-x-auto p-0">
+        <PremiumPanel className="relative overflow-x-auto p-0">
           <table className="w-full text-sm">
             <caption className="sr-only">Scénarios de l&apos;exécution</caption>
             <thead>

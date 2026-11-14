@@ -46,7 +46,7 @@ export function depsAiguillageWhatsapp(): DepsAiguillage {
     societes: () => identitesSocietes(),
     quota: async (chatId) => {
       const cle = createHmac('sha256', process.env.WAHA_WEBHOOK_HMAC_KEY ?? 'westbourse-waha').update(`jev:${chatId}`).digest('hex');
-      return (await checkRateLimit({ route: 'whatsapp-jev', ip: cle, maxHits: QUOTA_HEURE, windowSeconds: 3600 })).allowed;
+      return (await checkRateLimit({ route: 'whatsapp-jev', ip: cle, maxHits: QUOTA_HEURE, windowSeconds: 3600, failClosed: true })).allowed;
     },
     reserverBudget: async () => {
       const { data, error } = await getServiceClient().rpc('jev_reserver_budget', { p_usage: 'whatsapp', p_plafond: plafondJour() });

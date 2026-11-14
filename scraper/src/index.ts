@@ -35,6 +35,7 @@
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
+ *   tsx src/index.ts communaute            # membres du canal Telegram -> communaute_releves
  *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
@@ -418,6 +419,27 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'boc:cote': {
+      // Cote officielle (statut SP, PER, dividende) depuis le Bulletin
+      // Officiel de la Cote : référence du contrôle quotidien des écarts.
+      const { runCoteBoc } = await import('./boc/runCoteBoc.js');
+      await monitored(
+        { code: 'boc-cote', label: 'Cote officielle (BOC)' },
+        async () => {
+          const r = await runCoteBoc({ date: positional[0] });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lues,
+              rows_upserted: r.ecrites,
+              metadata: { date_marche: r.date, suspendues: r.suspendues, saute: r.saute },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'social:articles': {
       // Reprise manuelle de la publication LinkedIn/TikTok des articles du
       // jour (le cron `articles` la fait déjà). Le verrou par (article,
@@ -461,6 +483,13 @@ async function main(): Promise<number> {
           };
         },
       );
+      return 0;
+    }
+    case 'communaute': {
+      // Relevé automatique des membres du canal Telegram (communaute_releves, 0218).
+      const { runCommunaute } = await import('./communaute/runCommunaute.js');
+      const r = await runCommunaute({ mock });
+      logger.info(r, 'communauté relevée');
       return 0;
     }
     case 'sante:llm': {
@@ -647,6 +676,14 @@ async function main(): Promise<number> {
       const { runEmd } = await import('./conseiller/runEmd.js');
       // Seuls l'écart-type et l'EMD sortent : jamais la moyenne (spec §2.4).
       console.log(JSON.stringify(await runEmd(), null, 2));
+      return 0;
+    }
+    case 'eval:signaux:rejeu': {
+      // Rejeu LECTURE SEULE : ancienne et nouvelle formule de score sur les mêmes
+      // séances, passées au même banc, + corrélation de chaque composante.
+      const { runRejeuSignaux } = await import('./signaux/runRejeuSignaux.js');
+      const r = await runRejeuSignaux();
+      console.log(r.rapport);
       return 0;
     }
     case 'eval:signaux': {

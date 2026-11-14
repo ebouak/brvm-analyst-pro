@@ -1,8 +1,9 @@
 // GET /api/metrics  — format texte Prometheus (exposition v0.0.4).
 // Métriques agrégées depuis Supabase pour monitoring (cf. spec §11.3).
 // À scraper depuis Prometheus avec un bearer optionnel si METRICS_TOKEN défini.
+import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse, type NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,12 +45,14 @@ export async function GET(req: NextRequest) {
   if (!expected) {
     return new NextResponse('metrics disabled: METRICS_TOKEN not configured', { status: 503 });
   }
-  const auth = req.headers.get('authorization') ?? '';
-  if (auth !== `Bearer ${expected}`) {
+  if (!cronAutorise(req, expected)) {
     return new NextResponse('unauthorized', { status: 401 });
   }
 
-  const supabase = createClient();
+  // Client serveur : derrière le jeton ci-dessus. Avec la clé publique, les
+  // tables fermées à l'anonyme (F-04) et les tables internes compteraient 0
+  // en silence, ce qui ferait mentir la supervision.
+  const supabase = getServiceClient();
   const metrics: Metric[] = [];
 
   // Comptages bruts par table.

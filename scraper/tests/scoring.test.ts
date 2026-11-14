@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sma, ema, rsi, macd, emaSeries, clamp } from '../src/scoring/indicators.js';
-import { computeScore } from '../src/scoring/score.js';
+import { computeScore, SCORING_PARAMS } from '../src/scoring/score.js';
 
 describe('indicateurs', () => {
   it('sma: moyenne des N derniers', () => {
@@ -90,7 +90,7 @@ describe('computeScore', () => {
     expect(r.explication).toContain('Signal d’achat');
   });
 
-  it('tendance baissière qui accélère + baisse + volume => SELL', () => {
+  it('tendance baissière qui accélère + baisse + volume => score très négatif, mais HOLD (aucune vente émise)', () => {
     const closes: number[] = [];
     for (let i = 0; i < 40; i++) closes.push(300 - i);
     for (let i = 0; i < 20; i++) closes.push(260 - i * 4); // accélération baissière
@@ -104,7 +104,9 @@ describe('computeScore', () => {
     expect(r.inputs.trend_norm).toBeLessThan(0); // régime baissier
     expect(r.bonus_tendance).toBeLessThan(0); // facteur tendance SYMÉTRIQUE (négatif)
     expect(r.score_total).toBeLessThan(-0.6);
-    expect(r.signal).toBe('SELL');
+    expect(r.score_total).toBeLessThan(SCORING_PARAMS.SELL_THRESHOLD);
+    expect(r.signal).toBe('HOLD');
+    expect(r.explication).toMatch(/aucun signal de vente/);
   });
 
   it('facteur de tendance symétrique : baissier => bonus_tendance négatif', () => {
@@ -178,5 +180,48 @@ describe('computeScore', () => {
     // avg_volume_30d très bas → sous le seuil MIN_LIQUIDITY_AVG_VOLUME → pénalité legacy.
     const r = computeScore({ code: 'L', closes, variation_pct: 1, volume: 10, avg_volume_30d: 10 });
     expect(r.penalite_liquidite).toBeGreaterThan(0);
+  });
+});
+
+describe('corrections du 2026-11-13 (constats contrôlés sur le code réel)', () => {
+  const plat = Array.from({ length: 60 }, () => 100);
+  const hausse = Array.from({ length: 60 }, (_, i) => 100 + i * 0.05);
+
+  it('A1 — un volume faible ne confirme pas la hausse : ratio 0,05 → 0, ratio 1 → 0', () => {
+    const faible = computeScore({ code: 'V', closes: hausse, variation_pct: 3, volume: 50, avg_volume_30d: 1000 });
+    const moyen = computeScore({ code: 'V', closes: hausse, variation_pct: 3, volume: 1000, avg_volume_30d: 1000 });
+    expect(faible.score_volume).toBe(0);
+    expect(moyen.score_volume).toBe(0);
+  });
+
+  it('A1 — un volume fort confirme dans le sens de la variation', () => {
+    const up = computeScore({ code: 'V', closes: hausse, variation_pct: 3, volume: 5000, avg_volume_30d: 1000 });
+    const down = computeScore({ code: 'V', closes: hausse, variation_pct: -3, volume: 5000, avg_volume_30d: 1000 });
+    expect(up.score_volume!).toBeGreaterThan(0.8);
+    expect(down.score_volume!).toBeLessThan(-0.8);
+  });
+
+  it('A1 — variation nulle : le volume ne dit rien', () => {
+    expect(computeScore({ code: 'V', closes: hausse, variation_pct: 0, volume: 20000, avg_volume_30d: 1000 }).score_volume).toBe(0);
+  });
+
+  it('A2 — titre immobile et illiquide : score 0, pas « momentum négatif »', () => {
+    const r = computeScore({ code: 'L', closes: plat, variation_pct: 0, volume: 0, avg_volume_30d: 1000, liquidity_score: 0 });
+    expect(r.score_total).toBe(0);
+  });
+
+  it('A2 — pénalité symétrique : entrées opposées → scores opposés, quelle que soit la liquidité', () => {
+    for (const liquidite of [0, 10, 40, 90]) {
+      const up = computeScore({ code: 'L', closes: plat, variation_pct: 4, volume: 5000, avg_volume_30d: 1000, liquidity_score: liquidite });
+      const down = computeScore({ code: 'L', closes: plat, variation_pct: -4, volume: 5000, avg_volume_30d: 1000, liquidity_score: liquidite });
+      expect(up.score_total, `liquidité ${liquidite}`).toBeCloseTo(-down.score_total, 4);
+    }
+  });
+
+  it('A2 — liquidité nulle : le score garde la moitié de son amplitude', () => {
+    const base = { code: 'L', closes: plat, variation_pct: 4, volume: 5000, avg_volume_30d: 1000 };
+    const liquide = computeScore({ ...base, liquidity_score: 90 });
+    const illiquide = computeScore({ ...base, liquidity_score: 0 });
+    expect(illiquide.score_total).toBeCloseTo(liquide.score_total * 0.5, 3);
   });
 });

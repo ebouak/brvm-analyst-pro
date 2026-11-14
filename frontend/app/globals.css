@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Polices « Taste » (Bespoke Serif + Supreme + JetBrains Mono) chargées via
-   <link rel="stylesheet"> + preconnect dans app/layout.tsx (head) — plus rapide
-   que des @import CSS render-blocking. */
+/* Polices de la charte (docs/CHARTE.md §4) : Geist, Geist Mono, Instrument Serif,
+   chargées par next/font (lib/vitrine/polices.ts) et déclarées sur <html>. */
 
 :root {
   color-scheme: dark;
-  --font-display: "Bespoke Serif", Georgia, serif;
-  --font-sans: "Supreme", "Helvetica Neue", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: var(--vitrine-sans), "Helvetica Neue", system-ui, sans-serif;
+  --font-sans: var(--vitrine-sans), "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: var(--vitrine-mono), ui-monospace, monospace;
+  --font-accent: var(--vitrine-accent), Georgia, serif;
   --content: 1480px;
   --ease: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -174,8 +174,12 @@ body::before {
 }
 :root[data-theme="light"] .premium-topo::after { opacity: 0.02; }
 
-/* Titres — Bespoke Serif */
-.font-display { font-family: var(--font-display); }
+/* Titres — Geist, resserré comme sur la page d'accueil (charte §4). */
+.font-display { font-family: var(--font-display); letter-spacing: -0.025em; }
+
+/* Accent typographique de la charte : Instrument Serif italique, pour un mot
+   souligné dans un titre, jamais pour un paragraphe. */
+.font-accent { font-family: var(--font-accent); font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
 
 /* Chiffres financiers — mono tabulaire */
 .tabular {

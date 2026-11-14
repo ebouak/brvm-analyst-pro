@@ -5,6 +5,7 @@ import DiagnosticClient from '@/components/premium/DiagnosticClient';
 import PatternDiagnostic from '@/components/premium/PatternDiagnostic';
 import { ViewTracker } from '@/components/analytics/ViewTracker';
 import { graphiquesParSection } from '@/components/diagnostic/GraphiquesDiagnostic';
+import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
 
 interface Props { params: Promise<{ code: string }> }
 
@@ -22,7 +23,8 @@ export default async function DiagnosticPage(props: Props) {
   if (!instrument) notFound();
 
   const [{ data: cached }, graphiques] = await Promise.all([
-    supa.from('diagnostic_reports').select('markdown_content, generated_at').eq('code', code).single(),
+    // Ancien prompt (verdict, objectif, stop) = rapport absent, régénéré à la demande.
+    supa.from('diagnostic_reports').select('markdown_content, generated_at').eq('code', code).eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC).maybeSingle(),
     // Un échec des graphiques ne doit jamais priver la page du rapport.
     graphiquesParSection(code).catch((e) => {
       console.error('[diagnostic] graphiques indisponibles pour', code, (e as Error).message);
@@ -59,9 +61,11 @@ export default async function DiagnosticPage(props: Props) {
             Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
             garde-fous de plausibilité : forces et faiblesses, rentabilité, bilan, flux, comparaison aux
             médianes des sociétés comparables, valorisation DCF et multiples, dividende, risques, points de
-            vigilance, ce que les chiffres ne disent pas, puis une orientation ACHAT/CONSERVER/VENDRE.
-            Actualisée chaque semaine.
+            vigilance, ce que les chiffres ne disent pas, puis une conclusion sur ce que les chiffres
+            établissent et n&apos;établissent pas. Actualisée chaque semaine. Information générale, sans
+            recommandation d&apos;achat ou de vente : ce rapport ne constitue pas un conseil en investissement.
           </p>
+          <p className="mt-2 text-xs text-faint">Analyse rédigée par une IA à partir des comptes publiés.</p>
         </div>
 
         <DiagnosticClient

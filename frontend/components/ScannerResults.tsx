@@ -19,7 +19,7 @@ const SCANNER_CSV_COLUMNS: CsvColumn<ScanRow>[] = [
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
   { header: 'Signal', accessor: (r) => r.signal ?? '' },
   { header: 'Score', accessor: (r) => r.score ?? '' },
-  { header: 'Confiance %', accessor: (r) => r.confiance ?? '' },
+  { header: 'Confiance %', accessor: (r) => (r.confiance != null ? Math.round(r.confiance * 100) : '') },
 ];
 
 type SortKey = keyof Pick<
@@ -34,15 +34,15 @@ interface Props {
 function signalBadge(signal: ScanRow['signal']) {
   if (signal === 'BUY')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">Achat</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">Haussier</span>
     );
   if (signal === 'SELL')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">Vente</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">Baissier</span>
     );
   if (signal === 'HOLD')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">Attente</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">Neutre</span>
     );
   return <span className="text-muted">—</span>;
 }
@@ -155,7 +155,7 @@ export default function ScannerResults({ rows }: Props) {
               <th className="px-3 py-2 text-left text-xs text-muted whitespace-nowrap">Tendance MA</th>
               <Th k="volume" label="Volume (× moy. 20 j)" />
               <Th k="score" label="Signal" />
-              <th className="px-3 py-2 text-left text-xs text-muted">Score (/100)</th>
+              <th className="px-3 py-2 text-left text-xs text-muted">Score (−1 à +1)</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -181,9 +181,11 @@ export default function ScannerResults({ rows }: Props) {
                   <td className="px-3 py-2.5">{volumeRatioLabel(row.volume, row.volumeAvg20)}</td>
                   <td className="px-3 py-2.5">{signalBadge(row.signal)}</td>
                   <td className="px-3 py-2.5 tabular text-muted">
-                    {row.score != null ? fmtNumber(row.score, 0) : '—'}
+                    {/* score_total ∈ [−1 ; +1] et confiance ∈ [0 ; 1] : affichés « 0(1%) » avant
+                        l'audit du 2026-11-13, faute de mise à l'échelle. */}
+                    {row.score != null ? (row.score > 0 ? '+' : '') + fmtNumber(row.score, 2).replace('-', '−') : '—'}
                     {row.confiance != null && (
-                      <span className="ml-1 text-xs text-border">({fmtNumber(row.confiance, 0)}%)</span>
+                      <span className="ml-1 text-xs text-faint" title="Confiance du signal">({fmtNumber(row.confiance * 100, 0)} %)</span>
                     )}
                   </td>
                   <td className="px-3 py-2.5">

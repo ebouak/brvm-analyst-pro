@@ -117,6 +117,9 @@ export async function appairerWhatsapp(chatId: string, texte: string): Promise<v
         '🤖 Pour poser vos questions à l’assistant ici même, activez-le dans vos paramètres :',
         LIEN_PARAMETRES,
         '',
+        '📘 Pour commencer, les bases de la Bourse expliquées simplement :',
+        'https://www.westbourse.com/debutant',
+        '',
         '💡 Tapez *AIDE* pour les commandes rapides, *HUMAIN* pour écrire à l’équipe.',
       ].join('\n'),
     );

@@ -75,7 +75,7 @@ function depsChatbot(chatId: string): DepsChatbot {
       return { palier: premium ? 'premium' : 'lie', userId, perso: premium && Boolean(prefs?.agent_optin) };
     },
     quota: async (id) => {
-      if (!id.userId) return (await checkRateLimit({ route: 'whatsapp-ia', ip: h, maxHits: 1, windowSeconds: 86_400 })).allowed;
+      if (!id.userId) return (await checkRateLimit({ route: 'whatsapp-ia', ip: h, maxHits: 1, windowSeconds: 86_400, failClosed: true })).allowed;
       return (await checkFeature('whatsapp_agent', { id: id.userId, email: profil?.email ?? null, isPremium: profil?.isPremium ?? false })).allowed;
     },
     budget: async (id) => {

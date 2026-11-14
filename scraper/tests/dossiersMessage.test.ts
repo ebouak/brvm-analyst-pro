@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { composerMessage, composerRectificatif } from '../src/dossiers/message.js';
+import { composerInvitation, composerMessage, composerRectificatif } from '../src/dossiers/message.js';
 import type { Selection } from '../src/dossiers/selection.js';
 
 const sel: Selection = {
@@ -79,5 +79,24 @@ describe('composerRectificatif', () => {
       const sansDates = composerRectificatif(sel, '2026-10-05', canal).corps.replace(/\b\d{2}\/\d{2}\/\d{4}\b/g, '');
       expect(sansDates).not.toMatch(/\d/);
     }
+  });
+});
+
+describe('composerInvitation', () => {
+  const inv = composerInvitation([{ code: 'NEIC', designation: 'NEI CEDA CI' }]);
+  it('dit que les dossiers sont réservés au Premium et donne le lien', () => {
+    expect(inv.sujet).toMatch(/Premium/);
+    expect(inv.corps).toContain('https://www.westbourse.com/account/plan');
+  });
+  it('nomme les valeurs du portefeuille et donne le moyen de ne plus le recevoir', () => {
+    expect(inv.corps).toContain('NEIC — NEI CEDA CI');
+    expect(inv.corps).toContain('/parametres/alertes');
+  });
+  it('AUCUN chiffre, aucune pièce jointe annoncée', () => {
+    expect(inv.corps).not.toMatch(/\d/);
+    expect(inv.corps).not.toMatch(/ci-joint/i);
+  });
+  it('portefeuille vide : pas de liste', () => {
+    expect(composerInvitation([]).corps).not.toContain('•');
   });
 });

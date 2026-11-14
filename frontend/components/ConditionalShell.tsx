@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import ContactNudge from '@/components/contact/ContactNudge';
 import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
 import GeoCompte from '@/components/crm/GeoCompte';
+import FilAriane, { FilArianeProvider } from '@/components/nav/FilAriane';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -31,6 +32,8 @@ const BARE_PREFIXES = [
   '/embed',
   '/debutant',
   '/developers',
+  '/qualite-donnees', // PublicShell : sans lui ici, sidebar + en-tête public en double
+  '/operations-titres',
   '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)
   '/apercu', // apercu non indexe de la landing bis (meme code que /), hors auth
 ];
@@ -117,16 +120,22 @@ export default function ConditionalShell({
   }
 
   return (
+    <FilArianeProvider>
     <div className="flex min-h-screen">
       <GeoCompte />
       <Sidebar isPremium={isPremium} isAdmin={isAdmin} />
       <div className="flex-1 min-w-0">
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
         {/* pb-16 : réserve la hauteur de la BottomNav mobile (56px + safe-area). */}
-        <main id="contenu" className="min-w-0 pb-16 md:pb-0">{children}</main>
+        <main id="contenu" className="min-w-0 overflow-x-clip pb-16 md:pb-0">
+          {/* Fil d'Ariane tiré du registre, sur toute page de niveau 2 et plus. */}
+          <FilAriane variante="app" />
+          {children}
+        </main>
       </div>
       <BottomNav />
       {showNudge && <ContactNudge />}
     </div>
+    </FilArianeProvider>
   );
 }

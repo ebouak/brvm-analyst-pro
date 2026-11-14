@@ -21,6 +21,7 @@ import {
   StatPill,
   Eyebrow,
 } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
@@ -214,7 +215,7 @@ export default async function BacktestPage(props: PageProps) {
       {/* Header */}
       <SectionHeader
         title="Backtest"
-        subtitle="Signal momentum : variation supérieure à 2 % = achat, inférieure à −2 % = vente, sinon attente. Simulation sur performances passées, sans garantie pour l'avenir."
+        subtitle="Signal momentum : variation supérieure à 2 % = position ouverte, inférieure à −2 % = position soldée, sinon inchangée. Simulation sur performances passées, sans garantie pour l'avenir."
       />
 
       <div className="gold-rule" />
@@ -486,6 +487,11 @@ export default async function BacktestPage(props: PageProps) {
           </div>
         </>
       )}
+      <EtMaintenant suites={[
+              { href: '/signaux', titre: 'Les signaux', detail: 'Les signaux du jour et leur explication.' },
+              { href: '/screener', titre: 'Filtrer le marché', detail: 'Trouver des valeurs par critères.' },
+              { href: '/journal', titre: 'Mon journal', detail: 'Noter une thèse et la suivre.' },
+            ]} />
     </div>
   );
 }

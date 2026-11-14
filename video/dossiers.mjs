@@ -14,7 +14,7 @@
  * CE QUI EST PRODUIT, PAR CODE :  <CODE>/<date>.pdf  (historique)
  *                                  <CODE>/dernier.pdf (ce que sert /api/dossier/[code]/pdf)
  *
- * VERROU. Un PDF n'est rangé que si la page a rendu toutes ses feuilles (`.dv-page`)
+ * VERROU. Un PDF n'est rangé que si la page a rendu toutes ses feuilles (`[data-feuille]` : feuilles du dossier et pages du système de document)
  * et si le fichier fait plus de 30 ko. Une page d'erreur imprimée fait une
  * feuille et quelques ko ; la ranger sous « dernier.pdf » livrerait une erreur
  * à un client. Un code en échec n'arrête pas le lot ; il est listé à la fin et
@@ -54,7 +54,7 @@ const SECRET = lire('DOSSIER_RENDER_SECRET');
 const SITE = (lire('DOSSIER_SITE_URL') || 'https://www.westbourse.com').replace(/\/$/, '');
 const BUCKET = 'dossiers';
 const DRY = lire('DOSSIER_DRY') === '1';
-const FEUILLES_ATTENDUES = 9; // ⚠️ = TOTAL_FEUILLES de app/rapports/dossier/[code]/page.tsx
+const FEUILLES_ATTENDUES = 14; // ⚠️ = TOTAL_FEUILLES de app/rapports/dossier/[code]/page.tsx
 const OCTETS_MIN = 30_000;
 
 const manquants = [['SUPABASE_URL', URL_SB], ['SUPABASE_SERVICE_ROLE_KEY', SERVICE], ['DOSSIER_RENDER_SECRET', SECRET]]
@@ -103,7 +103,7 @@ async function imprimer(page, code) {
   if (statut !== 200 || finale.includes('/login')) {
     throw new Error(`HTTP ${statut}, url finale ${finale} — le secret de rendu est-il posé sur Vercel ?`);
   }
-  const feuilles = await page.locator('.dv-page').count();
+  const feuilles = await page.locator('[data-feuille]').count();
   if (feuilles !== FEUILLES_ATTENDUES) {
     throw new Error(`${feuilles} feuille(s) rendue(s) au lieu de ${FEUILLES_ATTENDUES}`);
   }
@@ -121,7 +121,7 @@ async function imprimer(page, code) {
      Un contenu qui déborde serait ROGNÉ en silence — un rapport client avec une
      ligne coupée. On le mesure ici, sous média print, et on refuse. */
   await page.emulateMedia({ media: 'print' });
-  const debords = await page.locator('.dv-page').evaluateAll((els) =>
+  const debords = await page.locator('[data-feuille]').evaluateAll((els) =>
     els.map((e, i) => (e.scrollHeight > e.clientHeight + 1 ? `feuille ${i + 1} (+${e.scrollHeight - e.clientHeight} px)` : null)).filter(Boolean),
   );
   if (debords.length) {

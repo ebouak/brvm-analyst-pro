@@ -28,7 +28,7 @@ jobs:
 
       - name: Install scraper dependencies
         working-directory: scraper
-        run: npm install
+        run: npm ci
 
       - name: Vérifier et mettre à jour les taux BCEAO
         working-directory: scraper

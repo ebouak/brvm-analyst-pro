@@ -81,7 +81,7 @@ jobs:
         run: python -m pip install --quiet edge-tts
 
       - name: Installer les dépendances
-        run: npm install
+        run: npm ci
 
       # Le récit (modèle, angle, phrases, garde-fou des chiffres) est testé
       # avant chaque génération : un gabarit cassé ne doit jamais parler.
@@ -197,7 +197,7 @@ jobs:
           RECAP_SECRET: ${{ secrets.RECAP_SECRET }}
           LOG_LEVEL: info
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npx tsx src/index.ts cloture
 
       - name: Envoyer le brief aux abonnés

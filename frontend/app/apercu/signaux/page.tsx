@@ -1,19 +1,23 @@
 import { createPublicClient } from '@/lib/supabase/public';
+import { signauxPublicsDeLaSeance, type LigneSignalPublic } from '@/lib/signals/publics';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import { ApercuFrame, ApercuNav } from '@/components/apercu-app/ApercuFrame';
 import { SeanceStrip } from '@/components/apercu-app/SeanceStrip';
-import type { ActionDaily, SignalDaily } from '@/lib/types';
+import type { ActionDaily } from '@/lib/types';
 
 export const revalidate = 300;
 export const metadata = { robots: { index: false, follow: false }, title: 'Aperçu — Signaux (hybride)' };
 
 async function getData() {
   const supabase = createPublicClient();
-  const { data: lastRow } = await supabase.from('signals_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);
-  const lastDate = lastRow?.[0]?.date_marche ?? null;
+  // Note publique seule (F-04) : la fonction bornée rend la dernière note de
+  // chaque valeur ; la séance affichée est la plus récente d'entre elles.
+  const { data: publics } = await supabase.rpc('signaux_publics');
+  const lignes = (publics ?? []) as LigneSignalPublic[];
+  const lastDate = lignes.reduce<string | null>((m, l) => (m == null || l.date_marche > m ? l.date_marche : m), null);
   if (!lastDate) return { lastDate: null, rows: [] as SignalRow[] };
-  const [{ data: signals }, { data: actions }, { data: instruments }] = await Promise.all([
-    supabase.from('signals_daily').select('*').eq('date_marche', lastDate),
+  const signals = signauxPublicsDeLaSeance(lignes, lastDate);
+  const [{ data: actions }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('code, designation, cours_jour, variation_pct, secteur, pays').eq('date_marche', lastDate),
     supabase.from('brvm_instruments').select('code, secteur, pays'),
   ]);
@@ -21,7 +25,7 @@ async function getData() {
   for (const a of (actions ?? []) as ActionDaily[]) actMap[a.code] = a;
   const instrMap: Record<string, { secteur?: string | null; pays?: string | null }> = {};
   for (const i of (instruments ?? []) as { code: string; secteur?: string | null; pays?: string | null }[]) instrMap[i.code] = i;
-  const rows: SignalRow[] = ((signals ?? []) as SignalDaily[]).map((s) => ({ ...s, designation: actMap[s.code]?.designation ?? null, cours_jour: actMap[s.code]?.cours_jour ?? null, variation_pct: actMap[s.code]?.variation_pct ?? null, secteur: instrMap[s.code]?.secteur ?? actMap[s.code]?.secteur ?? null, pays: instrMap[s.code]?.pays ?? actMap[s.code]?.pays ?? null }));
+  const rows: SignalRow[] = signals.map((s) => ({ ...s, designation: actMap[s.code]?.designation ?? null, cours_jour: actMap[s.code]?.cours_jour ?? null, variation_pct: actMap[s.code]?.variation_pct ?? null, secteur: instrMap[s.code]?.secteur ?? actMap[s.code]?.secteur ?? null, pays: instrMap[s.code]?.pays ?? actMap[s.code]?.pays ?? null }));
   return { lastDate, rows };
 }
 

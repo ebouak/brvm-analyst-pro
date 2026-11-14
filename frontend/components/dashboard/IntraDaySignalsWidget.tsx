@@ -89,7 +89,7 @@ export default function IntraDaySignalsWidget() {
       )}
 
       {patterns.length === 0 ? (
-        <p className="text-xs text-muted italic py-2">Aucun signal détecté aujourd'hui</p>
+        <p className="text-xs text-muted italic py-2">Aucun signal détecté aujourd&apos;hui</p>
       ) : (
         <>
           {/* Summary counts */}

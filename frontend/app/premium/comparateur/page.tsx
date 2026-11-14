@@ -1,6 +1,7 @@
 import { getAssetComparison } from '@/lib/compare/server';
 import AssetComparisonChart from '@/components/premium/AssetComparisonChart';
 import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/components/ui/premium';
+import EtMaintenant from '@/components/navigation/EtMaintenant';
 
 export const revalidate = 3600;
 export const metadata = { title: 'Comparateur multi-actifs' };
@@ -26,8 +27,8 @@ export default async function ComparateurPage() {
           <PremiumPanel glow className="p-5">
             <AssetComparisonChart points={points} />
             <p className="mt-3 text-[11px] text-faint">
-              Plus un point est haut, plus le rendement attendu est élevé ; plus il est à droite, plus le risque l'est.
-              L'arbitrage idéal cherche le meilleur rendement pour un risque donné (vers le haut-gauche).
+              Plus un point est haut, plus le rendement attendu est élevé ; plus il est à droite, plus le risque l&apos;est.
+              L&apos;arbitrage idéal cherche le meilleur rendement pour un risque donné (vers le haut-gauche).
             </p>
           </PremiumPanel>
 
@@ -35,7 +36,7 @@ export default async function ComparateurPage() {
             <table className="w-full text-sm">
               <thead className="text-xs text-muted border-b border-border">
                 <tr>
-                  <th className="text-left py-2 px-4">Classe d'actif</th>
+                  <th className="text-left py-2 px-4">Classe d&apos;actif</th>
                   <th className="text-right py-2 px-4">Rendement</th>
                   <th className="text-right py-2 px-4">Risque (vol.)</th>
                   <th className="text-right py-2 px-4">Sharpe</th>
@@ -59,10 +60,15 @@ export default async function ComparateurPage() {
           <p className="text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
             Rendements actions/marché : historique BRVM-C sur 2 ans (rendements quotidiens annualisés). Obligations : YTM
             moyen des titres cotés (volatilité du revenu fixe non estimée). Revenu dividende : rendement moyen des sociétés
-            distributrices. Sans-risque : 6% (obligations d'État UEMOA). Outil informatif.
+            distributrices. Sans-risque : 6% (obligations d&apos;État UEMOA). Outil informatif.
           </p>
         </>
       )}
+      <EtMaintenant suites={[
+              { href: '/obligations', titre: 'Les obligations', detail: 'Le marché obligataire.' },
+              { href: '/dividendes', titre: 'Dividendes', detail: 'Les rendements des sociétés distributrices.' },
+              { href: '/premium/outils', titre: 'Outils Pro', detail: 'Les autres outils d’analyse.' },
+            ]} />
     </div>
   );
 }

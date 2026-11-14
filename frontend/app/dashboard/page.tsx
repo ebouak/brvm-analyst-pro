@@ -36,6 +36,8 @@ import BlocPublications from '@/components/dashboard/blocs/BlocPublications';
 import BlocLiquidite from '@/components/dashboard/blocs/BlocLiquidite';
 import BlocPortefeuille from '@/components/dashboard/blocs/BlocPortefeuille';
 import BlocMarcheDuJour from '@/components/dashboard/blocs/BlocMarcheDuJour';
+import BlocLectureSeance from '@/components/dashboard/lecture/BlocLectureSeance';
+import { lectureSeance } from '@/lib/dashboard/lectureSeance';
 import { chargerMarcheDuJour } from '@/lib/marche/chargement';
 import { largeurSeance } from '@/lib/marche/marcheDuJour';
 import { Fragment } from 'react';
@@ -408,6 +410,9 @@ export default async function Dashboard() {
     { libelle: 'Titres échangés', valeur: actions.some((a) => a.volume != null) ? fmtNumber(titresEchanges, 0) : '—', variation: null, note: `${actions.length} valeurs cotées` },
   ];
 
+  // Lecture de la séance (reprise du tableau de bord v2) : même séance, même Composite.
+  const lecture = lectureSeance(actions, brvmcJour?.variation_pct ?? null);
+
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
     secteurs: user ? (
@@ -489,6 +494,7 @@ export default async function Dashboard() {
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
+    lecture: <BlocLectureSeance lecture={lecture} dateMarche={lastDate} miennes={titresDetenus.map((p) => p.code)} />,
     agenda: agenda !== null && agenda.length === 0 && !portefeuilleIndisponible ? null : <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={Object.fromEntries(quantites)} portefeuilleIndisponible={portefeuilleIndisponible} />,
     publications: <BlocPublications items={publications} depuis={depuisPublications} portefeuilleIndisponible={portefeuilleIndisponible} />,
     liquidite: (
@@ -525,16 +531,6 @@ export default async function Dashboard() {
                 {dashboardLayout ? 'Ordre personnalisé' : 'Personnaliser'}
               </Link>
             )}
-            {/* Passage vers la seconde version du tableau de bord. Les deux
-                cohabitent : sans ce lien, /dashboard/v2 n'est atteignable qu'en
-                connaissant l'URL par cœur. */}
-            <Link
-              href="/dashboard/v2"
-              className="rounded-full border border-accent/30 px-3 py-1.5 text-xs text-accent transition-colors hover:border-accent/60 hover:bg-accent/[0.06]"
-              title="Essayer la nouvelle version du tableau de bord"
-            >
-              Version v2 →
-            </Link>
           </nav>
         </header>
 
