@@ -103,10 +103,12 @@ export type Simulation = z.infer<typeof simulationSchema>;
  *  - `indices` : dernière valeur et variation d'indices (codes BRVMC, BRVM30…).
  *  - `ratios` : BPA, PER, P/B et ROE calculés au rendu (dernier exercice publié
  *    avec résultat ET fonds propres, dernier cours, nombre de titres).
+ *  - `technique` : dernier cours, moyennes mobiles 20 et 50 séances, RSI 14,
+ *    calculés au rendu sur les clôtures réelles (aucune recommandation).
  */
 export const donneesReellesSchema = z.object({
-  vue: z.enum(['rendement', 'historique', 'cours', 'indices', 'ratios']),
-  codes: z.array(z.string().regex(/^[A-Z0-9]{3,6}$/)).min(1).max(6),
+  vue: z.enum(['rendement', 'historique', 'cours', 'indices', 'ratios', 'technique']),
+  codes: z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).min(1).max(6),
   actions: z.number().int().positive().max(1_000_000).optional(),
 });
 export type DonneesReellesSpec = z.infer<typeof donneesReellesSchema>;

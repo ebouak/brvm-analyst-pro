@@ -84,3 +84,25 @@ describe('ratiosValeurs', () => {
     expect(r.manquants).toEqual(['CCC']);
   });
 });
+
+import { lectureTechnique } from './donneesReelles';
+
+describe('lectureTechnique', () => {
+  const serie = (n: number, f: (i: number) => number) =>
+    Array.from({ length: n }, (_, i) => ({ date: `2026-${String(Math.floor(i / 28) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`, cours: f(i) }));
+  it('hausse régulière : au-dessus des deux moyennes, RSI en surachat ; historique court nommé', () => {
+    const r = lectureTechnique(['UP', 'COURT'], {}, { UP: serie(60, (i) => 100 + i), COURT: serie(30, () => 100) });
+    const l = r.lignes[0]!;
+    expect(l.cours).toBe(159);
+    expect(l.mm20).toBeCloseTo(149.5, 6);
+    expect(l.mm50).toBeCloseTo(134.5, 6);
+    expect(l.position).toBe('au-dessus des deux');
+    expect(l.zoneRsi).toBe('surachat');
+    expect(r.manquants).toEqual(['COURT']);
+  });
+  it('baisse régulière : sous les deux moyennes, RSI en survente', () => {
+    const l = lectureTechnique(['DN'], {}, { DN: serie(60, (i) => 300 - i) }).lignes[0]!;
+    expect(l.position).toBe('sous les deux');
+    expect(l.zoneRsi).toBe('survente');
+  });
+});

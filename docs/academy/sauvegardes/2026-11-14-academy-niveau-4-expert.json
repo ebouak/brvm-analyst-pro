@@ -1,0 +1,386 @@
+{
+ "glossaire": [
+  {
+   "definition": "Conseil Régional de l'Épargne Publique et des Marchés Financiers. Régulateur de l'UEMOA.",
+   "terme": "CREPMF"
+  },
+  {
+   "definition": "Offre de titres financiers au public (introduction en bourse, augmentation de capital).",
+   "terme": "Appel public à l'épargne"
+  },
+  {
+   "definition": "Agrément accordé par le CREPMF autorisant un intervenant à opérer sur le marché.",
+   "terme": "Habilitation"
+  },
+  {
+   "definition": "Pratiques illégales (manipulation de cours, délit d'initié) sanctionnées par le CREPMF.",
+   "terme": "Abus de marché"
+  },
+  {
+   "definition": "Utilisation d'informations privilegiées non publiques pour réaliser des transactions boursières.",
+   "terme": "Délit d'initié"
+  },
+  {
+   "definition": "Information précise, non publique, susceptible d'influencer le cours si rendue publique.",
+   "terme": "Information privilégiée"
+  },
+  {
+   "definition": "Situation où l'intérêt personnel d'un intervenant entre en contradiction avec l'intérêt de son client.",
+   "terme": "Conflit d'intérêt"
+  },
+  {
+   "definition": "Actions visant à influencer artificiellement le cours d'un titre — sanctionnées par le CREPMF.",
+   "terme": "Manipulation de cours"
+  },
+  {
+   "definition": "Initial Public Offering : introduction en bourse, première émission d'actions au public.",
+   "terme": "IPO"
+  },
+  {
+   "definition": "Document officiel validé par le CREPMF décrivant l'entreprise, ses finances et les conditions de l'introduction.",
+   "terme": "Prospectus"
+  },
+  {
+   "definition": "Tournée de présentation de l'entreprise aux investisseurs institutionnels avant l'introduction.",
+   "terme": "Road-show"
+  },
+  {
+   "definition": "Marché des nouvelles émissions de titres (vs marché secondaire = échanges entre investisseurs).",
+   "terme": "Marché primaire"
+  },
+  {
+   "definition": "Ensemble des mécanismes de contrôle et de transparence d'une entreprise (conseil d'administration, commissaires aux comptes).",
+   "terme": "Gouvernance"
+  },
+  {
+   "definition": "Offre à Prix Ferme : introduction avec un prix unique fixé à l'avance.",
+   "terme": "OPF"
+  },
+  {
+   "definition": "Offre à Prix Ouvert : introduction avec une fourchette de prix, prix final déterminé par le marché.",
+   "terme": "OPO"
+  },
+  {
+   "definition": "Situation où les demandes dépassent l'offre de titres disponibles.",
+   "terme": "Sursouscription"
+  },
+  {
+   "definition": "Répartition des titres entre souscripteurs en cas de sursouscription.",
+   "terme": "Allocation"
+  },
+  {
+   "definition": "Prix déterminé par la confrontation offre/demande lors d'une OPO.",
+   "terme": "Prix d'équilibre"
+  },
+  {
+   "definition": "Bourse Régionale des Valeurs Mobilières — marché financier commun des 8 pays UEMOA, créé en 1998 à Abidjan.",
+   "terme": "BRVM"
+  },
+  {
+   "definition": "Union Économique et Monétaire Ouest Africaine — 8 pays : Bénin, Burkina Faso, Côte d'Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo.",
+   "terme": "UEMOA"
+  },
+  {
+   "definition": "Société de Gestion et d'Intermédiation — courtier agréé par le CREPMF, intermédiaire obligatoire pour investir à la BRVM.",
+   "terme": "SGI"
+  },
+  {
+   "definition": "Titre de propriété représentant une fraction du capital d'une entreprise. Donne droit aux dividendes, au vote en AG et à la plus-value.",
+   "terme": "Action"
+  },
+  {
+   "definition": "Part des bénéfices d'une entreprise redistribuée aux actionnaires. Versé généralement une fois par an.",
+   "terme": "Dividende"
+  },
+  {
+   "definition": "Gain réalisé lors de la revente d'une action à un prix supérieur au prix d'achat.",
+   "terme": "Plus-value"
+  },
+  {
+   "definition": "Droit Préférentiel de Souscription — droit accordé aux actionnaires lors d'une augmentation de capital.",
+   "terme": "DPS"
+  },
+  {
+   "definition": "Price Earning Ratio = Cours / BPA. Mesure combien de fois le bénéfice annuel est intégré dans le prix de l'action.",
+   "terme": "PER"
+  },
+  {
+   "definition": "Relative Strength Index — oscillateur entre 0 et 100 mesurant la force relative des hausses vs baisses. > 70 surachat, < 30 survente.",
+   "terme": "RSI"
+  },
+  {
+   "definition": "Niveau de prix où l'offre est forte — le cours bute et ne parvient pas à franchir ce plafond.",
+   "terme": "Résistance"
+  }
+ ],
+ "intro": "Niveau 4 — Expert CREPMF — parcours complet de la WestBourse Academy : 4 leçons interactives organisées par module, avec quiz, glossaire et suivi de progression. Cas et chiffres issus du marché BRVM.",
+ "lessons": [
+  {
+   "categorie": "regulatory",
+   "duree_min": 4,
+   "image": {
+    "alt": "Wooden letter tiles spelling 'Regulation' on a textured wood background, conveying themes of compliance and structure.",
+    "credit": "Photo : Markus Winkler / Pexels",
+    "url": "https://images.pexels.com/photos/19813733/pexels-photo-19813733.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/methodologie",
+     "label": "Méthodologie WESTBOURSE"
+    }
+   ],
+   "module": "Module 1 — Réglementation CREPMF",
+   "qcm": {
+    "correct": 1,
+    "explication": "Article 2 : 3 attributions du CREPMF : 1) Organisation de l'appel public à l'épargne, 2) Habilitation et contrôle des structures de marché et intervenants, 3) Contrôle de la régularité des opérations de bourse.",
+    "options": [
+     "Prêter, assurer, former les investisseurs",
+     "Organiser l'appel public à l'épargne, habiliter les structures, contrôler les opérations de bourse",
+     "Fixer les cours, distribuer les dividendes, gérer les comptes-titres",
+     "Créer des entreprises, financer les États, gérer les réserves de change"
+    ],
+    "question": "Quelles sont les 3 grandes attributions du CREPMF selon l'Article 2 ?"
+   },
+   "resume": "Créé par convention du 3 juillet 1996, le CREPMF est l'autorité de régulation du marché financier de l'UEMOA. Il organise l'appel public à l'épargne, habilite les structures de marché et contrôle la régularité de toutes les opérations de bourse.",
+   "sections": [
+    {
+     "contenu": "Le CREPMF est le gardien de la confiance des investisseurs dans le marché financier de l'UEMOA. Sans une régulation crédible, les investisseurs institutionnels étrangers n'investiraient pas dans la région, et les petits investisseurs locaux n'oseraient pas épargner en bourse. Le CREPMF est donc un acteur de développement économique régional autant qu'un gendarme financier.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le CREPMF a été institué simultanément avec la BRVM, par la même convention du 3 juillet 1996. Les deux institutions sont conçues comme indissociables : la BRVM organise le marché, le CREPMF le surveille. Cette architecture institutionnelle duale est similaire à celle de la plupart des places financières mondiales (NYSE + SEC aux États-Unis, Euronext + AMF en France).",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Comprendre les pouvoirs du CREPMF permet à l'investisseur de savoir quels recours sont à sa disposition en cas de litige ou de pratique abusive. Le CREPMF peut être saisi par tout investisseur qui estime avoir été lésé par un intervenant du marché.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Article 2 — Les 3 attributions fondamentales du CREPMF : 1. Organisation de l'appel public à l'épargne (contrôle des opérations de bourse et des produits de placement offerts au public). 2. Habilitation et contrôle des structures de marché et des intervenants commerciaux (agrément des SGI, gestionnaires d'OPCVM, conseillers en investissement). 3. Contrôle de la régularité des opérations de bourse (surveillance continue des transactions pour détecter les manipulations, les délits d'initié, les abus de marché).Article 3 — Pouvoir normatif : Le CREPMF édicte les dispositions applicables à l'appel public à l'épargne, aux conditions d'exercice des structures de marché et aux intervenants commerciaux. Il dispose d'un droit de veto sur tout projet d'ouverture de nouveaux marchés financiers dans la région qu'il estimerait contraire à la sécurité et à la protection de l'épargne publique.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "En 2018, le CREPMF a sanctionné une SGI pour défaut d'information des clients lors d'une opération d'augmentation de capital. La SGI n'avait pas informé ses clients de la date limite pour exercer leurs DPS, provoquant l'expiration de droits non exercés. Résultat : suspension temporaire de l'agrément et amende administrative. L'investisseur lésé a été indemnisé. Leçon : le CREPMF protège activement les investisseurs face aux manquements des intermédiaires.",
+     "titre": "Cas réel CREPMF",
+     "type": "cas"
+    },
+    {
+     "contenu": "Confondre la BRVM et le CREPMF. La BRVM est un opérateur privé qui gère la plateforme d'échanges. Le CREPMF est l'autorité publique qui réglemente et sanctionne. Pour déposer une plainte ou signaler un abus, c'est le CREPMF qu'il faut contacter (crepmf.org) — pas la BRVM.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "CREPMF créé le 3 juillet 1996 — même date que la BRVM.3 attributions : organiser l'appel public à l'épargne, habiliter les structures, contrôler les opérations.CREPMF ≠ BRVM : la BRVM opère le marché, le CREPMF le réglemente et le surveille.Pour toute plainte d'investisseur : contactez le CREPMF via crepmf.org.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 1 — Le CREPMF : institution, missions et pouvoirs (Articles 1 à 3)"
+  },
+  {
+   "categorie": "regulatory",
+   "duree_min": 4,
+   "image": {
+    "alt": "Detailed loan agreement document close-up on a wooden table representing legal and financial concepts.",
+    "credit": "Photo : RDNE Stock project / Pexels",
+    "url": "https://images.pexels.com/photos/7841821/pexels-photo-7841821.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/methodologie",
+     "label": "Méthodologie WESTBOURSE"
+    }
+   ],
+   "module": "Module 1 — Réglementation CREPMF",
+   "qcm": {
+    "correct": 1,
+    "explication": "Article 5 : Toutes les activités des structures de marché et intervenants commerciaux doivent être accomplies avec diligence, loyauté, neutralité et impartialité. Ces 4 valeurs sont les piliers déontologiques du marché BRVM.",
+    "options": [
+     "Rapidité, rentabilité, confidentialité, agressivité commerciale",
+     "Diligence, loyauté, neutralité et impartialité",
+     "Efficacité, prudence, discrétion et performance financière",
+     "Indépendance, créativité, ambition et transparence"
+    ],
+    "question": "Selon l'Article 6 du Règlement Général, avec quelles valeurs les intervenants doivent-ils agir ?"
+   },
+   "resume": "Les Articles 4 à 6 du Règlement Général CREPMF imposent discrétion absolue, loyauté et impartialité à tous les intervenants du marché. Le délit d'initié — utiliser une information confidentielle pour trader — est l'une des infractions les plus graves sanctionnées.",
+   "sections": [
+    {
+     "contenu": "La déontologie des marchés financiers n'est pas une abstraction théorique : c'est le ciment de la confiance des investisseurs. Un marché où le délit d'initié est courant et impuni se vide de ses investisseurs — qui partent vers des marchés plus équitables. La déontologie protège autant les investisseurs que le marché lui-même.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "Délit d'initié : utiliser une information privilégiée (non publique) pour effectuer des transactions en bourse, à titre personnel ou pour le compte de tiers. L'information est \"privilégiée\" si elle est précise, confidentielle et susceptible d'influencer significativement le cours si elle était rendue publique. Exemples : résultats non encore publiés, projet de fusion non annoncé, décision judiciaire non encore rendue publique.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Tout professionnel travaillant dans le secteur financier, dans une entreprise cotée ou ayant accès à des informations sensibles doit connaître les limites légales de l'utilisation de ces informations. La méconnaissance de la loi n'est pas une excuse légale — les sanctions s'appliquent même en l'absence d'intention délibérée.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Article 4 — Obligation de discrétion : Les membres et personnels du CREPMF sont tenus à une obligation absolue de discrétion quant aux faits et actes dont ils ont connaissance dans l'exercice de leurs fonctions, dès lors que ces faits ne sont pas publics. Cette obligation s'étend aux informations sur les entreprises et les transactions en cours d'instruction.Article 5 — Loyauté et impartialité : Toutes les activités exercées par les structures de marché et intervenants commerciaux doivent être accomplies avec diligence, loyauté, neutralité et impartialité. Ces principes s'appliquent également dans les filiales et entités liées.Article 6 — Obligations des intervenants : Les intervenants commerciaux doivent agir avec loyauté et équité dans l'exercice de leur activité. Ils s'assurent que leurs conseils sont adaptés à la situation et aux objectifs de leurs clients. Ils ne placent pas leurs intérêts au-dessus de ceux de leurs clients et évitent les conflits d'intérêt.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Scénario : M. N., directeur financier d'une entreprise cotée à la BRVM, apprend lors d'un comité de direction que les résultats annuels dépasseront les attentes de 40%. Avant l'annonce officielle, il achète 500 actions de sa propre entreprise via le compte de son frère. Il s'agit d'un délit d'initié caractérisé : information précise (résultats), non publique (avant l'annonce), susceptible d'influencer le cours, utilisée à des fins personnelles via un tiers interposé. Sanctions potentielles : amende pouvant atteindre 10 fois le profit réalisé + peine d'emprisonnement + interdiction d'exercer dans le secteur financier.",
+     "titre": "Cas illustratif",
+     "type": "cas"
+    },
+    {
+     "contenu": "Croire que l'utilisation d'informations \"entendu par hasard\" est légale. Si vous entendez dans un dîner un dirigeant parler de résultats exceptionnels non publiés et que vous achetez des actions le lendemain, vous commettez un délit d'initié — même si vous n'avez pas demandé cette information. La source de l'information ne change pas la qualification juridique du délit.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "Art. 4 : obligation absolue de discrétion sur toute information non publique.Art. 5 : diligence, loyauté, neutralité, impartialité — les 4 piliers déontologiques.Art. 6 : l'intérêt du client prime toujours sur celui de l'intervenant.Délit d'initié = sanctions pénales + administratives + interdiction professionnelle.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 2 — Déontologie et délit d'initié (Articles 4 à 6)"
+  },
+  {
+   "categorie": "regulatory",
+   "duree_min": 4,
+   "image": {
+    "alt": "Women in traditional Balinese attire participating in an outdoor ceremony procession.",
+    "credit": "Photo : Arjun  Adinata / Pexels",
+    "url": "https://images.pexels.com/photos/32585252/pexels-photo-32585252.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/methodologie",
+     "label": "Méthodologie WESTBOURSE"
+    }
+   ],
+   "module": "Module 2 — Introduction en Bourse",
+   "qcm": {
+    "correct": 1,
+    "explication": "La recherche ENEAM identifie la culture de l'entreprise familiale fermée comme le principal frein culturel aux IPO. Les fondateurs craignent de perdre le contrôle et voient les actionnaires extérieurs comme une menace potentielle.",
+    "options": [
+     "Le manque de réglementations claires de la BRVM",
+     "La réticence des entrepreneurs à ouvrir leur capital et à perdre le contrôle de leur entreprise familiale",
+     "Les marchés boursiers africains sont perçus comme trop risqués",
+     "Les investisseurs étrangers dominent déjà tous les marchés"
+    ],
+    "question": "Quelle est la principale raison CULTURELLE freinant les IPO en Afrique de l'Ouest ?"
+   },
+   "resume": "La recherche ENEAM (Université d'Abomey-Calavi, Bénin) identifie 3 obstacles structurels aux IPO africaines : culturels (réticence à ouvrir le capital), économiques (coûts élevés) et informationnels (méconnaissance des procédures). Des solutions existent.",
+   "sections": [
+    {
+     "contenu": "La BRVM compte moins de 50 entreprises cotées pour 8 pays et plus de 130 millions d'habitants. À titre de comparaison, la Bourse de Lagos (Nigeria) compte plus de 150 entreprises pour un seul pays. Ce sous-développement relatif n'est pas lié à un manque d'entreprises performantes en zone UEMOA — c'est la compréhension et l'attraction vers le marché boursier qui fait défaut.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "L'introduction en bourse (IPO — Initial Public Offering) est l'opération par laquelle une entreprise ouvre son capital au public pour la première fois en émettant des actions sur le marché boursier. En contrepartie, elle s'engage à une transparence financière totale et à une gouvernance renforcée. C'est un acte fondateur qui transforme une entreprise privée en entreprise publiquement détenue.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Comprendre les obstacles à l'IPO permet à un entrepreneur de se préparer bien en avance à une éventuelle introduction en bourse. Cela permet également à un investisseur averti d'anticiper les premières cotations (marché primaire) qui offrent parfois des opportunités d'achat à prix préférentiel.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Obstacle 1 — Culturel : L'entreprise familiale fermée est un modèle culturellement dominant en Afrique de l'Ouest. Le fondateur perçoit l'ouverture du capital comme une perte de contrôle et une intrusion dans les affaires familiales. Cette résistance est renforcée par la méfiance envers des actionnaires \"extérieurs\" perçus comme potentiellement prédateurs ou déstabilisateurs.Obstacle 2 — Économique : Les coûts d'introduction en bourse sont substantiels : honoraires des conseillers financiers (SGI + banque d'affaires), audit des comptes sur 3 ans par un commissaire aux comptes agréé, frais juridiques de mise en conformité, production du prospectus d'introduction, frais de communication (road-show auprès des investisseurs). Ces coûts peuvent atteindre 2 à 5% du montant de l'opération, parfois plusieurs centaines de millions de FCFA.Obstacle 3 — Informationnel : Des entreprises UEMOA rentables et solvables ignorent qu'elles pourraient se coter en bourse. Les critères d'éligibilité ne sont pas connus, les procédures paraissent opaques, et les avantages concrets (accès à des capitaux bon marché, valorisation objective, notoriété institutionnelle) sont sous-estimés.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "PALM CI (Palmier à huile) s'est introduite à la BRVM en 2020 après des années de préparation. L'entreprise a structuré ses comptes sur 3 ans, mis en conformité sa gouvernance (conseil d'administration indépendant, commissaires aux comptes agréés) et produit un prospectus validé par le CREPMF. L'introduction a permis de lever 10 milliards FCFA de capital frais pour financer l'extension de ses plantations. En contrepartie, l'entreprise publie désormais ses résultats trimestriels — une transparence inédite pour une société de ce secteur.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Croire qu'une introduction en bourse résout tous les problèmes de financement d'une entreprise. Une IPO n'est pas une \"solution miracle\" — elle impose des contraintes permanentes (transparence, gouvernance, communication financière régulière, pression des actionnaires sur les résultats). Une entreprise qui n'est pas prête à ces exigences peut trouver la vie en bourse plus pénalisante que bénéfique.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "3 obstacles aux IPO africaines : culturels, économiques, informationnels.Conditions BRVM (compartiment principal) : capital ≥ 500 M FCFA, 3 ans de comptes certifiés, 20% du capital diffusé.Une IPO impose des contraintes permanentes de transparence et de gouvernance.Le marché primaire (nouvelles introductions) offre parfois des prix préférentiels aux investisseurs.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 3 — Problématique de l'introduction en bourse des entreprises africaines"
+  },
+  {
+   "categorie": "regulatory",
+   "duree_min": 4,
+   "image": {
+    "alt": "People in traditional attire gather for a Balinese offering ceremony with flowers and fruits.",
+    "credit": "Photo : Arjun  Adinata / Pexels",
+    "url": "https://images.pexels.com/photos/30720678/pexels-photo-30720678.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+   },
+   "liens": [
+    {
+     "href": "/methodologie",
+     "label": "Méthodologie WESTBOURSE"
+    }
+   ],
+   "module": "Module 2 — Introduction en Bourse",
+   "qcm": {
+    "correct": 2,
+    "explication": "L'OPF (Offre à Prix Ferme) fixe un prix unique dès le départ. Tous les souscripteurs paient ce prix. En cas de sursouscription, les allocations sont réduites proportionnellement ou par tirage au sort.",
+    "options": [
+     "Offre à Prix Ouvert (OPO)",
+     "Cession d'Actions Existantes",
+     "Offre à Prix Ferme (OPF)",
+     "Placement privé auprès d'institutionnels"
+    ],
+    "question": "Quelle méthode d'introduction fixe un prix unique pour toutes les actions vendues ?"
+   },
+   "resume": "3 méthodes d'introduction : Offre à Prix Ferme (OPF), Offre à Prix Ouvert (OPO) et Cession d'Actions Existantes. Chaque méthode répond à des objectifs différents. La procédure est supervisée par le CREPMF de l'instruction du dossier jusqu'à la première cotation.",
+   "sections": [
+    {
+     "contenu": "Pour un investisseur, comprendre les méthodes d'introduction en bourse permet de participer intelligemment au marché primaire. Les IPO offrent parfois des prix d'entrée inférieurs à la valeur réelle de l'entreprise — opportunité rare que seul un investisseur formé peut identifier et saisir.",
+     "titre": "Synthèse éditoriale",
+     "type": "definition"
+    },
+    {
+     "contenu": "La procédure d'introduction commence par le dépôt d'un dossier au CREPMF. L'instruction dure généralement 2 à 6 mois. Une fois l'autorisation accordée, l'entreprise publie un avis dans les journaux officiels et les médias financiers, ouvre une période de souscription (généralement 2 à 3 semaines), puis procède à l'allocation des actions et à la première cotation en bourse.",
+     "titre": "Définition enrichie",
+     "type": "definition"
+    },
+    {
+     "contenu": "Participer à une IPO est fondamentalement différent d'acheter une action déjà cotée. Les règles sont différentes, les risques aussi. Un investisseur qui ne comprend pas la procédure peut surpayer ou, à l'inverse, passer à côté d'une excellente entrée à prix préférentiel.",
+     "titre": "Pourquoi cette leçon est importante",
+     "type": "importance"
+    },
+    {
+     "contenu": "Offre à Prix Ferme (OPF) : l'entreprise fixe un prix unique dès le départ. Tous les investisseurs paient ce prix s'ils sont servis. En cas de sursouscription (demandes > offre), une procédure de réduction proportionnelle ou de tirage au sort détermine l'allocation. Avantage : simplicité et lisibilité. Inconvénient : le prix peut être mal calibré si l'entreprise sous-estime ou surestime l'intérêt du marché.Offre à Prix Ouvert (OPO) : l'entreprise publie une fourchette de prix indicative. Les investisseurs soumettent des offres en précisant leur prix et leur quantité. À la clôture, un prix d'équilibre est déterminé en confrontant toutes les offres reçues (le prix qui permet d'écouler le maximum d'actions). Avantage : découverte du prix \"juste\" par le marché. Inconvénient : complexité pour les petits investisseurs non institutionnels.Cession d'Actions Existantes : les actionnaires fondateurs vendent une partie de leurs actions existantes au public. L'entreprise ne reçoit pas de liquidités nouvelles — c'est une opération de liquidité pour les fondateurs, pas de financement pour l'entreprise.",
+     "titre": "Réécriture structurée",
+     "type": "definition"
+    },
+    {
+     "contenu": "Introduction de SONATEL à la BRVM : Sonatelhad réalisé une OPF à 10 000 FCFA par action lors de son introduction. La demande de souscription a dépassé l'offre d'un facteur 3 (sursouscription de 300%). Les allocations ont été réduites proportionnellement. Les investisseurs ayant participé à l'IPO et ayant conservé leurs actions pendant 10 ans ont réalisé un rendement total (plus-values + dividendes cumulés) supérieur à 400%. Ce cas illustre l'intérêt de participer aux IPO d'entreprises solides à leur introduction.",
+     "titre": "Cas réel BRVM",
+     "type": "cas"
+    },
+    {
+     "contenu": "Souscrire à toutes les IPO sans analyse préalable. Toutes les introductions en bourse ne sont pas égales. Certaines entreprises s'introduisent en bourse pour lever des fonds dont elles ont urgemment besoin (signe de faiblesse potentielle), d'autres pour financer une expansion rentable (opportunité). Analysez toujours le prospectus et les ratios fondamentaux avant de souscrire.",
+     "titre": "Piège fréquent",
+     "type": "piege"
+    },
+    {
+     "contenu": "3 méthodes : OPF (prix fixe), OPO (fourchette + prix découvert par le marché), Cession d'existantes.La sursouscription lors d'une IPO est un signal d'intérêt fort mais ne garantit pas une performance future.Toujours lire le prospectus et analyser les fondamentaux avant de souscrire à une IPO.Une IPO peut être une opportunité de premier prix sur une entreprise solide.",
+     "titre": "À retenir",
+     "type": "retenir"
+    }
+   ],
+   "titre": "Leçon 4 — Les procédures d'introduction en bourse à la BRVM"
+  }
+ ],
+ "niveau": "expert",
+ "relatedLinks": [],
+ "titre": "Niveau 4 — Expert CREPMF"
+}

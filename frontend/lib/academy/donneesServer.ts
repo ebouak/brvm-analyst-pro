@@ -7,6 +7,8 @@ import {
   historiqueDividendes,
   lectureIndices,
   ratiosValeurs,
+  lectureTechnique,
+  type PointCloture,
   type Cotation,
   type LigneFondamentale,
   type LigneDividende,
@@ -28,7 +30,8 @@ export type DonneesSection =
   | ({ vue: 'historique' } & ReturnType<typeof historiqueDividendes>)
   | ({ vue: 'cours' } & ReturnType<typeof exemplesCours>)
   | ({ vue: 'indices' } & ReturnType<typeof lectureIndices>)
-  | ({ vue: 'ratios' } & ReturnType<typeof ratiosValeurs>);
+  | ({ vue: 'ratios' } & ReturnType<typeof ratiosValeurs>)
+  | ({ vue: 'technique' } & ReturnType<typeof lectureTechnique>);
 
 /** Par index de leçon, puis index de section. */
 export type DonneesLecons = Record<number, Record<number, DonneesSection | null>>;
@@ -81,6 +84,25 @@ export async function chargerDonneesReelles(lessons: Lesson[]): Promise<DonneesL
       }));
     }
 
+    // Clôtures : lues seulement si une leçon demande une lecture technique (~100 séances).
+    const series: Record<string, PointCloture[]> = {};
+    const codesTech = [...new Set(blocs.filter((b) => b.spec.vue === 'technique').flatMap((b) => b.spec.codes))];
+    if (codesTech.length > 0 && date) {
+      const depuis = new Date(new Date(date).getTime() - 160 * 86_400_000).toISOString().slice(0, 10);
+      const h = await sb
+        .from('brvm_actions_daily')
+        .select('code, date_marche, cours_jour')
+        .in('code', codesTech)
+        .gte('date_marche', depuis)
+        .order('date_marche', { ascending: true })
+        .limit(1000);
+      if (h.error) throw new Error('lecture des clôtures impossible');
+      for (const r of (h.data ?? []) as { code: string; date_marche: string; cours_jour: number | null }[]) {
+        if (r.cours_jour == null || Number(r.cours_jour) <= 0) continue;
+        (series[r.code] ??= []).push({ date: r.date_marche, cours: Number(r.cours_jour) });
+      }
+    }
+
     const noms = Object.fromEntries(
       ((ins.data ?? []) as { code: string; designation: string | null }[]).map((r) => [r.code, r.designation ?? r.code]),
     );
@@ -109,6 +131,8 @@ export async function chargerDonneesReelles(lessons: Lesson[]): Promise<DonneesL
               ? { vue: 'indices', ...lectureIndices(spec.codes, indices) }
               : spec.vue === 'ratios'
                 ? { vue: 'ratios', ...ratiosValeurs(spec.codes, noms, cotations, fondamentaux, titres) }
+                : spec.vue === 'technique'
+                  ? { vue: 'technique', ...lectureTechnique(spec.codes, noms, series) }
               : { vue: 'historique', ...historiqueDividendes(spec.codes, noms, dividendes) };
       poser(li, si, v);
     }

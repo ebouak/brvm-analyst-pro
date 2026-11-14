@@ -1,0 +1,228 @@
+{
+ "titre": "Leçon 1 — L’architecture du marché financier régional",
+ "module": "Module 1 — Régulation et intégrité du marché",
+ "categorie": "regulatory",
+ "duree_min": 11,
+ "sous_titre": "Qui réglemente, qui organise, qui conserve, qui négocie : les institutions du marché de l’UMOA et leurs rôles.",
+ "resume": "Le marché financier régional de l’UMOA repose sur quelques institutions aux rôles distincts. L’AMF-UMOA, qui a succédé au CREPMF, réglemente et contrôle ; la BRVM organise la cotation ; le Dépositaire central conserve les titres et règle les transactions ; les SGI sont les seules à pouvoir négocier en bourse. Cette leçon décrit chacun de ces rôles et ce qu’ils changent pour l’investisseur.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Les institutions et leurs rôles",
+   "contenu": "Chaque acteur a un périmètre précis. Savoir qui fait quoi permet de savoir à qui s’adresser.",
+   "tableau": {
+    "colonnes": [
+     "Institution",
+     "Rôle",
+     "Ce que cela signifie pour vous"
+    ],
+    "lignes": [
+     [
+      "AMF-UMOA",
+      "Autorité de régulation : agrément des acteurs, visa des opérations, contrôle et sanctions",
+      "C’est elle qui protège l’épargne publique et qui reçoit les réclamations"
+     ],
+     [
+      "BRVM",
+      "Entreprise de marché : admission à la cote, cotation, diffusion des cours",
+      "Elle publie les cours, le Bulletin officiel de la cote et les avis"
+     ],
+     [
+      "Dépositaire central / Banque de règlement",
+      "Conservation centrale des titres, règlement et livraison des transactions",
+      "Il garantit que vos titres existent et changent bien de main"
+     ],
+     [
+      "SGI",
+      "Sociétés de gestion et d’intermédiation agréées : seules habilitées à négocier en bourse",
+      "Tout ordre passe par une SGI ; elle tient souvent votre compte-titres"
+     ],
+     [
+      "Sociétés de gestion d’OPCVM",
+      "Gestion des fonds collectifs",
+      "Elles gèrent les FCP et SICAV que vous pouvez souscrire"
+     ]
+    ],
+    "note": "Les banques, elles, sont supervisées par la Commission bancaire de l’UMOA, aux côtés de la BCEAO."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Du CREPMF à l’AMF-UMOA",
+   "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement résulte du Traité révisé de l’UMOA du 12 juillet 2019, entré en vigueur le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.",
+   "etapes": [
+    {
+     "titre": "12 juillet 2019",
+     "detail": "Signature du Traité révisé de l’UMOA."
+    },
+    {
+     "titre": "1er octobre 2022",
+     "detail": "Entrée en vigueur : l’AMF-UMOA a succédé au CREPMF.",
+     "cle": true
+    },
+    {
+     "titre": "Depuis",
+     "detail": "L’AMF-UMOA agrée, contrôle et sanctionne ; une Commission des sanctions statue sur les manquements."
+    }
+   ],
+   "etapes_style": "frise"
+  },
+  {
+   "type": "importance",
+   "titre": "Le circuit d’un ordre de bourse",
+   "contenu": "Un achat d’actions traverse plusieurs institutions avant que les titres n’arrivent sur votre compte.",
+   "flux": [
+    {
+     "titre": "Vous",
+     "detail": "Transmettez un ordre à votre SGI",
+     "icone": "actionnaires"
+    },
+    {
+     "titre": "SGI",
+     "detail": "Place l’ordre sur le système de cotation",
+     "icone": "entreprise"
+    },
+    {
+     "titre": "BRVM",
+     "detail": "Rapproche acheteurs et vendeurs",
+     "icone": "graphique"
+    },
+    {
+     "titre": "Dépositaire central",
+     "detail": "Règle l’argent et livre les titres",
+     "icone": "paiement"
+    },
+    {
+     "titre": "Compte-titres",
+     "detail": "Les actions sont inscrites à votre nom",
+     "icone": "piece"
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "Les confusions fréquentes",
+   "contenu": "Des erreurs de compréhension qui coûtent cher en cas de litige.",
+   "points": [
+    {
+     "titre": "Croire que la BRVM garantit les sociétés",
+     "detail": "La BRVM organise la cotation ; elle ne garantit ni la solidité des sociétés ni le cours.",
+     "verifier": "Les comptes publiés par la société."
+    },
+    {
+     "titre": "Passer par un intermédiaire non agréé",
+     "detail": "Seule une SGI agréée peut négocier en bourse. Un « placement » proposé hors de ce circuit n’offre pas les mêmes protections.",
+     "verifier": "La liste des acteurs agréés publiée par l’AMF-UMOA."
+    },
+    {
+     "titre": "S’étonner de l’ancien nom",
+     "detail": "Les documents antérieurs à octobre 2022 parlent de l’ex-CREPMF : il s’agit de la même autorité, sous son ancien nom.",
+     "verifier": "La date du document."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "L’essentiel",
+   "contenu": "Quatre acteurs, quatre rôles.",
+   "points": [
+    {
+     "titre": "L’AMF-UMOA réglemente, agrée, contrôle et sanctionne"
+    },
+    {
+     "titre": "La BRVM organise la cotation et publie les cours"
+    },
+    {
+     "titre": "Le Dépositaire central conserve les titres et règle les transactions"
+    },
+    {
+     "titre": "Seule une SGI agréée peut négocier vos ordres"
+    }
+   ]
+  }
+ ],
+ "quiz": [
+  {
+   "question": "Quelle institution a succédé à l’ex-CREPMF ?",
+   "options": [
+    "La BCEAO",
+    "L’AMF-UMOA",
+    "La BRVM",
+    "La Commission bancaire"
+   ],
+   "correct": 1,
+   "explication": "L’AMF-UMOA a succédé au CREPMF le 1er octobre 2022, à l’entrée en vigueur du Traité révisé de l’UMOA."
+  },
+  {
+   "question": "Qui est seul habilité à négocier vos ordres en bourse ?",
+   "options": [
+    "Votre banque, quelle qu’elle soit",
+    "Une SGI agréée",
+    "La BRVM directement",
+    "Le Dépositaire central"
+   ],
+   "correct": 1,
+   "explication": "Les ordres de bourse passent obligatoirement par une SGI agréée."
+  },
+  {
+   "question": "Quel est le rôle du Dépositaire central / Banque de règlement ?",
+   "options": [
+    "Fixer les cours",
+    "Conserver les titres et régler les transactions",
+    "Agréer les SGI",
+    "Publier les comptes des sociétés"
+   ],
+   "correct": 1,
+   "explication": "Il assure la conservation centrale des titres, le règlement et la livraison."
+  },
+  {
+   "question": "La BRVM garantit-elle la solidité des sociétés cotées ?",
+   "options": [
+    "Oui, toujours",
+    "Non : elle organise la cotation, sans garantir les sociétés ni les cours",
+    "Oui, pour le compartiment Prestige",
+    "Seulement pour les banques"
+   ],
+   "correct": 1,
+   "explication": "La cotation n’est pas une garantie : l’investisseur reste exposé au risque de la société."
+  },
+  {
+   "question": "Quel organe la réforme de 2022 a-t-elle créé au sein de l’AMF-UMOA ?",
+   "options": [
+    "Une banque centrale",
+    "Une Commission des sanctions",
+    "Une nouvelle bourse",
+    "Un fonds de garantie des dépôts"
+   ],
+   "correct": 1,
+   "explication": "La réforme a doté l’AMF-UMOA d’une Commission des sanctions et d’un Médiateur."
+  }
+ ],
+ "liens": [
+  {
+   "label": "Choisir sa SGI",
+   "href": "/comparateur-sgi"
+  },
+  {
+   "label": "Les sociétés cotées",
+   "href": "/societes"
+  },
+  {
+   "label": "La qualité de nos données",
+   "href": "/qualite-donnees"
+  }
+ ],
+ "avertissement": "Ceci n’est pas un conseil en investissement ni un avis juridique. Les règles citées sont résumées ; seuls les textes officiels de l’AMF-UMOA et de la BRVM font foi.",
+ "charts": [],
+ "qcm": {
+  "question": "Quelle institution a succédé à l’ex-CREPMF ?",
+  "options": [
+   "La BCEAO",
+   "L’AMF-UMOA",
+   "La BRVM",
+   "La Commission bancaire"
+  ],
+  "correct": 1,
+  "explication": "L’AMF-UMOA a succédé au CREPMF le 1er octobre 2022, à l’entrée en vigueur du Traité révisé de l’UMOA."
+ }
+}

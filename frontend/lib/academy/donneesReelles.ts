@@ -1,3 +1,4 @@
+import { rsi as rsiCalc, sma } from '@/lib/indicators';
 /**
  * Exemples RÉELS des leçons Academy — fonctions PURES et testées
  * (donneesReelles.test.ts). Le chargement depuis Supabase vit dans
@@ -251,4 +252,65 @@ export function ratiosValeurs(
     });
   }
   return { dateCours: lignes.map((l) => l.dateCours).sort().at(-1) ?? null, lignes, manquants };
+}
+
+// ── Lecture technique (moyennes mobiles, RSI) ───────────────────────────
+
+export interface PointCloture {
+  date: string;
+  cours: number;
+}
+
+export interface LectureTechnique {
+  code: string;
+  nom: string;
+  date: string;
+  cours: number;
+  mm20: number;
+  mm50: number;
+  rsi14: number;
+  /** Position du cours face aux deux moyennes : description, jamais un conseil. */
+  position: 'au-dessus des deux' | 'sous les deux' | 'entre les deux';
+  zoneRsi: 'surachat' | 'survente' | 'neutre';
+}
+
+/** Séances minimales : de quoi calculer une moyenne sur 50 séances. */
+export const SEANCES_MIN_TECHNIQUE = 50;
+
+/**
+ * Indicateurs calculés sur les clôtures RÉELLES. Moins de 50 séances cotées :
+ * la valeur est NOMMÉE, aucun indicateur n'est calculé sur un historique court.
+ */
+export function lectureTechnique(
+  codes: string[],
+  noms: Record<string, string>,
+  series: Record<string, PointCloture[]>,
+): { date: string | null; lignes: LectureTechnique[]; manquants: string[] } {
+  const lignes: LectureTechnique[] = [];
+  const manquants: string[] = [];
+  for (const code of codes) {
+    const s = (series[code] ?? []).filter((p) => p.cours > 0).sort((a, b) => a.date.localeCompare(b.date));
+    const closes = s.map((p) => p.cours);
+    const assez = closes.length >= SEANCES_MIN_TECHNIQUE;
+    const mm20 = assez ? sma(closes, 20) : null;
+    const mm50 = assez ? sma(closes, 50) : null;
+    const r = assez ? rsiCalc(closes, 14) : null;
+    if (mm20 == null || mm50 == null || r == null) {
+      manquants.push(code);
+      continue;
+    }
+    const cours = closes[closes.length - 1]!;
+    lignes.push({
+      code,
+      nom: noms[code] ?? code,
+      date: s[s.length - 1]!.date,
+      cours,
+      mm20,
+      mm50,
+      rsi14: r,
+      position: cours > mm20 && cours > mm50 ? 'au-dessus des deux' : cours < mm20 && cours < mm50 ? 'sous les deux' : 'entre les deux',
+      zoneRsi: r >= 70 ? 'surachat' : r <= 30 ? 'survente' : 'neutre',
+    });
+  }
+  return { date: lignes.map((l) => l.date).sort().at(-1) ?? null, lignes, manquants };
 }
