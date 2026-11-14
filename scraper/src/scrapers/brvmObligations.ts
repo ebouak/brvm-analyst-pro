@@ -127,3 +127,24 @@ export async function fetchBrvmObligations(): Promise<ObligationRow[]> {
     return [];
   }
 }
+
+/**
+ * Écarte les obligations ÉCHUES (maturité strictement passée).
+ *
+ * Constat du 2026-11-14 : la page « cours obligations » de brvm.org liste encore
+ * 55 titres échus depuis 2016-2025 (TPBF 2011-2016, PALM 2009-2016…), avec un
+ * cours au pair et un dernier coupon payé en 2015-2018. Les recopier chaque jour
+ * fabriquait une cotation à des titres remboursés depuis des années.
+ * Une maturité inconnue n'écarte rien : on ne devine pas qu'un titre est mort.
+ * La maturité dérivée du nom vaut le 31/12 de l'année d'échéance : l'écart est
+ * donc tardif, jamais prématuré.
+ */
+export function exclureEchues<T extends { maturite: string | null }>(
+  rows: T[],
+  aujourdhui: string,
+): { gardees: T[]; echues: T[] } {
+  const gardees: T[] = [];
+  const echues: T[] = [];
+  for (const r of rows) (r.maturite != null && r.maturite < aujourdhui ? echues : gardees).push(r);
+  return { gardees, echues };
+}

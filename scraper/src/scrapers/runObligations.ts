@@ -13,7 +13,7 @@
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { ensureObligationInstruments, upsertObligations } from '../persistence/repository.js';
-import { fetchBrvmObligations } from './brvmObligations.js';
+import { exclureEchues, fetchBrvmObligations } from './brvmObligations.js';
 import type { MarketSnapshot, ObligationRow } from '../types.js';
 import { jourNonOuvre } from '../utils/jourOuvre.js';
 
@@ -51,7 +51,8 @@ export async function runObligations(opts: { mock?: boolean } = {}): Promise<Obl
       return { status: 'success', nb: 0, message: `jour non ouvré : ${raison}` };
     }
 
-    const fetched: ObligationRow[] = await fetchBrvmObligations();
+    const { gardees: fetched, echues } = exclureEchues(await fetchBrvmObligations(), today);
+    if (echues.length > 0) log.info({ nb: echues.length }, 'Obligations échues ignorées (encore listées par brvm.org)');
     if (fetched.length === 0) {
       log.warn('Aucune obligation parsée depuis brvm.org');
       return { status: 'failed', nb: 0, message: 'Aucune obligation parsée' };
