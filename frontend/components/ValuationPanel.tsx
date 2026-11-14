@@ -76,6 +76,29 @@ export default function ValuationPanel({ v, scoring, rendementDividende, masquer
           </div>
         )}
 
+        {/* Désaccord : dire quelle méthode donne quoi, et pourquoi aucun écart n'est affiché. */}
+        {verdict.stance === 'desaccord' && v.price != null && fv.byPER != null && fv.byPBR != null && (
+          <div className="rounded-lg border border-border/60 bg-bg/40 p-3 text-xs leading-relaxed text-muted">
+            <p className="text-ivory font-medium">Pourquoi « méthodes en désaccord » ?</p>
+            <ul className="mt-1.5 space-y-1">
+              <li>
+                Par les bénéfices (bénéfice par action × PER médian du secteur) :{' '}
+                <span className="tabular text-ivory">{fmtFcfa(fv.byPER)} FCFA</span>,{' '}
+                {fv.byPER < v.price ? 'sous le cours : l’action paraît chère.' : 'au-dessus du cours : l’action paraît bon marché.'}
+              </li>
+              <li>
+                Par les fonds propres (fonds propres par action × P/B médian du secteur) :{' '}
+                <span className="tabular text-ivory">{fmtFcfa(fv.byPBR)} FCFA</span>,{' '}
+                {fv.byPBR < v.price ? 'sous le cours : l’action paraît chère.' : 'au-dessus du cours : l’action paraît bon marché.'}
+              </li>
+            </ul>
+            <p className="mt-1.5">
+              Les deux lectures se contredisent : en faire la moyenne cacherait ce désaccord. Aucun écart au cours n’est donc affiché ;
+              la fourchette indique où se situe la valeur selon la méthode retenue.
+            </p>
+          </div>
+        )}
+
         {/* Ratios */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {ratios.map((r) => (
