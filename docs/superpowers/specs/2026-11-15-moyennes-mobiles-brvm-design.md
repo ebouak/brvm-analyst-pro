@@ -34,8 +34,10 @@ présente pas un croisement comme une prévision ou une recommandation.
    la part des titres du même secteur dont le cours est au-dessus de la SMA50
    et de la SMA200 à la même séance, avec le nombre de titres disponibles.
    C'est un contexte collectif, pas un ajustement du score de la valeur. Si le
-   secteur est inconnu ou si moins de trois titres ont les données requises,
-   afficher « données sectorielles insuffisantes ».
+   secteur est inconnu ou si moins de trois titres ont une clôture publiée pour
+   la séance analysée et la moyenne requise, afficher « données sectorielles
+   insuffisantes ». Une clôture périmée ne compte pas comme une observation de
+   cette séance.
 6. **Données manquantes visibles.** Une moyenne nécessite autant de clôtures
    valides que sa fenêtre. Ne pas remplacer une moyenne indisponible par une
    valeur estimée, ni assimiler une absence de cours à une clôture nulle.
@@ -74,12 +76,13 @@ observation est une cotation du jour.
   secteur renseigné et leurs clôtures jusqu'à la séance analysée, en une
   requête paginée sur une fenêtre maximale de 400 jours calendaires. Pour
   chaque titre, les SMA sont calculées sur ses 200 dernières clôtures valides
-  au plus à cette séance; un titre sans historique suffisant est exclu du
-  dénominateur de la SMA concernée. Les lectures incomplètes ou en erreur
-  doivent échouer explicitement; elles ne deviennent pas un secteur à 0 %
-  haussier. L'interface peut afficher « données insuffisantes » seulement si
-  le chargement a réussi mais que les données ne satisfont pas les seuils
-  documentés ci-dessus.
+  au plus à cette séance. Seuls les titres dont la clôture la plus récente est
+  précisément celle de la séance analysée participent à la largeur; un titre
+  sans SMA suffisante est exclu du dénominateur de la moyenne concernée. Les
+  lectures incomplètes ou en erreur doivent échouer explicitement; elles ne
+  deviennent pas un secteur à 0 % haussier. L'interface peut afficher
+  « données insuffisantes » seulement si le chargement a réussi mais que les
+  données ne satisfont pas les seuils documentés ci-dessus.
 - Le module ne modifie ni `signals_daily`, ni `computeScore`, ni les seuils,
   ni le barème `scoreToRating`. Aucune migration n'est requise.
 
@@ -93,17 +96,21 @@ observation est une cotation du jour.
   pente « forte ».
 - Structure haussière complète : `cours > SMA20 > SMA50 > SMA200`.
   Structure baissière complète : `cours < SMA20 < SMA50 < SMA200`.
-  Toute autre configuration avec SMA20 et SMA50 calculables est « mixte ».
-  Sans SMA50, qualifier seulement la position par rapport aux moyennes
-  disponibles; sans SMA20, signaler des données insuffisantes.
+  Sans SMA200, appliquer la même comparaison avec le triplet disponible
+  `cours/SMA20/SMA50`, mais étiqueter explicitement la lecture « court et moyen
+  terme seulement ». Toute autre configuration avec au moins SMA20 et SMA50
+  calculables est « mixte ». Avec SMA20 seule, ne pas qualifier le régime :
+  montrer uniquement le cours au-dessus/sous cette moyenne et signaler que la
+  structure de tendance est incomplète.
 - Croisement haussier 20/50 : SMA20 courante supérieure à SMA50 courante et
   SMA20 précédente inférieure ou égale à SMA50 précédente. Le croisement
   baissier est défini symétriquement. Aucun croisement n'est déclaré si une
   des quatre valeurs manque.
 - Largeur sectorielle d'une moyenne : nombre de titres secteur avec clôture
-  au-dessus de la moyenne, divisé par le nombre de titres disposant de cette
-  moyenne, multiplié par 100. Afficher numérateur et dénominateur, sans seuil
-  de jugement du type « bon secteur ».
+  publiée à la séance analysée et au-dessus de la moyenne, divisé par le nombre
+  de titres du secteur avec clôture publiée à cette même séance et disposant de
+  cette moyenne, multiplié par 100. Afficher numérateur et dénominateur, sans
+  seuil de jugement du type « bon secteur ».
 
 ## Données BRVM et précautions
 
