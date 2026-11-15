@@ -102,7 +102,6 @@ export const INCOME_ROWS: Record<Famille, StatementRow[]> = {
     { key: 'pnb', label: 'Produit Net Bancaire (PNB)', specific: true, bold: true },
     { key: 'frais_generaux_admin', label: "Frais généraux d'exploitation" },
     { key: 'depenses_exploitation', label: "Charges d'exploitation" },
-    { key: 'coefficient_exploitation', label: "Coefficient d'exploitation", specific: true, format: 'pct' },
     { key: 'autres_depenses', label: 'Autres charges' },
     ...RESULTAT_COMMUN,
     ...PAR_ACTION,
