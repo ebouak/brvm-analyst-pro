@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 5 — Les dividendes : se constituer un revenu régulier",
+  "image": {
+    "url": "https://images.pexels.com/photos/6928996/pexels-photo-6928996.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "alt": "Calendrier, loupe et pièces de monnaie posés sur un bureau",
+    "credit": "Photo : Leeloo The First / Pexels"
+  },
   "categorie": "income",
   "duree_min": 9,
   "sous_titre": "Comprendre le mécanisme, calculer son rendement et mesurer l’effet du réinvestissement.",

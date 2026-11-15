@@ -71,7 +71,7 @@
       "imageQuery": null,
       "image": {
         "url": "https://images.pexels.com/photos/7947755/pexels-photo-7947755.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Top view of financial charts with a smartphone calculator, magnifying glass, and pencils on a desk.",
+        "alt": "Graphiques financiers, calculatrice, loupe et crayons sur un bureau",
         "credit": "Photo : RDNE Stock project / Pexels"
       }
     },
@@ -135,9 +135,9 @@
       ],
       "imageQuery": null,
       "image": {
-        "url": "https://images.pexels.com/photos/29799518/pexels-photo-29799518.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Close-up of house keys, euro bills, and charts symbolizing real estate investment and finance.",
-        "credit": "Photo : Jakub Zerdzicki / Pexels"
+        "url": "https://images.pexels.com/photos/10284048/pexels-photo-10284048.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Rayonnages chargés de matériaux de construction dans un entrepôt",
+        "credit": "Photo : Markus Winkler / Pexels"
       }
     },
     {
@@ -201,9 +201,9 @@
       "exercice_id": "value-trap-pick",
       "imageQuery": null,
       "image": {
-        "url": "https://images.pexels.com/photos/8927688/pexels-photo-8927688.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "A tidy workspace featuring a laptop, documents, and eyeglasses for productivity.",
-        "credit": "Photo : Nataliya Vaitkevich / Pexels"
+        "url": "https://images.pexels.com/photos/38118040/pexels-photo-38118040.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Jeune palmier à huile dans une plantation",
+        "credit": "Photo : Kawê  Rodrigues / Pexels"
       }
     },
     {
@@ -268,7 +268,7 @@
       "imageQuery": null,
       "image": {
         "url": "https://images.pexels.com/photos/5849571/pexels-photo-5849571.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Illustration of a cartoon character struggling with a large coin symbolizing financial loss.",
+        "alt": "Illustration d’un personnage portant une grosse pièce marquée d’une flèche vers le bas",
         "credit": "Photo : Monstera Production / Pexels"
       }
     }

@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 6 — Ouvrir un compte et passer son premier ordre",
+  "image": {
+    "url": "https://images.pexels.com/photos/9870227/pexels-photo-9870227.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "alt": "Mains signant un formulaire sur une table",
+    "credit": "Photo : Ron Lach / Pexels"
+  },
   "categorie": "general",
   "duree_min": 7,
   "sous_titre": "Quatre étapes, les bons documents, et le type d’ordre qui protège votre prix.",

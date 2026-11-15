@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 8 — Cas pratique : financer la scolarité de vos enfants",
+  "image": {
+    "url": "https://images.pexels.com/photos/10646406/pexels-photo-10646406.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "alt": "Salle de classe vide, tables alignées et sacs d’élèves",
+    "credit": "Photo : Ron Lach / Pexels"
+  },
   "categorie": "income",
   "duree_min": 7,
   "sous_titre": "Partir d’un objectif daté, mesurer l’effort réel, et laisser le temps travailler.",

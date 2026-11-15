@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 2 — Les 4 acteurs clés du marché",
+  "image": {
+    "url": "https://images.pexels.com/photos/18435332/pexels-photo-18435332.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "alt": "Immeubles du Plateau, quartier des affaires d’Abidjan, vus depuis la lagune Ébrié",
+    "credit": "Photo : Jean Marc Bonnel / Pexels"
+  },
   "categorie": "regulatory",
   "duree_min": 8,
   "sous_titre": "Qui organise, qui contrôle, qui exécute, qui conserve : et à qui s’adresser en cas de problème.",

@@ -44,9 +44,9 @@
       },
       "imageQuery": "stock exchange building africa",
       "image": {
-        "url": "https://images.pexels.com/photos/28958001/pexels-photo-28958001.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Historic New York Stock Exchange building facade captured in a vintage style.",
-        "credit": "Photo : Louis / Pexels"
+        "url": "https://images.pexels.com/photos/7821684/pexels-photo-7821684.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Documents remis de main en main au-dessus d’un bureau",
+        "credit": "Photo : RDNE Stock project / Pexels"
       }
     },
     {
@@ -90,7 +90,7 @@
       "imageQuery": "oil refinery industrial plant",
       "image": {
         "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+        "alt": "Raffinerie et ses cheminées sous un ciel clair",
         "credit": "Photo : Life Of Pix / Pexels"
       }
     },
@@ -134,9 +134,9 @@
       },
       "imageQuery": "business investors meeting handshake",
       "image": {
-        "url": "https://images.pexels.com/photos/7414041/pexels-photo-7414041.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Two male professionals shaking hands in a modern office setting, symbolizing teamwork and collaboration.",
-        "credit": "Photo : RDNE Stock project / Pexels"
+        "url": "https://images.pexels.com/photos/8470831/pexels-photo-8470831.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Mains signant un document, deux personnes de part et d’autre",
+        "credit": "Photo : Thirdman / Pexels"
       }
     },
     {
@@ -189,7 +189,7 @@
       "imageQuery": "financial data charts analysis",
       "image": {
         "url": "https://images.pexels.com/photos/7947754/pexels-photo-7947754.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Detailed close-up of a blue bar graph showing data analysis on printed paper.",
+        "alt": "Histogramme imprimé en gros plan",
         "credit": "Photo : RDNE Stock project / Pexels"
       }
     },
@@ -234,7 +234,7 @@
       "imageQuery": "investor checklist magnifying glass documents",
       "image": {
         "url": "https://images.pexels.com/photos/8962463/pexels-photo-8962463.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Close-up of tax preparation checklist and income statement with paperclips.",
+        "alt": "Liste de contrôle et compte de résultat posés sur un bureau",
         "credit": "Photo : Leeloo The First / Pexels"
       }
     }

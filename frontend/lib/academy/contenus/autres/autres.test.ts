@@ -199,8 +199,18 @@ describe('migration 0241 synchronisée avec les JSON', () => {
   const sql = readFileSync(join(__dirname, '../../../../../supabase/migrations/0241_academy_cours_hors_niveaux_relus.sql'), 'utf8');
   for (const slug of SLUGS) {
     it(`${slug} : contenu identique et garde du nombre de leçons`, () => {
-      const compact = JSON.stringify(brut(slug));
-      expect(sql.split(compact).length - 1).toBe(2);
+      // Les photos (clé `image`) sont remplacées ensuite par 0244 : elles sont
+      // comparées hors de cette migration (photos.test.ts).
+      const sansImages = (c: unknown) => {
+        const copie = JSON.parse(JSON.stringify(c)) as { lessons: Record<string, unknown>[] };
+        for (const l of copie.lessons) delete l.image;
+        return copie;
+      };
+      const blocs = [...sql.matchAll(/\$wb\$(\{"titre".*?\})\$wb\$/g)]
+        .map((m) => JSON.parse(m[1]!) as { titre: string; lessons: unknown[] })
+        .filter((c) => c.titre === (brut(slug) as { titre: string }).titre);
+      expect(blocs).toHaveLength(2);
+      for (const b of blocs) expect(sansImages(b)).toEqual(sansImages(brut(slug)));
       const n = sauvegarde.cours[slug]!.content.lessons.length;
       expect(sql).toContain(`jsonb_array_length(content->'lessons') = ${n}`);
       expect(sql).toContain(colonnes[slug]!.resume);
