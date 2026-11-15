@@ -88,7 +88,7 @@ export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolea
     return { rapport: null, echecs: 0, ecrites: sel.ecrites };
   }
 
-  if (opts.depuis && !/^d{4}-d{2}-d{2}$/.test(opts.depuis)) throw new Error(`--depuis attend AAAA-MM-JJ, reçu « ${opts.depuis} »`);
+  if (opts.depuis && !/^\d{4}-\d{2}-\d{2}$/.test(opts.depuis)) throw new Error(`--depuis attend AAAA-MM-JJ, reçu « ${opts.depuis} »`);
   const ex = await extraireAgregats({ codes, reprise: true, fixtures: opts.fixtures, depuis: opts.depuis ?? null });
   const plan = await selectionnerAgregats({ dryRun: true, codes, enMemoire: ex.observations as unknown as ObsLue[] });
   const { ecrites: _e, relecturesOuvertes: _r, avertissements: avSel, ...planSeul } = plan;
