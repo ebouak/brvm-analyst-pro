@@ -9,6 +9,7 @@ import ExerciseBlock from './ExerciseBlock';
 import { ChiffresCles, Flux, Formules, Frise, Points, Tableau, Texte } from './lecon/Blocs';
 import SimulationLecon from './lecon/Simulations';
 import DonneesReelles from './lecon/DonneesReelles';
+import Illustration from './lecon/Illustration';
 import type { DonneesSection } from '@/lib/academy/donneesServer';
 import './lecon/lecon.css';
 
@@ -50,6 +51,11 @@ function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: Donn
       {s.flux.length > 0 && (
         <div className="lp-bloc">
           <Flux etapes={s.flux} titre={s.titre} />
+        </div>
+      )}
+      {s.illustration && (
+        <div className="lp-bloc lp-large">
+          <Illustration illustration={s.illustration} />
         </div>
       )}
       {s.formules.length > 0 && (

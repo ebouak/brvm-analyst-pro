@@ -29,6 +29,27 @@
     "cours": 16000,
     "pays": "CI",
     "euros": false
+   },
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "Un dividende brut, deux destinataires (exemple fictif, IRVM de 12 %)",
+    "operation": "somme",
+    "unite": "FCFA",
+    "resultat": {
+     "label": "Dividende brut",
+     "valeur": 1000
+    },
+    "facteurs": [
+     {
+      "label": "Dividende net versé",
+      "valeur": 880
+     },
+     {
+      "label": "IRVM retenu à la source",
+      "valeur": 120
+     }
+    ],
+    "note": "Au taux ivoirien de 12 % pour une personne physique, la société retient 120 FCFA et vous verse 880 FCFA. C’est sur ces 880 FCFA que se calcule le rendement net."
    }
   },
   {
@@ -200,7 +221,23 @@
   }
  ],
  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
- "charts": [],
+ "charts": [
+  {
+   "type": "bar",
+   "titre": "Rendement net de deux obligations (exemple)",
+   "labels": [
+    "État, 6 % exonéré",
+    "Société, 6,5 % brut"
+   ],
+   "valeurs": [
+    6,
+    5.85
+   ],
+   "unite": "%",
+   "reel": false,
+   "note": "Exemple fictif de la leçon : l’obligation de société affiche le taux le plus haut, mais une retenue de 10 % la ramène à 5,85 % net, sous l’obligation d’État exonérée."
+  }
+ ],
  "qcm": {
   "question": "Une société ivoirienne verse un dividende brut de 1 500 FCFA. Avec un IRVM de 12 %, quel est le dividende net ?",
   "options": [

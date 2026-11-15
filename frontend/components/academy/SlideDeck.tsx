@@ -7,6 +7,7 @@ import type { CourseContent } from '@/lib/academy/types';
 import { courseToSlides, splitNumbered, type Slide } from '@/lib/academy/slides';
 import { SECTION_LABEL } from '@/lib/academy/types';
 import LessonChart from './LessonChart';
+import Illustration from './lecon/Illustration';
 
 /**
  * Mode présentation — rend le cours en diapositives fidèles au support PDF
@@ -310,6 +311,13 @@ function SectionSlide({
                 {k.detail && <p className="mt-0.5 text-[11px] leading-snug" style={{ color: MUTED }}>{k.detail}</p>}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Schéma pédagogique : sur fond blanc, y compris sur une diapo « piège » sombre */}
+        {s.illustration && (
+          <div className="mt-4 max-w-xl rounded-lg border bg-white p-3" style={{ borderColor: '#e2d8c4', color: INK }}>
+            <Illustration illustration={s.illustration} />
           </div>
         )}
 

@@ -55,7 +55,28 @@
      "valeur": "Dividende ÷ Bénéfice",
      "detail": "Proche de 100 % : peu de bénéfice gardé pour investir"
     }
-   ]
+   ],
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "Le P/B se décompose en PER et ROE (exemple de la leçon)",
+    "operation": "produit",
+    "resultat": {
+     "label": "P/B (cours ÷ valeur comptable)",
+     "valeur": 2.5
+    },
+    "facteurs": [
+     {
+      "label": "PER",
+      "valeur": 10
+     },
+     {
+      "label": "ROE",
+      "valeur": 25,
+      "pourcentage": true
+     }
+    ],
+    "note": "À PER égal, c’est la rentabilité des fonds propres qui fixe le P/B. Avec un ROE de 5 %, le même PER de 10 donnerait un P/B de 0,5 : la moitié de la valeur comptable."
+   }
   },
   {
    "type": "cas",
@@ -154,7 +175,38 @@
      "detail": "Après des pertes accumulées, P/B et ROE n’ont plus de sens.",
      "verifier": "Le signe des capitaux propres."
     }
-   ]
+   ],
+   "illustration": {
+    "gabarit": "avant_apres",
+    "titre": "Même bénéfice de 4 Md FCFA, deux façons de se financer (exemple fictif)",
+    "unite": "Md FCFA",
+    "part_du_premier": true,
+    "colonnes": [
+     {
+      "label": "Première société",
+      "segments": [
+       {
+        "label": "Fonds propres",
+        "valeur": 40
+       }
+      ]
+     },
+     {
+      "label": "Seconde société",
+      "segments": [
+       {
+        "label": "Fonds propres",
+        "valeur": 10
+       },
+       {
+        "label": "Dettes",
+        "valeur": 30
+       }
+      ]
+     }
+    ],
+    "note": "Les deux sociétés gagnent 4 Md FCFA. Rapporté à 40 Md FCFA de fonds propres, cela fait un ROE de 10 % ; rapporté à 10 Md FCFA, 40 %. L’écart vient de la dette, pas d’une meilleure gestion : la seconde est plus fragile si ses ventes baissent."
+   }
   },
   {
    "type": "retenir",

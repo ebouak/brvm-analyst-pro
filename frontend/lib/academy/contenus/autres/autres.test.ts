@@ -195,11 +195,19 @@ describe('Dangote : faits vérifiés au 15 novembre 2026', () => {
   });
 });
 
+/** Retire les clés `illustration` de section, posées par la migration 0243. */
+function sansIllustrations(c: unknown): unknown {
+  const copie = structuredClone(c) as { lessons: { sections: Record<string, unknown>[] }[] };
+  for (const l of copie.lessons) for (const s of l.sections) delete s.illustration;
+  return copie;
+}
+
 describe('migration 0241 synchronisée avec les JSON', () => {
   const sql = readFileSync(join(__dirname, '../../../../../supabase/migrations/0241_academy_cours_hors_niveaux_relus.sql'), 'utf8');
   for (const slug of SLUGS) {
     it(`${slug} : contenu identique et garde du nombre de leçons`, () => {
-      const compact = JSON.stringify(brut(slug));
+      // 0243 ajoute ensuite des schémas (`illustration`) : 0241 porte le contenu sans eux.
+      const compact = JSON.stringify(sansIllustrations(brut(slug)));
       expect(sql.split(compact).length - 1).toBe(2);
       const n = sauvegarde.cours[slug]!.content.lessons.length;
       expect(sql).toContain(`jsonb_array_length(content->'lessons') = ${n}`);

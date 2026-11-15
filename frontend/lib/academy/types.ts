@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { illustrationSchema } from './illustrations';
 
 /**
  * Schéma du contenu d'un cours Academy généré par LLM.
@@ -347,6 +348,8 @@ export const sectionSchema = z.object({
   /** Simulations supplémentaires, rendues après `simulation` (ex. répartition puis scénario). */
   simulations: z.array(simulationSchema).max(3).optional().default([]),
   donnees_reelles: donneesReellesSchema.nullable().optional(),
+  /** Schéma pédagogique dessiné par le code (lib/academy/illustrations.ts). */
+  illustration: illustrationSchema.nullable().optional(),
 });
 
 export const qcmSchema = z.object({

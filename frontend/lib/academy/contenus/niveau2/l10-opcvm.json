@@ -98,6 +98,27 @@
     "frais_gestion_pct": 1.5,
     "frais_sortie_pct": 0,
     "performance_pct": 0
+   },
+   "illustration": {
+    "gabarit": "cascade",
+    "titre": "Ce que les frais retirent à 1 000 000 FCFA placés cinq ans (exemple fictif)",
+    "unite": "FCFA",
+    "depart": {
+     "label": "Somme placée",
+     "valeur": 1000000
+    },
+    "etapes": [
+     {
+      "label": "Frais d’entrée (2 %)",
+      "valeur": -20000
+     },
+     {
+      "label": "Frais de gestion sur 5 ans (1,5 % l’an)",
+      "valeur": -71328
+     }
+    ],
+    "arrivee": "Valeur après 5 ans, sans performance",
+    "note": "Mêmes hypothèses que le simulateur, sans performance des titres : les frais coûtent environ 91 300 FCFA, soit 9,1 % de la somme placée. Les frais de gestion portent sur un encours qui diminue chaque année : ils restent un peu sous les 75 000 FCFA d’un encours stable."
    }
   },
   {
