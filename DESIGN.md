@@ -2,7 +2,7 @@
 
 Contrat visuel dérivé du code livré (branche `design/systeme-contraste`, 2026-11-07).
 Sources : `frontend/tailwind.config.ts`, `frontend/app/globals.css`,
-`frontend/components/ui/premium.tsx`, `frontend/components/layout/SiteHeader.tsx`.
+`frontend/components/ui/premium.tsx`, `frontend/components/layout/barre/BarreDeCote.tsx`.
 En cas de divergence, le code gagne ; la divergence est notée en §9.
 
 ## 1. Direction : « la cote du soir »
@@ -106,7 +106,7 @@ Le monospace est réservé aux chiffres : pas d'étiquette mono, pas de capitale
 ### Espacement
 - Jetons : `section` 24 px, `card` 16 px, `gutter` 32 px ; largeur de contenu `max-w-content` 1480 px (`--content`).
 - Réel : cartes `p-4`, états vides `p-12`, coque de panneau `p-1.5`, grilles `gap-4`. En-tête : `h-14`, `max-w-6xl`, `px-4 md:px-6`.
-- Cible tactile mobile : lignes de navigation `min-h-[48px]`, bouton menu 40×40 (`SiteHeader.tsx:72,85`).
+- Cible tactile mobile : 48 px minimum dans le plein écran de navigation et la barre du bas (§5 bis).
 
 ### Rayons
 `chip` 0,6 rem · `card` 1,1 rem · `panel` 1,5 rem · `xl2` 1,8 rem · `full` 9999 px. Boutons : `rounded-xl` (plein/fantôme), `rounded-lg` (état vide). Badges : `rounded-full`. Cœur de `PremiumPanel` : `calc(1.125rem - 0.375rem)`.
@@ -127,7 +127,7 @@ Ombres floues et neutres. Aucune ombre dure décalée. À l'impression, toute om
 - Variable `--ease` : 240 ms `cubic-bezier(0.16, 1, 0.3, 1)` (fonds, couleurs, CTA de landing).
 - Transition du kit (`EASE`, `premium.tsx:24`) : couleur, fond, bordure, ombre, transform, filtre ; 300 ms `cubic-bezier(0.32,0.72,0,1)`. Survol : `brightness-110`, flèche `translate-x-0.5` ; appui : `scale-[0.98]` (CTA) / `scale-95` (état vide).
 - Entrée : `rise-in` 0,7 s (translateY 16 px → 0), `reveal-in`, `nudgeIn`. Clignotement de valeur : `.flash-value` 120 ms, `flash-up-kf` / `flash-down-kf`.
-- **Pas de boucle décorative.** Exceptions déclarées : le **bandeau des cours** (`ticker` 46 s linéaire, `wb-ticker-scroll` 40 s en pause au survol) et la **pastille de séance ouverte** (`pulse`, vert).
+- **Pas de boucle décorative.** Exceptions déclarées : le **bandeau des cours** de la connexion et du widget embarquable (`ticker` 46 s linéaire, `wb-ticker-scroll` 40 s en pause au survol ; le bandeau défilant au-dessus des pages a disparu au lot 7) et la **pastille de séance ouverte** (`pulse`, vert).
 - `prefers-reduced-motion: reduce` neutralise toutes les animations et transitions (`globals.css:372-378`) ; le ticker embarquable passe en défilement manuel.
 - `gold-sweep` est désactivé (`animation: none`).
 
@@ -146,7 +146,48 @@ Tous compatibles serveur, sans hook client.
 | `PremiumCTA` | action principale (`gold` : fond `accent-ink`, texte `obsidian`) ; `ghost` pour l'action secondaire. Un seul plein par écran. |
 | `Eyebrow` | existe encore, **ne plus l'employer** (voir §9). |
 
-En-tête de site (`SiteHeader`) : `sticky top-0 z-40`, `bg-surface/90` + `backdrop-blur`, trait `border/60`, masqué à l'impression ; navigation mobile en tiroir (`aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`).
+La navigation du site est la barre de cote (§5 bis). L'ancien en-tête public (`SiteHeader`), la barre latérale (`Sidebar`) et le tiroir mobile (`MobileNav`) ont été retirés au lot 7.
+
+## 5 bis. Barre de cote
+
+Une seule navigation pour tout le site, publique comme applicative : `components/layout/barre/BarreDeCote.tsx`, posée **une seule fois** par `components/ConditionalShell.tsx`. Sa logique est pure, dans `lib/barreDeCote.ts` (testée par `lib/barreDeCote.test.ts`). Structure : une barre pleine largeur, plate, découpée en cellules par des filets d'un pixel. Ni arrondi, ni ombre, ni flou d'arrière-plan.
+
+### Anatomie (bureau, à partir de 1024 px)
+De gauche à droite, chaque cellule bornée par un filet `border` d'1 px :
+1. **Logo** : marque + « WESTBOURSE », vers `/dashboard` si connecté, `/` sinon.
+2. **Aujourd'hui**, qui est aussi l'horloge du marché : pastille + « Séance ouverte · clôture dans 1 h 12 » ou « Marché fermé · prochaine séance lundi » (`etatSeance`, fenêtre de `lib/freshness.ts`, aucun horaire ajouté). La pastille ne pulse que séance ouverte, jamais sous `prefers-reduced-motion`.
+3. **Quatre rubriques** (`RUBRIQUES_BARRE`) : Le marché · Trouver une idée · Mes revenus · Apprendre. Libellés raccourcis sous 1536 et 1280 px.
+4. **Contexte** (sous-pages de `/actions/[code]` seulement, à partir de 1280 px) : code, dernier cours, variation. Absente de la fiche elle-même, dont `FicheStickyNav` montre déjà le cours.
+5. Espace élastique.
+6. **Recherche** : « Chercher une valeur », indice `⌘K`/`Ctrl K` et `/`. Ouvre `CommandPalette`, sans la remplacer.
+7. **Action pleine** collée au bord droit (fond `ivory`, texte `bg`, lisible dans les deux thèmes) : « Créer un compte » (précédée de la cellule « Se connecter ») pour un visiteur ; « Mon portefeuille » une fois connecté, qui ouvre le panneau de la rubrique `portefeuille` suivi de `MENU_COMPTE`, du thème, du mode débutant/expert et de la déconnexion. Pour un visiteur, le sélecteur de thème est en bout de barre (à partir de 1360 px).
+
+Hauteur 56 px (`h-14`), 44 px (`h-11`) après 80 px de défilement, transition de 150 ms (aucune sous `prefers-reduced-motion`). Rubrique courante : filet `accent-ink` de 2 px au bas de sa cellule, pas d'aplat. Une réserve de hauteur placée avant la barre évite tout décalage ; `--barre-h` sert aux éléments collants situés dessous (`FicheStickyNav`, `SommaireChapitres`). Aucun débordement horizontal à 1024 px.
+
+### Panneau et colonne vivante
+- **Un seul panneau partagé**, pleine largeur, borné par les mêmes filets. Passer d'une rubrique à l'autre ne le ferme pas : la hauteur s'ajuste, le contenu fond en 120 ms. Son ouverture ne déplace pas le contenu de la page (CLS 0 mesuré).
+- **Trois colonnes** : deux colonnes de liens (libellé + description de 3 à 6 mots, cadenas discret sur une entrée Premium ; pour un compte gratuit, une entrée Premium mène à `/premium/upgrade?from=…`, `hrefPanneau`), puis la **colonne vivante** sur fond `sunken` : brief du jour et prochaine date de l'agenda (Aujourd'hui), plus fortes hausses et baisses de la séance (Le marché, qui porte aussi le groupe « Documents »), dernière édition « Valeurs de la semaine » et « Ce mois-ci » (Trouver une idée), trois prochains détachements (Mes revenus), leçon en cours puis prochaine formation en direct (Apprendre), valeur, variation du jour et alertes actives (Mon portefeuille).
+- **Données** : `/api/nav/apercu` (marché, cache serveur 60 s) ; `/api/nav/portefeuille` et `/api/nav/apprendre` (privées, jamais en cache partagé). Demandées au premier survol ou focus d'une cellule, **jamais au chargement**. Échec ou lenteur (4 s) : un lien statique vers la page, sans squelette qui clignote ni hauteur qui change. Une valeur absente est retirée, jamais remplacée par zéro. Aucun signal d'achat ou de vente, aucun classement présenté comme une suggestion.
+
+### Comportement
+- Survol avec intention : 120 ms à l'entrée, 200 ms à la sortie, dans un conteneur de survol partagé (pas de zone de tolérance en diagonale). Jamais au survol seul sur écran tactile.
+- Clavier : `Tab` parcourt les cellules ; le focus seul n'ouvre pas, il prépare la colonne vivante. `Entrée`, `Espace` ou `↓` ouvrent (le focus passe au premier lien) ; `←`/`→` changent de rubrique panneau ouvert ; `Échap` ferme et rend le focus à la cellule. Sémantique disclosure : `nav aria-label="Navigation principale"`, `button aria-expanded` + `aria-controls`, jamais `role="menu"`.
+- Fermeture au changement de route, au clic extérieur, au défilement de plus de 40 px.
+- Le lien d'évitement « Aller au contenu » reste le premier élément focalisable de la page.
+
+### Mobile et tablette (sous 1024 px)
+- Barre : logo · recherche (occupe l'espace) · grille 3 × 3 (`aria-haspopup="dialog"`).
+- La grille ouvre un **plein écran** (`role="dialog" aria-modal`) : état de séance en tête, les six rubriques en accordéon (une seule ouverte, la courante par défaut), groupe « Documents », action de compte en pied. Cibles de 48 px minimum, défilement de la page verrouillé, focus piégé, `Échap` ferme.
+- `BottomNav` reste pour le pouce : quatre destinations tirées du registre (`destinationsPouce`) plus la grille, qui ouvre le même plein écran.
+
+### Pages sans barre
+`sansBarre` (pur, testé) : widgets `/embed/*`, console `/admin` (elle a `AdminShell`), `/login`, `/signup`, `/crm`, `/offre`, sorties `…/print` et lecteur de leçon de l'Academy. Le Dossier valeur et le relevé gardent la barre à l'écran ; elle est `print:hidden`, sa réserve de hauteur aussi, et n'ajoute aucune feuille au PDF imprimé par le robot.
+
+### Règles
+- **Aucun lien en dur** dans la barre, le panneau, le plein écran, la barre du bas ou la palette : tout est dérivé de `lib/navRegistre.ts` (`REGISTRE`, `RUBRIQUES`, champs `description`, `colonne`, `groupe`) via `construirePanneaux` et `destinationsPouce`, et de `lib/nav.ts` (`NAV_GROUPS`, `PALETTE_EXTRA`) pour la palette. Retirer une entrée du registre la retire partout ; une entrée de menu apparaît dans un panneau et un seul (testé).
+- **Registre unique** : une nouvelle page se déclare dans le registre, jamais dans un composant de navigation.
+- **Aucune requête avant interaction** : rien sous `/api/nav/*` tant qu'aucune cellule n'a été survolée, focalisée ou ouverte (testé en e2e).
+- Jetons du design system uniquement ; icônes `lucide-react`.
 
 ## 6. Signature : la source et l'heure du relevé
 

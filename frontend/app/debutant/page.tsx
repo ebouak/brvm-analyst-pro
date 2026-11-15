@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { StickyCta } from '@/components/landing/bis/StickyCta';
 import { getDebutantData, type FicheDebutant, type SerieMois } from '@/lib/landing/debutantData';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -89,7 +88,6 @@ export default async function DebutantPage() {
     <div className="lb db">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(howTo) }} />
       <div className="wrap">
-        <LandingNav />
 
         <main>
           {/* 1 · HERO */}

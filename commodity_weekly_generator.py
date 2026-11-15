@@ -64,18 +64,31 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
+import commodity_weekly_qualite as _q
+
 log = logging.getLogger("wb-commodity-weekly")
+
+# Codes réellement cotés (registre du frontend). Tout code d'exposition passe
+# par lui : la S46/2026 citait SVOC, SIFCA, SAPH, SOGB et SUCR, absents de la cote.
+REFERENTIEL = _q.charger_referentiel()
+_INCONNUS = _q.codes_inconnus(REFERENTIEL)
+if _INCONNUS:
+    raise SystemExit(f"Registre d'exposition : codes absents de la cote {_INCONNUS}")
+
+
+def _brvm(matiere: str | None) -> list[str]:
+    return _q.codes_exposes(matiere, REFERENTIEL)
 
 # ── Constantes ────────────────────────────────────────────────────────────────
 
 YFINANCE_TICKERS = {
-    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["SIFCA"]},  # SICC = coco râpé, pas cacao
-    "CL=F":  {"nom": "Pétrole WTI",    "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
-    "BZ=F":  {"nom": "Pétrole Brent",  "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
+    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": []},   # aucun émetteur cacao coté
+    "CL=F":  {"nom": "Pétrole WTI",    "unite": "USD/bbl",  "brvm": _brvm("petrole")},
+    "BZ=F":  {"nom": "Pétrole Brent",  "unite": "USD/bbl",  "brvm": _brvm("petrole")},
     "KC=F":  {"nom": "Café",           "unite": "USc/lb",   "brvm": []},
-    "SB=F":  {"nom": "Sucre",          "unite": "USc/lb",   "brvm": ["SCRC"]},   # Sucrivoire
-    "CT=F":  {"nom": "Coton",          "unite": "USc/lb",   "brvm": ["SIFCA", "CFAC"]},
-    "GC=F":  {"nom": "Or",             "unite": "USD/oz",   "brvm": []},          # pas de minier coté BRVM
+    "SB=F":  {"nom": "Sucre",          "unite": "USc/lb",   "brvm": _brvm("sucre")},
+    "CT=F":  {"nom": "Coton",          "unite": "USc/lb",   "brvm": []},   # aucun émetteur coton coté
+    "GC=F":  {"nom": "Or",             "unite": "USD/oz",   "brvm": []},   # pas de minier coté BRVM
     "SI=F":  {"nom": "Argent",         "unite": "USD/oz",   "brvm": []},
 }
 
@@ -98,12 +111,12 @@ def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
 
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
-    "COCOA":       {"nom": "Cacao",         "brvm": ["SIFCA"]},              # pas de pur joueur cacao coté BRVM
-    "RUBBER_TSR20":{"nom": "Caoutchouc",    "brvm": ["SAPH", "SOGB"]},          # SICOM/TOCOM — purs joueurs
-    "PALM_OIL":    {"nom": "Huile de palme","brvm": ["PALC", "SIFCA"]},          # CPO Bursa Malaysia
-    "CRUDE_OIL":   {"nom": "Pétrole brut",  "brvm": ["TTLS", "SVOC"]},
-    "COTTON_A_IDX":{"nom": "Coton",         "brvm": ["SIFCA", "CFAC"]},          # indirect
-    "GOLD":        {"nom": "Or",            "brvm": []},                          # pas de minier coté BRVM
+    "COCOA":       {"nom": "Cacao",         "brvm": []},
+    "RUBBER_TSR20":{"nom": "Caoutchouc",    "brvm": _brvm("caoutchouc")},
+    "PALM_OIL":    {"nom": "Huile de palme","brvm": _brvm("huile_palme")},
+    "CRUDE_OIL":   {"nom": "Pétrole brut",  "brvm": _brvm("petrole")},
+    "COTTON_A_IDX":{"nom": "Coton",         "brvm": []},
+    "GOLD":        {"nom": "Or",            "brvm": []},
 }
 
 @dataclass
@@ -209,7 +222,12 @@ def fetch_yfinance_prices() -> dict[str, dict]:
                 week_high = round(float(highs.max()), 2) if not highs.empty else round(prix_actuel, 2)
             except Exception:
                 week_low = week_high = round(prix_actuel, 2)
+            if not _q.cours_coherent(prix_actuel, week_low, week_high):
+                log.warning("yfinance %s écarté : clôture %.2f hors fourchette [%.2f ; %.2f]",
+                            sym, prix_actuel, week_low, week_high)
+                continue
             results[sym] = {
+                "n_seances": int(len(closes) - 1),
                 "nom": meta["nom"],
                 "symbole": sym,
                 "prix_actuel": round(prix_actuel, 2),
@@ -225,6 +243,44 @@ def fetch_yfinance_prices() -> dict[str, dict]:
             log.warning("yfinance %s erreur : %s", sym, e)
 
     return results
+
+
+def fetch_eurusd() -> dict | None:
+    """EUR/USD en début et fin de fenêtre : le franc CFA est arrimé à l'euro,
+    donc USD/FCFA = 655,957 / EURUSD. None si la donnée manque (bloc FCFA absent)."""
+    try:
+        import yfinance as yf
+        hist = yf.download("EURUSD=X", period="7d", interval="1d", progress=False, auto_adjust=True)
+        closes = hist["Close"].squeeze().dropna()
+        if len(closes) < 2:
+            return None
+        actuel, debut = float(closes.iloc[-1]), float(closes.iloc[0])
+        if not (0.5 < actuel < 2.0 and 0.5 < debut < 2.0):
+            return None
+        return {"actuel": round(actuel, 5), "debut": round(debut, 5)}
+    except Exception as e:
+        log.warning("EUR/USD indisponible : %s", e)
+        return None
+
+
+def fetch_semaine_precedente(year: int, week: int) -> dict | None:
+    """Métadonnées de l'hebdo de la semaine ISO précédente (pour le bilan)."""
+    if not SUPABASE_URL or not SERVICE_KEY:
+        return None
+    import requests
+    lundi = datetime.fromisocalendar(year, week, 1) - timedelta(days=7)
+    y, w, _ = lundi.isocalendar()
+    slug = f"westbourse-commodities-weekly-{y}-w{w:02d}"
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/brvm_news?slug=eq.{slug}&select=metadata&limit=1",
+            headers={"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}"}, timeout=15)
+        resp.raise_for_status()
+        rows = resp.json()
+        return rows[0].get("metadata") if rows else None
+    except Exception as e:
+        log.warning("Hebdo précédent illisible : %s", e)
+        return None
 
 
 # ── 2. World Bank Pink Sheet ──────────────────────────────────────────────────
@@ -332,10 +388,11 @@ def fetch_supabase_articles(days: int = 14) -> list[dict]:
 
 # Filières agro-industrielles BRVM : matière sous-jacente → producteurs cotés
 _FILIERES_CORR = {
-    "Huile de palme": {"commodity": "palm_oil", "codes": ["PALC", "SOGC"], "couleur": "#f59e0b"},
-    "Caoutchouc":     {"commodity": "rubber",   "codes": ["SAPH", "SOGB"], "couleur": "#22c55e"},
-    "Sucre":          {"commodity": "sugar",     "codes": ["STAC", "SUCR"], "couleur": "#e879f9"},
-    "Cacao":          {"commodity": "cocoa",     "codes": ["CFAC"],         "couleur": "#a16207"},
+    "Huile de palme": {"commodity": "palm_oil", "codes": _brvm("huile_palme"), "couleur": "#f59e0b"},
+    "Caoutchouc":     {"commodity": "rubber",   "codes": _brvm("caoutchouc"),  "couleur": "#22c55e"},
+    "Sucre":          {"commodity": "sugar",    "codes": _brvm("sucre"),       "couleur": "#e879f9"},
+    # Cacao retiré : aucun émetteur cacao n'est coté. L'ancienne ligne le
+    # corrélait à CFAC (CFAO Motors, distribution automobile).
 }
 
 
@@ -741,130 +798,285 @@ def build_editorial_prompt(
     prices: list,
     wb: dict,
     articles: list,
-    brvm_scores: dict,
     correlations: list | None = None,
     perplexity_items: list[dict] | None = None,
     week: int | None = None,
     year: int | None = None,
+    edition: str = "note",
+    fcfa: list[dict] | None = None,
+    refus: list[str] | None = None,
 ) -> str:
     """
-    DeepSeek génère UNIQUEMENT le texte éditorial (synthèse + 8 analyses + réactions + perspectives).
-    Python construit séparément le SVG, les tables et le footer.
+    Le LLM ne rédige QUE l'analyse par matière. Titre, synthèse, tableaux,
+    conversions, scénarios et bilan sont calculés par Python. Tout nombre du
+    texte doit figurer dans DONNÉES : `verrous()` le contrôle après coup.
     """
-    now = datetime.now(timezone(timedelta(hours=1)))
-    week_num = week if week is not None else now.isocalendar()[1]
-    year = year if year is not None else now.year
+    def ligne(p) -> str:
+        d = _q.dec_prix(p.current)
+        pos = _q.position_pct(p)
+        return (f"  - {p.label} ({p.ticker}) : clôture {_q.fr(p.current, d)} {p.unit} ; variation semaine "
+                f"{_q.pct(p.weekly_change_pct)} ; fourchette {_q.fr(p.week_low, d)} à {_q.fr(p.week_high, d)} ; "
+                f"amplitude {_q.fr(_q.amplitude_pct(p), 1)} % ; clôture à "
+                f"{'n/d' if pos is None else round(pos)} % de la fourchette")
 
-    price_lines = "\n".join(f"  - {p.to_prompt_line()}" for p in prices)
+    price_lines = "\n".join(ligne(p) for p in prices)
+    presse = [f"  [{a.get('source_label','')}] {str(a.get('titre',''))[:130]}" for a in (articles or [])[:6]]
+    presse += [f"  [{it.get('date','')}] {str(it.get('titre',''))[:130]}" for it in (perplexity_items or [])[:8]]
+    presse_ctx = "\n".join(presse) or "  (aucun titre disponible)"
 
-    wb_ctx = ""
-    if wb:
-        wb_ctx = f"\nBanque Mondiale ({wb.get('month','')}) : "
-        wb_ctx += ", ".join(f"{k}={v:.1f}" for k, v in wb.items() if k != "month" and v)
+    expo_ctx = "\n".join(
+        f"  {_q.LIBELLE_MATIERE[m]} : " + ", ".join(f"{_q.NOMS[e['code']]} ({e['code']}) — {e['canal']}"
+                                                   for e in lst if e["code"] in REFERENTIEL)
+        for m, lst in _q.EXPOSITIONS.items())
 
-    art_ctx = ""
-    if articles:
-        art_ctx = "\nActualités commodités BRVM (7 derniers jours) :"
-        for a in articles[:6]:
-            art_ctx += f"\n  [{a.get('source_label','')}] {a.get('titre','')[:130]}"
+    corr_ctx = "\n".join(
+        f"  {c['matiere']} ({', '.join(c['codes'])}) : r = {_q.fr(c['coefficient'], 2)} sur {c['n_months']} mois"
+        for c in (correlations or []) if c.get("available") and c.get("coefficient") is not None
+    ) or "  (aucune corrélation disponible)"
 
-    perplex_ctx = ""
-    if perplexity_items:
-        perplex_ctx = "\nContexte macro récent (sources externes vérifiées) :"
-        for it in perplexity_items[:6]:
-            perplex_ctx += f"\n  [{it.get('date','')}] {str(it.get('titre',''))[:130]}"
+    fcfa_ctx = "\n".join(
+        f"  {l['label']} : {_q.fr(l['prix_fcfa'], 0 if l['prix_fcfa'] >= 100 else 2)} {l['unite']} ; "
+        f"variation en FCFA {_q.pct(l['var_fcfa'])}" for l in (fcfa or [])) or "  (taux de change indisponible)"
 
-    top_brvm = ", ".join(f"{tk}({s}/10)" for tk, s in list(brvm_scores.items())[:5])
+    consigne_edition = {
+        "note": "Chaque matière reçoit un bloc de longueur comparable.",
+        "briefing": "Semaine calme : deux phrases au plus par paragraphe, aucun développement.",
+        "dossier": f"La matière dominante ({prices[0].label}) reçoit un bloc deux fois plus long que les autres, placé en premier.",
+    }[edition]
 
-    corr_ctx = ""
-    if correlations:
-        corr_ctx = "\nCorrélations BRVM ↔ Matières premières (Pearson, variations mensuelles) :"
-        for c in correlations:
-            if c["available"] and c["coefficient"] is not None:
-                corr_ctx += (
-                    f"\n  {c['matiere']} ({', '.join(c['codes'])}) : r={c['coefficient']:+.2f}"
-                    f" [{c['interpretation']}] — {c['macro_reading']}"
-                )
-            else:
-                corr_ctx += f"\n  {c['matiere']} ({', '.join(c['codes'])}) : données insuffisantes"
+    reprise = ""
+    if refus:
+        reprise = ("\nTA VERSION PRÉCÉDENTE A ÉTÉ REFUSÉE pour ces raisons, corrige-les toutes :\n"
+                   + "\n".join(f"  - {r}" for r in refus) + "\n")
 
-    return f"""Tu es rédacteur senior marchés/commodities pour WestBourse (BRVM Abidjan).
-Génère l'analyse éditoriale des matières premières — Semaine {week_num}/{year}.
-
-DONNÉES :
+    return f"""Tu es analyste matières premières pour WESTBOURSE (BRVM, UEMOA).
+Rédige l'analyse par matière de l'hebdo — semaine {week}/{year}. Édition : {_q.NOM_EDITION[edition]}.
+{reprise}
+DONNÉES (seule source de chiffres autorisée) :
 {price_lines}
-{wb_ctx}
-{art_ctx}
-{perplex_ctx}
-Top BRVM scorées : {top_brvm}
+
+PRIX EN FRANCS CFA :
+{fcfa_ctx}
+
+TITRES DE PRESSE DE LA SEMAINE (seule source d'explications autorisée) :
+{presse_ctx}
+
+VALEURS BRVM EXPOSÉES (seuls codes autorisés, à citer sous la forme « Nom (CODE) ») :
+{expo_ctx}
+  Cacao, café, coton, or, argent : aucune société cotée exposée directement.
+
+CORRÉLATIONS HISTORIQUES :
 {corr_ctx}
 
-CONSIGNE STRICTE :
-- Produis UNIQUEMENT les sections texte ci-dessous.
-- Styles CSS 100% INLINE sur chaque balise (pas de <style>, pas de class externe).
-- Commence par <section> et termine par </section>.
-- Aucune table de prix, aucun graphique, aucune table de corrélation (tous déjà générés par le système).
-- Si une corrélation est forte (|r| > 0.7), cite-la explicitement dans l'analyse de la matière concernée.
-- Analyse approfondie, sans limite de longueur : développe autant que nécessaire pour couvrir chaque matière, les facteurs macro, les implications BRVM et les perspectives.
-- Chaque matière : au moins 5-7 phrases d'analyse substantielle (facteurs géopolitiques, offre/demande, météo, devise, position des fonds).
+RÈGLES, chacune vérifiée par un contrôle automatique qui refuse le texte :
+1. Tout nombre que tu écris figure tel quel dans DONNÉES, PRIX EN FRANCS CFA, CORRÉLATIONS ou un TITRE DE PRESSE. Aucun calcul, aucun arrondi nouveau, aucun niveau de prix de mémoire.
+2. Nombres à la française : virgule décimale, espace des milliers, « % » précédé d'une espace.
+3. Aucun code de valeur hors de la liste ci-dessus.
+4. Aucune recommandation ni orientation de portefeuille : tu informes, tu ne conseilles pas.
+5. Tu ne parles ni de « score », ni de « notation ».
+6. Phrases de 22 mots au plus, voix active, présent. Pas d'émoji, pas de point d'exclamation, pas de superlatif.
+7. {consigne_edition}
 
-STYLE D'ÉCRITURE (impératif — registre note de recherche sell-side) :
-- Phrases COURTES (max ~22 mots), voix active, présent de l'indicatif pour les faits.
-- Chaque affirmation s'appuie sur un CHIFFRE des DONNÉES ci-dessus (prix, variation, corrélation). N'invente JAMAIS un fait, un niveau de prix ou un événement absent des DONNÉES : si l'information manque, écris « non couvert par nos sources cette semaine ».
-- Structure interne de chaque analyse matière : 1) LE FAIT (mouvement chiffré), 2) POURQUOI (facteurs, en citant les actualités fournies si pertinentes), 3) IMPACT BRVM (valeurs exposées nommées avec leur ticker).
-- Tout ce qui est prédictif est au CONDITIONNEL (« pourrait », « devrait ») et attribué (« selon la tendance des 5 dernières séances »).
-- INTERDITS : « il convient de noter », « force est de constater », « dans un contexte de », « plus que jamais », « véritable », superlatifs creux, métaphores guerrières, point d'exclamation.
-- Vocabulaire pro FR : préférer « repli/rebond/consolidation » à « chute/explosion » ; toujours préciser l'unité et la période d'une variation.
-- Les tickers BRVM sont cités entre parenthèses après le nom : SAPH (SAPH), Palm CI (PALC).
+CHAQUE BLOC a exactement quatre paragraphes, dans cet ordre, chacun ouvert par son étiquette en <strong> :
+- « Fait vérifié. » Le mouvement chiffré, tiré de DONNÉES. Dis si la clôture est près du plus bas ou du plus haut quand c'est le cas.
+- « Lecture. » L'explication donnée par les TITRES DE PRESSE, en nommant la source entre crochets. Si aucun titre ne porte sur cette matière, écris seulement : « Aucune cause identifiée dans nos sources. » N'en invente pas. Cette phrase ne peut apparaître que deux fois : regroupe en un seul bloc les matières sans explication.
+- « Hypothèse. » Ce qui pourrait suivre, au conditionnel, rattaché à un seuil de DONNÉES (plus bas ou plus haut de la semaine).
+- « Transmission à la BRVM. » Le canal vers les valeurs exposées, ou l'absence de société cotée exposée.
 
-STRUCTURE EXACTE À PRODUIRE :
+FORMAT : HTML, styles en ligne uniquement. Commence par <section> et termine par </section>. Un bloc =
 
-<section style="font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;line-height:1.75;">
+<div style="border:1px solid #e2e8f0;border-radius:8px;padding:18px 20px;margin-bottom:16px;">
+  <p style="font-size:11px;color:#64748b;font-weight:600;margin:0 0 6px 0;">[Énergie | Métaux précieux | Agriculture]</p>
+  <h3 style="font-size:17px;font-weight:700;margin:0 0 10px 0;color:#0f172a;">[Titre factuel de 12 mots au plus, qui nomme la ou les matières du bloc]</h3>
+  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Fait vérifié.</strong> …</p>
+  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Lecture.</strong> …</p>
+  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Hypothèse.</strong> …</p>
+  <p style="margin:0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Transmission à la BRVM.</strong> …</p>
+</div>
 
-  <!-- À RETENIR — 3 puces factuelles chiffrées (lecture 20 secondes) -->
-  <div style="background:#eff6ff;border-left:4px solid #1d4ed8;padding:16px 20px;margin-bottom:16px;border-radius:0 8px 8px 0;">
-    <p style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px 0;">À retenir — Semaine {week_num}/{year}</p>
-    <ul style="margin:0;padding-left:18px;font-size:14px;color:#0f172a;">
-      <li style="margin-bottom:6px;">[Fait n°1 le plus important, avec chiffre : la matière qui a le plus bougé et de combien]</li>
-      <li style="margin-bottom:6px;">[Fait n°2 : l'impact BRVM concret — valeur(s) exposée(s) nommée(s) avec ticker]</li>
-      <li style="margin:0;">[Fait n°3 : le point à surveiller la semaine prochaine, au conditionnel]</li>
-    </ul>
-  </div>
+Chaque matière de DONNÉES doit être nommée par son libellé exact dans au moins un bloc. 700 mots au plus au total."""
 
-  <!-- SYNTHÈSE EXÉCUTIVE -->
-  <div style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 20px;margin-bottom:28px;">
-    <p style="margin:0;font-size:15px;color:#0f172a;font-weight:500;">[2-3 phrases denses : quelle matière a dominé la semaine (chiffre), quel impact BRVM, tonalité générale — sans répéter mot pour mot les puces]</p>
-  </div>
 
-  <!-- ANALYSE PAR MATIÈRE : un bloc par matière (8 blocs total) -->
-  <div style="border:1px solid #e2e8f0;border-radius:8px;padding:18px 20px;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-      <span style="font-size:11px;color:#64748b;font-weight:600;">[FAMILLE EX: Agriculture]</span>
-      <code style="font-size:10px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#475569;">[TICKER EX: CC=F]</code>
-    </div>
-    <h3 style="font-size:16px;font-weight:700;margin:0 0 10px 0;color:[#10b981 si hausse | #ef4444 si baisse | #d97706 si stable];">
-      [LABEL] : [PRIX] [UNITÉ] — Δ5j [VARIATION%]
-    </h3>
-    <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Le fait.</strong> [1-2 phrases : le mouvement chiffré de la semaine, niveau atteint]</p>
-    <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Pourquoi.</strong> [2-3 phrases : facteurs offre/demande, météo, géopolitique, devise — en citant les actualités fournies quand elles existent, sinon « non couvert par nos sources cette semaine »]</p>
-    <p style="margin:0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Impact BRVM.</strong> [1-2 phrases : valeurs exposées nommées avec ticker + corrélation citée si |r| &gt; 0.7]</p>
-  </div>
+# ── 5a. Blocs calculés (aucun texte de LLM) ──────────────────────────────────
 
-  <!-- RÉACTIONS DE MARCHÉ -->
-  <div style="margin:28px 0 20px;">
-    <h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:14px;">Réactions de marché observées</h2>
-    <p style="font-size:14px;color:#334155;">[3-4 phrases sur les mouvements observés sur la BRVM cette semaine en lien avec les matières premières]</p>
-  </div>
+_H2 = 'style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin:0 0 12px 0;"'
+_TH = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
+_TD = 'style="padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155;"'
+_NIVEAUX = {
+    "essentiel": ("Essentiel", "Pour tous : l'essentiel en 30 secondes", "#065f46", "#d1fae5"),
+    "investisseur": ("Investisseur", "Pour suivre la cote : l'analyse", "#1e3a8a", "#dbeafe"),
+    "pro": ("Pro", "Pour aller plus loin : méthode, corrélations, sources", "#3b0764", "#ede9fe"),
+}
 
-  <!-- PERSPECTIVES -->
-  <div style="background:#f0fdf4;border-radius:8px;padding:18px 20px;margin-bottom:20px;">
-    <h2 style="font-size:18px;font-weight:700;color:#065f46;margin:0 0 12px 0;">Perspectives — Semaine {week_num + 1}/{year}</h2>
-    <p style="font-size:14px;color:#064e3b;margin:0 0 10px 0;">[Scénario central 2-3 phrases : tendances attendues sur les principales matières]</p>
-    <p style="font-size:14px;color:#064e3b;margin:0 0 10px 0;">[Risques à surveiller 1-2 phrases]</p>
-    <p style="font-size:14px;color:#0f172a;margin:0;"><strong>Recommandation WestBourse :</strong> [1 phrase d'orientation portefeuille claire et actionnable]</p>
-  </div>
 
-</section>"""
+def build_badge(niveau: str) -> str:
+    """Bandeau de niveau de lecture : le lecteur sait où s'arrêter."""
+    nom, legende, encre, fond = _NIVEAUX[niveau]
+    return (f'<div style="display:flex;align-items:center;gap:10px;margin:32px 0 14px 0;">'
+            f'<span style="background:{fond};color:{encre};font-size:11px;font-weight:700;'
+            f'padding:4px 10px;border-radius:12px;">{nom}</span>'
+            f'<span style="font-size:12px;color:#64748b;">{legende}</span></div>')
+
+
+def build_essentiel(prices: list, fcfa: list[dict], edition: str) -> str:
+    """Synthèse en langage simple, calculée : trois phrases, aucun jargon."""
+    if not prices:
+        return ""
+    top = max(prices, key=lambda p: abs(p.weekly_change_pct))
+    hausses = sum(1 for p in prices if p.weekly_change_pct >= 0.5)
+    baisses = sum(1 for p in prices if p.weekly_change_pct <= -0.5)
+    stables = len(prices) - hausses - baisses
+    nom = _q.ARTICLE.get(top.label, top.label.lower())
+    puces = [
+        f"Le plus fort mouvement de la semaine : {nom} "
+        f"{'gagne' if top.weekly_change_pct > 0 else 'perd'} {_q.fr(abs(top.weekly_change_pct))} %.",
+        f"Sur {len(prices)} matières suivies : {hausses} en hausse, {baisses} en baisse, {stables} stable(s).",
+    ]
+    brent = next((l for l in fcfa if l["ticker"] == "BZ=F"), None)
+    if brent:
+        puces.append(f"En francs CFA, le baril de Brent vaut {_q.fr(brent['prix_fcfa'], 0)} FCFA "
+                     f"({_q.pct(brent['var_fcfa'])} sur la semaine).")
+    puces.append("Une matière première qui monte ou baisse ne fait pas à elle seule monter ou baisser "
+                 "une action : le tableau « Valeurs exposées » dit par quel canal elle peut peser.")
+    items = "".join(f'<li style="margin-bottom:6px;">{_html.escape(t)}</li>' for t in puces)
+    return (build_badge("essentiel")
+            + f'<div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:8px;">'
+            f'<ul style="margin:0;padding-left:18px;font-size:15px;color:#0f172a;">{items}</ul>'
+            f'<p style="margin:10px 0 0 0;font-size:12px;color:#64748b;">Édition de la semaine : '
+            f'{_q.NOM_EDITION[edition]}.</p></div>')
+
+
+def build_bilan(bilan: list[dict]) -> str:
+    """Ce que nous surveillions la semaine passée, et ce qui s'est produit."""
+    if not bilan:
+        return ""
+    items = "".join(
+        f'<li style="margin-bottom:6px;"><strong style="color:{"#b91c1c" if b["franchi"] else "#065f46"};">'
+        f'{"Seuil franchi" if b["franchi"] else "Seuil tenu"}.</strong> {_html.escape(b["texte"])}</li>'
+        for b in bilan)
+    return (f'<div style="border:1px solid #0f172a;border-radius:8px;padding:16px 20px;margin:16px 0 8px 0;">'
+            f'<p style="margin:0 0 8px 0;font-size:13px;font-weight:700;color:#0f172a;">'
+            f'Bilan de la semaine précédente : les seuils que nous surveillions</p>'
+            f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#334155;">{items}</ul></div>')
+
+
+def build_seuils(seuils: list[dict]) -> str:
+    if not seuils:
+        return ""
+    items = "".join(
+        f'<li style="margin-bottom:4px;">{_html.escape(s["label"])} : '
+        f'{"plus bas" if s["type"] == "bas" else "plus haut"} de la semaine à '
+        f'{_q.fr(s["niveau"], _q.dec_prix(s["niveau"]))} {_html.escape(s["unite"])}</li>' for s in seuils)
+    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Seuils à surveiller la semaine prochaine</h2>'
+            f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#334155;">{items}</ul>'
+            f'<p style="font-size:12px;color:#64748b;margin:8px 0 0 0;">Nous dirons dans le prochain numéro '
+            f'si chacun a tenu ou cédé.</p></div>')
+
+
+def build_legende_preuve() -> str:
+    return ('<p style="font-size:12px;color:#64748b;margin:0 0 14px 0;">'
+            '<strong style="color:#0f172a;">Fait vérifié</strong> : chiffre de marché contrôlé. '
+            '<strong style="color:#0f172a;">Lecture</strong> : explication donnée par une source nommée. '
+            '<strong style="color:#0f172a;">Hypothèse</strong> : ce qui pourrait suivre, sans certitude.</p>')
+
+
+def _lecture_valeur(matiere: str, var: float | None) -> str:
+    if var is None:
+        return "Cours de la matière non disponible cette semaine."
+    if matiere == "sucre":
+        return "Effet limité : le prix de vente domestique est encadré."
+    if abs(var) < 1:
+        return "Neutre : variation inférieure à 1 %."
+    if matiere == "petrole":
+        return ("Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé." if var < 0
+                else "Effet ambigu : stocks revalorisés, besoin de trésorerie accru.")
+    return "Prix de vente orienté à la hausse." if var > 0 else "Prix de vente orienté à la baisse."
+
+
+def build_valeurs_exposees(prices: list, wb_snapshot: dict) -> str:
+    """Valeurs exposées : canal de transmission et lecture, sans score ni verdict."""
+    pm = {p.ticker: p for p in prices}
+    var: dict[str, tuple[float | None, str]] = {
+        "petrole": (pm["BZ=F"].weekly_change_pct, "Brent, semaine") if "BZ=F" in pm else (None, ""),
+        "sucre": (pm["SB=F"].weekly_change_pct, "sucre brut, semaine") if "SB=F" in pm else (None, ""),
+    }
+    for cle, d in (wb_snapshot or {}).items():
+        m = _q.MATIERE_PAR_WB.get(cle)
+        if m in ("huile_palme", "caoutchouc") and d.get("variation_mensuelle_pct") is not None:
+            var[m] = (d["variation_mensuelle_pct"], "Banque mondiale, mois")
+    rows = ""
+    for matiere, lst in _q.EXPOSITIONS.items():
+        v, base = var.get(matiere, (None, ""))
+        for e in lst:
+            if e["code"] not in REFERENTIEL:
+                continue
+            mouvement = f"{_q.pct(v)} ({base})" if v is not None else "n/d"
+            rows += (f'<tr><td {_TD}><strong style="color:#0f172a;">{_q.NOMS[e["code"]]}</strong> '
+                     f'<span style="font-family:monospace;font-size:11px;color:#64748b;">{e["code"]}</span></td>'
+                     f'<td {_TD}>{_q.LIBELLE_MATIERE[matiere]}</td><td {_TD}>{mouvement}</td>'
+                     f'<td {_TD}>{_html.escape(e["canal"])}</td>'
+                     f'<td {_TD}>{_html.escape(_lecture_valeur(matiere, v))}</td></tr>')
+    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Valeurs BRVM exposées</h2>'
+            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Le tableau décrit un canal de '
+            f'transmission. Il ne note pas les titres et ne dit pas dans quel sens ils évolueront.</p>'
+            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
+            f'<thead><tr style="background:#0f172a;"><th {_TH}>Valeur</th><th {_TH}>Matière</th>'
+            f'<th {_TH}>Mouvement</th><th {_TH}>Canal</th><th {_TH}>Lecture</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table></div></div>')
+
+
+def build_fcfa(fcfa: list[dict], eurusd: dict | None) -> str:
+    if not fcfa or not eurusd:
+        return ""
+    rows = "".join(
+        f'<tr><td {_TD}><strong style="color:#0f172a;">{l["label"]}</strong></td>'
+        f'<td {_TD}>{_q.fr(l["prix_fcfa"], 0 if l["prix_fcfa"] >= 100 else 2)} {l["unite"]}</td>'
+        f'<td {_TD}>{_q.pct(l["var_usd"])}</td><td {_TD}>{_q.pct(l["var_fcfa"])}</td></tr>' for l in fcfa)
+    taux = _q.usd_xof(eurusd["actuel"])
+    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Les mêmes prix en francs CFA</h2>'
+            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">1 dollar = {_q.fr(taux, 1)} FCFA '
+            f'(parité fixe de 655,957 FCFA pour 1 euro, euro à {_q.fr(eurusd["actuel"], 4)} dollar). '
+            f'La variation en FCFA ajoute l\'effet du change à celle du cours.</p>'
+            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
+            f'<thead><tr style="background:#0f172a;"><th {_TH}>Matière</th><th {_TH}>Prix</th>'
+            f'<th {_TH}>Variation en dollars</th><th {_TH}>Variation en FCFA</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table></div></div>')
+
+
+def build_scenarios(scenarios: list[dict], prices: list) -> str:
+    brent = next((p for p in prices if p.ticker == "BZ=F"), None)
+    if not scenarios or not brent:
+        return ""
+    rows = "".join(
+        f'<tr><td {_TD}><strong style="color:#0f172a;">Brent à {_q.fr(s["niveau_usd"], 0)} USD</strong></td>'
+        f'<td {_TD}>{_q.pct(s["ecart_pct"], 1)}</td><td {_TD}>{_q.fr(s["fcfa_baril"], 0)} FCFA</td>'
+        f'<td {_TD}>{_q.fr(s["fcfa_litre"], 1)} FCFA</td></tr>' for s in scenarios)
+    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Scénarios : et si le Brent bougeait de 10 % ?</h2>'
+            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Calcul à change constant, depuis la '
+            f'clôture de {_q.fr(brent.current)} USD. Ce ne sont pas des prévisions.</p>'
+            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
+            f'<thead><tr style="background:#0f172a;"><th {_TH}>Scénario</th><th {_TH}>Écart</th>'
+            f'<th {_TH}>Prix du baril</th><th {_TH}>Prix du litre de brut</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table></div>'
+            f'<p style="font-size:12px;color:#64748b;margin:8px 0 0 0;">Le litre de brut n\'est pas le prix à la '
+            f'pompe, fixé par les États. L\'effet sur le résultat des distributeurs cotés n\'est pas chiffré : '
+            f'leurs niveaux de stock ne sont pas publiés.</p></div>')
+
+
+def build_methode(prices: list, controles: dict) -> str:
+    repli = controles.get("texte") == "squelette"
+    return (f'<div style="background:#f8fafc;border-radius:8px;padding:16px 20px;margin-bottom:24px;">'
+            f'<p style="margin:0 0 8px 0;font-size:13px;font-weight:700;color:#0f172a;">Méthode et limites</p>'
+            f'<ul style="margin:0;padding-left:18px;font-size:13px;color:#475569;">'
+            f'<li>Variations de clôture à clôture sur la fenêtre de cotation de la semaine, contrat à terme le plus proche.</li>'
+            f'<li>Chaque chiffre du texte est comparé aux données avant publication ; un chiffre absent des données fait refuser le texte.</li>'
+            f'<li>Les explications reprennent des titres de presse datés et nommés ; elles ne sont pas des certitudes.</li>'
+            f'<li>Huile de palme et caoutchouc : cours mensuels de la Banque mondiale, sans cotation hebdomadaire.</li>'
+            + ('<li>Cette semaine, l\'analyse rédigée n\'a pas passé les contrôles : seuls les faits calculés sont publiés.</li>' if repli else '')
+            + '</ul></div>')
+
+
+_LIB_COURT = {"CL=F": "WTI", "BZ=F": "Brent"}
 
 
 def build_svg_barchart(prices: list) -> str:
@@ -903,9 +1115,9 @@ def build_svg_barchart(prices: list) -> str:
         bars += (
             f'<rect x="{bx}" y="{by}" width="{bw}" height="{bar_h}" fill="{color}" rx="3" opacity="0.88"/>'
             f'<text x="{cx}" y="{vy}" text-anchor="middle" font-size="10" '
-            f'fill="{color}" font-weight="700" font-family="system-ui">{sign}{pct}%</text>'
+            f'fill="{color}" font-weight="700" font-family="system-ui">{_q.pct(pct, 1)}</text>'
             f'<text x="{cx}" y="{H - PB + 14}" text-anchor="middle" '
-            f'font-size="10" fill="#64748b" font-family="system-ui">{p.label[:7]}</text>'
+            f'font-size="10" fill="#64748b" font-family="system-ui">{_LIB_COURT.get(p.ticker, p.label[:7])}</text>'
         )
     zero_line = (f'<line x1="{PL}" y1="{zero_y}" x2="{W - PR}" y2="{zero_y}" '
                  f'stroke="#94a3b8" stroke-width="1.5"/>')
@@ -930,9 +1142,9 @@ def build_price_table(prices: list) -> str:
             f'<tr>'
             f'<td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">{p.label}</td>'
             f'<td style="padding:10px 12px;font-family:monospace;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">{p.ticker}</td>'
-            f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{p.current:.2f} <span style="font-size:11px;font-weight:400;color:#94a3b8;">{p.unit}</span></td>'
-            f'<td style="padding:10px 12px;color:#475569;border-bottom:1px solid #f1f5f9;">{p.week_low:.2f} – {p.week_high:.2f}</td>'
-            f'<td style="padding:10px 12px;font-weight:700;color:{color};border-bottom:1px solid #f1f5f9;">{arrow} {sign}{p.weekly_change_pct:.1f}%</td>'
+            f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{_q.fr(p.current, _q.dec_prix(p.current))} <span style="font-size:11px;font-weight:400;color:#94a3b8;">{p.unit}</span></td>'
+            f'<td style="padding:10px 12px;color:#475569;border-bottom:1px solid #f1f5f9;">{_q.fr(p.week_low, _q.dec_prix(p.week_low))} – {_q.fr(p.week_high, _q.dec_prix(p.week_high))}</td>'
+            f'<td style="padding:10px 12px;font-weight:700;color:{color};border-bottom:1px solid #f1f5f9;">{arrow} {_q.pct(p.weekly_change_pct)}</td>'
             f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">'
             f'<span style="background:{sig_bg};color:{sig_col};padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;">{p.signal}</span>'
             f'</td></tr>'
@@ -945,78 +1157,6 @@ def build_price_table(prices: list) -> str:
         f'<th {th}>Matière</th><th {th}>Ticker</th><th {th}>Cours</th>'
         f'<th {th}>Range 5j</th><th {th}>Var. hebdo</th><th {th}>Signal</th>'
         f'</tr></thead><tbody>{rows}</tbody></table></div>'
-    )
-
-
-def build_brvm_table(prices: list, brvm_scores: dict) -> str:
-    """Table impact BRVM avec barres de score visuelles."""
-    # Scores d'exposition aux futures trackés (1=faible, 5=très forte).
-    # Caoutchouc (SICOM/TOCOM) et huile de palme (CPO Bursa) n'ont pas de futures
-    # yfinance dans notre liste — proxies approximatifs utilisés, labellisés comme tels.
-    # SICC (SICOR = coco râpé) : coprah sans futures direct → absent de ce mapping.
-    # NEIC (NEI-CEDA) = éditeur de livres → hors scope commodity définitivement.
-    BRVM_EXPOSURE = {
-        # ── Cacao ICE (CC=F) — pas de pur joueur cacao coté BRVM ───────
-        "SIFCA": {"CC=F": 1, "SB=F": 2},  # groupe agro : cacao mineur, sucre via Sucrivoire
-        # ── Caoutchouc SICOM/TOCOM (proxy CC=F, indicatif) ─────────────
-        "SAPH":  {"CC=F": 3},              # pur hévéa (filiale type Michelin)
-        "SOGB":  {"CC=F": 2},              # hévéa + palmier à huile
-        # ── Huile de palme CPO Bursa (proxy SB=F, indicatif) ───────────
-        "PALC":  {"SB=F": 3},              # PALMCI — pur joueur huile de palme
-        # ── Sucre brut ICE (SB=F) ──────────────────────────────────────
-        "SCRC":  {"SB=F": 3},              # Sucrivoire — exposition partiellement amortie
-        # ── Pétrole Brent / WTI ────────────────────────────────────────
-        "TTLS":  {"CL=F": 5, "BZ=F": 5},  # Total Sénégal — distribution
-        "SVOC":  {"CL=F": 5, "BZ=F": 5},  # Société pétrolière CI — raffinage + distribution
-        # ── Coton ICE (CT=F) ───────────────────────────────────────────
-        "CFAC":  {"CT=F": 3},              # filière coton Burkina (indirect)
-    }
-    LABELS = {
-        "CC=F": "Cacao", "CL=F": "Pétrole WTI", "BZ=F": "Brent",
-        "KC=F": "Café", "SB=F": "Sucre", "CT=F": "Coton", "GC=F": "Or", "SI=F": "Argent",
-    }
-    pm = {p.ticker: p for p in prices}
-    rows = ""
-    for tk, score in list(brvm_scores.items())[:8]:
-        exp = BRVM_EXPOSURE.get(tk, {})
-        matieres = ", ".join(LABELS.get(ct, ct) for ct in exp)
-        weighted = sum((pm[ct].weekly_change_pct if ct in pm else 0) * w for ct, w in exp.items())
-        if weighted > 0.5:
-            tend, t_col, bar_col = "Favorable", "#059669", "#10b981"
-        elif weighted < -0.5:
-            tend, t_col, bar_col = "Défavorable", "#dc2626", "#ef4444"
-        else:
-            tend, t_col, bar_col = "Neutre", "#d97706", "#f59e0b"
-        detail = " | ".join(
-            f"{LABELS.get(ct, ct)} {'+' if (pm[ct].weekly_change_pct if ct in pm else 0) >= 0 else ''}"
-            f"{pm[ct].weekly_change_pct:.1f}%"
-            for ct in exp if ct in pm
-        )
-        bar_w = min(int(score * 9), 80)
-        rows += (
-            f'<tr>'
-            f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{tk}</td>'
-            f'<td style="padding:10px 12px;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;">{matieres}</td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">'
-            f'<div style="display:flex;align-items:center;gap:8px;">'
-            f'<div style="width:{bar_w}px;height:7px;background:{bar_col};border-radius:4px;"></div>'
-            f'<span style="font-size:12px;color:#64748b;font-weight:600;">{score}/10</span>'
-            f'</div></td>'
-            f'<td style="padding:10px 12px;font-weight:700;color:{t_col};border-bottom:1px solid #f1f5f9;">{tend}</td>'
-            f'<td style="padding:10px 12px;font-size:12px;color:{t_col};border-bottom:1px solid #f1f5f9;">{detail}</td>'
-            f'</tr>'
-        )
-    th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
-    return (
-        f'<div style="margin-bottom:28px;">'
-        f'<h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:14px;">Impact sur les valeurs BRVM exposées</h2>'
-        f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Scores d\'exposition (0–10) calculés par WestBourse selon la corrélation chiffre d\'affaires × prix commodités.</p>'
-        f'<div style="overflow-x:auto;">'
-        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
-        f'<thead><tr style="background:#0f172a;">'
-        f'<th {th}>Valeur</th><th {th}>Matières liées</th><th {th}>Score exposition</th>'
-        f'<th {th}>Tendance semaine</th><th {th}>Détail variation</th>'
-        f'</tr></thead><tbody>{rows}</tbody></table></div></div>'
     )
 
 
@@ -1039,9 +1179,9 @@ def build_hero_section(prices: list, week: int, year: int) -> str:
         f'<p style="margin:0 0 6px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);'
         f'text-transform:uppercase;letter-spacing:.1em;">Matières premières BRVM — Semaine {week:02d}/{year}</p>'
         f'<h2 style="margin:0 0 8px;font-size:26px;font-weight:800;color:#fff;line-height:1.2;">'
-        f'{top.label} : {top.current:.2f} {top.unit}</h2>'
+        f'{top.label} : {_q.fr(top.current, _q.dec_prix(top.current))} {top.unit}</h2>'
         f'<p style="margin:0;font-size:17px;font-weight:700;color:{color};">'
-        f'{arrow} {sign}{top.weekly_change_pct:.1f}% cette semaine — temps fort du marché</p>'
+        f'{arrow} {_q.pct(top.weekly_change_pct)} sur la semaine</p>'
         f'</div>'
         f'<div style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,0.45);'
         f'backdrop-filter:blur(8px);padding:6px 14px;border-radius:20px;">'
@@ -1072,7 +1212,7 @@ def build_commodity_cards(prices: list) -> str:
         sig = p.signal
         sig_bg  = "#f0fdf4" if sig == "HAUSSE" else "#fef2f2" if sig == "BAISSE" else "#fefce8"
         sig_col = "#059669" if sig == "HAUSSE" else "#dc2626" if sig == "BAISSE" else "#d97706"
-        sig_icon = "📈" if sig == "HAUSSE" else "📉" if sig == "BAISSE" else "➡️"
+        sig_icon = "▲" if sig == "HAUSSE" else "▼" if sig == "BAISSE" else "■"
         cards += (
             f'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;'
             f'overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
@@ -1083,11 +1223,11 @@ def build_commodity_cards(prices: list) -> str:
             f'<code style="font-size:10px;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#475569;">{p.ticker}</code>'
             f'</div>'
             f'<p style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;">'
-            f'{p.current:.2f} <span style="font-size:12px;font-weight:400;color:#94a3b8;">{p.unit}</span></p>'
+            f'{_q.fr(p.current, _q.dec_prix(p.current))} <span style="font-size:12px;font-weight:400;color:#94a3b8;">{p.unit}</span></p>'
             f'<p style="margin:0 0 10px;font-size:15px;font-weight:700;color:{color};">'
-            f'{arrow} {sign}{p.weekly_change_pct:.1f}%</p>'
+            f'{arrow} {_q.pct(p.weekly_change_pct)}</p>'
             f'<div style="display:flex;align-items:center;justify-content:space-between;">'
-            f'<span style="font-size:11px;color:#94a3b8;">Range 5j : {p.week_low:.2f} – {p.week_high:.2f}</span>'
+            f'<span style="font-size:11px;color:#94a3b8;">Fourchette de la semaine : {_q.fr(p.week_low, _q.dec_prix(p.week_low))} – {_q.fr(p.week_high, _q.dec_prix(p.week_high))}</span>'
             f'<span style="background:{sig_bg};color:{sig_col};padding:3px 10px;border-radius:12px;'
             f'font-size:11px;font-weight:700;">{sig_icon} {sig}</span>'
             f'</div>'
@@ -1125,7 +1265,7 @@ def build_correlation_table(correlations: list[dict]) -> str:
             badge = (
                 f'<span style="background:{b_bg};color:{b_col};padding:2px 9px;'
                 f'border-radius:12px;font-size:11px;font-weight:700;">'
-                f'{sign}{coeff:.2f} — {strength}</span>'
+                f'{_q.fr(coeff, 2) if coeff < 0 else '+' + _q.fr(coeff, 2)} — {strength}</span>'
             )
             interp_cell = (
                 f'<span style="font-size:12px;color:#475569;">'
@@ -1237,7 +1377,7 @@ def build_footer(year: int) -> str:
         f'<strong style="color:#64748b;">Avertissement légal :</strong> Ce document est produit à titre informatif '
         f'uniquement par WestBourse. Il ne constitue pas un conseil en investissement ni une sollicitation '
         f'à acheter ou vendre des instruments financiers. Les performances passées ne préjugent pas des '
-        f'résultats futurs. Sources : yfinance, Banque Mondiale CMO Pink Sheet, actualités sectorielles BRVM.'
+        f'performances futures. Sources : Yahoo Finance (contrats à terme COMEX, NYMEX, ICE), Banque mondiale (Pink Sheet), BRVM.'
         f'</p>'
         f'<p style="font-size:11px;color:#94a3b8;margin:0;">© {year} WestBourse — Plateforme d\'analyse de la BRVM. Tous droits réservés.</p>'
         f'</footer>'
@@ -1266,41 +1406,63 @@ def build_sources_perplexity(items: list[dict]) -> str:
     )
 
 
-def assemble_content_html(
-    editorial_html: str,
-    prices: list,
-    brvm_scores: dict,
-    correlations: list | None = None,
-    perplexity_items: list[dict] | None = None,
-    year: int | None = None,
-    week: int | None = None,
-) -> str:
+def assemble_content_html(editorial_html: str, prices: list, ctx: dict) -> str:
     """
-    Assemble le HTML final : visuels Python + texte DeepSeek.
-    Structure : hero photo + SVG + cartes commodities + éditorial + tables BRVM/corrélations + footer
+    Assemble l'article en trois niveaux de lecture (Essentiel, Investisseur, Pro).
+    L'ordre des blocs dépend de l'édition, pour que deux numéros ne se ressemblent pas.
     """
-    now = datetime.now(timezone(timedelta(hours=1)))
-    year = year if year is not None else now.year
-    week_num = week if week is not None else now.isocalendar()[1]
-    text = assainir_editorial(editorial_html).strip()
+    edition = ctx.get("edition", "note")
+    text = _q.nettoyer(assainir_editorial(editorial_html)).strip()
     if not text.startswith("<section"):
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
                 f'color:#1e293b;line-height:1.8;">{text}</section>')
-    corr_html = build_correlation_table(correlations or [])
-    sources_html = build_sources_perplexity(perplexity_items or [])
+    analyse = ('<h2 ' + _H2 + '>Analyse par matière</h2>' + build_legende_preuve() + text)
+    graphique = build_svg_barchart(prices) + "\n" + build_commodity_cards(prices)
+    valeurs = build_valeurs_exposees(prices, ctx.get("wb_snapshot") or {})
+    fcfa = build_fcfa(ctx.get("fcfa") or [], ctx.get("eurusd"))
+    scenarios = build_scenarios(ctx.get("scenarios") or [], prices)
+    seuils = build_seuils(ctx.get("seuils") or [])
+    corps = {
+        "note": [graphique, analyse, valeurs, fcfa, scenarios, seuils],
+        "briefing": [graphique, fcfa, valeurs, analyse, seuils, scenarios],
+        "dossier": [analyse, graphique, valeurs, scenarios, fcfa, seuils],
+    }[edition]
     return (
         '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
         'max-width:900px;margin:0 auto;color:#1e293b;line-height:1.8;">\n'
-        + build_hero_section(prices, week_num, year) + "\n"
-        + build_svg_barchart(prices) + "\n"
-        + build_commodity_cards(prices) + "\n"
-        + text + "\n"
-        + build_brvm_table(prices, brvm_scores) + "\n"
-        + corr_html + "\n"
-        + sources_html + "\n"
-        + build_footer(year) + "\n"
+        + build_hero_section(prices, ctx["week"], ctx["year"]) + "\n"
+        + build_essentiel(prices, ctx.get("fcfa") or [], edition) + "\n"
+        + build_bilan(ctx.get("bilan") or []) + "\n"
+        + build_badge("investisseur") + "\n"
+        + "\n".join(b for b in corps if b) + "\n"
+        + build_badge("pro") + "\n"
+        + build_methode(prices, ctx.get("controles") or {}) + "\n"
+        + build_correlation_table(ctx.get("correlations") or []) + "\n"
+        + build_sources_perplexity(ctx.get("perplexity_items") or []) + "\n"
+        + build_footer(ctx["year"]) + "\n"
         + "</article>"
     )
+
+
+def rediger_editorial(prompt_pour, prices: list, autorises: set[float], appel=None) -> tuple[str, dict]:
+    """
+    Deux essais au plus, chacun passé aux verrous. Le second reçoit les raisons
+    du refus. Si les deux échouent, on publie le squelette calculé : aucun
+    chemin ne publie un texte de LLM non vérifié.
+    """
+    appel = appel or call_llm
+    refus: list[str] = []
+    for essai in (1, 2):
+        try:
+            texte = _q.nettoyer(assainir_editorial(appel(prompt_pour(refus)))).strip()
+        except Exception as e:
+            refus = [f"appel LLM en échec : {str(e)[:160]}"]
+            break
+        refus = _q.verrous(texte, prices, REFERENTIEL, autorises)
+        if not refus:
+            return texte, {"texte": "llm", "essais": essai, "refus": []}
+        log.warning("Texte refusé (essai %d) : %s", essai, " ; ".join(refus))
+    return _q.squelette_editorial(prices, REFERENTIEL), {"texte": "squelette", "essais": 2, "refus": refus}
 
 
 # ── 6. Appel LLM ────────────────────────────────────────────────────────────
@@ -1332,7 +1494,7 @@ def call_llm(prompt: str) -> str:
             client = OpenAI(api_key=cle, base_url=base_url)
             resp = client.chat.completions.create(
                 model=modele,
-                max_tokens=4096,
+                max_tokens=7000,
                 messages=[{"role": "user", "content": prompt}],
                 **extra,
             )
@@ -1418,6 +1580,7 @@ def publish_supabase(
     yf_prices: dict | None = None,
     wb_snapshot: dict | None = None,
     dry_run: bool = False,
+    extra: dict | None = None,
 ) -> bool:
     if dry_run:
         log.info("[DRY-RUN] Supabase upsert ignoré")
@@ -1456,6 +1619,7 @@ def publish_supabase(
             "yf_prices": yf_prices or {},
             "wb_snapshot": wb_snapshot or {},
             "brvm_scores": brvm_scores,
+            **(extra or {}),
         },
     }
 
@@ -1526,33 +1690,52 @@ def main():
     perplexity_items = fetch_perplexity_context(noms_commodites)
     log.info("    → %d item(s) de contexte retenus", len(perplexity_items))
 
-    # Étape 5 : Prompt + DeepSeek
-    log.info("5/7 Génération article via DeepSeek...")
+    # Garde-fou : sous quatre contrats exploitables, la collecte a échoué.
+    # Mieux vaut une semaine sans hebdo qu'un article sur des données partielles.
     prices = build_prices_list(yf_prices)
+    if len(prices) < 4:
+        log.error("Seulement %d contrat(s) exploitable(s) : rien n'est publié.", len(prices))
+        return 1
+
+    # Étape 4d : blocs calculés (FCFA, scénarios, seuils, bilan de la semaine passée)
+    eurusd = fetch_eurusd()
+    fcfa = _q.conversions_fcfa(prices, eurusd)
+    scenarios = _q.scenarios_brent(prices, eurusd)
+    seuils = _q.seuils_a_surveiller(prices)
+    precedent = fetch_semaine_precedente(year, week)
+    bilan = _q.bilan_semaine_precedente(_q.seuils_depuis_metadata(precedent), prices)
+    edition = _q.choisir_edition(prices)
+    log.info("    → édition « %s », %d ligne(s) FCFA, %d seuil(s), bilan : %d",
+             edition, len(fcfa), len(seuils), len(bilan))
+
+    # Étape 5 : rédaction sous verrous
+    log.info("5/7 Rédaction de l'analyse (LLM sous contrôle)...")
     wb_summary = build_wb_summary(wb_snapshot)
-    # Convertir scores 0-100 → 0-10 pour le prompt et les tables
-    brvm_scores_simple = {tk: round(v["score"] / 10, 1) for tk, v in brvm_scores.items()}
-    prompt = build_editorial_prompt(
-        prices, wb_summary, articles, brvm_scores_simple, correlations,
-        perplexity_items=perplexity_items, week=week, year=year,
-    )
+    titres = [str(a.get("titre", "")) for a in articles[:6]] + [str(i.get("titre", "")) for i in perplexity_items[:8]]
+    autorises = _q.nombres_autorises(prices, correlations=correlations, fcfa=fcfa, scenarios=scenarios,
+                                     titres=titres, week=week, year=year)
+
+    def prompt_pour(refus: list[str]) -> str:
+        return build_editorial_prompt(prices, wb_summary, articles, correlations,
+                                      perplexity_items=perplexity_items, week=week, year=year,
+                                      edition=edition, fcfa=fcfa, refus=refus)
 
     if args.dry_run:
-        log.info("[DRY-RUN] Appel DeepSeek ignoré")
-        editorial_html = "<section><p>[DRY-RUN] Contenu éditorial non généré.</p></section>"
+        log.info("[DRY-RUN] Appel LLM ignoré : squelette calculé")
+        editorial_html, controles = _q.squelette_editorial(prices, REFERENTIEL), {"texte": "squelette", "essais": 0, "refus": []}
     else:
-        editorial_html = call_llm(prompt)
+        editorial_html, controles = rediger_editorial(prompt_pour, prices, autorises)
+    log.info("    → texte : %s", controles["texte"])
 
-    article_html = assemble_content_html(
-        editorial_html, prices, brvm_scores_simple, correlations,
-        perplexity_items=perplexity_items, year=year, week=week,
-    )
+    ctx = {"edition": edition, "fcfa": fcfa, "eurusd": eurusd, "scenarios": scenarios, "seuils": seuils,
+           "bilan": bilan, "wb_snapshot": wb_snapshot, "correlations": correlations,
+           "perplexity_items": perplexity_items, "controles": controles, "year": year, "week": week}
+    article_html = assemble_content_html(editorial_html, prices, ctx)
 
     # Étape 6 : HTML final
-    title = f"Matières premières BRVM – Semaine {week:02d}/{year} | WestBourse"
+    title = _q.titre_article(prices, week, year)
     description = (
-        f"Analyse hebdomadaire de l'impact des matières premières "
-        f"(cacao, pétrole, caoutchouc, huile de palme) sur les valeurs BRVM. "
+        f"Analyse hebdomadaire des matières premières et de leur transmission aux valeurs BRVM. "
         f"Semaine {week:02d}, {year}."
     )
     full_html = build_full_html(article_html, title, description)
@@ -1572,6 +1755,7 @@ def main():
         yf_prices=yf_prices,
         wb_snapshot=wb_snapshot,
         dry_run=args.dry_run,
+        extra={"edition": edition, "seuils": seuils, "eurusd": eurusd, "controles": controles},
     )
 
     log.info("=== Terminé. Supabase: %s | Slug: %s ===", "OK" if ok else "ERREUR", slug)
