@@ -69,13 +69,19 @@ ne doit pas produire un second remplissage.
    Il s'agit d'une simulation simplifiée, pas d'une reconstitution de la
    séance.
 2. **Prudent avec indication BOC** (mode recommandé pour les défis) : reprend
-   la même règle de prix au fixing, et utilise le dernier BOC disponible avant
-   la séance comme signal de liquidité/opposition. Si le carnet manque,
-   comporte une limite au marché ou ne donne pas les données nécessaires,
-   l'interface l'indique et n'invente pas de profondeur. Le moteur peut laisser
-   l'ordre en attente ou limiter sa quantité simulée selon la règle qui sera
-   explicitement approuvée et testée. Toute exécution partielle est étiquetée
-   « estimée ».
+   la même règle de prix au fixing, et borne la quantité simulée par le minimum
+   de la quantité restante, de la quantité résiduelle opposée publiée au BOC
+   déjà disponible lors de la saisie de l'ordre et du volume total observé à la
+   séance évaluée. Pour un achat, la quantité opposée est celle de vente ; pour
+   une vente, celle d'achat. Le remplissage est aussi plafonné par les titres
+   réservés pour une vente ou par les liquidités réservées au cours du fixing
+   pour un achat. Si le fixing respecte la limite, l'exécution est au fixing ;
+   toute quantité restante demeure en attente jusqu'à son échéance, sauf si le
+   budget réservé est épuisé, auquel cas le reliquat est annulé avec un motif.
+   Une donnée nécessaire manquante produit un état « en attente de données » ;
+   une quantité opposée nulle ne remplit rien. Le BOC et le volume constituent
+   un plafond prudent de simulation, non une reconstitution de l'exécution
+   réelle de l'ordre.
 
 Les quantités résiduelles du BOC ne sont jamais présentées comme les quantités
 effectivement exécutées par un ordre hypothétique. Le bulletin ne révèle ni la
@@ -84,10 +90,16 @@ après sa publication. Le volume journalier est également un total observé, pa
 une promesse de capacité disponible à cet ordre. Il ne faut donc pas prétendre
 simuler exactement la priorité, le prorata ou l'appariement BRVM.
 
-La règle quantitative de remplissage partiel du mode prudent (notamment
-l'usage éventuel du volume échangé et de la quantité résiduelle opposée) est un
-point de décision à confirmer avant l'implémentation. En l'absence de règle
-validée, le mode prudent ne doit pas fabriquer de taux de participation.
+Pour éviter tout regard vers le futur, le BOC exploitable pour un ordre doit
+avoir une date de séance au plus égale à la dernière séance connue lors de sa
+saisie, et son `collecte_at` doit être antérieur ou égal à l'horodatage de
+saisie. Il doit aussi précéder la séance évaluée. Si aucun instantané ne
+satisfait ces trois conditions, le mode prudent attend les données.
+
+Le plafond du mode prudent n'emploie aucun pourcentage de participation
+inventé. Les comptes papier restent indépendants : le plafond n'est pas
+partagé entre les ordres hypothétiques des utilisateurs et ne représente pas
+une allocation réelle de la liquidité du marché.
 
 ### 3.3 BOC dans l'expérience
 
@@ -115,8 +127,10 @@ simulation.
   capital virtuel et règles. Le rang n'est pas basé uniquement sur le gain :
   afficher rendement, drawdown maximal, nombre d'ordres et respect du cadre.
 - Le score d'équipe est une moyenne équipondérée des rendements des membres
-  ayant commencé le défi, sans pondération par leur capital réel ou virtuel.
-  La formule est visible aux participants.
+  inscrits avant le début du défi, sans pondération par leur capital réel ou
+  virtuel. Un membre sans ordre conserve un rendement nul ; les abandons ne
+  sont pas retirés rétroactivement du dénominateur. La formule est visible aux
+  participants.
 - Par défaut, un coach voit la participation et la progression pédagogique,
   pas les ordres individuels ni les gains détaillés d'un membre. Une vue
   financière nominative nécessite le consentement explicite de ce membre.
@@ -209,11 +223,10 @@ pas d'un conseil en investissement.
 
 ## 9. Décisions restant à valider
 
-1. La règle quantitative exacte du mode prudent : le seul carnet BOC ne permet
-   pas d'en déduire une exécution. Une option simple et vérifiable est d'utiliser
-   le BOC comme indicateur seulement et de remplir au fixing ; une option plus
-   conservatrice laisse l'ordre en attente lorsqu'il manque une donnée, mais
-   n'est toujours pas une simulation de file exacte.
+1. Le mode prudent adopte pour la première version un plafond déterministe :
+   minimum entre quantité restante, quantité opposée du dernier BOC disponible
+   lors de la saisie et volume de la séance évaluée. Ce plafond est une
+   hypothèse pédagogique, pas une simulation de file exacte.
 2. Le public pilote et le modèle d'accès des établissements (gratuit, Premium
    ou offre institutionnelle).
 3. Le barème de frais et les règles de pas/validité applicables, à confirmer
