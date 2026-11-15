@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 1 — Qu’est-ce que la BRVM et comment ça marche ?",
+  "image": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/BRVM.jpg/960px-BRVM.jpg",
+    "alt": "Bâtiment de la Bourse Régionale des Valeurs Mobilières (BRVM) à Abidjan",
+    "credit": "Photo : Wikimedia Commons (BRVM, Abidjan)"
+  },
   "categorie": "general",
   "duree_min": 9,
   "sous_titre": "Une bourse commune à huit pays, des sociétés que vous connaissez, et un prix qui se forme chaque jour.",

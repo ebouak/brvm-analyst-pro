@@ -33,9 +33,9 @@
       ],
       "imageQuery": "african business finance skyline",
       "image": {
-        "url": "https://images.pexels.com/photos/3814231/pexels-photo-3814231.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "A stunning aerial view of Durban's modern skyline with high-rise buildings and an overcast sky.",
-        "credit": "Photo : Magda Ehlers / Pexels"
+        "url": "https://images.pexels.com/photos/37405043/pexels-photo-37405043.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Immeubles de Lagos au bord de la lagune, un bateau au premier plan",
+        "credit": "Photo : Fawaz Onakoya / Pexels"
       }
     },
     {
@@ -64,7 +64,7 @@
       "imageQuery": "oil refinery industrial infrastructure",
       "image": {
         "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+        "alt": "Raffinerie et ses cheminées sous un ciel clair",
         "credit": "Photo : Life Of Pix / Pexels"
       }
     },
@@ -94,7 +94,7 @@
       "imageQuery": "calendar schedule business planning",
       "image": {
         "url": "https://images.pexels.com/photos/11773871/pexels-photo-11773871.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Close-up shot of a hand marking a date on a calendar with a pen, emphasizing planning and scheduling.",
+        "alt": "Main entourant une date sur un calendrier",
         "credit": "Photo : Towfiqu barbhuiya / Pexels"
       }
     },
@@ -122,9 +122,9 @@
       ],
       "imageQuery": "risk warning financial documents",
       "image": {
-        "url": "https://images.pexels.com/photos/7247413/pexels-photo-7247413.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "A close look at tax forms marked with scam, highlighting financial fraud risks.",
-        "credit": "Photo : Leeloo The First / Pexels"
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/BRVM.jpg/960px-BRVM.jpg",
+        "alt": "Bâtiment de la Bourse Régionale des Valeurs Mobilières (BRVM) à Abidjan",
+        "credit": "Photo : Wikimedia Commons (BRVM, Abidjan)"
       }
     },
     {
@@ -151,9 +151,9 @@
       ],
       "imageQuery": "stock market analysis screen data",
       "image": {
-        "url": "https://images.pexels.com/photos/35118208/pexels-photo-35118208.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-        "alt": "Candlestick chart showing a downward trend in the stock market analysis.",
-        "credit": "Photo : Alex Luna / Pexels"
+        "url": "https://images.pexels.com/photos/7821674/pexels-photo-7821674.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+        "alt": "Main tenant une loupe au-dessus de relevés financiers",
+        "credit": "Photo : RDNE Stock project / Pexels"
       }
     }
   ],

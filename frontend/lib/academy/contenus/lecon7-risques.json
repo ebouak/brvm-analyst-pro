@@ -1,5 +1,10 @@
 {
  "titre": "Leçon 7 — Les risques : apprendre avant d’investir",
+ "image": {
+  "url": "https://images.pexels.com/photos/128867/coins-currency-investment-insurance-128867.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+  "alt": "Pile de pièces de monnaie devant une horloge",
+  "credit": "Photo : Pixabay / Pexels"
+ },
  "categorie": "general",
  "duree_min": 12,
  "sous_titre": "Anticiper une perte, protéger son capital, passer un ordre correctement, et décider calmement quand le marché baisse.",

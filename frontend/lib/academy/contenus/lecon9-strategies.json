@@ -1,5 +1,10 @@
 {
   "titre": "Leçon 9 — Trois stratégies d’investissement à la BRVM",
+  "image": {
+    "url": "https://images.pexels.com/photos/7947707/pexels-photo-7947707.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+    "alt": "Rapport financier imprimé avec graphiques, loupe et calculatrice",
+    "credit": "Photo : RDNE Stock project / Pexels"
+  },
   "categorie": "general",
   "duree_min": 7,
   "sous_titre": "Valeur, revenu ou croissance : choisir une approche, et l’horizon qui va avec.",
