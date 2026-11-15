@@ -1,3 +1,10 @@
+import type {
+  PaperBookSnapshot,
+  PaperExecutionMode,
+  PaperOrderForEvaluation,
+  PaperOrderStatus,
+} from './orders';
+
 export interface Account {
   id: string;
   user_id: string;
@@ -37,6 +44,55 @@ export interface Position {
 export interface OpenPosition extends Position {
   current_price: number;
   current_value: number;
+}
+
+export interface PaperOpenPosition extends Omit<OpenPosition, 'status'> {
+  status: 'open';
+  current_price_date: string;
+  reservedShares: number;
+  availableShares: number;
+}
+
+export type PaperClosedPosition = Position & { status: 'closed' };
+export type PaperPosition = PaperOpenPosition | PaperClosedPosition;
+
+export interface PaperOrder extends PaperOrderForEvaluation {
+  userId: string;
+  accountId: string;
+  code: string;
+  status: PaperOrderStatus;
+  updatedAt: string;
+  lastEvaluatedDate: string | null;
+  reason: string | null;
+  bookSnapshot: PaperBookSnapshot | null;
+}
+
+export interface PaperFill {
+  id: string;
+  orderId: string;
+  code: string;
+  date: string;
+  quantity: number;
+  price: number;
+  mode: PaperExecutionMode;
+  bookDate: string | null;
+  createdAt: string;
+}
+
+export interface PaperBookContext extends PaperBookSnapshot {}
+
+export interface PaperTradableAction {
+  code: string;
+  designation: string | null;
+  cours_jour: number | null;
+  book: PaperBookSnapshot | null;
+}
+
+export interface PaperTradingPositionsResponse {
+  positions: PaperPosition[];
+  account: Account | null;
+  cashAvailable: number | null;
+  cashReserved: number | null;
 }
 
 export interface Stats {

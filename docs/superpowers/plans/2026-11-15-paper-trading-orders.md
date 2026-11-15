@@ -8,6 +8,18 @@
 
 **Tech Stack:** Next.js 15 App Router, React 19, TypeScript, Supabase PostgreSQL/RLS, Vitest, existing `brvm_actions_daily` and `brvm_carnet_daily` market data.
 
+**Status (2026-11-15):** Individual order flow and UI are implemented and
+rebased on `main` through migration `0243`. The focused paper-trading suite has
+50 focused tests and all 3,136 frontend tests pass, and `npm run typecheck`
+passes after removing stale generated Next.js route types. The isolated
+production build is running. Production
+preflight confirms the existing account, BOC and trigger dependencies and that
+the new order tables are absent; migration `0244` is not yet applied. The
+production migration ledger reports `0146` as its latest entry despite some
+later schema objects being present, so do not use `supabase db push` until that
+pre-existing ledger drift is reconciled. Teams and establishment challenges
+are intentionally out of scope for this lot.
+
 ## Global Constraints
 
 - The product does not submit real BRVM orders and never labels an estimated simulation as an actual execution.
@@ -39,10 +51,9 @@ migration.
   order price checks, freshness guards and deterministic fill calculation.
 - Create `frontend/lib/paper-trading/orders.test.ts`: table-driven tests for
   price, volume, BOC, expiration and temporal rules.
-- Create `supabase/migrations/0200_paper_trading_orders.sql`: orders/fills
+- Create `supabase/migrations/0244_paper_trading_orders.sql`: orders/fills
   schema, owner read policies, server-only mutation grants, and transactional
-  placement/cancellation/fill RPCs. The current latest migration is 0199; confirm
-  no newer migration exists immediately before implementation.
+  placement/cancellation/fill RPCs. Migration 0243 is the latest on `main`.
 - Create `frontend/app/api/paper-trading/orders/route.ts`: authenticated order
   list/create endpoints, request validation, session-derived user ID and
   explicit errors.
@@ -136,6 +147,7 @@ export interface PaperOrderEvaluation {
   status: PaperOrderStatus;
   fillQuantity: number;
   fillPrice: number | null;
+  evaluatedSessions: number;
   reason: string;
   evaluatedDate: string | null;
   bookDate: string | null;
@@ -237,7 +249,7 @@ debits or releases the matching reservation in the same transaction.
 - Produces: `evaluatePaperOrder(order, session, priorBook)` with no Supabase,
   browser, current-time, or network dependency.
 
-- [ ] **Step 1: Write tests for the evaluation contract**
+- [x] **Step 1: Write tests for the evaluation contract**
 
 Create tests for:
 
@@ -310,7 +322,7 @@ side/type/mode, limit order without a positive limit, au-mieux with a limit,
 and validity outside 1–20. Assert it returns `null` rather than a partial or
 success-shaped fallback.
 
-- [ ] **Step 2: Run the targeted tests and confirm they fail**
+- [x] **Step 2: Run the targeted tests and confirm they fail**
 
 Run from `frontend`:
 
@@ -320,18 +332,21 @@ npm test -- lib/paper-trading/orders.test.ts
 
 Expected: FAIL because `orders.ts` and `evaluatePaperOrder` do not yet exist.
 
-- [ ] **Step 3: Implement only the pure evaluator**
+- [x] **Step 3: Implement only the pure evaluator**
 
 Implement exhaustive status handling and deterministic validation. Return
 `waiting_data` for missing required quote, volume or eligible BOC; `pending`
 when the price condition is not met; `partial` or `filled` according to the
 capped quantity; `expired` when an unfilled eligible session reaches validity;
 and `cancelled` when a buy's cash reservation cannot support any remaining
-share. A `waiting_data` session does not consume validity. Reject invalid
-non-positive prices/quantities at the boundary rather than converting them
-into plausible fills.
+share. On the final eligible session, any unfilled remainder expires even if
+that session produced a partial fill; retain the fill quantity and expose the
+expiry reason. Return the updated `evaluatedSessions` count with each
+evaluation; `waiting_data` leaves it unchanged, and each eligible session
+increments it exactly once. Reject invalid non-positive prices/quantities at
+the boundary rather than converting them into plausible fills.
 
-- [ ] **Step 4: Run and pass the evaluator tests**
+- [x] **Step 4: Run and pass the evaluator tests**
 
 Run:
 
@@ -345,7 +360,7 @@ passes only by replacing missing data with zero or the entry price.
 ### Task 2: Add owner-scoped order and fill storage
 
 **Files:**
-- Create: `supabase/migrations/0200_paper_trading_orders.sql`
+- Create: `supabase/migrations/0244_paper_trading_orders.sql`
 - Create: `frontend/lib/paper-trading/ordersServer.ts`
 - Test: `frontend/lib/paper-trading/orders.test.ts` (add mapping/idempotency
   tests for pure result normalization if extracted)
@@ -357,12 +372,13 @@ passes only by replacing missing data with zero or the entry price.
 - Produces: order/fill tables and server-only placement, settlement and
   cancellation operations described in Interfaces.
 
-- [ ] **Step 1: Add schema and privilege assertions**
+- [x] **Step 1: Add schema and privilege assertions**
 
 Create `paper_trading_orders` with UUID ID; owner/account/code foreign keys;
 validated side/type/mode/status; positive integer quantity; nullable positive
 limit; filled/remaining quantities; submission-session date; validity/
-evaluation counters; reserved cash/shares; explicit waiting reason; timestamps;
+evaluation counters and last evaluated session date; reserved cash/shares;
+explicit waiting reason; timestamps;
 and nullable snapshot columns for BOC date, collection timestamp, buy/sell
 residual quantities, best buy/sell prices and market-order flags. The snapshot
 columns are written only at order creation. Create
@@ -376,7 +392,7 @@ rows. Revoke client `INSERT`, `UPDATE` and `DELETE`; mutation functions are
 Use the existing project migration conventions and add comments that the
 records are simulated and BOC values are dated indicators.
 
-- [ ] **Step 2: Add transactional RPCs**
+- [x] **Step 2: Add transactional RPCs**
 
 Implement server-only RPCs for:
 
@@ -394,6 +410,8 @@ Implement server-only RPCs for:
    reservation and holdings; insert fill, update remaining quantity/status and
    positions, release surplus reservation on final state, and return a typed
    result.
+4. marking a data wait: lock account and order, write an explicit waiting
+   reason without consuming validity or marking the session evaluated.
 
 Use these exact signatures (the RPCs are callable only from the service-role
 server client):
@@ -411,6 +429,9 @@ public.paper_appliquer_remplissage(
   p_quantity bigint, p_price numeric, p_mode text
 ) returns jsonb
 
+public.paper_marquer_attente_donnees(
+  p_user uuid, p_order_id uuid, p_date_marche date, p_reason text
+) returns jsonb
 ```
 
 `paper_appliquer_remplissage` must verify `p_price` against the stored close for
@@ -418,7 +439,12 @@ public.paper_appliquer_remplissage(
 quantity against remaining shares/cash, the immutable BOC snapshot and that
 session's volume, and enforce the stored limit before writing. It calculates
 the actual accepted quantity itself instead of trusting a proposed client
-quantity and verify `p_mode` matches the order's stored mode. The existing
+quantity and verifies `p_mode` matches the order's stored mode.
+`last_evaluated_date` prevents retries from consuming the same validity
+session more than once, including sessions that produced no fill. If required
+source data is absent, `paper_marquer_attente_donnees` records the waiting
+state but advances neither the session counter nor `last_evaluated_date`. The
+existing
 `paper_ouvrir_position` RPC remains inaccessible to authenticated clients under
 migration 0182; the legacy browser endpoints return 405 so new positions can
 only be created through the order flow. Keep existing position rows readable
@@ -433,7 +459,7 @@ closed positions and the original capital using the existing account
 conventions; do not add P&L twice on retry.
 Reject all state transitions that do not match an open/partial order.
 
-- [ ] **Step 3: Build the server-only orchestration**
+- [x] **Step 3: Build the server-only orchestration**
 
 `settlePaperOrders(userId)` reads the account's pending/partial orders and
 market rows strictly after each order's `submitted_after` session. For every
@@ -444,7 +470,7 @@ or price returned by the browser. Stop at expiry; preserve explicit waiting
 states when required source rows are absent. Sort sessions ascending and orders
 by their server-created timestamp then ID for deterministic retries.
 
-- [ ] **Step 4: Verify migration shape and server typecheck**
+- [x] **Step 4: Verify migration shape and server typecheck**
 
 Run from `frontend`:
 
@@ -472,7 +498,7 @@ there; otherwise do not claim the SQL was executed.
 - Produces: authenticated GET/POST orders, POST cancel, typed `PaperOrder` and
   `PaperFill` responses, and positions response refreshed after settlement.
 
-- [ ] **Step 1: Validate request and response types**
+- [x] **Step 1: Validate request and response types**
 
 Validate `code`, `side`, `type`, `mode`, `quantity`, `limit_price`, and
 `expires_after_sessions` at the route boundary. Accept only the enum values in
@@ -481,14 +507,14 @@ only for `limit`, and a validity between 1 and 20 market sessions. For
 `at_best`, require `limit_price` to be null. Reject malformed JSON and return
 explicit 400 errors; resolve the owner exclusively with `createClient().auth.getUser()`.
 
-- [ ] **Step 2: Implement route tests or pure route validators**
+- [x] **Step 2: Implement route tests or pure route validators**
 
 Add pure validation tests adjacent to `orders.test.ts` covering invalid side,
 market order with a price, limit order without a price, zero/fractional
 quantity, unsupported mode, validity outside 1–20 and malformed data. Keep
 Supabase route I/O outside the pure validator.
 
-- [ ] **Step 3: Implement create/list/cancel endpoints and retire legacy writes**
+- [x] **Step 3: Implement create/list/cancel endpoints and retire legacy writes**
 
 The create route calls the placement RPC with `user.id`, not a body owner ID.
 The list route queries only orders/fills visible under owner RLS. The cancel
@@ -500,7 +526,7 @@ fallback on failed queries. Change POST `/positions` and POST
 `/positions/[id]/close` to return 405 with a JSON message directing clients to
 the order endpoint. Keep GET `/positions` and all existing position records.
 
-- [ ] **Step 4: Settle before returning dashboard state**
+- [x] **Step 4: Settle before returning dashboard state**
 
 In the positions GET route, call `settlePaperOrders(user.id)` after
 authentication and before reading positions. Propagate settlement failures as
@@ -508,7 +534,7 @@ logged 500 errors. Add reserved cash and reserved shares to a dedicated
 portfolio summary; do not alter the meaning of the existing
 `capital_current` field or silently net reservations into it.
 
-- [ ] **Step 5: Run typecheck and targeted tests**
+- [x] **Step 5: Run typecheck and targeted tests**
 
 Run:
 
@@ -537,7 +563,7 @@ errors are surfaced.
 - Produces: an order ticket with explicit simulated-order semantics and an
   auditable table of user orders/fills; existing portfolio remains visible.
 
-- [ ] **Step 1: Add UI formatting and interaction tests**
+- [x] **Step 1: Add UI formatting and interaction tests**
 
 Test pure view-model helpers for:
 
@@ -554,7 +580,7 @@ The UI must label BOC session date, show quantities only when non-null, show a
 spread only when both limit prices exist, and label simulated/estimated fills.
 Do not label BOC data “temps réel”, “carnet complet” or “ordres exécutés”.
 
-- [ ] **Step 2: Implement accessible order ticket**
+- [x] **Step 2: Implement accessible order ticket**
 
 Provide side (achat/vente), type (au mieux/limité), simulation mode, code,
 quantity, optional limit and validity. For sells, show only server-reported unreserved shares; a client preview never
@@ -565,7 +591,7 @@ disclosure that fills are simulated at a future fixing and BOC residuals are
 indicative, not a queue guarantee. Show server errors inline and preserve input
 on failure.
 
-- [ ] **Step 3: Implement order history**
+- [x] **Step 3: Implement order history**
 
 Group orders by pending/partial and terminal state; display order date,
 evaluation date, source BOC date, requested/filled/remaining quantity, fixing
@@ -573,7 +599,7 @@ price, status and reason. Show estimated fill badges for BOC-prudent fills.
 Offer cancellation only for pending/partial orders and require no extra
 confirmation for a cancel request beyond the explicit button label.
 
-- [ ] **Step 4: Wire portfolio actions to orders**
+- [x] **Step 4: Wire portfolio actions to orders**
 
 Replace immediate buy submission in `PaperTradingDashboard` with
 `OrderTicket`. Replace `PaperTradingJournal` immediate close with a sell-order
@@ -630,7 +656,7 @@ cancel or settle user B's order; verify `service_role` RPCs are executable only
 with the intended server key. Run the repository's security advisor scan if
 available. Record results; do not infer them from migration text alone.
 
-- [ ] **Step 3: Verify simulation invariants**
+- [x] **Step 3: Verify simulation invariants**
 
 With deterministic fixtures, verify a same-session fixing never fills a newly
 submitted order; a prior BOC can only affect the next eligible session; missing
@@ -638,13 +664,13 @@ or zero volume cannot create a fill; filled cash and shares reconcile with
 positions; multiple retries create one fill; invalid or terminal cancellation
 is rejected; cash and holdings never become negative.
 
-- [ ] **Step 4: Check for unrelated worktree changes**
+- [x] **Step 4: Check for unrelated worktree changes**
 
 Run:
 
 ```powershell
 git status --short
-git --no-pager diff --check -- frontend supabase/migrations/0200_paper_trading_orders.sql docs
+git --no-pager diff --check -- frontend supabase/migrations/0244_paper_trading_orders.sql docs
 ```
 
 Expected: no whitespace errors in task files. Unrelated pre-existing worktree

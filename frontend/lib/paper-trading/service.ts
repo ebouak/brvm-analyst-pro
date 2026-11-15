@@ -1,4 +1,11 @@
-import { Account, Position, Stats } from './types';
+import { Account, Stats } from './types';
+import type {
+  PaperFill,
+  PaperOrder,
+  PaperTradableAction,
+  PaperTradingPositionsResponse,
+} from './types';
+import type { PlacePaperOrderInput } from './orders';
 
 export interface InitAccountRequest {
   capital_initial: number;
@@ -23,7 +30,7 @@ export class PaperTradingClientService {
 
   async getPositions(
     status?: 'open' | 'closed'
-  ): Promise<{ positions: Position[]; account: Account | null }> {
+  ): Promise<PaperTradingPositionsResponse> {
     const params = new URLSearchParams();
     if (status) params.append('status', status);
 
@@ -42,29 +49,48 @@ export class PaperTradingClientService {
     return res.json();
   }
 
-  async openPosition(code: string, amount?: number): Promise<{ position: Position; reinforced: boolean }> {
-    const res = await fetch('/api/paper-trading/positions', {
+  async getOrders(): Promise<{ orders: PaperOrder[]; fills: PaperFill[] }> {
+    const res = await fetch('/api/paper-trading/orders', { method: 'GET' });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Impossible de charger les ordres.');
+    }
+    return res.json();
+  }
+
+  async getTradable(): Promise<{ sessionDate: string | null; actions: PaperTradableAction[] }> {
+    const res = await fetch('/api/paper-trading/tradable', { method: 'GET' });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Impossible de charger les valeurs négociables.');
+    }
+    return res.json();
+  }
+
+  async placeOrder(input: PlacePaperOrderInput): Promise<PaperOrder> {
+    const res = await fetch('/api/paper-trading/orders', {
       method: 'POST',
-      body: JSON.stringify(amount != null ? { code, amount } : { code }),
+      body: JSON.stringify(input),
       headers: { 'Content-Type': 'application/json' },
     });
     if (!res.ok) {
       const error = await res.json();
-      throw new Error(error.error || "Échec de l'ouverture");
+      throw new Error(error.error || 'Impossible de passer cet ordre simulé.');
     }
     const json = await res.json();
-    return { position: json.position, reinforced: Boolean(json.reinforced) };
+    return json.order;
   }
 
-  async closePosition(id: string): Promise<{ pnl: number; pnl_pct: number }> {
-    const res = await fetch(`/api/paper-trading/positions/${id}/close`, {
+  async cancelOrder(id: string): Promise<PaperOrder> {
+    const res = await fetch(`/api/paper-trading/orders/${encodeURIComponent(id)}/cancel`, {
       method: 'POST',
     });
     if (!res.ok) {
       const error = await res.json();
-      throw new Error(error.error || 'Échec de la fermeture');
+      throw new Error(error.error || 'Impossible d’annuler cet ordre.');
     }
-    return res.json();
+    const json = await res.json();
+    return json.order;
   }
 
   async getStats(): Promise<{ stats: Stats | null; account: Account | null }> {

@@ -1,152 +1,194 @@
 import { createClient } from '@/lib/supabase/server';
-import { getServiceClient } from '@/lib/billing/serviceClient';
 import { NextRequest, NextResponse } from 'next/server';
+import { settlePaperOrders } from '@/lib/paper-trading/ordersServer';
 
-/**
- * Ouvre une position paper trading sur un code, au dernier cours connu.
- * Taille = 10% du capital courant. Body: { code: string }.
- */
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+const PAGE_SIZE = 1000;
+const MAX_QUOTE_PAGES = 20;
+const ACTIVE_ORDER_STATUSES = ['pending', 'partial', 'waiting_data'] as const;
 
-    const body = (await request.json()) as { code?: string; amount?: number };
-    const code = (body.code ?? '').trim().toUpperCase();
-    if (!code) {
-      return NextResponse.json({ error: 'Code requis' }, { status: 400 });
-    }
-    const requestedAmount = typeof body.amount === 'number' && Number.isFinite(body.amount) && body.amount > 0 ? body.amount : null;
+interface PositionRow {
+  id: string;
+  code: string;
+  entry_price: number;
+  entry_date: string;
+  num_shares: number;
+  status: 'open' | 'closed';
+  [key: string]: unknown;
+}
 
-    // Plafond d'exposition + ouverture/renfort dans UNE fonction SQL qui verrouille
-    // le compte (migration 0185) : les requêtes parallèles ne peuvent plus lire le
-    // même « disponible ». Appel service_role, avec l'identifiant de la session.
-    const { data, error } = await getServiceClient().rpc('paper_ouvrir_position', {
-      p_user: user.id,
-      p_code: code,
-      p_amount: requestedAmount,
-    });
-    if (error || !data) {
-      console.error('Create position error:', error);
-      return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
-    }
-    const r = data as { ok: boolean; error?: string; prix?: number; reinforced?: boolean; position?: unknown };
-    if (!r.ok) {
-      if (r.error === 'NO_ACCOUNT') return NextResponse.json({ error: 'Compte non initialisé' }, { status: 400 });
-      if (r.error === 'NO_QUOTE') return NextResponse.json({ error: `Aucun cours pour ${code}` }, { status: 400 });
-      if (r.error === 'AMOUNT_TOO_LOW') {
-        return NextResponse.json(
-          { error: `Montant insuffisant : il faut au moins ${Math.round(r.prix ?? 0).toLocaleString('fr-FR')} FCFA pour 1 titre de ${code}.` },
-          { status: 400 },
-        );
+interface LatestQuote {
+  code: string;
+  date_marche: string;
+  cours_jour: number;
+}
+
+async function loadLatestQuotes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  codes: string[],
+): Promise<Map<string, LatestQuote>> {
+  const quotes = new Map<string, LatestQuote>();
+
+  for (let page = 0; page < MAX_QUOTE_PAGES && quotes.size < codes.length; page += 1) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('brvm_actions_daily')
+      .select('code, date_marche, cours_jour')
+      .in('code', codes)
+      .not('cours_jour', 'is', null)
+      .order('date_marche', { ascending: false })
+      .order('code', { ascending: true })
+      .range(from, to);
+    if (error) throw new Error(`Impossible de charger les cours du portefeuille : ${error.message}`);
+
+    const rows = data ?? [];
+    for (const row of rows) {
+      if (!quotes.has(row.code)) {
+        quotes.set(row.code, {
+          code: row.code,
+          date_marche: row.date_marche,
+          cours_jour: row.cours_jour,
+        });
       }
-      return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
     }
-    if (r.reinforced) return NextResponse.json({ position: r.position, reinforced: true }, { status: 200 });
-    return NextResponse.json({ position: r.position }, { status: 201 });
-  } catch (error) {
-    console.error('Paper trading create position error:', error);
-    return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
+
+    if (rows.length < PAGE_SIZE) break;
   }
+
+  const missing = codes.filter((code) => !quotes.has(code));
+  if (missing.length > 0) {
+    throw new Error(`Cours de référence introuvable pour : ${missing.join(', ')}`);
+  }
+  return quotes;
+}
+
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Les achats et ventes passent désormais par des ordres simulés.' },
+    { status: 405 },
+  );
 }
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-
-    // Get current user
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
-
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 });
     }
 
-    // Get account
-    const { data: account } = await supabase
+    await settlePaperOrders(user.id);
+
+    const { data: account, error: accountError } = await supabase
       .from('paper_trading_accounts')
-      .select()
+      .select('*')
       .eq('user_id', user.id)
-      .single();
-
+      .maybeSingle();
+    if (accountError) {
+      console.error('Failed to fetch paper trading account:', accountError);
+      return NextResponse.json({ error: 'Échec chargement du compte.' }, { status: 500 });
+    }
     if (!account) {
-      return NextResponse.json({ positions: [], account: null }, { status: 200 });
-    }
-
-    // Parse query params
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') as 'open' | 'closed' | null;
-
-    // Fetch positions
-    let query = supabase
-      .from('paper_trading_positions')
-      .select()
-      .eq('account_id', account.id);
-
-    if (status) {
-      query = query.eq('status', status);
-    }
-
-    const { data: positions, error } = await query.order('entry_date', { ascending: false });
-
-    if (error) {
-      console.error('Failed to fetch positions:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch positions' },
-        { status: 500 }
+        { positions: [], account: null, cashAvailable: null, cashReserved: null },
+        { status: 200 },
       );
     }
 
-    const rows = positions || [];
+    const { data: positions, error: positionsError } = await supabase
+      .from('paper_trading_positions')
+      .select('*')
+      .eq('account_id', account.id)
+      .order('entry_date', { ascending: false })
+      .order('id', { ascending: false });
+    if (positionsError) {
+      console.error('Failed to fetch paper trading positions:', positionsError);
+      return NextResponse.json({ error: 'Échec chargement des positions.' }, { status: 500 });
+    }
 
-    // Valorise les positions OUVERTES au dernier cours connu (P&L latent).
-    const openCodes = [...new Set(rows.filter((p) => p.status === 'open').map((p) => p.code))];
-    const lastCours: Record<string, number> = {};
-    if (openCodes.length > 0) {
-      const { data: lastDateRow } = await supabase
-        .from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);
-      const lastDate = (lastDateRow as { date_marche: string }[] | null)?.[0]?.date_marche ?? null;
-      if (lastDate) {
-        const { data: quotes } = await supabase
-          .from('brvm_actions_daily').select('code, cours_jour').eq('date_marche', lastDate).in('code', openCodes);
-        for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) {
-          if (q.cours_jour != null) lastCours[q.code] = q.cours_jour;
-        }
+    const { searchParams } = new URL(request.url);
+    const requestedStatus = searchParams.get('status');
+    if (requestedStatus && requestedStatus !== 'open' && requestedStatus !== 'closed') {
+      return NextResponse.json({ error: 'Filtre de position invalide.' }, { status: 400 });
+    }
+
+    const rows = (positions ?? []) as PositionRow[];
+    const openRows = rows.filter((position) => position.status === 'open');
+    const openCodes = [...new Set(openRows.map((position) => position.code))];
+    const latestQuotes = openCodes.length
+      ? await loadLatestQuotes(supabase, openCodes)
+      : new Map<string, LatestQuote>();
+
+    const { data: activeOrders, error: ordersError } = await supabase
+      .from('paper_trading_orders')
+      .select('code, side, reserved_cash_remaining, reserved_shares_remaining')
+      .eq('account_id', account.id)
+      .in('status', [...ACTIVE_ORDER_STATUSES]);
+    if (ordersError) {
+      console.error('Failed to fetch paper trading order reservations:', ordersError);
+      return NextResponse.json({ error: 'Échec chargement des réservations.' }, { status: 500 });
+    }
+
+    let cashReserved = 0;
+    const sharesReserved = new Map<string, number>();
+    for (const order of activeOrders ?? []) {
+      if (order.side === 'buy') {
+        cashReserved += order.reserved_cash_remaining ?? 0;
+      } else if (order.side === 'sell') {
+        sharesReserved.set(
+          order.code,
+          (sharesReserved.get(order.code) ?? 0) + (order.reserved_shares_remaining ?? 0),
+        );
       }
     }
 
-    const enriched = rows.map((p) => {
-      if (p.status !== 'open') return p;
-      const cours = lastCours[p.code] ?? p.entry_price;
-      const currentValue = cours * p.num_shares;
-      const cost = p.entry_price * p.num_shares;
+    const openCost = openRows.reduce(
+      (total, position) => total + position.entry_price * position.num_shares,
+      0,
+    );
+    const cashAvailable = account.capital_current - openCost - cashReserved;
+    if (!Number.isFinite(cashAvailable) || cashAvailable < 0) {
+      throw new Error('Paper trading cash reservations exceed the account balance.');
+    }
+
+    const enriched = rows.map((position) => {
+      if (position.status !== 'open') return position;
+      const quote = latestQuotes.get(position.code);
+      if (!quote) throw new Error(`Missing latest quote for open position ${position.code}.`);
+
+      const reservedShares = sharesReserved.get(position.code) ?? 0;
+      const availableShares = Math.max(0, position.num_shares - reservedShares);
+      const currentValue = quote.cours_jour * position.num_shares;
+      const cost = position.entry_price * position.num_shares;
       const latentPnl = currentValue - cost;
       return {
-        ...p,
-        current_price: cours,
+        ...position,
+        current_price: quote.cours_jour,
         current_value: currentValue,
+        current_price_date: quote.date_marche,
+        reservedShares,
+        availableShares,
         pnl: latentPnl,
         pnl_pct: cost > 0 ? (latentPnl / cost) * 100 : 0,
       };
     });
 
     return NextResponse.json(
-      { positions: enriched, account },
-      { status: 200 }
+      {
+        positions: requestedStatus
+          ? enriched.filter((position) => position.status === requestedStatus)
+          : enriched,
+        account,
+        cashAvailable,
+        cashReserved,
+      },
+      { status: 200 },
     );
   } catch (error) {
     console.error('Paper trading positions error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch positions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Échec chargement du portefeuille.' }, { status: 500 });
   }
 }
