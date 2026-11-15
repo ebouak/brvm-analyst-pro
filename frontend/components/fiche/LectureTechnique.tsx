@@ -15,6 +15,7 @@ interface Props {
     indicateurs?: { texte: string; sens: 'up' | 'down' | 'neutral' | 'na' }[];
   } | null;
   saisonnalite: ReactNode;
+  moyennesMobiles?: ReactNode;
   detections: { label: string; ok: boolean }[];
   position: ReactNode;
   detailScore: ReactNode;
@@ -42,7 +43,7 @@ function Liste({ titre, items, marque }: { titre: string; items: string[]; marqu
   );
 }
 
-export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graphiques, synthese, saisonnalite, detections, position, detailScore }: Props) {
+export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graphiques, synthese, saisonnalite, moyennesMobiles, detections, position, detailScore }: Props) {
   const actives = detections.filter((d) => d.ok);
   const inactives = detections.filter((d) => !d.ok);
   const pos = score != null ? Math.max(0, Math.min(1, (score + 1) / 2)) * 100 : null;
@@ -81,6 +82,7 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
       )}
 
       <div className="mt-6">{graphiques}</div>
+      {moyennesMobiles && <div className="mt-4">{moyennesMobiles}</div>}
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="rounded-card border border-border p-4">{saisonnalite}</div>

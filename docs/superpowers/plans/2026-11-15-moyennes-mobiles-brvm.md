@@ -27,10 +27,10 @@
 
 - `frontend/lib/movingAverages.ts` — pure calculations for one instrument and sector breadth; no I/O.
 - `frontend/lib/movingAverages.test.ts` — deterministic tests for windows, gaps, trend states, crossovers, and breadth.
-- `frontend/lib/movingAverages/server.ts` — bounded, paginated Supabase read of same-sector prices as of a market date; propagates query errors.
+- `frontend/lib/movingAverages/server.ts` — bounded, paginated Supabase read of same-sector prices as of a market date; derives peers from the curated `brvmSectors.json` map and propagates query errors.
 - `frontend/lib/movingAverages/server.test.ts` — loader tests with injected/fake query behavior where repository patterns permit.
 - `frontend/components/fiche/MoyennesMobiles.tsx` — presentation of the current security's moving averages, stale-data context, crossover fact, sector breadth, and disclaimer.
-- `frontend/components/fiche/MoyennesMobiles.test.tsx` — rendered-state regression tests for complete/partial history and sector breadth availability.
+- `frontend/lib/fiche/moyennesMobiles.test.ts` — rendered-state regression tests for partial history, stale closes, and sector breadth availability.
 - `frontend/components/fiche/LectureTechnique.tsx` — place the new component within the existing technical reading, keeping its current layout and score explanation.
 - `frontend/app/actions/[code]/page.tsx` — pass dated closes and sector/as-of context to the pure calculation and component.
 
@@ -234,9 +234,10 @@ git commit -m "feat(technicals): load BRVM sector moving-average breadth"
     secteur: string | null;
     dateDernierCours: string | null;
     dateSeance: string;
+    seancesSansCotation: number | null;
   }
   ```
-- The page computes `reading` from the current title's existing dated close rows and calls `loadSectorBreadth(secteur, last.date_marche)`.
+- The page takes the title's sector from `brvmSectors.json`, computes `reading` from its existing dated close rows, and calls `loadSectorBreadth(secteur, reading.date ?? dateSeanceAnalyse)`. The older `brvm_instruments.secteur` value is not authoritative. It reports a no-quote session count only when the loaded rows cover the reference session.
 - `LectureTechnique` accepts one optional `moyennesMobiles: ReactNode` and renders it after the existing indicators/graphs, without changing the score band or summary.
 
 - [ ] **Step 1: Add a component test or existing page-level assertion** for: all averages available, SMA200 unavailable, crossover absent, sector breadth available, and sector breadth insufficient.
@@ -247,7 +248,7 @@ Use `renderToStaticMarkup(createElement(...))` from the already installed React 
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it } from 'vitest';
-import { MoyennesMobiles } from './MoyennesMobiles';
+import { MoyennesMobiles } from '@/components/fiche/MoyennesMobiles';
 
 it('shows unavailable long-term and sector context without inventing values', () => {
   const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
@@ -256,10 +257,11 @@ it('shows unavailable long-term and sector context without inventing values', ()
       sma20: 98, sma50: 95, sma200: null,
       distance20Pct: 2.04, distance50Pct: 5.26, distance200Pct: null,
       slope20Pct: 1.2, slope50Pct: 0.8, slope200Pct: null,
-      regime: 'haussier', crossover: null,
+      regime: 'haussier', regimeHorizon: 'court_moyen', crossover: null,
     },
     breadth: { status: 'insufficient', reading: null },
     secteur: 'Industrie', dateDernierCours: '2026-11-13', dateSeance: '2026-11-13',
+    seancesSansCotation: 0,
   }));
   expect(html).toContain('SMA200');
   expect(html).toContain('données sectorielles insuffisantes');
@@ -273,20 +275,20 @@ Add a second fixture with `breadth.status = 'available'` and assert both percent
 
 Show the session date, latest close, SMA20/50/200 values, distances, slopes, and regime. Format unavailable values as `—` with a nearby explanation. Show the crossover only when present and phrase it as an observed event. For sector breadth, show each count and denominator, percentage when available, and the sector label. Include the disclaimer from the spec verbatim. Do not add BUY/SELL language, a grade, or a recommendation.
 
-- [ ] **Step 3: Wire the page to the existing valid dated close rows and selected market date.**
+- [ ] **Step 3: Wire the page to the existing dated close rows and selected market date.**
 
 Pass sector from the already loaded instrument/last market row. If the server loader throws, let the route's normal error handling surface it; do not silently render an empty/healthy sector. Continue to show the per-title moving-average reading when `secteur` is unknown, with sector breadth marked insufficient.
 
 - [ ] **Step 4: Run focused component and page type checks.**
 
-Run from `frontend`: `npm test -- components/fiche/MoyennesMobiles.test.tsx lib/movingAverages.test.ts lib/movingAverages/server.test.ts`
+Run from `frontend`: `npm test -- lib/fiche/moyennesMobiles.test.ts lib/movingAverages.test.ts lib/movingAverages/server.test.ts`
 
 Expected: PASS with all four UI states represented.
 
 - [ ] **Step 5: Commit the fiche integration.**
 
 ```powershell
-git add -- frontend/components/fiche/MoyennesMobiles.tsx frontend/components/fiche/MoyennesMobiles.test.tsx frontend/components/fiche/LectureTechnique.tsx "frontend/app/actions/[code]/page.tsx"
+git add -- frontend/components/fiche/MoyennesMobiles.tsx frontend/lib/fiche/moyennesMobiles.test.ts frontend/components/fiche/LectureTechnique.tsx "frontend/app/actions/[code]/page.tsx"
 git commit -m "feat(technicals): show BRVM moving-average reading"
 ```
 
@@ -303,7 +305,7 @@ git commit -m "feat(technicals): show BRVM moving-average reading"
 Run from `frontend`:
 
 ```powershell
-npm test -- lib/movingAverages.test.ts lib/movingAverages/server.test.ts components/fiche/MoyennesMobiles.test.tsx
+npm test -- lib/movingAverages.test.ts lib/movingAverages/server.test.ts lib/fiche/moyennesMobiles.test.ts
 npm run typecheck
 ```
 

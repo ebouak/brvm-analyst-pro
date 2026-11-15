@@ -123,8 +123,11 @@ observation est une cotation du jour.
   Avant d'interpréter les ruptures autour d'un fractionnement, il faut vérifier
   le traitement de l'historique dans la source; aucune correction historique
   non sourcée n'est inventée par ce module.
-- Le secteur vient du référentiel curé. Un secteur absent reste inconnu; aucune
-  inférence automatique par nom ou ticker.
+- Le secteur vient de `frontend/lib/brvmSectors.json`, référentiel curé déjà
+  utilisé par la heatmap et les tableaux sectoriels. La colonne
+  `brvm_instruments.secteur` n'est pas une source fiable (elle est quasi vide
+  et emploie une ancienne classification). Un code absent du JSON reste sans
+  secteur; aucune inférence par nom ou ticker.
 - Les secteurs peu fournis restent affichables uniquement avec l'effectif
   disponible, et le minimum de trois titres s'applique à la largeur agrégée.
 
