@@ -2,7 +2,7 @@
 
 import { useBeginnerMode } from '@/lib/beginner-mode';
 
-export default function BeginnerToggle() {
+export default function BeginnerToggle({ className = '' }: { className?: string } = {}) {
   const { beginner, toggle } = useBeginnerMode();
   return (
     <button
@@ -13,7 +13,7 @@ export default function BeginnerToggle() {
         beginner
           ? 'border-cyan/40 text-cyan bg-cyan/10'
           : 'border-border text-faint hover:border-cyan/30 hover:text-muted'
-      }`}
+      } ${className}`}
     >
       {beginner ? 'Débutant' : 'Expert'}
     </button>

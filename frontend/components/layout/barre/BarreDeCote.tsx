@@ -439,7 +439,7 @@ export default function BarreDeCote({
           {code && (
             <div
               aria-live="polite"
-              className={`tabular ${FILET} flex min-w-[168px] items-center gap-2 whitespace-nowrap px-4 text-sm ${ctx ? '' : 'invisible'}`}
+              className={`tabular ${FILET} hidden min-w-[168px] items-center xl:flex gap-2 whitespace-nowrap px-4 text-sm ${ctx ? '' : 'invisible'}`}
             >
               <Link href={`/actions/${code}`} className="font-semibold text-ivory hover:underline">{code}</Link>
               {ctx && (
@@ -702,8 +702,8 @@ function GrilleMobile({
       <div className="shrink-0 border-t border-border bg-bg p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="mb-3 flex items-center justify-between gap-2">
           <span className="flex items-center gap-2">
-            <ThemeToggle />
-            {connecte && <BeginnerToggle />}
+            <ThemeToggle className="min-h-[48px]" />
+            {connecte && <BeginnerToggle className="min-h-[48px]" />}
           </span>
           {connecte && <button type="button" onClick={deconnecter} className="inline-flex min-h-[48px] items-center px-3 text-sm text-muted outline-none hover:text-ivory focus-visible:ring-2 focus-visible:ring-accent-ink">Se déconnecter</button>}
         </div>
