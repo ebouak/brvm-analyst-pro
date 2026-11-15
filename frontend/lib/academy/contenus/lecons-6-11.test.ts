@@ -5,10 +5,10 @@ import { lessonSchema, type Lesson } from '../types';
 import { capitalPourObjectif, simulerReinvestissement } from '../simulations';
 import { executerOrdre } from '../carnet';
 import { analyserAllocation, simulerScenario } from '../allocation';
-import l6 from './lecon6-risques.json';
-import l7 from './lecon7-scolarite.json';
-import l8 from './lecon8-strategies.json';
-import l9 from './lecon9-compte-ordre.json';
+import l6 from './lecon6-compte-ordre.json';
+import l7 from './lecon7-risques.json';
+import l8 from './lecon8-scolarite.json';
+import l9 from './lecon9-strategies.json';
 import l10 from './lecon10-diaspora.json';
 import l11 from './lecon11-comparaison.json';
 
@@ -74,25 +74,25 @@ describe.each(LECONS)('leçon %i — règles éditoriales', (n, brut) => {
 });
 
 describe('réponses de calcul : la bonne option est bien le bon résultat', () => {
-  it('leçon 6 — une ligne sur cinq divise son dividende par deux : −10 %', () => {
-    expect(bonne(parse(l6), 1)).toContain('10 %');
-    expect(bonne(parse(l6), 4)).toContain('1 200 000');
-  });
-  it('leçon 7 — revenu 200 × 1 200 + 100 × 400 = 280 000 ; capital 1 000 000 ÷ 8 % = 12 500 000 ; 1,1¹⁰ ≈ 2,594', () => {
-    expect(200 * 1200 + 100 * 400).toBe(280_000);
-    expect(bonne(parse(l7), 0)).toContain('280 000');
-    expect(capitalPourObjectif(1_000_000, [8])[0]!.capital).toBe(12_500_000);
-    expect(bonne(parse(l7), 1)).toContain('12 500 000');
-    expect(Math.round(1000 * 1.1 ** 10)).toBe(2594);
-    expect(bonne(parse(l7), 3)).toContain('2 594');
-  });
-  it('leçon 8 — PER 12 000 ÷ 1 500 = 8', () => {
-    expect(12_000 / 1_500).toBe(8);
-    expect(bonne(parse(l8), 1)).toBe('8');
-  });
-  it('leçon 9 — 20 × 10 000 + 1 % de frais = 202 000', () => {
+  it('leçon 6 — 20 × 10 000 + 1 % de frais = 202 000', () => {
     expect(20 * 10_000 * 1.01).toBe(202_000);
-    expect(bonne(parse(l9), 3)).toContain('202 000');
+    expect(bonne(parse(l6), 3)).toContain('202 000');
+  });
+  it('leçon 7 — une ligne sur cinq divise son dividende par deux : −10 %', () => {
+    expect(bonne(parse(l7), 1)).toContain('10 %');
+    expect(bonne(parse(l7), 4)).toContain('1 200 000');
+  });
+  it('leçon 8 — revenu 200 × 1 200 + 100 × 400 = 280 000 ; capital 1 000 000 ÷ 8 % = 12 500 000 ; 1,1¹⁰ ≈ 2,594', () => {
+    expect(200 * 1200 + 100 * 400).toBe(280_000);
+    expect(bonne(parse(l8), 0)).toContain('280 000');
+    expect(capitalPourObjectif(1_000_000, [8])[0]!.capital).toBe(12_500_000);
+    expect(bonne(parse(l8), 1)).toContain('12 500 000');
+    expect(Math.round(1000 * 1.1 ** 10)).toBe(2594);
+    expect(bonne(parse(l8), 3)).toContain('2 594');
+  });
+  it('leçon 9 — PER 12 000 ÷ 1 500 = 8', () => {
+    expect(12_000 / 1_500).toBe(8);
+    expect(bonne(parse(l9), 1)).toBe('8');
   });
   it('leçon 10 — 1 000 € × 655,957 = 655 957 FCFA', () => {
     expect(Math.round(1000 * 655.957)).toBe(655_957);
@@ -104,8 +104,8 @@ describe('réponses de calcul : la bonne option est bien le bon résultat', () =
   });
 });
 
-describe('leçon 6 — simulateurs interactifs', () => {
-  const l = parse(l6);
+describe('leçon 7 (risques) — simulateurs interactifs', () => {
+  const l = parse(l7);
   const toutes = l.sections.flatMap((s) => [s.simulation, ...s.simulations]).filter((x) => x != null);
 
   it('porte les trois simulateurs, dans huit sections au plus', () => {
@@ -125,5 +125,16 @@ describe('leçon 6 — simulateurs interactifs', () => {
     const sc = toutes.find((x) => x!.type === 'scenario_baisse') as Extract<NonNullable<(typeof toutes)[number]>, { type: 'scenario_baisse' }>;
     const r = simulerScenario({ capital: sc.capital, rendement_pct: sc.rendement_pct, lignes: sc.secteurs }, { type: 'dividende', nom: sc.secteurs[0]!.nom, facteur: 0.5 });
     expect([r.revenuAvant, r.revenuApres, r.variationRevenuPct]).toEqual([80_000, 72_000, -10]);
+  });
+});
+
+describe('ordre du cours (2026-11-15) : « compte et ordre » avant les risques', () => {
+  const texte = (l: Lesson) => l.sections.map((s) => s.contenu).join('\n');
+  it('la leçon 6 annonce la suite en leçon 7, qui renvoie à la leçon 6 sans renvoi inversé', () => {
+    expect(parse(l6).titre).toMatch(/compte et passer son premier ordre/);
+    expect(parse(l7).titre).toMatch(/Les risques/);
+    expect(texte(parse(l6))).toMatch(/La leçon 7 y ajoute la durée de validité/);
+    expect(texte(parse(l6))).not.toMatch(/en leçon 6/);
+    expect(texte(parse(l7))).toMatch(/La leçon 6 a présenté les deux limites de prix/);
   });
 });
