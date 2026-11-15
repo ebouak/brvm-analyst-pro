@@ -112,6 +112,25 @@ def cours_coherent(prix: float, bas: float, haut: float) -> bool:
     return prix > 0 and bas > 0 and bas <= haut and bas * 0.999 <= prix <= haut * 1.001
 
 
+def fenetre_hebdo(closes: list[float], lows: list[float], highs: list[float], n: int = 5) -> dict | None:
+    """
+    Variation sur n séances : dernière clôture contre celle d'il y a n séances,
+    fourchette sur les n dernières séances. Indépendant du jour d'exécution.
+
+    L'ancien calcul prenait la première clôture d'une fenêtre de 7 jours
+    calendaires : lancé un samedi ou un dimanche, il ne couvrait que 4 séances
+    (lundi → vendredi) et oubliait le mouvement du lundi. Mesuré le 15/11/2026 :
+    Brent +3,5 % au lieu de −2,09 %.
+    """
+    if len(closes) < n + 1 or len(lows) < n or len(highs) < n:
+        return None
+    ref, dernier = closes[-(n + 1)], closes[-1]
+    if not ref or ref <= 0:
+        return None
+    return {"prix": dernier, "reference": ref, "variation_pct": (dernier - ref) / ref * 100,
+            "bas": min(lows[-n:]), "haut": max(highs[-n:]), "n_seances": n}
+
+
 # ── Édition et titre ──────────────────────────────────────────────────────────
 
 ARTICLE = {

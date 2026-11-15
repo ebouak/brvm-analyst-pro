@@ -242,3 +242,19 @@ def test_le_prompt_ne_donne_que_des_chiffres_autorises():
     autorises = q.nombres_autorises(prices, fcfa=fcfa, week=46, year=2026)
     assert q.chiffres_etrangers(donnees, autorises) == []
     assert "SVOC" not in prompt and "Recommandation WestBourse" not in prompt
+
+
+def test_fenetre_hebdo_independante_du_jour_d_execution():
+    # Vendredi précédent 98,33 ; lundi 92,60 ; ... ; vendredi 96,27.
+    closes = [97.0, 98.33, 92.60, 93.5, 94.1, 95.0, 96.27]
+    lows = [96.0, 97.5, 89.15, 92.0, 93.0, 94.0, 95.1]
+    highs = [98.0, 99.0, 100.92, 94.5, 95.0, 96.0, 97.0]
+    f = q.fenetre_hebdo(closes, lows, highs)
+    assert abs(f["variation_pct"] - (-2.095)) < 0.01  # vendredi contre vendredi, pas lundi contre vendredi
+    assert (f["bas"], f["haut"], f["n_seances"]) == (89.15, 100.92, 5)
+    assert f["reference"] == 98.33
+
+
+def test_fenetre_hebdo_refuse_un_historique_trop_court():
+    assert q.fenetre_hebdo([1, 2, 3, 4, 5], [1] * 5, [5] * 5) is None
+    assert q.fenetre_hebdo([0, 2, 3, 4, 5, 6], [1] * 6, [7] * 6) is None
