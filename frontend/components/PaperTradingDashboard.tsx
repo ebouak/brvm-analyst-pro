@@ -16,27 +16,45 @@ import {
 } from 'recharts';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { paperTradingService } from '@/lib/paper-trading/service';
-import { Account, Position, OpenPosition, Stats } from '@/lib/paper-trading/types';
+import type {
+  Account,
+  PaperFill,
+  PaperOrder,
+  PaperOpenPosition,
+  PaperPosition,
+  PaperTradableAction,
+  Stats,
+} from '@/lib/paper-trading/types';
+import type { PaperOrderSide } from '@/lib/paper-trading/orders';
 import { PaperTradingJournal } from './PaperTradingJournal';
 import { InfoTip } from '@/components/paper-trading/InfoTip';
 import { AnimatedValue } from '@/components/AnimatedValue';
-
-interface TradableAction { code: string; designation: string | null; cours_jour: number | null }
+import { OrderTicket } from '@/components/paper-trading/OrderTicket';
+import { OrdersTable } from '@/components/paper-trading/OrdersTable';
 
 export function PaperTradingDashboard() {
   const [account, setAccount] = useState<Account | null>(null);
-  const [positions, setPositions] = useState<Position[]>([]);
+  const [positions, setPositions] = useState<PaperPosition[]>([]);
+  const [cashAvailable, setCashAvailable] = useState<number | null>(null);
+  const [cashReserved, setCashReserved] = useState<number | null>(null);
+  const [orders, setOrders] = useState<PaperOrder[]>([]);
+  const [fills, setFills] = useState<PaperFill[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [tradable, setTradable] = useState<TradableAction[]>([]);
-  const [selectedCode, setSelectedCode] = useState('');
-  const [amountInput, setAmountInput] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [showOrderTicket, setShowOrderTicket] = useState(false);
+  const [tradable, setTradable] = useState<PaperTradableAction[]>([]);
+  const [sessionDate, setSessionDate] = useState<string | null>(null);
+  const [tradableLoaded, setTradableLoaded] = useState(false);
+  const [tradableLoading, setTradableLoading] = useState(false);
+  const [tradableError, setTradableError] = useState<string | null>(null);
+  const [ticketPrefill, setTicketPrefill] = useState<{
+    code?: string;
+    side: PaperOrderSide;
+    quantity?: number;
+  }>({ side: 'buy' });
+  const [ticketKey, setTicketKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  // Position dont la fermeture est en attente de confirmation (V2 : aperçu latent→réalisé).
-  const [confirmClose, setConfirmClose] = useState<OpenPosition | null>(null);
   // Courbe : équité réalisée seule, ou valeur du portefeuille (latent inclus).
   const [curveWithLatent, setCurveWithLatent] = useState(false);
   // Période affichée sur la courbe : jour (7j) / mois (30j) / année (365j) / tout.
@@ -44,15 +62,22 @@ export function PaperTradingDashboard() {
 
   async function load() {
     try {
-      const [posData, statsData] = await Promise.all([
-        paperTradingService.getPositions(),
-        paperTradingService.getStats(),
-      ]);
+      setError(null);
+      const posData = await paperTradingService.getPositions();
       setPositions(posData.positions);
       setAccount(posData.account);
+      setCashAvailable(posData.cashAvailable);
+      setCashReserved(posData.cashReserved);
+      const [statsData, ordersData] = await Promise.all([
+        paperTradingService.getStats(),
+        paperTradingService.getOrders(),
+      ]);
       setStats(statsData.stats);
+      setOrders(ordersData.orders);
+      setFills(ordersData.fills);
     } catch (err) {
       console.error('Failed to load paper trading data:', err);
+      setError(err instanceof Error ? err.message : 'Impossible de charger le portefeuille simulé.');
     } finally {
       setLoading(false);
     }
@@ -62,72 +87,35 @@ export function PaperTradingDashboard() {
     load();
   }, []);
 
-  // Fermeture de la modale à la touche Échap
-  useEffect(() => {
-    if (!showModal) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setShowModal(false); setError(null); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [showModal]);
-
-  // Fermeture de la modale de confirmation à la touche Échap
-  useEffect(() => {
-    if (!confirmClose) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setConfirmClose(null);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [confirmClose]);
-
-  async function openModal() {
+  async function openOrderTicket(
+    intent: { code?: string; side: PaperOrderSide; quantity?: number } = { side: 'buy' },
+  ) {
     setError(null);
-    setShowModal(true);
-    if (tradable.length === 0) {
+    setShowOrderTicket(true);
+    setTicketPrefill(intent);
+    setTicketKey((key) => key + 1);
+    if (!tradableLoaded) {
+      setTradableLoading(true);
+      setTradableError(null);
       try {
-        const res = await fetch('/api/paper-trading/tradable');
-        const json = await res.json();
-        setTradable(json.actions ?? []);
-      } catch {
-        setError('Impossible de charger la liste des actions.');
+        const data = await paperTradingService.getTradable();
+        setTradable(data.actions);
+        setSessionDate(data.sessionDate);
+        setTradableLoaded(true);
+      } catch (loadError) {
+        setTradableError(
+          loadError instanceof Error ? loadError.message : 'Impossible de charger les valeurs BRVM.',
+        );
+      } finally {
+        setTradableLoading(false);
       }
     }
   }
 
-  async function handleOpen() {
-    if (!selectedCode) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const amt = parseFloat(amountInput);
-      const code = selectedCode;
-      const { reinforced } = await paperTradingService.openPosition(code, Number.isFinite(amt) && amt > 0 ? amt : undefined);
-      setShowModal(false);
-      setSelectedCode('');
-      setAmountInput('');
-      await load();
-      setSuccess(reinforced ? `Position renforcée sur ${code} ✓` : `Position ouverte sur ${code} ✓`);
-      setTimeout(() => setSuccess(null), 4000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec de l'ouverture");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleClose(id: string) {
-    setBusy(true);
-    try {
-      await paperTradingService.closePosition(id);
-      setConfirmClose(null);
-      await load();
-    } catch (err) {
-      console.error('close failed', err);
-    } finally {
-      setBusy(false);
-    }
+  async function handleOrderPlaced() {
+    await load();
+    setSuccess('Ordre simulé enregistré. Il sera évalué sur les séances futures.');
+    window.setTimeout(() => setSuccess(null), 5000);
   }
 
   if (loading) {
@@ -183,8 +171,10 @@ export function PaperTradingDashboard() {
       : null;
 
   // L'API enrichit les positions ouvertes (current_price/current_value, pnl = latent).
-  const openPositions = positions.filter((p) => p.status === 'open') as OpenPosition[];
-  const closedPositions = positions.filter((p) => p.status === 'closed');
+  const openPositions = positions.filter(
+    (position): position is PaperOpenPosition => position.status === 'open',
+  );
+  const closedPositions = positions.filter((position) => position.status === 'closed');
 
   // P&L latent des positions ouvertes (valorisées au cours courant par l'API).
   const latentPnl = openPositions.reduce((s, p) => s + (typeof p.pnl === 'number' ? p.pnl : 0), 0);
@@ -219,183 +209,84 @@ export function PaperTradingDashboard() {
         </div>
       )}
 
-      {/* En-tête pédagogique */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <details className="group min-w-0 flex-1">
-          <summary className="cursor-pointer list-none text-sm font-medium text-info marker:content-none">
-            <span className="underline decoration-dotted underline-offset-4">Comment ça marche ?</span>
-          </summary>
-          <ol className="mt-3 max-w-2xl space-y-1.5 text-xs text-muted">
-            <li>
-              <span className="text-white">1.</span> Vous ouvrez une position fictive : par défaut
-              10 % de votre capital simulé, converti en titres au cours du jour.
-            </li>
-            <li>
-              <span className="text-white">2.</span> Tant qu&apos;elle est ouverte, votre gain ou perte
-              est <span className="text-info">latent</span> : il varie chaque jour avec le cours,
-              rien n&apos;est encore acquis.
-            </li>
-            <li>
-              <span className="text-white">3.</span> Quand vous fermez la position, le gain ou la
-              perte devient <span className="text-info">réalisé</span> : il s&apos;inscrit définitivement
-              dans votre performance.
-            </li>
-          </ol>
-        </details>
+      <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-surface px-5 py-4">
+        <div className="max-w-3xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-info">
+            Marché réel · argent fictif
+          </p>
+          <h2 className="mt-1 text-base font-semibold text-white">Simulez des ordres BRVM</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
+            Les ordres sont évalués sur les séances futures. Le mode BOC prudent utilise uniquement
+            la meilleure limite publiée et sa quantité résiduelle, pas une file complète ni du temps réel.
+          </p>
+          <details className="group mt-3">
+            <summary className="cursor-pointer list-none text-xs font-medium text-info marker:content-none">
+              <span className="underline decoration-dotted underline-offset-4">Comment ça marche ?</span>
+            </summary>
+            <ol className="mt-2 max-w-2xl space-y-1.5 text-xs text-muted">
+              <li>
+                <span className="text-white">1.</span> Vous choisissez un achat ou une vente simulée
+                et définissez la quantité, le type d&apos;ordre et sa durée de validité.
+              </li>
+              <li>
+                <span className="text-white">2.</span> L&apos;ordre est évalué après sa création sur les
+                séances BRVM futures; aucune exécution n&apos;est garantie.
+              </li>
+              <li>
+                <span className="text-white">3.</span> Le mode BOC prudent s&apos;appuie sur la meilleure
+                limite et la quantité résiduelle publiées, sans prétendre représenter le carnet complet.
+              </li>
+            </ol>
+          </details>
+        </div>
         <button
           type="button"
-          onClick={openModal}
-          className="bg-info hover:bg-info/90 text-bg font-medium px-4 py-2 rounded-lg transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50"
+          onClick={() => void openOrderTicket()}
+          className="shrink-0 rounded-lg bg-info px-4 py-2.5 text-sm font-semibold text-bg transition hover:bg-info/90 focus:outline-none focus:ring-2 focus:ring-info/50"
         >
-          + Ouvrir une position fictive
+          Nouvel ordre
         </button>
       </div>
 
-      {/* Modale ouverture */}
-      {showModal && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-          onClick={() => { setShowModal(false); setError(null); }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Ouvrir une position"
-            onClick={(e) => e.stopPropagation()}
-            className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4"
-          >
-            <h3 className="text-lg font-semibold text-white">Ouvrir une position</h3>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">Action</label>
-              <select
-                aria-label="Choisir une action à acheter"
-                value={selectedCode}
-                onChange={(e) => setSelectedCode(e.target.value)}
-                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-info/50"
-              >
-                <option value="">— Choisir une action —</option>
-                {tradable.map((a) => (
-                  <option key={a.code} value={a.code}>
-                    {a.code} — {a.designation ?? ''} ({fmtNumber(a.cours_jour)} FCFA)
-                  </option>
-                ))}
-              </select>
-              {account && selectedCode && (() => {
-                const a = tradable.find((x) => x.code === selectedCode);
-                if (!a?.cours_jour) return null;
-                const parsed = parseFloat(amountInput);
-                const montant = Number.isFinite(parsed) && parsed > 0 ? parsed : account.capital_current * 0.1;
-                const titres = Math.floor(montant / a.cours_jour);
-                const investiReel = titres * a.cours_jour;
-                const dejaOuverte = openPositions.some((p) => p.code === selectedCode);
-                return (
-                  <div className="space-y-2">
-                    <label className="block text-xs text-muted">Montant à investir (FCFA)</label>
-                    <input
-                      type="number" min="0" step="1000"
-                      value={amountInput}
-                      onChange={(e) => setAmountInput(e.target.value)}
-                      placeholder={`Défaut : ${Math.round(account.capital_current * 0.1).toLocaleString('fr-FR')} (10 % du capital)`}
-                      aria-label="Montant à investir en FCFA"
-                      className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-info/50"
-                    />
-                    <p className="text-xs text-muted">
-                      <span className="text-white tabular">{titres}</span> titre{titres > 1 ? 's' : ''} au cours de{' '}
-                      <span className="text-white tabular">{fmtNumber(a.cours_jour)}</span> FCFA
-                      {titres > 0 && investiReel !== montant && (
-                        <> · investi réel <span className="text-white tabular">{fmtFcfa(investiReel)}</span> FCFA</>
-                      )}
-                    </p>
-                    {titres < 1 && (
-                      <p className="text-xs text-down">Montant insuffisant pour acheter au moins 1 titre.</p>
-                    )}
-                    {dejaOuverte && (
-                      <p className="text-xs text-info">ℹ️ Position déjà ouverte : cet achat la renforcera (prix moyen pondéré).</p>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-            {error && <p className="text-xs text-down">{error}</p>}
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => { setShowModal(false); setError(null); }}
-                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-border"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={!selectedCode || busy}
-                onClick={handleOpen}
-                className="px-4 py-2 rounded-lg bg-info text-bg font-medium disabled:opacity-40 transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50"
-              >
-                {busy ? 'Ouverture…' : 'Ouvrir'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {error && (
+        <p role="alert" className="rounded-lg border border-down/30 bg-down/5 px-4 py-3 text-sm text-down">
+          {error}
+        </p>
       )}
 
-      {/* Modale de confirmation de fermeture (aperçu latent → réalisé) */}
-      {confirmClose && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-          onClick={() => setConfirmClose(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Fermer la position ${confirmClose.code}`}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4"
-          >
-            <h3 className="text-lg font-semibold text-white">
-              Fermer la position {confirmClose.code} ?
-            </h3>
-            <p className="text-sm text-muted">
-              La position sera vendue au cours du jour de{' '}
-              <span className="text-white tabular">{fmtFcfa(confirmClose.current_price)}</span> FCFA.
-              Votre P&amp;L latent de{' '}
-              <span className={`tabular font-semibold ${confirmClose.pnl >= 0 ? 'text-up' : 'text-down'}`}>
-                {confirmClose.pnl >= 0 ? '+' : ''}
-                {fmtFcfa(confirmClose.pnl)}
-              </span>{' '}
-              deviendra <span className="text-info">réalisé</span> et s&apos;inscrira définitivement dans
-              votre performance.
-            </p>
-            <div className="rounded-lg border border-border bg-surface px-3 py-2.5 text-xs text-muted space-y-1">
-              <div className="flex justify-between">
-                <span>Investi</span>
-                <span className="tabular text-white">
-                  {fmtFcfa(confirmClose.entry_price * confirmClose.num_shares)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Encaissé (au cours du jour)</span>
-                <span className="tabular text-white">{fmtFcfa(confirmClose.current_value)}</span>
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setConfirmClose(null)}
-                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-border"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => handleClose(confirmClose.id)}
-                className="px-4 py-2 rounded-lg bg-down text-bg font-medium disabled:opacity-40 transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-down/50"
-              >
-                {busy ? 'Fermeture…' : 'Confirmer la fermeture'}
-              </button>
-            </div>
+      {showOrderTicket && (
+        tradableLoading ? (
+          <div className="animate-pulse rounded-xl border border-border bg-surface p-6 text-sm text-muted" aria-busy="true">
+            Chargement des cours et du dernier BOC disponible…
           </div>
-        </div>
+        ) : tradableError ? (
+          <div className="rounded-xl border border-down/30 bg-down/5 p-5">
+            <p role="alert" className="text-sm text-down">{tradableError}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setTradableLoaded(false);
+                void openOrderTicket(ticketPrefill);
+              }}
+              className="mt-3 rounded border border-border px-3 py-2 text-xs text-white hover:bg-elevated"
+            >
+              Réessayer
+            </button>
+          </div>
+        ) : (
+          <OrderTicket
+            key={ticketKey}
+            actions={tradable}
+            sessionDate={sessionDate}
+            cashAvailable={cashAvailable ?? 0}
+            openPositions={openPositions}
+            initialCode={ticketPrefill.code}
+            initialSide={ticketPrefill.side}
+            initialQuantity={ticketPrefill.quantity}
+            onClose={() => setShowOrderTicket(false)}
+            onOrderPlaced={handleOrderPlaced}
+          />
+        )
       )}
 
       {/* KPIs */}
@@ -403,13 +294,16 @@ export function PaperTradingDashboard() {
         <div className="bg-surface border border-border rounded-lg p-4">
           <div className="text-xs text-muted mb-1 inline-flex items-center gap-1">
             Valeur du portefeuille
-            <InfoTip label="Liquidités disponibles + valeur actuelle de vos positions ouvertes." />
+            <InfoTip label="Liquidités libres, sommes réservées aux ordres en attente et valeur actuelle des positions ouvertes." />
           </div>
           <div className="text-2xl font-semibold text-white tabular">
             <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} />
           </div>
           <div className="text-xs text-muted mt-1">
-            Liquidités {fmtFcfa(account.capital_current)} · investi {fmtFcfa(equityTotal - account.capital_current)}
+            Disponible {fmtFcfa(cashAvailable ?? 0)} · réservé aux ordres {fmtFcfa(cashReserved ?? 0)}
+          </div>
+          <div className="text-xs text-muted">
+            Valeur des positions {fmtFcfa(Math.max(0, equityTotal - (cashAvailable ?? 0) - (cashReserved ?? 0)))}
           </div>
         </div>
 
@@ -447,6 +341,12 @@ export function PaperTradingDashboard() {
           </div>
         </div>
       </div>
+
+      <OrdersTable
+        orders={orders}
+        fills={fills}
+        onOrdersChanged={load}
+      />
 
       {/* Equity Curve */}
       <div className="bg-surface border border-border rounded-lg p-6">
@@ -547,7 +447,7 @@ export function PaperTradingDashboard() {
           <ResponsiveContainer width="100%" height={Math.max(160, openPositions.length * 56)}>
             <BarChart
               layout="vertical"
-              data={openPositions.map((p) => ({ code: p.code, pnl: Math.round((p as { pnl?: number }).pnl ?? 0) }))}
+              data={openPositions.map((p) => ({ code: p.code, pnl: Math.round(p.pnl) }))}
               margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#232733" horizontal={false} />
@@ -560,7 +460,7 @@ export function PaperTradingDashboard() {
               />
               <Bar dataKey="pnl" isAnimationActive={false}>
                 {openPositions.map((p) => (
-                  <Cell key={p.code} fill={((p as { pnl?: number }).pnl ?? 0) >= 0 ? '#3fe18b' : '#ff6b6b'} />
+                  <Cell key={p.code} fill={p.pnl >= 0 ? '#3fe18b' : '#ff6b6b'} />
                 ))}
               </Bar>
             </BarChart>
@@ -613,11 +513,9 @@ export function PaperTradingDashboard() {
           openPositions={openPositions}
           closedPositions={closedPositions}
           portfolioValue={equityTotal}
-          onClose={(id) => {
-            const pos = openPositions.find((p) => p.id === id);
-            if (pos) setConfirmClose(pos);
-          }}
-          busy={busy}
+          onCreateSell={(code, quantity) =>
+            void openOrderTicket({ code, side: 'sell', quantity })
+          }
         />
       </div>
     </div>
