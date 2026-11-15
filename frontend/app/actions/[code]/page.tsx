@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { BellPlus, Download, FileText, History, MessageSquareText, Star } from 'lucide-react';
 import type { Metadata } from 'next';
+import brvmSectors from '@/lib/brvmSectors.json';
 import { createClient } from '@/lib/supabase/server';
 import { getAdminContext, can } from '@/lib/server/rbac';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -17,6 +18,7 @@ import { loadCompanyFinancials } from '@/lib/financials/queries';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
+const SECTORS_BY_CODE = brvmSectors as Record<string, string>;
 
 /** Origine CANONIQUE : westbourse.com redirige en 308 vers www — un canonical qui
  *  pointerait vers la version sans www diluerait le signal entre deux URL. */
@@ -58,6 +60,7 @@ import { AnalyseIA } from '@/components/fiche/AnalyseIA';
 import { JaugesPlage } from '@/components/fiche/JaugesPlage';
 import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
 import { LectureTechnique } from '@/components/fiche/LectureTechnique';
+import { MoyennesMobiles } from '@/components/fiche/MoyennesMobiles';
 import { CombinedAlphaCarte } from '@/components/fiche/CombinedAlphaCarte';
 import { StatsEtCours, AProposBloc } from '@/components/fiche/VueEnsemble';
 import { lignesStatistiques, phrasePerformance, serieAnnuelle, dateEnLettres, libelleFamille } from '@/lib/fiche/overview';
@@ -77,6 +80,8 @@ import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa, fmtDateCourte, fmtPctAbs } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
+import { analyzeMovingAverages } from '@/lib/movingAverages';
+import { loadSectorBreadth } from '@/lib/movingAverages/server';
 import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import NotationBadge from '@/components/NotationBadge';
@@ -395,6 +400,24 @@ export default async function InstrumentPage(
   // Fraîcheur des cours : dernière collecte intraday + dernière séance en base.
   const fInputs = await loadFreshnessInputs();
   const fraicheur = computeFreshness(fInputs.derniereCollecte, fInputs.derniereSeance, new Date());
+  const dateSeanceAnalyse = fInputs.derniereSeance ?? last.date_marche;
+  const movingAveragePoints = rows.map((row) => ({
+    code: row.code,
+    date: row.date_marche,
+    close: row.cours_jour ?? null,
+  }));
+  const movingAverageReading = analyzeMovingAverages(movingAveragePoints, dateSeanceAnalyse);
+  let latestCloseIndex = -1;
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const close = rows[index]?.cours_jour;
+    if (close != null && Number.isFinite(close) && close > 0) {
+      latestCloseIndex = index;
+      break;
+    }
+  }
+  const seancesSansCotation = latestCloseIndex >= 0 && rows[rows.length - 1]?.date_marche === dateSeanceAnalyse
+    ? rows.length - 1 - latestCloseIndex
+    : null;
   const lastRsi = rsiByRow[rsiByRow.length - 1];
   const lastMacd = macdByRow[macdByRow.length - 1];
   const lastMa20 = ma20[ma20.length - 1] ?? null;
@@ -690,6 +713,11 @@ export default async function InstrumentPage(
 
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
+  const secteurMoyennes = SECTORS_BY_CODE[code] ?? null;
+  const breadthDate = movingAverageReading.date ?? dateSeanceAnalyse;
+  const sectorBreadth = gateIndicateurs.allowed
+    ? await loadSectorBreadth(secteurMoyennes, breadthDate)
+    : { status: 'insufficient' as const, reading: null };
 
   // Rendement dividende net d'IRVM, selon la BASE du montant : un montant déjà
   // net (calendrier officiel) n'est jamais retaxé — double IRVM corrigée le
@@ -1546,6 +1574,16 @@ export default async function InstrumentPage(
                 />
                 <IndicatorCharts data={indicatorData} />
               </div>
+            }
+            moyennesMobiles={
+              <MoyennesMobiles
+                reading={movingAverageReading}
+                breadth={sectorBreadth}
+                secteur={secteurMoyennes}
+                dateDernierCours={movingAverageReading.date}
+                dateSeance={dateSeanceAnalyse}
+                seancesSansCotation={seancesSansCotation}
+              />
             }
             synthese={{
               haussiers: technicalSummary.bullCount,

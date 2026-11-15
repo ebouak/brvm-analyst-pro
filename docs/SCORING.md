@@ -90,3 +90,25 @@ idempotent dans `signals_daily` par `(code, date_marche)`.
   sous-score supplémentaire est trivial (pondérations dans `SCORING_PARAMS`).
 - Les seuils (0.6 / -0.6) et pondérations sont des valeurs initiales du cahier
   des charges : à calibrer/back-tester sur l'historique réel BRVM.
+
+## 7. Lecture indépendante des moyennes mobiles
+
+La fiche action présente aussi une lecture descriptive des SMA20, SMA50 et
+SMA200, calculées sur les dernières clôtures valides de **séances BRVM**. Elle
+montre les écarts du cours, les pentes sur cinq observations et les
+croisements 20/50 observés à la dernière clôture. Un historique trop court ou
+une clôture absente reste explicitement indisponible.
+
+La largeur sectorielle est un contexte distinct : elle compte, pour chaque
+moyenne, les titres du même secteur cotés à la séance analysée et dont le cours
+est au-dessus de cette moyenne. Le numérateur et le dénominateur sont affichés;
+moins de trois titres éligibles rend le pourcentage indisponible. Les secteurs
+viennent du référentiel curé `frontend/lib/brvmSectors.json`, et l'historique
+est borné à 400 jours calendaires avec pagination pour éviter la troncature
+PostgREST.
+
+Cette lecture ne change ni `signals_daily`, ni `computeScore`, ni les seuils
+BUY/HOLD/SELL, ni la conversion du score en note A–F. Elle n'émet aucun ordre
+et ne transforme pas la largeur sectorielle en pondération ou recommandation.
+Les moyennes mobiles sont retardées par construction et ne sont pas
+prédictives.
