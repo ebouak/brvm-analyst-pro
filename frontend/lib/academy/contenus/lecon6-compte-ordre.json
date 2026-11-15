@@ -1,5 +1,5 @@
 {
-  "titre": "Leçon 9 — Ouvrir un compte et passer son premier ordre",
+  "titre": "Leçon 6 — Ouvrir un compte et passer son premier ordre",
   "categorie": "general",
   "duree_min": 7,
   "sous_titre": "Quatre étapes, les bons documents, et le type d’ordre qui protège votre prix.",
@@ -47,7 +47,7 @@
     {
       "type": "definition",
       "titre": "Deux types d’ordres",
-      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.\nLe règlement de la BRVM parle d’ordre « à cours limité » et d’ordre « au mieux ». Le détail des règles (validité, tout ou rien) est en leçon 6.",
+      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.\nLe règlement de la BRVM parle d’ordre « à cours limité » et d’ordre « au mieux ». La leçon 7 y ajoute la durée de validité et le « tout ou rien », puis met ces règles en pratique sur un carnet d’ordres.",
       "points": [
         {
           "titre": "L’ordre à cours limité",

@@ -4,7 +4,7 @@ import { chiffresParAction, classerNotions, lireListeValeurs, sansSignal, type L
 const LECONS: LeconIndex[] = [
   { cours: 'Niveau 2', slug: 'academy-niveau-2-fondamental', titre: 'Leçon 2 — Le PER : évaluer la cherté d’une action' },
   { cours: 'Niveau 1', slug: 'academy-niveau-1-initiation', titre: 'Leçon 5 — Les dividendes : construire un revenu passif' },
-  { cours: 'Niveau 1', slug: 'academy-niveau-1-initiation', titre: 'Leçon 9 — Ouvrir un compte et passer son premier ordre' },
+  { cours: 'Niveau 1', slug: 'academy-niveau-1-initiation', titre: 'Leçon 6 — Ouvrir un compte et passer son premier ordre' },
 ];
 
 describe('notions', () => {

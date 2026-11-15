@@ -46,9 +46,9 @@ describe('B1 — les DPS ne sont pas une source de gain (niveau 1, leçon 4)', (
   });
 });
 
-describe('B2 — « le prix de 20 actions » affiche des cours, pas des dividendes (niveau 1, leçon 9)', () => {
+describe('B2 — « le prix de 20 actions » affiche des cours, pas des dividendes (niveau 1, leçon 6, ex-leçon 9)', () => {
   it('le bloc lit la vue « cours »', () => {
-    const s = lire('lecon9-compte-ordre.json').sections.find((x) => x.titre.includes('prix de 20 actions'))!;
+    const s = lire('lecon6-compte-ordre.json').sections.find((x) => x.titre.includes('prix de 20 actions'))!;
     expect(s.donnees_reelles?.vue).toBe('cours');
     expect(s.donnees_reelles?.actions).toBe(20);
   });
@@ -85,7 +85,7 @@ describe('cohérence entre niveaux', () => {
     for (const f of fichiers) expect(texte(lire(f)), f).not.toMatch(/[Oo]rdre au marché/);
   });
   it('même repère de diversification : 20 % par société, 35 % par secteur', () => {
-    expect(texte(lire('lecon6-risques.json'))).toMatch(/20 % sur une société, ni plus de 35 % sur un secteur/);
+    expect(texte(lire('lecon7-risques.json'))).toMatch(/20 % sur une société, ni plus de 35 % sur un secteur/);
     const t = texte(lire('niveau2/l05-diversification.json'));
     expect(t).toMatch(/Pas plus de 20 % du portefeuille/);
     expect(t).toMatch(/Pas plus de 35 % sur un seul secteur/);

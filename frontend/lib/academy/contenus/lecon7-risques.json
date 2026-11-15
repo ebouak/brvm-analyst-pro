@@ -1,5 +1,5 @@
 {
- "titre": "Leçon 6 — Les risques : apprendre avant d’investir",
+ "titre": "Leçon 7 — Les risques : apprendre avant d’investir",
  "categorie": "general",
  "duree_min": 12,
  "sous_titre": "Anticiper une perte, protéger son capital, passer un ordre correctement, et décider calmement quand le marché baisse.",
@@ -160,7 +160,7 @@
   {
    "type": "importance",
    "titre": "Les ordres de bourse selon les règles de la BRVM",
-   "contenu": "Choisir une bonne action ne suffit pas : un ordre mal rédigé peut faire payer trop cher, ou ne jamais s’exécuter. Le règlement général de la BRVM décrit un ordre par trois caractéristiques : sa limite de prix, sa durée de validité, et ce qu’il accepte en cas de réponse partielle.\nSelon la valeur, les ordres sont confrontés au fixing (un cours d’équilibre unique) ou en continu (chaque ordre rencontre aussitôt le carnet).",
+   "contenu": "Un ordre mal rédigé peut faire payer trop cher, ou ne jamais s’exécuter. La leçon 6 a présenté les deux limites de prix : au mieux et à cours limité.\nLe règlement général de la BRVM décrit un ordre par trois caractéristiques : sa limite de prix, sa durée de validité, et ce qu’il accepte en cas de réponse partielle.\nSelon la valeur, les ordres sont confrontés au fixing (un cours d’équilibre unique) ou en continu (chaque ordre rencontre aussitôt le carnet).",
    "tableau": {
     "colonnes": [
      "Caractéristique",
