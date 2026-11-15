@@ -25,9 +25,20 @@
  * corroboration. Un document de l'émetteur relayé par une plateforme
  * (`reprise_emetteur`) compte comme l'émetteur. Une valeur déclarée provisoire
  * par l'émetteur peut être retenue, mais avec la réserve « provisoire ».
+ *
+ * Règle (2026-11-15, migration 0245) : une observation rejetée en relecture
+ * est ignorée ; une observation « a_relire » dans le périmètre décisif bloque
+ * toute valeur ; une observation « valide » l'emporte. Les montants se
+ * rapprochent à leur granularité imprimée (montants.ts), jamais d'une devise
+ * à l'autre (USD et FCFA ne se comparent pas).
+ *
+ * ⚠️ Copié dans frontend/lib/agregats/pure/ (scripts/copier-agregats-purs.mjs,
+ * vérifié par copie.test.ts) : corriger ICI, puis relancer le script.
  */
 
 import { rapprocher } from './rapprochement.js';
+import { rapprocherMontants } from './montants.js';
+import type { UniteSource } from '../agregats/nombres.js';
 
 export type Perimetre = 'individuel' | 'consolide' | 'non_precise';
 export type Comparateur = '=' | '>' | '>=' | '<' | '<=';
@@ -48,12 +59,21 @@ export interface ObsPrudentielle {
   /** Absent = 'emetteur' (observations antérieures à 0149). */
   nature_source?: 'emetteur' | 'reprise_emetteur' | 'secondaire';
   provisoire?: boolean;
+  /** État de contrôle (0245). Absent = 'ok'. */
+  controle?: 'ok' | 'a_relire' | 'valide' | 'rejete';
+  /** Unité stockée (fcfa, usd, pct) ; absente = fcfa pour un montant. */
+  unite?: string | null;
+  /** Unité imprimée et décimales (montants), pour le rapprochement à la granularité publiée. */
+  unite_source?: UniteSource | null;
+  decimales?: number | null;
 }
 
 export type Decision =
   | { etat: 'retenue'; valeur: number; observation: string; perimetre: Perimetre;
       classe: 'unique' | 'rounding_compatible'; reserve: 'controle_en_cours' | 'provisoire' | null }
   | { etat: 'conflit'; observations: string[] }
+  /** Un contrôle a échoué sur une observation du périmètre décisif : rien n'est retenu avant relecture. */
+  | { etat: 'a_relire'; observations: string[] }
   | { etat: 'borne'; comparateur: Exclude<Comparateur, '='>; valeur: number; observation: string }
   | { etat: 'non_exploitable'; motif: Motif | null; observations: string[] }
   | { etat: 'non_applicable' }
@@ -79,10 +99,10 @@ function respecte(v: number, c: Exclude<Comparateur, '='>, borne: number): boole
   }
 }
 
-export function selectionnerExercice(obs: ObsPrudentielle[], dateArrete: string): Decision {
-  // Les sources secondaires sont écartées AVANT tout : elles ne doivent ni
-  // décider, ni contredire un chiffre de l'émetteur.
-  const exercice = obs.filter((o) => o.date_arrete === dateArrete && o.nature_source !== 'secondaire');
+export function selectionnerExercice(obs: ObsPrudentielle[], dateArrete: string, nature: 'pct' | 'montant' = 'pct'): Decision {
+  // Les sources secondaires et les observations rejetées en relecture sont
+  // écartées AVANT tout : elles ne doivent ni décider, ni contredire.
+  const exercice = obs.filter((o) => o.date_arrete === dateArrete && o.nature_source !== 'secondaire' && o.controle !== 'rejete');
   if (exercice.length === 0) return { etat: 'aucune_observation' };
 
   const publiees = (p: Perimetre) =>
@@ -96,15 +116,22 @@ export function selectionnerExercice(obs: ObsPrudentielle[], dateArrete: string)
   }
 
   const lignes = publiees(perimetre);
+  const aRelire = lignes.filter((o) => o.controle === 'a_relire');
+  if (aRelire.length) return { etat: 'a_relire', observations: aRelire.map((o) => o.id) };
   const enConflit = lignes.filter((o) => o.motif === 'source_conflict');
   if (enConflit.length) return { etat: 'conflit', observations: enConflit.map((o) => o.id) };
 
   const utilisables = lignes.filter((o) => o.statut === 'publie' && o.valeur != null && !(o.motif && NON_EXACT.has(o.motif)));
-  const exactes = utilisables.filter((o) => o.comparateur === '=');
+  const exactesToutes = utilisables.filter((o) => o.comparateur === '=');
+  // Une valeur confirmée en relecture l'emporte : une personne a tranché.
+  const valides = exactesToutes.filter((o) => o.controle === 'valide');
+  const exactes = valides.length ? valides : exactesToutes;
   const bornes = utilisables.filter((o) => o.comparateur !== '=') as (ObsPrudentielle & { comparateur: Exclude<Comparateur, '='>; valeur: number })[];
 
   if (exactes.length) {
-    const r = rapprocher(exactes.map((o) => ({ id: o.id, texte: texte(o) })));
+    const r = nature === 'montant'
+      ? rapprocherMontants(exactes.map((o) => ({ id: o.id, valeur: o.valeur!, unite: o.unite ?? null, unite_source: o.unite_source ?? null, decimales: o.decimales ?? null })))
+      : rapprocher(exactes.map((o) => ({ id: o.id, texte: texte(o) })));
     if (r.classe === 'source_conflict') return { etat: 'conflit', observations: [...new Set(r.conflits.flat())] };
     if (r.classe === 'illisible' || r.retenue == null) {
       return { etat: 'non_exploitable', motif: 'illisible', observations: exactes.map((o) => o.id) };
