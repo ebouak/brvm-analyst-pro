@@ -149,6 +149,16 @@ describe('rendu de chaque gabarit', () => {
       for (const l of texteEquivalent(ill)) expect(html).toContain(l.replace(/&/g, '&amp;'));
     });
   }
+  it('cascade : aucune liaison ne traverse une bande de texte (libellé ou montant)', () => {
+    const html = renderToStaticMarkup(h(Illustration, { illustration: parse(EXEMPLES.cascade) }));
+    const lignes = [...html.matchAll(/<line[^>]*y1="([\d.]+)" y2="([\d.]+)"[^>]*class="illu-liaison"/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    const textes = [...html.matchAll(/<text[^>]*y="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(lignes.length).toBeGreaterThan(0);
+    for (const [a, b] of lignes) for (const t of textes) {
+      // boîte d'un texte de 12,5 (ascendante et jambages compris), avec une marge
+      expect(b <= t - 13 || a >= t + 5, `liaison ${a}→${b} sur le texte à ${t}`).toBe(true);
+    }
+  });
   it('chiffres réels : la source est affichée', () => {
     const html = renderToStaticMarkup(h(Illustration, { illustration: parse(avec('cascade', { reel: true, source: 'Rapport 2025', note: 'Chiffres de la banque.' })) }));
     expect(html).toContain('Chiffres publiés · Rapport 2025');

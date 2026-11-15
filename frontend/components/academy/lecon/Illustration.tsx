@@ -42,7 +42,14 @@ function Lignes({ x, y, lignes, className, anchor = 'middle', pas = 14 }: { x: n
 
 function Cascade({ ill }: { ill: Extract<IllustrationT, { gabarit: 'cascade' }> }) {
   const { lignes, max } = calculerCascade(ill);
-  const H = 46;
+  const H = 52;
+  /**
+   * Bande de texte d'une ligne (texte de 12,5, ligne de base y+14 : boîte de
+   * y+2 à y+18 environ, jambages compris) : aucune liaison n'y entre. La barre
+   * occupe y+24 à y+38 ; la liaison s'arrête à y+H et reprend à y+H+20.
+   */
+  const LIAISON_HAUT = 0;
+  const LIAISON_BAS = 20;
   const x = (v: number) => (v / max) * W;
   return (
     <svg viewBox={`0 0 ${W} ${lignes.length * H}`} className="lp-illu-svg" aria-hidden="true" focusable="false">
@@ -58,15 +65,15 @@ function Cascade({ ill }: { ill: Extract<IllustrationT, { gabarit: 'cascade' }> 
               {signe}
               {fmtValeur(Math.abs(l.valeur), ill.unite)}
             </text>
-            <rect x={x(l.de)} y={y + 22} width={Math.max(x(l.a) - x(l.de), 2)} height={14} rx={2} className={`illu-barre illu-${l.nature}`} />
+            <rect x={x(l.de)} y={y + 24} width={Math.max(x(l.a) - x(l.de), 2)} height={14} rx={2} className={`illu-barre illu-${l.nature}`} />
+            {/* Liaison vers la barre suivante, INTERROMPUE dans la bande de texte
+                de la ligne suivante (y+H → y+H+20) : un trait
+                ne traverse jamais un libellé ni un montant, quelle que soit sa position. */}
             {i < lignes.length - 1 && (
-              <line
-                x1={x(l.nature === 'baisse' ? l.de : l.a)}
-                x2={x(l.nature === 'baisse' ? l.de : l.a)}
-                y1={y + 36}
-                y2={y + H + 22}
-                className="illu-liaison"
-              />
+              <>
+                <line x1={x(l.nature === 'baisse' ? l.de : l.a)} x2={x(l.nature === 'baisse' ? l.de : l.a)} y1={y + 38} y2={y + H + LIAISON_HAUT} className="illu-liaison" />
+                <line x1={x(l.nature === 'baisse' ? l.de : l.a)} x2={x(l.nature === 'baisse' ? l.de : l.a)} y1={y + H + LIAISON_BAS} y2={y + H + 24} className="illu-liaison" />
+              </>
             )}
           </g>
         );
