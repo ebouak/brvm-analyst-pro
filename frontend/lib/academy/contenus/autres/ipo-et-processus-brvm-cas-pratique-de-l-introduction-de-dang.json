@@ -1,0 +1,276 @@
+{
+  "titre": "L’introduction en bourse de Dangote : un cas pratique, hors BRVM",
+  "niveau": "debutant",
+  "intro": "En 2026, la raffinerie nigériane Dangote a réalisé l’une des plus grandes introductions en bourse de l’histoire africaine. Elle ne s’est pas faite à la BRVM : l’offre publique a été autorisée par le régulateur nigérian et les actions sont destinées au Nigerian Exchange (NGX), à Lagos. La BRVM a seulement été associée à des discussions, sans accord à ce jour.\n\nCe cours, pensé pour les débutants, se sert de ce cas réel pour expliquer le mécanisme d’une introduction en bourse, la différence entre placement privé et offre publique, et ce qu’un investisseur de l’UEMOA doit vérifier avant de souscrire à une offre étrangère. Les faits sont arrêtés au 15 novembre 2026, avec leurs sources ; certains peuvent avoir changé depuis.",
+  "relatedLinks": [
+    {
+      "label": "La chronologie de l’opération",
+      "slug": "suivi-dangote-brvm-ipo"
+    }
+  ],
+  "lessons": [
+    {
+      "titre": "C’est quoi une introduction en bourse (IPO) ?",
+      "categorie": "general",
+      "resume": "Comprendre en mots simples ce qu’est une introduction en bourse et ce que devient l’investisseur qui achète une action.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Une introduction en bourse (en anglais IPO, Initial Public Offering) est l’opération par laquelle une entreprise ouvre son capital au public en vendant des actions, nouvelles ou existantes, puis fait coter ces actions sur une bourse. Celui qui achète une action devient propriétaire d’une petite part de l’entreprise."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Quand l’entreprise émet des actions nouvelles, l’introduction lui permet de lever de l’argent pour financer sa croissance. Pour l’investisseur, c’est la possibilité de recevoir des dividendes et de profiter d’une éventuelle hausse du cours, avec un risque réel de perte en capital."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Acheter lors d’une introduction, c’est devenir actionnaire. Une introduction suit en général quatre étapes : autorisation du régulateur (visa du prospectus), période de souscription, allocation des titres (réduite si la demande dépasse l’offre), puis première cotation. Le niveau 4 de l’Academy détaille la procédure à la BRVM."
+        }
+      ],
+      "qcm": {
+        "question": "Que devient celui qui achète une action lors d’une introduction en bourse ?",
+        "options": [
+          "Un créancier remboursé avec intérêts",
+          "Un actionnaire",
+          "Un salarié de l’entreprise",
+          "Un garant de la dette de la société"
+        ],
+        "correct": 1,
+        "explication": "Acheter une action, c’est détenir une fraction du capital : on devient actionnaire, pas prêteur."
+      },
+      "imageQuery": "stock exchange building africa",
+      "image": {
+        "url": "https://images.pexels.com/photos/28958001/pexels-photo-28958001.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Historic New York Stock Exchange building facade captured in a vintage style.",
+        "credit": "Photo : Louis / Pexels"
+      }
+    },
+    {
+      "titre": "Le cas Dangote : où l’offre a-t-elle eu lieu ?",
+      "categorie": "regulatory",
+      "resume": "L’offre publique de la raffinerie Dangote a été autorisée au Nigeria et vise une cotation au Nigerian Exchange. La BRVM a participé à des discussions, sans accord ni cotation.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Investir en actions comporte un risque de perte en capital. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "La société",
+          "contenu": "Dangote Petroleum Refinery & Petrochemicals FZE exploite une raffinerie à Lekki, près de Lagos (Nigeria), entrée en production en 2024. Sa capacité, annoncée à l’origine à 650 000 barils par jour, est de 700 000 barils par jour selon le prospectus de septembre 2026, qui prévoit de la porter à 1,4 million d’ici 2029. Son coût de construction est estimé par la presse à environ 20 milliards de dollars. Sources : prospectus du 7 septembre 2026 (ipo.dangote.com), Reuters (7 septembre 2026)."
+        },
+        {
+          "type": "importance",
+          "titre": "Une offre nigériane, pas une offre de la BRVM",
+          "contenu": "Le régulateur nigérian, la SEC Nigeria, a approuvé l’offre publique début septembre 2026 (Reuters, 4 septembre 2026). Le prospectus prévoit l’admission des actions au Nigerian Exchange (NGX). La BRVM a été invitée dès avril 2026 à des discussions avec plusieurs bourses africaines ; selon son directeur général, aucun consensus n’a été trouvé, et une cotation dans chaque pays exige l’autorisation de son propre régulateur (Reuters, 4 novembre 2026)."
+        },
+        {
+          "type": "piege",
+          "titre": "Le raccourci à éviter",
+          "contenu": "Parler d’une « introduction de Dangote à la BRVM » est inexact : au 15 novembre 2026, aucune action ni aucun certificat représentatif d’actions Dangote n’est coté à la BRVM, et aucune autorisation de l’AMF-UMOA n’a été annoncée à notre connaissance (à vérifier sur amf-umoa.org et brvm.org)."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Une introduction en bourse relève du régulateur et de la bourse du pays où elle a lieu. Pour Dangote, c’est la SEC Nigeria et le Nigerian Exchange. Une cotation à la BRVM exigerait une procédure propre, autorisée par l’AMF-UMOA."
+        }
+      ],
+      "qcm": {
+        "question": "Sur quelle bourse les actions offertes au public en septembre 2026 doivent-elles être admises ?",
+        "options": [
+          "La BRVM, à Abidjan",
+          "Le Nigerian Exchange, à Lagos",
+          "La Bourse de Johannesburg",
+          "La Bourse de Londres"
+        ],
+        "correct": 1,
+        "explication": "Le prospectus approuvé par la SEC Nigeria prévoit l’admission des actions au Nigerian Exchange (NGX). La BRVM n’a participé qu’à des discussions, sans accord."
+      },
+      "imageQuery": "oil refinery industrial plant",
+      "image": {
+        "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+        "credit": "Photo : Life Of Pix / Pexels"
+      }
+    },
+    {
+      "titre": "Placement privé ou offre publique ? La distinction clé",
+      "categorie": "evaluation",
+      "resume": "Avant l’offre publique, la raffinerie a vendu des actions à de grands investisseurs dans un placement privé. Les deux opérations n’ont ni les mêmes conditions, ni le même public.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Investir en actions comporte un risque de perte en capital. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Un placement privé consiste à proposer des actions à un cercle restreint de grands investisseurs (institutions, fortunes privées), sans offre au public. Une offre publique, elle, est ouverte à tous les investisseurs, après le visa du prospectus par le régulateur."
+        },
+        {
+          "type": "importance",
+          "titre": "Le placement privé de juin 2026",
+          "contenu": "Selon Reuters, qui cite le document de placement (11 juin 2026), la raffinerie proposait 3 milliards d’actions à 0,35 dollar, avec un minimum d’un million d’actions, soit 350 000 dollars, et une interdiction de revendre pendant 365 jours. L’entreprise a ensuite indiqué avoir levé 2,5 milliards de dollars par placement privé (Reuters, 17 juillet 2026). Ces conditions visaient les institutions, pas le petit épargnant."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Ne confondez pas les conditions du placement privé avec celles de l’offre publique. L’offre publique de septembre 2026 était accessible dès 10 actions, à 525 nairas l’action (prospectus du 7 septembre 2026). Selon Reuters (14 septembre 2026), le particulier a payé plus cher par action que les investisseurs du placement privé."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Trois choses à séparer : le placement privé réservé aux institutions (juin-juillet 2026), l’offre publique approuvée par la SEC Nigeria (septembre-octobre 2026), et les campagnes de promotion non autorisées que la SEC a fait cesser le 23 juin 2026."
+        }
+      ],
+      "qcm": {
+        "question": "Un ticket minimum d’environ 350 000 dollars et un blocage des titres de 365 jours caractérisent surtout :",
+        "options": [
+          "L’offre publique ouverte à tous les épargnants",
+          "Le placement privé",
+          "Un compte d’épargne ouvert dans une banque",
+          "Une obligation émise par un État"
+        ],
+        "correct": 1,
+        "explication": "Ces conditions (ticket élevé, blocage d’un an) caractérisent le placement privé réservé aux institutions. L’offre publique de septembre 2026 était accessible dès 10 actions."
+      },
+      "imageQuery": "business investors meeting handshake",
+      "image": {
+        "url": "https://images.pexels.com/photos/7414041/pexels-photo-7414041.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Two male professionals shaking hands in a modern office setting, symbolizing teamwork and collaboration.",
+        "credit": "Photo : RDNE Stock project / Pexels"
+      }
+    },
+    {
+      "titre": "Les chiffres clés de l’offre publique",
+      "categorie": "fundamental",
+      "resume": "Les chiffres de l’offre publique viennent du prospectus approuvé ; la valorisation et la demande viennent de calculs et de sources de presse, à lire comme telles.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Investir en actions comporte un risque de perte en capital. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Ce que dit le prospectus",
+          "contenu": "Offre de 4,1 milliards d’actions ordinaires à 525 nairas l’action, soit environ 2 150 milliards de nairas (4,1 milliards × 525). Souscription minimale : 10 actions, soit 5 250 nairas. Période de souscription prévue du 14 septembre au 13 octobre 2026, prolongée jusqu’au 27 octobre 2026. Les actions existantes, environ 120,1 milliards, doivent aussi être admises au Nigerian Exchange. Sources : prospectus du 7 septembre 2026 et site de l’offre (ipo.dangote.com)."
+        },
+        {
+          "type": "importance",
+          "titre": "Ce qui vient de la presse",
+          "contenu": "Valorisation : 39,1 milliards de dollars au prix du placement privé (document de placement cité par Reuters, 11 juin 2026), environ 47 milliards au prix de l’offre publique selon un calcul de Reuters (4 septembre 2026). Demande : environ trois fois le montant offert, selon des sources citées par Reuters (4 novembre 2026). Le prospectus prévoit la possibilité d’émettre jusqu’à 30 % d’actions en plus si la demande dépasse l’offre (Reuters, 7 septembre 2026)."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Une forte demande ne dit rien du cours futur : après la cotation, le prix se forme librement et peut passer sous le prix d’offre. Les montants convertis en dollars ou en francs CFA dépendent du taux de change du jour ; le naira n’a pas de parité fixe avec le franc CFA."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Distinguez trois sources : le prospectus (conditions de l’offre), les calculs dérivés (valorisation implicite) et les informations de presse non officielles (demande). Seule la première engage l’émetteur."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "Valorisation de la raffinerie selon l’opération (Md$)",
+        "labels": ["Placement privé (juin 2026)", "Offre publique (sept. 2026)"],
+        "valeurs": [39.1, 47],
+        "unite": "Md$",
+        "note": "Placement privé : document de placement cité par Reuters (11 juin 2026). Offre publique : calcul de Reuters à partir du prix de 525 nairas et des actions existantes (4 septembre 2026). Ces valorisations dépendent du taux de change naira-dollar retenu.",
+        "reel": true
+      },
+      "qcm": {
+        "question": "L’offre porte sur 4,1 milliards d’actions à 525 nairas. Quel montant vise-t-elle ?",
+        "options": [
+          "Environ 215 milliards de nairas",
+          "Environ 2 150 milliards de nairas",
+          "Environ 21 500 milliards de nairas",
+          "Environ 525 milliards de nairas"
+        ],
+        "correct": 1,
+        "explication": "4,1 milliards × 525 = 2 152,5 milliards de nairas, soit environ 2 150 milliards (2,15 billions)."
+      },
+      "imageQuery": "financial data charts analysis",
+      "image": {
+        "url": "https://images.pexels.com/photos/7947754/pexels-photo-7947754.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Detailed close-up of a blue bar graph showing data analysis on printed paper.",
+        "credit": "Photo : RDNE Stock project / Pexels"
+      }
+    },
+    {
+      "titre": "Avant de souscrire à une offre étrangère : ce qu’il faut vérifier",
+      "categorie": "regulatory",
+      "resume": "Pour un investisseur de l’UEMOA, une offre étrangère pose des questions précises : autorisation dans sa zone, intermédiaire agréé, change, fraude.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Les quatre vérifications",
+          "contenu": "1) Le prospectus a-t-il été approuvé par le régulateur du pays de l’offre ? 2) L’offre, ou un instrument qui la représente, est-elle autorisée dans votre zone, c’est-à-dire par l’AMF-UMOA pour l’UEMOA ? 3) L’intermédiaire qui vous la propose est-il agréé (annuaire des SGI de l’AMF-UMOA et de la BRVM) ? 4) Comprenez-vous le risque de change, ici entre le naira et le franc CFA ?"
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Le prospectus Dangote n’a pas été enregistré comme offre publique hors du Nigeria (Business Insider Africa, 4 novembre 2026). Certains pays ont créé leur propre accès : le régulateur du Kenya, par exemple, a approuvé un dispositif de certificats représentatifs d’actions (Daba Finance, 5 octobre 2026). Sans dispositif autorisé dans votre zone, vous ne bénéficiez pas de la protection de votre régulateur."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Méfiez-vous des « offres » relayées sur les réseaux sociaux : le 23 juin 2026, la SEC Nigeria a ordonné l’arrêt des promotions non autorisées autour de cette introduction et le remboursement des fonds collectés. Ne versez jamais d’argent sans document officiel, ni à un intermédiaire non agréé."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Prospectus approuvé, autorisation dans votre zone, intermédiaire agréé, risque de change compris : sans ces quatre éléments, une offre étrangère n’offre pas les garanties d’une opération à la BRVM."
+        }
+      ],
+      "qcm": {
+        "question": "À Dakar, un intermédiaire vous propose des actions Dangote. Que vérifier d’abord ?",
+        "options": [
+          "Le nombre d’abonnés de l’intermédiaire sur les réseaux sociaux",
+          "Son agrément, et l’autorisation de l’offre dans l’UEMOA",
+          "La demande annoncée dans la presse nigériane",
+          "Le rendement que l’intermédiaire vous promet sur un an"
+        ],
+        "correct": 1,
+        "explication": "Un intermédiaire doit être agréé, et l’offre autorisée dans votre zone par l’AMF-UMOA. La popularité, la demande annoncée ou un rendement promis ne protègent pas l’épargnant."
+      },
+      "imageQuery": "investor checklist magnifying glass documents",
+      "image": {
+        "url": "https://images.pexels.com/photos/8962463/pexels-photo-8962463.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Close-up of tax preparation checklist and income statement with paperclips.",
+        "credit": "Photo : Leeloo The First / Pexels"
+      }
+    }
+  ],
+  "glossaire": [
+    {
+      "terme": "Introduction en bourse (IPO)",
+      "definition": "Opération par laquelle une entreprise ouvre son capital au public et fait coter ses actions sur une bourse."
+    },
+    {
+      "terme": "Placement privé",
+      "definition": "Vente d’actions à un cercle restreint de grands investisseurs, distincte d’une offre publique ouverte à tous."
+    },
+    {
+      "terme": "Prospectus",
+      "definition": "Document officiel, approuvé par le régulateur, qui décrit l’opération, la société, les risques et les modalités. Indispensable avant toute offre publique."
+    },
+    {
+      "terme": "Période de blocage (lock-up)",
+      "definition": "Période pendant laquelle l’investisseur ne peut pas revendre ses actions (365 jours pour le placement privé Dangote de 2026)."
+    },
+    {
+      "terme": "Sursouscription",
+      "definition": "Situation où la demande dépasse le nombre de titres offerts ; l’allocation de chacun est alors réduite."
+    },
+    {
+      "terme": "Certificat représentatif d’actions",
+      "definition": "Titre coté sur une bourse étrangère qui représente des actions conservées dans le pays d’origine (en anglais depositary receipt)."
+    },
+    {
+      "terme": "SEC (Nigeria)",
+      "definition": "Securities and Exchange Commission : le régulateur des marchés financiers du Nigeria."
+    },
+    {
+      "terme": "AMF-UMOA",
+      "definition": "Autorité des marchés financiers de l’UMOA : elle autorise les offres publiques dans l’UEMOA et agrée les SGI."
+    }
+  ]
+}

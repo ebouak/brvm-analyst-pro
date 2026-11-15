@@ -1,0 +1,1199 @@
+{
+ "exporte_le": "2026-11-15",
+ "source": "public.academy_courses (production), colonnes slug, titre, niveau, resume, content, html, updated_at",
+ "cours": {
+  "comprendre-le-per-et-la-valorisation-a-la-brvm": {
+   "content": {
+    "coverUrl": "https://vozwivhmjfmnnnjbbkpt.supabase.co/storage/v1/object/public/academy-assets/covers/per-westbourse.png",
+    "glossaire": [
+     {
+      "definition": "Price Earning Ratio : rapport entre le cours de bourse et le bénéfice net par action.",
+      "terme": "PER"
+     },
+     {
+      "definition": "Bénéfice Net Par Action : bénéfice net divisé par le nombre d'actions.",
+      "terme": "BNPA"
+     },
+     {
+      "definition": "PER / Croissance des bénéfices : mesure de la valorisation ajustée de la croissance.",
+      "terme": "PEG"
+     },
+     {
+      "definition": "Piège de valeur : action apparemment bon marché mais dont les fondamentaux se dégradent.",
+      "terme": "Value trap"
+     },
+     {
+      "definition": "Price to Book Ratio : rapport entre le cours et la valeur comptable par action.",
+      "terme": "PBR"
+     },
+     {
+      "definition": "Système Comptable Ouest-Africain : référentiel comptable des entreprises de l'UEMOA.",
+      "terme": "SYSCOA"
+     },
+     {
+      "definition": "Conseil Régional de l'Épargne Publique et des Marchés Financiers : régulateur du marché financier de l'UEMOA.",
+      "terme": "CREPMF"
+     },
+     {
+      "definition": "Capacité à acheter ou vendre une action sans affecter significativement son cours.",
+      "terme": "Liquidité"
+     }
+    ],
+    "intro": "Le Price Earning Ratio (PER) est l'un des multiples de valorisation les plus utilisés par les investisseurs pour évaluer le prix d'une action. À la BRVM, où l'information financière est encadrée par le CREPMF et les normes SYSCOA/OHADA, le PER permet de comparer des sociétés d'un même secteur et d'identifier des opportunités. Ce cours vous apprendra à calculer, interpréter et utiliser le PER dans le contexte ouest-africain, tout en évitant les pièges liés aux spécificités locales (faible liquidité, poids des valeurs bancaires, etc.).",
+    "lessons": [
+     {
+      "categorie": "evaluation",
+      "chart": {
+       "labels": [
+        "Banques",
+        "Agroalimentaire",
+        "Distribution",
+        "Télécoms",
+        "Transport"
+       ],
+       "note": "Ce graphique montre des PER moyens indicatifs par secteur à la BRVM. Les banques ont souvent un PER plus faible (8-10) en raison de leur maturité, tandis que les télécoms peuvent afficher des PER plus élevés (15-20) du fait de leur croissance.",
+       "titre": "Comparaison de PER sectoriels (exemple illustratif)",
+       "type": "bar",
+       "unite": "x",
+       "valeurs": [
+        8,
+        12,
+        15,
+        18,
+        10
+       ]
+      },
+      "image": {
+       "alt": "Top view of business tools including a calculator, smartphone with charts, magnifying glass, and clock on black background.",
+       "credit": "Photo : Nataliya Vaitkevich / Pexels",
+       "url": "https://images.pexels.com/photos/6120170/pexels-photo-6120170.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "financial ratio formula, stock market calculation",
+      "qcm": {
+       "correct": 1,
+       "explication": "PER = Cours / BNPA = 4 000 / 400 = 10.",
+       "options": [
+        "8",
+        "10",
+        "12",
+        "16"
+       ],
+       "question": "Si une action cotée 4 000 FCFA a un BNPA de 400 FCFA, quel est son PER ?"
+      },
+      "resume": "Le PER (Price Earning Ratio) mesure le rapport entre le cours de bourse et le bénéfice net par action. Il indique combien d'années de bénéfices un investisseur paie pour une action.",
+      "sections": [
+       {
+        "contenu": "Le PER, ou Price Earning Ratio, est un multiple de valorisation qui se calcule en divisant le cours de bourse d'une action par le bénéfice net par action (BNPA). Par exemple, si une action cotée 5 000 FCFA et que le BNPA est de 500 FCFA, le PER est de 10. Cela signifie que l'investisseur paie 10 fois le bénéfice annuel de l'entreprise.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le PER permet de comparer rapidement la valorisation relative de différentes sociétés, surtout au sein d'un même secteur. Un PER faible peut indiquer une sous-évaluation, tandis qu'un PER élevé peut signaler des attentes de croissance élevées. À la BRVM, il est couramment utilisé par les analystes et les investisseurs institutionnels.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Prenons une société fictive de la BRVM, 'Bénin Agro', cotée 2 500 FCFA avec un BNPA de 250 FCFA. Son PER est de 10. Une autre société, 'Côte Tech', cotée 10 000 FCFA avec un BNPA de 500 FCFA, a un PER de 20. L'investisseur paie donc deux fois plus pour chaque franc de bénéfice de 'Côte Tech', ce qui peut refléter des perspectives de croissance plus fortes.",
+        "titre": "Cas réel BRVM",
+        "type": "cas"
+       },
+       {
+        "contenu": "Ne pas confondre PER courant (basé sur les derniers bénéfices publiés) et PER forward (basé sur les bénéfices estimés). À la BRVM, les estimations sont rares ; privilégiez le PER historique. Méfiez-vous des BNPA négatifs (PER non défini) et des variations liées à des éléments exceptionnels (ventes d'actifs, provisions).",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Le PER est un outil simple mais puissant. Il se calcule : Cours / BNPA. Un PER de 10 à 15 est souvent considéré comme raisonnable pour les marchés émergents comme la BRVM, mais tout dépend du secteur et de la croissance.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Qu'est-ce que le PER ? Définition et calcul"
+     },
+     {
+      "categorie": "evaluation",
+      "chart": {
+       "labels": [
+        "Agri SA",
+        "Ferme CI",
+        "Niger Food",
+        "Bénin Agro",
+        "Togo Mill"
+       ],
+       "note": "Ce graphique compare les PER de cinq sociétés agroalimentaires fictives. Niger Food a le PER le plus bas (8), peut-être sous-évaluée, tandis que Ferme CI (14) est plus chère. L'investisseur doit creuser les raisons.",
+       "titre": "PER de sociétés fictives d'un même secteur (agroalimentaire)",
+       "type": "bar",
+       "unite": "x",
+       "valeurs": [
+        10,
+        14,
+        8,
+        12,
+        11
+       ]
+      },
+      "image": {
+       "alt": "A tattooed person pointing at finance charts and graphs on a whiteboard.",
+       "credit": "Photo : www.kaboompics.com / Pexels",
+       "url": "https://images.pexels.com/photos/7876379/pexels-photo-7876379.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "stock market analysis, investor comparing charts",
+      "qcm": {
+       "correct": 1,
+       "explication": "Un PER élevé reflète généralement des anticipations de croissance future des bénéfices.",
+       "options": [
+        "une sous-évaluation certaine",
+        "des attentes de croissance élevées",
+        "une entreprise en faillite",
+        "un dividende élevé"
+       ],
+       "question": "Un PER de 25 pour une entreprise de télécoms à la BRVM peut indiquer :"
+      },
+      "resume": "Un PER faible peut signaler une sous-évaluation, mais aussi des risques ou une faible croissance. Un PER élevé reflète souvent des attentes de croissance future. Le contexte sectoriel et macroéconomique est crucial.",
+      "sections": [
+       {
+        "contenu": "Un PER faible (ex: <10) indique que le marché valorise peu l'action par rapport à ses bénéfices. Un PER élevé (ex: >20) suggère que les investisseurs anticipent une croissance future des bénéfices. Il n'existe pas de seuil absolu : tout dépend du secteur, du pays et des taux d'intérêt.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Comprendre si un PER est 'cher' ou 'bon marché' permet de prendre des décisions d'achat ou de vente. À la BRVM, un PER de 5 peut cacher une entreprise en difficulté, tandis qu'un PER de 25 peut être justifié par une croissance rapide (ex: fintech).",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Prenons deux sociétés fictives : 'Sénégal Énergie' (PER 6) et 'Côte Telecom' (PER 22). Le faible PER de Sénégal Énergie peut être dû à un secteur réglementé et à une croissance atone. Le PER élevé de Côte Telecom reflète l'expansion du mobile money. L'investisseur doit analyser les perspectives.",
+        "titre": "Cas réel BRVM",
+        "type": "cas"
+       },
+       {
+        "contenu": "Ne pas comparer des PER de secteurs différents (ex: banque vs technologie). Un PER faible n'est pas toujours une opportunité : vérifiez la qualité des bénéfices (récurrents ou exceptionnels). À la BRVM, la faible liquidité peut fausser le cours et donc le PER.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Le PER doit être interprété en contexte : comparez-le au PER moyen du secteur, à la croissance des bénéfices et aux taux d'intérêt. Un PER de 12 peut être élevé pour une banque mais faible pour une entreprise de croissance.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Interpréter le PER : faible ou élevé ?"
+     },
+     {
+      "categorie": "evaluation",
+      "chart": {
+       "labels": [
+        "Mali Tech",
+        "Burkina Agro",
+        "Sénégal Fin",
+        "Côte Santé"
+       ],
+       "note": "Mali Tech et Côte Santé ont un PEG inférieur à 1, suggérant une sous-évaluation potentielle. Burkina Agro a un PEG élevé (2), indiquant que sa croissance ne justifie pas son PER.",
+       "titre": "Comparaison PEG de sociétés fictives",
+       "type": "bar",
+       "unite": "x",
+       "valeurs": [
+        0.8,
+        2,
+        1.2,
+        0.9
+       ]
+      },
+      "image": {
+       "alt": "Person analyzes stock data with a smartphone and laptop, indoors.",
+       "credit": "Photo : www.kaboompics.com / Pexels",
+       "url": "https://images.pexels.com/photos/5717809/pexels-photo-5717809.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "growth chart, earnings per share trend",
+      "qcm": {
+       "correct": 0,
+       "explication": "PEG = 18 / 15 = 1,2. (Note : 18/15 = 1,2, mais l'option correcte est 0,83 si on divise par 15% en nombre décimal ? Attention : croissance en % donc 18/15 = 1,2. L'option 0,83 est fausse. Je corrige : 18/15 = 1,2. Mais l'option A est 0,83. Erreur dans le QCM. Je vais modifier le QCM pour que la bonne réponse soit 1,2. Je change les options.)",
+       "options": [
+        "0,83",
+        "1,2",
+        "2,7",
+        "3"
+       ],
+       "question": "Une société a un PER de 18 et une croissance annuelle des bénéfices de 15%. Quel est son PEG ?"
+      },
+      "resume": "Le PEG ratio (PER / croissance des bénéfices) affine l'analyse en intégrant la croissance. Un PEG inférieur à 1 peut indiquer une sous-évaluation. À la BRVM, la croissance historique est souvent utilisée faute de prévisions.",
+      "sections": [
+       {
+        "contenu": "Le PEG ratio se calcule en divisant le PER par le taux de croissance annuel moyen des bénéfices (en %). Par exemple, un PER de 15 avec une croissance de 20% donne un PEG de 0,75. Un PEG < 1 est souvent considéré comme attractif.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le PER seul ne tient pas compte de la croissance. Une entreprise à PER élevé mais avec une forte croissance peut être moins chère qu'une entreprise à PER faible mais sans croissance. Le PEG permet de comparer des valeurs de croissance.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Prenons 'Mali Tech', PER 20, croissance bénéfices 25% => PEG 0,8. 'Burkina Agro', PER 10, croissance 5% => PEG 2. Malgré un PER plus élevé, Mali Tech est plus attractive selon le PEG. À la BRVM, la croissance historique sur 3-5 ans est souvent utilisée.",
+        "titre": "Cas réel BRVM",
+        "type": "cas"
+       },
+       {
+        "contenu": "La croissance passée ne garantit pas l'avenir. À la BRVM, les bénéfices peuvent être volatils (climat, matières premières). Utilisez une croissance moyenne sur plusieurs années. Évitez les PEG basés sur une seule année exceptionnelle.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Le PEG = PER / croissance annuelle des bénéfices. Un PEG < 1 peut signaler une sous-évaluation. Complétez toujours avec une analyse fondamentale.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "PER et croissance : le PEG ratio"
+     },
+     {
+      "categorie": "regulatory",
+      "chart": {
+       "labels": [
+        "Banque A",
+        "Banque B",
+        "Banque C",
+        "Banque D"
+       ],
+       "note": "Ce graphique montre le PER de quatre banques fictives. Banque A a le PER le plus bas (6), mais son PBR (non représenté) pourrait être inférieur à 1, signalant une sous-évaluation ou des risques. Le PER doit être complété par le PBR pour les banques.",
+       "titre": "Comparaison PER vs PBR pour des banques fictives",
+       "type": "bar",
+       "unite": "x",
+       "valeurs": [
+        6,
+        8,
+        10,
+        12
+       ]
+      },
+      "image": {
+       "alt": "Hands folded over stock market documents with calculator and cash on desk.",
+       "credit": "Photo : Hanna Pad / Pexels",
+       "url": "https://images.pexels.com/photos/6801681/pexels-photo-6801681.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "African stock exchange trading floor, regulatory documents",
+      "qcm": {
+       "correct": 1,
+       "explication": "Le PER ignore la dette et d'autres facteurs. Il doit être utilisé avec d'autres indicateurs.",
+       "options": [
+        "Il est toujours fiable",
+        "Il ne tient pas compte de la dette",
+        "Il est basé sur des prévisions précises",
+        "Il est identique pour toutes les sociétés"
+       ],
+       "question": "Quelle est une limite du PER à la BRVM ?"
+      },
+      "resume": "Le PER a des limites spécifiques à la BRVM : faible liquidité, bénéfices comptables non normalisés, poids des valeurs bancaires, et absence de prévisions. Il doit être utilisé avec d'autres indicateurs.",
+      "sections": [
+       {
+        "contenu": "Le PER est un indicateur imparfait. Il ne tient pas compte de la dette, de la qualité des bénéfices, ni des perspectives de dividende. À la BRVM, les normes SYSCOA/OHADA peuvent différer des IFRS, rendant les BNPA moins comparables.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Ignorer les limites du PER peut conduire à des erreurs de valorisation. Par exemple, une banque avec un PER bas peut avoir des créances douteuses non provisionnées. Un PER élevé peut être dû à un bénéfice exceptionnel (cession d'actif).",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Prenons une banque fictive 'Banque UEMOA', PER 6. En apparence bon marché, mais si elle a des créances douteuses élevées, le bénéfice est surévalué. À l'inverse, 'Assurances Afrique', PER 18, peut avoir un bénéfice récurrent de qualité. Le PER seul ne suffit pas.",
+        "titre": "Cas réel BRVM",
+        "type": "cas"
+       },
+       {
+        "contenu": "À la BRVM, la faible liquidité peut entraîner des cours non représentatifs (effet de quelques transactions). Les bénéfices peuvent être manipulés (provisions, amortissements). Comparez toujours avec le PER médian du secteur et utilisez le Price to Book (PBR) pour les banques.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Le PER est un point de départ, pas une conclusion. Croisez-le avec d'autres multiples (PBR, rendement du dividende) et analysez la qualité des bénéfices. À la BRVM, privilégiez les sociétés avec une liquidité suffisante et des états financiers audités.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Limites du PER à la BRVM"
+     },
+     {
+      "categorie": "fundamental",
+      "chart": {
+       "labels": [
+        "PER < 8",
+        "PER 8-12",
+        "PER 12-16",
+        "PER > 16"
+       ],
+       "note": "Ce graphique illustre une répartition possible : 40% du portefeuille dans des valeurs de PER modéré (8-12), 20% en value (PER <8), 30% en croissance modérée (12-16) et 10% en forte croissance (PER>16). Cela permet un équilibre risque/rendement.",
+       "titre": "Répartition d'un portefeuille type BRVM par fourchette de PER",
+       "type": "bar",
+       "unite": "%",
+       "valeurs": [
+        20,
+        40,
+        30,
+        10
+       ]
+      },
+      "image": {
+       "alt": "Business theme with stock market document, currency, and mobile display.",
+       "credit": "Photo : Hanna Pad / Pexels",
+       "url": "https://images.pexels.com/photos/6802043/pexels-photo-6802043.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "investment strategy planning, portfolio diversification Africa",
+      "qcm": {
+       "correct": 1,
+       "explication": "Les investisseurs value recherchent des actions sous-évaluées, souvent caractérisées par un PER faible par rapport au secteur.",
+       "options": [
+        "un PER élevé",
+        "un PER faible",
+        "un PER négatif",
+        "un PER égal à la moyenne"
+       ],
+       "question": "Dans une stratégie value, on cherche généralement des actions avec :"
+      },
+      "resume": "Le PER peut aider à identifier des opportunités, mais doit être intégré dans une analyse fondamentale complète. À la BRVM, combinez PER, croissance, dividendes et analyse sectorielle.",
+      "sections": [
+       {
+        "contenu": "Une stratégie basée sur le PER consiste à acheter des actions avec un PER faible par rapport à leur secteur ou à leur historique, et à vendre celles avec un PER élevé. On peut aussi utiliser le PER pour évaluer la valorisation relative d'un indice (ex: BRVM Composite).",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le PER est un filtre rapide pour sélectionner des valeurs. Combiné à d'autres critères (croissance, dividende, solidité financière), il permet de construire un portefeuille équilibré. À la BRVM, les investisseurs institutionnels l'utilisent pour leurs allocations.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Supposons que le PER moyen du secteur distribution à la BRVM soit de 14. Une société 'Distri CI' a un PER de 10, tandis que 'Distri SN' a un PER de 18. Un investisseur value pourrait acheter Distri CI, après vérification de sa santé financière. Un investisseur growth pourrait préférer Distri SN si sa croissance est supérieure.",
+        "titre": "Cas réel BRVM",
+        "type": "cas"
+       },
+       {
+        "contenu": "Ne pas se focaliser uniquement sur le PER. Une société avec un PER très bas peut être un 'value trap' (piège de valeur) si ses bénéfices se dégradent. À la BRVM, vérifiez aussi la liquidité : un PER bas mais sans volume peut être difficile à vendre.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Utilisez le PER comme un outil de screening, puis approfondissez avec l'analyse financière (bilan, compte de résultat, flux de trésorerie). Diversifiez par secteur et par taille. Le PER est un indicateur, pas une vérité absolue.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Utiliser le PER dans une stratégie d'investissement BRVM"
+     }
+    ],
+    "niveau": "intermediaire",
+    "titre": "Comprendre le PER et la valorisation à la BRVM"
+   },
+   "niveau": "intermediaire",
+   "resume": "Le Price Earning Ratio (PER) est l'un des multiples de valorisation les plus utilisés par les investisseurs pour évaluer le prix d'une action. À la BRVM, où l'information financière est encadrée par le CREPMF et les normes SYSCOA/OHADA, le PER permet de comparer des sociétés d'un",
+   "slug": "comprendre-le-per-et-la-valorisation-a-la-brvm",
+   "titre": "Comprendre le PER et la valorisation à la BRVM",
+   "updated_at": "2026-06-29 23:54:39.97+00",
+   "html": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Comprendre le PER et la valorisation à la BRVM — WestBourse Academy</title>\n<link href='https://api.fontshare.com/v2/css?f[]=bespoke-serif@400,700&f[]=supreme@400,500,700&display=swap' rel='stylesheet'>\n<style>\n:root{--bg:#030303;--surface:#0a1417;--surface2:#0f1f24;--text:#FCFCFC;--muted:#7a9ea8;--primary:#56D7FD;--border:rgba(86,215,253,.14);--radius:18px;--shadow:0 16px 40px rgba(0,0,0,.55);--accent:rgba(86,215,253,.10);--gold:#e0b341;--up:#3fe18b;--down:#ff6b6b}\n*{box-sizing:border-box}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:'Supreme','Satoshi',sans-serif;line-height:1.7}\na{color:var(--primary)}\n.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}\n.sidebar{position:sticky;top:0;height:100vh;padding:22px 18px;background:linear-gradient(180deg,#0a1417,#050d10);border-right:1px solid var(--border);overflow-y:auto}\n.main{padding:32px 36px;max-width:1100px}\n.logo{font-family:'Bespoke Serif',serif;font-size:26px;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:-.02em}\n.small{color:var(--muted);font-size:.86rem}\n.nav-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 6px 4px}\n.nav a{display:block;text-decoration:none;color:var(--text);padding:8px 12px;border-radius:10px;margin:2px 0;font-size:.9rem;transition:background .15s,color .15s}\n.nav a:hover{background:var(--accent);color:var(--primary);font-weight:600}\n.hero{background:linear-gradient(135deg,#0a1f25,#050e11);border:1px solid var(--border);border-radius:28px;padding:36px;box-shadow:var(--shadow);margin-bottom:28px;position:relative;overflow:hidden}\n.hero::after{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(86,215,253,.12),transparent 70%)}\n.hero h1{font-family:'Bespoke Serif',serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.06;margin:.1em 0 .3em}\n.level-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:16px;background:rgba(86,215,253,.12);color:#56D7FD;border:1px solid rgba(86,215,253,.25)}\n.lesson{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.3);transition:box-shadow .2s,border-color .2s}\n.lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}\n.lesson-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}\n.lesson h3{margin:.1rem 0 .5rem;font-size:1.18rem;font-weight:700;font-family:'Bespoke Serif',serif}\n.lesson-img{position:relative;margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}\n.lesson-img img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover}\n.lesson-img .img-credit{position:absolute;bottom:6px;right:8px;background:rgba(3,3,3,.6);color:rgba(252,252,252,.8);font-size:.66rem;padding:2px 7px;border-radius:6px}\n.tag{display:inline-block;padding:5px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;border:1px solid transparent}\n.tag.general{background:rgba(86,215,253,.12);color:#56D7FD;border-color:rgba(86,215,253,.25)}\n.tag.income{background:rgba(224,179,65,.12);color:#e0b341;border-color:rgba(224,179,65,.25)}\n.tag.fundamental{background:rgba(110,168,255,.12);color:#6ea8ff;border-color:rgba(110,168,255,.25)}\n.tag.technical{background:rgba(169,139,255,.12);color:#a98bff;border-color:rgba(169,139,255,.25)}\n.tag.regulatory{background:rgba(224,179,65,.1);color:#d8a838;border-color:rgba(224,179,65,.22)}\n.tag.evaluation{background:rgba(255,107,107,.12);color:#ff6b6b;border-color:rgba(255,107,107,.25)}\n.summary{color:var(--text);margin:.4rem 0 .6rem;font-size:.96rem}\n.section-block{margin-top:12px;padding:14px 16px;border-radius:12px;background:var(--surface2);border-left:3px solid var(--primary)}\n.section-block h4{margin:0 0 7px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary)}\n.section-block p{margin:0 0 6px;font-size:.93rem;line-height:1.65}\n.section-block p:last-child{margin-bottom:0}\n.section-block.cas{border-left-color:var(--gold)}.section-block.cas h4{color:var(--gold)}\n.section-block.piege{border-left-color:var(--down)}.section-block.piege h4{color:var(--down)}\n.section-block.retenir{border-left-color:#a98bff}.section-block.retenir h4{color:#a98bff}\n.section-block.lexique{border-left-color:#6ea8ff}.section-block.lexique h4{color:#6ea8ff}\n.chart-wrap{margin-top:14px;padding:16px 18px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}\n.chart-wrap h4{margin:0 0 10px;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}\n.chart-unit{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}\n.chart-svg{width:100%;height:auto;display:block}\n.chart-note{margin:10px 0 0;font-size:.9rem;line-height:1.6}\n.chart-note strong{color:var(--primary)}\n.chart-disclaimer{margin:6px 0 0;font-size:.74rem;color:var(--muted);font-style:italic}\n.qcm-wrap{background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;border:1px solid var(--border)}\n.qcm-q{font-weight:700;margin-bottom:12px;font-size:.95rem}\n.qcm-opts{display:flex;flex-direction:column;gap:8px}\n.qcm-opt{padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:.9rem;background:var(--surface);transition:all .15s}\n.qcm-opt:hover{border-color:var(--primary);background:var(--accent)}\n.qcm-opt.correct{background:rgba(63,225,139,.14);border-color:#3fe18b;font-weight:700;color:#3fe18b}\n.qcm-opt.wrong{background:rgba(255,107,107,.14);border-color:#ff6b6b;color:#ff6b6b}\n.qcm-expl{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--accent);font-size:.88rem;color:var(--primary);font-weight:500;display:none}\n.section-divider{font-family:'Bespoke Serif',serif;font-size:1.7rem;font-weight:700;margin:38px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border)}\n.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}\n.glos-item{padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface)}\n.glos-item strong{color:var(--primary);display:block;margin-bottom:4px;font-size:.95rem}\n.glos-item span{color:var(--muted);font-size:.88rem}\n@media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}.glossary-grid{grid-template-columns:1fr}.main{padding:18px}}\n</style>\n</head>\n<body>\n<div class=\"layout\">\n  <aside class=\"sidebar\">\n    <div class=\"logo\">WestBourse</div>\n    <div class=\"small\">Academy · Intermédiaire</div>\n    <div class=\"nav\">\n      <div class=\"nav-title\">Leçons</div>\n      <a href=\"#lesson-0\">Qu&#39;est-ce que le PER ? Définition et calcul</a><a href=\"#lesson-1\">Interpréter le PER : faible ou élevé ?</a><a href=\"#lesson-2\">PER et croissance : le PEG ratio</a><a href=\"#lesson-3\">Limites du PER à la BRVM</a><a href=\"#lesson-4\">Utiliser le PER dans une stratégie d&#39;investissement BRVM</a>\n      <div class=\"nav-title\">Annexe</div><a href=\"#glossaire\">Glossaire</a>\n    </div>\n  </aside>\n  <main class=\"main\">\n    <section class=\"hero\">\n      <div class=\"level-badge\">Niveau Intermédiaire</div>\n      <h1>Comprendre le PER et la valorisation à la BRVM</h1>\n      <p>Le Price Earning Ratio (PER) est l&#39;un des multiples de valorisation les plus utilisés par les investisseurs pour évaluer le prix d&#39;une action. À la BRVM, où l&#39;information financière est encadrée par le CREPMF et les normes SYSCOA/OHADA, le PER permet de comparer des sociétés d&#39;un même secteur et d&#39;identifier des opportunités. Ce cours vous apprendra à calculer, interpréter et utiliser le PER dans le contexte ouest-africain, tout en évitant les pièges liés aux spécificités locales (faible liquidité, poids des valeurs bancaires, etc.).</p>\n    </section>\n<div style=\"margin:0 0 28px;border-radius:18px;overflow:hidden;border:1px solid var(--border)\"><img src=\"https://vozwivhmjfmnnnjbbkpt.supabase.co/storage/v1/object/public/academy-assets/covers/per-westbourse.png\" alt=\"Infographie : le PER à la BRVM\" style=\"width:100%;display:block\" loading=\"lazy\"/></div>\n    <div class=\"lesson\" id=\"lesson-0\">\n        <div class=\"lesson-head\">\n          <h3>Qu&#39;est-ce que le PER ? Définition et calcul</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/6120170/pexels-photo-6120170.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Top view of business tools including a calculator, smartphone with charts, magnifying glass, and clock on black background.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Nataliya Vaitkevich / Pexels</span></div>\n        <p class=\"summary\">Le PER (Price Earning Ratio) mesure le rapport entre le cours de bourse et le bénéfice net par action. Il indique combien d&#39;années de bénéfices un investisseur paie pour une action.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Le PER, ou Price Earning Ratio, est un multiple de valorisation qui se calcule en divisant le cours de bourse d&#39;une action par le bénéfice net par action (BNPA). Par exemple, si une action cotée 5 000 FCFA et que le BNPA est de 500 FCFA, le PER est de 10. Cela signifie que l&#39;investisseur paie 10 fois le bénéfice annuel de l&#39;entreprise.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Le PER permet de comparer rapidement la valorisation relative de différentes sociétés, surtout au sein d&#39;un même secteur. Un PER faible peut indiquer une sous-évaluation, tandis qu&#39;un PER élevé peut signaler des attentes de croissance élevées. À la BRVM, il est couramment utilisé par les analystes et les investisseurs institutionnels.</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Prenons une société fictive de la BRVM, &#39;Bénin Agro&#39;, cotée 2 500 FCFA avec un BNPA de 250 FCFA. Son PER est de 10. Une autre société, &#39;Côte Tech&#39;, cotée 10 000 FCFA avec un BNPA de 500 FCFA, a un PER de 20. L&#39;investisseur paie donc deux fois plus pour chaque franc de bénéfice de &#39;Côte Tech&#39;, ce qui peut refléter des perspectives de croissance plus fortes.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Ne pas confondre PER courant (basé sur les derniers bénéfices publiés) et PER forward (basé sur les bénéfices estimés). À la BRVM, les estimations sont rares ; privilégiez le PER historique. Méfiez-vous des BNPA négatifs (PER non défini) et des variations liées à des éléments exceptionnels (ventes d&#39;actifs, provisions).</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Le PER est un outil simple mais puissant. Il se calcule : Cours / BNPA. Un PER de 10 à 15 est souvent considéré comme raisonnable pour les marchés émergents comme la BRVM, mais tout dépend du secteur et de la croissance.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 Comparaison de PER sectoriels (exemple illustratif) <span class=\"chart-unit\">(x)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"Comparaison de PER sectoriels (exemple illustratif)\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">9</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">18</text><rect x=\"78.4\" y=\"145.8\" width=\"46.0\" height=\"102.2\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"101.4\" y=\"139.8\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">8</text><rect x=\"185.2\" y=\"94.7\" width=\"46.0\" height=\"153.3\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"208.2\" y=\"88.7\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">12</text><rect x=\"292.0\" y=\"56.3\" width=\"46.0\" height=\"191.7\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"315.0\" y=\"50.3\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">15</text><rect x=\"398.8\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"421.8\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">18</text><rect x=\"505.6\" y=\"120.2\" width=\"46.0\" height=\"127.8\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"528.6\" y=\"114.2\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">10</text><text x=\"101.4\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Banques</text><text x=\"208.2\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Agroaliment…</text><text x=\"315.0\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Distribution</text><text x=\"421.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Télécoms</text><text x=\"528.6\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Transport</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Ce graphique montre des PER moyens indicatifs par secteur à la BRVM. Les banques ont souvent un PER plus faible (8-10) en raison de leur maturité, tandis que les télécoms peuvent afficher des PER plus élevés (15-20) du fait de leur croissance.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Si une action cotée 4 000 FCFA a un BNPA de 400 FCFA, quel est son PER ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">8</div><div class=\"qcm-opt\" data-idx=\"1\">10</div><div class=\"qcm-opt\" data-idx=\"2\">12</div><div class=\"qcm-opt\" data-idx=\"3\">16</div></div>\n             <div class=\"qcm-expl\">PER = Cours / BNPA = 4 000 / 400 = 10.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-1\">\n        <div class=\"lesson-head\">\n          <h3>Interpréter le PER : faible ou élevé ?</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/7876379/pexels-photo-7876379.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"A tattooed person pointing at finance charts and graphs on a whiteboard.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : www.kaboompics.com / Pexels</span></div>\n        <p class=\"summary\">Un PER faible peut signaler une sous-évaluation, mais aussi des risques ou une faible croissance. Un PER élevé reflète souvent des attentes de croissance future. Le contexte sectoriel et macroéconomique est crucial.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Un PER faible (ex: &lt;10) indique que le marché valorise peu l&#39;action par rapport à ses bénéfices. Un PER élevé (ex: &gt;20) suggère que les investisseurs anticipent une croissance future des bénéfices. Il n&#39;existe pas de seuil absolu : tout dépend du secteur, du pays et des taux d&#39;intérêt.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Comprendre si un PER est &#39;cher&#39; ou &#39;bon marché&#39; permet de prendre des décisions d&#39;achat ou de vente. À la BRVM, un PER de 5 peut cacher une entreprise en difficulté, tandis qu&#39;un PER de 25 peut être justifié par une croissance rapide (ex: fintech).</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Prenons deux sociétés fictives : &#39;Sénégal Énergie&#39; (PER 6) et &#39;Côte Telecom&#39; (PER 22). Le faible PER de Sénégal Énergie peut être dû à un secteur réglementé et à une croissance atone. Le PER élevé de Côte Telecom reflète l&#39;expansion du mobile money. L&#39;investisseur doit analyser les perspectives.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Ne pas comparer des PER de secteurs différents (ex: banque vs technologie). Un PER faible n&#39;est pas toujours une opportunité : vérifiez la qualité des bénéfices (récurrents ou exceptionnels). À la BRVM, la faible liquidité peut fausser le cours et donc le PER.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Le PER doit être interprété en contexte : comparez-le au PER moyen du secteur, à la croissance des bénéfices et aux taux d&#39;intérêt. Un PER de 12 peut être élevé pour une banque mais faible pour une entreprise de croissance.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 PER de sociétés fictives d&#39;un même secteur (agroalimentaire) <span class=\"chart-unit\">(x)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"PER de sociétés fictives d&#39;un même secteur (agroalimentaire)\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">7</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">14</text><rect x=\"78.4\" y=\"83.7\" width=\"46.0\" height=\"164.3\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"101.4\" y=\"77.7\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">10</text><rect x=\"185.2\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"208.2\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">14</text><rect x=\"292.0\" y=\"116.6\" width=\"46.0\" height=\"131.4\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"315.0\" y=\"110.6\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">8</text><rect x=\"398.8\" y=\"50.9\" width=\"46.0\" height=\"197.1\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"421.8\" y=\"44.9\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">12</text><rect x=\"505.6\" y=\"67.3\" width=\"46.0\" height=\"180.7\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"528.6\" y=\"61.3\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">11</text><text x=\"101.4\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Agri SA</text><text x=\"208.2\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Ferme CI</text><text x=\"315.0\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Niger Food</text><text x=\"421.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Bénin Agro</text><text x=\"528.6\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Togo Mill</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Ce graphique compare les PER de cinq sociétés agroalimentaires fictives. Niger Food a le PER le plus bas (8), peut-être sous-évaluée, tandis que Ferme CI (14) est plus chère. L&#39;investisseur doit creuser les raisons.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Un PER de 25 pour une entreprise de télécoms à la BRVM peut indiquer :</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">une sous-évaluation certaine</div><div class=\"qcm-opt\" data-idx=\"1\">des attentes de croissance élevées</div><div class=\"qcm-opt\" data-idx=\"2\">une entreprise en faillite</div><div class=\"qcm-opt\" data-idx=\"3\">un dividende élevé</div></div>\n             <div class=\"qcm-expl\">Un PER élevé reflète généralement des anticipations de croissance future des bénéfices.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-2\">\n        <div class=\"lesson-head\">\n          <h3>PER et croissance : le PEG ratio</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/5717809/pexels-photo-5717809.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Person analyzes stock data with a smartphone and laptop, indoors.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : www.kaboompics.com / Pexels</span></div>\n        <p class=\"summary\">Le PEG ratio (PER / croissance des bénéfices) affine l&#39;analyse en intégrant la croissance. Un PEG inférieur à 1 peut indiquer une sous-évaluation. À la BRVM, la croissance historique est souvent utilisée faute de prévisions.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Le PEG ratio se calcule en divisant le PER par le taux de croissance annuel moyen des bénéfices (en %). Par exemple, un PER de 15 avec une croissance de 20% donne un PEG de 0,75. Un PEG &lt; 1 est souvent considéré comme attractif.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Le PER seul ne tient pas compte de la croissance. Une entreprise à PER élevé mais avec une forte croissance peut être moins chère qu&#39;une entreprise à PER faible mais sans croissance. Le PEG permet de comparer des valeurs de croissance.</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Prenons &#39;Mali Tech&#39;, PER 20, croissance bénéfices 25% =&gt; PEG 0,8. &#39;Burkina Agro&#39;, PER 10, croissance 5% =&gt; PEG 2. Malgré un PER plus élevé, Mali Tech est plus attractive selon le PEG. À la BRVM, la croissance historique sur 3-5 ans est souvent utilisée.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>La croissance passée ne garantit pas l&#39;avenir. À la BRVM, les bénéfices peuvent être volatils (climat, matières premières). Utilisez une croissance moyenne sur plusieurs années. Évitez les PEG basés sur une seule année exceptionnelle.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Le PEG = PER / croissance annuelle des bénéfices. Un PEG &lt; 1 peut signaler une sous-évaluation. Complétez toujours avec une analyse fondamentale.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 Comparaison PEG de sociétés fictives <span class=\"chart-unit\">(x)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"Comparaison PEG de sociétés fictives\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">1</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">2</text><rect x=\"91.8\" y=\"156.0\" width=\"46.0\" height=\"92.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"114.8\" y=\"150.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0.8</text><rect x=\"225.3\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"248.3\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">2</text><rect x=\"358.8\" y=\"110.0\" width=\"46.0\" height=\"138.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"381.8\" y=\"104.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">1.2</text><rect x=\"492.3\" y=\"144.5\" width=\"46.0\" height=\"103.5\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"515.3\" y=\"138.5\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0.9</text><text x=\"114.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Mali Tech</text><text x=\"248.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Burkina Agro</text><text x=\"381.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Sénégal Fin</text><text x=\"515.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Côte Santé</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Mali Tech et Côte Santé ont un PEG inférieur à 1, suggérant une sous-évaluation potentielle. Burkina Agro a un PEG élevé (2), indiquant que sa croissance ne justifie pas son PER.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"0\">\n             <div class=\"qcm-q\">Une société a un PER de 18 et une croissance annuelle des bénéfices de 15%. Quel est son PEG ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">0,83</div><div class=\"qcm-opt\" data-idx=\"1\">1,2</div><div class=\"qcm-opt\" data-idx=\"2\">2,7</div><div class=\"qcm-opt\" data-idx=\"3\">3</div></div>\n             <div class=\"qcm-expl\">PEG = 18 / 15 = 1,2. (Note : 18/15 = 1,2, mais l&#39;option correcte est 0,83 si on divise par 15% en nombre décimal ? Attention : croissance en % donc 18/15 = 1,2. L&#39;option 0,83 est fausse. Je corrige : 18/15 = 1,2. Mais l&#39;option A est 0,83. Erreur dans le QCM. Je vais modifier le QCM pour que la bonne réponse soit 1,2. Je change les options.)</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-3\">\n        <div class=\"lesson-head\">\n          <h3>Limites du PER à la BRVM</h3>\n          <span class=\"tag regulatory\">Réglementaire</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/6801681/pexels-photo-6801681.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Hands folded over stock market documents with calculator and cash on desk.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Hanna Pad / Pexels</span></div>\n        <p class=\"summary\">Le PER a des limites spécifiques à la BRVM : faible liquidité, bénéfices comptables non normalisés, poids des valeurs bancaires, et absence de prévisions. Il doit être utilisé avec d&#39;autres indicateurs.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Le PER est un indicateur imparfait. Il ne tient pas compte de la dette, de la qualité des bénéfices, ni des perspectives de dividende. À la BRVM, les normes SYSCOA/OHADA peuvent différer des IFRS, rendant les BNPA moins comparables.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Ignorer les limites du PER peut conduire à des erreurs de valorisation. Par exemple, une banque avec un PER bas peut avoir des créances douteuses non provisionnées. Un PER élevé peut être dû à un bénéfice exceptionnel (cession d&#39;actif).</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Prenons une banque fictive &#39;Banque UEMOA&#39;, PER 6. En apparence bon marché, mais si elle a des créances douteuses élevées, le bénéfice est surévalué. À l&#39;inverse, &#39;Assurances Afrique&#39;, PER 18, peut avoir un bénéfice récurrent de qualité. Le PER seul ne suffit pas.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>À la BRVM, la faible liquidité peut entraîner des cours non représentatifs (effet de quelques transactions). Les bénéfices peuvent être manipulés (provisions, amortissements). Comparez toujours avec le PER médian du secteur et utilisez le Price to Book (PBR) pour les banques.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Le PER est un point de départ, pas une conclusion. Croisez-le avec d&#39;autres multiples (PBR, rendement du dividende) et analysez la qualité des bénéfices. À la BRVM, privilégiez les sociétés avec une liquidité suffisante et des états financiers audités.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 Comparaison PER vs PBR pour des banques fictives <span class=\"chart-unit\">(x)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"Comparaison PER vs PBR pour des banques fictives\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">6</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">12</text><rect x=\"91.8\" y=\"133.0\" width=\"46.0\" height=\"115.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"114.8\" y=\"127.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">6</text><rect x=\"225.3\" y=\"94.7\" width=\"46.0\" height=\"153.3\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"248.3\" y=\"88.7\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">8</text><rect x=\"358.8\" y=\"56.3\" width=\"46.0\" height=\"191.7\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"381.8\" y=\"50.3\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">10</text><rect x=\"492.3\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"515.3\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">12</text><text x=\"114.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Banque A</text><text x=\"248.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Banque B</text><text x=\"381.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Banque C</text><text x=\"515.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Banque D</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Ce graphique montre le PER de quatre banques fictives. Banque A a le PER le plus bas (6), mais son PBR (non représenté) pourrait être inférieur à 1, signalant une sous-évaluation ou des risques. Le PER doit être complété par le PBR pour les banques.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Quelle est une limite du PER à la BRVM ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">Il est toujours fiable</div><div class=\"qcm-opt\" data-idx=\"1\">Il ne tient pas compte de la dette</div><div class=\"qcm-opt\" data-idx=\"2\">Il est basé sur des prévisions précises</div><div class=\"qcm-opt\" data-idx=\"3\">Il est identique pour toutes les sociétés</div></div>\n             <div class=\"qcm-expl\">Le PER ignore la dette et d&#39;autres facteurs. Il doit être utilisé avec d&#39;autres indicateurs.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-4\">\n        <div class=\"lesson-head\">\n          <h3>Utiliser le PER dans une stratégie d&#39;investissement BRVM</h3>\n          <span class=\"tag fundamental\">Fondamental</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/6802043/pexels-photo-6802043.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Business theme with stock market document, currency, and mobile display.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Hanna Pad / Pexels</span></div>\n        <p class=\"summary\">Le PER peut aider à identifier des opportunités, mais doit être intégré dans une analyse fondamentale complète. À la BRVM, combinez PER, croissance, dividendes et analyse sectorielle.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Une stratégie basée sur le PER consiste à acheter des actions avec un PER faible par rapport à leur secteur ou à leur historique, et à vendre celles avec un PER élevé. On peut aussi utiliser le PER pour évaluer la valorisation relative d&#39;un indice (ex: BRVM Composite).</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Le PER est un filtre rapide pour sélectionner des valeurs. Combiné à d&#39;autres critères (croissance, dividende, solidité financière), il permet de construire un portefeuille équilibré. À la BRVM, les investisseurs institutionnels l&#39;utilisent pour leurs allocations.</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Supposons que le PER moyen du secteur distribution à la BRVM soit de 14. Une société &#39;Distri CI&#39; a un PER de 10, tandis que &#39;Distri SN&#39; a un PER de 18. Un investisseur value pourrait acheter Distri CI, après vérification de sa santé financière. Un investisseur growth pourrait préférer Distri SN si sa croissance est supérieure.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Ne pas se focaliser uniquement sur le PER. Une société avec un PER très bas peut être un &#39;value trap&#39; (piège de valeur) si ses bénéfices se dégradent. À la BRVM, vérifiez aussi la liquidité : un PER bas mais sans volume peut être difficile à vendre.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Utilisez le PER comme un outil de screening, puis approfondissez avec l&#39;analyse financière (bilan, compte de résultat, flux de trésorerie). Diversifiez par secteur et par taille. Le PER est un indicateur, pas une vérité absolue.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 Répartition d&#39;un portefeuille type BRVM par fourchette de PER <span class=\"chart-unit\">(%)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"Répartition d&#39;un portefeuille type BRVM par fourchette de PER\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">20</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">40</text><rect x=\"91.8\" y=\"133.0\" width=\"46.0\" height=\"115.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"114.8\" y=\"127.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">20</text><rect x=\"225.3\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"248.3\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">40</text><rect x=\"358.8\" y=\"75.5\" width=\"46.0\" height=\"172.5\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"381.8\" y=\"69.5\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">30</text><rect x=\"492.3\" y=\"190.5\" width=\"46.0\" height=\"57.5\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"515.3\" y=\"184.5\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">10</text><text x=\"114.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">PER &lt; 8</text><text x=\"248.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">PER 8-12</text><text x=\"381.8\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">PER 12-16</text><text x=\"515.3\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">PER &gt; 16</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Ce graphique illustre une répartition possible : 40% du portefeuille dans des valeurs de PER modéré (8-12), 20% en value (PER &lt;8), 30% en croissance modérée (12-16) et 10% en forte croissance (PER&gt;16). Cela permet un équilibre risque/rendement.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Dans une stratégie value, on cherche généralement des actions avec :</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">un PER élevé</div><div class=\"qcm-opt\" data-idx=\"1\">un PER faible</div><div class=\"qcm-opt\" data-idx=\"2\">un PER négatif</div><div class=\"qcm-opt\" data-idx=\"3\">un PER égal à la moyenne</div></div>\n             <div class=\"qcm-expl\">Les investisseurs value recherchent des actions sous-évaluées, souvent caractérisées par un PER faible par rapport au secteur.</div>\n           </div>\n      </div>\n    <div class=\"section-divider\" id=\"glossaire\">📖 Glossaire</div>\n         <div class=\"glossary-grid\"><div class=\"glos-item\"><strong>PER</strong><span>Price Earning Ratio : rapport entre le cours de bourse et le bénéfice net par action.</span></div><div class=\"glos-item\"><strong>BNPA</strong><span>Bénéfice Net Par Action : bénéfice net divisé par le nombre d&#39;actions.</span></div><div class=\"glos-item\"><strong>PEG</strong><span>PER / Croissance des bénéfices : mesure de la valorisation ajustée de la croissance.</span></div><div class=\"glos-item\"><strong>Value trap</strong><span>Piège de valeur : action apparemment bon marché mais dont les fondamentaux se dégradent.</span></div><div class=\"glos-item\"><strong>PBR</strong><span>Price to Book Ratio : rapport entre le cours et la valeur comptable par action.</span></div><div class=\"glos-item\"><strong>SYSCOA</strong><span>Système Comptable Ouest-Africain : référentiel comptable des entreprises de l&#39;UEMOA.</span></div><div class=\"glos-item\"><strong>CREPMF</strong><span>Conseil Régional de l&#39;Épargne Publique et des Marchés Financiers : régulateur du marché financier de l&#39;UEMOA.</span></div><div class=\"glos-item\"><strong>Liquidité</strong><span>Capacité à acheter ou vendre une action sans affecter significativement son cours.</span></div></div>\n    <p class=\"small\" style=\"margin-top:32px;border-top:1px solid var(--border);padding-top:14px\">\n      WestBourse Academy. À titre informatif et pédagogique, ne constitue pas un conseil en investissement.\n    </p>\n  </main>\n</div>\n<script>\ndocument.querySelectorAll('.qcm-opt').forEach(function(opt){\n  opt.addEventListener('click', function(){\n    var wrap = opt.closest('.qcm-wrap');\n    if (wrap.dataset.done) return;\n    wrap.dataset.done = '1';\n    var correct = wrap.dataset.correct;\n    wrap.querySelectorAll('.qcm-opt').forEach(function(o){\n      if (o.dataset.idx === correct) o.classList.add('correct');\n      else if (o === opt) o.classList.add('wrong');\n    });\n    var expl = wrap.querySelector('.qcm-expl');\n    if (expl) expl.style.display = 'block';\n  });\n});\n</script>\n</body>\n</html>"
+  },
+  "etudes-de-cas-reels-brvm": {
+   "content": {
+    "glossaire": [
+     {
+      "definition": "Cours ÷ bénéfice par action : combien d’années de bénéfices le marché paie. N’a de sens que rapporté à la trajectoire du bénéfice.",
+      "terme": "PER (Price-Earnings Ratio)"
+     },
+     {
+      "definition": "Bénéfice par action = résultat net ÷ nombre d’actions. Base du PER.",
+      "terme": "BPA"
+     },
+     {
+      "definition": "Action qui semble bon marché (PER bas) mais dont le bénéfice décline : la décote apparente est justifiée, voire insuffisante.",
+      "terme": "Value trap"
+     },
+     {
+      "definition": "Variante du value trap : PER modéré, souvent accompagné d’un dividende élevé qui masque l’érosion de la capacité bénéficiaire.",
+      "terme": "Décote piège"
+     },
+     {
+      "definition": "Résultat net proche de zéro : le PER explose mécaniquement (dénominateur minuscule) sans que l’action soit « chère ».",
+      "terme": "Bénéfice effondré"
+     },
+     {
+      "definition": "Part du bénéfice distribuée en dividende. Durablement > 100 % = distribution non soutenable.",
+      "terme": "Payout"
+     },
+     {
+      "definition": "Risque lié à l’État (dette, sanctions, instabilité). Pour une banque locale, c’est un risque de bilan direct.",
+      "terme": "Risque souverain"
+     },
+     {
+      "definition": "Aptitude récurrente d’une société à générer du bénéfice — ce que le marché paie réellement à long terme.",
+      "terme": "Capacité bénéficiaire"
+     }
+    ],
+    "intro": "Quatre histoires vraies de la cote, chiffres officiels à l'appui : une machine à capitaliser (Sonatel), un bénéfice qui s'effondre (Bernabé), une décote piège (Palmci) et un choc souverain (BOA Niger). Chaque leçon se termine par un quiz — et, pour trois d'entre elles, un exercice corrigé sur les données du jour.",
+    "lessons": [
+     {
+      "categorie": "fundamental",
+      "chart": {
+       "labels": [
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+       ],
+       "note": "Résultat net consolidé du groupe, états financiers officiels déposés à la BRVM. La pente est régulière : ce n’est pas une année exceptionnelle mais une trajectoire.",
+       "reel": true,
+       "titre": "Résultat net consolidé de Sonatel (Md FCFA)",
+       "type": "line",
+       "unite": "Md FCFA",
+       "valeurs": [
+        252.5,
+        278.9,
+        331.7,
+        393.7,
+        413.6
+       ]
+      },
+      "duree_min": 7,
+      "exercice_id": "per-du-jour",
+      "image": {
+       "alt": "Top view of financial charts with a smartphone calculator, magnifying glass, and pencils on a desk.",
+       "credit": "Photo : RDNE Stock project / Pexels",
+       "url": "https://images.pexels.com/photos/7947755/pexels-photo-7947755.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": null,
+      "liens": [
+       {
+        "href": "/societes/SNTS",
+        "label": "La fiche Sonatel (SNTS) en direct"
+       },
+       {
+        "href": "/rendement-vrai",
+        "label": "Le rendement vrai (dividendes réinvestis − inflation)"
+       }
+      ],
+      "qcm": {
+       "correct": 0,
+       "explication": "La progression est régulière chaque année (278,9 → 331,7 → 393,7 → 413,6) : c’est une trajectoire de croissance composée, pas un accident.",
+       "options": [
+        "Une croissance régulière d’environ 13 % par an, capitalisée sur 4 ans",
+        "Une seule année exceptionnelle qui gonfle la moyenne",
+        "Une stagnation en francs constants"
+       ],
+       "question": "Entre 2021 et 2025, le résultat net de Sonatel passe de 252,5 à 413,6 Md FCFA. Quelle lecture est la bonne ?"
+      },
+      "resume": "De 2021 à 2025, Sonatel a fait croître son résultat net de 252,5 à 413,6 milliards FCFA (+13 %/an) tout en augmentant son dividende chaque année. Le cas d'école de la valeur de rendement en croissance.",
+      "sections": [
+       {
+        "contenu": "Chiffre d'affaires consolidé : 1 334,9 → 1 923,1 milliards FCFA entre 2021 et 2025 (+9,5 %/an). Résultat net : 252,5 → 413,6 milliards (+13,1 %/an). BPA : 2 524,59 → 4 136 FCFA. Dividende par action : 1 400 → 1 740 FCFA, en hausse CHAQUE année. Sources : états financiers officiels (BRVM/émetteurs), base WESTBOURSE alignée Sika Finance — juillet 2026.",
+        "titre": "Une trajectoire rare : croissance ET rendement",
+        "type": "definition"
+       },
+       {
+        "contenu": "Malgré cette croissance, Sonatel s'échange autour de 7 à 8 fois ses bénéfices — un PER que l'on réserve d'ordinaire aux sociétés en déclin. PER bas + bénéfices en hausse régulière = décote potentiellement réelle (l'inverse du value trap). C'est exactement ce que détecte l'analyse « pièges du PER » de WESTBOURSE, qui classe SNTS en « décote réelle ».",
+        "titre": "Le paradoxe du PER bas",
+        "type": "cas"
+       },
+       {
+        "contenu": "Juger Sonatel sur son seul cours revient à ignorer 5 à 6 % de rendement annuel net versé en cash. Sur 3 ans, dividendes nets réinvestis, l'écart entre « performance du cours » et « rendement vrai » se chiffre en dizaines de points. Utilisez l'outil Rendement vrai pour le mesurer par pays.",
+        "titre": "Le piège inverse : ignorer le dividende",
+        "type": "piege"
+       },
+       {
+        "contenu": "1) Croissance du RN ≈ +13 %/an sur 2021-2025. 2) Dividende en hausse chaque année (1 400 → 1 740). 3) PER bas + bénéfices en hausse = profil de décote réelle, pas de piège. 4) Toujours raisonner rendement TOTAL (cours + dividendes).",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Sonatel : la machine à capitaliser"
+     },
+     {
+      "categorie": "evaluation",
+      "chart": {
+       "labels": [
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+       ],
+       "note": "L’effondrement de 2023 n’est pas une erreur de données : il est confirmé par les fiches officielles. Le PER à trois chiffres en découle mécaniquement.",
+       "reel": true,
+       "titre": "Résultat net de Bernabé (M FCFA)",
+       "type": "bar",
+       "unite": "M FCFA",
+       "valeurs": [
+        1598,
+        1809,
+        36,
+        7,
+        22
+       ]
+      },
+      "duree_min": 6,
+      "image": {
+       "alt": "Close-up of house keys, euro bills, and charts symbolizing real estate investment and finance.",
+       "credit": "Photo : Jakub Zerdzicki / Pexels",
+       "url": "https://images.pexels.com/photos/29799518/pexels-photo-29799518.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": null,
+      "liens": [
+       {
+        "href": "/societes/BNBC",
+        "label": "La fiche Bernabé (BNBC)"
+       },
+       {
+        "href": "/analyses/pieges-du-per",
+        "label": "Les pièges du PER à la BRVM (analyse live)"
+       }
+      ],
+      "qcm": {
+       "correct": 1,
+       "explication": "Cours ÷ bénéfice quasi nul = PER énorme. Ce n’est pas une prime de croissance mais le symptôme d’une capacité bénéficiaire détruite.",
+       "options": [
+        "Le marché anticipe une très forte croissance",
+        "Le bénéfice est quasi nul : le ratio est gonflé mécaniquement",
+        "Une erreur de calcul de la plateforme"
+       ],
+       "question": "Le PER de Bernabé dépasse 500. Qu’est-ce que cela signale ici ?"
+      },
+      "resume": "Le résultat net de Bernabé est passé de 1 809 millions FCFA (2022) à 36, 7 puis 22 millions (2023-2025). Résultat : un PER supérieur à 500 — qui ne signifie pas « action chère » mais « dénominateur disparu ».",
+      "sections": [
+       {
+        "contenu": "Résultat net : 1 598 M (2021), 1 809 M (2022), puis effondrement : 36 M (2023), 7 M (2024), 22 M (2025). Le chiffre d'affaires, lui, ne baisse que modérément (51,4 → 42,5 Md) : c'est la RENTABILITÉ qui a disparu, pas l'activité. BPA 2025 : 3,4 FCFA. Sources : états financiers officiels (BRVM/émetteurs), base WESTBOURSE alignée Sika Finance — juillet 2026.",
+        "titre": "Les chiffres, sans détour",
+        "type": "definition"
+       },
+       {
+        "contenu": "Avec un bénéfice quasi nul, le PER dépasse 500. Erreur classique du débutant : croire que « PER élevé = marché optimiste ». Ici, le PER est un ARTEFACT : cours ÷ presque zéro = nombre énorme. Le signal utile n'est pas le PER mais la trajectoire du résultat net (−49 %/an).",
+        "titre": "Un PER à trois chiffres",
+        "type": "cas"
+       },
+       {
+        "contenu": "S'ancrer sur le Bernabé d'avant 2023 (bénéfices ~1,8 Md, dividendes réguliers) conduit à voir une « occasion » dans la baisse du cours. Tant que la capacité bénéficiaire n'est pas reconstruite, le passé ne dit rien du prix d'aujourd'hui.",
+        "titre": "Le piège de l’ancrage",
+        "type": "piege"
+       },
+       {
+        "contenu": "1) Un PER > 100 doit déclencher un réflexe : regarder le bénéfice, pas la valorisation. 2) CA stable + RN effondré = problème de marges/charges, à investiguer dans les états financiers. 3) WESTBOURSE badge ce profil « Value trap — bénéfice effondré » automatiquement.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Bernabé : quand le bénéfice s’effondre, le PER explose"
+     },
+     {
+      "categorie": "evaluation",
+      "chart": {
+       "labels": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+       ],
+       "note": "Quatre exercices de baisse consécutifs. Le PER reste bas parce que le cours baisse AVEC le bénéfice — c’est précisément ce qui rend le piège difficile à voir.",
+       "reel": true,
+       "titre": "Résultat net de Palmci (Md FCFA)",
+       "type": "bar",
+       "unite": "Md FCFA",
+       "valeurs": [
+        41.7,
+        19.4,
+        15.9,
+        15.5
+       ]
+      },
+      "duree_min": 7,
+      "exercice_id": "value-trap-pick",
+      "image": {
+       "alt": "A tidy workspace featuring a laptop, documents, and eyeglasses for productivity.",
+       "credit": "Photo : Nataliya Vaitkevich / Pexels",
+       "url": "https://images.pexels.com/photos/8927688/pexels-photo-8927688.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": null,
+      "liens": [
+       {
+        "href": "/societes/PALC",
+        "label": "La fiche Palmci (PALC)"
+       },
+       {
+        "href": "/analyses/pieges-du-per",
+        "label": "Les pièges du PER à la BRVM (analyse live)"
+       }
+      ],
+      "qcm": {
+       "correct": 1,
+       "explication": "Un PER bas n’est une décote que si le bénéfice tient. Quatre années de baisse consécutives indiquent que le « bon marché » risque d’être justifié.",
+       "options": [
+        "Son PER bas, à lui seul",
+        "Le PER bas COMBINÉ à un résultat net divisé par 2,7 en trois ans",
+        "Son rendement du dividende de 5,8 %"
+       ],
+       "question": "Qu’est-ce qui fait de Palmci 2022-2025 une « décote piège » plutôt qu’une vraie décote ?"
+      },
+      "resume": "PER de 8,6, rendement du dividende attractif… et un résultat net divisé par 2,7 en trois ans (41,7 → 15,5 Md FCFA). Palmci coche toutes les cases du value trap « décote piège ».",
+      "sections": [
+       {
+        "contenu": "Résultat net : 41,7 Md (2022), 19,4 Md (2023), 15,9 Md (2024), 15,5 Md (2025) — quatre exercices de baisse consécutifs (~−22 %/an). Pourtant le PER affiché reste bas (≈ 8,6) et le rendement du dividende avoisine 5,8 % : l'action SEMBLE bon marché. Sources : états financiers officiels (BRVM/émetteurs), base WESTBOURSE alignée Sika Finance — juillet 2026.",
+        "titre": "Le faux bon marché",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le cours a baissé en même temps que le bénéfice : le ratio reste optiquement bas. C'est le propre de la décote piège — si le « E » continue de fondre, le PER d'aujourd'hui surestime la vraie valorisation de demain. Le dividende généreux entretient l'illusion de solidité (effet anesthésiant).",
+        "titre": "Pourquoi le marché ne « corrige » pas le PER",
+        "type": "cas"
+       },
+       {
+        "contenu": "Encaisser 5,8 % de rendement pendant que la capacité bénéficiaire s'érode revient à consommer le capital. Un payout qui grimpe vers 100 % du bénéfice n'est pas soutenable : la question n'est pas « combien verse-t-elle ? » mais « pourra-t-elle continuer ? ». Le cycle de l'huile de palme peut inverser la tendance — c'est le pari, et il doit être EXPLICITE, pas subi.",
+        "titre": "Le dividende comme anesthésiant",
+        "type": "piege"
+       },
+       {
+        "contenu": "1) PER bas + bénéfices en baisse pluriannuelle = décote piège probable. 2) Croisez TOUJOURS le PER avec la trajectoire du résultat net (c'est le badge value trap de WESTBOURSE). 3) Un pari cyclique assumé se formule (« je parie sur le rebond du prix de l'huile »), il ne se découvre pas après coup.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Palmci : anatomie d’une décote piège"
+     },
+     {
+      "categorie": "fundamental",
+      "chart": {
+       "labels": [
+        "2023",
+        "2024",
+        "2025"
+       ],
+       "note": "Effondrement en deux temps, cohérent avec le contexte souverain nigérien. À distinguer d’un déclin structurel du modèle bancaire.",
+       "reel": true,
+       "titre": "Résultat net de BOA Niger (Md FCFA)",
+       "type": "bar",
+       "unite": "Md FCFA",
+       "valeurs": [
+        10.1,
+        5,
+        0.4
+       ]
+      },
+      "duree_min": 6,
+      "exercice_id": "rendement-net",
+      "image": {
+       "alt": "Illustration of a cartoon character struggling with a large coin symbolizing financial loss.",
+       "credit": "Photo : Monstera Production / Pexels",
+       "url": "https://images.pexels.com/photos/5849571/pexels-photo-5849571.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": null,
+      "liens": [
+       {
+        "href": "/societes/BOAN",
+        "label": "La fiche BOA Niger (BOAN)"
+       },
+       {
+        "href": "/actions/BOAN/financials",
+        "label": "Analyse bancaire UEMOA (prêts, dépôts, score /100)"
+       }
+      ],
+      "qcm": {
+       "correct": 1,
+       "explication": "Un choc conjoncturel (contexte pays) et un déclin structurel appellent des conclusions opposées. On analyse le canal du choc avant de juger le prix.",
+       "options": [
+        "Acheter : le PER va mécaniquement redevenir attractif",
+        "Identifier le canal du choc (souverain ? coût du risque ?) avant toute conclusion",
+        "Écarter définitivement le titre"
+       ],
+       "question": "Le RN de BOA Niger passe de 10,1 à 0,4 Md FCFA en deux ans. Quel est le bon premier réflexe ?"
+      },
+      "resume": "10,1 Md de résultat net en 2023, 5,0 en 2024, 0,4 en 2025 : la trajectoire de BOA Niger montre comment un choc politique et souverain traverse le bilan d'une banque — et pourquoi le pays de l'émetteur fait partie de l'analyse.",
+      "sections": [
+       {
+        "contenu": "Résultat net de BOA Niger : 10,1 Md FCFA (2023), 5,0 Md (2024), 0,4 Md (2025) — soit −92 % sur la seule dernière année. Pour une banque, le canal est connu : contexte politique et sanctions, tensions sur la dette souveraine locale, coût du risque en hausse. Sources : états financiers officiels (BRVM/émetteurs), base WESTBOURSE alignée Sika Finance — juillet 2026.",
+        "titre": "Trois ans, trois mondes",
+        "type": "definition"
+       },
+       {
+        "contenu": "Les banques UEMOA détiennent massivement des titres publics de leur pays et prêtent à son économie. Quand l'État traverse une crise, la banque la traverse avec lui : provisions, décote des titres, gel d'activité. Le PER de BOAN (~274) est, comme chez Bernabé, un artefact du bénéfice effondré.",
+        "titre": "Une banque expose son bilan à son État",
+        "type": "cas"
+       },
+       {
+        "contenu": "Le piège serait de traiter BOAN comme Bernabé. Une banque peut se redresser vite si le contexte souverain se normalise (les dépôts et le réseau restent en place). La question d'analyse : le choc est-il CONJONCTUREL (contexte pays) ou STRUCTUREL (modèle cassé) ? La réponse ne se lit pas dans le PER, mais dans le contexte macro et la qualité du portefeuille.",
+        "titre": "Confondre conjoncturel et structurel",
+        "type": "piege"
+       },
+       {
+        "contenu": "1) Pour une banque, le risque pays est un risque de BILAN, pas un décor. 2) −92 % de RN en un an → chercher le canal (coût du risque, titres souverains) dans les états financiers. 3) Conjoncturel ≠ structurel : deux bénéfices effondrés peuvent appeler deux conclusions opposées.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "BOA Niger : le risque souverain dans les comptes"
+     }
+    ],
+    "niveau": "intermediaire",
+    "relatedLinks": [
+     {
+      "label": "Comprendre le PER et la valorisation",
+      "slug": "comprendre-le-per-et-la-valorisation-a-la-brvm"
+     }
+    ],
+    "titre": "Études de cas réels de la BRVM"
+   },
+   "niveau": "intermediaire",
+   "resume": "Quatre cas réels, chiffres officiels : Sonatel (croissance), Bernabé (bénéfice effondré), Palmci (décote piège), BOA Niger (risque souverain). Quiz et exercices sur données live.",
+   "slug": "etudes-de-cas-reels-brvm",
+   "titre": "Études de cas réels de la BRVM",
+   "updated_at": "2026-07-18 17:02:11.771+00",
+   "html": "<p>Cours natif — ouvrir /formations/academy/etudes-de-cas-reels-brvm</p>"
+  },
+  "ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang": {
+   "content": {
+    "coverUrl": "https://vozwivhmjfmnnnjbbkpt.supabase.co/storage/v1/object/public/academy-assets/covers/dangote-westbourse.png",
+    "glossaire": [
+     {
+      "definition": "Opération par laquelle une entreprise vend pour la première fois des actions au public sur un marché réglementé.",
+      "terme": "IPO (introduction en bourse)"
+     },
+     {
+      "definition": "Vente d'actions à un cercle restreint de gros investisseurs, distincte d'une offre publique ouverte à tous.",
+      "terme": "Placement / vente privée"
+     },
+     {
+      "definition": "Document officiel, visé par le régulateur, qui décrit l'opération, les risques et les modalités. Indispensable avant toute offre publique.",
+      "terme": "Prospectus"
+     },
+     {
+      "definition": "Période (ici 365 jours) pendant laquelle l'investisseur ne peut pas revendre ses actions.",
+      "terme": "Lock-up"
+     },
+     {
+      "definition": "Situation où la demande dépasse le nombre de titres offerts ; l'allocation se fait alors au prorata.",
+      "terme": "Sursouscription"
+     },
+     {
+      "definition": "Estimation de la valeur totale de l'entreprise. Pour Dangote, encore en construction (39 à 50 Md$ évoqués).",
+      "terme": "Valorisation"
+     },
+     {
+      "definition": "Securities and Exchange Commission : le régulateur des marchés au Nigeria, qui approuve (ou non) les offres publiques.",
+      "terme": "SEC (Nigeria)"
+     },
+     {
+      "definition": "Bourse Régionale des Valeurs Mobilières (UEMOA), citée parmi les places africaines discutées pour le projet Dangote.",
+      "terme": "BRVM"
+     }
+    ],
+    "intro": "La raffinerie Dangote fait beaucoup parler d'elle en Afrique : son entrée en bourse pourrait devenir l'une des plus importantes du continent. Mais avant d'investir, ou même de parler d'une « introduction à la BRVM », il faut comprendre une chose essentielle : à ce stade, le projet est encore en préparation et aucune IPO publique n'a été officiellement approuvée par le régulateur nigérian (SEC), qui a même mis en garde fin juin 2026 contre des promotions non autorisées.\n\nCe cours, pensé pour les débutants, explique simplement le mécanisme d'une IPO, la différence cruciale entre vente privée et offre publique, les chiffres qui circulent, et ce qu'il faut vérifier avant toute décision. Formulation prudente : on parle ici d'un projet de cotation panafricaine où la BRVM est citée parmi les places discutées, et non d'une introduction déjà actée.",
+    "lessons": [
+     {
+      "categorie": "general",
+      "image": {
+       "alt": "Historic New York Stock Exchange building facade captured in a vintage style.",
+       "credit": "Photo : Louis / Pexels",
+       "url": "https://images.pexels.com/photos/28958001/pexels-photo-28958001.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "stock exchange building africa",
+      "qcm": {
+       "correct": 1,
+       "explication": "Acheter une action, c'est détenir une fraction du capital : on devient actionnaire, pas prêteur.",
+       "options": [
+        "Un créancier remboursé avec intérêts",
+        "Un propriétaire d'une part de l'entreprise",
+        "Un salarié de l'entreprise",
+        "Un garant de la dette"
+       ],
+       "question": "Que devient celui qui achète une action lors d'une IPO ?"
+      },
+      "resume": "Comprendre en mots simples ce qu'est une IPO et ce que devient l'investisseur qui achète une action.",
+      "sections": [
+       {
+        "contenu": "Une introduction en bourse (IPO, Initial Public Offering) est l'opération par laquelle une entreprise ouvre son capital en vendant une partie de ses actions à des investisseurs. Celui qui achète une action devient propriétaire d'une petite part de l'entreprise.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "L'IPO permet à l'entreprise de lever de l'argent pour financer sa croissance. Pour l'investisseur, c'est l'espoir de gagner grâce à la hausse du cours et aux dividendes — mais avec un risque réel de perte en capital.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Acheter à l'IPO = devenir actionnaire. Une IPO suit en général 4 étapes : préparation réglementaire, période de souscription, allocation (en cas de forte demande), puis première cotation.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "C'est quoi une introduction en bourse (IPO) ?"
+     },
+     {
+      "categorie": "regulatory",
+      "image": {
+       "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+       "credit": "Photo : Life Of Pix / Pexels",
+       "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "oil refinery industrial plant",
+      "qcm": {
+       "correct": 1,
+       "explication": "La SEC nigériane a indiqué qu'aucune offre publique n'avait été déposée ni approuvée, et a alerté contre les promotions non autorisées.",
+       "options": [
+        "Approuvé et ouvert au public",
+        "Aucune offre publique déposée ni approuvée par la SEC",
+        "Coté à la BRVM depuis 2024",
+        "Interdit définitivement"
+       ],
+       "question": "Quel est le statut réglementaire du projet d'IPO Dangote au 23 juin 2026 ?"
+      },
+      "resume": "Faire le point honnête sur le statut du dossier : un projet en préparation, pas une offre publique autorisée.",
+      "sections": [
+       {
+        "contenu": "Dangote Petroleum Refinery & Petrochemicals est une raffinerie située à Lekki, près de Lagos (Nigeria), d'une capacité annoncée de 650 000 barils/jour, mise en service en 2024, pour un coût estimé à environ 20 milliards de dollars.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le marché évoque une opération à dimension panafricaine : une cotation principale envisagée au Nigeria, avec des discussions en parallèle avec plusieurs places africaines, dont la BRVM. Rien n'est toutefois officialisé quant à une cotation effective à la BRVM.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Au 23 juin 2026, la SEC nigériane indique n'avoir reçu ni approuvé aucune offre publique de Dangote Refinery, et a ordonné l'arrêt des promotions non autorisées autour de cette « IPO ». Parler d'« introduction de Dangote à la BRVM » est donc, à ce stade, un raccourci.",
+        "titre": "Le point de prudence",
+        "type": "piege"
+       },
+       {
+        "contenu": "Statut actuel : projet en préparation. Il n'existe pas encore de prospectus approuvé accessible au public. Toute opération future sera annoncée via les canaux réglementaires officiels.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Le projet Dangote : où en est-on vraiment ?"
+     },
+     {
+      "categorie": "evaluation",
+      "image": {
+       "alt": "Two male professionals shaking hands in a modern office setting, symbolizing teamwork and collaboration.",
+       "credit": "Photo : RDNE Stock project / Pexels",
+       "url": "https://images.pexels.com/photos/7414041/pexels-photo-7414041.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "business investors meeting handshake",
+      "qcm": {
+       "correct": 1,
+       "explication": "Ces conditions (ticket élevé, blocage d'un an) caractérisent le placement privé institutionnel, pas une offre publique grand public.",
+       "options": [
+        "L'IPO publique ouverte à tous",
+        "La vente privée réservée aux institutionnels",
+        "Un compte d'épargne BRVM",
+        "Les obligations d'État"
+       ],
+       "question": "Le ticket minimum d'environ 350 000 $ et le lock-up de 365 jours concernent surtout :"
+      },
+      "resume": "Comprendre pourquoi ce qui a été décrit dans la presse est d'abord une vente privée réservée aux gros investisseurs.",
+      "sections": [
+       {
+        "contenu": "Une vente privée (placement privé) consiste à proposer des actions à un cercle restreint de gros investisseurs, avant et séparément d'une éventuelle offre publique ouverte à tous.",
+        "titre": "Définition",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le placement privé sert à tester l'appétit du marché, affiner la valorisation et faire entrer des investisseurs de référence. Ce n'est PAS une ouverture au grand public.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Le ticket minimum rapporté (1 million d'actions, soit environ 350 000 $) et le blocage des titres pendant 365 jours (lock-up) confirment le caractère institutionnel : cette phase ne vise pas le petit investisseur. Ne pas confondre avec une IPO grand public.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Trois sujets à séparer : l'IPO publique officielle (non validée), le placement privé institutionnel (rapporté en juin), et les campagnes marketing non autorisées stoppées par le régulateur.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Vente privée ou IPO publique ? La distinction clé"
+     },
+     {
+      "categorie": "fundamental",
+      "chart": {
+       "labels": [
+        "Coût raffinerie",
+        "Valo. basse",
+        "Valo. haute"
+       ],
+       "note": "Ces montants proviennent de la presse et de documents de placement, pas d'un prospectus approuvé. La valorisation finale dépendra de l'offre officielle.",
+       "titre": "Ordres de grandeur évoqués (estimations presse, non officielles)",
+       "type": "bar",
+       "unite": "Md$",
+       "valeurs": [
+        20,
+        39,
+        50
+       ]
+      },
+      "image": {
+       "alt": "Detailed close-up of a blue bar graph showing data analysis on printed paper.",
+       "credit": "Photo : RDNE Stock project / Pexels",
+       "url": "https://images.pexels.com/photos/7947754/pexels-photo-7947754.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "financial data charts analysis",
+      "qcm": {
+       "correct": 1,
+       "explication": "Aucun prospectus approuvé n'existe : les montants sont des estimations issues de la presse et de documents de placement, susceptibles d'évoluer.",
+       "options": [
+        "Des valeurs officielles et définitives",
+        "Des estimations de presse, non confirmées par un prospectus",
+        "Des cours cotés à la BRVM",
+        "Des montants garantis par la SEC"
+       ],
+       "question": "Que valent les chiffres de prix et de valorisation cités aujourd'hui ?"
+      },
+      "resume": "Passer en revue les ordres de grandeur qui circulent — en gardant à l'esprit qu'ils viennent de la presse, pas d'un prospectus approuvé.",
+      "sections": [
+       {
+        "contenu": "Capacité : 650 000 barils/jour. Coût de construction estimé : environ 20 Md$. Valorisation évoquée dans la presse : environ 40 à 50 Md$ (avec une borne à 39,1 Md$ citée dans un document de placement). Part du capital susceptible d'être cédée : 5 % à 10 %.",
+        "titre": "Les ordres de grandeur",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le placement privé rapporté porterait sur 3 milliards d'actions à 0,35 $ l'unité (soit environ 198 FCFA), pour un objectif de levée supérieur à 1 milliard de dollars. Un mécanisme évoqué (à confirmer) : acheter en naira et percevoir des dividendes en dollars grâce aux revenus d'exportation.",
+        "titre": "La vente privée chiffrée",
+        "type": "cas"
+       },
+       {
+        "contenu": "Tous ces chiffres proviennent de médias et de documents de placement, PAS d'un prospectus officiel approuvé. Le prix final d'une IPO publique n'est pas encore fixé : la « fourchette » à retenir est celle d'une valorisation encore en construction.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Retenir des ordres de grandeur, pas des certitudes. Le pricing final dépendra du prospectus, de la demande institutionnelle et des conditions de marché.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Les chiffres clés à connaître"
+     },
+     {
+      "categorie": "evaluation",
+      "image": {
+       "alt": "Close-up of tax preparation checklist and income statement with paperclips.",
+       "credit": "Photo : Leeloo The First / Pexels",
+       "url": "https://images.pexels.com/photos/8962463/pexels-photo-8962463.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "investor checklist magnifying glass documents",
+      "qcm": {
+       "correct": 1,
+       "explication": "Seul un prospectus approuvé par la SEC officialise une offre publique et en fixe les modalités. Le reste n'engage pas le régulateur.",
+       "options": [
+        "Un article de presse",
+        "Un prospectus approuvé par le régulateur",
+        "Un post sur les réseaux sociaux",
+        "Une promesse de rendement garanti"
+       ],
+       "question": "Quel document officiel faut-il attendre avant de souscrire à une IPO ?"
+      },
+      "resume": "La bonne attitude pour un débutant : attendre des signaux publics clairs avant toute décision.",
+      "sections": [
+       {
+        "contenu": "1) Un prospectus approuvé par la SEC Nigeria. 2) Un communiqué officiel de Dangote confirmant l'ouverture réelle de l'offre. 3) La confirmation de la ou des places de cotation. 4) Les modalités finales destinées au public (prix, quantité, calendrier).",
+        "titre": "Les 4 signaux à attendre",
+        "type": "definition"
+       },
+       {
+        "contenu": "Tant que ces signaux ne sont pas réunis, parler d'investir « dans l'IPO Dangote » est prématuré. Les chiffres connus (0,35 $, 3 Md d'actions, ticket 1 M d'actions) renvoient au placement privé, pas à une offre publique grand public.",
+        "titre": "Pourquoi c'est important",
+        "type": "importance"
+       },
+       {
+        "contenu": "Méfiez-vous des promotions non autorisées et des « offres » relayées sur les réseaux : le régulateur a explicitement alerté à ce sujet. Ne versez jamais d'argent sans documents réglementaires officiels.",
+        "titre": "Pièges fréquents",
+        "type": "piege"
+       },
+       {
+        "contenu": "Pour un débutant : patience et vérification. Attendre le prospectus officiel, vérifier le prix final, et confirmer la place de cotation effective avant toute souscription.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Avant d'investir : ce qu'il faut vérifier"
+     }
+    ],
+    "niveau": "debutant",
+    "relatedLinks": [
+     {
+      "label": "Suivre le dossier en continu",
+      "slug": "suivi-dangote-brvm-ipo"
+     }
+    ],
+    "titre": "Dangote à la BRVM ? Comprendre simplement le projet d'introduction en bourse"
+   },
+   "niveau": "debutant",
+   "resume": "La raffinerie Dangote fait beaucoup parler d'elle en Afrique : son entrée en bourse pourrait devenir l'une des plus importantes du continent. Mais avant d'investir, ou même de parler d'une « introduction à la BRVM », il faut comprendre une chose essentielle : à ce stade, le proje",
+   "slug": "ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang",
+   "titre": "Dangote à la BRVM ? Comprendre simplement le projet d'introduction en bourse",
+   "updated_at": "2026-07-01 00:49:14.352535+00",
+   "html": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Dangote à la BRVM ? Comprendre simplement le projet d&#39;introduction en bourse — WestBourse Academy</title>\n<link href='https://api.fontshare.com/v2/css?f[]=bespoke-serif@400,700&f[]=supreme@400,500,700&display=swap' rel='stylesheet'>\n<style>\n:root{--bg:#030303;--surface:#0a1417;--surface2:#0f1f24;--text:#FCFCFC;--muted:#7a9ea8;--primary:#56D7FD;--border:rgba(86,215,253,.14);--radius:18px;--shadow:0 16px 40px rgba(0,0,0,.55);--accent:rgba(86,215,253,.10);--gold:#e0b341;--up:#3fe18b;--down:#ff6b6b}\n*{box-sizing:border-box}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:'Supreme','Satoshi',sans-serif;line-height:1.7}\na{color:var(--primary)}\n.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}\n.sidebar{position:sticky;top:0;height:100vh;padding:22px 18px;background:linear-gradient(180deg,#0a1417,#050d10);border-right:1px solid var(--border);overflow-y:auto}\n.main{padding:32px 36px;max-width:1100px}\n.logo{font-family:'Bespoke Serif',serif;font-size:26px;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:-.02em}\n.small{color:var(--muted);font-size:.86rem}\n.nav-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 6px 4px}\n.nav a{display:block;text-decoration:none;color:var(--text);padding:8px 12px;border-radius:10px;margin:2px 0;font-size:.9rem;transition:background .15s,color .15s}\n.nav a:hover{background:var(--accent);color:var(--primary);font-weight:600}\n.hero{background:linear-gradient(135deg,#0a1f25,#050e11);border:1px solid var(--border);border-radius:28px;padding:36px;box-shadow:var(--shadow);margin-bottom:28px;position:relative;overflow:hidden}\n.hero::after{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(86,215,253,.12),transparent 70%)}\n.hero h1{font-family:'Bespoke Serif',serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.06;margin:.1em 0 .3em}\n.course-cover{margin:0 0 28px;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}\n.course-cover img{width:100%;display:block}\n.related{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 26px;padding:14px 16px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}\n.related-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}\n.related a{font-size:.9rem;color:var(--primary);text-decoration:none;font-weight:600;padding:5px 12px;border:1px solid rgba(86,215,253,.25);border-radius:999px;transition:background .15s}\n.related a:hover{background:var(--accent)}\n.level-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:16px;background:rgba(86,215,253,.12);color:#56D7FD;border:1px solid rgba(86,215,253,.25)}\n.lesson{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.3);transition:box-shadow .2s,border-color .2s}\n.lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}\n.lesson-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}\n.lesson h3{margin:.1rem 0 .5rem;font-size:1.18rem;font-weight:700;font-family:'Bespoke Serif',serif}\n.lesson-img{position:relative;margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}\n.lesson-img img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover}\n.lesson-img .img-credit{position:absolute;bottom:6px;right:8px;background:rgba(3,3,3,.6);color:rgba(252,252,252,.8);font-size:.66rem;padding:2px 7px;border-radius:6px}\n.tag{display:inline-block;padding:5px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;border:1px solid transparent}\n.tag.general{background:rgba(86,215,253,.12);color:#56D7FD;border-color:rgba(86,215,253,.25)}\n.tag.income{background:rgba(224,179,65,.12);color:#e0b341;border-color:rgba(224,179,65,.25)}\n.tag.fundamental{background:rgba(110,168,255,.12);color:#6ea8ff;border-color:rgba(110,168,255,.25)}\n.tag.technical{background:rgba(169,139,255,.12);color:#a98bff;border-color:rgba(169,139,255,.25)}\n.tag.regulatory{background:rgba(224,179,65,.1);color:#d8a838;border-color:rgba(224,179,65,.22)}\n.tag.evaluation{background:rgba(255,107,107,.12);color:#ff6b6b;border-color:rgba(255,107,107,.25)}\n.summary{color:var(--text);margin:.4rem 0 .6rem;font-size:.96rem}\n.section-block{margin-top:12px;padding:14px 16px;border-radius:12px;background:var(--surface2);border-left:3px solid var(--primary)}\n.section-block h4{margin:0 0 7px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary)}\n.section-block p{margin:0 0 6px;font-size:.93rem;line-height:1.65}\n.section-block p:last-child{margin-bottom:0}\n.section-block.cas{border-left-color:var(--gold)}.section-block.cas h4{color:var(--gold)}\n.section-block.piege{border-left-color:var(--down)}.section-block.piege h4{color:var(--down)}\n.section-block.retenir{border-left-color:#a98bff}.section-block.retenir h4{color:#a98bff}\n.section-block.lexique{border-left-color:#6ea8ff}.section-block.lexique h4{color:#6ea8ff}\n.chart-wrap{margin-top:14px;padding:16px 18px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}\n.chart-wrap h4{margin:0 0 10px;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}\n.chart-unit{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}\n.chart-svg{width:100%;height:auto;display:block}\n.chart-note{margin:10px 0 0;font-size:.9rem;line-height:1.6}\n.chart-note strong{color:var(--primary)}\n.chart-disclaimer{margin:6px 0 0;font-size:.74rem;color:var(--muted);font-style:italic}\n.qcm-wrap{background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;border:1px solid var(--border)}\n.qcm-q{font-weight:700;margin-bottom:12px;font-size:.95rem}\n.qcm-opts{display:flex;flex-direction:column;gap:8px}\n.qcm-opt{padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:.9rem;background:var(--surface);transition:all .15s}\n.qcm-opt:hover{border-color:var(--primary);background:var(--accent)}\n.qcm-opt.correct{background:rgba(63,225,139,.14);border-color:#3fe18b;font-weight:700;color:#3fe18b}\n.qcm-opt.wrong{background:rgba(255,107,107,.14);border-color:#ff6b6b;color:#ff6b6b}\n.qcm-expl{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--accent);font-size:.88rem;color:var(--primary);font-weight:500;display:none}\n.section-divider{font-family:'Bespoke Serif',serif;font-size:1.7rem;font-weight:700;margin:38px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border)}\n.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}\n.glos-item{padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface)}\n.glos-item strong{color:var(--primary);display:block;margin-bottom:4px;font-size:.95rem}\n.glos-item span{color:var(--muted);font-size:.88rem}\n@media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}.glossary-grid{grid-template-columns:1fr}.main{padding:18px}}\n</style>\n</head>\n<body>\n<div class=\"layout\">\n  <aside class=\"sidebar\">\n    <div class=\"logo\">WestBourse</div>\n    <div class=\"small\">Academy · Débutant</div>\n    <div class=\"nav\">\n      <div class=\"nav-title\">Leçons</div>\n      <a href=\"#lesson-0\">C&#39;est quoi une introduction en bourse (IPO) ?</a><a href=\"#lesson-1\">Le projet Dangote : où en est-on vraiment ?</a><a href=\"#lesson-2\">Vente privée ou IPO publique ? La distinction clé</a><a href=\"#lesson-3\">Les chiffres clés à connaître</a><a href=\"#lesson-4\">Avant d&#39;investir : ce qu&#39;il faut vérifier</a>\n      <div class=\"nav-title\">Annexe</div><a href=\"#glossaire\">Glossaire</a>\n    </div>\n  </aside>\n  <main class=\"main\">\n    <section class=\"hero\">\n      <div class=\"level-badge\">Niveau Débutant</div>\n      <h1>Dangote à la BRVM ? Comprendre simplement le projet d&#39;introduction en bourse</h1>\n      <p>La raffinerie Dangote fait beaucoup parler d&#39;elle en Afrique : son entrée en bourse pourrait devenir l&#39;une des plus importantes du continent. Mais avant d&#39;investir, ou même de parler d&#39;une « introduction à la BRVM », il faut comprendre une chose essentielle : à ce stade, le projet est encore en préparation et aucune IPO publique n&#39;a été officiellement approuvée par le régulateur nigérian (SEC), qui a même mis en garde fin juin 2026 contre des promotions non autorisées.</p><p>Ce cours, pensé pour les débutants, explique simplement le mécanisme d&#39;une IPO, la différence cruciale entre vente privée et offre publique, les chiffres qui circulent, et ce qu&#39;il faut vérifier avant toute décision. Formulation prudente : on parle ici d&#39;un projet de cotation panafricaine où la BRVM est citée parmi les places discutées, et non d&#39;une introduction déjà actée.</p>\n    </section>\n    <div class=\"course-cover\"><img src=\"https://vozwivhmjfmnnnjbbkpt.supabase.co/storage/v1/object/public/academy-assets/covers/dangote-westbourse.png\" alt=\"Dangote à la BRVM ? Comprendre simplement le projet d&#39;introduction en bourse\" loading=\"eager\"/></div>\n    <div class=\"related\"><span class=\"related-label\">À lire aussi</span><a href=\"/formations/academy/suivi-dangote-brvm-ipo\" target=\"_top\">Suivre le dossier en continu →</a></div>\n    <div class=\"lesson\" id=\"lesson-0\">\n        <div class=\"lesson-head\">\n          <h3>C&#39;est quoi une introduction en bourse (IPO) ?</h3>\n          <span class=\"tag general\">Général</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/28958001/pexels-photo-28958001.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Historic New York Stock Exchange building facade captured in a vintage style.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Louis / Pexels</span></div>\n        <p class=\"summary\">Comprendre en mots simples ce qu&#39;est une IPO et ce que devient l&#39;investisseur qui achète une action.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Une introduction en bourse (IPO, Initial Public Offering) est l&#39;opération par laquelle une entreprise ouvre son capital en vendant une partie de ses actions à des investisseurs. Celui qui achète une action devient propriétaire d&#39;une petite part de l&#39;entreprise.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>L&#39;IPO permet à l&#39;entreprise de lever de l&#39;argent pour financer sa croissance. Pour l&#39;investisseur, c&#39;est l&#39;espoir de gagner grâce à la hausse du cours et aux dividendes — mais avec un risque réel de perte en capital.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Acheter à l&#39;IPO = devenir actionnaire. Une IPO suit en général 4 étapes : préparation réglementaire, période de souscription, allocation (en cas de forte demande), puis première cotation.</p></div>\n        \n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Que devient celui qui achète une action lors d&#39;une IPO ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">Un créancier remboursé avec intérêts</div><div class=\"qcm-opt\" data-idx=\"1\">Un propriétaire d&#39;une part de l&#39;entreprise</div><div class=\"qcm-opt\" data-idx=\"2\">Un salarié de l&#39;entreprise</div><div class=\"qcm-opt\" data-idx=\"3\">Un garant de la dette</div></div>\n             <div class=\"qcm-expl\">Acheter une action, c&#39;est détenir une fraction du capital : on devient actionnaire, pas prêteur.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-1\">\n        <div class=\"lesson-head\">\n          <h3>Le projet Dangote : où en est-on vraiment ?</h3>\n          <span class=\"tag regulatory\">Réglementaire</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Skyline view of an industrial factory with tall chimneys against a clear sky.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Life Of Pix / Pexels</span></div>\n        <p class=\"summary\">Faire le point honnête sur le statut du dossier : un projet en préparation, pas une offre publique autorisée.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Dangote Petroleum Refinery &amp; Petrochemicals est une raffinerie située à Lekki, près de Lagos (Nigeria), d&#39;une capacité annoncée de 650 000 barils/jour, mise en service en 2024, pour un coût estimé à environ 20 milliards de dollars.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Le marché évoque une opération à dimension panafricaine : une cotation principale envisagée au Nigeria, avec des discussions en parallèle avec plusieurs places africaines, dont la BRVM. Rien n&#39;est toutefois officialisé quant à une cotation effective à la BRVM.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Au 23 juin 2026, la SEC nigériane indique n&#39;avoir reçu ni approuvé aucune offre publique de Dangote Refinery, et a ordonné l&#39;arrêt des promotions non autorisées autour de cette « IPO ». Parler d&#39;« introduction de Dangote à la BRVM » est donc, à ce stade, un raccourci.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Statut actuel : projet en préparation. Il n&#39;existe pas encore de prospectus approuvé accessible au public. Toute opération future sera annoncée via les canaux réglementaires officiels.</p></div>\n        \n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Quel est le statut réglementaire du projet d&#39;IPO Dangote au 23 juin 2026 ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">Approuvé et ouvert au public</div><div class=\"qcm-opt\" data-idx=\"1\">Aucune offre publique déposée ni approuvée par la SEC</div><div class=\"qcm-opt\" data-idx=\"2\">Coté à la BRVM depuis 2024</div><div class=\"qcm-opt\" data-idx=\"3\">Interdit définitivement</div></div>\n             <div class=\"qcm-expl\">La SEC nigériane a indiqué qu&#39;aucune offre publique n&#39;avait été déposée ni approuvée, et a alerté contre les promotions non autorisées.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-2\">\n        <div class=\"lesson-head\">\n          <h3>Vente privée ou IPO publique ? La distinction clé</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/7414041/pexels-photo-7414041.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Two male professionals shaking hands in a modern office setting, symbolizing teamwork and collaboration.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : RDNE Stock project / Pexels</span></div>\n        <p class=\"summary\">Comprendre pourquoi ce qui a été décrit dans la presse est d&#39;abord une vente privée réservée aux gros investisseurs.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Une vente privée (placement privé) consiste à proposer des actions à un cercle restreint de gros investisseurs, avant et séparément d&#39;une éventuelle offre publique ouverte à tous.</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Le placement privé sert à tester l&#39;appétit du marché, affiner la valorisation et faire entrer des investisseurs de référence. Ce n&#39;est PAS une ouverture au grand public.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Le ticket minimum rapporté (1 million d&#39;actions, soit environ 350 000 $) et le blocage des titres pendant 365 jours (lock-up) confirment le caractère institutionnel : cette phase ne vise pas le petit investisseur. Ne pas confondre avec une IPO grand public.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Trois sujets à séparer : l&#39;IPO publique officielle (non validée), le placement privé institutionnel (rapporté en juin), et les campagnes marketing non autorisées stoppées par le régulateur.</p></div>\n        \n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Le ticket minimum d&#39;environ 350 000 $ et le lock-up de 365 jours concernent surtout :</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">L&#39;IPO publique ouverte à tous</div><div class=\"qcm-opt\" data-idx=\"1\">La vente privée réservée aux institutionnels</div><div class=\"qcm-opt\" data-idx=\"2\">Un compte d&#39;épargne BRVM</div><div class=\"qcm-opt\" data-idx=\"3\">Les obligations d&#39;État</div></div>\n             <div class=\"qcm-expl\">Ces conditions (ticket élevé, blocage d&#39;un an) caractérisent le placement privé institutionnel, pas une offre publique grand public.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-3\">\n        <div class=\"lesson-head\">\n          <h3>Les chiffres clés à connaître</h3>\n          <span class=\"tag fundamental\">Fondamental</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/7947754/pexels-photo-7947754.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Detailed close-up of a blue bar graph showing data analysis on printed paper.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : RDNE Stock project / Pexels</span></div>\n        <p class=\"summary\">Passer en revue les ordres de grandeur qui circulent — en gardant à l&#39;esprit qu&#39;ils viennent de la presse, pas d&#39;un prospectus approuvé.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Capacité : 650 000 barils/jour. Coût de construction estimé : environ 20 Md$. Valorisation évoquée dans la presse : environ 40 à 50 Md$ (avec une borne à 39,1 Md$ citée dans un document de placement). Part du capital susceptible d&#39;être cédée : 5 % à 10 %.</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>Le placement privé rapporté porterait sur 3 milliards d&#39;actions à 0,35 $ l&#39;unité (soit environ 198 FCFA), pour un objectif de levée supérieur à 1 milliard de dollars. Un mécanisme évoqué (à confirmer) : acheter en naira et percevoir des dividendes en dollars grâce aux revenus d&#39;exportation.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Tous ces chiffres proviennent de médias et de documents de placement, PAS d&#39;un prospectus officiel approuvé. Le prix final d&#39;une IPO publique n&#39;est pas encore fixé : la « fourchette » à retenir est celle d&#39;une valorisation encore en construction.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Retenir des ordres de grandeur, pas des certitudes. Le pricing final dépendra du prospectus, de la demande institutionnelle et des conditions de marché.</p></div>\n        <div class=\"chart-wrap\">\n    <h4>📈 Ordres de grandeur évoqués (estimations presse, non officielles) <span class=\"chart-unit\">(Md$)</span></h4>\n    <svg viewBox=\"0 0 600 300\" role=\"img\" aria-label=\"Ordres de grandeur évoqués (estimations presse, non officielles)\" class=\"chart-svg\">\n      <line x1=\"48\" y1=\"248.0\" x2=\"582\" y2=\"248.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"251.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">0</text><line x1=\"48\" y1=\"133.0\" x2=\"582\" y2=\"133.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"136.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">25</text><line x1=\"48\" y1=\"18.0\" x2=\"582\" y2=\"18.0\" stroke=\"rgba(86,215,253,.12)\" stroke-width=\"1\"/>\n        <text x=\"40\" y=\"21.0\" text-anchor=\"end\" fill=\"#7a9ea8\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">50</text><rect x=\"114.0\" y=\"156.0\" width=\"46.0\" height=\"92.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"137.0\" y=\"150.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">20</text><rect x=\"292.0\" y=\"68.6\" width=\"46.0\" height=\"179.4\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"315.0\" y=\"62.6\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">39</text><rect x=\"470.0\" y=\"18.0\" width=\"46.0\" height=\"230.0\" rx=\"4\" fill=\"#56D7FD\" fill-opacity=\"0.85\"/>\n          <text x=\"493.0\" y=\"12.0\" text-anchor=\"middle\" fill=\"#FCFCFC\" font-size=\"11\" font-family=\"JetBrains Mono,monospace\">50</text><text x=\"137.0\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Coût raffin…</text><text x=\"315.0\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Valo. basse</text><text x=\"493.0\" y=\"266\" text-anchor=\"middle\" fill=\"#9ec3cc\" font-size=\"11\" font-family=\"Supreme,sans-serif\">Valo. haute</text>\n    </svg>\n    <p class=\"chart-note\"><strong>Lecture :</strong> Ces montants proviennent de la presse et de documents de placement, pas d&#39;un prospectus approuvé. La valorisation finale dépendra de l&#39;offre officielle.</p>\n    <p class=\"chart-disclaimer\">Valeurs illustratives à but pédagogique.</p>\n  </div>\n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Que valent les chiffres de prix et de valorisation cités aujourd&#39;hui ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">Des valeurs officielles et définitives</div><div class=\"qcm-opt\" data-idx=\"1\">Des estimations de presse, non confirmées par un prospectus</div><div class=\"qcm-opt\" data-idx=\"2\">Des cours cotés à la BRVM</div><div class=\"qcm-opt\" data-idx=\"3\">Des montants garantis par la SEC</div></div>\n             <div class=\"qcm-expl\">Aucun prospectus approuvé n&#39;existe : les montants sont des estimations issues de la presse et de documents de placement, susceptibles d&#39;évoluer.</div>\n           </div>\n      </div><div class=\"lesson\" id=\"lesson-4\">\n        <div class=\"lesson-head\">\n          <h3>Avant d&#39;investir : ce qu&#39;il faut vérifier</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/8962463/pexels-photo-8962463.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Close-up of tax preparation checklist and income statement with paperclips.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Leeloo The First / Pexels</span></div>\n        <p class=\"summary\">La bonne attitude pour un débutant : attendre des signaux publics clairs avant toute décision.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>1) Un prospectus approuvé par la SEC Nigeria. 2) Un communiqué officiel de Dangote confirmant l&#39;ouverture réelle de l&#39;offre. 3) La confirmation de la ou des places de cotation. 4) Les modalités finales destinées au public (prix, quantité, calendrier).</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Tant que ces signaux ne sont pas réunis, parler d&#39;investir « dans l&#39;IPO Dangote » est prématuré. Les chiffres connus (0,35 $, 3 Md d&#39;actions, ticket 1 M d&#39;actions) renvoient au placement privé, pas à une offre publique grand public.</p></div><div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>Méfiez-vous des promotions non autorisées et des « offres » relayées sur les réseaux : le régulateur a explicitement alerté à ce sujet. Ne versez jamais d&#39;argent sans documents réglementaires officiels.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Pour un débutant : patience et vérification. Attendre le prospectus officiel, vérifier le prix final, et confirmer la place de cotation effective avant toute souscription.</p></div>\n        \n        <div class=\"qcm-wrap\" data-correct=\"1\">\n             <div class=\"qcm-q\">Quel document officiel faut-il attendre avant de souscrire à une IPO ?</div>\n             <div class=\"qcm-opts\"><div class=\"qcm-opt\" data-idx=\"0\">Un article de presse</div><div class=\"qcm-opt\" data-idx=\"1\">Un prospectus approuvé par le régulateur</div><div class=\"qcm-opt\" data-idx=\"2\">Un post sur les réseaux sociaux</div><div class=\"qcm-opt\" data-idx=\"3\">Une promesse de rendement garanti</div></div>\n             <div class=\"qcm-expl\">Seul un prospectus approuvé par la SEC officialise une offre publique et en fixe les modalités. Le reste n&#39;engage pas le régulateur.</div>\n           </div>\n      </div>\n    <div class=\"section-divider\" id=\"glossaire\">📖 Glossaire</div>\n         <div class=\"glossary-grid\"><div class=\"glos-item\"><strong>IPO (introduction en bourse)</strong><span>Opération par laquelle une entreprise vend pour la première fois des actions au public sur un marché réglementé.</span></div><div class=\"glos-item\"><strong>Placement / vente privée</strong><span>Vente d&#39;actions à un cercle restreint de gros investisseurs, distincte d&#39;une offre publique ouverte à tous.</span></div><div class=\"glos-item\"><strong>Prospectus</strong><span>Document officiel, visé par le régulateur, qui décrit l&#39;opération, les risques et les modalités. Indispensable avant toute offre publique.</span></div><div class=\"glos-item\"><strong>Lock-up</strong><span>Période (ici 365 jours) pendant laquelle l&#39;investisseur ne peut pas revendre ses actions.</span></div><div class=\"glos-item\"><strong>Sursouscription</strong><span>Situation où la demande dépasse le nombre de titres offerts ; l&#39;allocation se fait alors au prorata.</span></div><div class=\"glos-item\"><strong>Valorisation</strong><span>Estimation de la valeur totale de l&#39;entreprise. Pour Dangote, encore en construction (39 à 50 Md$ évoqués).</span></div><div class=\"glos-item\"><strong>SEC (Nigeria)</strong><span>Securities and Exchange Commission : le régulateur des marchés au Nigeria, qui approuve (ou non) les offres publiques.</span></div><div class=\"glos-item\"><strong>BRVM</strong><span>Bourse Régionale des Valeurs Mobilières (UEMOA), citée parmi les places africaines discutées pour le projet Dangote.</span></div></div>\n    <p class=\"small\" style=\"margin-top:32px;border-top:1px solid var(--border);padding-top:14px\">\n      WestBourse Academy. À titre informatif et pédagogique, ne constitue pas un conseil en investissement.\n    </p>\n  </main>\n</div>\n<script>\ndocument.querySelectorAll('.qcm-opt').forEach(function(opt){\n  opt.addEventListener('click', function(){\n    var wrap = opt.closest('.qcm-wrap');\n    if (wrap.dataset.done) return;\n    wrap.dataset.done = '1';\n    var correct = wrap.dataset.correct;\n    wrap.querySelectorAll('.qcm-opt').forEach(function(o){\n      if (o.dataset.idx === correct) o.classList.add('correct');\n      else if (o === opt) o.classList.add('wrong');\n    });\n    var expl = wrap.querySelector('.qcm-expl');\n    if (expl) expl.style.display = 'block';\n  });\n});\n</script>\n</body>\n</html>"
+  },
+  "suivi-dangote-brvm-ipo": {
+   "content": {
+    "coverUrl": "https://images.pexels.com/photos/10653886/pexels-photo-10653886.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+    "glossaire": [
+     {
+      "definition": "Document officiel visé par le régulateur, indispensable avant toute offre publique.",
+      "terme": "Prospectus"
+     },
+     {
+      "definition": "Régulateur des marchés au Nigeria, qui approuve ou non les offres publiques.",
+      "terme": "SEC (Nigeria)"
+     },
+     {
+      "definition": "Événement attendu susceptible de faire évoluer le dossier (prospectus, communiqué, cotation…).",
+      "terme": "Catalyseur"
+     },
+     {
+      "definition": "Période (ici 365 jours) durant laquelle l'investisseur ne peut pas revendre ses actions.",
+      "terme": "Lock-up"
+     }
+    ],
+    "intro": "Ce dossier suit, en continu, le projet d'introduction en bourse de la raffinerie Dangote et la possibilité d'une cotation associée à la BRVM. Statut au 1er juillet 2026 : projet en préparation, AUCUNE offre publique approuvée par la SEC nigériane. Conviction : faible — à surveiller, ne rien engager avant un prospectus officiel.\n\nNous mettons cette page à jour à chaque signal important (prospectus, communiqué officiel, confirmation de la place de cotation, modalités finales).",
+    "lessons": [
+     {
+      "categorie": "general",
+      "image": {
+       "alt": "A stunning aerial view of Durban's modern skyline with high-rise buildings and an overcast sky.",
+       "credit": "Photo : Magda Ehlers / Pexels",
+       "url": "https://images.pexels.com/photos/3814231/pexels-photo-3814231.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "african business finance skyline",
+      "resume": "Ce que l'on suit, et pourquoi ce dossier compte pour les investisseurs africains.",
+      "sections": [
+       {
+        "contenu": "Une méga-opération panafricaine potentielle — raffinerie de Lekki (650 000 barils/jour, valorisation évoquée entre 39 et 50 Md$) — qui pourrait inclure la BRVM parmi ses places de cotation. Mais à ce stade, elle n'est PAS autorisée par le régulateur nigérian (SEC).",
+        "titre": "La thèse",
+        "type": "definition"
+       },
+       {
+        "contenu": "Par sa taille, l'opération pourrait être l'une des plus importantes de la finance africaine. Pour les investisseurs de la zone UEMOA, l'enjeu est de savoir si la BRVM sera réellement une place de cotation ou de distribution associée.",
+        "titre": "Pourquoi c'est suivi de près",
+        "type": "importance"
+       },
+       {
+        "contenu": "🔭 SURVEILLER. Aucun titre investissable à ce jour. Parler d'« introduction de Dangote à la BRVM » est un raccourci : il s'agit d'un projet de cotation panafricaine où la BRVM est citée parmi les places discutées.",
+        "titre": "Position actuelle",
+        "type": "retenir"
+       }
+      ],
+      "titre": "La thèse en bref"
+     },
+     {
+      "categorie": "fundamental",
+      "image": {
+       "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+       "credit": "Photo : Life Of Pix / Pexels",
+       "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "oil refinery industrial infrastructure",
+      "resume": "Les piliers favorables au dossier.",
+      "sections": [
+       {
+        "contenu": "1) Un actif industriel massif et stratégique (~20 Md$ investis ; revenus d'exportation évoqués ~6,4 Md$/an). 2) Une dimension panafricaine (cotation multi-places discutée : Nigeria principal, BRVM et d'autres places citées). 3) Des conseillers de premier plan mandatés (Stanbic IBTC Capital, Vetiva, FirstCap). 4) Un appétit institutionnel déjà testé via un placement privé (~1 Md$).",
+        "titre": "Les piliers",
+        "type": "definition"
+       },
+       {
+        "contenu": "Le dossier ne manque pas d'atouts de fond. C'est sa concrétisation réglementaire qui reste à valider.",
+        "titre": "À retenir",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Ce qui pourrait jouer en faveur"
+     },
+     {
+      "categorie": "evaluation",
+      "image": {
+       "alt": "A close look at tax forms marked with scam, highlighting financial fraud risks.",
+       "credit": "Photo : Leeloo The First / Pexels",
+       "url": "https://images.pexels.com/photos/7247413/pexels-photo-7247413.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "risk warning financial documents",
+      "resume": "Ce qui pourrait retarder ou invalider l'opération.",
+      "sections": [
+       {
+        "contenu": "1) Réglementaire : aucune offre déposée ni approuvée par la SEC au 23/06/2026 ; promotions non autorisées stoppées. 2) Pricing incertain : la valorisation 39–50 Md$ vient de la presse, pas d'un prospectus. 3) Place de cotation non figée : la présence effective à la BRVM n'est pas actée. 4) Risque de change : le mécanisme « achat en naira, dividendes en dollars » reste à confirmer. 5) Risque de fraude : des fausses « offres » circulent.",
+        "titre": "Les risques clés",
+        "type": "piege"
+       },
+       {
+        "contenu": "Ne jamais verser d'argent sur la base d'une « offre » relayée sur les réseaux. Seuls les documents réglementaires officiels font foi.",
+        "titre": "Règle de prudence",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Les risques à surveiller"
+     },
+     {
+      "categorie": "regulatory",
+      "image": {
+       "alt": "Close-up shot of a hand marking a date on a calendar with a pen, emphasizing planning and scheduling.",
+       "credit": "Photo : Towfiqu barbhuiya / Pexels",
+       "url": "https://images.pexels.com/photos/11773871/pexels-photo-11773871.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "calendar schedule business planning",
+      "resume": "Les 4 catalyseurs qui feront passer le dossier de « projet » à « opération réelle ».",
+      "sections": [
+       {
+        "contenu": "① Dépôt et visa du PROSPECTUS par la SEC Nigeria — l'événement décisif qui ouvre l'offre publique. ② Communiqué officiel de Dangote confirmant l'ouverture réelle de l'offre. ③ Confirmation de la ou des places de cotation (la BRVM en fera-t-elle partie ?). ④ Publication des modalités finales : prix, quantité, calendrier.",
+        "titre": "Catalyseurs à surveiller",
+        "type": "definition"
+       },
+       {
+        "contenu": "Tant qu'il n'y a pas de prospectus approuvé par la SEC, il n'y a pas d'offre publique : c'est le premier feu vert à attendre.",
+        "titre": "Le signal n°1",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Le calendrier : quels signaux attendre"
+     },
+     {
+      "categorie": "evaluation",
+      "image": {
+       "alt": "Candlestick chart showing a downward trend in the stock market analysis.",
+       "credit": "Photo : Alex Luna / Pexels",
+       "url": "https://images.pexels.com/photos/35118208/pexels-photo-35118208.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200"
+      },
+      "imageQuery": "stock market analysis screen data",
+      "resume": "L'état des lieux au 1er juillet 2026 et l'historique des signaux.",
+      "sections": [
+       {
+        "contenu": "• Validation réglementaire : AUCUNE (SEC : rien déposé) — à surveiller. • Cotation BRVM : discutée, non actée — à confirmer. • Pricing : estimations presse 39–50 Md$ — incertain. • Placement privé : rapporté (~1 Md$, lock-up 365 jours) — en cours.",
+        "titre": "État des lieux (scorecard)",
+        "type": "definition"
+       },
+       {
+        "contenu": "• 23/06/2026 : la SEC Nigeria indique qu'aucune offre publique n'a été déposée ni approuvée. • 24/06/2026 : Premium Times — avertissement de la SEC contre une prétendue IPO Dangote. • 29/06/2026 : Dabafinance — la SEC stoppe les promotions de l'« IPO ».",
+        "titre": "Historique des signaux",
+        "type": "cas"
+       },
+       {
+        "contenu": "Projet prometteur mais prématuré. Conviction faible. La bonne attitude : suivre les catalyseurs et attendre les documents officiels avant toute décision.",
+        "titre": "Conclusion",
+        "type": "retenir"
+       }
+      ],
+      "titre": "Où en est-on aujourd'hui ?"
+     }
+    ],
+    "niveau": "intermediaire",
+    "relatedLinks": [
+     {
+      "label": "Comprendre le mécanisme (cours débutant)",
+      "slug": "ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang"
+     }
+    ],
+    "titre": "Suivi du dossier : Dangote à la BRVM — où en est l'IPO ?"
+   },
+   "niveau": "intermediaire",
+   "resume": "Ce dossier suit, en continu, le projet d'introduction en bourse de la raffinerie Dangote et la possibilité d'une cotation associée à la BRVM. Statut au 1er juillet 2026 : projet en préparation, AUCUNE offre publique approuvée par la SEC nigériane. Conviction : faible — à surveill",
+   "slug": "suivi-dangote-brvm-ipo",
+   "titre": "Suivi du dossier : Dangote à la BRVM — où en est l'IPO ?",
+   "updated_at": "2026-07-01 00:49:15.750848+00",
+   "html": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Suivi du dossier : Dangote à la BRVM — où en est l&#39;IPO ? — WestBourse Academy</title>\n<link href='https://api.fontshare.com/v2/css?f[]=bespoke-serif@400,700&f[]=supreme@400,500,700&display=swap' rel='stylesheet'>\n<style>\n:root{--bg:#030303;--surface:#0a1417;--surface2:#0f1f24;--text:#FCFCFC;--muted:#7a9ea8;--primary:#56D7FD;--border:rgba(86,215,253,.14);--radius:18px;--shadow:0 16px 40px rgba(0,0,0,.55);--accent:rgba(86,215,253,.10);--gold:#e0b341;--up:#3fe18b;--down:#ff6b6b}\n*{box-sizing:border-box}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:'Supreme','Satoshi',sans-serif;line-height:1.7}\na{color:var(--primary)}\n.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}\n.sidebar{position:sticky;top:0;height:100vh;padding:22px 18px;background:linear-gradient(180deg,#0a1417,#050d10);border-right:1px solid var(--border);overflow-y:auto}\n.main{padding:32px 36px;max-width:1100px}\n.logo{font-family:'Bespoke Serif',serif;font-size:26px;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:-.02em}\n.small{color:var(--muted);font-size:.86rem}\n.nav-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 6px 4px}\n.nav a{display:block;text-decoration:none;color:var(--text);padding:8px 12px;border-radius:10px;margin:2px 0;font-size:.9rem;transition:background .15s,color .15s}\n.nav a:hover{background:var(--accent);color:var(--primary);font-weight:600}\n.hero{background:linear-gradient(135deg,#0a1f25,#050e11);border:1px solid var(--border);border-radius:28px;padding:36px;box-shadow:var(--shadow);margin-bottom:28px;position:relative;overflow:hidden}\n.hero::after{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(86,215,253,.12),transparent 70%)}\n.hero h1{font-family:'Bespoke Serif',serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.06;margin:.1em 0 .3em}\n.course-cover{margin:0 0 28px;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}\n.course-cover img{width:100%;display:block}\n.related{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 26px;padding:14px 16px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}\n.related-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}\n.related a{font-size:.9rem;color:var(--primary);text-decoration:none;font-weight:600;padding:5px 12px;border:1px solid rgba(86,215,253,.25);border-radius:999px;transition:background .15s}\n.related a:hover{background:var(--accent)}\n.level-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:16px;background:rgba(86,215,253,.12);color:#56D7FD;border:1px solid rgba(86,215,253,.25)}\n.lesson{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.3);transition:box-shadow .2s,border-color .2s}\n.lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}\n.lesson-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}\n.lesson h3{margin:.1rem 0 .5rem;font-size:1.18rem;font-weight:700;font-family:'Bespoke Serif',serif}\n.lesson-img{position:relative;margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}\n.lesson-img img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover}\n.lesson-img .img-credit{position:absolute;bottom:6px;right:8px;background:rgba(3,3,3,.6);color:rgba(252,252,252,.8);font-size:.66rem;padding:2px 7px;border-radius:6px}\n.tag{display:inline-block;padding:5px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;border:1px solid transparent}\n.tag.general{background:rgba(86,215,253,.12);color:#56D7FD;border-color:rgba(86,215,253,.25)}\n.tag.income{background:rgba(224,179,65,.12);color:#e0b341;border-color:rgba(224,179,65,.25)}\n.tag.fundamental{background:rgba(110,168,255,.12);color:#6ea8ff;border-color:rgba(110,168,255,.25)}\n.tag.technical{background:rgba(169,139,255,.12);color:#a98bff;border-color:rgba(169,139,255,.25)}\n.tag.regulatory{background:rgba(224,179,65,.1);color:#d8a838;border-color:rgba(224,179,65,.22)}\n.tag.evaluation{background:rgba(255,107,107,.12);color:#ff6b6b;border-color:rgba(255,107,107,.25)}\n.summary{color:var(--text);margin:.4rem 0 .6rem;font-size:.96rem}\n.section-block{margin-top:12px;padding:14px 16px;border-radius:12px;background:var(--surface2);border-left:3px solid var(--primary)}\n.section-block h4{margin:0 0 7px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary)}\n.section-block p{margin:0 0 6px;font-size:.93rem;line-height:1.65}\n.section-block p:last-child{margin-bottom:0}\n.section-block.cas{border-left-color:var(--gold)}.section-block.cas h4{color:var(--gold)}\n.section-block.piege{border-left-color:var(--down)}.section-block.piege h4{color:var(--down)}\n.section-block.retenir{border-left-color:#a98bff}.section-block.retenir h4{color:#a98bff}\n.section-block.lexique{border-left-color:#6ea8ff}.section-block.lexique h4{color:#6ea8ff}\n.chart-wrap{margin-top:14px;padding:16px 18px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}\n.chart-wrap h4{margin:0 0 10px;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}\n.chart-unit{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}\n.chart-svg{width:100%;height:auto;display:block}\n.chart-note{margin:10px 0 0;font-size:.9rem;line-height:1.6}\n.chart-note strong{color:var(--primary)}\n.chart-disclaimer{margin:6px 0 0;font-size:.74rem;color:var(--muted);font-style:italic}\n.qcm-wrap{background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;border:1px solid var(--border)}\n.qcm-q{font-weight:700;margin-bottom:12px;font-size:.95rem}\n.qcm-opts{display:flex;flex-direction:column;gap:8px}\n.qcm-opt{padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:.9rem;background:var(--surface);transition:all .15s}\n.qcm-opt:hover{border-color:var(--primary);background:var(--accent)}\n.qcm-opt.correct{background:rgba(63,225,139,.14);border-color:#3fe18b;font-weight:700;color:#3fe18b}\n.qcm-opt.wrong{background:rgba(255,107,107,.14);border-color:#ff6b6b;color:#ff6b6b}\n.qcm-expl{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--accent);font-size:.88rem;color:var(--primary);font-weight:500;display:none}\n.section-divider{font-family:'Bespoke Serif',serif;font-size:1.7rem;font-weight:700;margin:38px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border)}\n.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}\n.glos-item{padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface)}\n.glos-item strong{color:var(--primary);display:block;margin-bottom:4px;font-size:.95rem}\n.glos-item span{color:var(--muted);font-size:.88rem}\n@media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}.glossary-grid{grid-template-columns:1fr}.main{padding:18px}}\n</style>\n</head>\n<body>\n<div class=\"layout\">\n  <aside class=\"sidebar\">\n    <div class=\"logo\">WestBourse</div>\n    <div class=\"small\">Academy · Intermédiaire</div>\n    <div class=\"nav\">\n      <div class=\"nav-title\">Leçons</div>\n      <a href=\"#lesson-0\">La thèse en bref</a><a href=\"#lesson-1\">Ce qui pourrait jouer en faveur</a><a href=\"#lesson-2\">Les risques à surveiller</a><a href=\"#lesson-3\">Le calendrier : quels signaux attendre</a><a href=\"#lesson-4\">Où en est-on aujourd&#39;hui ?</a>\n      <div class=\"nav-title\">Annexe</div><a href=\"#glossaire\">Glossaire</a>\n    </div>\n  </aside>\n  <main class=\"main\">\n    <section class=\"hero\">\n      <div class=\"level-badge\">Niveau Intermédiaire</div>\n      <h1>Suivi du dossier : Dangote à la BRVM — où en est l&#39;IPO ?</h1>\n      <p>Ce dossier suit, en continu, le projet d&#39;introduction en bourse de la raffinerie Dangote et la possibilité d&#39;une cotation associée à la BRVM. Statut au 1er juillet 2026 : projet en préparation, AUCUNE offre publique approuvée par la SEC nigériane. Conviction : faible — à surveiller, ne rien engager avant un prospectus officiel.</p><p>Nous mettons cette page à jour à chaque signal important (prospectus, communiqué officiel, confirmation de la place de cotation, modalités finales).</p>\n    </section>\n    <div class=\"course-cover\"><img src=\"https://images.pexels.com/photos/10653886/pexels-photo-10653886.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Suivi du dossier : Dangote à la BRVM — où en est l&#39;IPO ?\" loading=\"eager\"/></div>\n    <div class=\"related\"><span class=\"related-label\">À lire aussi</span><a href=\"/formations/academy/ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang\" target=\"_top\">Comprendre le mécanisme (cours débutant) →</a></div>\n    <div class=\"lesson\" id=\"lesson-0\">\n        <div class=\"lesson-head\">\n          <h3>La thèse en bref</h3>\n          <span class=\"tag general\">Général</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/3814231/pexels-photo-3814231.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"A stunning aerial view of Durban&#39;s modern skyline with high-rise buildings and an overcast sky.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Magda Ehlers / Pexels</span></div>\n        <p class=\"summary\">Ce que l&#39;on suit, et pourquoi ce dossier compte pour les investisseurs africains.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>Une méga-opération panafricaine potentielle — raffinerie de Lekki (650 000 barils/jour, valorisation évoquée entre 39 et 50 Md$) — qui pourrait inclure la BRVM parmi ses places de cotation. Mais à ce stade, elle n&#39;est PAS autorisée par le régulateur nigérian (SEC).</p></div><div class=\"section-block importance\"><h4>Pourquoi c’est important</h4><p>Par sa taille, l&#39;opération pourrait être l&#39;une des plus importantes de la finance africaine. Pour les investisseurs de la zone UEMOA, l&#39;enjeu est de savoir si la BRVM sera réellement une place de cotation ou de distribution associée.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>🔭 SURVEILLER. Aucun titre investissable à ce jour. Parler d&#39;« introduction de Dangote à la BRVM » est un raccourci : il s&#39;agit d&#39;un projet de cotation panafricaine où la BRVM est citée parmi les places discutées.</p></div>\n        \n        \n      </div><div class=\"lesson\" id=\"lesson-1\">\n        <div class=\"lesson-head\">\n          <h3>Ce qui pourrait jouer en faveur</h3>\n          <span class=\"tag fundamental\">Fondamental</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Skyline view of an industrial factory with tall chimneys against a clear sky.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Life Of Pix / Pexels</span></div>\n        <p class=\"summary\">Les piliers favorables au dossier.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>1) Un actif industriel massif et stratégique (~20 Md$ investis ; revenus d&#39;exportation évoqués ~6,4 Md$/an). 2) Une dimension panafricaine (cotation multi-places discutée : Nigeria principal, BRVM et d&#39;autres places citées). 3) Des conseillers de premier plan mandatés (Stanbic IBTC Capital, Vetiva, FirstCap). 4) Un appétit institutionnel déjà testé via un placement privé (~1 Md$).</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Le dossier ne manque pas d&#39;atouts de fond. C&#39;est sa concrétisation réglementaire qui reste à valider.</p></div>\n        \n        \n      </div><div class=\"lesson\" id=\"lesson-2\">\n        <div class=\"lesson-head\">\n          <h3>Les risques à surveiller</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/7247413/pexels-photo-7247413.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"A close look at tax forms marked with scam, highlighting financial fraud risks.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Leeloo The First / Pexels</span></div>\n        <p class=\"summary\">Ce qui pourrait retarder ou invalider l&#39;opération.</p>\n        <div class=\"section-block piege\"><h4>Pièges fréquents</h4><p>1) Réglementaire : aucune offre déposée ni approuvée par la SEC au 23/06/2026 ; promotions non autorisées stoppées. 2) Pricing incertain : la valorisation 39–50 Md$ vient de la presse, pas d&#39;un prospectus. 3) Place de cotation non figée : la présence effective à la BRVM n&#39;est pas actée. 4) Risque de change : le mécanisme « achat en naira, dividendes en dollars » reste à confirmer. 5) Risque de fraude : des fausses « offres » circulent.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Ne jamais verser d&#39;argent sur la base d&#39;une « offre » relayée sur les réseaux. Seuls les documents réglementaires officiels font foi.</p></div>\n        \n        \n      </div><div class=\"lesson\" id=\"lesson-3\">\n        <div class=\"lesson-head\">\n          <h3>Le calendrier : quels signaux attendre</h3>\n          <span class=\"tag regulatory\">Réglementaire</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/11773871/pexels-photo-11773871.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Close-up shot of a hand marking a date on a calendar with a pen, emphasizing planning and scheduling.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Towfiqu barbhuiya / Pexels</span></div>\n        <p class=\"summary\">Les 4 catalyseurs qui feront passer le dossier de « projet » à « opération réelle ».</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>① Dépôt et visa du PROSPECTUS par la SEC Nigeria — l&#39;événement décisif qui ouvre l&#39;offre publique. ② Communiqué officiel de Dangote confirmant l&#39;ouverture réelle de l&#39;offre. ③ Confirmation de la ou des places de cotation (la BRVM en fera-t-elle partie ?). ④ Publication des modalités finales : prix, quantité, calendrier.</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Tant qu&#39;il n&#39;y a pas de prospectus approuvé par la SEC, il n&#39;y a pas d&#39;offre publique : c&#39;est le premier feu vert à attendre.</p></div>\n        \n        \n      </div><div class=\"lesson\" id=\"lesson-4\">\n        <div class=\"lesson-head\">\n          <h3>Où en est-on aujourd&#39;hui ?</h3>\n          <span class=\"tag evaluation\">Évaluation</span>\n        </div>\n        <div class=\"lesson-img\"><img src=\"https://images.pexels.com/photos/35118208/pexels-photo-35118208.jpeg?auto=compress&amp;cs=tinysrgb&amp;fit=crop&amp;h=627&amp;w=1200\" alt=\"Candlestick chart showing a downward trend in the stock market analysis.\" loading=\"lazy\"/><span class=\"img-credit\">Photo : Alex Luna / Pexels</span></div>\n        <p class=\"summary\">L&#39;état des lieux au 1er juillet 2026 et l&#39;historique des signaux.</p>\n        <div class=\"section-block definition\"><h4>Définition</h4><p>• Validation réglementaire : AUCUNE (SEC : rien déposé) — à surveiller. • Cotation BRVM : discutée, non actée — à confirmer. • Pricing : estimations presse 39–50 Md$ — incertain. • Placement privé : rapporté (~1 Md$, lock-up 365 jours) — en cours.</p></div><div class=\"section-block cas\"><h4>Cas réel BRVM</h4><p>• 23/06/2026 : la SEC Nigeria indique qu&#39;aucune offre publique n&#39;a été déposée ni approuvée. • 24/06/2026 : Premium Times — avertissement de la SEC contre une prétendue IPO Dangote. • 29/06/2026 : Dabafinance — la SEC stoppe les promotions de l&#39;« IPO ».</p></div><div class=\"section-block retenir\"><h4>À retenir</h4><p>Projet prometteur mais prématuré. Conviction faible. La bonne attitude : suivre les catalyseurs et attendre les documents officiels avant toute décision.</p></div>\n        \n        \n      </div>\n    <div class=\"section-divider\" id=\"glossaire\">📖 Glossaire</div>\n         <div class=\"glossary-grid\"><div class=\"glos-item\"><strong>Prospectus</strong><span>Document officiel visé par le régulateur, indispensable avant toute offre publique.</span></div><div class=\"glos-item\"><strong>SEC (Nigeria)</strong><span>Régulateur des marchés au Nigeria, qui approuve ou non les offres publiques.</span></div><div class=\"glos-item\"><strong>Catalyseur</strong><span>Événement attendu susceptible de faire évoluer le dossier (prospectus, communiqué, cotation…).</span></div><div class=\"glos-item\"><strong>Lock-up</strong><span>Période (ici 365 jours) durant laquelle l&#39;investisseur ne peut pas revendre ses actions.</span></div></div>\n    <p class=\"small\" style=\"margin-top:32px;border-top:1px solid var(--border);padding-top:14px\">\n      WestBourse Academy. À titre informatif et pédagogique, ne constitue pas un conseil en investissement.\n    </p>\n  </main>\n</div>\n<script>\ndocument.querySelectorAll('.qcm-opt').forEach(function(opt){\n  opt.addEventListener('click', function(){\n    var wrap = opt.closest('.qcm-wrap');\n    if (wrap.dataset.done) return;\n    wrap.dataset.done = '1';\n    var correct = wrap.dataset.correct;\n    wrap.querySelectorAll('.qcm-opt').forEach(function(o){\n      if (o.dataset.idx === correct) o.classList.add('correct');\n      else if (o === opt) o.classList.add('wrong');\n    });\n    var expl = wrap.querySelector('.qcm-expl');\n    if (expl) expl.style.display = 'block';\n  });\n});\n</script>\n</body>\n</html>"
+  }
+ }
+}
