@@ -35,6 +35,11 @@ jobs:
           pip install --upgrade pip
           pip install yfinance openai requests pandas openpyxl perplexityai==0.46.1
 
+      - name: Tests purs (référentiel, verrous, conversions)
+        run: |
+          pip install pytest
+          python -m pytest -q test_commodity_qualite.py test_commodity_perplexity.py
+
       - name: Générer l'article
         env:
           # Clé DeepSeek NON passée : le script la lit dans la table

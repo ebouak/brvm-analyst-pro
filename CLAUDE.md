@@ -1552,6 +1552,40 @@ contraction, fonction bornée plutôt que vue SECURITY DEFINER).
 - `/rapports/dossier/[code]` lit avec le client serveur : le worker d'impression n'a
   pas de session, et une table fermée lui rendrait `[]` en silence.
 
+### Ajouts (passage 2026-11-15) — Hebdo matières premières : référentiel, verrous, trois niveaux
+
+Branche `feat/hebdo-matieres-analyste`. 48 tests purs (`test_commodity_qualite.py`),
+lancés par `commodity-weekly.yml` AVANT la génération. Non exécuté en réel ici
+(pas de réseau) : le premier passage est à faire en `dry_run`, puis à relire.
+
+- **Le constat (S46/2026)** : l'article citait SVOC, SIFCA, SAPH, SOGB, SUCR —
+  absents de la cote — et « TotalEnergies CI (TTLS) » (TTLS est le Sénégal).
+  Cacao corrélé à CFAC (CFAO Motors). Texte tronqué au milieu du sucre
+  (`max_tokens=4096` sous une consigne « sans limite de longueur »). Le prompt
+  demandait une « Recommandation WestBourse actionnable », contre l'avertissement
+  du pied de page. Le « score d'exposition » n'était que |variation| normalisée,
+  et le LLM l'écrivait « notation technique maximale ».
+- **Module pur `commodity_weekly_qualite.py`** : registre d'exposition validé au
+  démarrage contre `frontend/lib/brvmSectors.json` (un code inconnu ARRÊTE le
+  script) ; canaux de transmission ⚠️ **à valider par l'analyste** (prix à la
+  pompe administrés, sucre encadré : ce sont des lectures, pas des données).
+- **Aucun texte de LLM non vérifié** (`rediger_editorial`) : deux essais, chacun
+  passé à `verrous()` — texte tronqué, matière absente, code hors cote, conseil,
+  score lu comme une note, chiffre absent des données (liste blanche, comme
+  `hebdo/polish.ts`). Le second essai reçoit les raisons du refus ; sinon le
+  squelette calculé est publié et le bloc « Méthode » le dit.
+- **Blocs calculés, sans LLM** : synthèse « Essentiel », prix en FCFA (parité
+  655,957 et EUR/USD ; absent si le change manque), scénarios Brent ±10 %,
+  seuils à surveiller, **bilan de la semaine précédente** (seuils rangés dans
+  `metadata.seuils`, reconstruits de `yf_prices` pour les anciens numéros).
+- **Trois niveaux** (badges Essentiel / Investisseur / Pro) et **trois éditions**
+  (`choisir_edition` : dossier si un marché domine, briefing si semaine calme,
+  note sinon) qui réordonnent les blocs.
+- **Garde-fous de données** : clôture hors de sa fourchette → contrat écarté ;
+  moins de 4 contrats → rien n'est publié (code 1).
+- **Non fait** : effet d'un scénario sur le RÉSULTAT des distributeurs (stocks
+  non publiés) ; huile de palme et caoutchouc restent mensuels (Banque mondiale).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
