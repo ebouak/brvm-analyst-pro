@@ -86,3 +86,10 @@ describe('planifierEcritures', () => {
     expect(p.orphelins).toEqual(['SGBC|income_statements|T1|2026-03-31']);
   });
 });
+
+it('contradiction avec une observation sans texte imprimé (antérieure à 0148) : sa valeur est citée', () => {
+  const a = o({ indicateur: 'solvabilite_total', valeur: 14.2, texte_original: null, unite: 'pct', document_url: 'd1', periode: 'exercice', date_arrete: '2024-12-31' });
+  const b = o({ indicateur: 'solvabilite_total', valeur: 16.5, texte_original: '16,5', unite: 'pct', document_url: 'd2', periode: 'exercice', date_arrete: '2024-12-31' });
+  const p = planifierEcritures([a, b], [ligne({ table: 'balance_sheets', periode: '2024', type_periode: 'annuel' })]);
+  expect(p.relectures[0]!.detail).toBe('Valeurs incompatibles : 14,2 / 16,5');
+});

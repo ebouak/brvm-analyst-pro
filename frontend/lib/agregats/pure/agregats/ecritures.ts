@@ -152,7 +152,8 @@ export function planifierEcritures(obs: ObsLue[], lignes: LigneComptes[]): PlanE
           detail: d.etat === 'conflit'
             ? `Valeurs incompatibles : ${d.observations.map((id) => {
               const x = parId.get(id);
-              return x ? `${x.texte_original ?? '?'}${x.unite === 'usd' ? ' (USD)' : ''}` : '?';
+              // Une observation saisie avant 0148 n'a pas de texte imprimé : sa valeur stockée.
+              return x ? `${x.texte_original ?? (x.valeur != null ? String(x.valeur).replace('.', ',') : '?')}${x.unite === 'usd' ? ' (USD)' : ''}` : '?';
             }).join(' / ')}`
             : [...new Set(d.observations.map((id) => parId.get(id)?.controle_motif).filter(Boolean))].join(' ; ') || 'contrôle en échec',
           observations: d.observations,
