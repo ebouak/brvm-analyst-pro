@@ -17,6 +17,10 @@ import { RESERVE_REACTION } from '@/lib/reactionPublication';
 import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
+import CascadeBancaire from '@/components/bank/CascadeBancaire';
+import { illustrationCascade } from '@/lib/bank/cascade';
+import { trajectoireBancaire, encoursDossier } from '@/lib/bank/dossierBancaire';
+import { montantLigne } from '@/lib/bank/format';
 import { fmtFcfa, fmtNumber, fmtDateFR, fmtDateCourte } from '@/lib/format';
 import { perAffichable, distributionAffichable, horsExploitation, dividendeCourant, evolutionResultat } from '@/lib/fiche/affichage';
 import Link from 'next/link';
@@ -220,6 +224,11 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
     ? dividendeCourant([{ montant: div.montant, exercice: div.exercice, ex_date: div.ex_date, payment_date: div.payment_date }], dernierExercice)
     : null;
   const traj = d.trajectoire;
+  // Banque : PNB retenu dans la trajectoire, cascade et encours de la lecture (lib/bank/).
+  const lb = d.banque?.lecture ?? null;
+  const trajAffichee = d.banque ? trajectoireBancaire(d.trajectoire, d.banque.pnbParExercice) : d.trajectoire;
+  const cascade = lb ? illustrationCascade(lb) : null;
+  const encoursB = lb ? encoursDossier(lb, BORNES.encoursBancaires) : null;
   const evolution = traj.length >= 2 ? evolutionResultat(traj[traj.length - 1]!.resultat_net, traj[traj.length - 2]!.resultat_net) : null;
   const dette = c.dette_perimetre === 'long_terme' ? 'dette à plus d’un an' : 'dette financière';
 
@@ -570,10 +579,12 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       <Feuille d={d} page={6}>
         <Panneau
           n={PANNEAU.trajectoire}
-          titre="Trajectoire des résultats"
-          chapo="Chiffre d'affaires et résultat net par exercice, à la même échelle : les deux sont en FCFA, la comparaison est directe."
+          titre={d.banque ? 'Trajectoire du PNB et du résultat' : 'Trajectoire des résultats'}
+          chapo={d.banque
+            ? 'Produit net bancaire et résultat net par exercice, à la même échelle, en FCFA.'
+            : "Chiffre d'affaires et résultat net par exercice, à la même échelle : les deux sont en FCFA, la comparaison est directe."}
         >
-          <BarresAnnuelles points={d.trajectoire} />
+          <BarresAnnuelles points={trajAffichee} libelleRevenu={d.banque ? 'Produit net bancaire' : "Chiffre d'affaires"} />
         </Panneau>
 
         <Panneau
@@ -593,7 +604,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               />
             )}
             <Mesure libelle="Cours / capitaux propres" valeur={fois(r?.pb)} />
-            <Mesure libelle="Cours / chiffre d'affaires" valeur={fois(r?.ps)} />
+            <Mesure libelle={d.banque ? 'Cours / PNB' : "Cours / chiffre d'affaires"} valeur={fois(r?.ps)} />
             <Mesure
               libelle="Rentabilité des capitaux propres"
               valeur={part(r?.roe)}
@@ -624,6 +635,41 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
 
       {/* ── Feuille 4 · Qualité du résultat et dividende ───────────────── */}
       <Feuille d={d} page={7}>
+        {lb ? (
+          <Panneau
+            n={PANNEAU.benefice}
+            titre="D'où vient le bénéfice"
+            chapo={`Du produit net bancaire au résultat net, ${lb.libelle}${lb.sources[0]?.document_libelle ? `, d'après « ${lb.sources[0].document_libelle} »` : ''}. Chaque marche est un agrégat publié ; « autres éléments et impôt » est l'écart restant.`}
+          >
+            {/* Feuille à hauteur fixe (avec le dividende) : cascade et encours côte à côte. */}
+            <div className={cascade ? 'bk-duo' : undefined}>
+              {cascade ? (
+                <CascadeBancaire illustration={cascade} compacte />
+              ) : (
+                <dl className="dv-grille">
+                  {lb.compteResultat.slice(0, 4).map((l) => (
+                    <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
+                  ))}
+                </dl>
+              )}
+              {encoursB && encoursB.affichees.length > 0 && (
+                <dl className="dv-grille" style={cascade ? undefined : { marginTop: '3mm' }}>
+                  {encoursB.affichees.map((l) => (
+                    <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
+                  ))}
+                </dl>
+              )}
+            </div>
+            {((encoursB && phraseOmis(encoursB.omis, 'indicateur')) || lb.mentionNonPublies) && (
+              <p className="dv-legende">
+                {[
+                  encoursB && phraseOmis(encoursB.omis, 'indicateur') ? `${phraseOmis(encoursB.omis, 'indicateur')}, détaillés dans la Revue de résultats.` : null,
+                  lb.mentionNonPublies,
+                ].filter(Boolean).join(' ')}
+              </p>
+            )}
+          </Panneau>
+        ) : (
         <Panneau
           n={PANNEAU.benefice}
           titre="D'où vient le bénéfice"
@@ -660,6 +706,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
             </p>
           )}
         </Panneau>
+        )}
 
         <Panneau n={PANNEAU.dividende} titre="Dividende">
           {div.montant != null && div.montant > 0 ? (

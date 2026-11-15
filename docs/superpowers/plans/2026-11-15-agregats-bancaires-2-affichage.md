@@ -23,6 +23,53 @@ Spécification : `docs/superpowers/specs/2026-11-15-agregats-bancaires-design.md
   coefficient recalculé (charges d'exploitation ÷ PNB) l'est. La valeur stockée
   sert de recoupement à l'extraction (plan 1, contrôle D3).
 
+## Avenant de l'exploitant pour la PR 2 (2026-11-15) — PRIME sur la suite du plan
+
+1. **ETIT en USD, tel que publié.** L'unité vient de
+   `sources_specifiques[clé].unite` (`fcfa` | `usd` | `pct`). Concrètement :
+   - `Valeur` porte `unite` ; une valeur de la base sans source (résultat net,
+     capitaux propres) est en `fcfa` ;
+   - `compatibles()` exige le même périmètre (règle inchangée) ET la même
+     unité : aucun ratio, aucune comparaison, aucune marche de cascade entre
+     USD et FCFA (jamais de conversion) ; les ratios USD ÷ USD se calculent ;
+   - `LigneAgregat.unite` vaut `fcfa` | `usd` | `pct` ; `lecture.ts` exporte
+     `deviseDe(unite)` et `montantCourt(v, unite)`, et TOUTES les surfaces
+     (Revue, fiche, carte bancaire, dossier, article) écrivent l'unité de la
+     ligne, jamais « FCFA » en dur à côté d'un agrégat ; le titre de la Revue et
+     l'en-tête « Compte de résultat » suivent l'unité ;
+   - la trajectoire du dossier (graphique en FCFA) ne reprend un PNB sourcé
+     que s'il est en FCFA ;
+   - lecteurs historiques de `lignes_specifiques` (tableau des comptes, carte
+     bancaire `computeBankKpis`, diagnostic, impression, comparateur) : tous
+     passent par `loadCompanyFinancials`, qui retire désormais les clés dont la
+     source est en USD (`lib/bank/unites.ts`, pur, testé) — un montant USD ne
+     se glisse jamais dans un tableau en FCFA ;
+   - un test de rendu (`lib/bank/usd.test.ts`) échoue si une surface affiche
+     un montant USD suivi de « FCFA » ;
+   - DERNIÈRE tâche seulement (Task 10), une fois toutes les surfaces
+     branchées : `ECRITURE_USD_AUTORISEE = true` dans
+     `scraper/src/agregats/ecritures.ts`, copie frontend régénérée
+     (`node scripts/copier-agregats-purs.mjs`), tests du verrou mis à jour
+     (copie.test.ts vert).
+2. **Coefficient d'exploitation stocké : plus affiché nulle part.** Seul le
+   coefficient de `lecture.ts` (charges d'exploitation ÷ PNB) s'affiche :
+   `loadCompanyFinancials` retire `coefficient_exploitation` des lignes lues
+   (la ligne disparaît du tableau des comptes et du diagnostic) ;
+   `appliquerLecture` met `costIncome` à la valeur de la lecture ou à `null`
+   (le « frais généraux ÷ PNB » de `computeBankKpis` n'est plus affiché : une
+   autre définition donnerait un autre chiffre). La valeur stockée reste lue
+   par le scraper (contrôle D3 de l'extraction).
+3. **Cascade du dossier (et de la Revue) : gabarit `cascade` de l'Academy.**
+   On construit une `Illustration` (`gabarit: 'cascade'`, `reel: true`,
+   source datée) validée par `illustrationSchema`, rendue par
+   `components/academy/lecon/Illustration.tsx` — pas de second composant. Le
+   gabarit n'a pas de sous-total intermédiaire : la cascade est PNB → charges
+   d'exploitation → coût du risque → autres éléments et impôt → résultat net
+   (le RBE reste dans le tableau). Si le schéma refuse les données (perte qui
+   fait passer le cumul sous zéro, marche nulle, unités mêlées), on affiche la
+   grille de mesures à la place. Animation coupée à l'impression.
+4. Exécution tâche par tâche, test d'abord, un commit par tâche.
+
 ## Conventions
 
 - Tests frontend : `cd C:\tmp\wt-banques\frontend; npx vitest run <fichier>` ; scraper : `cd C:\tmp\wt-banques\scraper; npx vitest run <fichier>`. Toujours depuis un chemin `C:` en majuscule.

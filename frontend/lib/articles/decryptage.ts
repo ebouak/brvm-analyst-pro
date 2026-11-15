@@ -200,6 +200,7 @@ const PILIER_DU_FAIT: Record<string, string> = {
   paiement_rappel: 'dividende',
   operation_titres: 'aucun, l’opération ne change pas la valeur',
   seance_hors_norme: 'marché (cours et liquidité)',
+  resultats: 'résultats publiés',
 };
 
 /**

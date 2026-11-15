@@ -17,6 +17,13 @@ import { fmtFcfa, fmtNumber } from '@/lib/format';
 import { libellePeriode, type LectureIntermediaire } from '@/lib/financials/interim';
 import { constatCouverture, constatIntermediaire } from '@/lib/document/constats';
 
+/** Libellés du revenu : une banque n'a pas de « chiffre d'affaires », elle a un PNB. */
+export interface Vocabulaire { revenu: string; revenuMinuscule: string }
+export const VOCABULAIRE: Record<'general' | 'banque', Vocabulaire> = {
+  general: { revenu: 'Chiffre d’affaires', revenuMinuscule: 'chiffre d’affaires' },
+  banque: { revenu: 'Produit net bancaire', revenuMinuscule: 'produit net bancaire' },
+};
+
 export interface ExerciceAnnuel {
   periode: string;
   revenu: number | null;
@@ -104,7 +111,7 @@ export function periodePrincipale(annuels: ExerciceAnnuel[], inter: LectureInter
 const sansArrondiNul = (n: number) => `${fmtFcfa(n)} FCFA`;
 
 /** Phrase de couverture : l'évolution sur la même période, ou à défaut les montants. */
-export function constatPeriode(p: PeriodePrincipale): string | null {
+export function constatPeriode(p: PeriodePrincipale, voc: Vocabulaire = VOCABULAIRE.general): string | null {
   if (p.type === 'annuel') {
     return constatCouverture({
       exercice: p.periode,
@@ -120,11 +127,11 @@ export function constatPeriode(p: PeriodePrincipale): string | null {
         revenuPrecedent: p.revenuPrecedent,
         resultatNet: p.resultatNet,
         resultatNetPrecedent: p.resultatNetPrecedent,
-      })
+      }, voc.revenuMinuscule)
     : null;
   if (phrase) return phrase;
   const membres = [
-    p.revenu != null ? `chiffre d’affaires de ${sansArrondiNul(p.revenu)}` : null,
+    p.revenu != null ? `${voc.revenuMinuscule} de ${sansArrondiNul(p.revenu)}` : null,
     p.resultatNet != null ? (p.resultatNet < 0 ? `perte nette de ${sansArrondiNul(-p.resultatNet)}` : `résultat net de ${sansArrondiNul(p.resultatNet)}`) : null,
   ].filter(Boolean);
   if (membres.length === 0) return null;
@@ -147,7 +154,7 @@ const signe = (v: number) => (v > 0 ? '+' : v < 0 ? '−' : '');
  * sur la même période ; à défaut celle du chiffre d'affaires ; à défaut le
  * montant du résultat net. Une donnée absente donne `valeur: null`.
  */
-export function chiffreGeantPeriode(p: PeriodePrincipale): ChiffreGeantPeriode {
+export function chiffreGeantPeriode(p: PeriodePrincipale, voc: Vocabulaire = VOCABULAIRE.general): ChiffreGeantPeriode {
   const comp = p.libellePrecedent ? `par rapport à ${avecArticle(p.libellePrecedent)}` : '';
   const vRn = p.comparable ? variationPct(p.resultatNet, p.resultatNetPrecedent) : null;
   if (vRn != null) {
@@ -163,8 +170,8 @@ export function chiffreGeantPeriode(p: PeriodePrincipale): ChiffreGeantPeriode {
     return {
       valeur: `${signe(vCa)}${fmtNumber(Math.abs(vCa), 1)}`,
       unite: '%',
-      legende: `Évolution du chiffre d’affaires sur ${avecArticle(p.libelle)}, ${comp}. Le résultat net n’est pas comparable (base nulle, négative ou absente).`,
-      titre: `Chiffre d’affaires ${vCa >= 0 ? 'en hausse' : 'en baisse'} de ${fmtNumber(Math.abs(vCa), 1)} % sur ${avecArticle(p.libelle)}`,
+      legende: `Évolution du ${voc.revenuMinuscule} sur ${avecArticle(p.libelle)}, ${comp}. Le résultat net n’est pas comparable (base nulle, négative ou absente).`,
+      titre: `${voc.revenu} ${vCa >= 0 ? 'en hausse' : 'en baisse'} de ${fmtNumber(Math.abs(vCa), 1)} % sur ${avecArticle(p.libelle)}`,
     };
   }
   if (p.resultatNet != null) {
@@ -188,12 +195,12 @@ export interface LigneComparaison {
 }
 
 /** Lignes du tableau « période contre même période de l'année précédente ». Une ligne sans aucune valeur est retirée. */
-export function lignesComparaison(p: PeriodePrincipale): LigneComparaison[] {
+export function lignesComparaison(p: PeriodePrincipale, voc: Vocabulaire = VOCABULAIRE.general): LigneComparaison[] {
   const l = (libelle: string, courant: number | null, precedent: number | null): LigneComparaison => ({
     libelle, courant, precedent, evolution: p.comparable ? variationPct(courant, precedent) : null,
   });
   return [
-    l('Chiffre d’affaires', p.revenu, p.revenuPrecedent),
+    l(voc.revenu, p.revenu, p.revenuPrecedent),
     l('Résultat net', p.resultatNet, p.resultatNetPrecedent),
   ].filter((x) => !(aucune(x.courant) && aucune(x.precedent)));
 }

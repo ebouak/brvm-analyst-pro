@@ -64,3 +64,6 @@ assert.equal(formatStatementValue(62.5, 'pct'), '62,5 %');
 assert.equal(formatStatementValue(null, 'xof'), '—');
 
 console.log('✓ statementRows.test.mjs : tous les tests passent');
+
+/* ── Avenant 2026-11-15 : le coefficient d'exploitation stocké n'est plus affiché ─ */
+assert.ok(!INCOME_ROWS.banque.map((r) => r.key).includes('coefficient_exploitation'));

@@ -94,25 +94,26 @@ it('contradiction avec une observation sans texte imprimé (antérieure à 0148)
   expect(p.relectures[0]!.detail).toBe('Valeurs incompatibles : 14,2 / 16,5');
 });
 
-describe('écriture des montants USD (ETIT) verrouillée tant que l’affichage ne lit pas l’unité', () => {
-  it('le drapeau est fermé dans cette PR', () => {
-    expect(ECRITURE_USD_AUTORISEE).toBe(false);
+describe('écriture des montants USD (ETIT) : verrou ouvert depuis la PR 2 (l’affichage lit l’unité)', () => {
+  it('le drapeau est ouvert : toutes les surfaces lisent sources_specifiques[clé].unite', () => {
+    expect(ECRITURE_USD_AUTORISEE).toBe(true);
   });
-  it('une valeur USD retenue n’est PAS écrite dans lignes_specifiques ; elle est signalée', () => {
+  it('par défaut, une valeur USD retenue s’écrit, avec l’unité dans sa source', () => {
     const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT', lignes_specifiques: { pnb: 690e9 } })]);
-    expect(p.misesAJour).toEqual([]);
-    expect(p.ecartesUsd).toEqual(['ETIT|income_statements|2026-S1|pnb']);
+    expect(p.misesAJour[0]!.lignes_specifiques).toEqual({ pnb: 1.2e9 });
+    expect(p.misesAJour[0]!.sources_specifiques.pnb!.unite).toBe('usd');
+    expect(p.ecartesUsd).toEqual([]);
   });
-  it('un conflit USD/FCFA ne retire pas non plus la valeur en base, mais part en relecture', () => {
+  it('un conflit USD/FCFA retire la valeur en base et part en relecture (jamais de conversion)', () => {
     const a = o({ code: 'ETIT', document_url: 'd1', valeur: 1.2e9, unite: 'usd' });
     const b = o({ code: 'ETIT', document_url: 'd2', valeur: 690e9, unite: 'fcfa' });
     const p = planifierEcritures([a, b], [ligne({ code: 'ETIT', lignes_specifiques: { pnb: 690e9 } })]);
-    expect(p.misesAJour).toEqual([]);
     expect(p.relectures).toHaveLength(1);
+    expect(p.misesAJour[0]?.lignes_specifiques.pnb ?? null).toBeNull();
   });
-  it('drapeau ouvert (PR 2) : la valeur USD s’écrit, unité dans la source', () => {
-    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT' })], { ecritureUsd: true });
-    expect(p.misesAJour[0]!.lignes_specifiques).toEqual({ pnb: 1.2e9 });
-    expect(p.ecartesUsd).toEqual([]);
+  it('verrou refermable (ecritureUsd: false) : rien n’est écrit, l’agrégat est signalé', () => {
+    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT', lignes_specifiques: { pnb: 690e9 } })], { ecritureUsd: false });
+    expect(p.misesAJour).toEqual([]);
+    expect(p.ecartesUsd).toEqual(['ETIT|income_statements|2026-S1|pnb']);
   });
 });

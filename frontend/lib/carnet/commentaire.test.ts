@@ -246,6 +246,13 @@ describe('commenterSeance — cohérence économique', () => {
     expect(t).toContain('0,88 fois ses fonds propres');
   });
 
+  it('banque : « produit net bancaire », jamais « chiffre d’affaires »', () => {
+    const t = tout(commenterSeance({ carnet: null, signal: null, economie: { ...palmci, libelleRevenu: 'produit net bancaire' } }));
+    expect(t).toContain('de produit net bancaire');
+    expect(t).toContain('le produit net bancaire');
+    expect(t).not.toMatch(/chiffre d'affaires/);
+  });
+
   it('DIT qu’une décote sur fonds propres peut durer et ne prédit rien', () => {
     const t = tout(commenterSeance({ carnet: null, signal: null, economie: palmci }));
     expect(t).toContain('sous la valeur comptable');

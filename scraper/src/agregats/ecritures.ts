@@ -9,12 +9,13 @@
  *   - conflit ou a_relire → ouvrir un élément de relecture.
  * Aucune ligne de comptes n'est créée (règle de 0147).
  *
- * Montants en USD (ETIT) : tant que l'affichage ne lit pas
- * sources_specifiques[clé].unite (PR 2), RIEN n'est écrit dans
- * lignes_specifiques pour un agrégat dont une observation est en USD — ni
- * valeur, ni retrait. Les observations restent en base, les relectures
- * s'ouvrent, et l'agrégat est listé dans `ecartesUsd`. Basculer
- * ECRITURE_USD_AUTORISEE dans la PR 2.
+ * Montants en USD (ETIT) : écrits tels que publiés, l'unité dans
+ * sources_specifiques[clé].unite. Verrou ECRITURE_USD_AUTORISEE OUVERT depuis
+ * la PR 2, une fois toutes les surfaces branchées sur l'unité
+ * (frontend/lib/bank/lecture.ts, lib/bank/unites.ts ; garde-fou
+ * frontend/lib/bank/usd.test.ts). Refermé (`ecritureUsd: false`), RIEN
+ * n'est écrit pour un agrégat dont une observation est en USD — ni valeur,
+ * ni retrait — et l'agrégat est listé dans `ecartesUsd`.
  *
  * Utilisé par le cron (runSelectionAgregats.ts) ET, dans sa copie frontend,
  * par la route de relecture qui applique une décision immédiatement.
@@ -113,8 +114,12 @@ export function periodeDeLigne(periode: string): { code: CodePeriode; dateArrete
   return m ? { code: m[2] as CodePeriode, dateArrete: dateArreteDe(Number(m[1]), m[2] as CodePeriode) } : null;
 }
 
-/** Verrou des montants USD : à passer à true quand l'affichage lit l'unité (PR 2). */
-export const ECRITURE_USD_AUTORISEE = false;
+/**
+ * Verrou des montants USD : ouvert (PR 2). Avant de le refermer ou de brancher
+ * une nouvelle surface sur lignes_specifiques, voir frontend/lib/bank/usd.test.ts :
+ * aucun montant USD ne doit s'afficher suivi de « FCFA ».
+ */
+export const ECRITURE_USD_AUTORISEE = true;
 
 const RETIRE: ReadonlySet<Decision['etat']> = new Set(['conflit', 'borne', 'non_exploitable', 'non_applicable']);
 

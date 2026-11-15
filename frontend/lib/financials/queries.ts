@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { FinancialsData } from './types';
 import { TYPES_INTERIM } from './interim';
 import { NB_SEANCES_SERIE, plage52Semaines } from '@/lib/fiche/plages';
+import { avecLignesAffichables } from '@/lib/bank/unites';
 
 export async function loadCompanyFinancials(code: string): Promise<FinancialsData | null> {
   const supabase = createClient();
@@ -85,11 +86,13 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
     },
     latestDaily: { cours_jour, cours_bas_52s, cours_haut_52s, valorisation: hist52[0]?.valorisation != null ? Number(hist52[0].valorisation) : null },
     serieCours: hist52.map((r) => ({ date_marche: r.date_marche, cours_jour: r.cours_jour })),
-    incomeStatements: (incomeRes.data ?? []) as any,
-    balanceSheets: (balanceRes.data ?? []) as any,
+    // Lignes spécifiques affichables seulement : ni montant USD (ETIT) dans
+    // un tableau en FCFA, ni coefficient d'exploitation stocké (lib/bank/unites).
+    incomeStatements: (incomeRes.data ?? []).map(avecLignesAffichables) as any,
+    balanceSheets: (balanceRes.data ?? []).map(avecLignesAffichables) as any,
     cashFlowStatements: (cashflowRes.data ?? []) as any,
-    incomeInterim: (incomeIntRes.data ?? []) as any,
-    balanceInterim: (balanceIntRes.data ?? []) as any,
+    incomeInterim: (incomeIntRes.data ?? []).map(avecLignesAffichables) as any,
+    balanceInterim: (balanceIntRes.data ?? []).map(avecLignesAffichables) as any,
     publications: (pubsRes.data ?? []) as { id: string; libelle: string | null; date_publication: string; type_publication: string | null; source_url: string | null }[],
   };
 }

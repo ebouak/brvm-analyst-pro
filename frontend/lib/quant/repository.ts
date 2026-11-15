@@ -1,3 +1,4 @@
+import { avecLignesAffichables } from '@/lib/bank/unites';
 import { createClient } from '@/lib/supabase/server';
 import { createPublicClient } from '@/lib/supabase/public';
 
@@ -18,7 +19,8 @@ export async function fetchFinancialsForCodes(codes: string[]){
   const { data: bal } = await supabase.from('balance_sheets').select('*').in('code',codes).order('periode',{ascending:false});
   const { data: cf } = await supabase.from('cash_flow_statements').select('*').in('code',codes).order('periode',{ascending:false});
   const { data: div } = await supabase.from('dividends').select('*').in('code',codes).order('exercice',{ascending:false});
-  return { inc: inc??[], bal: bal??[], cf: cf??[], div: div??[] };
+  // Ni montant USD (ETIT) ni coefficient stocké dans un modèle en FCFA (lib/bank/unites).
+  return { inc: (inc??[]).map(avecLignesAffichables), bal: (bal??[]).map(avecLignesAffichables), cf: cf??[], div: div??[] };
 }
 export async function fetchDividends(code:string){
   const supabase = createPublicClient();

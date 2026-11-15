@@ -127,6 +127,7 @@ function blocBanque(q: {
   cours_bas_52s: number | null; cours_haut_52s: number | null;
   absenceSolvabilite?: string | null;
   qualiteActif?: string | null;
+  coefficientExploitation?: number | null;
 }): string {
   const { inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions, m } = q;
   const li = inc_n?.lignes_specifiques ?? {};
@@ -147,8 +148,9 @@ function blocBanque(q: {
   const rn = inc_n?.resultat_net ?? null;
   const roeFin = rn != null && bal_n?.total_capitaux_propres ? rn / bal_n.total_capitaux_propres : null;
   const roaFin = rn != null && bal_n?.total_actifs ? rn / bal_n.total_actifs : null;
-  const coefPublie = enPct(li.coefficient_exploitation);
-  const coef = coefPublie ?? (k?.costIncome != null ? k.costIncome * 100 : null);
+  // Avenant du 2026-11-15 : seul le coefficient de lib/bank/lecture.ts (charges
+  // d'exploitation ÷ PNB, agrégats sourcés) ; ni la valeur stockée, ni frais généraux ÷ PNB.
+  const coef = q.coefficientExploitation != null ? q.coefficientExploitation * 100 : null;
   const pc100 = (v: number | null | undefined) => pct(v == null ? null : v * 100);
   const croissancePnb = pnb != null && pnb1 ? ((pnb - pnb1) / Math.abs(pnb1)) * 100 : null;
   const per = inc_n?.benefice_par_action && cours ? cours / inc_n.benefice_par_action : null;
@@ -186,7 +188,7 @@ ${blocIntermediaire(q.interim)}
 
 ---
 ## RATIOS BANCAIRES
-Rentabilité : ROE ${pc100(roeFin)} (résultat net / capitaux propres de fin d'exercice — même définition que la comparaison aux pairs) | ROA ${pc100(roaFin)} (résultat net / total du bilan de fin d'exercice) | Coefficient d'exploitation ${pct(coef)} (${coefPublie != null ? 'publié' : 'calculé : frais généraux / PNB'}) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
+Rentabilité : ROE ${pc100(roeFin)} (résultat net / capitaux propres de fin d'exercice — même définition que la comparaison aux pairs) | ROA ${pc100(roaFin)} (résultat net / total du bilan de fin d'exercice) | Coefficient d'exploitation ${pct(coef)} (calculé par WESTBOURSE : charges d'exploitation / PNB publiés) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
 Qualité du portefeuille : Créances douteuses / crédits ${pc100(k?.nplRatio)} | Couverture des créances non performantes (taux publié) ${pct(enPct(lb.taux_couverture_creances))}${q.qualiteActif ? `\nTaux publiés par la banque : ${q.qualiteActif}` : ''}
 Structure : Crédits / dépôts ${pc100(k?.transformation)} | Fonds propres / total du bilan ${pc100(k?.leverage)} | Ratio de solvabilité ${lb.ratio_solvabilite != null ? pct(lb.ratio_solvabilite) : q.absenceSolvabilite ?? 'N/D'} (minimum réglementaire UEMOA : 11.5%)
 Valorisation (cours ${cours ?? 'N/D'} FCFA) : PER ${x(per)} | Cours / valeur comptable ${x(k?.pb)} | Rendement du dividende ${pc100(k?.rendementDiv)}
@@ -240,11 +242,13 @@ export function buildDiagnosticPrompt(params: {
   absenceSolvabilite?: string | null;
   /** Banque : taux de créances en souffrance et couverture publiés (lib/bank/prudentiel). */
   qualiteActif?: string | null;
+  /** Banque : coefficient d'exploitation de lib/bank/lecture.ts (fraction), le seul affiché. */
+  coefficientExploitation?: number | null;
 }): string {
   const { code, designation, secteur, cours, cours_bas_52s, cours_haut_52s,
           inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
           periode_n, periode_n1, redFlags, newsSignals, webSignals,
-          interim, contexteQuant, dateRapport, famille, marche, absenceSolvabilite, qualiteActif } = params;
+          interim, contexteQuant, dateRapport, famille, marche, absenceSolvabilite, qualiteActif, coefficientExploitation } = params;
   const banque = famille === 'banque';
 
   const redFlagsTable = redFlags.checks.map((c) => {
@@ -318,7 +322,7 @@ INTERDITS ABSOLUS : ce rapport est une information générale, pas un conseil en
 Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
 
 ${banque
-  ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s, absenceSolvabilite, qualiteActif }) + '\n\n'
+  ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s, absenceSolvabilite, qualiteActif, coefficientExploitation }) + '\n\n'
   : donneesGenerales}---
 ## VALORISATION CALCULÉE (mêmes nombres que le graphique du rapport)
 ${blocValorisation(valoriser({ famille, cours, actions: marche?.actions ?? null, inc: inc_n, bal: bal_n, medianes: contexteQuant?.medianes?.lignes }))}
