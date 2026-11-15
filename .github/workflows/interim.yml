@@ -17,6 +17,14 @@ name: Comptes intermédiaires (trimestres, semestres)
 # Échec visible : un PDF ou un LLM injoignable fait sortir le job en code 1.
 # Secrets : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (les clés LLM sont lues
 # dans la table api_keys).
+#
+# Puis les AGRÉGATS BANCAIRES (scraper/src/agregats/) : chaque publication
+# bancaire nouvelle est lue en entier par Gemini, chaque valeur contrôlée ;
+# seules les concordantes vont dans lignes_specifiques. Une file de relecture
+# non vide alerte l'exploitant sur Telegram (les décisions prises dans
+# /admin/agregats s'appliquent aussitôt, sans attendre ce job). Une panne
+# d'extraction sort en code 1. Secrets supplémentaires : TELEGRAM_BOT_TOKEN,
+# TELEGRAM_CHAT_ID.
 
 on:
   schedule:
@@ -41,7 +49,7 @@ permissions:
 jobs:
   interim:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: scraper
@@ -59,3 +67,14 @@ jobs:
           LOG_LEVEL: info
           CODES: ${{ github.event.inputs.codes }}
         run: npx tsx src/index.ts interim $CODES
+      - name: Extraire les agrégats bancaires
+        # Même si l'étape précédente a échoué : ce sont deux lectures distinctes.
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LOG_LEVEL: info
+          CODES: ${{ github.event.inputs.codes }}
+        run: npx tsx src/index.ts agregats:bancaires $CODES
