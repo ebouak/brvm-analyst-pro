@@ -21,6 +21,82 @@ Spécification : `docs/superpowers/specs/2026-11-15-agregats-bancaires-design.md
 - Un ratio n'est jamais extrait ni écrit par ce plan (coefficient d'exploitation, coût du risque relatif, crédits ÷ dépôts, ROE sont CALCULÉS par le plan 2). Les ratios PRUDENTIELS publiés (solvabilité, CET1, Tier 1, taux et couverture des créances en souffrance) sont des indicateurs de 0147, définitions inchangées.
 - Numéro de migration : `0245` (0243 et 0244 sont réservés à d'autres PR). Vérifier avant d'écrire : `git -C C:\tmp\wt-banques ls-tree --name-only origin/main supabase/migrations/ | Select-Object -Last 5`. Si `0245` est pris, prendre le premier libre au-dessus et renommer partout dans ce plan.
 
+## Avenant du 2026-11-15 — décisions de l'exploitant (PRIMENT sur le reste du plan)
+
+Là où une tâche ci-dessous contredit cet avenant, l'avenant l'emporte. Worktree
+d'exécution : `C:\tmp\wt-banq-extr` (lire ce chemin à la place de
+`C:\tmp\wt-banques` dans toutes les commandes).
+
+**D1 — ETIT publie en USD : extrait et affiché EN USD, sans conversion.**
+- Task 6 (`normaliser`) : devise FCFA (ou absente) → `unite = 'fcfa'` ; devise
+  USD → `unite = 'usd'`, statut `publie`, valeur = nombre × unité imprimée,
+  AUCUN taux de change. Toute autre devise reste `publie_non_exploitable`
+  (`definition_incompatible`). Le test « ETIT » attend `publie` + `usd`. La
+  colonne `unite` de 0147 accepte déjà `usd` : rien à changer en base.
+- Task 7 (`controler`) : une observation en USD n'est jamais rapprochée d'une
+  référence de la base (les comptes ETIT en base sont CONVERTIS en FCFA,
+  migrations 0115/0116 : comparer exigerait un taux, interdit). Unité plausible
+  contre le total du bilan DU MÊME DOCUMENT et de la même unité seulement ;
+  sans lui, bornes absolues du total du bilan [0,1 ; 100] Md USD. Égalités
+  comptables : uniquement entre valeurs de même unité. Variation N−1 : clé
+  `indicateur|perimetre|unite`.
+- Task 9 (`selectionnerExercice`, montants) : deux montants d'unités
+  différentes (USD et FCFA) ne se rapprochent pas → `conflit` (relecture).
+- Task 10 (`ecritures`) : `sources_specifiques[clé]` porte `unite`
+  (`fcfa` | `usd` | `pct`) ; c'est par elle que l'affichage (plan 2) écrit
+  « USD ». Les ratios se calculent sans conversion (numérateur et dénominateur
+  dans la même unité).
+- Task 15 : la file affiche l'unité réelle (USD / FCFA / %) ; une correction
+  garde l'unité de l'observation (`usd` pour un document en USD).
+- Procédure PR 3 : ETIT n'est plus « tout non exploitable » ; ses agrégats
+  sortent en USD.
+
+**D2 — Une décision de relecture s'applique IMMÉDIATEMENT.**
+- La route `POST /api/admin/agregats/relecture/[id]` (Task 15), après avoir
+  changé l'état des observations et clos l'élément, REJOUE la sélection pour
+  cette banque seule et écrit la valeur retenue (lignes_specifiques,
+  sources_specifiques, trace `correction_champ` `corrige_par =
+  'relecture-agregats'`, nouveaux éléments de relecture éventuels), sans
+  attendre le cron. Un échec de cette application renvoie 500 avec un message
+  explicite (la décision reste enregistrée ; le cron la réappliquera) — jamais
+  un succès silencieux.
+- Pour cela le frontend porte une COPIE des modules purs de sélection
+  (`frontend/lib/agregats/pure/`, chemins relatifs identiques au scraper :
+  `agregats/{indicateurs,dates,nombres,ecritures}.ts`,
+  `prudentiel/{rapprochement,montants,selection}.ts`), générée par
+  `frontend/scripts/copier-agregats-purs.mjs` et vérifiée par
+  `frontend/lib/agregats/pure/copie.test.ts` (contenu identique au scraper,
+  aux seules extensions `.js` d'import près). Toute correction se fait côté
+  scraper, puis on relance le script.
+- Pour que la copie soit fermée, Task 3 sépare les dates (`CodePeriode`,
+  `dateArreteDe`, `moisDe`, `periodeDeDate`) dans `scraper/src/agregats/dates.ts`
+  (sans dépendance), `periode.ts` les réexporte et garde `periodeDuDocument`.
+- I/O frontend : `frontend/lib/admin/rejouerSelection.ts` (miroir de
+  `runSelectionAgregats.ts`, une banque). Test scraper ajouté (Task 10) :
+  après validation (une observation `valide`, l'autre `rejete`), la valeur est
+  retenue et aucune relecture n'est rouverte.
+
+**D3 — Le `coefficient_exploitation` déjà stocké est CONSERVÉ comme recoupement.**
+- Task 7 : `Reference.coefficientBase` (= `lignes_specifiques.coefficient_exploitation`
+  de la même période, en %). Si PNB et charges d'exploitation sont publiés dans
+  le même document, à la même date, même périmètre et même unité, le
+  coefficient recalculé (|charges| ÷ PNB × 100) est comparé au stocké : écart
+  > `TOLERANCE_COEFFICIENT` (1 point) → PNB et charges d'exploitation
+  `a_relire`, motif chiffré. Le coefficient n'est jamais extrait ni écrit.
+- Task 12 : `reference()` lit ce coefficient.
+- Affichage : il n'est PLUS affiché (le plan 2 affiche le coefficient
+  recalculé) — note reportée dans le plan 2.
+
+**D4 — Exécution tâche par tâche, test d'abord, un commit par tâche.**
+
+**Limites de cette exécution** : la migration 0245 est ÉCRITE, pas appliquée ;
+Task 16 Steps 1-3 (application, RLS à la clé publique, `get_advisors`) restent
+à faire par l'exploitant APRÈS le déploiement de Task 1 Step 2. Aucune
+écriture en production, aucun message réel. Comme 0245 n'est pas appliquée, la
+reprise à blanc tolère l'absence des colonnes de 0245 (lecture en repli,
+signalée dans le rapport) pour pouvoir produire rapport et fixtures avant
+l'application.
+
 ## Carte des fichiers
 
 | Fichier | Rôle |
@@ -2919,7 +2995,7 @@ Puis ouvrir la PR 1 (titre « Agrégats bancaires 1/3 : extraction sourcée, con
 1. **Lancer la reprise à blanc** sur les 16 banques :
    `cd C:\tmp\wt-banques\scraper; npx tsx src/index.ts agregats:reprise --rapport=output/agregats/reprise-AAAA-MM-JJ.json`
    (`AAAA-MM-JJ` = date du jour). Elle relit tous les documents bancaires de `publications`, n'écrit RIEN en base, et produit `reprise-AAAA-MM-JJ.json` (observations comprises) et `reprise-AAAA-MM-JJ.md` (synthèse). Vérifier ensuite par la donnée qu'aucune ligne n'a été écrite : `select count(*) from indicateur_source where methode = 'gemini-agregats';` doit rendre le même nombre qu'avant.
-2. **Présenter le rapport `.md` à l'exploitant** : documents lus / en échec, et pour chaque banque et période : valeurs trouvées, non trouvées, bloquées par un contrôle, contradictions, retenues ; liste « À relire » et périodes sans ligne de comptes. Signaler explicitement les cas attendus : ETIT (comptes en USD, tout « non exploitable »), branches islamiques Coris exclues, scans BOA.
+2. **Présenter le rapport `.md` à l'exploitant** : documents lus / en échec, et pour chaque banque et période : valeurs trouvées, non trouvées, bloquées par un contrôle, contradictions, retenues ; liste « À relire » et périodes sans ligne de comptes. Signaler explicitement les cas attendus : ETIT (agrégats en USD tels que publiés, sans conversion — avenant D1), branches islamiques Coris exclues, scans BOA.
 3. **Attendre son accord écrit.** Sans accord, ne rien écrire. S'il demande des corrections (prompt, contrôle), les faire dans une PR distincte puis relancer l'étape 1 : un rapport approuvé correspond à une version de code.
 4. **Écrire depuis le rapport approuvé**, sans relire les PDF :
    `cd C:\tmp\wt-banques\scraper; npx tsx src/index.ts agregats:reprise --ecrire --depuis-rapport=output/agregats/reprise-AAAA-MM-JJ.json`

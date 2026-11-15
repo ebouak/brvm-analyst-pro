@@ -12,6 +12,17 @@ Spécification : `docs/superpowers/specs/2026-11-15-agregats-bancaires-design.md
 
 ---
 
+## Report des décisions du 2026-11-15 (plan 1, avenant)
+
+- **USD** : `sources_specifiques[clé].unite` vaut `fcfa`, `usd` ou `pct`. ETIT
+  publie en USD : ses agrégats s'affichent EN USD (unité écrite), sans
+  conversion ; ses ratios se calculent sans conversion. `LigneAgregat.unite`
+  doit donc accepter `usd`, et les formateurs écrire « USD » au lieu de « FCFA ».
+- **Coefficient d'exploitation** : la valeur stockée
+  `lignes_specifiques.coefficient_exploitation` n'est PLUS affichée ; seul le
+  coefficient recalculé (charges d'exploitation ÷ PNB) l'est. La valeur stockée
+  sert de recoupement à l'extraction (plan 1, contrôle D3).
+
 ## Conventions
 
 - Tests frontend : `cd C:\tmp\wt-banques\frontend; npx vitest run <fichier>` ; scraper : `cd C:\tmp\wt-banques\scraper; npx vitest run <fichier>`. Toujours depuis un chemin `C:` en majuscule.
