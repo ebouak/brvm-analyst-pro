@@ -10,6 +10,12 @@ const SOURCES_FIABLES = new Set(['brvm-calendrier', 'brvm-boc', 'richbourse']);
 const SEUIL_VARIATION = 5;
 const SEUIL_VOLUME = 2;
 const SEUIL_PART = 40; // % des capitaux de la séance
+/**
+ * Part des capitaux sous laquelle un mouvement n'est pas représentatif. Le
+ * 11/11/2026, le titre de l'article portait sur Sicable CI (+7,18 %) pour
+ * 320 titres, soit 0,07 % des capitaux ; le 30/10, sur Unilever CI pour 25 titres.
+ */
+export const SEUIL_PART_MIN = 0.5;
 const MIN_HISTORIQUE = 10;
 const MIN_COTES = 20;
 const INDICES = ['BRVMC', 'BRVM30', 'BRVMPRES'];
@@ -74,7 +80,8 @@ export interface Mouvement {
  * remarquable, dans cet ordre — record de capitaux sur tout l'historique en
  * base, puis valeur qui pèse au moins 40 % des échanges, puis séance hors
  * norme (variation ≥ 5 % ou record 52 semaines, sur un volume ≥ 2× sa
- * moyenne), sinon la plus forte variation.
+ * moyenne), sinon la plus forte variation — parmi les valeurs qui pèsent au
+ * moins 0,5 % des capitaux de la séance.
  */
 function seance(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[] {
   const cotes = Object.values(ctx.cours).filter(
@@ -94,8 +101,12 @@ function seance(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[
     const record52 =
       c.cours_haut_52s && c.cours_jour! >= c.cours_haut_52s ? 'haut' : c.cours_bas_52s && c.cours_jour! <= c.cours_bas_52s ? 'bas' : null;
     const v = Math.abs(c.variation_pct!);
-    const horsNorme = ratioVolume != null && ratioVolume >= SEUIL_VOLUME && (v >= SEUIL_VARIATION || record52 != null);
-    const rang = recordValeur ? 4 : part >= SEUIL_PART ? 3 : horsNorme ? 2 : 1;
+    const representatif = part >= SEUIL_PART_MIN;
+    const horsNorme =
+      representatif && ratioVolume != null && ratioVolume >= SEUIL_VOLUME && (v >= SEUIL_VARIATION || record52 != null);
+    // Rang 0 : mouvement sur une part minime des capitaux. Il ne fait l'angle
+    // que si aucune valeur de la séance n'est représentative.
+    const rang = recordValeur ? 4 : part >= SEUIL_PART ? 3 : horsNorme ? 2 : representatif ? 1 : 0;
     const departage = rang >= 3 ? valeur : rang === 2 ? v * (ratioVolume ?? 1) : v;
     return { c, hist, moyenne, ratioVolume, valeur, part, prec, recordValeur, record52, rang, departage };
   });
@@ -112,6 +123,13 @@ function seance(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[
     return i && i.valeur != null && i.variation_pct != null ? { valeur: i.valeur, variation: i.variation_pct } : null;
   };
   const actions = ctx.actions?.[c.code] ?? null;
+  // La plus forte variation de la séance, quand elle n'est PAS l'angle parce
+  // qu'elle porte sur une part minime des capitaux : l'article la nomme et dit pourquoi.
+  const extreme = [...evalues].sort((a, b) => Math.abs(b.c.variation_pct!) - Math.abs(a.c.variation_pct!))[0]!;
+  const isolee =
+    extreme.c.code !== c.code && extreme.part < SEUIL_PART_MIN && Math.abs(extreme.c.variation_pct!) > Math.abs(c.variation_pct!)
+      ? { code: extreme.c.code, cours: extreme.c.cours_jour!, variation: extreme.c.variation_pct!, volume: extreme.c.volume ?? 0, part: arrondi(extreme.part, 2) }
+      : null;
 
   return [
     {
@@ -121,6 +139,7 @@ function seance(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[
       dateFait: c.date_marche,
       donnees: {
         rang: angle.rang,
+        variation_isolee: isolee,
         cours: c.cours_jour,
         cours_precedent: c.cours_precedent,
         variation: c.variation_pct,

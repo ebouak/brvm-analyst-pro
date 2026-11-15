@@ -61,8 +61,15 @@ export class Plume {
   /** Montant dans la devise de sa source (USD pour ETIT, sans conversion), même échelle que fcfa. */
   montant(x: number, devise: 'FCFA' | 'USD'): string {
     const a = Math.abs(x);
+    // « 1 millions FCFA » a été publié pour 931 200 F : sous 10 millions on
+    // garde deux décimales, sous un million le montant exact, et le pluriel
+    // ne vient qu'à partir de deux.
+    const unite = (v: number, mot: string) => `${mot}${v >= 2 ? 's' : ''} ${devise}`;
     if (a >= 1e11) return `${this.n(a / 1e9, 0)} milliards ${devise}`;
-    return a >= 1e9 ? `${this.n(a / 1e9, 2)} milliards ${devise}` : `${this.n(a / 1e6, 0)} millions ${devise}`;
+    if (a >= 1e9) return `${this.n(a / 1e9, 2)} ${unite(a / 1e9, 'milliard')}`;
+    if (a >= 1e7) return `${this.n(a / 1e6, 0)} millions ${devise}`;
+    if (a >= 1e6) return `${this.n(a / 1e6, 2)} ${unite(a / 1e6, 'million')}`;
+    return `${this.n(a, 0)} ${devise}`;
   }
 
   date(iso: string): string {
@@ -292,6 +299,37 @@ function seance(f: Fait, o: Outils): Corps {
     `${p.n(num(d.hausses)!)} valeurs progressent, ${p.n(num(d.baisses)!)} reculent et ${p.n(num(d.stables)!)} sont stables ; ` +
     `${p.fcfa(num(d.total)!)} ont été échangés.`;
 
+  // Notre lecture : ce que les chiffres de la séance disent, sans cause supposée.
+  const nbHausses = num(d.hausses) ?? 0;
+  const nbBaisses = num(d.baisses) ?? 0;
+  const lecture: string[] = [];
+  if (composite && composite.variation > 0 && nbBaisses > nbHausses) {
+    lecture.push(
+      `L’indice progresse alors que les baisses (${p.n(nbBaisses)}) sont plus nombreuses que les hausses (${p.n(nbHausses)}) : la hausse repose sur un petit nombre de valeurs.`,
+    );
+  } else if (composite && composite.variation < 0 && nbHausses > nbBaisses) {
+    lecture.push(
+      `L’indice recule alors que les hausses (${p.n(nbHausses)}) sont plus nombreuses que les baisses (${p.n(nbBaisses)}) : le repli repose sur un petit nombre de valeurs.`,
+    );
+  }
+  const b30 = indices.BRVM30 ?? null;
+  if (composite && b30 && Math.abs(b30.variation - composite.variation) >= 0.2) {
+    const mieux = b30.variation > composite.variation;
+    lecture.push(
+      `Le BRVM 30 (${variationDe(b30.variation)}) évolue ${mieux ? 'au-dessus' : 'en dessous'} du BRVM Composite (${variationDe(composite.variation)}) : les valeurs les plus traitées font ${mieux ? 'mieux' : 'moins bien'} que le reste de la cote.`,
+    );
+  }
+  const partAngle = num(d.part) ?? 0;
+  if (partAngle >= 40) {
+    lecture.push(`${nom} concentre ${p.pct(partAngle)} des capitaux : hors de cette valeur, l’activité de la séance est faible.`);
+  }
+  const isolee = d.variation_isolee as { code: string; cours: number; variation: number; volume: number; part: number } | null | undefined;
+  if (isolee) {
+    lecture.push(
+      `La plus forte variation de la séance, ${nomDe(isolee.code)} (${signe(isolee.variation)}${p.pct(isolee.variation)} à ${p.f(isolee.cours)} F), ne porte que sur ${p.n(isolee.volume)} titres, soit ${p.pct(isolee.part)} des capitaux : elle n’est pas représentative.`,
+    );
+  }
+
   // La valeur du jour
   const prec = num(d.cours_precedent);
   const valeur = num(d.valeur) ?? 0;
@@ -343,10 +381,12 @@ function seance(f: Fait, o: Outils): Corps {
     baisses.length ? `Côté baisses : ${liste(baisses)}.` : '',
   ].filter(Boolean);
 
-  const sections: SkeletonSection[] = [
-    { titre: 'Le marché', texte: marche },
-    { titre: nom, texte: lignesValeur.join(' ') },
-  ];
+  if (rang === 0) {
+    lignesValeur.push('Ce mouvement porte sur une part minime des capitaux de la séance : il n’est pas représentatif.');
+  }
+  const sections: SkeletonSection[] = [{ titre: 'Le marché', texte: marche }];
+  if (lecture.length) sections.push({ titre: 'Notre lecture', texte: lecture.join(' ') });
+  sections.push({ titre: nom, texte: lignesValeur.join(' ') });
   if (autres.length) sections.push({ titre: 'Les autres mouvements', texte: autres.join(' ') });
   const reperes = reperesSection(o, cours, num(d.cours_haut_52s), num(d.cours_bas_52s));
   if (reperes) sections.push(reperes);
@@ -364,7 +404,7 @@ function seance(f: Fait, o: Outils): Corps {
 
   const image =
     rang === 4 && valeur > 0
-      ? { chiffre: p.fcfa(valeur).replace(' milliards FCFA', ' Md'), legende: `${nom} · record de capitaux` }
+      ? { chiffre: p.fcfa(valeur).replace(/ milliards? FCFA/, ' Md'), legende: `${nom} · record de capitaux` }
       : rang === 3
         ? { chiffre: p.pct(part, 0), legende: `des échanges captés par ${nom}` }
         : { chiffre: variationDe(v), legende: `${nom} · séance du ${date}` };

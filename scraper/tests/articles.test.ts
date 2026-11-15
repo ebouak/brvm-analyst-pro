@@ -137,6 +137,28 @@ describe('detecter — compte rendu de séance', () => {
     expect(s.donnees.rang).toBe(1);
   });
 
+  it('n’ouvre pas sur un mouvement qui pèse moins de 0,5 % des capitaux (Sicable, 11/11/2026)', () => {
+    // 320 titres pour 931 200 F : plus forte variation, mais 0,07 % des capitaux.
+    const ctx = contexte([ligne('CABC', 2910, 7.18, 320, 931_200), ligne('SNTS', 4190, 4.75, 250_000, 1_000_000_000)]);
+    const s = seanceDe(detecter(ctx, [], []))!;
+    expect(s.code).toBe('SNTS');
+    expect(s.donnees.variation_isolee).toMatchObject({ code: 'CABC', variation: 7.18, volume: 320 });
+    const b = rediger(s, { ...NOMS, CABC: 'SICABLE CI' });
+    expect(b.titre).not.toContain('Sicable');
+    const lecture = b.sections.find((x) => x.titre === 'Notre lecture')!.texte;
+    expect(lecture).toContain('ne porte que sur 320 titres');
+    expect(lecture).toContain('elle n’est pas représentative');
+  });
+
+  it('un volume inhabituel sur un titre illiquide ne suffit pas à faire l’angle', () => {
+    // 25 titres contre 2 en moyenne : 12 fois la moyenne, et pourtant rien de significatif.
+    const ctx = contexte([ligne('UNLC', 49000, 6.52, 25, 1_225_000), ligne('BOAM', 5800, 2.1, 50_000, 290_000_000)]);
+    ctx.historique.UNLC = historique('UNLC', 2);
+    const s = seanceDe(detecter(ctx, [], []))!;
+    expect(s.code).toBe('BOAM');
+    expect(s.donnees.variation_isolee).toMatchObject({ code: 'UNLC', volume: 25 });
+  });
+
   it('juxtapose un détachement et rappelle une opération sur titres récente', () => {
     const ctx = contexte([ligne('SDSC', 2810, -6.33, 5000, 300_000_000)]);
     ctx.historique.SDSC = [...historique('SDSC', 1000), { ...ligne('SDSC', 3000, 0, 1000, 0), date_marche: '2026-10-27' }];
@@ -200,12 +222,34 @@ describe('rediger', () => {
   it('écrit la séance comme un compte rendu : marché, valeur, autres mouvements, repères', () => {
     const b = rediger(SEANCE_SNTS, NOMS, REPERES);
     expect(b.titre).toBe('BRVM : Sonatel signe un record de 12,85 milliards FCFA échangés');
-    expect(b.sections.map((s) => s.titre)).toEqual(['Le marché', 'Sonatel', 'Les autres mouvements', 'Repères pour l’investisseur']);
+    expect(b.sections.map((s) => s.titre)).toEqual(['Le marché', 'Notre lecture', 'Sonatel', 'Les autres mouvements', 'Repères pour l’investisseur']);
+    expect(b.sections[1]!.texte).toContain('Sonatel concentre 90,86 % des capitaux');
     const texte = b.sections.map((s) => s.texte).join(' ');
     for (const attendu of ['le BRVM Composite perd 0,70 % à 528,34 points, le BRVM 30 perd 0,75 % à 256,25 points et le BRVM Prestige', '90,86 %', 'recule de 225 milliards FCFA', 'le 2 janvier 2007', 'Bank of Africa Mali (+5,45 % à 5 800 F)', '10,2 fois le bénéfice', 'fractionnement']) {
       expect(texte).toContain(attendu);
     }
     expect(b.image.chiffre).toBe('12,85 Md');
+  });
+
+  it('écrit les petits montants sans arrondi trompeur ni faute d’accord', () => {
+    const f: Fait = { ...SEANCE_SNTS, donnees: { ...SEANCE_SNTS.donnees, rang: 1, record_valeur: false, valeur: 931_200, total: 1_220_000_000, part: 0.08, volume: 320, capitalisation_delta: 1_150_000_000 } };
+    const texte = rediger(f, NOMS).sections.map((s) => s.texte).join(' ');
+    expect(texte).toContain('931 200 FCFA');
+    expect(texte).toContain('1,22 milliard FCFA');
+    expect(texte).toContain('1,15 milliard FCFA');
+    expect(texte).not.toMatch(/1 millions|1,\d+ milliards/);
+  });
+
+  it('signale un indice en hausse quand les baisses dominent', () => {
+    const f: Fait = { ...SEANCE_SNTS, donnees: { ...SEANCE_SNTS.donnees, rang: 1, record_valeur: false, part: 20, hausses: 15, baisses: 23, stables: 10,
+      indices: { BRVMC: { valeur: 517.17, variation: 0.85 }, BRVM30: { valeur: 250.13, variation: 1.07 }, BRVMPRES: { valeur: 192.47, variation: 0.45 } } } };
+    const b = rediger(f, NOMS);
+    const lecture = b.sections.find((x) => x.titre === 'Notre lecture')!.texte;
+    expect(lecture).toContain('les baisses (23) sont plus nombreuses que les hausses (15)');
+    expect(lecture).toContain('Le BRVM 30 (+1,07 %) évolue au-dessus du BRVM Composite (+0,85 %)');
+    const tout = [b.titre, b.chapo, ...b.sections.map((s) => s.texte)].join('\n');
+    expect(assertNoForeignNumber(tout, b.chiffres)).toBe(true);
+    expect(tout).not.toMatch(/à cause|en raison|suite à|porté par|grâce à/);
   });
 
   it('juxtapose un détachement sans lien de cause', () => {
