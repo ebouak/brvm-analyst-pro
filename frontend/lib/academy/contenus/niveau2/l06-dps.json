@@ -53,7 +53,15 @@
      "expression": "(4 × 6 000 + 4 500) ÷ 5",
      "exemple": "28 500 ÷ 5 = 5 700 FCFA : la valeur se conserve"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "dps",
+    "consigne": "Changez la parité, le prix d’émission ou le nombre d’actions : la valeur se conserve, mais votre part du capital dépend de votre choix.",
+    "cours": 6000,
+    "prix_emission": 4500,
+    "parite": 4,
+    "actions": 4
+   }
   },
   {
    "type": "cas",

@@ -61,6 +61,17 @@
      ]
     ],
     "note": "Le passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal."
+   },
+   "simulation": {
+    "type": "technique",
+    "indicateur": "macd",
+    "consigne": "Le MACD 12, 26, 9 calculé sur une valeur réelle : l’histogramme est lu selon son signe et son évolution, comme dans le tableau.",
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "SGBC",
+     "SIBC"
+    ]
    }
   },
   {

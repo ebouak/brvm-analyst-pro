@@ -21,7 +21,15 @@
      "expression": "Dividende net ÷ Cours",
      "exemple": "880 ÷ 16 000 = 5,5 %"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "rendement_net",
+    "consigne": "Choisissez le pays de la société : pour un même dividende brut, le montant net change.",
+    "dividende_brut": 1000,
+    "cours": 16000,
+    "pays": "CI",
+    "euros": false
+   }
   },
   {
    "type": "importance",

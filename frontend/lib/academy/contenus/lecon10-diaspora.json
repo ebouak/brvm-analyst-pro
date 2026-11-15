@@ -24,7 +24,8 @@
       "contenu": "Le franc CFA est lié à l’euro par une parité fixe : 1 euro vaut 655,957 FCFA. Pour un résident de la zone euro, ce change ne fluctue pas.\nPour les autres devises, comme le dollar, le cours varie : le rendement final dépend aussi du change.",
       "formules": [
         { "nom": "Conversion", "expression": "Montant en FCFA = Montant en euros × 655,957", "exemple": "500 € × 655,957 ≈ 327 979 FCFA" }
-      ]
+      ],
+      "simulation": { "type": "change", "consigne": "Renseignez les frais de votre banque : la parité ne bouge pas, mais les frais réduisent ce qui arrive sur le compte.", "montant_eur": 500, "frais_pct": 0, "frais_fixes_eur": 0, "cours_action": 0 }
     },
     {
       "type": "importance",

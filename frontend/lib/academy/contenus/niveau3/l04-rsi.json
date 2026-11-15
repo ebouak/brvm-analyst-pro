@@ -43,7 +43,22 @@
      "valeur": "Survente",
      "detail": "Les baisses récentes dominent nettement"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "technique",
+    "indicateur": "rsi",
+    "consigne": "Changez la période et les seuils : la zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.",
+    "codes": [
+     "SNTS",
+     "BOAC",
+     "NTLC",
+     "SDCC",
+     "TTLC"
+    ],
+    "periode": 14,
+    "seuil_haut": 70,
+    "seuil_bas": 30
+   }
   },
   {
    "type": "cas",

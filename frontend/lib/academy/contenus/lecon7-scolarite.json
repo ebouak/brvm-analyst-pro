@@ -64,7 +64,8 @@
         { "titre": "Surestimer le rendement", "detail": "Un dividende peut baisser. Construisez votre plan sur une hypothèse prudente." },
         { "titre": "Tout miser sur un seul titre", "detail": "Un projet de dix ans traversera de mauvaises années : répartissez sur plusieurs valeurs." },
         { "titre": "Rester tout en actions jusqu’au dernier jour", "detail": "Une baisse juste avant la rentrée obligerait à vendre au mauvais moment." }
-      ]
+      ],
+      "simulation": { "type": "valeur_future", "consigne": "Ajoutez un versement mensuel ou un capital visé : le simulateur compare aussi avec un départ trois ans plus tard.", "capital_initial": 200000, "versement_mensuel": 0, "taux_pct": 8, "annees": 10, "objectif": 0 }
     },
     {
       "type": "retenir",

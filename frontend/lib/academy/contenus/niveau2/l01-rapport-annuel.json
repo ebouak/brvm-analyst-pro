@@ -63,7 +63,14 @@
      "detail": "Le reste renforce les fonds propres",
      "icone": "actionnaires"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "distribution",
+    "consigne": "Déplacez le curseur comme le ferait l’assemblée : la part distribuée va aux actionnaires, le reste renforce les fonds propres.",
+    "resultat_net": 2000000000,
+    "actions": 10000000,
+    "taux_distribution_pct": 50
+   }
   },
   {
    "type": "cas",

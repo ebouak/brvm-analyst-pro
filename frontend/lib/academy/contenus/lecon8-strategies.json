@@ -46,7 +46,8 @@
       "contenu": "Le PER compare le prix d’une action au bénéfice qu’elle génère. Un PER de 8 signifie que l’on paie l’action 8 fois son bénéfice annuel.\nUn PER bas peut signaler une décote à saisir, ou une société en difficulté. Il se compare toujours à celui du secteur et à son propre historique.",
       "formules": [
         { "nom": "PER", "expression": "Cours de l’action ÷ Bénéfice par action", "exemple": "10 000 ÷ 1 250 = 8" }
-      ]
+      ],
+      "simulation": { "type": "per", "consigne": "Calculez un PER sur l’exemple de la leçon, puis sur une valeur cotée, à partir de ses derniers comptes publiés.", "cours": 10000, "bpa": 1250, "croissance_pct": 0, "annees": 3, "codes": ["SNTS", "SGBC", "BOAB"] }
     },
     {
       "type": "importance",

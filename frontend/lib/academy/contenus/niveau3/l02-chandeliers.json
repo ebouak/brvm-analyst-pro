@@ -27,7 +27,15 @@
      "titre": "La taille",
      "detail": "Un grand corps traduit un mouvement net ; un petit corps, de l’hésitation."
     }
-   ]
+   ],
+   "simulation": {
+    "type": "chandelier",
+    "consigne": "Saisissez quatre prix : la bougie se dessine et sa forme est décrite. Essayez un doji, un marteau, une étoile filante.",
+    "ouverture": 1000,
+    "haut": 1060,
+    "bas": 980,
+    "cloture": 1040
+   }
   },
   {
    "type": "importance",

@@ -88,7 +88,17 @@
      "expression": "Actif net du fonds ÷ Nombre de parts",
      "exemple": "5 Md ÷ 500 000 parts = 10 000 FCFA la part"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "opcvm_frais",
+    "consigne": "Ajoutez des frais de sortie ou une performance : le simulateur indique ce que le fonds doit gagner pour seulement compenser ses frais.",
+    "montant": 1000000,
+    "annees": 5,
+    "frais_entree_pct": 2,
+    "frais_gestion_pct": 1.5,
+    "frais_sortie_pct": 0,
+    "performance_pct": 0
+   }
   },
   {
    "type": "cas",
