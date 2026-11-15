@@ -16,25 +16,25 @@ const valide = {
 };
 
 describe('schemaLecture', () => {
-  it('accepte une réponse conforme et pose les défauts', () => {
+  it('accepte une rÃ©ponse conforme et pose les dÃ©fauts', () => {
     const r = schemaLecture.parse(valide);
     expect(r.valeurs[1]).toMatchObject({ colonne: 'courante', comparateur: '=', approximation: false });
   });
-  it('refuse un indicateur inconnu (un ratio calculé, par exemple)', () => {
+  it('refuse un indicateur inconnu (un ratio calculÃ©, par exemple)', () => {
     const r = schemaLecture.safeParse({ ...valide, valeurs: [{ ...valide.valeurs[0], indicateur: 'coefficient_exploitation' }] });
     expect(r.success).toBe(false);
   });
-  it('refuse une date mal formée', () => {
+  it('refuse une date mal formÃ©e', () => {
     expect(schemaLecture.safeParse({ ...valide, date_arrete: '30/06/2026' }).success).toBe(false);
   });
 });
 
 describe('promptAgregats', () => {
   it('nomme chaque indicateur et interdit tout calcul et toute conversion', () => {
-    const { systeme, consigne } = promptAgregats('SGBC', 'Rapport d’activités - 1er semestre 2026');
+    const { systeme, consigne } = promptAgregats('SGBC', 'Rapport dâ€™activitÃ©s - 1er semestre 2026');
     expect(systeme).toContain('marge_interets');
     expect(systeme).toContain('ratio_tier1');
-    expect(systeme).toMatch(/ne calcule jamais/i);
+    expect(systeme).toMatch(/ne calcules? jamais/i);
     expect(systeme).toMatch(/islamique/i);
     expect(systeme).toMatch(/USD/);
     expect(consigne).toContain('SGBC');
