@@ -1,7 +1,8 @@
 'use client';
 
 /**
- * Barre de cote : la navigation unique des pages publiques (étape 1 du lot 7).
+ * Barre de cote : la navigation unique du site, pages publiques ET application
+ * (lot 7, étapes 1 et 2). Posée une seule fois par `ConditionalShell`.
  *
  * Plate, pleine largeur, découpée en cellules par des filets d'un pixel, cellule
  * d'action pleine collée au bord droit. Aucun lien n'est écrit ici : panneaux,
@@ -10,7 +11,9 @@
  *
  * Accessibilité : motif « disclosure » (`button aria-expanded` + `nav`), pas de
  * `role="menu"`. Les données de la colonne vivante ne sont demandées qu'à la
- * première ouverture d'un panneau, jamais au chargement de la page.
+ * première ouverture d'un panneau (ou au premier focus d'une cellule), jamais
+ * au chargement de la page. Le focus clavier n'ouvre PAS le panneau : Entrée,
+ * Espace ou ↓ l'ouvrent (accord de l'exploitant du 2026-11-15).
  */
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -18,25 +21,32 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { ChevronDown, Grid3x3, Lock, Search, X } from 'lucide-react';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import ThemeToggle from '@/components/ThemeToggle';
+import BeginnerToggle from '@/components/BeginnerToggle';
 import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
 import { createClient } from '@/lib/supabase/client';
 import { phCapture, phReset } from '@/lib/analytics/posthogClient';
-import { rubriqueDe } from '@/lib/nav';
+import { isNavItemActive, rubriqueDe } from '@/lib/nav';
 import type { Rubrique } from '@/lib/navRegistre';
 import {
-  LIENS_COMPTE, PANNEAUX, REPLI_VIVANT, RUBRIQUES_BARRE, codeContexte, etatSeance, formaterContexte, panneauDe,
+  LIENS_COMPTE, PANNEAUX, REPLI_VIVANT, RUBRIQUES_BARRE, codeContexte, etatSeance, formaterContexte, hrefPanneau, panneauDe,
   type Apercu, type ContexteValeur, type EtatSeance, type LienPanneau,
 } from '@/lib/barreDeCote';
 
 type Session = 'inconnu' | 'anonyme' | 'connecte';
 type Cellule = Rubrique;
+type Acces = { connecte: boolean; premium: boolean };
 
 const ORDRE_CELLULES: Cellule[] = ['aujourdhui', ...RUBRIQUES_BARRE];
 
+/** Événement qui ouvre le plein écran mobile (cellule grille de la barre du bas). */
+export const OUVRIR_GRILLE_EVENT = 'westbourse:ouvrir-grille';
+
 // ── Hooks ──────────────────────────────────────────────────────────────────
 
-function useSession(): Session {
-  const [etat, setEtat] = useState<Session>('inconnu');
+function useSession(initiale?: boolean): Session {
+  // Le serveur (app/layout.tsx) connaît la session : la barre est rendue d'emblée
+  // dans son état final, sans cellule qui apparaît après coup.
+  const [etat, setEtat] = useState<Session>(initiale === undefined ? 'inconnu' : initiale ? 'connecte' : 'anonyme');
   useEffect(() => {
     let actif = true;
     let fin: (() => void) | undefined;
@@ -54,9 +64,14 @@ function useSession(): Session {
   return etat;
 }
 
-/** L'état de séance dépend de l'heure : calculé après montage (les pages publiques sont en cache). */
+/**
+ * L'état de séance dépend de l'heure : calculé dès le rendu (pas de libellé
+ * provisoire qui change de largeur), puis recalculé au montage et toutes les
+ * 30 s. Un HTML servi depuis un cache peut porter un texte de quelques minutes :
+ * l'écart est corrigé dès l'hydratation (`suppressHydrationWarning`).
+ */
 function useSeance(): EtatSeance | null {
-  const [s, setS] = useState<EtatSeance | null>(null);
+  const [s, setS] = useState<EtatSeance | null>(() => etatSeance(new Date()));
   useEffect(() => {
     const maj = () => setS(etatSeance(new Date()));
     maj();
@@ -77,7 +92,10 @@ function useApercus(connecte: boolean) {
     demandes.current.add(id);
     const ctl = new AbortController();
     const t = window.setTimeout(() => ctl.abort(), 4000);
-    const url = id === 'portefeuille' ? '/api/nav/portefeuille' : `/api/nav/apercu?r=${id}`;
+    // Données privées (portefeuille, leçon en cours) : routes distinctes, jamais en cache partagé.
+    const url = id === 'portefeuille' ? '/api/nav/portefeuille'
+      : id === 'apprendre' && connecte ? '/api/nav/apprendre'
+      : `/api/nav/apercu?r=${id}`;
     fetch(url, { signal: ctl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((j: { apercu?: Apercu }) => setApercus((a) => ({ ...a, [id]: j.apercu ?? 'echec' })))
@@ -96,23 +114,34 @@ function Pastille({ seance }: { seance: EtatSeance | null }) {
   return (
     <span
       aria-hidden
+      suppressHydrationWarning
       className={`h-2 w-2 shrink-0 rounded-full ${seance?.ouverte ? 'bg-up motion-safe:animate-[pulse_2s_infinite]' : 'bg-faint'}`}
     />
   );
 }
 
-function ColonneLiens({ liens, fermer, refPremier }: { liens: LienPanneau[]; fermer: () => void; refPremier?: (el: HTMLAnchorElement | null) => void }) {
+/** Intitulé d'un groupe nommé (« Documents ») : rendu avant son premier lien. */
+function debutGroupe(liens: LienPanneau[], i: number): string | null {
+  const g = liens[i].groupe;
+  return g && (i === 0 || liens[i - 1].groupe !== g) ? g : null;
+}
+
+function ColonneLiens({ liens, fermer, refPremier, acces, pathname }: { liens: LienPanneau[]; fermer: () => void; refPremier?: (el: HTMLAnchorElement | null) => void; acces: Acces; pathname: string }) {
   return (
     <ul className="space-y-0.5">
       {liens.map((l, i) => (
         <li key={l.href}>
+          {debutGroupe(liens, i) && (
+            <p className={`px-3 pb-1 text-xs font-semibold text-faint ${i > 0 ? 'mt-2 border-t border-border pt-3' : 'pt-1'}`}>{l.groupe}</p>
+          )}
           <Link
-            href={l.href}
+            href={hrefPanneau(l, acces)}
             ref={i === 0 ? refPremier : undefined}
             onClick={fermer}
-            className="group grid min-h-[44px] content-center rounded-sm px-3 py-1.5 outline-none hover:bg-elevated focus-visible:bg-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink"
+            aria-current={isNavItemActive(l.href, pathname) ? 'page' : undefined}
+            className="group grid min-h-[44px] content-center rounded-sm px-3 py-1.5 outline-none hover:bg-elevated focus-visible:bg-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink aria-[current=page]:bg-elevated"
           >
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-ivory">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-ivory group-aria-[current=page]:text-accent-ink">
               {l.label}
               {l.premium && <Lock aria-label="Premium" className="h-3 w-3 text-faint" strokeWidth={2} />}
             </span>
@@ -158,13 +187,24 @@ function ColonneVivante({ id, charge, fermer }: { id: Rubrique; charge: Chargeme
 
 // ── Barre ──────────────────────────────────────────────────────────────────
 
-export default function BarreDeCote() {
+export default function BarreDeCote({
+  connecteInitial,
+  isPremium = false,
+  isAdmin = false,
+}: {
+  /** Session connue du serveur (app/layout.tsx). Absente : déterminée au montage. */
+  connecteInitial?: boolean;
+  isPremium?: boolean;
+  isAdmin?: boolean;
+} = {}) {
   const pathname = usePathname();
   const router = useRouter();
-  const session = useSession();
+  const session = useSession(connecteInitial);
   const seance = useSeance();
   const connecte = session === 'connecte';
+  const acces: Acces = { connecte, premium: isPremium };
   const { apercus, charger } = useApercus(connecte);
+  const liensCompte = [...LIENS_COMPTE, ...(connecte && isAdmin ? [{ href: '/admin', label: 'Administration' }] : [])];
 
   const [ouvert, setOuvert] = useState<Cellule | null>(null);
   const [compact, setCompact] = useState(false);
@@ -188,6 +228,9 @@ export default function BarreDeCote() {
   useEffect(() => {
     if (/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent)) setRaccourci('⌘K');
   }, []);
+
+  // Référence stable : le plein écran pose le piège de focus à son montage, pas à chaque rendu de la barre.
+  const fermerMobile = useCallback(() => setMobileOuvert(false), []);
 
   const fermer = useCallback(() => {
     window.clearTimeout(tOuverture.current);
@@ -221,6 +264,13 @@ export default function BarreDeCote() {
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
   }, [ouvert, fermer]);
+
+  // La cellule grille de la barre du bas (mobile) ouvre le même plein écran.
+  useEffect(() => {
+    const ouvrirGrille = () => setMobileOuvert(true);
+    window.addEventListener(OUVRIR_GRILLE_EVENT, ouvrirGrille);
+    return () => window.removeEventListener(OUVRIR_GRILLE_EVENT, ouvrirGrille);
+  }, []);
 
   // Raccourci « / » : ouvre la palette (hors champ de saisie).
   useEffect(() => {
@@ -319,8 +369,8 @@ export default function BarreDeCote() {
     <>
       <Pastille seance={seance} />
       <span className="tabular">
-        <span className="min-[1536px]:hidden">{seance?.court ?? 'Séance'}</span>
-        <span className="hidden min-[1536px]:inline">{seance?.libelle ?? 'Séance'}</span>
+        <span suppressHydrationWarning className="min-[1536px]:hidden">{seance?.court ?? 'Séance'}</span>
+        <span suppressHydrationWarning className="hidden min-[1536px]:inline">{seance?.libelle ?? 'Séance'}</span>
       </span>
     </>
   );
@@ -349,6 +399,7 @@ export default function BarreDeCote() {
         onClick={basculer(id)}
         onKeyDown={clavierCellule(id)}
         onPointerEnter={survol(id)}
+        onFocus={() => charger(id)}
         className={`${CELLULE} ${FILET} ${estOuvert ? 'bg-elevated text-ivory' : ''} ${actif ? 'text-ivory' : ''} ${extra}`}
       >
         {contenu}
@@ -363,6 +414,8 @@ export default function BarreDeCote() {
       <div aria-hidden className="h-14 print:hidden" />
       <header
         ref={entete}
+        id="barre-de-cote"
+        data-compacte={compact ? '' : undefined}
         onKeyDown={echap}
         onBlur={sortieFocus}
         onPointerLeave={sortie}
@@ -386,7 +439,7 @@ export default function BarreDeCote() {
           {code && (
             <div
               aria-live="polite"
-              className={`tabular ${FILET} flex min-w-[168px] items-center gap-2 whitespace-nowrap px-4 text-sm ${ctx ? '' : 'invisible'}`}
+              className={`tabular ${FILET} hidden min-w-[168px] items-center xl:flex gap-2 whitespace-nowrap px-4 text-sm ${ctx ? '' : 'invisible'}`}
             >
               <Link href={`/actions/${code}`} className="font-semibold text-ivory hover:underline">{code}</Link>
               {ctx && (
@@ -412,7 +465,7 @@ export default function BarreDeCote() {
           </button>
 
           {session !== 'connecte' && (
-            <div className={`${FILET} hidden items-center px-2 min-[1360px]:flex`}>
+            <div className={`${FILET} hidden w-28 items-center justify-center min-[1360px]:flex`}>
               <ThemeToggle className="!rounded-sm !border-0 !bg-transparent" />
             </div>
           )}
@@ -430,6 +483,7 @@ export default function BarreDeCote() {
               onClick={basculer('portefeuille')}
               onKeyDown={clavierCellule('portefeuille')}
               onPointerEnter={survol('portefeuille')}
+              onFocus={() => charger('portefeuille')}
               className="flex h-full items-center gap-2 whitespace-nowrap bg-ivory px-5 text-sm font-semibold text-bg outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink"
             >
               Mon portefeuille <ChevronDown aria-hidden className="h-4 w-4" />
@@ -462,22 +516,27 @@ export default function BarreDeCote() {
                     liens={panneau.colonnes[0]}
                     fermer={fermer}
                     refPremier={(el) => { premierLien.current = el; }}
+                    acces={acces}
+                    pathname={pathname}
                   />
                 </div>
                 <div className="px-3 py-3">
-                  <ColonneLiens liens={panneau.colonnes[1]} fermer={fermer} />
+                  <ColonneLiens liens={panneau.colonnes[1]} fermer={fermer} acces={acces} pathname={pathname} />
                   {estPortefeuille && (
                     <div className="mt-2 border-t border-border pt-2">
                       <p className="px-3 py-1 text-xs font-semibold text-faint">Compte</p>
                       <ul className="space-y-0.5">
-                        {LIENS_COMPTE.map((l) => (
+                        {liensCompte.map((l) => (
                           <li key={l.href}>
-                            <Link href={l.href} onClick={fermer} className="flex min-h-[36px] items-center rounded-sm px-3 text-sm text-ivory outline-none hover:bg-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink">{l.label}</Link>
+                            <Link href={l.href} onClick={fermer} aria-current={pathname === l.href ? 'page' : undefined} className="flex min-h-[36px] items-center rounded-sm px-3 text-sm text-ivory outline-none hover:bg-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink aria-[current=page]:text-accent-ink">{l.label}</Link>
                           </li>
                         ))}
                       </ul>
-                      <div className="flex items-center justify-between gap-3 px-3 pt-2">
-                        <ThemeToggle />
+                      <div className="flex flex-wrap items-center justify-between gap-3 px-3 pt-2">
+                        <span className="flex items-center gap-2">
+                          <ThemeToggle />
+                          <BeginnerToggle />
+                        </span>
                         <button type="button" onClick={deconnecter} className="inline-flex min-h-[44px] items-center text-sm text-muted underline-offset-4 outline-none hover:text-ivory hover:underline focus-visible:ring-2 focus-visible:ring-accent-ink">Se déconnecter</button>
                       </div>
                     </div>
@@ -517,8 +576,11 @@ export default function BarreDeCote() {
           connecte={connecte}
           session={session}
           courante={rubriqueCourante}
-          fermer={() => setMobileOuvert(false)}
+          fermer={fermerMobile}
           deconnecter={deconnecter}
+          acces={acces}
+          pathname={pathname}
+          liensCompte={liensCompte}
         />
       )}
     </>
@@ -528,7 +590,7 @@ export default function BarreDeCote() {
 // ── Plein écran mobile ─────────────────────────────────────────────────────
 
 function GrilleMobile({
-  seance, connecte, session, courante, fermer, deconnecter,
+  seance, connecte, session, courante, fermer, deconnecter, acces, pathname, liensCompte,
 }: {
   seance: EtatSeance | null;
   connecte: boolean;
@@ -536,6 +598,9 @@ function GrilleMobile({
   courante: Rubrique | null;
   fermer: () => void;
   deconnecter: () => void;
+  acces: Acces;
+  pathname: string;
+  liensCompte: { href: string; label: string }[];
 }) {
   const [ouverte, setOuverte] = useState<Rubrique>(courante ?? 'marche');
   const boite = useRef<HTMLDivElement>(null);
@@ -600,18 +665,34 @@ function GrilleMobile({
                 </button>
               </h2>
               <div id={idc} hidden={!est} className="bg-surface px-2 pb-2">
-                {[...p.colonnes[0], ...p.colonnes[1]].map((l) => (
-                  <Link key={l.href} href={l.href} onClick={fermer} className="grid min-h-[48px] content-center rounded-sm px-3 py-1.5 outline-none hover:bg-elevated focus-visible:bg-elevated">
-                    <span className="flex items-center gap-1.5 text-sm font-semibold text-ivory">
-                      {l.label}
-                      {l.premium && <Lock aria-label="Premium" className="h-3 w-3 text-faint" />}
-                    </span>
-                    {l.description && <span className="text-xs text-muted">{l.description}</span>}
-                  </Link>
-                ))}
-                {p.id === 'portefeuille' && LIENS_COMPTE.map((l) => (
-                  <Link key={l.href} href={l.href} onClick={fermer} className="flex min-h-[48px] items-center rounded-sm px-3 text-sm text-ivory outline-none hover:bg-elevated focus-visible:bg-elevated">{l.label}</Link>
-                ))}
+                {(() => {
+                  const liens = [...p.colonnes[0].filter((l) => !l.groupe), ...p.colonnes[1].filter((l) => !l.groupe), ...p.colonnes.flat().filter((l) => l.groupe)];
+                  return liens.map((l, i) => (
+                    <div key={l.href}>
+                      {debutGroupe(liens, i) && <p className="px-3 pb-1 pt-3 text-xs font-semibold text-faint">{l.groupe}</p>}
+                      <Link
+                        href={hrefPanneau(l, acces)}
+                        onClick={fermer}
+                        aria-current={isNavItemActive(l.href, pathname) ? 'page' : undefined}
+                        className="group grid min-h-[48px] content-center rounded-sm px-3 py-1.5 outline-none hover:bg-elevated focus-visible:bg-elevated aria-[current=page]:bg-elevated"
+                      >
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-ivory group-aria-[current=page]:text-accent-ink">
+                          {l.label}
+                          {l.premium && <Lock aria-label="Premium" className="h-3 w-3 text-faint" />}
+                        </span>
+                        {l.description && <span className="text-xs text-muted">{l.description}</span>}
+                      </Link>
+                    </div>
+                  ));
+                })()}
+                {p.id === 'portefeuille' && (
+                  <>
+                    <p className="px-3 pb-1 pt-3 text-xs font-semibold text-faint">Compte</p>
+                    {liensCompte.map((l) => (
+                      <Link key={l.href} href={l.href} onClick={fermer} aria-current={pathname === l.href ? 'page' : undefined} className="flex min-h-[48px] items-center rounded-sm px-3 text-sm text-ivory outline-none hover:bg-elevated focus-visible:bg-elevated aria-[current=page]:text-accent-ink">{l.label}</Link>
+                    ))}
+                  </>
+                )}
               </div>
             </section>
           );
@@ -619,8 +700,11 @@ function GrilleMobile({
       </div>
 
       <div className="shrink-0 border-t border-border bg-bg p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="mb-3 flex items-center justify-between">
-          <ThemeToggle />
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2">
+            <ThemeToggle className="min-h-[48px]" />
+            {connecte && <BeginnerToggle className="min-h-[48px]" />}
+          </span>
           {connecte && <button type="button" onClick={deconnecter} className="inline-flex min-h-[48px] items-center px-3 text-sm text-muted outline-none hover:text-ivory focus-visible:ring-2 focus-visible:ring-accent-ink">Se déconnecter</button>}
         </div>
         {session === 'anonyme' && (

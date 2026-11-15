@@ -308,7 +308,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </NonEmbedChrome>
         <ConsentProvider>
           <BeginnerModeProvider initial={initialBeginner}>
-            <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
+            <ConditionalShell isPremium={isPremium} isAdmin={isAdmin} connecte={hasUser}>{children}</ConditionalShell>
             <NonEmbedChrome>
               <CommandPaletteProvider />
               <ServiceWorkerRegister />

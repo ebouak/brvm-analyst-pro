@@ -1,19 +1,19 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
-import MobileNav from '@/components/MobileNav';
+import BarreDeCote from '@/components/layout/barre/BarreDeCote';
 import BottomNav from '@/components/BottomNav';
+import { sansBarre } from '@/lib/barreDeCote';
 import Footer from '@/components/Footer';
 import ContactNudge from '@/components/contact/ContactNudge';
 import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
 import GeoCompte from '@/components/crm/GeoCompte';
 import FilAriane, { FilArianeProvider } from '@/components/nav/FilAriane';
 
-/** Routes affichées en plein écran, sans la sidebar (landing + auth). */
+/** Routes publiques (landing + auth) : sans encart ni fil applicatifs. */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 
-/** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
+/** Sections publiques SEO (PublicShell, qui pose leur fil et leur pied de page). */
 const BARE_PREFIXES = [
   '/crm', // page publique d'opposition (visiteur anonyme, sans shell applicatif)
   '/offre', // dossier offert par jeton (visiteur anonyme, sans shell applicatif)
@@ -53,22 +53,46 @@ function showsFooter(pathname: string): boolean {
   return LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
+/** Lien d'évitement : premier élément focalisable de chaque page, avant la barre. */
+function LienEvitement() {
+  return (
+    <a
+      href="#contenu"
+      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-obsidian"
+    >
+      Aller au contenu
+    </a>
+  );
+}
+
 /**
- * Décide d'envelopper ou non les pages dans le shell applicatif (sidebar + main).
- * La landing (`/`), les pages publiques et les pages légales sont rendues plein
- * écran ; toutes les autres pages gardent le shell. Le footer global s'affiche
- * sur les routes publiques (jamais dans l'app authentifiée, ni sur /login·/signup).
+ * Une seule navigation pour tout le site (lot 7, étape 2) : la barre de cote,
+ * posée ICI une seule fois, sur les pages publiques comme dans l'application
+ * (elle remplace la barre latérale, le tiroir mobile et l'ancien en-tête
+ * public). Elle est absente des widgets `/embed/*`, de la console `/admin`, de
+ * la connexion, des sorties d'impression et du lecteur de leçon de l'Academy
+ * (`sansBarre`). Le contenu de l'application prend toute la largeur.
+ *
+ * La landing (`/`), les pages publiques et les pages légales restent sans fil
+ * d'Ariane applicatif ni barre du bas ; le footer global s'affiche sur les
+ * routes publiques (jamais dans l'app authentifiée, ni sur /login·/signup).
  */
 export default function ConditionalShell({
   isPremium,
   isAdmin = false,
+  connecte,
   children,
 }: {
   isPremium: boolean;
   isAdmin?: boolean;
+  /** Session connue du serveur : la barre est rendue d'emblée dans son état final. */
+  connecte?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const barre = sansBarre(pathname) ? null : (
+    <BarreDeCote connecteInitial={connecte} isPremium={isPremium} isAdmin={isAdmin} />
+  );
   // Encart de contact : partout sauf authentification, console admin et Academy plein écran.
   const showNudge =
     pathname !== '/login' &&
@@ -105,12 +129,8 @@ export default function ConditionalShell({
         {/* Lien d'évitement : ces pages n'avaient AUCUN <main> ni raccourci
             clavier vers le contenu. Un visiteur au clavier ou au lecteur
             d'écran devait traverser l'en-tête à chaque chargement. */}
-        <a
-          href="#contenu"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-obsidian"
-        >
-          Aller au contenu
-        </a>
+        <LienEvitement />
+        {barre}
         <main id="contenu">{children}</main>
         {showsFooter(pathname) && <Footer />}
         {showNudge && <ContactNudge />}
@@ -121,19 +141,17 @@ export default function ConditionalShell({
 
   return (
     <FilArianeProvider>
-    <div className="flex min-h-screen">
+    <div className="min-h-screen">
       <GeoCompte />
-      <Sidebar isPremium={isPremium} isAdmin={isAdmin} />
-      <div className="flex-1 min-w-0">
-        <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
-        {/* pb-16 : réserve la hauteur de la BottomNav mobile (56px + safe-area). */}
-        <main id="contenu" className="min-w-0 overflow-x-clip pb-16 md:pb-0">
-          {/* Fil d'Ariane tiré du registre, sur toute page de niveau 2 et plus. */}
-          <FilAriane variante="app" />
-          {children}
-        </main>
-      </div>
-      <BottomNav />
+      <LienEvitement />
+      {barre}
+      {/* pb-16 : réserve la hauteur de la barre du bas (56 px + safe-area), sous 1024 px. */}
+      <main id="contenu" className="min-w-0 overflow-x-clip pb-16 lg:pb-0">
+        {/* Fil d'Ariane tiré du registre, sur toute page de niveau 2 et plus. */}
+        <FilAriane variante="app" />
+        {children}
+      </main>
+      {barre && <BottomNav />}
       {showNudge && <ContactNudge />}
     </div>
     </FilArianeProvider>

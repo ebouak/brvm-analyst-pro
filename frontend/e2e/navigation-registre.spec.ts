@@ -63,8 +63,12 @@ test.describe('Shell applicatif (compte actif)', () => {
       await context.addCookies(JSON.parse(fs.readFileSync(COOKIES_ACTIF!, 'utf8')));
       await page.goto(c.chemin, { waitUntil: 'domcontentloaded' });
       test.skip(page.url().includes('/login'), 'Session expirée : redirigé vers /login.');
-      const sidebar = page.locator('aside');
-      await expect(sidebar.locator('a[aria-current="page"]')).toHaveText(new RegExp(`^${c.actif}`));
+      // Barre de cote (lot 7, étape 2) : la cellule de la rubrique est marquée ;
+      // son panneau ouvert, l'entrée de menu de la page (ou de son parent) l'est aussi.
+      const barre = page.getByRole('navigation', { name: 'Navigation principale', exact: true });
+      await barre.locator('button[aria-current="true"]').click();
+      await expect(page.locator('#barre-de-cote a[aria-current="page"]').first()).toContainText(c.actif);
+      await page.keyboard.press('Escape');
       await fil(page).locator(`a[href="${c.retour}"]`).click();
       await expect(page).toHaveURL(new RegExp(`${c.retour}$`));
     });
@@ -74,11 +78,13 @@ test.describe('Shell applicatif (compte actif)', () => {
     await context.addCookies(JSON.parse(fs.readFileSync(COOKIES_ACTIF!, 'utf8')));
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
     test.skip(page.url().includes('/login'), 'Session expirée : redirigé vers /login.');
-    const sidebar = page.locator('aside');
-    for (const r of ["Aujourd'hui", 'Le marché', 'Trouver une idée', 'Mes revenus', 'Mon portefeuille', 'Apprendre']) {
-      await expect(sidebar.getByRole('button', { name: r })).toBeVisible();
+    const barre = page.getByRole('navigation', { name: 'Navigation principale', exact: true });
+    // « Aujourd'hui » est la cellule-horloge : elle porte l'état de séance, pas son nom.
+    await expect(barre.getByRole('button', { name: /Séance ouverte|Marché fermé/ })).toBeVisible();
+    for (const r of ['Le marché', 'Trouver une idée', 'Mes revenus', 'Mon portefeuille', 'Apprendre']) {
+      await expect(barre.getByRole('button', { name: r })).toBeVisible();
     }
-    await sidebar.getByRole('button', { name: /Rechercher/ }).click();
+    await barre.getByRole('button', { name: /Chercher une valeur/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
   });
 

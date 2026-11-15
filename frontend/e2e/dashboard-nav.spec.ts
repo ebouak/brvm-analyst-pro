@@ -32,10 +32,12 @@ test('aucun overlay plein écran n’intercepte les clics (splash inclus)', asyn
   });
   expect(blockers, `overlay(s) plein écran interceptant les clics: ${JSON.stringify(blockers)}`).toEqual([]);
 
-  // Concrètement : cliquer un lien de la sidebar doit naviguer, tout de suite
+  // Concrètement : cliquer un lien de la navigation doit naviguer, tout de suite
   // (fenêtre où le splash est encore potentiellement visible). Cible PUBLIQUE :
   // « Obligations » est derrière le mur de connexion depuis le 2026-07-17, le
   // clic y menait bien… mais sur /login, et le test échouait pour cette raison.
-  await page.getByRole('link', { name: /^Secteurs$/i }).first().click();
+  // Barre de cote (lot 7, étape 2) : le lien vit dans le panneau « Le marché ».
+  await page.getByRole('button', { name: 'Le marché' }).click();
+  await page.locator('#barre-de-cote a[href="/secteurs"]').click();
   await expect(page).toHaveURL(/\/secteurs$/, { timeout: 10_000 });
 });
