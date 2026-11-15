@@ -12,7 +12,12 @@ import { phraseDetachement } from '@/lib/reports/detachementRevue';
 import { constatSerie } from '@/lib/document/constats';
 import { photoActivite } from '@/lib/document/activite';
 import { planActivite, LIGNES_FACULTATIVES } from '@/lib/revue/gabarit';
-import { periodePrincipale, constatPeriode, chiffreGeantPeriode, lignesComparaison, variationPct } from '@/lib/revue/periode';
+import { periodePrincipale, constatPeriode, chiffreGeantPeriode, lignesComparaison, variationPct, VOCABULAIRE } from '@/lib/revue/periode';
+import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
+import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
+import { lireBanque, lirePeriode } from '@/lib/bank/lecture';
+import { montantLigne } from '@/lib/bank/format';
+import { CompteResultatBancaire, EncoursBancaire } from '@/components/bank/LectureRevue';
 import { phraseMiseAJour } from '@/lib/revue/miseAJour';
 import { chargerDerniereMiseAJour } from '@/lib/revue/chargerMiseAJour';
 import { nomPays } from '@/lib/crm/geo';
@@ -30,6 +35,8 @@ interface Props { params: Promise<{ code: string }> }
 
 /**
  * Revue de résultats — quatre feuilles A4, même système de document que le Dossier.
+ * Une banque dont la période est extraite (lib/bank/lecture.ts) en a cinq : le
+ * compte de résultat bancaire et les encours ont chacun leur feuille.
  *
  * Elle s'ouvre sur la DERNIÈRE période publiée (trimestre, semestre ou exercice)
  * comparée à la même période de l'année précédente ; l'exercice annuel vient en
@@ -38,7 +45,6 @@ interface Props { params: Promise<{ code: string }> }
  */
 
 const LOGOS = brvmLogos as Record<string, string>;
-const TOTAL = 4;
 
 const moins = (s: string) => s.replace('-', '−'); // U+2212, comme le reste du site
 const md = (n: number | null | undefined) => (n == null ? null : moins(fmtFcfa(n)));
@@ -64,18 +70,29 @@ export default async function RevuePage(props: Props) {
       <AccessGate
         required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les Revues de résultats"
-        hint="Les derniers comptes de chaque société lus pour vous : chiffre d'affaires, résultat, dividende et ratios, comparés à la même période de l'année précédente."
+        hint="Les derniers comptes de chaque société lus pour vous : activité, résultat, dividende et ratios, comparés à la même période de l'année précédente."
       />
     );
   }
 
   const sb = createClient();
   const { latest, prev, profil } = d;
-  const [inter, evtResultats] = await Promise.all([
+  const banque = FAMILLE_PAR_CODE[d.code] === 'banque';
+  const [inter, evtResultats, periodesBanque] = await Promise.all([
     chargerIntermediaire(sb, d.code, d.years.map((y) => ({ year: Number(y.periode), revenue: y.revenu, net_income: y.resultatNet }))),
     chargerDerniereMiseAJour(sb, d.code),
+    banque ? chargerPeriodesBancaires(sb, d.code) : Promise.resolve([]),
   ]);
   const principale = periodePrincipale(d.years.map((y) => ({ periode: y.periode, revenu: y.revenu, resultatNet: y.resultatNet })), inter);
+  const voc = banque ? VOCABULAIRE.banque : VOCABULAIRE.general;
+  const visee = principale ? lirePeriode(principale.periode) : null;
+  const lectureBrute = banque && visee ? lireBanque(periodesBanque, visee) : null;
+  // Période non encore extraite : ancien affichage, vocabulaire bancaire.
+  const lecture = lectureBrute?.extrait ? lectureBrute : null;
+  const lPnb = lecture?.compteResultat.find((l) => l.cle === 'pnb') ?? null;
+  const lRn = lecture?.compteResultat.find((l) => l.cle === 'resultat_net') ?? null;
+  const TOTAL = lecture ? 5 : 4;
+  const p = (n: number) => (lecture && n >= 3 ? n + 1 : n); // numéro de feuille
   const miseAJour = phraseMiseAJour(evtResultats);
 
   const nom = d.designation;
@@ -98,7 +115,7 @@ export default async function RevuePage(props: Props) {
     libelle, cur: latest ? fn(latest) : null, prv: prev ? fn(prev) : null,
   });
   const lignesAnnuel = [
-    ligne("Chiffre d'affaires", (y) => y.revenu),
+    ligne(voc.revenu, (y) => y.revenu),
     ligne("Résultat d'exploitation", (y) => y.resultatExploitation),
     ligne('Résultat avant impôt', (y) => y.resultatAvantImpot),
     ligne('Résultat net', (y) => y.resultatNet),
@@ -142,7 +159,7 @@ export default async function RevuePage(props: Props) {
     </div>
   );
 
-  const geant = principale ? chiffreGeantPeriode(principale) : null;
+  const geant = principale ? chiffreGeantPeriode(principale, voc) : null;
 
   return (
     <div className="doc">
@@ -158,18 +175,27 @@ export default async function RevuePage(props: Props) {
       <CouverturePhoto
         entete={entete} societe={nom} code={d.code} logo={LOGOS[d.code] ?? null} photo={photo}
         surtitre={['Revue de résultats', d.secteur, d.pays ? nomPays(d.pays) : null].filter(Boolean).join(' · ')}
-        constat={principale ? constatPeriode(principale) : 'Aucun compte publié n’est disponible pour cette valeur.'}
+        constat={lecture ? lecture.titre : principale ? constatPeriode(principale, voc) : 'Aucun compte publié n’est disponible pour cette valeur.'}
         total={TOTAL}
         chiffres={[
-          principale?.revenu != null ? { libelle: 'Chiffre d’affaires', valeur: `${md(principale.revenu)} FCFA`, note: principale.libelle } : null,
-          principale?.resultatNet != null ? { libelle: 'Résultat net', valeur: `${md(principale.resultatNet)} FCFA`, note: principale.libelle } : null,
+          lecture
+            ? lPnb ? { libelle: 'Produit net bancaire', valeur: montantLigne(lPnb.valeur.valeur, lPnb.unite), note: lecture.libelle } : null
+            : principale?.revenu != null ? { libelle: voc.revenu, valeur: `${md(principale.revenu)} FCFA`, note: principale.libelle } : null,
+          lecture
+            ? lRn ? { libelle: 'Résultat net', valeur: montantLigne(lRn.valeur.valeur, lRn.unite), note: lecture.libelle } : null
+            : principale?.resultatNet != null ? { libelle: 'Résultat net', valeur: `${md(principale.resultatNet)} FCFA`, note: principale.libelle } : null,
           d.price?.cours != null ? { libelle: 'Cours', valeur: fcfa(d.price.cours)!, note: d.price.date ? `au ${fmtDateCourte(d.price.date)}` : null } : null,
         ].filter((x): x is NonNullable<typeof x> => x != null)}
       />
 
       {/* ── Feuille 2 · Dernière période publiée ─────────────────────────── */}
       <Feuille entete={entete} societe={nom} page={2} total={TOTAL}>
-        {principale && geant ? (
+        {lecture ? (
+          <Panneau titre={lecture.titre}>
+            <CompteResultatBancaire lecture={lecture} />
+            {miseAJour && <p className="rv-maj">{miseAJour}</p>}
+          </Panneau>
+        ) : principale && geant ? (
           <>
             <Panneau titre={geant.titre}>
               <ChiffreGeant valeur={geant.valeur} unite={geant.unite} legende={geant.legende} />
@@ -183,7 +209,7 @@ export default async function RevuePage(props: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {lignesComparaison(principale).map((l) => (
+                  {lignesComparaison(principale, voc).map((l) => (
                     <tr key={l.libelle}>
                       <td>{l.libelle}</td>
                       <td className="fort">{md(l.courant) ?? '—'}</td>
@@ -199,7 +225,7 @@ export default async function RevuePage(props: Props) {
               {!principale.comparable && principale.motif && <p className="rv-alerte">{principale.motif}</p>}
               {principale.glissant && (
                 <Mesures items={[
-                  { libelle: `Chiffre d’affaires, ${principale.glissant.libelle}`, valeur: md(principale.glissant.revenu) ? `${md(principale.glissant.revenu)} FCFA` : null },
+                  { libelle: `${voc.revenu}, ${principale.glissant.libelle}`, valeur: md(principale.glissant.revenu) ? `${md(principale.glissant.revenu)} FCFA` : null },
                   { libelle: `Résultat net, ${principale.glissant.libelle}`, valeur: md(principale.glissant.resultatNet) ? `${md(principale.glissant.resultatNet)} FCFA` : null },
                 ]} />
               )}
@@ -212,8 +238,17 @@ export default async function RevuePage(props: Props) {
         )}
       </Feuille>
 
-      {/* ── Feuille 3 · Exercice annuel ──────────────────────────────────── */}
-      <Feuille entete={entete} societe={nom} page={3} total={TOTAL}>
+      {/* ── Feuille 3 (banque extraite) · Encours et solidité ────────────── */}
+      {lecture && (
+        <Feuille entete={entete} societe={nom} page={3} total={TOTAL}>
+          <Panneau titre={`Encours et solidité, ${lecture.libelle}`}>
+            <EncoursBancaire lecture={lecture} />
+          </Panneau>
+        </Feuille>
+      )}
+
+      {/* ── Feuille · Exercice annuel ─────────────────────────────────────── */}
+      <Feuille entete={entete} societe={nom} page={p(3)} total={TOTAL}>
         {latest ? (
           <Panneau titre={titreAnnuel}>
             <table className="rv-table">
@@ -249,9 +284,9 @@ export default async function RevuePage(props: Props) {
             {d.years.length >= 2 && (
               <div className="doc-duo">
                 <div>
-                  <h3>Chiffre d’affaires</h3>
+                  <h3>{voc.revenu}</h3>
                   <GraphiqueBarres
-                    titre="Chiffre d’affaires par exercice" largeur={300} hauteur={200}
+                    titre={`${voc.revenu} par exercice`} largeur={300} hauteur={200}
                     points={anciens.map((y) => ({ libelle: y.periode, valeur: y.revenu }))}
                     format={(v) => fmtFcfa(v)}
                   />
@@ -278,7 +313,7 @@ export default async function RevuePage(props: Props) {
       </Feuille>
 
       {/* ── Feuille 4 · Dividende, cours et passage au Dossier ───────────── */}
-      <Feuille entete={entete} societe={nom} page={4} total={TOTAL}>
+      <Feuille entete={entete} societe={nom} page={p(4)} total={TOTAL}>
         <Panneau titre={rendementDiv != null && divCourant ? `Dividende de ${fcfa(divCourant.montant)} par action, rendement de ${fmtNumber(rendementDiv, 2)} %` : 'Dividende et cours'}>
           <Mesures items={[
             { libelle: 'Cours', valeur: fcfa(d.price?.cours), note: d.price?.date ? `au ${fmtDateCourte(d.price.date)}` : null },
