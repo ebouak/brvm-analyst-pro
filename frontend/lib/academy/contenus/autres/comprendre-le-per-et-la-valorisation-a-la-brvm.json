@@ -1,0 +1,327 @@
+{
+  "titre": "Comprendre le PER et la valorisation à la BRVM",
+  "niveau": "intermediaire",
+  "intro": "Le PER (Price Earnings Ratio) est l’un des multiples de valorisation les plus utilisés pour situer le prix d’une action par rapport à ses bénéfices. À la BRVM, où l’information financière est contrôlée par l’AMF-UMOA, il sert surtout à comparer des sociétés d’un même secteur. Ce cours explique comment le calculer, comment le lire et quelles sont ses limites sur notre marché : faible liquidité, poids des banques, référentiels comptables différents. Tous les exemples chiffrés portent sur des sociétés fictives ; les PER réels se lisent sur les fiches société, au cours du jour.",
+  "relatedLinks": [
+    {
+      "label": "Études de cas réels de la BRVM",
+      "slug": "etudes-de-cas-reels-brvm"
+    }
+  ],
+  "lessons": [
+    {
+      "titre": "Qu’est-ce que le PER ? Définition et calcul",
+      "categorie": "evaluation",
+      "resume": "Le PER rapporte le cours de bourse au bénéfice par action (BPA). Il indique combien de fois le bénéfice annuel le marché paie pour une action.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Le PER se calcule en divisant le cours de bourse d’une action par le bénéfice par action (BPA), c’est-à-dire le résultat net divisé par le nombre d’actions. Par exemple, une action cotée 5 000 FCFA dont le BPA est de 500 FCFA a un PER de 10 : l’acheteur paie 10 fois le bénéfice annuel par action. Si le bénéfice restait constant, il faudrait 10 années de bénéfices pour égaler le prix payé."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Le PER permet de comparer rapidement la valorisation relative de plusieurs sociétés, surtout au sein d’un même secteur. Un PER faible peut traduire une décote, ou une méfiance justifiée du marché ; un PER élevé traduit souvent des attentes de croissance. Il ne dit jamais, à lui seul, si une action est une bonne affaire."
+        },
+        {
+          "type": "cas",
+          "titre": "Exemple chiffré (sociétés fictives)",
+          "contenu": "Prenons deux sociétés fictives. « Bénin Agro » cote 2 500 FCFA pour un BPA de 250 FCFA : son PER est de 10. « Côte Tech » cote 10 000 FCFA pour un BPA de 500 FCFA : son PER est de 20. Pour chaque franc de bénéfice, l’acheteur de Côte Tech paie deux fois plus cher, ce qui peut refléter des perspectives de croissance plus fortes, ou un excès d’optimisme."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Ne confondez pas le PER historique (calculé sur le dernier exercice publié) et le PER prévisionnel (calculé sur un bénéfice estimé). À la BRVM, les estimations publiées sont rares : on travaille surtout sur le PER historique. Un BPA négatif rend le PER sans signification. Un bénéfice gonflé ou réduit par un élément exceptionnel (cession d’actif, provision) fausse le ratio."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "PER = cours ÷ BPA. Il n’existe pas de « bon » PER universel : le niveau 2 de l’Academy donne des repères (moins de 8, de 8 à 20, plus de 20) qui s’expliquent toujours par le secteur, la croissance et la qualité des bénéfices."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "PER par secteur : valeurs fictives, pour l’exemple",
+        "labels": ["Banques", "Agroalimentaire", "Distribution", "Télécoms", "Transport"],
+        "valeurs": [8, 12, 15, 18, 10],
+        "unite": "x",
+        "note": "Valeurs inventées pour illustrer une méthode : on compare le PER d’une société à celui des sociétés de son secteur, pas à celui d’un autre secteur. Les PER réels de la BRVM changent à chaque séance : consultez-les sur les fiches société."
+      },
+      "qcm": {
+        "question": "Si une action cotée 4 000 FCFA a un BPA de 400 FCFA, quel est son PER ?",
+        "options": ["8", "10", "12", "16"],
+        "correct": 1,
+        "explication": "PER = cours ÷ BPA = 4 000 ÷ 400 = 10."
+      },
+      "imageQuery": "financial ratio formula, stock market calculation",
+      "image": {
+        "url": "https://images.pexels.com/photos/6120170/pexels-photo-6120170.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Top view of business tools including a calculator, smartphone with charts, magnifying glass, and clock on black background.",
+        "credit": "Photo : Nataliya Vaitkevich / Pexels"
+      }
+    },
+    {
+      "titre": "Interpréter le PER : faible ou élevé ?",
+      "categorie": "evaluation",
+      "resume": "Un PER faible peut signaler une décote, mais aussi des risques ou une croissance faible. Un PER élevé reflète souvent des attentes de croissance. Le secteur et le contexte comptent autant que le chiffre.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Un PER faible indique que le marché paie peu chaque franc de bénéfice. Un PER élevé indique que les investisseurs anticipent une hausse future des bénéfices. Il n’existe pas de seuil absolu : tout dépend du secteur, du pays, des taux d’intérêt et de la régularité des bénéfices."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Savoir si un PER est « bas » ou « élevé » aide à situer une valorisation, sans dire à lui seul s’il faut acheter ou vendre. Un PER de 5 peut cacher une entreprise en difficulté ; un PER de 25 peut se justifier par une croissance rapide, ou trahir un excès d’optimisme."
+        },
+        {
+          "type": "cas",
+          "titre": "Exemple chiffré (sociétés fictives)",
+          "contenu": "Deux sociétés fictives : « Sénégal Énergie » (PER 6) et « Côte Telecom » (PER 22). Le PER faible de Sénégal Énergie peut venir d’un secteur réglementé et d’une croissance atone. Le PER élevé de Côte Telecom peut refléter l’essor du paiement mobile. Dans les deux cas, c’est l’analyse des perspectives qui permet d’expliquer l’écart."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Ne comparez pas les PER de secteurs différents (une banque et une société technologique, par exemple). Un PER faible n’est pas toujours une décote : vérifiez si les bénéfices sont récurrents ou exceptionnels. À la BRVM, un titre peu échangé peut avoir un cours peu représentatif, et donc un PER qui l’est aussi."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Le PER s’interprète en contexte : face au PER des sociétés du même secteur, à la croissance des bénéfices et au niveau des taux d’intérêt. Un PER de 12 peut être élevé pour une banque et faible pour une société en forte croissance."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "PER de cinq sociétés fictives d’un même secteur (agroalimentaire)",
+        "labels": ["Agri SA", "Ferme CI", "Niger Food", "Bénin Agro", "Togo Mill"],
+        "valeurs": [10, 14, 8, 12, 11],
+        "unite": "x",
+        "note": "Sociétés et valeurs fictives. Niger Food a le PER le plus bas (8) et Ferme CI le plus élevé (14). L’écart pose une question, il ne donne pas la réponse : décote, ou méfiance justifiée du marché ? Il faut regarder les bénéfices et leurs perspectives."
+      },
+      "qcm": {
+        "question": "Un PER de 25 pour une société de télécoms peut indiquer :",
+        "options": [
+          "une sous-évaluation certaine du titre",
+          "des attentes de croissance",
+          "une entreprise en faillite",
+          "un dividende élevé"
+        ],
+        "correct": 1,
+        "explication": "Un PER élevé reflète généralement des anticipations de croissance future des bénéfices. Rien n’assure que cette croissance viendra."
+      },
+      "imageQuery": "stock market analysis, investor comparing charts",
+      "image": {
+        "url": "https://images.pexels.com/photos/7876379/pexels-photo-7876379.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "A tattooed person pointing at finance charts and graphs on a whiteboard.",
+        "credit": "Photo : www.kaboompics.com / Pexels"
+      }
+    },
+    {
+      "titre": "PER et croissance : le PEG",
+      "categorie": "evaluation",
+      "resume": "Le PEG (PER ÷ croissance annuelle des bénéfices, en %) intègre la croissance dans la lecture du PER. À la BRVM, faute de prévisions publiées, on utilise le plus souvent la croissance passée.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Le PEG se calcule en divisant le PER par le taux de croissance annuel moyen des bénéfices, exprimé en pourcentage. Exemple : un PER de 15 et une croissance de 20 % par an donnent un PEG de 15 ÷ 20 = 0,75. Une règle d’usage considère qu’un PEG inférieur à 1 mérite l’attention ; ce n’est qu’un repère."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Le PER seul ignore la croissance. Une société à PER élevé mais à forte croissance peut ressortir moins chère, rapportée à sa croissance, qu’une société à PER faible dont les bénéfices stagnent. Le PEG permet de comparer des valeurs de croissance entre elles."
+        },
+        {
+          "type": "cas",
+          "titre": "Exemple chiffré (sociétés fictives)",
+          "contenu": "« Mali Tech » : PER 20, croissance des bénéfices de 25 % par an, donc PEG = 20 ÷ 25 = 0,8. « Burkina Agro » : PER 10, croissance de 5 % par an, donc PEG = 10 ÷ 5 = 2. Malgré un PER deux fois plus élevé, Mali Tech ressort moins chère une fois sa croissance prise en compte, à condition que cette croissance se maintienne."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "La croissance passée ne garantit pas la croissance future. À la BRVM, les bénéfices peuvent être volatils (climat, matières premières, contexte du pays). Utilisez une croissance moyenne sur plusieurs exercices, jamais une seule année exceptionnelle. Avec une croissance nulle ou négative, le PEG n’a pas de sens."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "PEG = PER ÷ croissance annuelle des bénéfices (en %). Il affine la lecture du PER mais dépend entièrement de l’hypothèse de croissance retenue. Il se complète toujours par l’analyse des comptes."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "PEG de quatre sociétés fictives",
+        "labels": ["Mali Tech", "Burkina Agro", "Sénégal Fin", "Côte Santé"],
+        "valeurs": [0.8, 2, 1.2, 0.9],
+        "unite": "x",
+        "note": "Sociétés et valeurs fictives. Mali Tech et Côte Santé ont un PEG inférieur à 1 : leur PER paraît modéré au regard de leur croissance passée. Burkina Agro (2) paie cher une croissance faible. Ces lectures restent à confirmer par l’analyse."
+      },
+      "qcm": {
+        "question": "Une société a un PER de 18 et une croissance annuelle des bénéfices de 15 %. Quel est son PEG ?",
+        "options": ["0,83", "1,2", "2,7", "3"],
+        "correct": 1,
+        "explication": "PEG = PER ÷ croissance en % = 18 ÷ 15 = 1,2. La réponse 0,83 correspond au calcul inversé (15 ÷ 18)."
+      },
+      "imageQuery": "growth chart, earnings per share trend",
+      "image": {
+        "url": "https://images.pexels.com/photos/5717809/pexels-photo-5717809.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Person analyzes stock data with a smartphone and laptop, indoors.",
+        "credit": "Photo : www.kaboompics.com / Pexels"
+      }
+    },
+    {
+      "titre": "Limites du PER à la BRVM",
+      "categorie": "evaluation",
+      "resume": "Le PER a des limites propres à la BRVM : faible liquidité de certains titres, référentiels comptables différents, poids des banques, rareté des prévisions. Il se croise avec d’autres indicateurs.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Le PER est un indicateur imparfait : il ignore la dette, la qualité des bénéfices et la politique de dividende. À la BRVM, les comptes individuels suivent le SYSCOHADA révisé, les banques le plan comptable bancaire de l’UMOA, les assureurs le code CIMA, et les groupes qui consolident publient souvent en IFRS. Deux BPA ne se comparent bien que s’ils suivent le même référentiel."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Ignorer ces limites conduit à des erreurs de lecture. Une banque au PER bas peut porter des créances douteuses insuffisamment provisionnées, ce qui gonfle son bénéfice. Un PER peut aussi être faussé par un résultat exceptionnel, comme une cession d’actif."
+        },
+        {
+          "type": "cas",
+          "titre": "Exemple chiffré (sociétés fictives)",
+          "contenu": "Une banque fictive, « Banque UEMOA », affiche un PER de 6. Elle paraît bon marché ; mais si ses créances douteuses sont élevées et mal provisionnées, son bénéfice est surévalué et son PER réel plus élevé. À l’inverse, « Assurances Afrique », au PER de 18, peut dégager un bénéfice régulier et de qualité. Le PER seul ne permet pas de trancher."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "À la BRVM, un titre peu échangé peut avoir un cours fixé par quelques transactions, donc un PER peu représentatif. Le bénéfice dépend aussi de choix comptables (provisions, amortissements). Comparez le PER à celui des sociétés du même secteur et, pour les banques, regardez aussi le P/B (cours ÷ capitaux propres par action)."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Le PER ouvre l’analyse, il ne la conclut pas. Croisez-le avec d’autres indicateurs (P/B, rendement du dividende, endettement), vérifiez la qualité des bénéfices et tenez compte de la liquidité du titre."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "PER de quatre banques fictives",
+        "labels": ["Banque A", "Banque B", "Banque C", "Banque D"],
+        "valeurs": [6, 8, 10, 12],
+        "unite": "x",
+        "note": "Banques et valeurs fictives. La banque A a le PER le plus bas (6). Avant d’y voir une décote, il faut regarder son P/B, la qualité de son portefeuille de crédits et ses provisions : pour une banque, le PER ne suffit pas."
+      },
+      "qcm": {
+        "question": "Quelle est une limite du PER ?",
+        "options": [
+          "Il est toujours fiable",
+          "Il ne tient pas compte de la dette",
+          "Il est basé sur des prévisions précises",
+          "Il est identique pour toutes les sociétés"
+        ],
+        "correct": 1,
+        "explication": "Le PER ignore la dette et d’autres facteurs (qualité des bénéfices, liquidité). Il s’utilise avec d’autres indicateurs."
+      },
+      "imageQuery": "African stock exchange trading floor, regulatory documents",
+      "image": {
+        "url": "https://images.pexels.com/photos/6801681/pexels-photo-6801681.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Hands folded over stock market documents with calculator and cash on desk.",
+        "credit": "Photo : Hanna Pad / Pexels"
+      }
+    },
+    {
+      "titre": "Le PER dans une analyse complète",
+      "categorie": "fundamental",
+      "resume": "Le PER sert de premier filtre ; il s’intègre ensuite dans une analyse fondamentale complète : croissance, dividendes, endettement, secteur, liquidité.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Définition",
+          "contenu": "Certaines approches, dites « value », s’intéressent d’abord aux sociétés dont le PER est faible par rapport à leur secteur ou à leur propre historique. Les approches dites « de croissance » acceptent un PER élevé si la croissance des bénéfices le justifie. Ce sont des méthodes d’analyse, pas des recommandations. Le PER peut aussi servir à situer un marché entier par rapport à son passé."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi c’est important",
+          "contenu": "Le PER est un filtre rapide pour repérer les titres qui méritent un examen plus poussé. Combiné à d’autres critères (croissance, dividende, solidité financière), il aide à comprendre pourquoi deux sociétés proches ne se valorisent pas au même prix."
+        },
+        {
+          "type": "cas",
+          "titre": "Exemple chiffré (sociétés fictives)",
+          "contenu": "Supposons que le PER moyen d’un secteur de la distribution soit de 14 (valeur fictive). « Distri CI » a un PER de 10, « Distri SN » un PER de 18. Une approche value examinerait d’abord Distri CI, à condition que ses bénéfices tiennent ; une approche de croissance regarderait Distri SN si sa croissance explique l’écart. Dans les deux cas, le PER ouvre l’analyse, il ne la conclut pas."
+        },
+        {
+          "type": "piege",
+          "titre": "Pièges fréquents",
+          "contenu": "Ne vous fiez pas au seul PER. Une société au PER très bas peut être un « value trap » (piège de valeur) si ses bénéfices se dégradent ; la formation « Études de cas réels de la BRVM » en donne des exemples. À la BRVM, regardez aussi la liquidité : un titre peu échangé peut être difficile à revendre."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "Utilisez le PER comme un outil de repérage, puis approfondissez avec les états financiers (bilan, compte de résultat, flux de trésorerie). Les repères de diversification sont donnés au niveau 1, leçon 6. Le PER est un indicateur, pas une vérité."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "Deux sociétés fictives face au PER moyen de leur secteur",
+        "labels": ["Distri CI", "Moyenne du secteur", "Distri SN"],
+        "valeurs": [10, 14, 18],
+        "unite": "x",
+        "note": "Valeurs fictives. Distri CI se situe sous la moyenne de son secteur, Distri SN au-dessus. L’écart est une question à instruire (bénéfices, croissance, endettement, liquidité), pas une conclusion."
+      },
+      "qcm": {
+        "question": "Dans une approche value, on cherche d’abord des actions dont :",
+        "options": [
+          "le PER est élevé",
+          "le PER est faible",
+          "le PER est négatif",
+          "le PER égale la moyenne du marché"
+        ],
+        "correct": 1,
+        "explication": "Les approches value s’intéressent aux actions dont le PER est faible par rapport à leur secteur, puis vérifient que les bénéfices tiennent : sinon, c’est un piège de valeur."
+      },
+      "imageQuery": "investment strategy planning, portfolio diversification Africa",
+      "image": {
+        "url": "https://images.pexels.com/photos/6802043/pexels-photo-6802043.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Business theme with stock market document, currency, and mobile display.",
+        "credit": "Photo : Hanna Pad / Pexels"
+      }
+    }
+  ],
+  "glossaire": [
+    {
+      "terme": "PER",
+      "definition": "Price Earnings Ratio : cours de bourse divisé par le bénéfice par action (BPA)."
+    },
+    {
+      "terme": "BPA (ou BNPA)",
+      "definition": "Bénéfice par action : résultat net divisé par le nombre d’actions."
+    },
+    {
+      "terme": "PEG",
+      "definition": "PER divisé par la croissance annuelle des bénéfices (en %) : la valorisation rapportée à la croissance."
+    },
+    {
+      "terme": "Value trap",
+      "definition": "Piège de valeur : action apparemment bon marché dont les bénéfices se dégradent."
+    },
+    {
+      "terme": "P/B (ou PBR)",
+      "definition": "Price to Book : cours divisé par les capitaux propres (valeur comptable) par action."
+    },
+    {
+      "terme": "SYSCOHADA révisé",
+      "definition": "Référentiel comptable de l’espace OHADA, suivi par les sociétés commerciales. Les banques suivent le plan comptable bancaire de l’UMOA, les assureurs le code CIMA ; les comptes consolidés sont souvent établis en IFRS."
+    },
+    {
+      "terme": "AMF-UMOA",
+      "definition": "Autorité des marchés financiers de l’UMOA, régulateur du marché financier régional (appelée CREPMF jusqu’en 2022)."
+    },
+    {
+      "terme": "Liquidité",
+      "definition": "Capacité à acheter ou vendre une action sans faire varier sensiblement son cours."
+    }
+  ]
+}

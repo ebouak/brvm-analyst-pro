@@ -1,0 +1,182 @@
+{
+  "titre": "Dangote et la BRVM : chronologie d’une introduction en bourse (2026)",
+  "niveau": "intermediaire",
+  "intro": "Cette chronologie retrace, sources à l’appui, l’introduction en bourse de la raffinerie nigériane Dangote et la place qu’y a tenue la BRVM. Elle s’arrête au 15 novembre 2026 : ce n’est ni une thèse d’investissement ni un suivi en temps réel, et certains faits ont pu changer depuis.\n\nEn bref : l’offre publique a été autorisée au Nigeria et vise le Nigerian Exchange (NGX). La BRVM a participé à des discussions avec d’autres bourses africaines, sans accord ; aucun titre Dangote n’y est coté.",
+  "relatedLinks": [
+    {
+      "label": "Comprendre le mécanisme (cours débutant)",
+      "slug": "ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang"
+    }
+  ],
+  "lessons": [
+    {
+      "titre": "Ce que retrace ce dossier",
+      "categorie": "general",
+      "resume": "L’objet de la chronologie, ses sources et ses limites.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "L’opération",
+          "contenu": "Dangote Petroleum Refinery & Petrochemicals FZE, qui exploite la raffinerie de Lekki près de Lagos, a ouvert son capital en deux temps en 2026 : un placement privé réservé aux institutions, puis une offre publique approuvée par la SEC Nigeria, destinée au Nigerian Exchange (NGX). La BRVM n’est pas la bourse de cotation, et aucun dispositif de souscription par la BRVM n’a été annoncé à notre connaissance."
+        },
+        {
+          "type": "importance",
+          "titre": "Pourquoi ce cas intéresse l’UEMOA",
+          "contenu": "Par sa taille, l’opération est présentée par la presse comme la plus grande introduction en bourse africaine. Elle montre aussi ce qui bloque une cotation sur plusieurs bourses africaines à la fois : chaque marché exige l’autorisation de son propre régulateur."
+        },
+        {
+          "type": "retenir",
+          "titre": "Comment lire ce dossier",
+          "contenu": "Chaque fait est daté et sourcé (régulateur, prospectus, Reuters, presse spécialisée). Une information citée d’après des « sources » anonymes est signalée comme telle. Pour la suite, reportez-vous directement aux sites officiels : sec.gov.ng, ngxgroup.com, brvm.org et amf-umoa.org."
+        }
+      ],
+      "imageQuery": "african business finance skyline",
+      "image": {
+        "url": "https://images.pexels.com/photos/3814231/pexels-photo-3814231.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "A stunning aerial view of Durban's modern skyline with high-rise buildings and an overcast sky.",
+        "credit": "Photo : Magda Ehlers / Pexels"
+      }
+    },
+    {
+      "titre": "Avant l’offre publique (mars à juillet 2026)",
+      "categorie": "regulatory",
+      "resume": "Réunion des bourses africaines, placement privé, mise en garde du régulateur nigérian.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Les faits datés",
+          "contenu": "Fin mars 2026, le Nigerian Exchange Group réunit à Lagos plusieurs bourses africaines, dont la BRVM, pour étudier une cotation transfrontalière (Sika Finance, 7 avril 2026). En juin, la raffinerie propose un placement privé : 3 milliards d’actions à 0,35 dollar, minimum un million d’actions, blocage de 365 jours, valorisation de 39,1 milliards de dollars (document de placement cité par Reuters, 11 juin 2026). Le 23 juin, la SEC Nigeria indique qu’aucune demande d’offre publique ne lui a été soumise et ordonne l’arrêt des promotions non autorisées, avec remboursement des fonds collectés (avis publié sur sec.gov.ng). Le 17 juillet, l’entreprise indique avoir levé 2,5 milliards de dollars par placement privé (Reuters).",
+          "etapes": [
+            { "titre": "Fin mars 2026", "detail": "Réunion à Lagos des bourses africaines, dont la BRVM (Sika Finance, 7 avril 2026)." },
+            { "titre": "11 juin 2026", "detail": "Placement privé de 3 milliards d’actions à 0,35 dollar, réservé aux institutions (Reuters)." },
+            { "titre": "23 juin 2026", "detail": "La SEC Nigeria fait cesser les promotions non autorisées : aucune offre publique n’est déposée (sec.gov.ng).", "cle": true },
+            { "titre": "17 juillet 2026", "detail": "2,5 milliards de dollars levés par placement privé, selon l’entreprise (Reuters)." }
+          ]
+        },
+        {
+          "type": "piege",
+          "titre": "Ce que cette période enseigne",
+          "contenu": "Une opération annoncée n’est pas une opération autorisée. En juin 2026, des intermédiaires collectaient déjà de l’argent pour une offre qui n’existait pas encore aux yeux du régulateur. Seul un prospectus approuvé ouvre une offre au public."
+        }
+      ],
+      "imageQuery": "oil refinery industrial infrastructure",
+      "image": {
+        "url": "https://images.pexels.com/photos/2391/dirty-industry-stack-factory.jpg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Skyline view of an industrial factory with tall chimneys against a clear sky.",
+        "credit": "Photo : Life Of Pix / Pexels"
+      }
+    },
+    {
+      "titre": "L’offre publique (septembre à octobre 2026)",
+      "categorie": "regulatory",
+      "resume": "Approbation par la SEC Nigeria, prospectus, période de souscription prolongée.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Les faits datés",
+          "contenu": "Début septembre 2026, la SEC Nigeria approuve l’offre publique (Reuters, 4 septembre 2026). Le prospectus, daté du 7 septembre, porte sur 4,1 milliards d’actions à 525 nairas, avec une souscription minimale de 10 actions, et prévoit l’admission au Nigerian Exchange. La souscription ouvre le 14 septembre ; prévue jusqu’au 13 octobre, elle est prolongée et close le 27 octobre (site de l’offre, ipo.dangote.com). Le régulateur du Kenya approuve entre-temps un dispositif de certificats représentatifs d’actions pour ses investisseurs (Daba Finance, 5 octobre 2026).",
+          "etapes": [
+            { "titre": "4 septembre 2026", "detail": "Approbation de l’offre publique par la SEC Nigeria (Reuters)." },
+            { "titre": "7 septembre 2026", "detail": "Prospectus : 4,1 milliards d’actions à 525 nairas, cotation prévue au Nigerian Exchange." },
+            { "titre": "14 septembre 2026", "detail": "Ouverture de la souscription, dès 10 actions.", "cle": true },
+            { "titre": "27 octobre 2026", "detail": "Clôture, après prolongation (ipo.dangote.com)." }
+          ]
+        },
+        {
+          "type": "importance",
+          "titre": "Ce qui est annoncé, et par qui",
+          "contenu": "Selon des sources citées par Reuters (4 novembre 2026), la demande a atteint environ trois fois le montant offert. Ce chiffre n’émane ni du régulateur ni de l’émetteur : il reste à confirmer par l’annonce officielle d’allocation."
+        }
+      ],
+      "imageQuery": "calendar schedule business planning",
+      "image": {
+        "url": "https://images.pexels.com/photos/11773871/pexels-photo-11773871.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Close-up shot of a hand marking a date on a calendar with a pen, emphasizing planning and scheduling.",
+        "credit": "Photo : Towfiqu barbhuiya / Pexels"
+      }
+    },
+    {
+      "titre": "Et la BRVM ?",
+      "categorie": "regulatory",
+      "resume": "Des discussions depuis avril 2026, aucun accord, aucune cotation : ce que le directeur général de la BRVM en a dit.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Ce qui a été dit",
+          "contenu": "Le directeur général de la BRVM, Edoh Kossi Amenounve, a indiqué que les discussions avaient commencé en avril 2026 à l’invitation de Dangote, sans qu’un consensus soit trouvé entre les différents marchés. Une option étudiée : des certificats représentatifs d’actions cotés sur d’autres bourses africaines. Une société qui veut être cotée dans plusieurs pays doit aujourd’hui obtenir l’autorisation du régulateur de chacun (Reuters, 4 novembre 2026)."
+        },
+        {
+          "type": "piege",
+          "titre": "Le raccourci à éviter",
+          "contenu": "Au 15 novembre 2026, aucun titre Dangote n’est coté à la BRVM, et aucune autorisation de l’AMF-UMOA n’a été annoncée à notre connaissance (à vérifier sur amf-umoa.org et brvm.org). Toute « offre Dangote à la BRVM » qui vous serait proposée est à vérifier auprès de ces deux institutions avant tout versement."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "La BRVM a été consultée, elle n’a pas accueilli l’opération. Une cotation dans l’UEMOA passerait par une procédure propre, autorisée par l’AMF-UMOA."
+        }
+      ],
+      "imageQuery": "risk warning financial documents",
+      "image": {
+        "url": "https://images.pexels.com/photos/7247413/pexels-photo-7247413.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "A close look at tax forms marked with scam, highlighting financial fraud risks.",
+        "credit": "Photo : Leeloo The First / Pexels"
+      }
+    },
+    {
+      "titre": "Ce qui reste à confirmer",
+      "categorie": "evaluation",
+      "resume": "Allocation, date de cotation, accès éventuel depuis d’autres pays : les étapes annoncées mais non encore réalisées au 15 novembre 2026.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Faits arrêtés au 15 novembre 2026.",
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Les étapes en attente",
+          "contenu": "1) L’allocation des titres doit être approuvée par la SEC Nigeria avant la cotation. 2) La première cotation au Nigerian Exchange était annoncée pour la fin novembre 2026, sans date ferme à la mi-novembre (Reuters, 4 novembre 2026). 3) Les dispositifs d’accès depuis d’autres pays (certificats représentatifs) dépendent de chaque régulateur."
+        },
+        {
+          "type": "importance",
+          "titre": "Où vérifier",
+          "contenu": "La SEC Nigeria (sec.gov.ng) pour l’allocation, le Nigerian Exchange (ngxgroup.com) pour la cotation, l’AMF-UMOA (amf-umoa.org) et la BRVM (brvm.org) pour tout ce qui concerne l’UEMOA. Les articles de presse, y compris ceux cités ici, ne remplacent pas ces sources."
+        },
+        {
+          "type": "retenir",
+          "titre": "Règle de prudence",
+          "contenu": "Ne versez jamais d’argent sur la base d’une « offre » relayée sur les réseaux sociaux. Seuls les documents officiels et les intermédiaires agréés font foi."
+        }
+      ],
+      "imageQuery": "stock market analysis screen data",
+      "image": {
+        "url": "https://images.pexels.com/photos/35118208/pexels-photo-35118208.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Candlestick chart showing a downward trend in the stock market analysis.",
+        "credit": "Photo : Alex Luna / Pexels"
+      }
+    }
+  ],
+  "glossaire": [
+    {
+      "terme": "Prospectus",
+      "definition": "Document officiel, approuvé par le régulateur, indispensable avant toute offre publique."
+    },
+    {
+      "terme": "SEC (Nigeria)",
+      "definition": "Securities and Exchange Commission : le régulateur des marchés financiers du Nigeria."
+    },
+    {
+      "terme": "Nigerian Exchange (NGX)",
+      "definition": "La principale bourse du Nigeria, à Lagos, où doivent être cotées les actions de la raffinerie."
+    },
+    {
+      "terme": "Certificat représentatif d’actions",
+      "definition": "Titre coté sur une bourse étrangère qui représente des actions conservées dans le pays d’origine (en anglais depositary receipt)."
+    },
+    {
+      "terme": "Période de blocage (lock-up)",
+      "definition": "Période pendant laquelle l’investisseur ne peut pas revendre ses actions (365 jours pour le placement privé de 2026)."
+    }
+  ]
+}

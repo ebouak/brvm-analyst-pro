@@ -1,0 +1,314 @@
+{
+  "titre": "Études de cas réels de la BRVM",
+  "niveau": "intermediaire",
+  "intro": "Quatre histoires vraies de la cote, chiffres publiés à l’appui : une croissance régulière (Sonatel), un bénéfice qui s’effondre (Bernabé), une décote piège (Palmci) et une banque frappée par la crise de son pays (BOA Niger). Les chiffres sont ceux des comptes annuels publiés (exercices 2021 à 2025) ; les ratios de marché (PER, rendement) changent à chaque séance et se lisent sur les fiches société. Chaque leçon se termine par un quiz et, pour trois d’entre elles, par un exercice corrigé sur les données du jour.",
+  "relatedLinks": [
+    {
+      "label": "Comprendre le PER et la valorisation",
+      "slug": "comprendre-le-per-et-la-valorisation-a-la-brvm"
+    }
+  ],
+  "lessons": [
+    {
+      "titre": "Sonatel : une croissance régulière des bénéfices",
+      "categorie": "fundamental",
+      "resume": "De 2021 à 2025, le résultat net consolidé de Sonatel est passé de 252,5 à 413,6 milliards FCFA (environ +13 % par an) et son dividende a augmenté à chaque exercice. Un cas d’étude où croissance et dividende sont allés ensemble, dans le passé.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les chiffres décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "duree_min": 7,
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Une trajectoire rare : croissance et dividende",
+          "contenu": "Chiffre d’affaires consolidé : 1 334,9 milliards FCFA en 2021, 1 923,1 milliards en 2025 (environ +9,6 % par an). Résultat net consolidé : 252,5 puis 413,6 milliards (environ +13,1 % par an). Bénéfice par action : 252,5 puis 413,6 FCFA, en tenant compte du fractionnement de l’action par 10 du 26 octobre 2026 (2 524,6 et 4 136 FCFA avant fractionnement). Dividende net par action, ajusté du fractionnement : 140 FCFA pour l’exercice 2021, 174 FCFA pour 2025, en hausse à chaque exercice. Sources : états financiers publiés par l’émetteur et la BRVM, base WestBourse."
+        },
+        {
+          "type": "cas",
+          "titre": "Lire le PER avec la trajectoire du bénéfice",
+          "reel": true,
+          "contenu": "Le PER de Sonatel se lit sur sa fiche, au cours du jour : il change à chaque séance. Ce cas illustre une règle : un PER se juge avec la trajectoire du bénéfice. Un PER modéré sur un bénéfice qui progresse n’a pas le même sens qu’un PER modéré sur un bénéfice qui recule (voir Palmci, leçon 3). Pour Sonatel, le PER calculé sur le résultat consolidé paraît plus bas que celui calculé sur la part du groupe, car une partie du résultat revient aux actionnaires minoritaires des filiales."
+        },
+        {
+          "type": "piege",
+          "titre": "Le piège inverse : oublier le dividende",
+          "contenu": "Juger une valeur de rendement sur la seule évolution de son cours revient à ignorer les dividendes versés chaque année. L’outil Rendement vrai mesure le rendement total, dividendes réinvestis et inflation déduite, pays par pays."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "1) Résultat net en hausse chaque année de 2021 à 2025, environ +13 % par an en moyenne, avec une progression plus lente en 2025 (+5 %). 2) Dividende net en hausse à chaque exercice (140 puis 174 FCFA après fractionnement). 3) Un PER se lit avec la trajectoire du bénéfice. 4) On raisonne en rendement total : cours et dividendes."
+        }
+      ],
+      "chart": {
+        "type": "line",
+        "titre": "Résultat net consolidé de Sonatel (Md FCFA)",
+        "labels": ["2021", "2022", "2023", "2024", "2025"],
+        "valeurs": [252.5, 278.9, 331.7, 393.7, 413.6],
+        "unite": "Md FCFA",
+        "note": "Résultat net consolidé du groupe, d’après les états financiers publiés. Il progresse chaque année, plus lentement en 2025 : c’est une trajectoire, pas une année exceptionnelle. Le passé ne préjuge pas de la suite.",
+        "reel": true
+      },
+      "qcm": {
+        "question": "Entre 2021 et 2025, le résultat net de Sonatel passe de 252,5 à 413,6 Md FCFA. Quelle lecture est la bonne ?",
+        "options": [
+          "Une hausse chaque année, environ 13 % l’an",
+          "Une seule année exceptionnelle qui gonfle la moyenne",
+          "Une stagnation une fois l’inflation déduite"
+        ],
+        "correct": 0,
+        "explication": "Le résultat augmente chaque année (252,5 → 278,9 → 331,7 → 393,7 → 413,6), soit environ 13 % par an en moyenne. La hausse de 2025 est plus faible (+5 %) : régulière ne veut pas dire constante."
+      },
+      "liens": [
+        {
+          "label": "La fiche Sonatel (SNTS) en direct",
+          "href": "/societes/SNTS"
+        },
+        {
+          "label": "Le rendement vrai (dividendes réinvestis, inflation déduite)",
+          "href": "/rendement-vrai"
+        }
+      ],
+      "exercice_id": "per-du-jour",
+      "imageQuery": null,
+      "image": {
+        "url": "https://images.pexels.com/photos/7947755/pexels-photo-7947755.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Top view of financial charts with a smartphone calculator, magnifying glass, and pencils on a desk.",
+        "credit": "Photo : RDNE Stock project / Pexels"
+      }
+    },
+    {
+      "titre": "Bernabé : quand le bénéfice s’effondre, le PER explose",
+      "categorie": "evaluation",
+      "resume": "Le résultat net de Bernabé est passé de 1 809 millions FCFA (2022) à 36, 7 puis 22 millions (2023 à 2025). Son PER se compte alors en centaines : cela ne signifie pas « action chère », mais « bénéfice presque disparu ».",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les chiffres décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "duree_min": 6,
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Les chiffres, sans détour",
+          "contenu": "Résultat net : 1 598 millions FCFA (2021), 1 809 millions (2022), puis 36 millions (2023), 7 millions (2024) et 22 millions (2025). Le chiffre d’affaires recule beaucoup moins : 51,4 milliards en 2022, 42,5 milliards en 2025 (−17 %). C’est la rentabilité qui a disparu, plus que l’activité. Bénéfice par action 2025 : 3,4 FCFA. Sources : états financiers publiés par l’émetteur et la BRVM, base WestBourse."
+        },
+        {
+          "type": "cas",
+          "titre": "Un PER à trois chiffres",
+          "reel": true,
+          "contenu": "Avec un bénéfice par action de 3,4 FCFA, le PER dépasse 100 dès que le cours dépasse 340 FCFA ; à 1 000 FCFA, il approche 300 (exemples de calcul). Erreur classique : croire que « PER élevé = marché optimiste ». Ici, le PER est un artefact : un cours divisé par presque zéro donne un nombre énorme. L’information utile n’est pas le PER, mais la trajectoire du résultat net."
+        },
+        {
+          "type": "piege",
+          "titre": "Le piège de l’ancrage",
+          "contenu": "S’ancrer sur le Bernabé d’avant 2023 (un bénéfice proche de 1,8 milliard FCFA) conduit à voir une « occasion » dans la baisse du cours. Tant que la capacité bénéficiaire n’est pas reconstruite, le passé ne dit rien du prix d’aujourd’hui."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "1) Un PER supérieur à 100 appelle un réflexe : regarder le bénéfice, pas la valorisation. 2) Chiffre d’affaires en léger recul et résultat effondré : le problème est dans les marges et les charges, à rechercher dans les états financiers. 3) La fiche société affiche le diagnostic « Value trap : bénéfice effondré » quand les conditions sont réunies au cours du jour."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "Résultat net de Bernabé (M FCFA)",
+        "labels": ["2021", "2022", "2023", "2024", "2025"],
+        "valeurs": [1598, 1809, 36, 7, 22],
+        "unite": "M FCFA",
+        "note": "L’effondrement de 2023 n’est pas une erreur de données : il figure dans les comptes publiés. Le PER à trois chiffres en découle mécaniquement.",
+        "reel": true
+      },
+      "qcm": {
+        "question": "Le PER de Bernabé se compte en centaines. Qu’est-ce que cela signale ici ?",
+        "options": [
+          "Le marché anticipe une très forte croissance des bénéfices",
+          "Un bénéfice quasi nul, qui gonfle le ratio",
+          "Une erreur de calcul de la plateforme"
+        ],
+        "correct": 1,
+        "explication": "Un cours divisé par un bénéfice quasi nul donne un PER énorme. Ce n’est pas une prime de croissance, mais le symptôme d’une capacité bénéficiaire détruite."
+      },
+      "liens": [
+        {
+          "label": "La fiche Bernabé (BNBC)",
+          "href": "/societes/BNBC"
+        },
+        {
+          "label": "Les pièges du PER à la BRVM (analyse en direct)",
+          "href": "/analyses/pieges-du-per"
+        }
+      ],
+      "imageQuery": null,
+      "image": {
+        "url": "https://images.pexels.com/photos/29799518/pexels-photo-29799518.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Close-up of house keys, euro bills, and charts symbolizing real estate investment and finance.",
+        "credit": "Photo : Jakub Zerdzicki / Pexels"
+      }
+    },
+    {
+      "titre": "Palmci : anatomie d’une décote piège",
+      "categorie": "evaluation",
+      "resume": "Un résultat net en baisse quatre exercices de suite, divisé par 2,7 entre 2022 et 2025 (41,7 puis 15,5 milliards FCFA). Un PER qui paraît bas peut alors être justifié : c’est la « décote piège ».",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les chiffres décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "duree_min": 7,
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Le faux bon marché",
+          "contenu": "Résultat net : 42,5 milliards FCFA (2021), 41,7 (2022), 19,4 (2023), 15,9 (2024), 15,5 (2025). Quatre baisses consécutives, soit environ −22 % par an de 2021 à 2025. Dividende net par action : 1 214 FCFA pour l’exercice 2022, 441 FCFA pour l’exercice 2025. Sources : états financiers publiés par l’émetteur et la BRVM, base WestBourse ; dividendes : calendrier de la BRVM et Sika Finance."
+        },
+        {
+          "type": "cas",
+          "titre": "Pourquoi un PER peut rester bas",
+          "reel": true,
+          "contenu": "Quand le cours baisse en même temps que le bénéfice, le PER reste bas en apparence. C’est le propre de la décote piège : si le bénéfice continue de fondre, le PER d’aujourd’hui sous-estime la valorisation de demain. Le PER de Palmci se lit sur sa fiche, au cours du jour ; ce qui compte ici est la trajectoire du bénéfice."
+        },
+        {
+          "type": "piege",
+          "titre": "Le rendement du dernier dividende",
+          "contenu": "Le dividende de Palmci a suivi le bénéfice à la baisse. Un rendement calculé sur un dividende passé peut sembler élevé ; la question utile n’est pas « combien a-t-elle versé ? » mais « pourra-t-elle continuer ? ». Le prix de l’huile de palme peut inverser la tendance : un pari sur ce cycle doit être formulé comme tel, pas découvert après coup."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "1) PER bas et bénéfices en baisse sur plusieurs exercices : décote piège probable. 2) Croisez toujours le PER avec la trajectoire du résultat net (c’est le diagnostic « Value trap » des fiches WestBourse). 3) Un pari sur un cycle se formule avant d’investir, il ne se découvre pas après."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "Résultat net de Palmci (Md FCFA)",
+        "labels": ["2021", "2022", "2023", "2024", "2025"],
+        "valeurs": [42.5, 41.7, 19.4, 15.9, 15.5],
+        "unite": "Md FCFA",
+        "note": "Quatre exercices de baisse consécutifs, d’après les comptes publiés. Si le cours baisse avec le bénéfice, le PER reste bas : c’est ce qui rend le piège difficile à voir.",
+        "reel": true
+      },
+      "qcm": {
+        "question": "Qu’est-ce qui fait de Palmci 2022-2025 une « décote piège » plutôt qu’une vraie décote ?",
+        "options": [
+          "Son PER bas, considéré seul, sans autre information",
+          "Un PER bas avec un bénéfice en chute",
+          "Le niveau de son dernier dividende, rapporté au cours"
+        ],
+        "correct": 1,
+        "explication": "Un PER bas n’est une décote que si le bénéfice tient. Quatre baisses consécutives, dont un résultat divisé par 2,7 entre 2022 et 2025, indiquent que le prix bas peut être justifié."
+      },
+      "liens": [
+        {
+          "label": "La fiche Palmci (PALC)",
+          "href": "/societes/PALC"
+        },
+        {
+          "label": "Les pièges du PER à la BRVM (analyse en direct)",
+          "href": "/analyses/pieges-du-per"
+        }
+      ],
+      "exercice_id": "value-trap-pick",
+      "imageQuery": null,
+      "image": {
+        "url": "https://images.pexels.com/photos/8927688/pexels-photo-8927688.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "A tidy workspace featuring a laptop, documents, and eyeglasses for productivity.",
+        "credit": "Photo : Nataliya Vaitkevich / Pexels"
+      }
+    },
+    {
+      "titre": "BOA Niger : le risque pays dans les comptes",
+      "categorie": "fundamental",
+      "resume": "10,1 milliards FCFA de résultat net en 2023, 5,0 en 2024, 0,4 en 2025 : la chute du bénéfice de BOA Niger coïncide avec la crise politique et financière du Niger. Le lien précis se vérifie dans les comptes de la banque.",
+      "avertissement": "Ceci n’est pas un conseil en investissement. Les chiffres décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+      "duree_min": 6,
+      "sections": [
+        {
+          "type": "definition",
+          "titre": "Trois ans, trois mondes",
+          "contenu": "Résultat net de BOA Niger : 10,1 milliards FCFA (2023), 5,0 milliards (2024), 0,4 milliard (2025), soit −92 % sur la seule dernière année. Le contexte est connu : coup d’État de juillet 2023, sanctions de la CEDEAO et de l’UEMOA levées en février 2024, tensions sur les finances publiques. Le canal exact (coût du risque, titres d’État, activité) se lit dans le rapport de gestion de la banque : à vérifier avant de conclure. Sources : états financiers publiés par l’émetteur et la BRVM, base WestBourse."
+        },
+        {
+          "type": "cas",
+          "titre": "Une banque expose son bilan à son État",
+          "reel": true,
+          "contenu": "Les banques de l’UEMOA détiennent souvent des titres publics de leur pays et prêtent à son économie. Quand l’État traverse une crise, la banque peut la traverser avec lui : provisions, baisse de valeur des titres, ralentissement de l’activité. Avec un bénéfice par action de 19,7 FCFA en 2025, le PER dépasse 100 dès que le cours dépasse 2 000 FCFA (exemple de calcul) : comme chez Bernabé, c’est un artefact du bénéfice effondré."
+        },
+        {
+          "type": "piege",
+          "titre": "Confondre conjoncturel et structurel",
+          "contenu": "Le piège serait de traiter BOA Niger comme Bernabé. Une banque peut se redresser si le contexte du pays se normalise, ses dépôts et son réseau restant en place ; rien ne le garantit. La question d’analyse : le choc est-il conjoncturel (contexte du pays) ou structurel (modèle cassé) ? La réponse ne se lit pas dans le PER, mais dans le contexte et la qualité du portefeuille de crédits."
+        },
+        {
+          "type": "retenir",
+          "titre": "À retenir",
+          "contenu": "1) Pour une banque, le risque pays est un risque de bilan, pas un décor. 2) −92 % de résultat net en un an : chercher le canal (coût du risque, titres d’État) dans les états financiers. 3) Conjoncturel ou structurel : deux bénéfices effondrés peuvent appeler deux conclusions opposées."
+        }
+      ],
+      "chart": {
+        "type": "bar",
+        "titre": "Résultat net de BOA Niger (Md FCFA)",
+        "labels": ["2023", "2024", "2025"],
+        "valeurs": [10.1, 5, 0.4],
+        "unite": "Md FCFA",
+        "note": "Chute en deux temps, d’après les comptes publiés. Elle coïncide avec la crise du Niger ; reste à établir, dans les comptes, s’il s’agit d’un choc conjoncturel ou d’un déclin du modèle bancaire.",
+        "reel": true
+      },
+      "qcm": {
+        "question": "Le résultat net de BOA Niger passe de 10,1 à 0,4 Md FCFA en deux ans. Quel est le bon premier réflexe ?",
+        "options": [
+          "Conclure que le PER redeviendra vite attractif",
+          "Chercher la cause du recul dans les comptes",
+          "Écarter le titre définitivement, sans autre analyse"
+        ],
+        "correct": 1,
+        "explication": "Un choc conjoncturel (contexte du pays) et un déclin structurel appellent des conclusions opposées. On identifie le canal du choc dans les comptes avant de juger le prix."
+      },
+      "liens": [
+        {
+          "label": "La fiche BOA Niger (BOAN)",
+          "href": "/societes/BOAN"
+        },
+        {
+          "label": "Les états financiers de BOA Niger",
+          "href": "/actions/BOAN/financials"
+        }
+      ],
+      "exercice_id": "rendement-net",
+      "imageQuery": null,
+      "image": {
+        "url": "https://images.pexels.com/photos/5849571/pexels-photo-5849571.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+        "alt": "Illustration of a cartoon character struggling with a large coin symbolizing financial loss.",
+        "credit": "Photo : Monstera Production / Pexels"
+      }
+    }
+  ],
+  "glossaire": [
+    {
+      "terme": "PER (Price Earnings Ratio)",
+      "definition": "Cours ÷ bénéfice par action : combien de fois le bénéfice annuel le marché paie. N’a de sens que rapporté à la trajectoire du bénéfice."
+    },
+    {
+      "terme": "BPA",
+      "definition": "Bénéfice par action = résultat net ÷ nombre d’actions. Base du PER."
+    },
+    {
+      "terme": "Value trap",
+      "definition": "Action qui semble bon marché (PER bas) mais dont le bénéfice décline : la décote apparente est justifiée, voire insuffisante."
+    },
+    {
+      "terme": "Décote piège",
+      "definition": "Variante du value trap : PER modéré pendant que la capacité bénéficiaire s’érode, parfois masquée par un dividende passé encore élevé."
+    },
+    {
+      "terme": "Bénéfice effondré",
+      "definition": "Résultat net proche de zéro : le PER explose mécaniquement (dénominateur minuscule) sans que l’action soit « chère »."
+    },
+    {
+      "terme": "Taux de distribution (payout)",
+      "definition": "Part du bénéfice distribuée en dividende. Durablement supérieur à 100 %, il n’est pas soutenable."
+    },
+    {
+      "terme": "Risque souverain",
+      "definition": "Risque lié à l’État (dette, sanctions, instabilité). Pour une banque locale, c’est un risque de bilan direct."
+    },
+    {
+      "terme": "Capacité bénéficiaire",
+      "definition": "Aptitude récurrente d’une société à dégager du bénéfice, ce que le marché paie à long terme."
+    },
+    {
+      "terme": "Fractionnement",
+      "definition": "Division du nominal d’une action : chaque action en devient plusieurs. Le BPA et le dividende par action sont divisés d’autant ; la valeur détenue ne change pas."
+    }
+  ]
+}
