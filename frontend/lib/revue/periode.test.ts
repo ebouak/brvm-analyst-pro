@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct } from './periode';
+import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct, VOCABULAIRE } from './periode';
 import { dernierEvenementResultats, phraseMiseAJour } from './miseAJour';
 import { lectureIntermediaire } from '@/lib/financials/interim';
 
@@ -97,5 +97,29 @@ describe('mise à jour dérivée', () => {
   });
   it('sans événement : aucune mention', () => {
     expect(phraseMiseAJour(dernierEvenementResultats([]))).toBeNull();
+  });
+});
+
+describe('vocabulaire bancaire', () => {
+  const inter = lectureIntermediaire([
+    { periode: '2025', revenu_total: 1000, resultat_net: 200 },
+    { periode: '2026-S1', revenu_total: 520, resultat_net: 110 },
+    { periode: '2025-S1', revenu_total: 500, resultat_net: 100 },
+  ]);
+  const p = periodePrincipale(annuels, inter)!;
+  it('les lignes et le chiffre géant disent « produit net bancaire », jamais « chiffre d’affaires »', () => {
+    expect(lignesComparaison(p, VOCABULAIRE.banque).map((l) => l.libelle)).toEqual(['Produit net bancaire', 'Résultat net']);
+    const t = JSON.stringify([constatPeriode(p, VOCABULAIRE.banque), chiffreGeantPeriode(p, VOCABULAIRE.banque)]);
+    expect(t).not.toMatch(/chiffre d’affaires/i);
+    expect(constatPeriode(p, VOCABULAIRE.banque)).toMatch(/produit net bancaire/);
+  });
+  it('chiffre géant sur le PNB quand le résultat net n’est pas comparable', () => {
+    const q = { ...p, resultatNetPrecedent: null };
+    const g = chiffreGeantPeriode(q, VOCABULAIRE.banque);
+    expect(g.titre).toMatch(/^Produit net bancaire en hausse/);
+    expect(g.legende).toMatch(/^Évolution du produit net bancaire/);
+  });
+  it('par défaut, le vocabulaire général reste inchangé', () => {
+    expect(lignesComparaison(p).map((l) => l.libelle)).toEqual(['Chiffre d’affaires', 'Résultat net']);
   });
 });

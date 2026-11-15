@@ -99,11 +99,11 @@ export function constatIntermediaire(i: {
   libelle: string; periodePrecedente: string;
   revenu: number | null; revenuPrecedent: number | null;
   resultatNet: number | null; resultatNetPrecedent: number | null;
-} | null): string | null {
+} | null, revenuLibelle = 'chiffre d’affaires'): string | null {
   if (!i) return null;
   const v = (a: number | null, b: number | null) => (a != null && b != null && b > 0 ? pct(((a - b) / b) * 100) : null);
   const membres = [
-    v(i.revenu, i.revenuPrecedent) ? `chiffre d’affaires ${v(i.revenu, i.revenuPrecedent)}` : null,
+    v(i.revenu, i.revenuPrecedent) ? `${revenuLibelle} ${v(i.revenu, i.revenuPrecedent)}` : null,
     i.resultatNet != null && i.resultatNet < 0 ? 'résultat net en perte'
       : v(i.resultatNet, i.resultatNetPrecedent) ? `résultat net ${v(i.resultatNet, i.resultatNetPrecedent)}` : null,
   ].filter(Boolean);
