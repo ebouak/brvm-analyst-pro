@@ -23,6 +23,7 @@ import { extraireAgregats } from './runExtraction.js';
 import { selectionnerAgregats } from './runSelectionAgregats.js';
 import { construireRapport, rapportTexte, type RapportReprise } from './rapport.js';
 import { messageFile } from './alerte.js';
+import { avertissementsBloquants } from './garde.js';
 import type { ObservationNouvelle } from './normaliser.js';
 import type { ObsLue } from './ecritures.js';
 
@@ -74,13 +75,16 @@ export async function runAgregatsBancaires(opts: { mock: boolean; codes: string[
   return res;
 }
 
-export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolean; depuisRapport: string | null; rapport: string; fixtures: string | null; depuis?: string | null }): Promise<{ rapport: RapportReprise | null; echecs: number; ecrites: number }> {
+export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolean; depuisRapport: string | null; rapport: string; fixtures: string | null; depuis?: string | null; partielleAcceptee?: boolean }): Promise<{ rapport: RapportReprise | null; echecs: number; ecrites: number }> {
   const codes = await banques(opts.codes);
   if (opts.ecrire) {
     if (!opts.depuisRapport) throw new Error('--ecrire exige --depuis-rapport=<fichier> : on n’écrit que ce que l’exploitant a approuvé');
     const approuve = JSON.parse(readFileSync(opts.depuisRapport, 'utf8')) as RapportReprise;
     if (approuve.version !== 1) throw new Error(`rapport de version ${String(approuve.version)} non pris en charge`);
-    if (approuve.avertissements?.length) throw new Error(`rapport produit avec réserves (${approuve.avertissements.join(' ; ')}) : le régénérer avant d’écrire`);
+    // Seule la reprise bornée dans le temps peut passer, et seulement si elle est
+    // acceptée explicitement (--partielle-acceptee) : voir garde.ts.
+    const bloquants = avertissementsBloquants(approuve.avertissements, { partielleAcceptee: opts.partielleAcceptee === true });
+    if (bloquants.length) throw new Error(`rapport produit avec réserves (${bloquants.join(' ; ')}) : le régénérer avant d’écrire`);
     const obs = approuve.observations.filter((o) => codes.includes(o.code));
     await inserer(obs);
     const sel = await selectionnerAgregats({ dryRun: false, codes });
