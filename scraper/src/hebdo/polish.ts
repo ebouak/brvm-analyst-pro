@@ -5,6 +5,7 @@
  */
 import { logger } from '../logger.js';
 import { rediger } from '../llm/redacteur.js';
+import { assertNoRecommendation } from './pure/narrative.js';
 
 export interface SkeletonSection { titre: string; texte: string }
 
@@ -52,12 +53,13 @@ export async function polishNarrative(
 ): Promise<SkeletonSection[]> {
   const brut = sections.map((s) => `## ${s.titre}\n${s.texte}`).join('\n\n');
   const prompt =
-    `Reformule ce commentaire boursier en français pour le rendre fluide et professionnel.\n` +
-    `RÈGLES ABSOLUES : n'ajoute AUCUN chiffre, AUCUN fait, AUCUNE prévision. ` +
+    `Relis ce commentaire boursier hebdomadaire et améliore seulement les liaisons entre les phrases, en français ` +
+    `d'analyste financier : phrases nettes, vouvoiement si tu t'adresses au lecteur, aucune formule creuse.\n` +
+    `RÈGLES ABSOLUES : n'ajoute AUCUN chiffre, AUCUN fait, AUCUNE prévision, AUCUNE interprétation. ` +
     `N'affirme JAMAIS qu'un événement explique un mouvement de cours (pas de ` +
     `« à cause de », « en raison de », « suite à », « grâce à », « porté par »). ` +
-    `Écris pour un lecteur qui débute en bourse : phrases courtes, mots simples, ` +
-    `aucun jargon non expliqué. ` +
+    `Ne formule AUCUNE recommandation (pas d'« acheter », « vendre », « opportunité », « objectif de cours »). ` +
+    `Ne retire aucune phrase : chaque fait doit rester. ` +
     `N'utilise que ces valeurs numériques : ${chiffres.join(', ')}. ` +
     `Conserve exactement les mêmes titres de section (lignes commençant par ##).\n\n${brut}`;
 
@@ -67,10 +69,11 @@ export async function polishNarrative(
   // fait passer au fournisseur suivant ; si tous échouent, squelette brut.
   const r = await rediger([{ role: 'user', content: prompt }], resolveKey, {
     temperature: 0.3,
-    maxTokens: 2500,
+    maxTokens: 4000,
     accepter: (out) =>
       assertNoForeignNumber(out, chiffres) &&
       assertNoCausalClaim(out) &&
+      assertNoRecommendation(out) &&
       blocsDe(out).length === sections.length,
     journal: ({ fournisseur, raison }) =>
       logger.warn({ provider: fournisseur, raison }, 'hebdo : reformulation écartée — fournisseur suivant'),

@@ -1,12 +1,13 @@
 // COPIE de frontend/lib/hebdo — frontend et scraper sont deux paquets TS distincts
 // (pas de module partagé dans ce repo). Toute correction doit être reportée des deux côtés.
+// Régénérer avec `node scripts/sync-hebdo-pure.mjs` (vérifié par tests/hebdoCopies.test.ts).
 /**
  * Compose les deux formats prêts à poster depuis un squelette DÉJÀ validé
  * (donc soumis aux mêmes garde-fous) : `long` pour LinkedIn/Facebook,
  * `court` pour WhatsApp/Telegram. PUR, testé.
  */
 import { fmtPct, fmtRatio } from './format.js';
-import type { Skeleton } from './narrative.js';
+import { TITRES, type Skeleton } from './narrative.js';
 import type { HebdoMetrics } from './types.js';
 
 export type PostFormat = 'long' | 'court';
@@ -38,10 +39,12 @@ function accrocheLongue(m: HebdoMetrics, tete: string): string {
   return `${tete} : la semaine en bref`;
 }
 
-/** Première phrase d'un texte, pour condenser dans le format court. */
-function premierePhrase(texte: string): string {
-  const i = texte.search(/[.!?]/);
-  return (i > 0 ? texte.slice(0, i + 1) : texte).trim();
+/** Longueur maximale du format court (un message WhatsApp lisible d'un coup d'œil). */
+const COURT_MAX = 700;
+
+/** Découpe en phrases (les nombres s'écrivent à la virgule : aucun point interne). */
+function phrases(texte: string): string[] {
+  return (texte.match(/[^.!?]+[.!?]/g) ?? [texte]).map((x) => x.trim()).filter(Boolean);
 }
 
 export function buildPost(sk: Skeleton, m: HebdoMetrics, format: PostFormat): string {
@@ -52,14 +55,22 @@ export function buildPost(sk: Skeleton, m: HebdoMetrics, format: PostFormat): st
     const v = m.variationHebdo;
     lignes.push(`${tete} — ${v == null ? 'stable' : `${v >= 0 ? '+' : '−'}${fmtPct(Math.abs(v))}`} cette semaine`);
     if (m.ratioVolume != null) {
-      lignes.push(`· ${fmtRatio(m.ratioVolume)}× plus de titres échangés que d’habitude`);
+      lignes.push(`· ${fmtRatio(m.ratioVolume)} fois le volume moyen lors de la dernière séance`);
     }
-    const sens = sk.sections.find((s) => s.titre === 'Ce que ça veut dire');
-    if (sens) lignes.push(`· ${premierePhrase(sens.texte)}`);
-    const ctx = sk.sections.find((s) => s.titre === 'Le contexte');
-    if (ctx) lignes.push(`· ${premierePhrase(ctx.texte)}`);
-    const niv = sk.sections.find((s) => s.titre === 'Les niveaux à surveiller');
-    if (niv) lignes.push(`· ${premierePhrase(niv.texte)}`);
+    const texteDe = (titre: string) => sk.sections.find((s) => s.titre === titre)?.texte ?? null;
+    const semaine = texteDe(TITRES.semaine);
+    const marche = semaine ? phrases(semaine).find((x) => x.startsWith('Sur la même période')) : undefined;
+    if (marche) lignes.push(`· ${marche}`);
+    const valo = texteDe(TITRES.valorisation);
+    if (valo) lignes.push(`· ${phrases(valo)[0]}`);
+    const liq = texteDe(TITRES.liquidite);
+    if (liq) lignes.push(`· ${phrases(liq)[0]}`);
+    const tech = texteDe(TITRES.technique);
+    const canal = tech ? phrases(tech).find((x) => x.startsWith('Le cours')) : undefined;
+    if (canal) lignes.push(`· ${canal}`);
+    // Format court : on retire les lignes de détail, de la dernière vers la
+    // première, jusqu'à tenir dans un message.
+    while (lignes.length > 1 && [...lignes, AVERTISSEMENT].join('\n').length > COURT_MAX) lignes.pop();
     lignes.push(AVERTISSEMENT);
     return lignes.join('\n');
   }
