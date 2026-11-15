@@ -1,4 +1,6 @@
 import type { BankKpis, BankScore } from '@/lib/bank/kpis';
+import type { LectureBancaire } from '@/lib/bank/lecture';
+import TableauLecture from '@/components/bank/TableauLecture';
 
 /**
  * Carte « Analyse bancaire UEMOA » : les éléments pertinents des états
@@ -27,7 +29,7 @@ function KpiRow({ label, value, tone, absence }: { label: string; value: string;
   );
 }
 
-export default function BankScorecard({ kpis, score, periode, absences, qualite }: {
+export default function BankScorecard({ kpis, score, periode, absences, qualite, lecture }: {
   kpis: BankKpis;
   score: BankScore;
   periode: string | null;
@@ -35,9 +37,12 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
   absences?: { solvabilite?: string | null };
   /** Taux publiés par la banque pour l'exercice affiché, EN POURCENTAGE (8 = 8 %). */
   qualite?: { taux: number | null; tauxAbsence: string | null; couverture: number | null; couvertureAbsence: string | null };
+  /** Lecture bancaire extraite (lib/bank/lecture.ts) : agrégats sourcés, mêmes chiffres que la Revue. */
+  lecture?: LectureBancaire | null;
 }) {
   return (
     <div className="space-y-4">
+      {lecture && <TableauLecture lecture={lecture} />}
       {/* ── Le bilan bancaire en clair : prêts, dépôts, transformation ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-surface border border-border rounded-xl p-4">
@@ -53,7 +58,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
           <h3 className="text-xs text-muted mb-3">Performance bancaire</h3>
           <KpiRow label="Marge nette d'intérêts (NIM)" value={pct(kpis.nim, 2)} />
           <KpiRow
-            label="Coefficient d'exploitation"
+            label="Coefficient d'exploitation (charges ÷ PNB)"
             value={pct(kpis.costIncome)}
             tone={kpis.costIncome == null ? null : kpis.costIncome <= 0.6 ? 'up' : kpis.costIncome >= 0.8 ? 'down' : null}
           />

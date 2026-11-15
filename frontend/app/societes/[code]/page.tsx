@@ -21,6 +21,11 @@ import EstimateurLiquidite from '@/components/fiche/EstimateurLiquidite';
 import { fiabiliteDividende, FENETRE_ANS } from '@/lib/dividendes/fiabilite';
 import { perAffichable, roeAffichable, montantDividende, dividendesAffichables, dividendePourRendement } from '@/lib/fiche/affichage';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
+import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
+import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
+import { lireBanque } from '@/lib/bank/lecture';
+import { montantLigne } from '@/lib/bank/format';
+import TableauLecture from '@/components/bank/TableauLecture';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
 import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
@@ -198,6 +203,14 @@ export default async function CompanyPage(props: PageProps) {
   const variation = last?.variation_pct ?? null;
 
   const bestFund = pickBestFundamental(fundamentals);
+  const estBanque = FAMILLE_PAR_CODE[code] === 'banque';
+  const lectureFiche = estBanque && bestFund?.year != null
+    ? lireBanque(await chargerPeriodesBancaires(createPublicClient(), code), { annee: bestFund.year, code: 'exercice' })
+    : null;
+  const lectureBanque = lectureFiche?.extrait ? lectureFiche : null;
+  // Même chiffre que la Revue et le dossier : le PNB retenu l'emporte sur la
+  // colonne revenue, avec l'unité de sa source (USD pour ETIT).
+  const pnbLecture = lectureBanque?.compteResultat.find((l) => l.cle === 'pnb') ?? null;
   // Dividende VÉRIFIÉ (détachement daté) pour le rendement : les valeurs société
   // sans ex_date sont biaisées (~12 %). Cohérent avec le reste du site.
   // Repli : jamais une ligne sans exercice ni un montant nul (rendement 0 % affiché à tort).
@@ -288,6 +301,7 @@ export default async function CompanyPage(props: PageProps) {
         resultatNetPrecedent: exPrecedent?.net_income ?? null,
         chiffreAffaires: exCourant.revenue ?? null,
         chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
+        ...(estBanque ? { libelleRevenu: 'produit net bancaire' } : {}),
         capitauxPropres: exCourant.equity ?? null,
         actions: instrument.shares ?? null,
         coursJour: cours ?? null,
@@ -495,7 +509,9 @@ export default async function CompanyPage(props: PageProps) {
           </div>
           <dl className="grid gap-x-8 md:grid-cols-2">
             {[
-              { label: "Chiffre d'affaires", value: avecUnite(fmtFcfa(bestFund?.revenue ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.revenue ?? null) },
+              pnbLecture
+                ? { label: 'Produit net bancaire', value: montantLigne(pnbLecture.valeur.valeur, pnbLecture.unite), badge: badgeCalcule(pnbLecture.valeur.valeur) }
+                : { label: estBanque ? 'Produit net bancaire' : "Chiffre d'affaires", value: avecUnite(fmtFcfa(bestFund?.revenue ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.revenue ?? null) },
               { label: 'Résultat net', value: avecUnite(fmtFcfa(bestFund?.net_income ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.net_income ?? null) },
               { label: 'Capitaux propres', value: avecUnite(fmtFcfa(bestFund?.equity ?? null), 'FCFA'), badge: badgeCalcule(bestFund?.equity ?? null) },
               { label: 'BPA', value: ratios?.bpa != null ? fmtNumber(ratios.bpa, 0) + ' FCFA' : '—', badge: badgeCalcule(ratios?.bpa ?? null) },
@@ -517,6 +533,11 @@ export default async function CompanyPage(props: PageProps) {
             « Calculé » : à partir des états financiers de l&apos;exercice {exercice ?? '—'}.
             {boc && <> PER et rendement recoupés avec le Bulletin officiel de la cote du {dateSeanceLongue(boc.date_marche)} ; « écart BOC » signale plus de 3 % d&apos;écart, à vérifier sur les comptes.</>}
           </p>
+          {lectureBanque && (
+            <div className="mt-4">
+              <TableauLecture lecture={lectureBanque} />
+            </div>
+          )}
         </section>
       )}
 

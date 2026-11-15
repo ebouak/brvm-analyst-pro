@@ -115,6 +115,8 @@ export interface EconomieSociete {
   resultatNetPrecedent?: number | null;
   chiffreAffaires?: number | null;
   chiffreAffairesPrecedent?: number | null;
+  /** Nom du revenu dans les phrases : « produit net bancaire » pour une banque (défaut : « chiffre d'affaires »). */
+  libelleRevenu?: string;
   capitauxPropres?: number | null;
   /** Nombre de titres (`brvm_instruments.shares`). */
   actions?: number | null;
@@ -433,17 +435,18 @@ export function commenterSeance(entree: {
     const { capitalisation, per, pbr } = valorisation(economie);
     const cCA = croissancePct(economie.chiffreAffaires, economie.chiffreAffairesPrecedent);
     const cRN = croissancePct(economie.resultatNet, economie.resultatNetPrecedent);
+    const revenuNom = economie.libelleRevenu ?? "chiffre d'affaires";
     ecoOrientation = orienterEconomie(cCA, cRN);
     coteSousFondsPropres = pbr != null && pbr < 1;
 
     const bloc = [
       economie.resultatNet != null ? `${fcfa(economie.resultatNet)} de résultat net` : null,
-      economie.chiffreAffaires != null ? `${fcfa(economie.chiffreAffaires)} de chiffre d'affaires` : null,
+      economie.chiffreAffaires != null ? `${fcfa(economie.chiffreAffaires)} de ${revenuNom}` : null,
     ].filter(Boolean);
 
     if (bloc.length > 0 || capitalisation != null) {
       const evolution = [
-        cCA != null ? `le chiffre d'affaires ${sensCroissance(cCA)}` : null,
+        cCA != null ? `le ${revenuNom} ${sensCroissance(cCA)}` : null,
         cRN != null ? `le résultat net ${sensCroissance(cRN)}` : null,
       ].filter(Boolean).join(' et ');
 
@@ -493,10 +496,10 @@ export function commenterSeance(entree: {
 
       const blocI = [
         im.resultatNet != null ? `${fcfa(im.resultatNet)} de résultat net` : null,
-        im.revenu != null ? `${fcfa(im.revenu)} de chiffre d'affaires` : null,
+        im.revenu != null ? `${fcfa(im.revenu)} de ${revenuNom}` : null,
       ].filter(Boolean);
       const evolI = [
-        iCA != null ? `le chiffre d'affaires ${sensCroissance(iCA)}` : null,
+        iCA != null ? `le ${revenuNom} ${sensCroissance(iCA)}` : null,
         iRN != null ? `le résultat net ${sensCroissance(iRN)}` : null,
       ].filter(Boolean).join(' et ');
       const rnG = im.glissant?.resultatNet ?? null;

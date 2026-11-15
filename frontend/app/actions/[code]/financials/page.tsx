@@ -29,6 +29,9 @@ import BankScorecard from '@/components/financials/BankScorecard';
 import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
+import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
+import { lireBanque } from '@/lib/bank/lecture';
+import { appliquerLecture } from '@/lib/bank/lectureKpis';
 import { libelleAbsence, serieRetenue, dateArrete, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
@@ -191,6 +194,14 @@ export default async function FinancialsPage(props: Props) {
   const tauxPublie = (indicateur: string) =>
     serieRetenue(obsPrudentielles, indicateur).find((p) => p.annee === anneeBilan)?.valeur ?? null;
 
+  // Lecture bancaire de l'exercice affiché (lib/bank/lecture.ts) : mêmes
+  // agrégats et mêmes ratios que la Revue et le dossier.
+  const anneeBanque = latestIncome?.periode ? Number(String(latestIncome.periode).slice(0, 4)) : null;
+  const lectureBanqueBrute = data.instrument.famille_comptable === 'banque' && anneeBanque != null && Number.isFinite(anneeBanque)
+    ? lireBanque(await chargerPeriodesBancaires(createClient(), code), { annee: anneeBanque, code: 'exercice' })
+    : null;
+  const lectureBanque = lectureBanqueBrute?.extrait ? lectureBanqueBrute : null;
+
   // Analyse bancaire UEMOA : postes spécifiques (prêts, dépôts, marge
   // d'intérêts…) + score /100 — uniquement pour la famille banque.
   const bankAnalysis = (() => {
@@ -198,13 +209,15 @@ export default async function FinancialsPage(props: Props) {
     const cur = extractBankYear(latestIncome, latestBalance);
     if (!cur) return null;
     const prev = extractBankYear(prevIncome, data.balanceSheets[1] ?? null);
-    const kpis = computeBankKpis(cur, prev, {
+    // Coefficient d'exploitation : celui de la lecture, ou aucun (avenant du 2026-11-15).
+    const kpis = appliquerLecture(computeBankKpis(cur, prev, {
       cours: data.latestDaily?.cours_jour ?? null,
       shares: data.instrument.shares,
       dividendeParAction: latestIncome?.dividende_par_action ?? null,
-    });
+    }), lectureBanque);
     return {
       kpis,
+      lecture: lectureBanque,
       score: scoreBanqueUemoa(kpis),
       periode: latestIncome?.periode ?? null,
       absences: { solvabilite: kpis.ratioSolvabilite == null ? libelleAbsence(obsDe('solvabilite_total'), latestBalance?.periode) : null },
@@ -375,7 +388,7 @@ export default async function FinancialsPage(props: Props) {
             {bankAnalysis && (
               <div>
                 <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
-                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} lecture={bankAnalysis.lecture} />
               </div>
             )}
 
