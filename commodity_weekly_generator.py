@@ -1224,7 +1224,10 @@ def main():
     # Étape 5 : rédaction sous verrous
     log.info("5/7 Rédaction de l'analyse (LLM sous contrôle)...")
     wb_summary = build_wb_summary(wb_snapshot)
-    titres = [str(a.get("titre", "")) for a in articles[:6]] + [str(i.get("titre", "")) for i in perplexity_items[:8]]
+    # TOUS les titres : le rédacteur reçoit la presse rangée par matière, puisée dans
+    # l'ensemble des titres. Une liste blanche limitée aux 14 premiers refusait
+    # « 4 000 dollars » sur l'or, cité tel quel dans un titre fourni.
+    titres = [str(a.get("titre", "")) for a in articles] + [str(i.get("titre", "")) for i in perplexity_items]
     autorises = _q.nombres_autorises(prices, correlations=correlations, fcfa=fcfa, scenarios=scenarios,
                                      titres=titres, week=week, year=year)
 
