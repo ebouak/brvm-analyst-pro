@@ -1,7 +1,6 @@
 import { libelleSignal } from '@/lib/signalLabel';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { getMemberCount } from '@/lib/landing/memberCount';
-import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
@@ -137,7 +136,6 @@ export default async function Landing() {
 
   return (
     <div className={`vitrine ${classesPolices}`}>
-      <LandingNav />
 
       {/* Refonte « vitrine » (PR 1, spec 2026-11-12) : sections 3.2 à 3.6. */}
       <Ouverture o={{ dateLongue: d.dateMarche ? dateLongue(d.dateMarche) : null, enSeance: estEnSeance(new Date()), membres, nbValeurs: d.nbActions || NB_SOCIETES_COTEES }} />

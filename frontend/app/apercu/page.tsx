@@ -11,7 +11,6 @@ import { BrvmAujourdhui } from '@/components/landing/apercu/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/apercu/Terminal';
 import { getMemberCount } from '@/lib/landing/memberCount';
 import { BentoFacons } from '@/components/landing/apercu/BentoFacons';
-import { LandingNav } from '@/components/landing/apercu/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
@@ -85,7 +84,6 @@ export default async function Apercu() {
     <div className="ah">
       <div style={{position:"sticky",top:0,zIndex:50,background:"linear-gradient(90deg,#56D7FD,#3FE18B)",color:"#06141a",textAlign:"center",padding:"6px 12px",fontSize:12,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase"}}>APERCU · bac à sable motion (noindex) — prod sur <Link href="/" style={{textDecoration:"underline"}}>/</Link></div>
       <div className="wrap" data-hybride="ah">
-        <LandingNav />
 
         <main>
           {/* 1 · HERO HYBRIDE A+B (claim + marché live) */}
