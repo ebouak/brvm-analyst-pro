@@ -1,5 +1,6 @@
 // COPIE de frontend/lib/hebdo — frontend et scraper sont deux paquets TS distincts
 // (pas de module partagé dans ce repo). Toute correction doit être reportée des deux côtés.
+// Régénérer avec `node scripts/sync-hebdo-pure.mjs` (vérifié par tests/hebdoCopies.test.ts).
 /**
  * Formatage de montants FCFA pour un lecteur non averti : « 96,6 millions FCFA »
  * plutôt que « 96558000 ». PUR, testé. Renvoie toujours la valeur ABSOLUE :

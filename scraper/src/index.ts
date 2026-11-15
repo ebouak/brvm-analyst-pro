@@ -38,6 +38,9 @@
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
  *   tsx src/index.ts communaute            # membres du canal Telegram -> communaute_releves
  *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
+ *   tsx src/index.ts agregats:bancaires    # agrégats bancaires des publications nouvelles (cron)
+ *   tsx src/index.ts agregats:reprise      # reprise À BLANC de l'historique, rapport sans écriture (--depuis=AAAA-MM-JJ pour borner)
+ *   tsx src/index.ts agregats:reprise --ecrire --depuis-rapport=output/agregats/reprise-AAAA-MM-JJ.json
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -248,6 +251,50 @@ async function main(): Promise<number> {
       // Un échec (LLM ou PDF injoignable) fait échouer le job ; un REJET par
       // garde-fou est une décision, pas une panne.
       return res.echecs > 0 ? 1 : 0;
+    }
+
+    case 'agregats:bancaires': {
+      // Agrégats bancaires des publications nouvelles (cron hebdomadaire) :
+      // observations sourcées, contrôles, sélection, alerte si relecture.
+      // `agregats:bancaires SGBC SIBC` limite.
+      const { runAgregatsBancaires } = await import('./agregats/runAgregats.js');
+      const res = await monitored(
+        { code: 'agregats-bancaires', label: 'Agrégats bancaires (extraction sourcée)' },
+        async () => {
+          const r = await runAgregatsBancaires({ mock, codes: positional.map((c) => c.toUpperCase()) });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.observations,
+              rows_upserted: r.ecrites,
+              metadata: { documents: r.documents, echecs: r.echecs, aRelire: r.aRelire, alerteEnvoyee: r.alerteEnvoyee },
+            },
+          };
+        },
+      );
+      // Une panne d'extraction fait échouer le job : jamais de vert silencieux.
+      return res.echecs > 0 ? 1 : 0;
+    }
+
+    case 'agregats:reprise': {
+      // Reprise de l'historique. À BLANC par défaut : relit tout, n'écrit rien,
+      // produit un rapport. --ecrire --depuis-rapport=<fichier> insère les
+      // observations du rapport approuvé, sans relire les PDF.
+      const { runRepriseAgregats } = await import('./agregats/runAgregats.js');
+      const opt = (nom: string) => rest.find((a) => a.startsWith(`--${nom}=`))?.split('=').slice(1).join('=') ?? null;
+      const jour = new Date().toISOString().slice(0, 10);
+      const r = await runRepriseAgregats({
+        codes: positional.map((c) => c.toUpperCase()),
+        ecrire: rest.includes('--ecrire'),
+        depuisRapport: opt('depuis-rapport'),
+        rapport: opt('rapport') ?? `output/agregats/reprise-${jour}.json`,
+        fixtures: opt('fixtures'),
+        depuis: opt('depuis'),
+      });
+      if (r.rapport) console.log(`Rapport : ${JSON.stringify(r.rapport.totaux)} — rien n’a été écrit.`);
+      else console.log(`Écrit depuis le rapport approuvé : ${r.ecrites} valeur(s) changée(s).`);
+      return r.echecs > 0 ? 1 : 0;
     }
 
     case 'pass': {

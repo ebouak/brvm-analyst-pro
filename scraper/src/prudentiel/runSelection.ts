@@ -86,7 +86,7 @@ export async function runSelectionPrudentielle(opts: { dryRun: boolean; codes?: 
   const indicateurs = Object.keys(CORRESPONDANCE);
 
   let q = sb.from('indicateur_source')
-    .select('id,code,indicateur,date_arrete,perimetre,statut,valeur,comparateur,texte_original,motif,document_url,document_libelle,page,nature_source,provisoire')
+    .select('id,code,indicateur,date_arrete,perimetre,statut,valeur,comparateur,texte_original,motif,document_url,document_libelle,page,nature_source,provisoire,controle,unite,unite_source,decimales')
     .in('indicateur', indicateurs);
   if (opts.codes?.length) q = q.in('code', opts.codes);
   const { data: obs, error } = await q;
