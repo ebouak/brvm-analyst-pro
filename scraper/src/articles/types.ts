@@ -4,9 +4,15 @@ export type TypeArticle =
   | 'detachement_rappel'
   | 'paiement_rappel'
   | 'operation_titres'
-  | 'seance_hors_norme';
+  | 'seance_hors_norme'
+  /** Résultats d'une banque, agrégats sourcés (lib/bank/lecture) : TOUJOURS relu (a_valider). */
+  | 'resultats';
 
-/** Lot 1 : tous publiés sans relecture. Résultats, notations et thèmes (lots 2-3) passeront par la validation. */
+/**
+ * Lot 1 : tous publiés sans relecture. Résultats, notations et thèmes (lots 2-3)
+ * passent par la validation : `resultats` (banques, agrégats sourcés) n'est PAS
+ * dans cette liste, il part en `a_valider` et attend la relecture humaine.
+ */
 export const TYPES_AUTOMATIQUES: ReadonlySet<string> = new Set<TypeArticle>([
   'dividende_annonce',
   'detachement_rappel',

@@ -13,6 +13,8 @@ import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { todayMarketDate } from '../utils/dates.js';
 import { polishNarrative } from '../hebdo/polish.js';
+import { chargerPeriodesBancaires } from '../bank/chargerPeriodes.js';
+import { lireBanque, lirePeriode } from '../bank/pure/lecture.js';
 import { resolveApiKeyForScraper } from '../hebdo/apiKey.js';
 import { envoyerImageWaha, envoyerTexteWaha, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { detecter } from './detecteurs.js';
@@ -149,6 +151,24 @@ export async function runArticles(opts: { mock?: boolean } = {}): Promise<Result
   // Opérations sur 12 jours pour le rappel dans la séance, 5 jours pour l'article dédié (détecteur).
   const operations = ((ops.data ?? []) as OperationRow[]).map((o) => ({ ...o, ratio: Number(o.ratio) }));
   const faits = detecter(ctx, divs, operations);
+
+  // Résultats bancaires : un PNB nouvellement RETENU par la sélection des
+  // agrégats (trace correction_champ des 3 derniers jours) fait un article,
+  // toujours en `a_valider` (type non automatique) : relu avant publication.
+  const { data: retenus, error: eRet } = await sb.from('correction_champ')
+    .select('code,periode,corrige_le')
+    .eq('corrige_par', 'selection-agregats').eq('champ', 'lignes_specifiques.pnb').not('valeur_apres', 'is', null)
+    .gte('corrige_le', `${decaler(aujourdhui, -3)}T00:00:00Z`);
+  if (eRet) throw new Error(`correction_champ (résultats bancaires) : ${eRet.message}`);
+  const vus = new Set<string>();
+  for (const r of (retenus ?? []) as { code: string; periode: string; corrige_le: string }[]) {
+    const visee = lirePeriode(r.periode);
+    if (!visee || vus.has(`${r.code}|${r.periode}`)) continue;
+    vus.add(`${r.code}|${r.periode}`);
+    const lecture = lireBanque(await chargerPeriodesBancaires(r.code), visee);
+    if (!lecture?.extrait || !lecture.constat.pnb) continue;
+    faits.push({ type: 'resultats', code: r.code, cle: r.periode, dateFait: r.corrige_le.slice(0, 10), donnees: { lecture } });
+  }
   res.detectes = faits.length;
 
   const slugsDe = new Map(faits.map((f) => [cleFait(f), rediger(f, ctx.noms).slug]));

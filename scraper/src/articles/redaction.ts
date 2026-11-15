@@ -12,6 +12,7 @@ import type { SkeletonSection } from '../hebdo/polish.js';
 import type { Mouvement } from './detecteurs.js';
 import { nomDit } from './noms.js';
 import type { Fait, RecordValeur, Reperes } from './types.js';
+import { resultatsBanque } from './resultatsBanque.js';
 
 export interface Source {
   label: string;
@@ -33,7 +34,7 @@ export const AVERTISSEMENT = 'Information de marché, pas un conseil en investis
 
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
-class Plume {
+export class Plume {
   readonly liste: number[] = [];
 
   n(x: number, d = 0): string {
@@ -54,9 +55,14 @@ class Plume {
 
   /** Montant en FCFA, en milliards au-delà d'un milliard. */
   fcfa(x: number): string {
+    return this.montant(x, 'FCFA');
+  }
+
+  /** Montant dans la devise de sa source (USD pour ETIT, sans conversion), même échelle que fcfa. */
+  montant(x: number, devise: 'FCFA' | 'USD'): string {
     const a = Math.abs(x);
-    if (a >= 1e11) return `${this.n(a / 1e9, 0)} milliards FCFA`;
-    return a >= 1e9 ? `${this.n(a / 1e9, 2)} milliards FCFA` : `${this.n(a / 1e6, 0)} millions FCFA`;
+    if (a >= 1e11) return `${this.n(a / 1e9, 0)} milliards ${devise}`;
+    return a >= 1e9 ? `${this.n(a / 1e9, 2)} milliards ${devise}` : `${this.n(a / 1e6, 0)} millions ${devise}`;
   }
 
   date(iso: string): string {
@@ -83,14 +89,15 @@ const PREFIXE: Record<Fait['type'], string> = {
   paiement_rappel: 'paiement',
   operation_titres: 'operation',
   seance_hors_norme: 'seance',
+  resultats: 'resultats',
 };
 const slugDe = (f: Fait) => `${PREFIXE[f.type]}-${f.code}-${f.cle}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const str = (v: unknown): string | null => (typeof v === 'string' && v ? v : null);
 
-type Corps = Omit<Brouillon, 'slug' | 'chiffres'>;
-interface Outils {
+export type Corps = Omit<Brouillon, 'slug' | 'chiffres'>;
+export interface Outils {
   p: Plume;
   nom: string;
   nomDe: (code: string) => string;
@@ -376,7 +383,11 @@ export function rediger(f: Fait, noms: Record<string, string>, reperes: Reperes 
   const toutes = Object.values(noms);
   const nomDe = (code: string) => p.nom(nomDit(noms[code] ?? code, toutes));
   const o: Outils = { p, nom: nomDe(f.code), nomDe, reperes };
-  const corps = f.type === 'operation_titres' ? operation(f, o) : f.type === 'seance_hors_norme' ? seance(f, o) : dividende(f, o);
+  const corps =
+    f.type === 'operation_titres' ? operation(f, o)
+      : f.type === 'seance_hors_norme' ? seance(f, o)
+        : f.type === 'resultats' ? resultatsBanque(f, o)
+          : dividende(f, o);
   return { ...corps, slug: slugDe(f), chiffres: [...new Set(p.liste)] };
 }
 

@@ -23,6 +23,7 @@ export const LIBELLE_TYPE: Record<string, string> = {
   paiement_rappel: 'Paiement',
   operation_titres: 'Opération sur titres',
   seance_hors_norme: 'Séance',
+  resultats: 'Résultats',
   decryptage: 'Décryptage',
 };
 
