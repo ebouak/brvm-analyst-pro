@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { planifierEcritures, periodeDeLigne, type ObsLue, type LigneComptes } from '../src/agregats/ecritures.js';
+import { planifierEcritures, periodeDeLigne, ECRITURE_USD_AUTORISEE, type ObsLue, type LigneComptes } from '../src/agregats/ecritures.js';
 
 let n = 0;
 const o = (p: Partial<ObsLue>): ObsLue => ({
@@ -31,8 +31,8 @@ describe('planifierEcritures', () => {
     expect(m.traces[0]).toMatchObject({ champ: 'lignes_specifiques.pnb', avant: 140e9, apres: 150e9 });
   });
 
-  it('un montant en USD (ETIT) est écrit tel quel, unité « usd » dans la source', () => {
-    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT' })]);
+  it('drapeau ouvert : un montant en USD (ETIT) est écrit tel quel, unité « usd » dans la source', () => {
+    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT' })], { ecritureUsd: true });
     expect(p.misesAJour[0]!.lignes_specifiques).toEqual({ pnb: 1.2e9 });
     expect(p.misesAJour[0]!.sources_specifiques.pnb).toMatchObject({ unite: 'usd' });
   });
@@ -92,4 +92,27 @@ it('contradiction avec une observation sans texte imprimé (antérieure à 0148)
   const b = o({ indicateur: 'solvabilite_total', valeur: 16.5, texte_original: '16,5', unite: 'pct', document_url: 'd2', periode: 'exercice', date_arrete: '2024-12-31' });
   const p = planifierEcritures([a, b], [ligne({ table: 'balance_sheets', periode: '2024', type_periode: 'annuel' })]);
   expect(p.relectures[0]!.detail).toBe('Valeurs incompatibles : 14,2 / 16,5');
+});
+
+describe('écriture des montants USD (ETIT) verrouillée tant que l’affichage ne lit pas l’unité', () => {
+  it('le drapeau est fermé dans cette PR', () => {
+    expect(ECRITURE_USD_AUTORISEE).toBe(false);
+  });
+  it('une valeur USD retenue n’est PAS écrite dans lignes_specifiques ; elle est signalée', () => {
+    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT', lignes_specifiques: { pnb: 690e9 } })]);
+    expect(p.misesAJour).toEqual([]);
+    expect(p.ecartesUsd).toEqual(['ETIT|income_statements|2026-S1|pnb']);
+  });
+  it('un conflit USD/FCFA ne retire pas non plus la valeur en base, mais part en relecture', () => {
+    const a = o({ code: 'ETIT', document_url: 'd1', valeur: 1.2e9, unite: 'usd' });
+    const b = o({ code: 'ETIT', document_url: 'd2', valeur: 690e9, unite: 'fcfa' });
+    const p = planifierEcritures([a, b], [ligne({ code: 'ETIT', lignes_specifiques: { pnb: 690e9 } })]);
+    expect(p.misesAJour).toEqual([]);
+    expect(p.relectures).toHaveLength(1);
+  });
+  it('drapeau ouvert (PR 2) : la valeur USD s’écrit, unité dans la source', () => {
+    const p = planifierEcritures([o({ code: 'ETIT', valeur: 1.2e9, unite: 'usd' })], [ligne({ code: 'ETIT' })], { ecritureUsd: true });
+    expect(p.misesAJour[0]!.lignes_specifiques).toEqual({ pnb: 1.2e9 });
+    expect(p.ecartesUsd).toEqual([]);
+  });
 });

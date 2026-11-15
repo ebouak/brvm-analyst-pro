@@ -76,6 +76,7 @@ export async function selectionnerAgregats(opts: { dryRun: boolean; codes: strin
 
   const plan = planifierEcritures(obs, lignes);
   if (plan.orphelins.length) log.warn({ orphelins: plan.orphelins }, 'observations sans ligne de comptes — non écrites');
+  if (plan.ecartesUsd.length) log.warn({ ecartesUsd: plan.ecartesUsd }, 'montants USD non écrits (verrou ECRITURE_USD_AUTORISEE)');
   if (opts.dryRun) return { ...plan, ecrites: 0, relecturesOuvertes: plan.relectures.length, avertissements };
 
   let ecrites = 0;

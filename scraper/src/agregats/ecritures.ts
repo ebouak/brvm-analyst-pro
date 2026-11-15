@@ -9,6 +9,13 @@
  *   - conflit ou a_relire → ouvrir un élément de relecture.
  * Aucune ligne de comptes n'est créée (règle de 0147).
  *
+ * Montants en USD (ETIT) : tant que l'affichage ne lit pas
+ * sources_specifiques[clé].unite (PR 2), RIEN n'est écrit dans
+ * lignes_specifiques pour un agrégat dont une observation est en USD — ni
+ * valeur, ni retrait. Les observations restent en base, les relectures
+ * s'ouvrent, et l'agrégat est listé dans `ecartesUsd`. Basculer
+ * ECRITURE_USD_AUTORISEE dans la PR 2.
+ *
  * Utilisé par le cron (runSelectionAgregats.ts) ET, dans sa copie frontend,
  * par la route de relecture qui applique une décision immédiatement.
  *
@@ -95,6 +102,8 @@ export interface PlanEcritures {
   relectures: ElementRelecture[];
   decisions: DecisionAgregat[];
   orphelins: string[];
+  /** « code|table|periode|clé » non écrits car en USD (verrou ECRITURE_USD_AUTORISEE). */
+  ecartesUsd: string[];
 }
 
 export function periodeDeLigne(periode: string): { code: CodePeriode; dateArrete: string } | null {
@@ -103,6 +112,9 @@ export function periodeDeLigne(periode: string): { code: CodePeriode; dateArrete
   const m = /^(\d{4})-(T1|S1|T3)$/.exec(periode);
   return m ? { code: m[2] as CodePeriode, dateArrete: dateArreteDe(Number(m[1]), m[2] as CodePeriode) } : null;
 }
+
+/** Verrou des montants USD : à passer à true quand l'affichage lit l'unité (PR 2). */
+export const ECRITURE_USD_AUTORISEE = false;
 
 const RETIRE: ReadonlySet<Decision['etat']> = new Set(['conflit', 'borne', 'non_exploitable', 'non_applicable']);
 
@@ -124,8 +136,9 @@ function uniteDe(o: ObsLue, ratio: boolean): UniteRetenue {
 
 const sansObservation = (s: SourceRetenue | undefined) => JSON.stringify(s ? { ...s, observation: '' } : null);
 
-export function planifierEcritures(obs: ObsLue[], lignes: LigneComptes[]): PlanEcritures {
-  const plan: PlanEcritures = { misesAJour: [], relectures: [], decisions: [], orphelins: [] };
+export function planifierEcritures(obs: ObsLue[], lignes: LigneComptes[], opts: { ecritureUsd?: boolean } = {}): PlanEcritures {
+  const ecritureUsd = opts.ecritureUsd ?? ECRITURE_USD_AUTORISEE;
+  const plan: PlanEcritures = { misesAJour: [], relectures: [], decisions: [], orphelins: [], ecartesUsd: [] };
   const parId = new Map(obs.map((o) => [o.id, o]));
   const couvertes = new Set<string>();
 
@@ -159,6 +172,10 @@ export function planifierEcritures(obs: ObsLue[], lignes: LigneComptes[]): PlanE
         });
       }
       if (def.cle == null) continue; // recoupement seul (résultat net)
+      if (!ecritureUsd && concernees.some((o) => o.unite === 'usd')) {
+        plan.ecartesUsd.push(`${l.code}|${l.table}|${l.periode}|${def.cle}`);
+        continue;
+      }
 
       const avant = ls[def.cle] == null ? null : Number(ls[def.cle]);
       let apres = avant;

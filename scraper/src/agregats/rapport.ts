@@ -99,5 +99,6 @@ export function rapportTexte(r: RapportReprise): string {
     lignes.push('', '## À relire', ...r.plan.relectures.map((x) => `- ${x.code} ${x.indicateur} ${x.periode} ${x.date_arrete} (${x.perimetre}) : ${x.raison} — ${x.detail}`));
   }
   if (r.plan.orphelins.length) lignes.push('', '## Sans ligne de comptes', ...r.plan.orphelins.map((k) => `- ${k}`));
+  if (r.plan.ecartesUsd?.length) lignes.push('', '## Montants USD non écrits (verrou ECRITURE_USD_AUTORISEE)', ...r.plan.ecartesUsd.map((k) => `- ${k}`));
   return lignes.join('\n');
 }

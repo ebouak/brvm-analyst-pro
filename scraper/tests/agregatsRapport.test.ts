@@ -10,7 +10,7 @@ const docs: DocumentRapport[] = [
   { code: 'SGBC', libelle: 'S1 2025', url: 'u2', periode: '2025-S1', etat: 'echec', erreur: 'Gemini HTTP 500' },
 ];
 const plan: PlanEcritures = {
-  misesAJour: [], orphelins: ['SGBC|income_statements|T1|2026-03-31'],
+  misesAJour: [], orphelins: ['SGBC|income_statements|T1|2026-03-31'], ecartesUsd: [],
   decisions: [{ code: 'SGBC', indicateur: 'pnb', periode: 'S1', date_arrete: '2026-06-30', decision: 'retenue', avant: null, apres: 1 }],
   relectures: [{ code: 'SGBC', indicateur: 'cout_du_risque', periode: 'S1', date_arrete: '2026-06-30', perimetre: 'individuel', raison: 'contradiction', detail: 'x', observations: ['a', 'b'] }],
 };
