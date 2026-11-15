@@ -16,8 +16,9 @@ limit; both now paginate, with regressions for 1,001 active orders. Migration
 `0244` is applied and recorded on the linked production project. RLS is enabled, owner
 SELECT policies are present, anonymous REST reads/writes return 401, and the
 four mutation RPCs are executable only by `service_role`; the security advisor
-reports no finding for these new objects. The original implementation build
-passed; CI/build and preview checks for the pagination follow-up are pending.
+reports no finding for these new objects. CI/build and Vercel preview checks
+pass for the pagination follow-up; production merge and deployment remain
+pending.
 The migration ledger had a pre-existing gap
 (`0147`–`0243` were not recorded although later schema objects exist); avoid
 `supabase db push` until that history is reconciled. Teams and establishment
@@ -640,7 +641,7 @@ waiting order, partial fill, full fill, failed submit and mobile-width ticket.
 - Produces: evidence that ownership, order states, user-facing wording and
   market-data freshness match the design.
 
-- [ ] **Step 1: Run focused unit and project validation**
+- [x] **Step 1: Run focused unit and project validation**
 
 Run from `frontend`:
 
@@ -653,8 +654,7 @@ npm run build
 Expected: all PASS.
 
 The pagination regressions and full frontend suite (3,138 tests), typecheck,
-and lint pass. Re-run the production build on the final revision before marking
-this step complete.
+lint, final CI build and Vercel preview all pass.
 
 - [x] **Step 2: Verify RLS and server-only writes**
 
