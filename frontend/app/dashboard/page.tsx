@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
-import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import { chargerProfil } from '@/lib/dashboard/profil';
 import { resolveLayout, grouperEnRangees, classeRangee, classeCellule, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
@@ -71,8 +70,10 @@ async function getData() {
   // Trois étapes au lieu de sept allers-retours enchaînés : chaque requête part
   // dès que ce dont elle dépend est connu. Sur mobile, le HTML complet arrive
   // plus tôt, avant que le processeur ne soit pris par l'exécution des scripts.
-  // 1) Dates de séance et obligations : indépendantes entre elles.
-  const [{ data: lastRow }, { data: lastIdxRow }, { data: oblRows }] = await Promise.all([
+  // 1) Dates de séance : indépendantes entre elles. (Le bandeau défilant des
+  // cours et des obligations a disparu au lot 7 : son contenu utile est dans la
+  // colonne « Le marché » de la barre de cote.)
+  const [{ data: lastRow }, { data: lastIdxRow }] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
       .select('date_marche')
@@ -85,15 +86,9 @@ async function getData() {
       .not('valeur', 'is', null)
       .order('date_marche', { ascending: false })
       .limit(1),
-    // Ticker permanent : actions + obligations de la dernière séance disponible
-    supabase
-      .from('brvm_obligations_daily')
-      .select('*')
-      .order('date_marche', { ascending: false })
-      .limit(80),
   ]);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], notesHold: [] as NoteSeance[], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], notesHold: [] as NoteSeance[], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null };
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
   // 2) Tout ce qui ne dépend que des dates.
@@ -205,24 +200,6 @@ async function getData() {
   // reverse: on a trié desc → on remet chronologique
   for (const k of Object.keys(sparklines)) sparklines[k]!.reverse();
 
-  const oblLatest = oblRows && oblRows.length > 0 ? (oblRows[0] as Record<string, unknown>).date_marche : null;
-  const obligations = ((oblRows ?? []) as Record<string, unknown>[]).filter((o) => o.date_marche === oblLatest);
-
-  const nfmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
-  const ticker: TickerLine[] = [
-    ...typedActions
-      .filter((a) => a.cours_jour != null)
-      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const, spark: sparklines[a.code]?.slice(-7), cours: a.cours_jour as number })),
-    ...obligations
-      .filter((o) => o.cours_jour != null)
-      .map((o) => {
-        const cours = o.cours_jour as number;
-        const prev = (o.cours_precedent ?? null) as number | null;
-        const variation =
-          (o.variation_pct as number | null) ?? (prev != null && prev > 0 ? ((cours - prev) / prev) * 100 : null);
-        return { code: String(o.code), value: nfmt(cours), variation, kind: 'obligation' as const };
-      }),
-  ];
 
   return {
     vedette,
@@ -234,7 +211,6 @@ async function getData() {
     sparklines,
     summary,
     summaryPrev,
-    ticker,
   };
 }
 
@@ -288,10 +264,10 @@ export default async function Dashboard() {
     canAccess('lecture_seance'),
     chargerUtilisateur(supa),
   ]);
-  const { lastDate, actions, indices, signals, notesHold, sparklines, summary, summaryPrev, ticker, vedette } = donnees;
+  const { lastDate, actions, indices, signals, notesHold, sparklines, summary, summaryPrev, vedette } = donnees;
   const { user, favoriteSectors, dashboardLayout, isPremium, triggeredAlerts, alertesBrutes, profil } = utilisateur;
 
-  // Fraîcheur des cours — affichée au-dessus du ticker permanent.
+  // Fraîcheur des cours, affichée dans l’en-tête du tableau de bord.
   const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
   const layout = resolveLayout(dashboardLayout, profil);
 
@@ -560,9 +536,6 @@ export default async function Dashboard() {
             <span className="ml-auto whitespace-nowrap">Voir les alertes →</span>
           </Link>
         )}
-
-        {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
-        <DashboardTicker items={ticker} dateMarche={lastDate} />
 
         <MacroBanner />
 

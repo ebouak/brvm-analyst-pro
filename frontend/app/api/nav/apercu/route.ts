@@ -42,11 +42,12 @@ export async function GET(req: Request) {
       }
       case 'aujourdhui': {
         const [{ data: brief }, { data: div }] = await Promise.all([
-          db.from('brief_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1),
+          db.from('brief_daily').select('date_marche, tendance:data->>tendance').order('date_marche', { ascending: false }).limit(1),
           db.from('dividends').select('code, ex_date').gte('ex_date', aujourdhui).order('ex_date', { ascending: true }).limit(1),
         ]);
+        const b = brief?.[0] as { date_marche: string; tendance: string | null } | undefined;
         return reponse({
-          apercu: apercuAujourdhui((brief?.[0]?.date_marche as string | undefined) ?? null, ((div?.[0] as LigneDetachement | undefined) ?? null)),
+          apercu: apercuAujourdhui(b ? { date: b.date_marche, tendance: b.tendance } : null, ((div?.[0] as LigneDetachement | undefined) ?? null)),
         });
       }
       case 'apprendre': {

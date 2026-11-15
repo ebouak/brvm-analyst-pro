@@ -81,7 +81,9 @@ test.describe('Porte Premium (compte gratuit)', () => {
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
     test.skip(page.url().includes('/login'), 'Session expirée : redirigé vers /login.');
-    await expect(page.locator('a[href^="/premium/upgrade?from="]').first()).toBeVisible();
+    // Barre de cote (lot 7, étape 2) : les entrées Premium vivent dans les panneaux.
+    await page.getByRole('button', { name: 'Trouver une idée' }).click();
+    await expect(page.locator('#barre-de-cote a[href^="/premium/upgrade?from="]').first()).toBeVisible();
   });
 });
 
