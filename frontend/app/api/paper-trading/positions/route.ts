@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { settlePaperOrders } from '@/lib/paper-trading/ordersServer';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 
 const PAGE_SIZE = 1000;
 const MAX_QUOTE_PAGES = 20;
@@ -122,11 +123,18 @@ export async function GET(request: NextRequest) {
       ? await loadLatestQuotes(supabase, openCodes)
       : new Map<string, LatestQuote>();
 
-    const { data: activeOrders, error: ordersError } = await supabase
-      .from('paper_trading_orders')
-      .select('code, side, reserved_cash_remaining, reserved_shares_remaining')
-      .eq('account_id', account.id)
-      .in('status', [...ACTIVE_ORDER_STATUSES]);
+    let ordersError: { message: string } | null = null;
+    const activeOrders = await fetchAllRows(async (from, to) => {
+      const result = await supabase
+        .from('paper_trading_orders')
+        .select('id, code, side, reserved_cash_remaining, reserved_shares_remaining')
+        .eq('account_id', account.id)
+        .in('status', [...ACTIVE_ORDER_STATUSES])
+        .order('id', { ascending: true })
+        .range(from, to);
+      ordersError = result.error;
+      return result;
+    });
     if (ordersError) {
       console.error('Failed to fetch paper trading order reservations:', ordersError);
       return NextResponse.json({ error: 'Échec chargement des réservations.' }, { status: 500 });

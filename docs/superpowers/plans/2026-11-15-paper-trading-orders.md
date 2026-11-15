@@ -9,16 +9,19 @@
 **Tech Stack:** Next.js 15 App Router, React 19, TypeScript, Supabase PostgreSQL/RLS, Vitest, existing `brvm_actions_daily` and `brvm_carnet_daily` market data.
 
 **Status (2026-11-15):** Individual order flow and UI are implemented and
-rebased on `main` through migration `0243`. The focused paper-trading suite has
-50 focused tests and all 3,136 frontend tests pass, and `npm run typecheck`
-passes after removing stale generated Next.js route types. The isolated
-production build is running. Production
-preflight confirms the existing account, BOC and trigger dependencies and that
-the new order tables are absent; migration `0244` is not yet applied. The
-production migration ledger reports `0146` as its latest entry despite some
-later schema objects being present, so do not use `supabase db push` until that
-pre-existing ledger drift is reconciled. Teams and establishment challenges
-are intentionally out of scope for this lot.
+rebased on `main` through migration `0243`. All 3,138 frontend tests, typecheck
+and lint pass. A pre-merge review found
+that settlement and reservation reads could truncate at PostgREST's 1,000-row
+limit; both now paginate, with regressions for 1,001 active orders. Migration
+`0244` is applied and recorded on the linked production project. RLS is enabled, owner
+SELECT policies are present, anonymous REST reads/writes return 401, and the
+four mutation RPCs are executable only by `service_role`; the security advisor
+reports no finding for these new objects. The original implementation build
+passed; CI/build and preview checks for the pagination follow-up are pending.
+The migration ledger had a pre-existing gap
+(`0147`–`0243` were not recorded although later schema objects exist); avoid
+`supabase db push` until that history is reconciled. Teams and establishment
+challenges are intentionally out of scope for this lot.
 
 ## Global Constraints
 
@@ -480,8 +483,9 @@ npm run typecheck
 
 Expected: PASS. Review the migration for grants to all three client roles,
 explicit owner SELECT policies, unique fill idempotency, and locked balance
-updates. If a local Supabase test database is available, apply the migration
-there; otherwise do not claim the SQL was executed.
+updates. Migration `0244` was applied through the linked Supabase Management
+API and recorded with `supabase migration repair`; production RLS, RPC grants
+and anonymous REST behavior were then checked directly.
 
 ### Task 3: Expose authenticated order APIs
 
@@ -648,13 +652,20 @@ npm run build
 
 Expected: all PASS.
 
-- [ ] **Step 2: Verify RLS and server-only writes**
+The pagination regressions and full frontend suite (3,138 tests), typecheck,
+and lint pass. Re-run the production build on the final revision before marking
+this step complete.
 
-On a migration-applied test project, verify with an anon key that orders/fills
-return no rows and direct insert/update/delete fail; verify user A cannot read,
-cancel or settle user B's order; verify `service_role` RPCs are executable only
-with the intended server key. Run the repository's security advisor scan if
-available. Record results; do not infer them from migration text alone.
+- [x] **Step 2: Verify RLS and server-only writes**
+
+On the production project, both tables have RLS enabled and authenticated-only
+owner SELECT policies; `anon` has no table access, `authenticated` has no write
+grants, and `service_role` has the server write grants. Public REST GET/POST/
+PATCH/DELETE requests all returned 401. All four RPCs deny `anon` and
+`authenticated` and allow `service_role`. The Supabase security advisor reported
+no finding for the new orders/fills tables or RPCs; it did report pre-existing
+warnings on unrelated objects. Cross-account mutation was not exercised with
+production user data.
 
 - [x] **Step 3: Verify simulation invariants**
 

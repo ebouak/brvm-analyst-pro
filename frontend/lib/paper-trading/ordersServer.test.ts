@@ -14,6 +14,7 @@ import { listPaperOrders, settlePaperOrders } from './ordersServer';
 function query(
   readRows: () => unknown[],
   readSingle: () => unknown,
+  onRange?: (from: number, to: number) => void,
 ) {
   let start = 0;
   let end = 999;
@@ -26,6 +27,7 @@ function query(
     range: (from: number, to: number) => {
       start = from;
       end = to;
+      onRange?.(from, to);
       return builder;
     },
     maybeSingle: async () => ({ data: readSingle(), error: null }),
@@ -74,6 +76,28 @@ afterEach(() => {
 });
 
 describe('settlePaperOrders', () => {
+  it('evaluates active orders beyond the PostgREST page limit', async () => {
+    const activeOrders = Array.from({ length: 1_001 }, (_, index) => ({
+      ...pendingOrder,
+      id: `order-${index}`,
+    }));
+    const orderRanges: Array<[number, number]> = [];
+    getServiceClientMock.mockReturnValue({
+      from: (table: string) => query(
+        () => table === 'paper_trading_orders' ? activeOrders : [],
+        () => null,
+        table === 'paper_trading_orders'
+          ? (from, to) => orderRanges.push([from, to])
+          : undefined,
+      ),
+      rpc: vi.fn(),
+    });
+
+    await settlePaperOrders('user-1');
+
+    expect(orderRanges).toEqual([[0, 999], [1_000, 1_999]]);
+  });
+
   it('treats a concurrent duplicate session evaluation as an idempotent result', async () => {
     let actionQueries = 0;
     const rpc = vi.fn().mockResolvedValue({

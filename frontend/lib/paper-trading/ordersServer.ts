@@ -281,16 +281,22 @@ export async function cancelPaperOrder(userId: string, orderId: string): Promise
 
 export async function settlePaperOrders(userId: string): Promise<void> {
   const supabase = getServiceClient();
-  const { data, error } = await supabase
-    .from('paper_trading_orders')
-    .select('*')
-    .eq('user_id', userId)
-    .in('status', [...ACTIVE_STATUSES])
-    .order('created_at', { ascending: true })
-    .order('id', { ascending: true });
-  if (error) throw new Error(`Unable to read open paper orders: ${error.message}`);
+  const rows = await fetchAllRows(async (from, to) => {
+    const result = await supabase
+      .from('paper_trading_orders')
+      .select('*')
+      .eq('user_id', userId)
+      .in('status', [...ACTIVE_STATUSES])
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to);
+    if (result.error) {
+      throw new Error(`Unable to read open paper orders: ${result.error.message}`);
+    }
+    return result;
+  });
 
-  const orders = (data ?? []).map(mapPaperOrder);
+  const orders = rows.map(mapPaperOrder);
   for (const originalOrder of orders) {
     let order = originalOrder;
     const dates = await futureMarketDates(order.submittedAfter, order.expiresAfterSessions);
