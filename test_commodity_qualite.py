@@ -313,3 +313,18 @@ def test_le_rendu_n_emploie_que_des_balises_admises_par_le_site():
 def test_les_apostrophes_survivent_a_l_assainissement():
     html = g.assemble_content_html("<section><div><h3>L'Or et l'Argent reculent</h3></div></section>", _prix(), _ctx())
     assert "L'or et l'argent reculent" in html
+
+
+def test_lecture_de_sogb_nomme_chaque_matiere():
+    lignes = q.lignes_exposition({"huile_palme": (-5.08, "mois"), "caoutchouc": (5.81, "mois")}, REF)
+    sogb = next(l for l in lignes if l["code"] == "SOGC")
+    assert sogb["lecture"] == "Huile de palme : prix de vente orienté à la baisse. Caoutchouc : prix de vente orienté à la hausse."
+    assert next(l for l in lignes if l["code"] == "PALC")["lecture"] == "Prix de vente orienté à la baisse."
+
+
+def test_transmission_par_une_correlation_refusee():
+    autorises = q.nombres_autorises(S46, correlations=[{"coefficient": 0.0, "n_months": 59}], week=46, year=2026)
+    faux = _texte_valide().replace(
+        "</section>",
+        "<div><h3>Sucre</h3><p><strong>Transmission à la BRVM.</strong> La corrélation de Sucrivoire (SCRC) est r = 0,00 sur 59 mois.</p></div></section>")
+    assert any("corrélation" in r for r in q.verrous(faux, S46, REF, autorises))

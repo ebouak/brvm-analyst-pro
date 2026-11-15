@@ -901,7 +901,7 @@ CHAQUE BLOC a exactement quatre paragraphes, dans cet ordre, chacun ouvert par s
 - « Fait vérifié. » Le mouvement chiffré, tiré de DONNÉES. Dis si la clôture est près du plus bas ou du plus haut quand c'est le cas.
 - « Lecture. » L'explication donnée par les TITRES DE PRESSE, en nommant la source entre crochets. Si aucun titre ne porte sur cette matière, écris seulement : « Aucune cause identifiée dans nos sources. » N'en invente pas. Cette phrase ne peut apparaître que deux fois : regroupe en un seul bloc les matières sans explication.
 - « Hypothèse. » Ce qui pourrait suivre, au conditionnel, rattaché à un seuil de DONNÉES (plus bas ou plus haut de la semaine).
-- « Transmission à la BRVM. » Le canal vers les valeurs exposées, ou l'absence de société cotée exposée.
+- « Transmission à la BRVM. » Le CANAL décrit dans VALEURS BRVM EXPOSÉES (par où le cours atteint les comptes de la société), ou l'absence de société cotée exposée. Aucune corrélation ni statistique dans ce paragraphe.
 
 FORMAT : HTML sans aucun attribut (ni style, ni classe). Commence par <section> et termine par </section>. Un bloc =
 
