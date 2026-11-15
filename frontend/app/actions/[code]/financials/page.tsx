@@ -31,6 +31,7 @@ import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import { libelleAbsence, serieRetenue, dateArrete, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
 import { canAccess } from '@/lib/server/featureAccess';
@@ -177,9 +178,10 @@ export default async function FinancialsPage(props: Props) {
   const rendementDiv = divCourant && coursDiv != null && coursDiv > 0 ? (divCourant.montant / coursDiv) * 100 : null;
 
   // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
-  // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
+  // consultés pour l'exercice du bilan affiché. indicateur_source n'est plus
+  // lisible publiquement (migration 0245) : lecture serveur en service_role.
   const obsPrudentielles: ObsIndicateur[] = data.instrument.famille_comptable === 'banque'
-    ? ((await createClient().from('indicateur_source')
+    ? ((await getServiceClient().from('indicateur_source')
         .select('indicateur,date_arrete,statut,motif,comparateur,valeur')
         .eq('code', code).in('indicateur', ['solvabilite_total', 'taux_creances_souffrance', 'couverture_creances_souffrance'])).data ?? []) as ObsIndicateur[]
     : [];
