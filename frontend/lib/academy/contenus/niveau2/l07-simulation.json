@@ -220,7 +220,25 @@
   }
  ],
  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
- "charts": [],
+ "charts": [
+  {
+   "type": "bar",
+   "titre": "Part des obligations dans les trois portefeuilles d’exemple",
+   "labels": [
+    "Prudent",
+    "Équilibré",
+    "Dynamique"
+   ],
+   "valeurs": [
+    50,
+    25,
+    0
+   ],
+   "unite": "%",
+   "reel": false,
+   "note": "Répartitions d’exemple, fictives, du tableau de la leçon : la part d’obligations baisse à mesure que le profil accepte plus de variations. Un profil se choisit d’après l’horizon et la baisse supportable, pas d’après le rendement espéré."
+  }
+ ],
  "qcm": {
   "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
   "options": [

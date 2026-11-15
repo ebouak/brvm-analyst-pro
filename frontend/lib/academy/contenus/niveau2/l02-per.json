@@ -26,7 +26,29 @@
      "expression": "1 ÷ PER",
      "exemple": "1 ÷ 15 ≈ 6,7 % : le bénéfice rapporté au prix payé"
     }
-   ]
+   ],
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "Le PER, cours divisé par bénéfice par action (exemple fictif)",
+    "operation": "quotient",
+    "resultat": {
+     "label": "PER",
+     "valeur": 15
+    },
+    "facteurs": [
+     {
+      "label": "Cours de l’action",
+      "valeur": 3000,
+      "unite": "FCFA"
+     },
+     {
+      "label": "Bénéfice par action (BPA)",
+      "valeur": 200,
+      "unite": "FCFA"
+     }
+    ],
+    "note": "À 3 000 FCFA l’action, l’acheteur paie 15 fois le bénéfice annuel par action. Le rendement bénéficiaire en est l’inverse : 1 ÷ 15, environ 6,7 %."
+   }
   },
   {
    "type": "importance",
@@ -137,7 +159,37 @@
      "detail": "Après un fractionnement, le BPA se divise : il faut le comparer avec le bon nombre de titres.",
      "verifier": "Les opérations sur titres de la société."
     }
-   ]
+   ],
+   "illustration": {
+    "gabarit": "avant_apres",
+    "titre": "Une plus-value exceptionnelle gonfle le résultat (exemple fictif)",
+    "unite": "Md FCFA",
+    "colonnes": [
+     {
+      "label": "Année habituelle",
+      "segments": [
+       {
+        "label": "Activité courante",
+        "valeur": 2
+       }
+      ]
+     },
+     {
+      "label": "Année de la cession",
+      "segments": [
+       {
+        "label": "Activité courante",
+        "valeur": 2
+       },
+       {
+        "label": "Plus-value du terrain",
+        "valeur": 3
+       }
+      ]
+     }
+    ],
+    "note": "Le résultat net passe de 2 à 5 Md FCFA et le PER est divisé par 2,5, alors que l’activité n’a pas changé. La plus-value ne se répétera pas l’année suivante : le PER retrouvera son niveau habituel."
+   }
   },
   {
    "type": "retenir",
@@ -231,7 +283,25 @@
   }
  ],
  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
- "charts": [],
+ "charts": [
+  {
+   "type": "bar",
+   "titre": "PER payé au cours de 4 000 FCFA, selon le bénéfice par action (exemple)",
+   "labels": [
+    "BPA de 200 FCFA",
+    "BPA de 300 FCFA",
+    "BPA de 400 FCFA"
+   ],
+   "valeurs": [
+    20,
+    13.3,
+    10
+   ],
+   "unite": "fois",
+   "reel": false,
+   "note": "Valeurs d’exemple, reprises du simulateur de la leçon : au même cours, un bénéfice qui double divise le PER par deux. Payer un PER de 20 suppose donc que cette hausse du bénéfice ait de bonnes raisons de se produire."
+  }
+ ],
  "qcm": {
   "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?",
   "options": [

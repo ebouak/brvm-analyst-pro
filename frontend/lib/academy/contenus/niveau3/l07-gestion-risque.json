@@ -54,6 +54,29 @@
     "prix_achat": 2000,
     "stop": 1800,
     "objectif": 2500
+   },
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "La taille de la position découle du risque accepté (exemple fictif)",
+    "operation": "quotient",
+    "resultat": {
+     "label": "Nombre d’actions",
+     "valeur": 250,
+     "unite": "actions"
+    },
+    "facteurs": [
+     {
+      "label": "Perte maximale (1 % du portefeuille)",
+      "valeur": 50000,
+      "unite": "FCFA"
+     },
+     {
+      "label": "Risque par action (prix − stop)",
+      "valeur": 200,
+      "unite": "FCFA"
+     }
+    ],
+    "note": "250 actions à 2 000 FCFA, soit 500 000 FCFA investis : 10 % du portefeuille pour 1 % de risque. La taille vient de l’écart jusqu’au stop, pas de la somme disponible."
    }
   },
   {

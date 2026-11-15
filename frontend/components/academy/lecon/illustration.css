@@ -1,0 +1,79 @@
+/**
+ * Schémas pédagogiques des leçons (components/academy/lecon/Illustration.tsx).
+ *
+ * Les couleurs reprennent les jetons de la leçon (`--lp-*`, lecon.css). Les
+ * valeurs de repli servent hors de `.lp` (mode diapositives, page d'aperçu) :
+ * le schéma reste lisible sur le papier clair de la leçon quel que soit le
+ * thème du site, puisque `.lp` ne change pas de fond.
+ */
+.lp-illu {
+  --illu-encre: var(--lp-encre, #0f1f33);
+  --illu-texte: var(--lp-texte, #2b3a4d);
+  --illu-doux: var(--lp-doux, #5d6b7d);
+  --illu-trame: var(--lp-trame, #e6dfd3);
+  --illu-accent: var(--lp-accent, #0b7d93);
+  --illu-accent-clair: var(--lp-accent-clair, #e3f3f6);
+  --illu-alerte: var(--lp-alerte, #a3401f);
+  --illu-retenir: var(--lp-retenir, #8a6a12);
+  --illu-hausse: var(--lp-hausse, #1d7a46);
+  --illu-fond: var(--lp-papier, #fbf8f3);
+
+  margin: 0;
+  color: var(--illu-texte);
+}
+.lp-illu-titre { font-weight: 600; color: var(--illu-encre); margin-bottom: 0.75rem; line-height: 1.35; }
+.lp-illu-dessin { width: 100%; max-width: 34rem; margin-inline: auto; }
+.lp-illu-svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--font-sans), system-ui, sans-serif; }
+.lp-illu-note { margin-top: 0.75rem; font-size: 0.9rem; line-height: 1.55; color: var(--illu-texte); }
+.lp-illu-statut { display: inline-block; font-size: 0.78rem; color: var(--illu-doux); font-style: italic; }
+.lp-illu-legende { list-style: none; margin: 0.6rem auto 0; padding: 0; max-width: 34rem; display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; font-size: 0.82rem; color: var(--illu-doux); }
+.lp-illu-legende li { display: inline-flex; align-items: center; gap: 0.4rem; }
+.lp-illu-pastille { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 2px; background: currentColor; }
+
+/* Textes du SVG — tailles en unités du viewBox (≈ px à 400 px de large). */
+.lp-illu .illu-label { font-size: 12.5px; fill: var(--illu-texte); }
+.lp-illu .illu-fort { font-weight: 600; fill: var(--illu-encre); }
+.lp-illu .illu-valeur { font-size: 12.5px; font-weight: 600; fill: var(--illu-encre); font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.lp-illu .illu-petit { font-size: 11px; fill: var(--illu-texte); font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.lp-illu .illu-doux { fill: var(--illu-doux); font-family: var(--font-sans), system-ui, sans-serif; }
+.lp-illu .illu-grand { font-size: 22px; font-weight: 700; font-family: var(--font-mono), ui-monospace, monospace; }
+.lp-illu .illu-moyen { font-size: 18px; font-weight: 700; fill: var(--illu-encre); font-family: var(--font-mono), ui-monospace, monospace; }
+.lp-illu .illu-operateur { font-size: 22px; font-weight: 600; fill: var(--illu-doux); }
+.lp-illu .illu-sur-fonce { fill: #ffffff; }
+.lp-illu .illu-segment { font-size: 11px; font-weight: 600; }
+.lp-illu .illu-segment--t0, .lp-illu .illu-segment--t1, .lp-illu .illu-segment--t3 { fill: #ffffff; }
+.lp-illu .illu-segment--t2 { fill: var(--illu-encre); }
+
+/* Formes */
+.lp-illu .illu-axe { stroke: var(--illu-doux); stroke-width: 1; }
+.lp-illu .illu-liaison { stroke: var(--illu-doux); stroke-width: 1; stroke-dasharray: 2 3; }
+.lp-illu .illu-depart, .lp-illu .illu-t0 { fill: var(--illu-accent); color: var(--illu-accent); }
+.lp-illu .illu-arrivee, .lp-illu .illu-t1 { fill: var(--illu-encre); color: var(--illu-encre); }
+.lp-illu .illu-t2 { fill: #d9b45a; color: #d9b45a; }
+.lp-illu .illu-t3, .lp-illu .illu-baisse { fill: var(--illu-alerte); color: var(--illu-alerte); }
+.lp-illu .illu-hausse { fill: var(--illu-hausse); color: var(--illu-hausse); }
+.lp-illu .illu-boite { stroke-width: 1; }
+.lp-illu .illu-boite--resultat { fill: var(--illu-encre); }
+.lp-illu .illu-t0-clair { fill: var(--illu-accent-clair); stroke: var(--illu-accent); }
+.lp-illu .illu-t1-clair { fill: #eceff3; stroke: var(--illu-encre); }
+.lp-illu .illu-t2-clair { fill: #f6efdc; stroke: var(--illu-retenir); }
+.lp-illu .illu-bloc { stroke: var(--illu-fond); stroke-width: 1; }
+.lp-illu .illu-bloc--actif { fill: var(--illu-accent-clair); stroke: var(--illu-accent); }
+.lp-illu .illu-bloc--fonds_propres { fill: var(--illu-accent); }
+.lp-illu .illu-bloc--dettes { fill: #dfe3e8; stroke: var(--illu-doux); }
+.lp-illu .illu-bloc-label { font-size: 12px; font-weight: 600; }
+.lp-illu .illu-bloc-valeur { font-size: 12px; font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.lp-illu .illu-bloc-label--actif, .lp-illu .illu-bloc-label--dettes { fill: var(--illu-encre); }
+.lp-illu .illu-bloc-label--fonds_propres { fill: #ffffff; }
+
+/* Entrée discrète, seulement si le lecteur n'a pas demandé moins de mouvement. */
+@media (prefers-reduced-motion: no-preference) {
+  .lp-illu .illu-barre, .lp-illu--avant_apres rect, .lp-illu--echeancier rect {
+    transform-box: fill-box;
+    animation: lp-illu-entree 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .lp-illu .illu-barre { transform-origin: left center; animation-name: lp-illu-largeur; }
+  .lp-illu--avant_apres rect, .lp-illu--echeancier rect { transform-origin: center bottom; }
+}
+@keyframes lp-illu-largeur { from { transform: scaleX(0.001); } to { transform: none; } }
+@keyframes lp-illu-entree { from { transform: scaleY(0.001); } to { transform: none; } }

@@ -31,7 +31,44 @@
      "detail": "Les notes détaillent les postes ; le rapport des commissaires aux comptes dit si les comptes sont certifiés, avec ou sans réserve.",
      "verifier": "Le mot « réserve » ou « observation » dans le rapport des commissaires."
     }
-   ]
+   ],
+   "illustration": {
+    "gabarit": "bilan",
+    "titre": "Un bilan en deux colonnes : ce que la société possède, et qui l’a financé (exemple fictif)",
+    "unite": "Md FCFA",
+    "actif": [
+     {
+      "label": "Immobilisations",
+      "valeur": 30
+     },
+     {
+      "label": "Stocks et créances",
+      "valeur": 15
+     },
+     {
+      "label": "Trésorerie",
+      "valeur": 5
+     }
+    ],
+    "passif": [
+     {
+      "label": "Fonds propres",
+      "valeur": 20,
+      "nature": "fonds_propres"
+     },
+     {
+      "label": "Dettes financières",
+      "valeur": 18,
+      "nature": "dettes"
+     },
+     {
+      "label": "Fournisseurs et autres",
+      "valeur": 12,
+      "nature": "dettes"
+     }
+    ],
+    "note": "Les deux colonnes ont toujours le même total : tout ce que la société possède a été financé par quelqu’un. Ici, 50 Md FCFA d’actifs sont financés à 40 % par les actionnaires (fonds propres) et à 60 % par des dettes."
+   }
   },
   {
    "type": "importance",
@@ -70,6 +107,39 @@
     "resultat_net": 2000000000,
     "actions": 10000000,
     "taux_distribution_pct": 50
+   },
+   "illustration": {
+    "gabarit": "cascade",
+    "titre": "Du chiffre d’affaires au résultat net (exemple fictif)",
+    "unite": "Md FCFA",
+    "depart": {
+     "label": "Chiffre d’affaires",
+     "valeur": 20
+    },
+    "etapes": [
+     {
+      "label": "Achats et charges externes",
+      "valeur": -11
+     },
+     {
+      "label": "Salaires",
+      "valeur": -4
+     },
+     {
+      "label": "Amortissements",
+      "valeur": -1.5
+     },
+     {
+      "label": "Intérêts de la dette",
+      "valeur": -0.5
+     },
+     {
+      "label": "Impôt sur le résultat",
+      "valeur": -1
+     }
+    ],
+    "arrivee": "Résultat net",
+    "note": "Sur 20 Md FCFA de ventes, il reste 2 Md FCFA de résultat net, soit 10 FCFA pour 100 FCFA vendus. C’est ce résultat, le même que dans le simulateur ci-dessous, que l’assemblée générale répartit entre dividende et réserves."
    }
   },
   {

@@ -18,7 +18,29 @@
         {
           "type": "definition",
           "titre": "Définition",
-          "contenu": "Le PER se calcule en divisant le cours de bourse d’une action par le bénéfice par action (BPA), c’est-à-dire le résultat net divisé par le nombre d’actions. Par exemple, une action cotée 5 000 FCFA dont le BPA est de 500 FCFA a un PER de 10 : l’acheteur paie 10 fois le bénéfice annuel par action. Si le bénéfice restait constant, il faudrait 10 années de bénéfices pour égaler le prix payé."
+          "contenu": "Le PER se calcule en divisant le cours de bourse d’une action par le bénéfice par action (BPA), c’est-à-dire le résultat net divisé par le nombre d’actions. Par exemple, une action cotée 5 000 FCFA dont le BPA est de 500 FCFA a un PER de 10 : l’acheteur paie 10 fois le bénéfice annuel par action. Si le bénéfice restait constant, il faudrait 10 années de bénéfices pour égaler le prix payé.",
+          "illustration": {
+            "gabarit": "decomposition",
+            "titre": "Le calcul du PER (exemple fictif de la leçon)",
+            "operation": "quotient",
+            "resultat": {
+              "label": "PER",
+              "valeur": 10
+            },
+            "facteurs": [
+              {
+                "label": "Cours de l’action",
+                "valeur": 5000,
+                "unite": "FCFA"
+              },
+              {
+                "label": "Bénéfice par action (BPA)",
+                "valeur": 500,
+                "unite": "FCFA"
+              }
+            ],
+            "note": "L’acheteur paie 10 fois le bénéfice annuel par action. Si ce bénéfice restait constant, il faudrait 10 années de bénéfices pour égaler le prix payé."
+          }
         },
         {
           "type": "importance",
@@ -139,7 +161,27 @@
         {
           "type": "cas",
           "titre": "Exemple chiffré (sociétés fictives)",
-          "contenu": "« Mali Tech » : PER 20, croissance des bénéfices de 25 % par an, donc PEG = 20 ÷ 25 = 0,8. « Burkina Agro » : PER 10, croissance de 5 % par an, donc PEG = 10 ÷ 5 = 2. Malgré un PER deux fois plus élevé, Mali Tech ressort moins chère une fois sa croissance prise en compte, à condition que cette croissance se maintienne."
+          "contenu": "« Mali Tech » : PER 20, croissance des bénéfices de 25 % par an, donc PEG = 20 ÷ 25 = 0,8. « Burkina Agro » : PER 10, croissance de 5 % par an, donc PEG = 10 ÷ 5 = 2. Malgré un PER deux fois plus élevé, Mali Tech ressort moins chère une fois sa croissance prise en compte, à condition que cette croissance se maintienne.",
+          "illustration": {
+            "gabarit": "decomposition",
+            "titre": "Le PEG de « Mali Tech », société fictive",
+            "operation": "quotient",
+            "resultat": {
+              "label": "PEG",
+              "valeur": 0.8
+            },
+            "facteurs": [
+              {
+                "label": "PER",
+                "valeur": 20
+              },
+              {
+                "label": "Croissance des bénéfices, en %",
+                "valeur": 25
+              }
+            ],
+            "note": "Le PEG divise le PER par la croissance exprimée en nombre (25, et non 0,25). Malgré un PER de 20, Mali Tech ressort à 0,8 : un repère qui ne vaut que si cette croissance se maintient."
+          }
         },
         {
           "type": "piege",

@@ -25,7 +25,30 @@
         { "nom": "Plus-value", "expression": "(Prix de revente − Prix d’achat) × Nombre d’actions", "exemple": "(5 600 − 5 000) × 200 = 120 000 FCFA" },
         { "nom": "Rendement total", "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie", "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %" }
       ],
-      "simulation": { "type": "rendement_total", "consigne": "Les trois formules réunies : changez le prix de revente ou le dividende, et regardez la part de chacun dans le résultat.", "prix_achat": 5000, "prix_vente": 5600, "actions": 200, "dividendes_par_action": 400, "annees": 1 }
+      "simulation": { "type": "rendement_total", "consigne": "Les trois formules réunies : changez le prix de revente ou le dividende, et regardez la part de chacun dans le résultat.", "prix_achat": 5000, "prix_vente": 5600, "actions": 200, "dividendes_par_action": 400, "annees": 1 },
+      "illustration": {
+        "gabarit": "decomposition",
+        "titre": "Le rendement total additionne dividende et plus-value (exemple pédagogique)",
+        "operation": "somme",
+        "resultat": {
+          "label": "Rendement total",
+          "valeur": 20,
+          "pourcentage": true
+        },
+        "facteurs": [
+          {
+            "label": "Dividendes reçus (80 000 FCFA)",
+            "valeur": 8,
+            "pourcentage": true
+          },
+          {
+            "label": "Plus-value (120 000 FCFA)",
+            "valeur": 12,
+            "pourcentage": true
+          }
+        ],
+        "note": "Sur 1 000 000 FCFA investis, les deux sources de gain s’additionnent. La plus-value n’est acquise qu’à la revente ; le dividende, lui, est encaissé au paiement."
+      }
     },
     {
       "type": "cas",
