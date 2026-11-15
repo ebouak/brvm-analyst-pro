@@ -34,7 +34,7 @@ function bornes(valeurs: number[]): { min: number; max: number } {
 
 // ── Trajectoire annuelle : CA et résultat net ───────────────────────────────
 
-export function BarresAnnuelles({ points }: { points: PointAnnuel[] }) {
+export function BarresAnnuelles({ points, libelleRevenu = "Chiffre d'affaires" }: { points: PointAnnuel[]; libelleRevenu?: string }) {
   const utiles = points.filter((p) => p.chiffre_affaires != null || p.resultat_net != null);
   if (utiles.length === 0) {
     return <p className="dv-vide">Aucun exercice exploitable : le graphique ne peut pas être tracé.</p>;
@@ -60,7 +60,7 @@ export function BarresAnnuelles({ points }: { points: PointAnnuel[] }) {
 
   return (
     <figure className="dv-figure">
-      <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label="Chiffre d'affaires et résultat net par exercice">
+      <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={`${libelleRevenu} et résultat net par exercice`}>
         {graduations.map((g) => (
           <g key={g}>
             <line x1={MG.gauche} x2={L - MG.droite} y1={y(g)} y2={y(g)} stroke={g === 0 ? DOUX : TRAME} strokeWidth={g === 0 ? 1 : 1} />
@@ -100,7 +100,7 @@ export function BarresAnnuelles({ points }: { points: PointAnnuel[] }) {
         })}
       </svg>
       <figcaption className="dv-legende">
-        <span><i style={{ background: ACCENT }} /> Chiffre d&apos;affaires</span>
+        <span><i style={{ background: ACCENT }} /> {libelleRevenu}</span>
         <span><i style={{ background: HAUSSE }} /> Résultat net (rouge si négatif)</span>
       </figcaption>
     </figure>

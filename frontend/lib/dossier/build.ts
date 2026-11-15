@@ -23,6 +23,9 @@ import { exerciceRetenu, memesComptes, mentionSecondJeu } from '@/lib/fiche/exer
 import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { chargerReactions } from '@/lib/server/reactionsPublications';
+import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
+import { lireBanque, dernierExercice, type LectureBancaire } from '@/lib/bank/lecture';
+import { pnbParExercice, type PnbExercice } from '@/lib/bank/dossierBancaire';
 import { placement, type ResultatPlacement, type PointSerie } from './placement';
 import { bandePer, perGlissant, type BandePer } from './per';
 import {
@@ -219,6 +222,8 @@ export interface DossierValeur {
   historique_publications: HistoriqueFamille[];
   /** Nombre de publications connues en base pour la société (tous types, toutes dates). */
   nb_publications: number | null;
+  /** Banque seulement : lecture de l'exercice de référence et PNB retenu par exercice (lib/bank/lecture). */
+  banque: { lecture: LectureBancaire | null; pnbParExercice: PnbExercice[] } | null;
 }
 
 export interface Suivi {
@@ -368,6 +373,14 @@ export async function buildDossier(
      l'annuel 2025 — et la croissance comparait un trimestre à un semestre. */
   const exerciceRef = fonda?.year != null ? String(fonda.year) : exercicesAnnuels(exercices)[0]?.periode ?? null;
   const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
+  const banque = FAMILLE_PAR_CODE[CODE] === 'banque'
+    ? await (async () => {
+        const periodes = await chargerPeriodesBancaires(sb, CODE);
+        const visee = exerciceRef ? { annee: Number(exerciceRef), code: 'exercice' as const } : dernierExercice(periodes);
+        const lecture = visee ? lireBanque(periodes, visee) : null;
+        return { lecture: lecture?.extrait ? lecture : null, pnbParExercice: pnbParExercice(periodes) };
+      })()
+    : null;
   const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
   const { data: bilanRef } = exerciceRef
     ? await sb.from('balance_sheets').select('total_actifs, total_capitaux_propres, dette_court_terme, dette_long_terme, tresorerie_equivalents').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
@@ -769,5 +782,6 @@ export async function buildDossier(
     reactions,
     historique_publications: historique,
     nb_publications: nbPub ?? null,
+    banque,
   };
 }

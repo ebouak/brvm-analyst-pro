@@ -10,9 +10,9 @@ import './bank.css';
  * largeur (le dessin garde ses proportions) et coupe l'animation d'entrée,
  * qui n'a pas de sens sur une feuille imprimée.
  */
-export default function CascadeBancaire({ illustration }: { illustration: IllustrationT }) {
+export default function CascadeBancaire({ illustration, compacte = false }: { illustration: IllustrationT; compacte?: boolean }) {
   return (
-    <div className="bk-cascade">
+    <div className={compacte ? 'bk-cascade bk-cascade--compacte' : 'bk-cascade'}>
       <Illustration illustration={illustration} />
     </div>
   );

@@ -4,6 +4,9 @@
 .bk-cascade .lp-illu-titre { font-size: 10.5pt; margin-bottom: 2mm; }
 .bk-cascade .lp-illu-dessin { max-width: 118mm; margin-inline: 0; }
 .bk-cascade .lp-illu-note { margin-top: 2mm; font-size: 9pt; line-height: 1.4; max-width: 70ch; }
+/* Dossier valeur : la feuille 7 porte aussi le dividende, le dessin est plus petit. */
+.bk-cascade--compacte { margin-top: 2mm; }
+.bk-cascade--compacte .lp-illu-dessin { max-width: 92mm; }
 /* Document imprimé : le dessin est à son état final, sans entrée animée. */
 .bk-cascade .lp-illu .illu-barre { animation: none !important; transform: none !important; }
 

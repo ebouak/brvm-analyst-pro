@@ -18,6 +18,8 @@ export const BORNES = {
   ecartesBande: 3,
   /** Feuille 3 : points d'appui et de vigilance chiffrés, par côté, sous la lecture d'ensemble. */
   pointsLecture: 2,
+  /** Feuille 7 (banque) : encours et solvabilité affichés sous la cascade PNB → résultat net. */
+  encoursBancaires: 4,
 } as const;
 
 export interface ListeBornee<T> {
