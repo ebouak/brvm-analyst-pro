@@ -304,7 +304,15 @@
         "expression": "Montant en FCFA = Montant en euros × 655,957",
         "exemple": "500 € × 655,957 ≈ 327 979 FCFA"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "change",
+       "consigne": "Renseignez les frais de votre banque : la parité ne bouge pas, mais les frais réduisent ce qui arrive sur le compte.",
+       "montant_eur": 500,
+       "frais_pct": 0,
+       "frais_fixes_eur": 0,
+       "cours_action": 0
+      }
      },
      {
       "type": "importance",
@@ -566,7 +574,16 @@
         "expression": "(Dividendes + Cours final − Cours initial) ÷ Cours initial × 100",
         "exemple": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 %"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "rendement_total",
+       "consigne": "Comparez avec et sans dividende, puis allongez la durée : le rendement annuel moyen se compare d’un placement à l’autre.",
+       "prix_achat": 10000,
+       "prix_vente": 10600,
+       "actions": 1,
+       "dividendes_par_action": 400,
+       "annees": 1
+      }
      },
      {
       "type": "importance",
@@ -1078,7 +1095,15 @@
         "titre": "La tenue de compte",
         "detail": "Certaines SGI facturent des frais annuels de tenue de compte ou de conservation."
        }
-      ]
+      ],
+      "simulation": {
+       "type": "frais_ordre",
+       "consigne": "Modifiez la quantité et ajoutez un minimum de frais : sur un petit ordre, le minimum pèse bien plus que le taux affiché.",
+       "cours": 2500,
+       "quantite": 10,
+       "taux_frais_pct": 1.5,
+       "minimum_fcfa": 0
+      }
      },
      {
       "type": "cas",
@@ -1272,7 +1297,16 @@
         "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie",
         "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "rendement_total",
+       "consigne": "Les trois formules réunies : changez le prix de revente ou le dividende, et regardez la part de chacun dans le résultat.",
+       "prix_achat": 5000,
+       "prix_vente": 5600,
+       "actions": 200,
+       "dividendes_par_action": 400,
+       "annees": 1
+      }
      },
      {
       "type": "cas",
@@ -2425,7 +2459,16 @@
         "titre": "Rester tout en actions jusqu’au dernier jour",
         "detail": "Une baisse juste avant la rentrée obligerait à vendre au mauvais moment."
        }
-      ]
+      ],
+      "simulation": {
+       "type": "valeur_future",
+       "consigne": "Ajoutez un versement mensuel ou un capital visé : le simulateur compare aussi avec un départ trois ans plus tard.",
+       "capital_initial": 200000,
+       "versement_mensuel": 0,
+       "taux_pct": 8,
+       "annees": 10,
+       "objectif": 0
+      }
      },
      {
       "type": "retenir",
@@ -2599,7 +2642,20 @@
         "expression": "Cours de l’action ÷ Bénéfice par action",
         "exemple": "10 000 ÷ 1 250 = 8"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "per",
+       "consigne": "Calculez un PER sur l’exemple de la leçon, puis sur une valeur cotée, à partir de ses derniers comptes publiés.",
+       "cours": 10000,
+       "bpa": 1250,
+       "croissance_pct": 0,
+       "annees": 3,
+       "codes": [
+        "SNTS",
+        "SGBC",
+        "BOAB"
+       ]
+      }
      },
      {
       "type": "importance",
@@ -2859,7 +2915,15 @@
         "expression": "Quantité × Cours + Frais",
         "exemple": "20 × 10 000 + 1 % = 202 000 FCFA"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "frais_ordre",
+       "consigne": "Reprenez l’exemple, puis réduisez la quantité : avec un minimum de frais, le coût d’un très petit ordre grimpe vite.",
+       "cours": 10000,
+       "quantite": 20,
+       "taux_frais_pct": 1,
+       "minimum_fcfa": 0
+      }
      },
      {
       "type": "cas",
@@ -3077,7 +3141,14 @@
         "detail": "Le reste renforce les fonds propres",
         "icone": "actionnaires"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "distribution",
+       "consigne": "Déplacez le curseur comme le ferait l’assemblée : la part distribuée va aux actionnaires, le reste renforce les fonds propres.",
+       "resultat_net": 2000000000,
+       "actions": 10000000,
+       "taux_distribution_pct": 50
+      }
      },
      {
       "type": "cas",
@@ -3329,7 +3400,20 @@
         "valeur": "Plus de 20",
         "detail": "Croissance attendue, ou bénéfice temporairement bas"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "per",
+       "consigne": "Fixez une progression du bénéfice : un PER de 20 payé aujourd’hui redevient un PER de 10 si le bénéfice double. Essayez aussi une valeur cotée.",
+       "cours": 4000,
+       "bpa": 200,
+       "croissance_pct": 0,
+       "annees": 3,
+       "codes": [
+        "SNTS",
+        "ORAC",
+        "ONTBF"
+       ]
+      }
      },
      {
       "type": "cas",
@@ -3624,6 +3708,28 @@
         ]
        ],
        "note": "Le même PER cache deux réalités : c’est le ROE qui fait la différence."
+      },
+      "simulation": {
+       "type": "pb_roe",
+       "consigne": "Modifiez le ROE de chaque société à PER égal, puis vérifiez le lien sur une valeur cotée.",
+       "societes": [
+        {
+         "nom": "Société A",
+         "per": 12,
+         "roe_pct": 25
+        },
+        {
+         "nom": "Société B",
+         "per": 12,
+         "roe_pct": 6
+        }
+       ],
+       "codes": [
+        "NTLC",
+        "PALC",
+        "SNTS",
+        "SGBC"
+       ]
       }
      },
      {
@@ -3862,7 +3968,15 @@
         "valeur": "Supérieure à 14 %",
         "detail": "Selon la banque, au-dessus du seuil réglementaire"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "banque",
+       "consigne": "Chiffres publiés par la SIB pour 2025 ; les frais généraux sont déduits du coefficient publié (38,59 % de 108,7 Md). Faites varier le coût du risque.",
+       "pnb": 108.7,
+       "frais_generaux": 41.9,
+       "cout_risque": 3.6,
+       "unite": "Md FCFA"
+      }
      },
      {
       "type": "cas",
@@ -4077,6 +4191,33 @@
         ]
        ],
        "note": "Ces repères sont des ordres de grandeur pédagogiques, pas des règles réglementaires."
+      },
+      "simulation": {
+       "type": "allocation",
+       "capital": 3000000,
+       "secteurs": [
+        {
+         "nom": "Banques",
+         "pct": 60
+        },
+        {
+         "nom": "Télécoms",
+         "pct": 10
+        },
+        {
+         "nom": "Distribution",
+         "pct": 10
+        },
+        {
+         "nom": "Agro-industrie",
+         "pct": 10
+        },
+        {
+         "nom": "Services publics",
+         "pct": 10
+        }
+       ],
+       "seuil_secteur_pct": 33
       }
      },
      {
@@ -4312,7 +4453,15 @@
         "expression": "(4 × 6 000 + 4 500) ÷ 5",
         "exemple": "28 500 ÷ 5 = 5 700 FCFA : la valeur se conserve"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "dps",
+       "consigne": "Changez la parité, le prix d’émission ou le nombre d’actions : la valeur se conserve, mais votre part du capital dépend de votre choix.",
+       "cours": 6000,
+       "prix_emission": 4500,
+       "parite": 4,
+       "actions": 4
+      }
      },
      {
       "type": "cas",
@@ -4768,7 +4917,15 @@
         "expression": "Dividende net ÷ Cours",
         "exemple": "880 ÷ 16 000 = 5,5 %"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "rendement_net",
+       "consigne": "Choisissez le pays de la société : pour un même dividende brut, le montant net change.",
+       "dividende_brut": 1000,
+       "cours": 16000,
+       "pays": "CI",
+       "euros": false
+      }
      },
      {
       "type": "importance",
@@ -5008,7 +5165,17 @@
         "expression": "Coupon × Jours écoulés ÷ 365",
         "exemple": "Payé en plus du prix à l’achat, rendu au prochain coupon"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "obligation",
+       "consigne": "Changez le prix payé ou le taux des nouveaux emprunts : le rendement réel dépend du prix, et le prix des taux.",
+       "nominal": 10000,
+       "taux_nominal_pct": 6.5,
+       "prix": 9800,
+       "annees_restantes": 5,
+       "jours_ecoules": 0,
+       "taux_marche_pct": 7
+      }
      },
      {
       "type": "cas",
@@ -5328,7 +5495,17 @@
         "expression": "Actif net du fonds ÷ Nombre de parts",
         "exemple": "5 Md ÷ 500 000 parts = 10 000 FCFA la part"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "opcvm_frais",
+       "consigne": "Ajoutez des frais de sortie ou une performance : le simulateur indique ce que le fonds doit gagner pour seulement compenser ses frais.",
+       "montant": 1000000,
+       "annees": 5,
+       "frais_entree_pct": 2,
+       "frais_gestion_pct": 1.5,
+       "frais_sortie_pct": 0,
+       "performance_pct": 0
+      }
      },
      {
       "type": "cas",
@@ -5551,6 +5728,17 @@
         ]
        ],
        "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+      },
+      "simulation": {
+       "type": "technique",
+       "indicateur": "variation",
+       "consigne": "Choisissez une valeur : sa variation est mesurée sur quatre horizons, à partir de ses clôtures réelles.",
+       "codes": [
+        "SNTS",
+        "SGBC",
+        "ORAC",
+        "PALC"
+       ]
       }
      },
      {
@@ -5767,7 +5955,22 @@
         "valeur": "Survente",
         "detail": "Les baisses récentes dominent nettement"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "technique",
+       "indicateur": "rsi",
+       "consigne": "Changez la période et les seuils : la zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.",
+       "codes": [
+        "SNTS",
+        "BOAC",
+        "NTLC",
+        "SDCC",
+        "TTLC"
+       ],
+       "periode": 14,
+       "seuil_haut": 70,
+       "seuil_bas": 30
+      }
      },
      {
       "type": "cas",
@@ -6034,6 +6237,17 @@
         ]
        ],
        "note": "Le passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal."
+      },
+      "simulation": {
+       "type": "technique",
+       "indicateur": "macd",
+       "consigne": "Le MACD 12, 26, 9 calculé sur une valeur réelle : l’histogramme est lu selon son signe et son évolution, comme dans le tableau.",
+       "codes": [
+        "SNTS",
+        "ORAC",
+        "SGBC",
+        "SIBC"
+       ]
       }
      },
      {
@@ -6243,7 +6457,16 @@
         "expression": "Risque maximal ÷ Risque par action",
         "exemple": "50 000 ÷ 200 = 250 actions, soit 500 000 FCFA investis"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "position",
+       "consigne": "Déplacez le stop ou le risque accepté : la taille de la position en découle, et l’objectif donne le rapport gain sur risque.",
+       "portefeuille": 5000000,
+       "risque_pct": 1,
+       "prix_achat": 2000,
+       "stop": 1800,
+       "objectif": 2500
+      }
      },
      {
       "type": "cas",
@@ -7155,7 +7378,15 @@
         "valeur": "24 septembre 2026",
         "detail": "48e société cotée de la BRVM"
        }
-      ]
+      ],
+      "simulation": {
+       "type": "souscription_ipo",
+       "consigne": "Chiffres publiés de l’offre BBGC. Indiquez le nombre de titres que vous auriez demandés : la réduction suit ici une règle proportionnelle.",
+       "titres_offerts": 10000000,
+       "prix": 6750,
+       "taux_souscription_pct": 142,
+       "demande": 100
+      }
      },
      {
       "type": "cas",
