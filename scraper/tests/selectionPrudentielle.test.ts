@@ -131,3 +131,48 @@ describe('nature de la source (migration 0149)', () => {
     expect(selectionnerExercice([p], D24)).toMatchObject({ etat: 'retenue', valeur: 11.886, reserve: 'provisoire' });
   });
 });
+
+describe('sélection étendue — contrôle et montants (0245)', () => {
+  const D = '2026-06-30';
+  it('une observation « a_relire » bloque le périmètre : rien n’est retenu', () => {
+    const a = o({ date_arrete: D, valeur: 19.6, texte_original: '19,6 %', controle: 'a_relire' });
+    expect(selectionnerExercice([a], D)).toEqual({ etat: 'a_relire', observations: [a.id] });
+  });
+
+  it('une observation « rejete » est ignorée', () => {
+    const a = o({ date_arrete: D, valeur: 19.6, texte_original: '19,6 %', controle: 'rejete' });
+    const b = o({ date_arrete: D, valeur: 18.2, texte_original: '18,2 %' });
+    expect(selectionnerExercice([a, b], D)).toMatchObject({ etat: 'retenue', valeur: 18.2 });
+  });
+
+  it('une observation « valide » l’emporte sur les autres exactes du même périmètre', () => {
+    const a = o({ date_arrete: D, valeur: 19.6, texte_original: '19,6 %', controle: 'valide' });
+    const b = o({ date_arrete: D, valeur: 18.2, texte_original: '18,2 %' });
+    expect(selectionnerExercice([a, b], D)).toMatchObject({ etat: 'retenue', valeur: 19.6, observation: a.id });
+  });
+
+  it('montants : deux documents concordants à l’arrondi → la valeur la plus fine', () => {
+    const a = o({ date_arrete: D, valeur: 152_345e6, texte_original: '152 345', unite_source: 'millions', decimales: 0 });
+    const b = o({ date_arrete: D, valeur: 152_345_210e3, texte_original: '152 345 210', unite_source: 'milliers', decimales: 0 });
+    expect(selectionnerExercice([a, b], D, 'montant')).toMatchObject({ etat: 'retenue', valeur: 152_345_210e3, classe: 'rounding_compatible' });
+  });
+
+  it('montants : contradiction → conflit, aucune valeur', () => {
+    const a = o({ date_arrete: D, valeur: 152_345e6, unite_source: 'millions', decimales: 0 });
+    const b = o({ date_arrete: D, valeur: 160_000e6, unite_source: 'millions', decimales: 0 });
+    expect(selectionnerExercice([a, b], D, 'montant')).toMatchObject({ etat: 'conflit' });
+  });
+
+  it('montants : un USD et un FCFA ne se rapprochent pas → conflit', () => {
+    const a = o({ date_arrete: D, valeur: 1e9, unite: 'usd', unite_source: 'millions', decimales: 0 });
+    const b = o({ date_arrete: D, valeur: 1e9, unite: 'fcfa', unite_source: 'millions', decimales: 0 });
+    expect(selectionnerExercice([a, b], D, 'montant')).toMatchObject({ etat: 'conflit' });
+  });
+
+  it('jamais de substitution : un conflit en individuel ne se répare pas avec le consolidé', () => {
+    const a = o({ date_arrete: D, perimetre: 'individuel', valeur: 1e9, unite_source: 'unites', decimales: 0 });
+    const b = o({ date_arrete: D, perimetre: 'individuel', valeur: 2e9, unite_source: 'unites', decimales: 0 });
+    const c = o({ date_arrete: D, perimetre: 'consolide', valeur: 3e9, unite_source: 'unites', decimales: 0 });
+    expect(selectionnerExercice([a, b, c], D, 'montant')).toMatchObject({ etat: 'conflit' });
+  });
+});
