@@ -34,7 +34,7 @@ export async function generateMetadata(props: { params: Promise<{ date: string }
   const codes = e.items.map((i) => i.code).join(', ');
   return {
     title: `Analyse hebdo BRVM du ${e.date} — ${codes}`,
-    description: `Analyse technique des valeurs en vue de la semaine : ${codes}. Cours, RSI, niveaux à surveiller.`,
+    description: `Les valeurs en vue de la semaine sur la BRVM : ${codes}. Cours face au marché et au secteur, valorisation, liquidité, lecture technique.`,
   };
 }
 
@@ -57,7 +57,7 @@ export default async function HebdoEditionPage(props: { params: Promise<{ date: 
       </Link>
       <EnTeteCote
         titre={`Les valeurs en vue, semaine du ${fmtDateCourte(e.date)}`}
-        description="Analyse technique sur les données réelles de la BRVM : cours de clôture, RSI sur 14 séances, niveaux de support et de résistance."
+        description="Lecture de la semaine sur les données réelles de la BRVM : cours face au marché et au secteur, valorisation, liquidité, RSI sur 14 séances, canal des 20 séances."
         compte={{ n: e.items.length, libelle: e.items.length > 1 ? 'valeurs' : 'valeur' }}
         source={null}
       />
@@ -133,7 +133,19 @@ export default async function HebdoEditionPage(props: { params: Promise<{ date: 
           </div>
           <div>
             <dt className="inline text-ivory">Support et résistance. </dt>
-            <dd className="inline">Bornes basse et haute des 20 dernières séances.</dd>
+            <dd className="inline">Bornes basse et haute des 20 séances précédentes, qui forment le canal. On ne parle de sortie de canal qu’au-delà d’un écart de 1 % (la variation médiane d’une séance sur la cote) ; en deçà, le cours est au contact de sa borne.</dd>
+          </div>
+          <div>
+            <dt className="inline text-ivory">PER. </dt>
+            <dd className="inline">Capitalisation rapportée au résultat net consolidé du dernier exercice : le nombre d’années de bénéfice que le cours représente. Il n’est calculé que si le bénéfice par action publié concorde avec le résultat divisé par le nombre de titres.</dd>
+          </div>
+          <div>
+            <dt className="inline text-ivory">Fourchette. </dt>
+            <dd className="inline">Écart entre la meilleure offre d’achat et la meilleure offre de vente du carnet d’ordres publié par la BRVM, rapporté à leur milieu.</dd>
+          </div>
+          <div>
+            <dt className="inline text-ivory">Classe de liquidité. </dt>
+            <dd className="inline">De A (négociable sans friction) à D (très illiquide), selon la présence du titre aux séances, la valeur échangée, l’impact des échanges sur le prix et la fourchette.</dd>
           </div>
         </dl>
         <LigneSource>

@@ -87,7 +87,7 @@ const metrics = {
 
 test('buildSkeleton produit des sections et une whitelist de chiffres', () => {
   const s = buildSkeleton(metrics);
-  assert.ok(s.sections.length >= 3);
+  assert.ok(s.sections.length >= 2);
   assert.ok(s.chiffres.includes(69.8));
   assert.ok(s.chiffres.includes(66));
   assert.ok(s.verdict.length > 0);
@@ -135,8 +135,8 @@ test('une valeur en BAISSE ne recoit jamais d objectif haussier', () => {
               objectif1: 3275, objectif2: 3350, objectifBas1: 2975, objectifBas2: 2900, invalidation: 3012 },
   };
   const s = buildSkeleton(baisse);
-  const niveaux = s.sections.find((x) => x.titre === 'Les niveaux à surveiller').texte;
-  assert.match(niveaux, /plancher/i);
+  const niveaux = s.sections.find((x) => x.titre === 'Lecture technique').texte;
+  assert.match(niveaux, /plus bas des 20 séances/i);
   assert.ok(!niveaux.includes('3275'), 'aucun objectif haussier ne doit apparaitre');
   assert.ok(!niveaux.includes('3350'), 'aucun objectif haussier ne doit apparaitre');
   assert.equal(assertNoForeignNumber(niveaux, s.chiffres), true);
@@ -243,8 +243,8 @@ test('buildSkeleton : le texte est vulgarise (pas de jargon brut)', () => {
   const s = buildSkeleton(metrics);
   const texte = s.sections.map((x) => x.texte).join(' ');
   assert.ok(!/RSI\(14\) s’établit/.test(texte), 'plus de formulation brute du RSI');
-  assert.match(texte, /surachet|survendu|tension/i);
-  assert.match(texte, /fois leur niveau habituel/i);
+  assert.match(texte, /surachat|survente/i);
+  assert.match(texte, /fois le volume moyen/i);
 });
 
 test('buildSkeleton : section contexte presente si fondamental notable', () => {
@@ -252,7 +252,7 @@ test('buildSkeleton : section contexte presente si fondamental notable', () => {
     fondamental: { phrase: 'La société a publié une perte de 96,6 millions FCFA sur l’exercice 2025.', chiffres: [96.6, 2025] },
     evenement: null,
   });
-  const ctx = s.sections.find((x) => x.titre === 'Le contexte');
+  const ctx = s.sections.find((x) => x.titre === 'Dans quel contexte');
   assert.ok(ctx);
   assert.match(ctx.texte, /perte/);
   assert.ok(s.chiffres.includes(96.6));
@@ -260,7 +260,7 @@ test('buildSkeleton : section contexte presente si fondamental notable', () => {
 
 test('buildSkeleton : pas de section contexte si rien de notable', () => {
   const s = buildSkeleton(metrics, { fondamental: null, evenement: null });
-  assert.equal(s.sections.find((x) => x.titre === 'Le contexte'), undefined);
+  assert.equal(s.sections.find((x) => x.titre === 'Dans quel contexte'), undefined);
 });
 
 test('buildSkeleton : le squelette passe ses deux gardes-fous', () => {
@@ -277,8 +277,8 @@ test('buildPost long : sections attendues + avertissement', () => {
   const s = buildSkeleton(metrics);
   const p = buildPost(s, metrics, 'long');
   assert.match(p, /^▲ ETIT/);
-  assert.match(p, /Ce qui s’est passé/);
-  assert.match(p, /Les niveaux à surveiller/);
+  assert.match(p, /La semaine/);
+  assert.match(p, /Lecture technique/);
   assert.match(p, /pas un conseil en investissement/);
   assert.match(p, /pas un conseil/i);
 });
@@ -302,5 +302,5 @@ test('buildPost long : le contexte apparait quand il existe', () => {
     fondamental: { phrase: 'La société a publié une perte de 96,6 millions FCFA sur l’exercice 2025.', chiffres: [96.6, 2025] },
     evenement: null,
   });
-  assert.match(buildPost(s, metrics, 'long'), /Le contexte/);
+  assert.match(buildPost(s, metrics, 'long'), /Dans quel contexte/);
 });

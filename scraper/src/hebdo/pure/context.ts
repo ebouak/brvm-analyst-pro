@@ -1,5 +1,6 @@
 // COPIE de frontend/lib/hebdo — frontend et scraper sont deux paquets TS distincts
 // (pas de module partagé dans ce repo). Toute correction doit être reportée des deux côtés.
+// Régénérer avec `node scripts/sync-hebdo-pure.mjs` (vérifié par tests/hebdoCopies.test.ts).
 /**
  * Contexte d'actualité — PUR, testé. Ne retient qu'un événement RÉCENT et se
  * contente de le JUXTAPOSER au mouvement de cours : jamais de lien de cause à
