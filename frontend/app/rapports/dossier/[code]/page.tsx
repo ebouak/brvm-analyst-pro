@@ -639,28 +639,35 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           <Panneau
             n={PANNEAU.benefice}
             titre="D'où vient le bénéfice"
-            chapo={`Du produit net bancaire au résultat net, ${lb.libelle}. Chaque marche est un agrégat publié ; aucune n'est reconstituée.`}
+            chapo={`Du produit net bancaire au résultat net, ${lb.libelle}${lb.sources[0]?.document_libelle ? `, d'après « ${lb.sources[0].document_libelle} »` : ''}. Chaque marche est un agrégat publié ; « autres éléments et impôt » est l'écart restant.`}
           >
-            {cascade ? (
-              <CascadeBancaire illustration={cascade} compacte />
-            ) : (
-              <dl className="dv-grille">
-                {lb.compteResultat.slice(0, 4).map((l) => (
-                  <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
-                ))}
-              </dl>
+            {/* Feuille à hauteur fixe (avec le dividende) : cascade et encours côte à côte. */}
+            <div className={cascade ? 'bk-duo' : undefined}>
+              {cascade ? (
+                <CascadeBancaire illustration={cascade} compacte />
+              ) : (
+                <dl className="dv-grille">
+                  {lb.compteResultat.slice(0, 4).map((l) => (
+                    <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
+                  ))}
+                </dl>
+              )}
+              {encoursB && encoursB.affichees.length > 0 && (
+                <dl className="dv-grille" style={cascade ? undefined : { marginTop: '3mm' }}>
+                  {encoursB.affichees.map((l) => (
+                    <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
+                  ))}
+                </dl>
+              )}
+            </div>
+            {((encoursB && phraseOmis(encoursB.omis, 'indicateur')) || lb.mentionNonPublies) && (
+              <p className="dv-legende">
+                {[
+                  encoursB && phraseOmis(encoursB.omis, 'indicateur') ? `${phraseOmis(encoursB.omis, 'indicateur')}, détaillés dans la Revue de résultats.` : null,
+                  lb.mentionNonPublies,
+                ].filter(Boolean).join(' ')}
+              </p>
             )}
-            {encoursB && encoursB.affichees.length > 0 && (
-              <dl className="dv-grille" style={{ marginTop: '3mm' }}>
-                {encoursB.affichees.map((l) => (
-                  <Mesure key={l.cle} libelle={l.libelle} valeur={montantLigne(l.valeur.valeur, l.unite)} />
-                ))}
-              </dl>
-            )}
-            {encoursB && phraseOmis(encoursB.omis, 'indicateur') && (
-              <p className="dv-legende">{phraseOmis(encoursB.omis, 'indicateur')}, détaillés dans la Revue de résultats.</p>
-            )}
-            {lb.mentionNonPublies && <p className="dv-legende">{lb.mentionNonPublies}</p>}
           </Panneau>
         ) : (
         <Panneau

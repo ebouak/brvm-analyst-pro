@@ -4,9 +4,25 @@
 .bk-cascade .lp-illu-titre { font-size: 10.5pt; margin-bottom: 2mm; }
 .bk-cascade .lp-illu-dessin { max-width: 118mm; margin-inline: 0; }
 .bk-cascade .lp-illu-note { margin-top: 2mm; font-size: 9pt; line-height: 1.4; max-width: 70ch; }
-/* Dossier valeur : la feuille 7 porte aussi le dividende, le dessin est plus petit. */
-.bk-cascade--compacte { margin-top: 2mm; }
-.bk-cascade--compacte .lp-illu-dessin { max-width: 92mm; }
+/* Dossier valeur : la feuille 7 porte aussi le dividende. Le dessin est plus
+   petit, son titre et sa note sont portés par le chapô du panneau, et les
+   encours se rangent à côté (.bk-duo) plutôt que dessous. */
+.bk-cascade--compacte { margin-top: 0; }
+.bk-cascade--compacte .lp-illu-dessin { max-width: 84mm; }
+.bk-cascade--compacte .lp-illu-titre,
+.bk-cascade--compacte .lp-illu-note { display: none; }
+.bk-duo { display: grid; grid-template-columns: 84mm 1fr; gap: 6mm; align-items: start; }
+.bk-duo .dv-grille { grid-template-columns: 1fr 1fr; gap: 2.5mm; }
+.bk-duo .dv-mesure { padding: 2mm 3mm; }
+.bk-duo .dv-mesure dd { font-size: 11pt; }
+/* Revue : cascade à gauche, ratios d'exploitation empilés à droite. */
+.bk-duo--revue { margin-top: 6mm; }
+.bk-duo--revue .doc-mesures { margin: 0; grid-template-columns: 1fr; row-gap: 4mm; }
+.bk-duo--revue .doc-mesures > div { grid-column: auto; }
+/* Écran étroit (le document se lit aussi au téléphone) : une colonne. L'impression A4 garde les deux. */
+@media screen and (max-width: 230mm) {
+  .bk-duo { grid-template-columns: 1fr; }
+}
 /* Document imprimé : le dessin est à son état final, sans entrée animée. */
 .bk-cascade .lp-illu .illu-barre { animation: none !important; transform: none !important; }
 

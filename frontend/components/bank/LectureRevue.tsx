@@ -60,7 +60,8 @@ function Tableau({ titre, lignes, colPrec, avecCloture }: { titre: string; ligne
 function Ratios({ lecture, cles }: { lecture: LectureBancaire; cles: CleRatio[] }) {
   const ratios = lecture.ratios.filter((r) => cles.includes(r.cle));
   if (ratios.length === 0) return null;
-  return <Mesures items={ratios.map((r) => ({ libelle: r.libelle, valeur: ratioLigne(r.valeur), note: [r.phrase, r.mention && `(${r.mention})`].filter(Boolean).join(' ') }))} />;
+  // La mention (annualisation, glissement) n'est ajoutée que si la phrase ne la porte pas déjà.
+  return <Mesures items={ratios.map((r) => ({ libelle: r.libelle, valeur: ratioLigne(r.valeur), note: r.mention && !r.phrase.includes(r.mention) ? `${r.phrase} (${r.mention})` : r.phrase }))} />;
 }
 
 function Sources({ lecture }: { lecture: LectureBancaire }) {
@@ -76,11 +77,17 @@ function Sources({ lecture }: { lecture: LectureBancaire }) {
 
 export function CompteResultatBancaire({ lecture }: { lecture: LectureBancaire }) {
   const cascade = illustrationCascade(lecture);
+  // Feuille A4 à hauteur fixe : jusqu'à neuf lignes, puis la cascade et les ratios côte à côte.
   return (
     <>
       <Tableau titre="Compte de résultat" lignes={lecture.compteResultat} colPrec={lecture.libellePrecedent} avecCloture={false} />
-      <Ratios lecture={lecture} cles={['coefficient_exploitation', 'cout_du_risque_relatif']} />
-      {cascade && <CascadeBancaire illustration={cascade} />}
+      <div className={cascade ? 'bk-duo bk-duo--revue' : undefined}>
+        {cascade && <CascadeBancaire illustration={cascade} compacte />}
+        <Ratios lecture={lecture} cles={['coefficient_exploitation', 'cout_du_risque_relatif']} />
+      </div>
+      {cascade && cascade.gabarit === 'cascade' && (
+        <p className="doc-note">{cascade.note} Source : {cascade.source}.</p>
+      )}
       {lecture.code !== 'exercice' && (
         <p className="doc-note">Flux cumulés depuis le début de l’exercice, comparés au même cumul de {lecture.annee - 1}.</p>
       )}
