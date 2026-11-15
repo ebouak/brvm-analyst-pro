@@ -19,6 +19,7 @@ import { LienCanal } from './LienCanal';
 import { CANAUX } from '@/lib/canaux';
 import { fmtNumber } from '@/lib/format';
 import type { SceneIndice as Indice, CaseValeur } from '@/lib/vitrine/seance';
+import { classesPolicesTitre } from '@/lib/vitrine/policesTitre';
 
 export interface DonneesOuverture {
   dateLongue: string | null;
@@ -48,7 +49,7 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
             Séance du {o.dateLongue} · {o.enSeance ? 'marché ouvert' : 'marché fermé'}
           </p>
         )}
-        <TitreMots as="h1" texte="Toute la BRVM. Au chiffre près." accent="Au chiffre près." className="v-ouverture" />
+        <TitreMots as="h1" texte="Toute la BRVM. Au chiffre près." accent="Au chiffre près." className={`v-ouverture ${classesPolicesTitre}`} />
         <p className="v-accroche vh-entree" style={rang(5)}>
           {o.nbValeurs} valeurs, notées de A à F, avec la source de chaque chiffre.
         </p>

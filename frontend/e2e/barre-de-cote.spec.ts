@@ -24,6 +24,19 @@ async function liensPanneau(page: Page, cellule: Locator): Promise<string[]> {
   return liens.evaluateAll((els) => els.map((e) => e.getAttribute('href') ?? ''));
 }
 
+/**
+ * Ouvre la page et attend que la barre soit HYDRATÉE (React a posé ses
+ * gestionnaires sur les cellules) : une touche ou un clic envoyé avant
+ * l'hydratation tombe sur du HTML inerte et le test échouerait au hasard.
+ */
+async function ouvrirPage(page: Page, chemin = PAGE) {
+  await page.goto(chemin, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => {
+    const b = document.querySelector('#barre-de-cote button');
+    return Boolean(b && Object.keys(b).some((k) => k.startsWith('__reactProps')));
+  });
+}
+
 const attendu = (id: string) => PANNEAUX.find((p) => p.id === id)!.colonnes.flat().map((l) => l.href);
 
 test.describe('bureau', () => {
@@ -33,7 +46,8 @@ test.describe('bureau', () => {
   test('aucune requête /api/nav/* avant la première interaction', async ({ page }) => {
     const requetes: string[] = [];
     page.on('request', (r) => { if (r.url().includes('/api/nav/')) requetes.push(r.url()); });
-    await page.goto(PAGE, { waitUntil: 'load' });
+    await ouvrirPage(page);
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
     expect(requetes, 'requête de la colonne vivante partie au chargement').toEqual([]);
     const reponse = page.waitForResponse((r) => r.url().includes('/api/nav/apercu'));
@@ -43,7 +57,7 @@ test.describe('bureau', () => {
 
   for (const touche of ['Enter', ' ', 'ArrowDown'] as const) {
     test(`clavier : « ${touche === ' ' ? 'Espace' : touche} » ouvre, Échap ferme et rend le focus`, async ({ page }) => {
-      await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+      await ouvrirPage(page);
       const cellule = nav(page).getByRole('button', { name: 'Le marché' });
       await cellule.focus();
       // Le focus seul n'ouvre pas le panneau (réglage validé du 2026-11-15).
@@ -61,12 +75,15 @@ test.describe('bureau', () => {
   }
 
   test('← / → changent de rubrique sans refermer le panneau', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     const marche = nav(page).getByRole('button', { name: 'Le marché' });
     const idee = nav(page).getByRole('button', { name: 'Trouver une idée' });
-    // Ouvert au clic : le focus reste sur la cellule, d'où ←/→ se lisent.
-    await marche.click();
+    // Ouvert au survol, puis focus sur la cellule (le focus seul ne referme
+    // pas) : ←/→ se lisent depuis une cellule. Pas de clic : survol (120 ms) et
+    // clic se croisent, le clic peut alors refermer ce que le survol a ouvert.
+    await marche.hover();
     await expect(marche).toHaveAttribute('aria-expanded', 'true');
+    await marche.focus();
     await page.keyboard.press('ArrowRight');
     await expect(idee).toHaveAttribute('aria-expanded', 'true');
     await expect(marche).toHaveAttribute('aria-expanded', 'false');
@@ -76,7 +93,7 @@ test.describe('bureau', () => {
   });
 
   test('sémantique disclosure : nav + button aria-expanded, aucun role="menu"', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     await expect(barre(page).locator('[role="menu"], [role="menuitem"]')).toHaveCount(0);
     // Lien d'évitement : premier élément focalisable de la page.
     await page.keyboard.press('Tab');
@@ -84,7 +101,7 @@ test.describe('bureau', () => {
   });
 
   test('registre : chaque panneau montre exactement les entrées du registre', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     const cellules: [string, Locator][] = [
       ['aujourdhui', nav(page).getByRole('button', { name: /Séance ouverte|Marché fermé|Séance/ })],
       ['marche', nav(page).getByRole('button', { name: 'Le marché' })],
@@ -93,7 +110,8 @@ test.describe('bureau', () => {
       ['apprendre', nav(page).getByRole('button', { name: 'Apprendre' })],
     ];
     for (const [id, cellule] of cellules) {
-      await cellule.click();
+      await cellule.focus();
+      await page.keyboard.press('ArrowDown'); // ↓ ouvre toujours, sans course avec le survol
       await expect(cellule).toHaveAttribute('aria-expanded', 'true');
       expect(await liensPanneau(page, cellule), `panneau ${id}`).toEqual(attendu(id));
       await page.keyboard.press('Escape');
@@ -101,7 +119,7 @@ test.describe('bureau', () => {
   });
 
   test('aucune barre à l’impression', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     await expect(barre(page)).toBeVisible();
     await page.emulateMedia({ media: 'print' });
     await expect(barre(page)).toBeHidden();
@@ -118,7 +136,7 @@ test.describe('mobile', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test('plein écran : défilement verrouillé, focus piégé, Échap rend le focus', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     const grille = barre(page).getByRole('button', { name: 'Ouvrir le menu' });
     await grille.click();
     const dialogue = page.getByRole('dialog');
@@ -141,7 +159,7 @@ test.describe('mobile', () => {
   });
 
   test('plein écran : une rubrique ouverte à la fois, liens issus du registre', async ({ page }) => {
-    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await ouvrirPage(page);
     await barre(page).getByRole('button', { name: 'Ouvrir le menu' }).click();
     const dialogue = page.getByRole('dialog');
     // Visiteur : pas de rubrique « Mon portefeuille ».

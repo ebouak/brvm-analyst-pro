@@ -38,7 +38,11 @@ test('dashboard authentifié : la navigation par <Link> fonctionne (anti-régres
 
   // LA régression : depuis /dashboard (page d'entrée), un clic <Link> de la
   // navigation doit naviguer (barre de cote, panneau « Le marché »).
-  await page.getByRole('button', { name: 'Le marché' }).click({ timeout: 8000 });
-  await page.locator('#barre-de-cote a[href="/actions"]').click({ timeout: 8000 });
+  // ↓ ouvre toujours le panneau (un clic peut refermer ce que le survol vient
+  // d'ouvrir) ; le lien visé est celui de la colonne de liens, pas « Voir toutes
+  // les valeurs » de la colonne vivante, qui mène aussi à /actions.
+  await page.getByRole('button', { name: 'Le marché' }).focus({ timeout: 8000 });
+  await page.keyboard.press('ArrowDown');
+  await page.locator('#barre-de-cote').getByRole('link', { name: /^Actions\b/ }).click({ timeout: 8000 });
   await expect(page).toHaveURL(/\/actions(?:$|\/|\?)/, { timeout: 10_000 });
 });
