@@ -2,6 +2,9 @@
 // Seed academy_exam_questions : QCM des leçons (source=quiz) + questions inédites
 // de synthèse (source=inedite). Idempotent (dédoublonnage par hash question+niveau).
 // Usage : SUPABASE_URL=… KEY=<service_role> node scripts/seed-exam-bank.mjs
+// ⚠️ REMPLACÉ par la migration 0239 (2026-11-15) : la banque active = les quiz relus
+// des leçons (champ `quiz`, pas seulement `qcm`). Ce script ne lit que `qcm` et ses
+// INEDITES n'ont jamais été relues : ne pas l'utiliser pour reconstruire la banque.
 import crypto from 'node:crypto';
 
 const U = process.env.SUPABASE_URL, K = process.env.KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
