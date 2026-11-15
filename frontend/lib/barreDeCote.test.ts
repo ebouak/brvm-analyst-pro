@@ -4,7 +4,8 @@ import {
   apercuMarche, apercuRevenus, apercuPortefeuille, apercuIdee, apercuApprendre, formaterContexte,
   apercuAujourdhui, destinationsPouce, hrefPanneau, ligneAlertes, sansBarre, titreBrief,
 } from './barreDeCote';
-import { REGISTRE, RUBRIQUES } from './navRegistre';
+import { REGISTRE, RUBRIQUES, entreesPalette } from './navRegistre';
+import { buildSearchItems } from './search-index';
 
 const menu = REGISTRE.filter((e) => e.statut === 'menu');
 
@@ -62,6 +63,15 @@ describe('panneaux dérivés du registre', () => {
     const hrefs = construirePanneaux(sans).flatMap((p) => p.colonnes.flat()).map((l) => l.href);
     expect(hrefs).not.toContain('/heatmap');
     expect(hrefs).toContain('/actions');
+  });
+
+  it('la palette suit le registre : mêmes pages, ni plus ni moins (une entrée retirée en sort aussi)', () => {
+    const pages = buildSearchItems({ instruments: [] }).filter((i) => i.kind === 'page').map((i) => i.href);
+    expect(new Set(pages)).toEqual(new Set(entreesPalette().map((e) => e.chemin)));
+    // Toute entrée d’un panneau est trouvable dans la palette (pages statiques).
+    for (const l of PANNEAUX.flatMap((p) => p.colonnes.flat())) {
+      if (!l.href.includes('[')) expect(pages, l.href).toContain(l.href);
+    }
   });
 
   it('les cellules de la barre, « Aujourd’hui » et le portefeuille couvrent les six rubriques', () => {

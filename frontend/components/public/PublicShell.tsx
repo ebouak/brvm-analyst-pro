@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import { RATING_DISCLAIMER } from '@/lib/rating';
-import { SiteHeader } from '@/components/layout/SiteHeader';
 import FilAriane from '@/components/nav/FilAriane';
 
 /**
- * Pages publiques SEO — header unifie SiteHeader, footer disclaimer conserve.
+ * Pages publiques SEO — la barre de cote est posée par ConditionalShell ; footer disclaimer conservé.
  * Fil d'Ariane public (avec données structurées BreadcrumbList) en tête du
  * contenu ; `filLibelle` nomme le dernier maillon d'une page dynamique ;
  * `fil={false}` quand la page est déjà dans le shell applicatif (qui pose le sien).
@@ -24,7 +23,6 @@ export default function PublicShell({
 }) {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
-      <SiteHeader />
       <main className={pleineLargeur ? 'flex-1 w-full' : 'flex-1 max-w-6xl mx-auto w-full px-4 md:px-6 py-8'}>
         {fil && (
           <FilAriane

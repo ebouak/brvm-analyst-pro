@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { PricingClient, type PricingPlan } from '@/components/pricing/PricingClient';
-import { SiteHeader } from '@/components/layout/SiteHeader';
 import SignalOffre from '@/components/crm/SignalOffre';
 
 export const metadata: Metadata = {
@@ -31,7 +30,6 @@ export default async function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <SignalOffre page="/pricing" />
-      <SiteHeader />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-12 md:px-6 md:pt-16">
         {plans.length > 0 ? (

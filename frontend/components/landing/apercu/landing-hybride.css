@@ -31,13 +31,13 @@
 .ah .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .ah .over { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--blue-tx); }
 .ah .hand { font-family: var(--hand); font-size: 26px; line-height: 1.1; color: var(--ink-2); }
-.ah .wrap { max-width: 1152px; margin-inline: auto; } /* 6xl — même grille que SiteHeader/PublicShell */
+.ah .wrap { max-width: 1152px; margin-inline: auto; } /* 6xl — même grille que PublicShell */
 .ah .accent { color: var(--blue-tx); }
 .ah .up { color: var(--up-tx); } .ah .down { color: var(--down-tx); }
 .ah img { outline: 1px solid rgba(0, 0, 0, .08); outline-offset: -1px; }
 .ah :is(a, button, input):focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-/* nav — legacy .ah header supprimé : remplacé par SiteHeader (layout/SiteHeader.tsx)
+/* nav — legacy .ah header supprimé : remplacé par la barre de cote (layout/barre/BarreDeCote.tsx)
    h-14 (56px) + max-w-6xl + breakpoint md (768px) unifiés. On garde .brand pour
    d'éventuels usages hors header. */
 .ah .brand { display: flex; align-items: center; gap: 10px; }

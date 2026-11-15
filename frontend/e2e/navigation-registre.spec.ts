@@ -66,8 +66,19 @@ test.describe('Shell applicatif (compte actif)', () => {
       // Barre de cote (lot 7, étape 2) : la cellule de la rubrique est marquée ;
       // son panneau ouvert, l'entrée de menu de la page (ou de son parent) l'est aussi.
       const barre = page.getByRole('navigation', { name: 'Navigation principale', exact: true });
-      await barre.locator('button[aria-current="true"]').click();
-      await expect(page.locator('#barre-de-cote a[aria-current="page"]').first()).toContainText(c.actif);
+      // ↓ ouvre toujours (un clic peut refermer ce que le survol vient d'ouvrir),
+      // une fois la barre hydratée (une touche sur du HTML inerte est perdue).
+      await page.waitForFunction(() => {
+        const b = document.querySelector('#barre-de-cote button');
+        return Boolean(b && Object.keys(b).some((k) => k.startsWith('__reactProps')));
+      });
+      // Le panneau se ferme au défilement de plus de 40 px : une page qui défile
+      // encore en fin de chargement peut le refermer, d'où la reprise.
+      await expect(async () => {
+        await barre.locator('button[aria-current="true"]').focus();
+        await page.keyboard.press('ArrowDown');
+        await expect(page.locator('#barre-de-cote a[aria-current="page"]').first()).toContainText(c.actif, { timeout: 2000 });
+      }).toPass({ timeout: 15_000 });
       await page.keyboard.press('Escape');
       await fil(page).locator(`a[href="${c.retour}"]`).click();
       await expect(page).toHaveURL(new RegExp(`${c.retour}$`));
