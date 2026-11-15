@@ -22,6 +22,7 @@ import { periodeDuDocument, type PeriodeDoc } from './periode.js';
 import { normaliser, type ObservationNouvelle } from './normaliser.js';
 import { controler, type Reference } from './controles.js';
 import { AGREGATS } from './indicateurs.js';
+import { coupureCron, publicationsDuCron } from './coupure.js';
 import type { DocumentRapport } from './rapport.js';
 
 const log = logger.child({ module: 'agregats-extraction' });
@@ -108,8 +109,10 @@ async function publicationsDe(banques: string[], depuis: string | null): Promise
 }
 
 /**
- * `depuis` (AAAA-MM-JJ) borne les publications lues ; sans lui, le cron lit
- * les 400 derniers jours et la reprise tout l'historique.
+ * Cron (reprise = false) : SEULES les publications datées de la coupure ou
+ * après (coupure.ts, AGREGATS_COUPURE) — l'historique attend l'accord de
+ * l'exploitant sur le rapport à blanc. Reprise : tout l'historique, ou depuis
+ * `depuis` (AAAA-MM-JJ).
  */
 export async function extraireAgregats(opts: { codes?: string[]; reprise: boolean; fixtures?: string | null; depuis?: string | null }): Promise<ResultatExtraction> {
   const sb = getSupabase();
@@ -123,7 +126,10 @@ export async function extraireAgregats(opts: { codes?: string[]; reprise: boolea
   if (opts.codes?.length) banques = banques.filter((c) => opts.codes!.includes(c));
   if (banques.length === 0) return { documents: [], observations: [], echecs: 0, avertissements: [] };
 
-  const pubs = await publicationsDe(banques, opts.depuis ?? (opts.reprise ? null : new Date(Date.now() - 400 * 86_400_000).toISOString().slice(0, 10)));
+  const coupure = opts.reprise ? null : coupureCron(process.env.AGREGATS_COUPURE);
+  const lues = await publicationsDe(banques, opts.reprise ? opts.depuis ?? null : coupure);
+  // Double verrou : même si la requête changeait, le cron ne traite rien d'antérieur à la coupure.
+  const pubs = coupure ? publicationsDuCron(lues, coupure) : lues;
 
   const alias = construireAlias(tous);
   const codesConnus = new Set(tous.map((i) => i.code));
