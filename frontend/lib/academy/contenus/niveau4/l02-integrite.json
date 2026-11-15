@@ -137,10 +137,10 @@
   {
    "question": "Une société signe un contrat majeur. Que lui impose l’information permanente ?",
    "options": [
-    "D’attendre le rapport annuel",
-    "De le rendre public sans délai s’il peut influencer le cours",
+    "D’attendre la publication du rapport annuel",
+    "De le rendre public sans délai",
     "De n’en parler qu’aux grands actionnaires",
-    "Rien"
+    "Rien tant que le contrat n’est pas exécuté"
    ],
    "correct": 1,
    "explication": "Tout fait susceptible d’influencer sensiblement le cours doit être publié sans délai."
@@ -159,10 +159,10 @@
   {
    "question": "Un ami salarié d’une société cotée vous annonce un excellent résultat, pas encore publié. Que faire ?",
    "options": [
-    "Acheter avant l’annonce",
-    "Ne pas opérer sur cette base : l’information est privilégiée",
-    "La relayer à d’autres",
-    "Vendre à découvert"
+    "Acheter avant que l’annonce ne soit publiée",
+    "Ne pas opérer : l’information est privilégiée",
+    "La relayer à d’autres pour qu’ils en profitent",
+    "Vendre à découvert pour couvrir le risque"
    ],
    "correct": 1,
    "explication": "Utiliser ou transmettre une information privilégiée est interdit, pour lui comme pour vous."

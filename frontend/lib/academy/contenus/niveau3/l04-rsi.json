@@ -78,25 +78,8 @@
   },
   {
    "type": "importance",
-   "titre": "Ce que nous avons mesuré sur la BRVM",
-   "contenu": "WestBourse a rejoué son score technique sur 2008-2023 : 109 634 séances que la formule n’avait jamais vues. Résultat : les titres les plus mal notés, souvent après une forte baisse, ont en moyenne fait mieux que le marché dans les semaines suivantes. Les mieux notés, non.\nSur un marché peu liquide, les excès ont plutôt tendance à se corriger. C’est une moyenne sur seize ans, pas une règle pour la prochaine séance.\nCe résultat porte sur un score qui combine plusieurs éléments, dont le RSI, et non sur le RSI seul. Il ne transforme pas un RSI bas en raison d’acheter.",
-   "stats": [
-    {
-     "label": "Séances rejouées",
-     "valeur": "109 634",
-     "detail": "2008-2023, hors échantillon de construction"
-    },
-    {
-     "label": "Scores les plus bas, 20 séances après",
-     "valeur": "+8,4 % face au marché",
-     "detail": "Moyenne, écart statistiquement établi"
-    },
-    {
-     "label": "Scores les plus hauts, 20 séances après",
-     "valeur": "−1,5 % face au marché",
-     "detail": "Moyenne, écart non établi"
-    }
-   ]
+   "titre": "Le RSI et la mesure de la leçon 1",
+   "contenu": "La leçon 1 présente le rejeu du score technique de WestBourse sur 2008-2023, avec son horizon, la taille de son échantillon et ses limites. Ce résultat porte sur un score qui combine plusieurs éléments, dont le RSI, et non sur le RSI seul.\nIl ne dit donc rien de ce que fait une valeur après un RSI bas. Un RSI décrit un excès récent : il ne dit pas si cet excès se corrigera, ni quand. Il ne transforme pas un RSI bas en raison d’acheter."
   },
   {
    "type": "piege",
@@ -135,7 +118,7 @@
      "titre": "Une zone extrême peut durer dans une tendance forte"
     },
     {
-     "titre": "À la BRVM, les excès ont plutôt eu tendance à se corriger en moyenne"
+     "titre": "Le RSI décrit un excès récent ; il ne dit pas s’il se corrigera"
     }
    ]
   }
@@ -210,10 +193,10 @@
   {
    "question": "Pourquoi le RSI d’une valeur peu liquide est-il à lire avec prudence ?",
    "options": [
-    "Il ne se calcule pas",
-    "Quelques séances avec peu d’échanges suffisent à le pousser vers un extrême",
-    "Il vaut toujours 50",
-    "Il est interdit"
+    "Il ne se calcule pas sans volume quotidien",
+    "Quelques ordres suffisent à le pousser à l’extrême",
+    "Il n’est publié qu’une fois par mois pour ces valeurs",
+    "Il est interdit sur les petites valeurs"
    ],
    "correct": 1,
    "explication": "Avec peu d’échanges, quelques ordres font bouger le cours, et donc le RSI."

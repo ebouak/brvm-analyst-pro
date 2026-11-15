@@ -49,7 +49,7 @@
   {
    "type": "importance",
    "titre": "Du CREPMF à l’AMF-UMOA",
-   "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement résulte du Traité révisé de l’UMOA du 12 juillet 2019, entré en vigueur le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.\nLa Commission des sanctions statue sur les manquements des acteurs du marché. Le Médiateur, lui, recherche un règlement amiable des différends entre épargnants et acteurs du marché. Pour l’épargnant, ce second organe est le plus concret : il offre une voie de recours qui ne passe pas d’emblée par un tribunal.",
+   "contenu": "Le Conseil régional de l’épargne publique et des marchés financiers (CREPMF) a été transformé en Autorité des marchés financiers de l’UMOA (AMF-UMOA). Le changement fait suite au Traité révisé de l’UMOA du 12 juillet 2019 ; il a pris effet le 1er octobre 2022.\nLa réforme a notamment doté l’autorité d’une Commission des sanctions et d’un Médiateur.\nLa Commission des sanctions statue sur les manquements des acteurs du marché. Le Médiateur, lui, recherche un règlement amiable des différends entre épargnants et acteurs du marché. Pour l’épargnant, ce second organe est le plus concret : il offre une voie de recours qui ne passe pas d’emblée par un tribunal.",
    "etapes": [
     {
      "titre": "12 juillet 2019",
@@ -57,7 +57,7 @@
     },
     {
      "titre": "1er octobre 2022",
-     "detail": "Entrée en vigueur : l’AMF-UMOA a succédé au CREPMF.",
+     "detail": "Prise d’effet : l’AMF-UMOA a succédé au CREPMF.",
      "cle": true
     },
     {
@@ -178,10 +178,10 @@
   {
    "question": "La BRVM garantit-elle la solidité des sociétés cotées ?",
    "options": [
-    "Oui, toujours",
-    "Non : elle organise la cotation, sans garantir les sociétés ni les cours",
+    "Oui, elle garantit toutes les sociétés cotées",
+    "Non : elle organise la cotation",
     "Oui, pour le compartiment Prestige",
-    "Seulement pour les banques"
+    "Seulement pour les banques cotées"
    ],
    "correct": 1,
    "explication": "La cotation n’est pas une garantie : l’investisseur reste exposé au risque de la société."

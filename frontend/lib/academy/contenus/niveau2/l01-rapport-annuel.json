@@ -9,7 +9,7 @@
   {
    "type": "definition",
    "titre": "Les quatre pièces d’un rapport annuel",
-   "contenu": "Les sociétés cotées à la BRVM tiennent leurs comptes selon le SYSCOHADA révisé ; les banques suivent le plan comptable bancaire de l’UMOA. Le vocabulaire diffère un peu, la logique est la même : chaque document répond à une question précise.\nLe bilan dit ce que la société possède et ce qu’elle doit, à une date donnée. Le compte de résultat dit ce qu’elle a gagné ou perdu pendant l’année. Le tableau des flux dit si ce gain s’est transformé en argent disponible. Les notes et le rapport des commissaires aux comptes disent comment lire les trois premiers, et s’ils sont fiables.\nLire une seule pièce conduit souvent à une erreur. Un bénéfice élevé peut cacher une trésorerie qui fond. Des fonds propres solides peuvent cacher une activité qui recule. C’est en croisant les quatre que l’on se fait une idée juste de la société.",
+   "contenu": "Les sociétés cotées à la BRVM tiennent leurs comptes selon le SYSCOHADA révisé et, quand elles publient des comptes consolidés, établissent ceux du groupe selon les normes IFRS. Les banques suivent le plan comptable bancaire de l’UMOA, les assureurs le plan comptable du code CIMA. Le vocabulaire diffère un peu, la logique est la même : chaque document répond à une question précise.\nLe bilan dit ce que la société possède et ce qu’elle doit, à une date donnée. Le compte de résultat dit ce qu’elle a gagné ou perdu pendant l’année. Le tableau des flux dit si ce gain s’est transformé en argent disponible. Les notes et le rapport des commissaires aux comptes disent comment lire les trois premiers, et s’ils sont fiables.\nLire une seule pièce conduit souvent à une erreur. Un bénéfice élevé peut cacher une trésorerie qui fond. Des fonds propres solides peuvent cacher une activité qui recule. C’est en croisant les quatre que l’on se fait une idée juste de la société.",
    "points": [
     {
      "titre": "Le bilan",
@@ -208,10 +208,10 @@
   {
    "question": "Que montre le bilan ?",
    "options": [
-    "Les ventes de l’année",
-    "Ce que la société possède et comment c’est financé, à une date donnée",
-    "L’argent entré et sorti dans l’année",
-    "Le cours moyen de l’action"
+    "Les ventes et les charges de toute l’année",
+    "Le patrimoine et son financement, à une date",
+    "L’argent entré et sorti de la société dans l’année",
+    "Le cours moyen de l’action sur l’exercice"
    ],
    "correct": 1,
    "explication": "Le bilan est une photographie à la date de clôture : actif d’un côté, fonds propres et dettes de l’autre."
@@ -219,10 +219,10 @@
   {
    "question": "Pourquoi regarder le résultat d’exploitation, pas seulement le résultat net ?",
    "options": [
-    "Il est toujours plus élevé",
-    "Il exclut les éléments exceptionnels et financiers : il montre l’activité courante",
-    "Il inclut le dividende",
-    "Il est le seul certifié"
+    "Il est toujours plus élevé que le résultat net",
+    "Il montre l’activité courante",
+    "Il inclut le dividende versé aux actionnaires",
+    "Il est le seul chiffre certifié des comptes"
    ],
    "correct": 1,
    "explication": "Le résultat d’exploitation reflète l’activité courante. Une cession exceptionnelle peut gonfler le résultat net d’une seule année."
@@ -230,10 +230,10 @@
   {
    "question": "Des états financiers publiés « provisoires, non approuvés par l’assemblée générale » :",
    "options": [
-    "Ne peuvent plus changer",
-    "Peuvent encore être modifiés avant leur approbation",
-    "Sont toujours faux",
-    "Ne sont pas publics"
+    "Ne peuvent plus changer une fois publiés",
+    "Peuvent encore être modifiés",
+    "Sont faux tant qu’ils ne sont pas approuvés",
+    "Ne sont communiqués qu’aux administrateurs"
    ],
    "correct": 1,
    "explication": "Des comptes provisoires peuvent évoluer jusqu’à l’assemblée générale. Ils sont utiles, à condition de le savoir."

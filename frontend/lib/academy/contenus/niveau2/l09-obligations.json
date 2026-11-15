@@ -4,7 +4,7 @@
  "categorie": "income",
  "duree_min": 11,
  "sous_titre": "Prêter à un État ou à une entreprise, recevoir un coupon, être remboursé : le fonctionnement et les pièges d’un marché peu liquide.",
- "resume": "Une obligation est un prêt découpé en titres. L’émetteur verse un intérêt, le coupon, et rembourse le capital selon un calendrier fixé. La BRVM cote plus de deux cents emprunts, surtout d’États. Cette leçon explique le vocabulaire, le calcul du rendement et les précautions propres à ce marché.",
+ "resume": "Une obligation est un prêt découpé en titres. L’émetteur verse un intérêt, le coupon, et rembourse le capital selon un calendrier fixé. La BRVM cote de nombreux emprunts, surtout d’États. Cette leçon explique le vocabulaire, le calcul du rendement et les précautions propres à ce marché.",
  "sections": [
   {
    "type": "definition",
@@ -46,7 +46,7 @@
     },
     {
      "nom": "Coupon couru",
-     "expression": "Coupon × Jours écoulés ÷ 365",
+     "expression": "Coupon × Jours écoulés ÷ Jours de l’année, selon la convention de l’emprunt",
      "exemple": "Payé en plus du prix à l’achat, rendu au prochain coupon"
     }
    ],
@@ -248,10 +248,10 @@
   {
    "question": "Une obligation affiche le même cours depuis des mois. Qu’en conclure ?",
    "options": [
-    "Que le titre est très stable",
-    "Qu’il s’échange peut-être très peu : vérifier la date du dernier échange réel",
-    "Qu’il va bientôt monter",
-    "Qu’il est garanti par l’État"
+    "Que le titre est très stable et sans risque",
+    "Qu’il s’échange peut-être très peu",
+    "Qu’il va bientôt monter vers le pair",
+    "Qu’il est garanti par l’État émetteur"
    ],
    "correct": 1,
    "explication": "Sans échange, le cours affiché ne bouge pas. Ce n’est pas un prix auquel on est sûr de vendre."

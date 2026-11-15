@@ -108,7 +108,7 @@
       "question": "Pourquoi comparer les placements sur cinq à dix ans ?",
       "options": [
         "Parce que les dividendes ne sont versés qu’au bout de cinq ans",
-        "Parce qu’une seule année peut être exceptionnellement bonne ou mauvaise",
+        "Parce qu’une seule année peut être exceptionnelle",
         "Parce que la BRVM ne publie ses cours qu’une fois par an",
         "Parce que l’immobilier ne se vend qu’après dix ans"
       ],
@@ -129,10 +129,10 @@
     {
       "question": "Par quoi commencer pour bâtir un patrimoine ?",
       "options": [
-        "Un portefeuille d’actions",
-        "Un bien immobilier",
-        "Une épargne de précaution disponible",
-        "Un commerce"
+        "Un portefeuille d’actions diversifié",
+        "Un bien immobilier en location",
+        "Une épargne de précaution",
+        "Un commerce de proximité"
       ],
       "correct": 2,
       "explication": "L’épargne de précaution couvre les imprévus : elle évite de devoir vendre ses actions ou son bien au mauvais moment."

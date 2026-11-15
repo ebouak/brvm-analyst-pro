@@ -40,7 +40,7 @@
     },
     {
      "label": "PER intermédiaire",
-     "valeur": "8 à 15",
+     "valeur": "8 à 20",
      "detail": "Zone fréquente pour une société mature"
     },
     {
@@ -104,7 +104,7 @@
       "Rare à la BRVM : aucune estimation n’est certifiée"
      ]
     ],
-    "note": "WestBourse utilise le PER historique, sur le résultat consolidé quand la société publie des comptes consolidés."
+    "note": "WestBourse utilise le PER historique, sur le résultat consolidé quand la société publie des comptes consolidés. Pour un groupe dont des actionnaires minoritaires détiennent une part des filiales (Sonatel, par exemple), le PER affiché paraît donc plus bas que celui calculé sur la part du groupe."
    }
   },
   {
@@ -185,10 +185,10 @@
   {
    "question": "Une société a un PER de 4, nettement sous ses concurrents. Quelle est la bonne réaction ?",
    "options": [
-    "Acheter immédiatement",
-    "Chercher pourquoi : bénéfice exceptionnel, bénéfices en baisse, risque particulier",
-    "Vendre immédiatement",
-    "Ignorer le PER"
+    "Acheter immédiatement, avant la hausse",
+    "Chercher d’abord pourquoi",
+    "Vendre immédiatement si vous en détenez",
+    "Ignorer le PER, qui n’a aucun sens"
    ],
    "correct": 1,
    "explication": "Un PER très bas peut être une opportunité, ou le signe d’un problème. Il faut l’expliquer avant de conclure."

@@ -1,19 +1,19 @@
 {
-  "titre": "Leçon 4 — Les 3 façons de gagner à la BRVM",
+  "titre": "Leçon 4 — Dividende et plus-value : les deux sources de gain",
   "categorie": "income",
   "duree_min": 9,
-  "sous_titre": "Le dividende, la plus-value et les droits de souscription : trois sources de gain, trois logiques.",
-  "resume": "Une action peut rapporter de trois façons : par le dividende versé chaque année, par la plus-value à la revente, et par les droits reçus lors d’une augmentation de capital.\nCette leçon apprend à les calculer, à les additionner, et à reconnaître ce qui n’est pas la norme.",
+  "sous_titre": "Le dividende et la plus-value : deux sources de gain, deux logiques. Et un droit à protéger lors d’une augmentation de capital.",
+  "resume": "Une action peut rapporter de deux façons : par le dividende versé chaque année, et par la plus-value à la revente. Lors d’une augmentation de capital, les droits que vous recevez ne sont pas un gain : ils compensent la dilution de vos titres.\nCette leçon apprend à calculer ces gains, à les additionner, et à reconnaître ce qui n’est pas la norme.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis et les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
   "sections": [
     {
       "type": "definition",
-      "titre": "Trois sources de gain",
-      "contenu": "Un actionnaire gagne de l’argent de trois manières, qui peuvent s’additionner.",
+      "titre": "Deux sources de gain, un droit à protéger",
+      "contenu": "Un actionnaire gagne de l’argent de deux manières, qui peuvent s’additionner. Un troisième élément, le droit de souscription, ne crée pas de gain : il protège ce que vous avez déjà.",
       "points": [
         { "titre": "Le dividende", "detail": "La part du bénéfice que l’assemblée générale décide de verser chaque année. Un revenu, sans vendre vos titres, mais jamais garanti." },
         { "titre": "La plus-value", "detail": "La différence entre le prix de revente et le prix d’achat. Elle peut aussi être négative : c’est alors une moins-value." },
-        { "titre": "Les droits préférentiels de souscription (DPS)", "detail": "Lors d’une augmentation de capital, les actionnaires reçoivent des droits pour souscrire aux nouvelles actions. Ces droits ont une valeur et se négocient." }
+        { "titre": "Les droits préférentiels de souscription (DPS)", "detail": "Lors d’une augmentation de capital, vous recevez des droits qui compensent la dilution de vos titres. Ils ne créent pas de gain : bien utilisés, ils évitent une perte." }
       ]
     },
     {
@@ -44,11 +44,11 @@
     {
       "type": "importance",
       "titre": "Une augmentation de capital : trois choix",
-      "contenu": "Quand une société cotée émet de nouvelles actions, ses actionnaires reçoivent des DPS, en proportion des titres qu’ils détiennent. Le prix de souscription est fixé par la société dans la note d’information de l’opération.",
+      "contenu": "Lors d’une augmentation de capital en numéraire, les actionnaires reçoivent en principe des DPS, en proportion des titres qu’ils détiennent, sauf si l’assemblée générale les a supprimés : la note d’information le précise.\nLe prix de souscription est fixé dans cette note. Au détachement des droits, le cours baisse d’environ leur valeur : c’est la dilution que les droits compensent.",
       "points": [
         { "titre": "Exercer ses droits", "detail": "Vous souscrivez aux nouvelles actions et gardez votre part du capital.", "verifier": "le prix de souscription et la période de l’opération." },
-        { "titre": "Céder ses droits", "detail": "Les DPS se négocient pendant la période de souscription : vous encaissez leur valeur sans rien débourser." },
-        { "titre": "Ne rien faire", "detail": "À la fin de la période, les droits non utilisés perdent leur valeur. C’est le seul mauvais choix." }
+        { "titre": "Céder ses droits", "detail": "Les DPS se négocient pendant la période de souscription : vendre vos droits compense la baisse du cours au détachement, sans rien débourser." },
+        { "titre": "Ne rien faire", "detail": "À la fin de la période, les droits non utilisés perdent leur valeur : vous subissez la dilution sans compensation. C’est le seul mauvais choix." }
       ]
     },
     {
@@ -66,7 +66,7 @@
       "titre": "L’essentiel",
       "contenu": "Quatre idées à garder en tête.",
       "points": [
-        { "titre": "Trois sources de gain", "detail": "Dividende, plus-value, droits de souscription." },
+        { "titre": "Deux sources de gain, un droit à protéger", "detail": "Dividende et plus-value ; les droits de souscription compensent la dilution, ils ne s’ajoutent pas au gain." },
         { "titre": "Le dividende est voté, pas promis", "detail": "Il peut baisser ou disparaître d’un exercice à l’autre." },
         { "titre": "Le rendement total additionne tout", "detail": "Dividendes reçus et plus-value, rapportés à la somme investie." },
         { "titre": "Ne jamais laisser expirer ses DPS", "detail": "Les exercer ou les céder, mais ne pas les ignorer." }
@@ -90,19 +90,19 @@
     },
     {
       "question": "Une société lance une augmentation de capital. Quel choix fait perdre de l’argent à coup sûr ?",
-      "options": ["Exercer ses DPS", "Céder ses DPS sur le marché", "Laisser expirer ses DPS sans rien faire", "Céder une partie et exercer l’autre"],
+      "options": ["Exercer tous ses DPS", "Céder ses DPS sur le marché", "Les laisser expirer", "Céder une partie et exercer l’autre"],
       "correct": 2,
       "explication": "Les droits non utilisés perdent leur valeur à la fin de la période de souscription. Les exercer ou les céder préserve leur valeur."
     },
     {
       "question": "Vous achetez une action la veille du détachement, juste pour toucher le dividende. Que se passe-t-il ?",
-      "options": ["Vous gagnez le dividende sans contrepartie", "Le cours baisse d’environ le montant du dividende au détachement", "Le dividende vous est refusé", "La société vous rembourse les frais"],
+      "options": ["Vous gagnez le dividende sans aucune contrepartie", "Le cours baisse d’environ le dividende", "Le dividende vous est refusé par la société", "La société vous rembourse les frais d’achat"],
       "correct": 1,
       "explication": "Au détachement, le cours est ajusté du dividende. Le gain apparent est compensé, et les frais d’achat restent à votre charge."
     },
     {
       "question": "Une société a versé un dividende chaque année depuis dix ans. Que pouvez-vous en déduire ?",
-      "options": ["Le dividende est garanti l’an prochain", "Il est voté chaque année : il peut baisser ou disparaître", "Il augmentera forcément", "La société ne peut plus le supprimer"],
+      "options": ["Le dividende est garanti pour l’an prochain", "Il peut baisser ou disparaître", "Il augmentera forcément l’an prochain", "La société ne peut plus le supprimer"],
       "correct": 1,
       "explication": "La régularité passée est un bon signe, pas une garantie : l’assemblée générale décide chaque année."
     }
