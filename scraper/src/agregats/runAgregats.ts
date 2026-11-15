@@ -74,7 +74,7 @@ export async function runAgregatsBancaires(opts: { mock: boolean; codes: string[
   return res;
 }
 
-export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolean; depuisRapport: string | null; rapport: string; fixtures: string | null }): Promise<{ rapport: RapportReprise | null; echecs: number; ecrites: number }> {
+export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolean; depuisRapport: string | null; rapport: string; fixtures: string | null; depuis?: string | null }): Promise<{ rapport: RapportReprise | null; echecs: number; ecrites: number }> {
   const codes = await banques(opts.codes);
   if (opts.ecrire) {
     if (!opts.depuisRapport) throw new Error('--ecrire exige --depuis-rapport=<fichier> : on n’écrit que ce que l’exploitant a approuvé');
@@ -88,10 +88,11 @@ export async function runRepriseAgregats(opts: { codes: string[]; ecrire: boolea
     return { rapport: null, echecs: 0, ecrites: sel.ecrites };
   }
 
-  const ex = await extraireAgregats({ codes, reprise: true, fixtures: opts.fixtures });
+  if (opts.depuis && !/^d{4}-d{2}-d{2}$/.test(opts.depuis)) throw new Error(`--depuis attend AAAA-MM-JJ, reçu « ${opts.depuis} »`);
+  const ex = await extraireAgregats({ codes, reprise: true, fixtures: opts.fixtures, depuis: opts.depuis ?? null });
   const plan = await selectionnerAgregats({ dryRun: true, codes, enMemoire: ex.observations as unknown as ObsLue[] });
   const { ecrites: _e, relecturesOuvertes: _r, avertissements: avSel, ...planSeul } = plan;
-  const avertissements = [...new Set([...ex.avertissements, ...avSel])];
+  const avertissements = [...new Set([...ex.avertissements, ...avSel, ...(opts.depuis ? [`Reprise partielle : publications depuis le ${opts.depuis} seulement.`] : [])])];
   const rapport = construireRapport(new Date().toISOString(), ex.documents, ex.observations, planSeul, avertissements);
   mkdirSync(dirname(opts.rapport), { recursive: true });
   writeFileSync(opts.rapport, JSON.stringify(rapport, null, 2));

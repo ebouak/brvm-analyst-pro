@@ -39,7 +39,7 @@
  *   tsx src/index.ts communaute            # membres du canal Telegram -> communaute_releves
  *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
  *   tsx src/index.ts agregats:bancaires    # agrégats bancaires des publications nouvelles (cron)
- *   tsx src/index.ts agregats:reprise      # reprise À BLANC de l'historique, rapport sans écriture
+ *   tsx src/index.ts agregats:reprise      # reprise À BLANC de l'historique, rapport sans écriture (--depuis=AAAA-MM-JJ pour borner)
  *   tsx src/index.ts agregats:reprise --ecrire --depuis-rapport=output/agregats/reprise-AAAA-MM-JJ.json
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
@@ -290,6 +290,7 @@ async function main(): Promise<number> {
         depuisRapport: opt('depuis-rapport'),
         rapport: opt('rapport') ?? `output/agregats/reprise-${jour}.json`,
         fixtures: opt('fixtures'),
+        depuis: opt('depuis'),
       });
       if (r.rapport) console.log(`Rapport : ${JSON.stringify(r.rapport.totaux)} — rien n’a été écrit.`);
       else console.log(`Écrit depuis le rapport approuvé : ${r.ecrites} valeur(s) changée(s).`);
