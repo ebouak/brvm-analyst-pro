@@ -6,6 +6,7 @@ export { MODEL_VERSION_CURRENT };
 import { computeMomentumFactors, scorePriceMomentum, computeAnnualizedVol } from './price-momentum';
 import { computeLiquidityScore } from './liquidity';
 import { fetchAllRows } from '@/lib/supabase/paginate';
+import { avecLignesAffichables } from '@/lib/bank/unites';
 import { runSecondHalf } from './run-second';
 function sectorFromMeta(famille: string | null, secteur: string | null): Sector {
   if (famille === 'banque') return 'banks';
@@ -55,8 +56,9 @@ export async function runQuantModels(opts: { calculationDate?: string; dryRun?: 
     const sc = scorePriceMomentum({ ...f, liquidityScore, annualizedVol: v }, { volPeers: vols });
     moms.push({ symbol: inst.code, sector: s, mom: sc.score, liq: liquidityScore, td: raw.td, price: raw.price, vol: v, cls: classifyMomentum(sc.score), penalties: sc.penalties, notes: [...lgNotes, ...sc.notes], closes: raw.closes, shares: nNum(inst.shares) });
   }
-  const incAll = await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('income_statements').select('*').in('code',codes).order('periode',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[];
-  const balAll = await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('balance_sheets').select('*').in('code',codes).order('periode',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[];
+  // Ni montant USD (ETIT) ni coefficient stocké dans un modèle en FCFA (lib/bank/unites).
+  const incAll = (await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('income_statements').select('*').in('code',codes).order('periode',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[]).map(avecLignesAffichables);
+  const balAll = (await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('balance_sheets').select('*').in('code',codes).order('periode',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[]).map(avecLignesAffichables);
   const cfAll = await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('cash_flow_statements').select('*').in('code',codes).order('periode',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[];
   const divAll = await fetchAllRows<Record<string,unknown>>((f,t)=> pub.from('dividends').select('*').in('code',codes).order('exercice',{ascending:false}).range(f,t)) as unknown as Record<string,unknown>[];
   const incBy=new Map<string,Record<string,unknown>[]>(); for(const r of incAll){const c=String((r as {code:string}).code); if(!incBy.has(c)) incBy.set(c,[]); incBy.get(c)!.push(r);}
