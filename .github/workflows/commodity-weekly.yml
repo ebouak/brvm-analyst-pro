@@ -2,8 +2,10 @@ name: Commodity Weekly Generator
 
 on:
   schedule:
-    # Vendredi 17h30 WAT (= 16h30 UTC)
-    - cron: "30 16 * * 5"
+    # Samedi 06h07 UTC. Le vendredi à 16h30 UTC, les marchés américains
+    # n'avaient pas clôturé : les « cours de clôture » publiés étaient des
+    # cours en séance, contredits le soir même par les dépêches.
+    - cron: "7 6 * * 6"
   workflow_dispatch:
     inputs:
       dry_run:

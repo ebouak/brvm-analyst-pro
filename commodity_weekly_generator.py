@@ -205,29 +205,27 @@ def fetch_yfinance_prices() -> dict[str, dict]:
     results: dict[str, dict] = {}
     for sym, meta in YFINANCE_TICKERS.items():
         try:
-            hist = yf.download(sym, period="7d", interval="1d", progress=False, auto_adjust=True)
-            if hist.empty or len(hist) < 2:
+            hist = yf.download(sym, period="1mo", interval="1d", progress=False, auto_adjust=True)
+            if hist.empty:
                 continue
             # yfinance >= 0.2.x retourne un MultiIndex pour un seul ticker
-            closes = hist["Close"].squeeze().dropna()
-            if len(closes) < 2:
+            bars = hist[["Close", "Low", "High"]].dropna()
+            f = _q.fenetre_hebdo(
+                [float(x) for x in bars["Close"].squeeze().tolist()],
+                [float(x) for x in bars["Low"].squeeze().tolist()],
+                [float(x) for x in bars["High"].squeeze().tolist()],
+            )
+            if not f:
+                log.warning("yfinance %s écarté : moins de 6 séances disponibles", sym)
                 continue
-            prix_actuel = float(closes.iloc[-1])
-            prix_debut = float(closes.iloc[0])
-            variation = (prix_actuel - prix_debut) / prix_debut * 100 if prix_debut else 0.0
-            try:
-                lows = hist["Low"].squeeze().dropna()
-                highs = hist["High"].squeeze().dropna()
-                week_low = round(float(lows.min()), 2) if not lows.empty else round(prix_actuel, 2)
-                week_high = round(float(highs.max()), 2) if not highs.empty else round(prix_actuel, 2)
-            except Exception:
-                week_low = week_high = round(prix_actuel, 2)
+            prix_actuel, variation = f["prix"], f["variation_pct"]
+            week_low, week_high = round(f["bas"], 2), round(f["haut"], 2)
             if not _q.cours_coherent(prix_actuel, week_low, week_high):
                 log.warning("yfinance %s écarté : clôture %.2f hors fourchette [%.2f ; %.2f]",
                             sym, prix_actuel, week_low, week_high)
                 continue
             results[sym] = {
-                "n_seances": int(len(closes) - 1),
+                "n_seances": f["n_seances"],
                 "nom": meta["nom"],
                 "symbole": sym,
                 "prix_actuel": round(prix_actuel, 2),
@@ -250,11 +248,11 @@ def fetch_eurusd() -> dict | None:
     donc USD/FCFA = 655,957 / EURUSD. None si la donnée manque (bloc FCFA absent)."""
     try:
         import yfinance as yf
-        hist = yf.download("EURUSD=X", period="7d", interval="1d", progress=False, auto_adjust=True)
+        hist = yf.download("EURUSD=X", period="1mo", interval="1d", progress=False, auto_adjust=True)
         closes = hist["Close"].squeeze().dropna()
-        if len(closes) < 2:
+        if len(closes) < 6:
             return None
-        actuel, debut = float(closes.iloc[-1]), float(closes.iloc[0])
+        actuel, debut = float(closes.iloc[-1]), float(closes.iloc[-6])
         if not (0.5 < actuel < 2.0 and 0.5 < debut < 2.0):
             return None
         return {"actuel": round(actuel, 5), "debut": round(debut, 5)}
