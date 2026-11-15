@@ -18,12 +18,16 @@ const ALLOWED_TAGS = [
   'h1', 'h2', 'h3', 'h4', 'blockquote', 'table', 'thead', 'tbody',
   'tr', 'td', 'th', 'img', 'figure', 'figcaption', 'span', 'div',
   'svg', 'path', 'g', 'line', 'circle', 'rect', 'text', 'polyline',
+  // Hebdo matières premières, gabarit « feuille » : mesures en liste de définitions.
+  'dl', 'dt', 'dd',
 ];
 
 const ALLOWED_ATTR = [
   'href', 'src', 'alt', 'title', 'class', 'target', 'rel',
   'width', 'height', 'style', 'viewBox', 'd', 'fill', 'stroke',
   'stroke-width', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'points',
+  // Accessibilité des graphiques et coins arrondis : sans effet sur la sécurité.
+  'rx', 'role', 'aria-label', 'stroke-linecap',
 ];
 
 export function sanitizeReportHtml(html: string): string {

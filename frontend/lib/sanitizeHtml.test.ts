@@ -31,4 +31,15 @@ describe('sanitizeReportHtml', () => {
     expect(out).toContain('<svg');
     expect(out).toContain('<path');
   });
+
+  it('garde la structure du gabarit « feuille » de l’hebdo (classes, mesures, graphique accessible)', () => {
+    const html =
+      '<dl class="wk-grille"><div class="wk-mesure"><dt>Brent</dt><dd class="wk-baisse">−2,52 %</dd></div></dl>' +
+      '<svg viewBox="0 0 10 10" role="img" aria-label="Variations"><rect class="wk-g-baisse" x="1" y="1" width="4" height="4" rx="2"></rect></svg>';
+    const out = sanitizeReportHtml(html);
+    expect(out).toContain('<dl class="wk-grille">');
+    expect(out).toContain('<dd class="wk-baisse">');
+    expect(out).toContain('aria-label="Variations"');
+    expect(out).toContain('rx="2"');
+  });
 });

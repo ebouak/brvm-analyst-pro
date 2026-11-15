@@ -137,6 +137,13 @@ ARTICLE = {
     "Cacao": "le cacao", "Pétrole WTI": "le WTI", "Pétrole Brent": "le Brent",
     "Café": "le café", "Sucre": "le sucre", "Coton": "le coton", "Or": "l'or", "Argent": "l'argent",
 }
+COURT = {"Pétrole Brent": "Brent", "Pétrole WTI": "WTI"}
+
+
+def court(label: str) -> str:
+    return COURT.get(label, label)
+
+
 NOM_EDITION = {"note": "Note d'analyste", "briefing": "Briefing", "dossier": "Dossier de la semaine"}
 
 
@@ -172,6 +179,104 @@ def titre_article(prices: list, week: int, year: int) -> str:
         o = max(inverses, key=lambda p: abs(p.weekly_change_pct))
         t += f", {ARTICLE.get(o.label, o.label.lower())} {_verbe(o.weekly_change_pct)} {fr(abs(o.weekly_change_pct))} %"
     return t
+
+
+def chapo_article(prices: list) -> str:
+    """Chapô factuel : les deux plus forts mouvements, puis le Brent s'il n'y est pas."""
+    if not prices:
+        return "Les matières premières de la semaine et leur transmission aux valeurs cotées à la BRVM."
+    classes = sorted(prices, key=lambda p: abs(p.weekly_change_pct), reverse=True)
+    morceaux = []
+    for p in classes[:2]:
+        if abs(p.weekly_change_pct) >= 0.5:
+            nom = ARTICLE.get(p.label, p.label.lower())
+            morceaux.append(f"{nom} {'gagne' if p.weekly_change_pct > 0 else 'perd'} {fr(abs(p.weekly_change_pct))}\u00a0%")
+    brent = next((p for p in prices if p.ticker == "BZ=F"), None)
+    if brent and brent not in classes[:2]:
+        morceaux.append(f"le Brent {'gagne' if brent.weekly_change_pct > 0 else 'recule de'} "
+                        f"{fr(abs(brent.weekly_change_pct))}\u00a0%, à {fr(brent.current)} dollars")
+    if not morceaux:
+        return "Semaine sans mouvement marqué sur les matières premières suivies."
+    phrase = ", ".join(morceaux[:-1]) + (" et " if len(morceaux) > 1 else "") + morceaux[-1]
+    return (f"Sur la semaine, {phrase}. Ce que ces mouvements changent, "
+            "ou ne changent pas, pour les valeurs cotées à la BRVM.")
+
+
+# Comment le texte peut nommer chaque matière (minuscules, forme de presse).
+ALIAS = {
+    "Pétrole Brent": ("brent",), "Pétrole WTI": ("wti",), "Or": ("l'or", "l’or", " or "),
+    "Argent": ("argent",), "Cacao": ("cacao",), "Café": ("café",), "Sucre": ("sucre",), "Coton": ("coton",),
+}
+_MOTS_PRESSE = {
+    "Pétrole Brent": r"brent|pétrole|petrole|baril|opep|ormuz|brut",
+    "Pétrole WTI": r"\bwti\b|pétrole|petrole|baril|brut",
+    "Or": r"\bl['’]or\b|\bgold\b|\bxau|métaux précieux|metaux precieux",
+    "Argent": r"\bl['’]argent\b|\bsilver\b|\bxag|métaux précieux|metaux precieux",
+    "Cacao": r"cacao|cocoa|cabosse",
+    "Café": r"café|cafe\b|arabica|robusta|coffee",
+    "Sucre": r"sucre|sugar|canne",
+    "Coton": r"coton|cotton",
+}
+
+
+def titres_par_matiere(items: list[dict], prices: list, n: int = 3) -> dict[str, list[str]]:
+    """
+    Titres de presse rangés par matière (3 au plus chacune). Le rédacteur ne
+    recevait que les 14 premiers titres, presque tous pétroliers : il écrivait
+    « aucune cause identifiée » pour l'or alors que la presse fournie traitait
+    de la Fed et de l'inflation américaine.
+    """
+    out: dict[str, list[str]] = {}
+    for p in prices:
+        motif = re.compile(_MOTS_PRESSE.get(p.label, re.escape(p.label.lower())), re.I)
+        vus: list[str] = []
+        for it in items:
+            titre = str(it.get("titre", "")).strip()
+            if titre and motif.search(titre) and titre not in vus:
+                vus.append(titre)
+            if len(vus) >= n:
+                break
+        datees = []
+        for t in vus:
+            it = next(i for i in items if str(i.get("titre", "")).strip() == t)
+            source = it.get("source_label") or it.get("date") or ""
+            datees.append(f"[{source}] {t[:150]}")
+        out[p.label] = datees
+    return out
+
+
+# ── Valeurs exposées ──────────────────────────────────────────────────────────
+
+def lecture_valeur(matiere: str, var: float | None) -> str:
+    if var is None:
+        return "Non évaluée cette semaine."
+    if matiere == "sucre":
+        return "Effet limité : le prix de vente domestique est encadré."
+    if abs(var) < 1:
+        return "Neutre : variation inférieure à 1\u00a0%."
+    if matiere == "petrole":
+        return ("Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé." if var < 0
+                else "Effet ambigu : stocks revalorisés, besoin de trésorerie accru.")
+    return "Prix de vente orienté à la hausse." if var > 0 else "Prix de vente orienté à la baisse."
+
+
+def lignes_exposition(mouvements: dict[str, tuple[float | None, str]], referentiel: set[str]) -> list[dict]:
+    """Une ligne par VALEUR (SOGB apparaissait deux fois, une par matière)."""
+    par_code: dict[str, dict] = {}
+    for matiere, lst in EXPOSITIONS.items():
+        var, base = mouvements.get(matiere, (None, ""))
+        for e in lst:
+            if e["code"] not in referentiel:
+                continue
+            l = par_code.setdefault(e["code"], {"code": e["code"], "nom": NOMS.get(e["code"], e["code"]),
+                                                "canal": e["canal"], "mouvements": [], "lectures": []})
+            l["mouvements"].append({"matiere": LIBELLE_MATIERE[matiere], "variation": var, "base": base})
+            lec = lecture_valeur(matiere, var)
+            if lec not in l["lectures"]:
+                l["lectures"].append(lec)
+    for l in par_code.values():
+        l["lecture"] = " ".join(l.pop("lectures"))
+    return list(par_code.values())
 
 
 # ── Francs CFA ────────────────────────────────────────────────────────────────
@@ -268,13 +373,13 @@ def bilan_semaine_precedente(seuils_prec: list[dict], prices: list) -> list[dict
         if s["type"] == "bas":
             franchi = p.week_low < niveau
             extreme = p.week_low
-            texte = (f"{s['label']} : le plus bas de {fr(niveau, d)} {s['unite']} "
+            texte = (f"{court(s['label'])} : le plus bas de {fr(niveau, d)} {s['unite']} "
                      + (f"a été enfoncé (nouveau plus bas : {fr(extreme, d)})." if franchi
                         else f"a tenu (plus bas de la semaine : {fr(extreme, d)})."))
         else:
             franchi = p.week_high > niveau
             extreme = p.week_high
-            texte = (f"{s['label']} : le plus haut de {fr(niveau, d)} {s['unite']} "
+            texte = (f"{court(s['label'])} : le plus haut de {fr(niveau, d)} {s['unite']} "
                      + (f"a été dépassé (nouveau plus haut : {fr(extreme, d)})." if franchi
                         else f"n'a pas été dépassé (plus haut de la semaine : {fr(extreme, d)})."))
         out.append({"ticker": s["ticker"], "franchi": franchi, "texte": texte})
@@ -340,12 +445,32 @@ _RE_EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿️⬀-⯿➡]")
 _RE_DECIMALE = re.compile(r"(?<=\d)\.(?=\d)")
 
 
+_RE_STYLE = re.compile(r"""\s(?:style|class)\s*=\s*("[^"]*"|'[^']*')""", re.I)
+# « cède −2,52 % » : le verbe porte déjà le sens, le signe fait double emploi.
+_RE_SIGNE_APRES_VERBE = re.compile(
+    r"\b(recule|reculent|cède|cèdent|perd|perdent|baisse|baissent|abandonne|chute|gagne|gagnent|progresse|"
+    r"progressent|avance|avancent|grimpe|monte|s['’]apprécie|se replie)(\s+de)?\s+[−+\-]\s?(?=\d)", re.I)
+_RE_NOM_MATIERE = re.compile(r"\b([Ll]e|[Ll]a|[Ll]es|[Dd]u|[Dd]es|[Aa]u|[Aa]ux|[Dd]e|[Ll]['’])\s?(Sucre|Cacao|Café|Coton|Or|Argent)\b")
+
+
+def minuscules(texte: str) -> str:
+    """« le Pétrole Brent » → « le Brent », « l'Or » → « l'or » : forme de presse."""
+    texte = re.sub(r"\bPétrole (Brent|WTI)\b", r"\1", texte)
+    return _RE_NOM_MATIERE.sub(lambda m: m.group(1) + ("" if m.group(1)[-1] in "'’" else " ") + m.group(2).lower(), texte)
+
+
 def nettoyer(html_txt: str) -> str:
-    """Retire les émojis et met les décimales à la française, hors balises."""
+    """Hors balises : émojis retirés, décimales à la française, signe redondant
+    après un verbe de sens, noms de matières en minuscules. Dans les balises :
+    styles et classes retirés (la feuille .wk met en forme)."""
     morceaux = re.split(r"(<[^>]*>)", html_txt or "")
     for i, m in enumerate(morceaux):
-        if not m.startswith("<"):
-            morceaux[i] = _RE_DECIMALE.sub(",", _RE_EMOJI.sub("", m))
+        if m.startswith("<"):
+            morceaux[i] = _RE_STYLE.sub("", m)
+        else:
+            t = _RE_DECIMALE.sub(",", _RE_EMOJI.sub("", m))
+            t = _RE_SIGNE_APRES_VERBE.sub(lambda x: x.group(1) + (x.group(2) or "") + " ", t)
+            morceaux[i] = minuscules(t)
     return "".join(morceaux)
 
 
@@ -368,7 +493,9 @@ def verrous(editorial_html: str, prices: list, referentiel: set[str], autorises:
     for balise in ("div", "p", "h3", "ul"):
         if len(re.findall(rf"<{balise}[\s>]", txt)) != txt.count(f"</{balise}>"):
             raisons.append(f"balises <{balise}> non équilibrées")
-    manquantes = [p.label for p in prices if p.label not in visible]
+    bas = f" {visible.lower()} "
+    manquantes = [p.label for p in prices
+                  if not any(a in bas for a in ALIAS.get(p.label, (p.label.lower(),)))]
     if manquantes:
         raisons.append("matières absentes : " + ", ".join(manquantes))
     if any(visible.count(etq) < 1 for etq in PREUVES[:2]):
@@ -415,13 +542,11 @@ def phrase_transmission(p, referentiel: set[str]) -> str:
 
 
 def squelette_editorial(prices: list, referentiel: set[str]) -> str:
+    """Repli publiable : uniquement des faits calculés, même structure que le texte rédigé."""
     blocs = []
     for p in prices:
         blocs.append(
-            '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:18px 20px;margin-bottom:16px;">'
-            f'<p style="font-size:11px;color:#64748b;font-weight:600;margin:0 0 6px 0;">{FAMILLE.get(p.ticker, "")}</p>'
-            f'<p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Fait vérifié.</strong> {_html.escape(phrase_fait(p))}</p>'
-            f'<p style="margin:0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Transmission à la BRVM.</strong> {_html.escape(phrase_transmission(p, referentiel))}</p>'
-            '</div>')
-    return ('<section style="font-family:\'Segoe UI\',system-ui,sans-serif;color:#1e293b;line-height:1.75;">'
-            + "".join(blocs) + "</section>")
+            f"<div><h4>{FAMILLE.get(p.ticker, '')}</h4><h3>{_html.escape(p.label)}</h3>"
+            f"<p><strong>Fait vérifié.</strong> {_html.escape(phrase_fait(p))}</p>"
+            f"<p><strong>Transmission à la BRVM.</strong> {_html.escape(phrase_transmission(p, referentiel))}</p></div>")
+    return "<section>" + "".join(blocs) + "</section>"
