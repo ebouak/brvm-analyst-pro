@@ -65,6 +65,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import commodity_weekly_qualite as _q
+import commodity_weekly_rendu as _r
 
 log = logging.getLogger("wb-commodity-weekly")
 
@@ -92,22 +93,7 @@ YFINANCE_TICKERS = {
     "SI=F":  {"nom": "Argent",         "unite": "USD/oz",   "brvm": []},
 }
 
-# Photos Unsplash par commodity (IDs vérifiés, libres de droits)
-COMMODITY_PHOTOS: dict[str, str] = {
-    "CC=F": "photo-1481391319762-47dff72954d9",  # cacao pods
-    "CL=F": "photo-1611273426858-450d8e3c9fce",  # oil refinery at night
-    "BZ=F": "photo-1614850523296-d8c1af93d400",  # offshore oil rig
-    "KC=F": "photo-1447933601403-0c6688de566e",  # coffee beans close-up
-    "SB=F": "photo-1559181567-c3190ca9d5db",     # sugarcane harvest
-    "CT=F": "photo-1597916829826-02e5bb4a54e0",  # cotton field
-    "GC=F": "photo-1610375461246-83df859d849d",  # gold bars
-    "SI=F": "photo-1611091354429-99f5dc04af7b",  # silver coins
-}
-# Photo hero de fallback (marché financier Afrique)
-HERO_FALLBACK_PHOTO = "photo-1559526324-4b87b5e36e44"  # stock market board
 
-def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
-    return f"https://images.unsplash.com/{photo_id}?w={w}&h={h}&fit=crop&auto=format&q=80"
 
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
@@ -281,6 +267,37 @@ def fetch_semaine_precedente(year: int, week: int) -> dict | None:
         return None
 
 
+def fetch_prix_mensuels() -> dict[str, tuple[float | None, str]]:
+    """
+    Dernière variation mensuelle de l'huile de palme et du caoutchouc, lue dans
+    `commodity_prices` (alimentée par le scraper depuis la Pink Sheet). La
+    lecture directe du classeur (fetch_world_bank_snapshot) ne trouvait pas ces
+    lignes : le tableau publié affichait « n/d » pour Palm CI, SAPH et SOGB.
+    """
+    vide = {"huile_palme": (None, ""), "caoutchouc": (None, "")}
+    if not SUPABASE_URL or not SERVICE_KEY:
+        return vide
+    import requests
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/commodity_prices?commodity=in.(palm_oil,rubber)"
+            f"&select=commodity,date,price&order=date.desc&limit=12",
+            headers={"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}"}, timeout=15)
+        resp.raise_for_status()
+        rows = resp.json()
+    except Exception as e:
+        log.warning("Cours mensuels illisibles : %s", e)
+        return vide
+    out = dict(vide)
+    for cle, matiere in (("palm_oil", "huile_palme"), ("rubber", "caoutchouc")):
+        serie = [r for r in rows if r.get("commodity") == cle and r.get("price")]
+        if len(serie) >= 2 and float(serie[1]["price"]) > 0:
+            v = (float(serie[0]["price"]) / float(serie[1]["price"]) - 1) * 100
+            mois = str(serie[0]["date"])[:7]
+            out[matiere] = (round(v, 2), f"mois de {mois}, Banque mondiale")
+    return out
+
+
 # ── 2. World Bank Pink Sheet ──────────────────────────────────────────────────
 
 def fetch_world_bank_snapshot() -> dict[str, dict]:
@@ -362,7 +379,7 @@ def fetch_supabase_articles(days: int = 14) -> list[dict]:
     url = (
         f"{SUPABASE_URL}/rest/v1/brvm_news"
         f"?date_publication=gte.{cutoff}"
-        f"&select=titre,resume,source_label,date_publication,ticker_codes,secteur"
+        f"&select=titre,resume,source_label,source_url,date_publication,ticker_codes,secteur"
         f"&order=date_publication.desc"
         f"&limit=50"
     )
@@ -818,9 +835,12 @@ def build_editorial_prompt(
                 f"{'n/d' if pos is None else round(pos)} % de la fourchette")
 
     price_lines = "\n".join(ligne(p) for p in prices)
-    presse = [f"  [{a.get('source_label','')}] {str(a.get('titre',''))[:130]}" for a in (articles or [])[:6]]
-    presse += [f"  [{it.get('date','')}] {str(it.get('titre',''))[:130]}" for it in (perplexity_items or [])[:8]]
-    presse_ctx = "\n".join(presse) or "  (aucun titre disponible)"
+    items = [{"titre": a.get("titre", ""), "source_label": a.get("source_label", "")} for a in (articles or [])]
+    items += [{"titre": it.get("titre", ""), "source_label": it.get("date", "")} for it in (perplexity_items or [])]
+    par_matiere = _q.titres_par_matiere(items, prices)
+    presse_ctx = "\n".join(
+        f"  {p.label} :\n" + ("\n".join(f"    {t}" for t in par_matiere.get(p.label, [])) or "    (aucun titre)")
+        for p in prices)
 
     expo_ctx = "\n".join(
         f"  {_q.LIBELLE_MATIERE[m]} : " + ", ".join(f"{_q.NOMS[e['code']]} ({e['code']}) — {e['canal']}"
@@ -856,7 +876,7 @@ DONNÉES (seule source de chiffres autorisée) :
 PRIX EN FRANCS CFA :
 {fcfa_ctx}
 
-TITRES DE PRESSE DE LA SEMAINE (seule source d'explications autorisée) :
+TITRES DE PRESSE DE LA SEMAINE, PAR MATIÈRE (seule source d'explications autorisée) :
 {presse_ctx}
 
 VALEURS BRVM EXPOSÉES (seuls codes autorisés, à citer sous la forme « Nom (CODE) ») :
@@ -873,6 +893,8 @@ RÈGLES, chacune vérifiée par un contrôle automatique qui refuse le texte :
 4. Aucune recommandation ni orientation de portefeuille : tu informes, tu ne conseilles pas.
 5. Tu ne parles ni de « score », ni de « notation ».
 6. Phrases de 22 mots au plus, voix active, présent. Pas d'émoji, pas de point d'exclamation, pas de superlatif.
+7b. Nomme les matières en minuscules, comme la presse : le Brent, le WTI, l'or, l'argent, le cacao, le café, le sucre, le coton.
+7c. Après un verbe de sens (recule, cède, perd, gagne, progresse), écris la variation SANS signe : « l'or recule de 4,63 % ».
 7. {consigne_edition}
 
 CHAQUE BLOC a exactement quatre paragraphes, dans cet ordre, chacun ouvert par son étiquette en <strong> :
@@ -881,15 +903,15 @@ CHAQUE BLOC a exactement quatre paragraphes, dans cet ordre, chacun ouvert par s
 - « Hypothèse. » Ce qui pourrait suivre, au conditionnel, rattaché à un seuil de DONNÉES (plus bas ou plus haut de la semaine).
 - « Transmission à la BRVM. » Le canal vers les valeurs exposées, ou l'absence de société cotée exposée.
 
-FORMAT : HTML, styles en ligne uniquement. Commence par <section> et termine par </section>. Un bloc =
+FORMAT : HTML sans aucun attribut (ni style, ni classe). Commence par <section> et termine par </section>. Un bloc =
 
-<div style="border:1px solid #e2e8f0;border-radius:8px;padding:18px 20px;margin-bottom:16px;">
-  <p style="font-size:11px;color:#64748b;font-weight:600;margin:0 0 6px 0;">[Énergie | Métaux précieux | Agriculture]</p>
-  <h3 style="font-size:17px;font-weight:700;margin:0 0 10px 0;color:#0f172a;">[Titre factuel de 12 mots au plus, qui nomme la ou les matières du bloc]</h3>
-  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Fait vérifié.</strong> …</p>
-  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Lecture.</strong> …</p>
-  <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Hypothèse.</strong> …</p>
-  <p style="margin:0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Transmission à la BRVM.</strong> …</p>
+<div>
+  <h4>[Énergie | Métaux précieux | Agriculture]</h4>
+  <h3>[Titre factuel de 12 mots au plus, qui nomme la ou les matières du bloc]</h3>
+  <p><strong>Fait vérifié.</strong> …</p>
+  <p><strong>Lecture.</strong> …</p>
+  <p><strong>Hypothèse.</strong> …</p>
+  <p><strong>Transmission à la BRVM.</strong> …</p>
 </div>
 
 Chaque matière de DONNÉES doit être nommée par son libellé exact dans au moins un bloc. 700 mots au plus au total."""
@@ -897,419 +919,11 @@ Chaque matière de DONNÉES doit être nommée par son libellé exact dans au mo
 
 # ── 5a. Blocs calculés (aucun texte de LLM) ──────────────────────────────────
 
-_H2 = 'style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin:0 0 12px 0;"'
-_TH = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
-_TD = 'style="padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155;"'
-_NIVEAUX = {
-    "essentiel": ("Essentiel", "Pour tous : l'essentiel en 30 secondes", "#065f46", "#d1fae5"),
-    "investisseur": ("Investisseur", "Pour suivre la cote : l'analyse", "#1e3a8a", "#dbeafe"),
-    "pro": ("Pro", "Pour aller plus loin : méthode, corrélations, sources", "#3b0764", "#ede9fe"),
-}
-
-
-def build_badge(niveau: str) -> str:
-    """Bandeau de niveau de lecture : le lecteur sait où s'arrêter."""
-    nom, legende, encre, fond = _NIVEAUX[niveau]
-    return (f'<div style="display:flex;align-items:center;gap:10px;margin:32px 0 14px 0;">'
-            f'<span style="background:{fond};color:{encre};font-size:11px;font-weight:700;'
-            f'padding:4px 10px;border-radius:12px;">{nom}</span>'
-            f'<span style="font-size:12px;color:#64748b;">{legende}</span></div>')
-
-
-def build_essentiel(prices: list, fcfa: list[dict], edition: str) -> str:
-    """Synthèse en langage simple, calculée : trois phrases, aucun jargon."""
-    if not prices:
-        return ""
-    top = max(prices, key=lambda p: abs(p.weekly_change_pct))
-    hausses = sum(1 for p in prices if p.weekly_change_pct >= 0.5)
-    baisses = sum(1 for p in prices if p.weekly_change_pct <= -0.5)
-    stables = len(prices) - hausses - baisses
-    nom = _q.ARTICLE.get(top.label, top.label.lower())
-    puces = [
-        f"Le plus fort mouvement de la semaine : {nom} "
-        f"{'gagne' if top.weekly_change_pct > 0 else 'perd'} {_q.fr(abs(top.weekly_change_pct))} %.",
-        f"Sur {len(prices)} matières suivies : {hausses} en hausse, {baisses} en baisse, {stables} stable(s).",
-    ]
-    brent = next((l for l in fcfa if l["ticker"] == "BZ=F"), None)
-    if brent:
-        puces.append(f"En francs CFA, le baril de Brent vaut {_q.fr(brent['prix_fcfa'], 0)} FCFA "
-                     f"({_q.pct(brent['var_fcfa'])} sur la semaine).")
-    puces.append("Une matière première qui monte ou baisse ne fait pas à elle seule monter ou baisser "
-                 "une action : le tableau « Valeurs exposées » dit par quel canal elle peut peser.")
-    items = "".join(f'<li style="margin-bottom:6px;">{_html.escape(t)}</li>' for t in puces)
-    return (build_badge("essentiel")
-            + f'<div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:8px;">'
-            f'<ul style="margin:0;padding-left:18px;font-size:15px;color:#0f172a;">{items}</ul>'
-            f'<p style="margin:10px 0 0 0;font-size:12px;color:#64748b;">Édition de la semaine : '
-            f'{_q.NOM_EDITION[edition]}.</p></div>')
-
-
-def build_bilan(bilan: list[dict]) -> str:
-    """Ce que nous surveillions la semaine passée, et ce qui s'est produit."""
-    if not bilan:
-        return ""
-    items = "".join(
-        f'<li style="margin-bottom:6px;"><strong style="color:{"#b91c1c" if b["franchi"] else "#065f46"};">'
-        f'{"Seuil franchi" if b["franchi"] else "Seuil tenu"}.</strong> {_html.escape(b["texte"])}</li>'
-        for b in bilan)
-    return (f'<div style="border:1px solid #0f172a;border-radius:8px;padding:16px 20px;margin:16px 0 8px 0;">'
-            f'<p style="margin:0 0 8px 0;font-size:13px;font-weight:700;color:#0f172a;">'
-            f'Bilan de la semaine précédente : les seuils que nous surveillions</p>'
-            f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#334155;">{items}</ul></div>')
-
-
-def build_seuils(seuils: list[dict]) -> str:
-    if not seuils:
-        return ""
-    items = "".join(
-        f'<li style="margin-bottom:4px;">{_html.escape(s["label"])} : '
-        f'{"plus bas" if s["type"] == "bas" else "plus haut"} de la semaine à '
-        f'{_q.fr(s["niveau"], _q.dec_prix(s["niveau"]))} {_html.escape(s["unite"])}</li>' for s in seuils)
-    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Seuils à surveiller la semaine prochaine</h2>'
-            f'<ul style="margin:0;padding-left:18px;font-size:14px;color:#334155;">{items}</ul>'
-            f'<p style="font-size:12px;color:#64748b;margin:8px 0 0 0;">Nous dirons dans le prochain numéro '
-            f'si chacun a tenu ou cédé.</p></div>')
-
-
-def build_legende_preuve() -> str:
-    return ('<p style="font-size:12px;color:#64748b;margin:0 0 14px 0;">'
-            '<strong style="color:#0f172a;">Fait vérifié</strong> : chiffre de marché contrôlé. '
-            '<strong style="color:#0f172a;">Lecture</strong> : explication donnée par une source nommée. '
-            '<strong style="color:#0f172a;">Hypothèse</strong> : ce qui pourrait suivre, sans certitude.</p>')
-
-
-def _lecture_valeur(matiere: str, var: float | None) -> str:
-    if var is None:
-        return "Cours de la matière non disponible cette semaine."
-    if matiere == "sucre":
-        return "Effet limité : le prix de vente domestique est encadré."
-    if abs(var) < 1:
-        return "Neutre : variation inférieure à 1 %."
-    if matiere == "petrole":
-        return ("Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé." if var < 0
-                else "Effet ambigu : stocks revalorisés, besoin de trésorerie accru.")
-    return "Prix de vente orienté à la hausse." if var > 0 else "Prix de vente orienté à la baisse."
-
-
-def build_valeurs_exposees(prices: list, wb_snapshot: dict) -> str:
-    """Valeurs exposées : canal de transmission et lecture, sans score ni verdict."""
-    pm = {p.ticker: p for p in prices}
-    var: dict[str, tuple[float | None, str]] = {
-        "petrole": (pm["BZ=F"].weekly_change_pct, "Brent, semaine") if "BZ=F" in pm else (None, ""),
-        "sucre": (pm["SB=F"].weekly_change_pct, "sucre brut, semaine") if "SB=F" in pm else (None, ""),
-    }
-    for cle, d in (wb_snapshot or {}).items():
-        m = _q.MATIERE_PAR_WB.get(cle)
-        if m in ("huile_palme", "caoutchouc") and d.get("variation_mensuelle_pct") is not None:
-            var[m] = (d["variation_mensuelle_pct"], "Banque mondiale, mois")
-    rows = ""
-    for matiere, lst in _q.EXPOSITIONS.items():
-        v, base = var.get(matiere, (None, ""))
-        for e in lst:
-            if e["code"] not in REFERENTIEL:
-                continue
-            mouvement = f"{_q.pct(v)} ({base})" if v is not None else "n/d"
-            rows += (f'<tr><td {_TD}><strong style="color:#0f172a;">{_q.NOMS[e["code"]]}</strong> '
-                     f'<span style="font-family:monospace;font-size:11px;color:#64748b;">{e["code"]}</span></td>'
-                     f'<td {_TD}>{_q.LIBELLE_MATIERE[matiere]}</td><td {_TD}>{mouvement}</td>'
-                     f'<td {_TD}>{_html.escape(e["canal"])}</td>'
-                     f'<td {_TD}>{_html.escape(_lecture_valeur(matiere, v))}</td></tr>')
-    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Valeurs BRVM exposées</h2>'
-            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Le tableau décrit un canal de '
-            f'transmission. Il ne note pas les titres et ne dit pas dans quel sens ils évolueront.</p>'
-            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
-            f'<thead><tr style="background:#0f172a;"><th {_TH}>Valeur</th><th {_TH}>Matière</th>'
-            f'<th {_TH}>Mouvement</th><th {_TH}>Canal</th><th {_TH}>Lecture</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table></div></div>')
-
-
-def build_fcfa(fcfa: list[dict], eurusd: dict | None) -> str:
-    if not fcfa or not eurusd:
-        return ""
-    rows = "".join(
-        f'<tr><td {_TD}><strong style="color:#0f172a;">{l["label"]}</strong></td>'
-        f'<td {_TD}>{_q.fr(l["prix_fcfa"], 0 if l["prix_fcfa"] >= 100 else 2)} {l["unite"]}</td>'
-        f'<td {_TD}>{_q.pct(l["var_usd"])}</td><td {_TD}>{_q.pct(l["var_fcfa"])}</td></tr>' for l in fcfa)
-    taux = _q.usd_xof(eurusd["actuel"])
-    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Les mêmes prix en francs CFA</h2>'
-            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">1 dollar = {_q.fr(taux, 1)} FCFA '
-            f'(parité fixe de 655,957 FCFA pour 1 euro, euro à {_q.fr(eurusd["actuel"], 4)} dollar). '
-            f'La variation en FCFA ajoute l\'effet du change à celle du cours.</p>'
-            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
-            f'<thead><tr style="background:#0f172a;"><th {_TH}>Matière</th><th {_TH}>Prix</th>'
-            f'<th {_TH}>Variation en dollars</th><th {_TH}>Variation en FCFA</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table></div></div>')
-
-
-def build_scenarios(scenarios: list[dict], prices: list) -> str:
-    brent = next((p for p in prices if p.ticker == "BZ=F"), None)
-    if not scenarios or not brent:
-        return ""
-    rows = "".join(
-        f'<tr><td {_TD}><strong style="color:#0f172a;">Brent à {_q.fr(s["niveau_usd"], 0)} USD</strong></td>'
-        f'<td {_TD}>{_q.pct(s["ecart_pct"], 1)}</td><td {_TD}>{_q.fr(s["fcfa_baril"], 0)} FCFA</td>'
-        f'<td {_TD}>{_q.fr(s["fcfa_litre"], 1)} FCFA</td></tr>' for s in scenarios)
-    return (f'<div style="margin-bottom:28px;"><h2 {_H2}>Scénarios : et si le Brent bougeait de 10 % ?</h2>'
-            f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Calcul à change constant, depuis la '
-            f'clôture de {_q.fr(brent.current)} USD. Ce ne sont pas des prévisions.</p>'
-            f'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">'
-            f'<thead><tr style="background:#0f172a;"><th {_TH}>Scénario</th><th {_TH}>Écart</th>'
-            f'<th {_TH}>Prix du baril</th><th {_TH}>Prix du litre de brut</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table></div>'
-            f'<p style="font-size:12px;color:#64748b;margin:8px 0 0 0;">Le litre de brut n\'est pas le prix à la '
-            f'pompe, fixé par les États. L\'effet sur le résultat des distributeurs cotés n\'est pas chiffré : '
-            f'leurs niveaux de stock ne sont pas publiés.</p></div>')
-
-
-def build_methode(prices: list, controles: dict) -> str:
-    repli = controles.get("texte") == "squelette"
-    return (f'<div style="background:#f8fafc;border-radius:8px;padding:16px 20px;margin-bottom:24px;">'
-            f'<p style="margin:0 0 8px 0;font-size:13px;font-weight:700;color:#0f172a;">Méthode et limites</p>'
-            f'<ul style="margin:0;padding-left:18px;font-size:13px;color:#475569;">'
-            f'<li>Variations de clôture à clôture sur la fenêtre de cotation de la semaine, contrat à terme le plus proche.</li>'
-            f'<li>Chaque chiffre du texte est comparé aux données avant publication ; un chiffre absent des données fait refuser le texte.</li>'
-            f'<li>Les explications reprennent des titres de presse datés et nommés ; elles ne sont pas des certitudes.</li>'
-            f'<li>Huile de palme et caoutchouc : cours mensuels de la Banque mondiale, sans cotation hebdomadaire.</li>'
-            + ('<li>Cette semaine, l\'analyse rédigée n\'a pas passé les contrôles : seuls les faits calculés sont publiés.</li>' if repli else '')
-            + '</ul></div>')
-
-
-_LIB_COURT = {"CL=F": "WTI", "BZ=F": "Brent"}
-
-
-def build_svg_barchart(prices: list) -> str:
-    """Graphique barres SVG inline — variation % hebdomadaire. Zero dépendance JS."""
-    W, H = 740, 220
-    PL, PR, PT, PB = 44, 16, 24, 44
-    chart_w = W - PL - PR
-    chart_h = H - PT - PB
-    n = max(len(prices), 1)
-    slot = chart_w // n
-    bw = min(52, slot - 10)
-    max_abs = max(abs(p.weekly_change_pct) for p in prices) or 1
-    zero_y = PT + chart_h // 2
-
-    grid = ""
-    for pct_ref, label in [
-        (max_abs, f"+{max_abs:.0f}%"), (max_abs / 2, f"+{max_abs/2:.0f}%"),
-        (0, "0%"), (-max_abs / 2, f"-{max_abs/2:.0f}%"), (-max_abs, f"-{max_abs:.0f}%"),
-    ]:
-        gy = zero_y - int(pct_ref / max_abs * chart_h / 2)
-        grid += (f'<line x1="{PL}" y1="{gy}" x2="{W - PR}" y2="{gy}" '
-                 f'stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>'
-                 f'<text x="{PL - 4}" y="{gy + 4}" text-anchor="end" '
-                 f'font-size="9" fill="#94a3b8" font-family="system-ui">{label}</text>')
-
-    bars = ""
-    for i, p in enumerate(prices):
-        pct = round(p.weekly_change_pct, 1)
-        color = "#10b981" if pct >= 0 else "#ef4444"
-        cx = PL + i * slot + slot // 2
-        bx = cx - bw // 2
-        bar_h = max(2, int(abs(pct) / max_abs * chart_h / 2))
-        by = zero_y - bar_h if pct >= 0 else zero_y
-        sign = "+" if pct >= 0 else ""
-        vy = by - 5 if pct >= 0 else by + bar_h + 12
-        bars += (
-            f'<rect x="{bx}" y="{by}" width="{bw}" height="{bar_h}" fill="{color}" rx="3" opacity="0.88"/>'
-            f'<text x="{cx}" y="{vy}" text-anchor="middle" font-size="10" '
-            f'fill="{color}" font-weight="700" font-family="system-ui">{_q.pct(pct, 1)}</text>'
-            f'<text x="{cx}" y="{H - PB + 14}" text-anchor="middle" '
-            f'font-size="10" fill="#64748b" font-family="system-ui">{_LIB_COURT.get(p.ticker, p.label[:7])}</text>'
-        )
-    zero_line = (f'<line x1="{PL}" y1="{zero_y}" x2="{W - PR}" y2="{zero_y}" '
-                 f'stroke="#94a3b8" stroke-width="1.5"/>')
-    return (
-        f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:20px;">'
-        f'<p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px 0;">Variations hebdomadaires des matières premières (%)</p>'
-        f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">'
-        f'{grid}{zero_line}{bars}</svg></div>'
-    )
-
-
-def build_price_table(prices: list) -> str:
-    """Table des prix avec styles 100% inline."""
-    rows = ""
-    for p in prices:
-        color = "#10b981" if p.weekly_change_pct >= 0 else "#ef4444"
-        sign = "+" if p.weekly_change_pct >= 0 else ""
-        arrow = "▲" if p.weekly_change_pct >= 0 else "▼"
-        sig_bg = "#f0fdf4" if p.signal == "HAUSSE" else "#fef2f2" if p.signal == "BAISSE" else "#fefce8"
-        sig_col = "#059669" if p.signal == "HAUSSE" else "#dc2626" if p.signal == "BAISSE" else "#d97706"
-        rows += (
-            f'<tr>'
-            f'<td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">{p.label}</td>'
-            f'<td style="padding:10px 12px;font-family:monospace;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">{p.ticker}</td>'
-            f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{_q.fr(p.current, _q.dec_prix(p.current))} <span style="font-size:11px;font-weight:400;color:#94a3b8;">{p.unit}</span></td>'
-            f'<td style="padding:10px 12px;color:#475569;border-bottom:1px solid #f1f5f9;">{_q.fr(p.week_low, _q.dec_prix(p.week_low))} – {_q.fr(p.week_high, _q.dec_prix(p.week_high))}</td>'
-            f'<td style="padding:10px 12px;font-weight:700;color:{color};border-bottom:1px solid #f1f5f9;">{arrow} {_q.pct(p.weekly_change_pct)}</td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">'
-            f'<span style="background:{sig_bg};color:{sig_col};padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;">{p.signal}</span>'
-            f'</td></tr>'
-        )
-    th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
-    return (
-        f'<div style="overflow-x:auto;margin-bottom:28px;">'
-        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
-        f'<thead><tr style="background:#0f172a;">'
-        f'<th {th}>Matière</th><th {th}>Ticker</th><th {th}>Cours</th>'
-        f'<th {th}>Range 5j</th><th {th}>Var. hebdo</th><th {th}>Signal</th>'
-        f'</tr></thead><tbody>{rows}</tbody></table></div>'
-    )
-
-
-def build_hero_section(prices: list, week: int, year: int) -> str:
-    """Section hero pleine largeur avec photo de la matière la plus mouvementée."""
-    if not prices:
-        return ""
-    top = max(prices, key=lambda p: abs(p.weekly_change_pct))
-    photo_id = COMMODITY_PHOTOS.get(top.ticker, HERO_FALLBACK_PHOTO)
-    photo_url = _photo_url(photo_id, 1200, 500)
-    color = "#10b981" if top.weekly_change_pct >= 0 else "#ef4444"
-    sign = "+" if top.weekly_change_pct >= 0 else ""
-    arrow = "▲" if top.weekly_change_pct >= 0 else "▼"
-    return (
-        f'<div style="position:relative;width:100%;height:320px;overflow:hidden;border-radius:12px;margin-bottom:28px;">'
-        f'<img src="{photo_url}" alt="{top.label}" loading="eager" '
-        f'style="width:100%;height:100%;object-fit:cover;display:block;"/>'
-        f'<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.72) 100%);"></div>'
-        f'<div style="position:absolute;bottom:0;left:0;right:0;padding:24px 28px;">'
-        f'<p style="margin:0 0 6px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);'
-        f'text-transform:uppercase;letter-spacing:.1em;">Matières premières BRVM — Semaine {week:02d}/{year}</p>'
-        f'<h2 style="margin:0 0 8px;font-size:26px;font-weight:800;color:#fff;line-height:1.2;">'
-        f'{top.label} : {_q.fr(top.current, _q.dec_prix(top.current))} {top.unit}</h2>'
-        f'<p style="margin:0;font-size:17px;font-weight:700;color:{color};">'
-        f'{arrow} {_q.pct(top.weekly_change_pct)} sur la semaine</p>'
-        f'</div>'
-        f'<div style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,0.45);'
-        f'backdrop-filter:blur(8px);padding:6px 14px;border-radius:20px;">'
-        f'<span style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:600;">'
-        f'© Photo : <a href="https://unsplash.com" target="_blank" '
-        f'style="color:rgba(255,255,255,0.7);text-decoration:none;">Unsplash</a></span>'
-        f'</div></div>'
-    )
-
-
-def build_commodity_cards(prices: list) -> str:
-    """Grille de cartes visuelles par matière (photo + données) — remplace la table prix."""
-    cards = ""
-    for p in prices:
-        photo_id = COMMODITY_PHOTOS.get(p.ticker)
-        photo_html = ""
-        if photo_id:
-            url = _photo_url(photo_id, 500, 220)
-            photo_html = (
-                f'<div style="width:100%;height:160px;overflow:hidden;border-radius:8px 8px 0 0;">'
-                f'<img src="{url}" alt="{p.label}" loading="lazy" '
-                f'style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;"/>'
-                f'</div>'
-            )
-        color = "#10b981" if p.weekly_change_pct >= 0 else "#ef4444"
-        sign = "+" if p.weekly_change_pct >= 0 else ""
-        arrow = "▲" if p.weekly_change_pct >= 0 else "▼"
-        sig = p.signal
-        sig_bg  = "#f0fdf4" if sig == "HAUSSE" else "#fef2f2" if sig == "BAISSE" else "#fefce8"
-        sig_col = "#059669" if sig == "HAUSSE" else "#dc2626" if sig == "BAISSE" else "#d97706"
-        sig_icon = "▲" if sig == "HAUSSE" else "▼" if sig == "BAISSE" else "■"
-        cards += (
-            f'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;'
-            f'overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
-            + photo_html +
-            f'<div style="padding:14px 16px;">'
-            f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-            f'<span style="font-size:15px;font-weight:700;color:#0f172a;">{p.label}</span>'
-            f'<code style="font-size:10px;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#475569;">{p.ticker}</code>'
-            f'</div>'
-            f'<p style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;">'
-            f'{_q.fr(p.current, _q.dec_prix(p.current))} <span style="font-size:12px;font-weight:400;color:#94a3b8;">{p.unit}</span></p>'
-            f'<p style="margin:0 0 10px;font-size:15px;font-weight:700;color:{color};">'
-            f'{arrow} {_q.pct(p.weekly_change_pct)}</p>'
-            f'<div style="display:flex;align-items:center;justify-content:space-between;">'
-            f'<span style="font-size:11px;color:#94a3b8;">Fourchette de la semaine : {_q.fr(p.week_low, _q.dec_prix(p.week_low))} – {_q.fr(p.week_high, _q.dec_prix(p.week_high))}</span>'
-            f'<span style="background:{sig_bg};color:{sig_col};padding:3px 10px;border-radius:12px;'
-            f'font-size:11px;font-weight:700;">{sig_icon} {sig}</span>'
-            f'</div>'
-            f'</div></div>'
-        )
-    return (
-        f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px;">'
-        + cards +
-        f'</div>'
-    )
-
-
-def build_correlation_table(correlations: list[dict]) -> str:
-    """Table corrélations BRVM ↔ Matières premières (données réelles Supabase)."""
-    if not correlations:
-        return ""
-    rows = ""
-    for c in correlations:
-        coeff = c.get("coefficient")
-        if not c["available"] or coeff is None:
-            badge = '<span style="font-size:11px;color:#94a3b8;">n/d</span>'
-            interp_cell = '<span style="font-size:12px;color:#94a3b8;">Historique insuffisant</span>'
-        else:
-            abs_c = abs(coeff)
-            if abs_c > 0.7:
-                b_bg, b_col = ("#f0fdf4", "#059669") if coeff > 0 else ("#fef2f2", "#dc2626")
-                strength = "Forte"
-            elif abs_c > 0.4:
-                b_bg, b_col = "#fefce8", "#d97706"
-                strength = "Modérée"
-            else:
-                b_bg, b_col = "#f8fafc", "#64748b"
-                strength = "Faible"
-            sign = "+" if coeff >= 0 else ""
-            badge = (
-                f'<span style="background:{b_bg};color:{b_col};padding:2px 9px;'
-                f'border-radius:12px;font-size:11px;font-weight:700;">'
-                f'{_q.fr(coeff, 2) if coeff < 0 else '+' + _q.fr(coeff, 2)} — {strength}</span>'
-            )
-            interp_cell = (
-                f'<span style="font-size:12px;color:#475569;">'
-                f'{"Mouvement synchrone" if abs_c > 0.7 else "Corrélation partielle" if abs_c > 0.4 else "Peu corrélé"}'
-                f' · corr. {c["direction"]}</span>'
-            )
-        rows += (
-            f'<tr>'
-            f'<td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">'
-            f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;'
-            f'background:{c["couleur"]};margin-right:7px;vertical-align:middle;"></span>'
-            f'{c["matiere"]}</td>'
-            f'<td style="padding:10px 12px;font-family:monospace;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">{", ".join(c["codes"])}</td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">{badge}</td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">{interp_cell}</td>'
-            f'<td style="padding:10px 12px;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">'
-            f'{c["n_months"]} mois</td>'
-            f'</tr>'
-        )
-    th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
-    return (
-        f'<div style="margin-bottom:28px;">'
-        f'<h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:6px;">Corrélations BRVM ↔ Matières premières</h2>'
-        f'<p style="font-size:12px;color:#64748b;margin-bottom:14px;">Corrélation de Pearson sur les variations mensuelles · Prix matières : World Bank Pink Sheet · Actions : cours moyen mensuel BRVM</p>'
-        f'<div style="overflow-x:auto;">'
-        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
-        f'<thead><tr style="background:#0f172a;">'
-        f'<th {th}>Filière</th><th {th}>Actions BRVM</th>'
-        f'<th {th}>Corrélation</th><th {th}>Interprétation</th><th {th}>Période</th>'
-        f'</tr></thead><tbody>{rows}</tbody></table></div></div>'
-    )
-
 
 # ── 5bis. Assainissement (HTML servi en même origine) ─────────────────────────
 # Le HTML est publié tel quel sous /weekly/<slug>.html : tout titre/URL issu de
 # Perplexity et tout HTML produit par le LLM doivent être neutralisés avant
 # insertion (XSS stocké sinon, exécuté sur l'origine du site).
-
-def _url_sure(url) -> str:
-    """URL http(s) uniquement, sinon chaîne vide (jamais javascript:/data:)."""
-    if not isinstance(url, str):
-        return ""
-    u = url.strip()
-    if urlparse(u).scheme.lower() not in ("http", "https"):
-        return ""
-    return _html.escape(u, quote=True)
 
 
 _TAGS_EDITORIAL = {
@@ -1339,7 +953,7 @@ class _AssainisseurHtml(HTMLParser):
         for k, v in attrs:
             v = v or ""
             if k == "href" and tag == "a":
-                u = _url_sure(v)
+                u = _r.url_sure(v)
                 if u:
                     parts.append(f' href="{u}" target="_blank" rel="noopener noreferrer"')
             elif k == "style":
@@ -1357,7 +971,8 @@ class _AssainisseurHtml(HTMLParser):
 
     def handle_data(self, data):
         if not self._ignore:
-            self.out.append(_html.escape(data))
+            # quote=False : une apostrophe reste une apostrophe, que nettoyer() sait lire.
+            self.out.append(_html.escape(data, quote=False))
 
 
 def assainir_editorial(texte: str) -> str:
@@ -1367,79 +982,20 @@ def assainir_editorial(texte: str) -> str:
     return "".join(p.out)
 
 
-
-def build_footer(year: int) -> str:
-    return (
-        f'<footer style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;">'
-        f'<p style="font-size:11px;color:#94a3b8;margin:0 0 4px 0;">'
-        f'<strong style="color:#64748b;">Avertissement légal :</strong> Ce document est produit à titre informatif '
-        f'uniquement par WestBourse. Il ne constitue pas un conseil en investissement ni une sollicitation '
-        f'à acheter ou vendre des instruments financiers. Les performances passées ne préjugent pas des '
-        f'performances futures. Sources : Yahoo Finance (contrats à terme COMEX, NYMEX, ICE), Banque mondiale (Pink Sheet), BRVM.'
-        f'</p>'
-        f'<p style="font-size:11px;color:#94a3b8;margin:0;">© {year} WestBourse — Plateforme d\'analyse de la BRVM. Tous droits réservés.</p>'
-        f'</footer>'
-    )
-
-
-def build_sources_perplexity(items: list[dict]) -> str:
-    """Bloc « Sources consultées » : rendu Python déterministe, jamais fondu
-    dans le texte DeepSeek (design §5 — contexte d'entrée uniquement, les
-    citations restent affichées séparément et vérifiables individuellement)."""
-    if not items:
-        return ""
-    rows = "".join(
-        f'<li style="margin-bottom:6px;font-size:12px;color:#475569;">'
-        f'<a href="{_url_sure(it.get("url",""))}" style="color:#56D7FD;text-decoration:none;" '
-        f'target="_blank" rel="noopener noreferrer">{_html.escape(str(it.get("titre","")))}</a>'
-        f' <span style="color:#94a3b8;">— {_html.escape(str(it.get("date","")))}</span></li>'
-        for it in items
-    )
-    return (
-        '<div style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:20px;">'
-        '<p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;'
-        'letter-spacing:.08em;margin:0 0 10px 0;">Contexte macro — sources consultées</p>'
-        f'<ul style="margin:0;padding-left:18px;">{rows}</ul>'
-        '</div>'
-    )
-
-
 def assemble_content_html(editorial_html: str, prices: list, ctx: dict) -> str:
-    """
-    Assemble l'article en trois niveaux de lecture (Essentiel, Investisseur, Pro).
-    L'ordre des blocs dépend de l'édition, pour que deux numéros ne se ressemblent pas.
-    """
-    edition = ctx.get("edition", "note")
+    """Corps de l'article, grammaire du dossier A4 (voir commodity_weekly_rendu.py)."""
     text = _q.nettoyer(assainir_editorial(editorial_html)).strip()
     if not text.startswith("<section"):
-        text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
-                f'color:#1e293b;line-height:1.8;">{text}</section>')
-    analyse = ('<h2 ' + _H2 + '>Analyse par matière</h2>' + build_legende_preuve() + text)
-    graphique = build_svg_barchart(prices) + "\n" + build_commodity_cards(prices)
-    valeurs = build_valeurs_exposees(prices, ctx.get("wb_snapshot") or {})
-    fcfa = build_fcfa(ctx.get("fcfa") or [], ctx.get("eurusd"))
-    scenarios = build_scenarios(ctx.get("scenarios") or [], prices)
-    seuils = build_seuils(ctx.get("seuils") or [])
-    corps = {
-        "note": [graphique, analyse, valeurs, fcfa, scenarios, seuils],
-        "briefing": [graphique, fcfa, valeurs, analyse, seuils, scenarios],
-        "dossier": [analyse, graphique, valeurs, scenarios, fcfa, seuils],
-    }[edition]
-    return (
-        '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
-        'max-width:900px;margin:0 auto;color:#1e293b;line-height:1.8;">\n'
-        + build_hero_section(prices, ctx["week"], ctx["year"]) + "\n"
-        + build_essentiel(prices, ctx.get("fcfa") or [], edition) + "\n"
-        + build_bilan(ctx.get("bilan") or []) + "\n"
-        + build_badge("investisseur") + "\n"
-        + "\n".join(b for b in corps if b) + "\n"
-        + build_badge("pro") + "\n"
-        + build_methode(prices, ctx.get("controles") or {}) + "\n"
-        + build_correlation_table(ctx.get("correlations") or []) + "\n"
-        + build_sources_perplexity(ctx.get("perplexity_items") or []) + "\n"
-        + build_footer(ctx["year"]) + "\n"
-        + "</article>"
-    )
+        text = f"<section>{text}</section>"
+    return _r.assembler(text, prices, ctx)
+
+
+CSS_FEUILLE = Path(__file__).resolve().parent / "frontend" / "app" / "weekly" / "[slug]" / "weekly.css"
+
+
+def build_full_html(article_html: str, title: str, description: str, signature: str = "") -> str:
+    css = CSS_FEUILLE.read_text(encoding="utf-8") if CSS_FEUILLE.exists() else ""
+    return _r.page_autonome(article_html, title, description, signature, css)
 
 
 def rediger_editorial(prompt_pour, prices: list, autorises: set[float], appel=None) -> tuple[str, dict]:
@@ -1511,48 +1067,6 @@ def call_llm(prompt: str) -> str:
 
 # ── 7. Assemblage HTML final ──────────────────────────────────────────────────
 
-_HTML_TEMPLATE = """\
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title}</title>
-  <meta name="description" content="{description}">
-  <meta property="og:title" content="{title}">
-  <meta property="og:type" content="article">
-  <style>
-    body {{ font-family: 'Supreme', system-ui, sans-serif; background: #030303; color: #FCFCFC; margin: 0; padding: 2rem; }}
-    .commodity-weekly {{ max-width: 860px; margin: 0 auto; }}
-    h1 {{ font-family: 'Bespoke Serif', Georgia, serif; color: #56D7FD; font-size: 2rem; }}
-    h2 {{ color: #56D7FD; border-bottom: 1px solid #1a2a30; padding-bottom: 0.3rem; }}
-    h3 {{ color: #FCFCFC; }}
-    .price-up {{ color: #3fe18b; font-weight: 600; }}
-    .price-down {{ color: #ff6b6b; font-weight: 600; }}
-    .ticker-badge {{ display: inline-block; background: #0a1417; border: 1px solid #56D7FD33; color: #56D7FD; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.8em; margin: 0 2px; }}
-    .commodity-card {{ background: #0a1417; border: 1px solid #1a2a30; border-radius: 8px; padding: 1rem; margin: 1rem 0; }}
-    table {{ width: 100%; border-collapse: collapse; }}
-    th, td {{ text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #1a2a30; }}
-    th {{ color: #56D7FD; font-weight: 600; background: #0a1417; }}
-    footer {{ color: #888; font-size: 0.8em; margin-top: 2rem; border-top: 1px solid #1a2a30; padding-top: 1rem; }}
-  </style>
-</head>
-<body>
-<div class="commodity-weekly">
-{article_html}
-</div>
-</body>
-</html>
-"""
-
-
-def build_full_html(article_html: str, title: str, description: str) -> str:
-    return _HTML_TEMPLATE.format(
-        title=title,
-        description=description,
-        article_html=article_html,
-    )
-
 
 # ── 8. Sauvegarde HTML ────────────────────────────────────────────────────────
 
@@ -1579,6 +1093,7 @@ def publish_supabase(
     wb_snapshot: dict | None = None,
     dry_run: bool = False,
     extra: dict | None = None,
+    resume: str | None = None,
 ) -> bool:
     if dry_run:
         log.info("[DRY-RUN] Supabase upsert ignoré")
@@ -1601,7 +1116,7 @@ def publish_supabase(
         "source_label": "WESTBOURSE PRO",
         "source_type": "analyse",
         "source_url": f"/weekly/{slug}.html",
-        "resume": f"Analyse hebdomadaire des matières premières et leur impact sur la BRVM — S{week:02d} {year}",
+        "resume": resume or f"Analyse hebdomadaire des matières premières et leur impact sur la BRVM — S{week:02d} {year}",
         "instrument_code": None,
         "secteur": "Marchés – Matières premières",
         "sentiment": "neutre",
@@ -1725,18 +1240,26 @@ def main():
         editorial_html, controles = rediger_editorial(prompt_pour, prices, autorises)
     log.info("    → texte : %s", controles["texte"])
 
+    pm = {p.ticker: p for p in prices}
+    mouvements = dict(fetch_prix_mensuels())
+    if "BZ=F" in pm:
+        mouvements["petrole"] = (pm["BZ=F"].weekly_change_pct, "Brent, semaine")
+    if "SB=F" in pm:
+        mouvements["sucre"] = (pm["SB=F"].weekly_change_pct, "sucre brut, semaine")
+    expositions = _q.lignes_exposition(mouvements, REFERENTIEL)
+    sources_lues = [{"titre": a.get("titre", ""), "url": a.get("source_url", ""), "date": a.get("date_publication", "")}
+                    for a in articles] + list(perplexity_items)
     ctx = {"edition": edition, "fcfa": fcfa, "eurusd": eurusd, "scenarios": scenarios, "seuils": seuils,
-           "bilan": bilan, "wb_snapshot": wb_snapshot, "correlations": correlations,
-           "perplexity_items": perplexity_items, "controles": controles, "year": year, "week": week}
+           "bilan": bilan, "expositions": expositions, "correlations": correlations,
+           "sources": sources_lues, "controles": controles, "year": year, "week": week}
     article_html = assemble_content_html(editorial_html, prices, ctx)
 
     # Étape 6 : HTML final
     title = _q.titre_article(prices, week, year)
-    description = (
-        f"Analyse hebdomadaire des matières premières et de leur transmission aux valeurs BRVM. "
-        f"Semaine {week:02d}, {year}."
-    )
-    full_html = build_full_html(article_html, title, description)
+    description = _q.chapo_article(prices)
+    signature = (f"Rédaction WESTBOURSE · semaine {week:02d}/{year} · clôtures du vendredi · "
+                 f"édition « {_q.NOM_EDITION[edition]} »")
+    full_html = build_full_html(article_html, title, description, signature)
 
     # Étape 7 : Sauvegarde fichier
     log.info("6/7 Sauvegarde + publication...")
@@ -1753,7 +1276,8 @@ def main():
         yf_prices=yf_prices,
         wb_snapshot=wb_snapshot,
         dry_run=args.dry_run,
-        extra={"edition": edition, "seuils": seuils, "eurusd": eurusd, "controles": controles},
+        resume=description,
+        extra={"format": _r.FORMAT, "edition": edition, "seuils": seuils, "eurusd": eurusd, "controles": controles},
     )
 
     log.info("=== Terminé. Supabase: %s | Slug: %s ===", "OK" if ok else "ERREUR", slug)

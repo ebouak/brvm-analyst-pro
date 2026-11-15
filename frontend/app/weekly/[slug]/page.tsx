@@ -7,6 +7,15 @@ import {
   WorldBankChart,
   BrvmExposureChart,
 } from '@/components/weekly/CommodityCharts';
+import './weekly.css';
+
+/** Gabarit « feuille » : HTML du générateur en classes `wk-*`, grammaire du dossier A4. */
+const FORMAT_FEUILLE = 'feuille-v1';
+const NOM_EDITION: Record<string, string> = {
+  note: 'Note d’analyste',
+  briefing: 'Briefing',
+  dossier: 'Dossier de la semaine',
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +67,49 @@ export default async function WeeklyArticlePage(props: { params: Promise<{ slug:
   const brvm_scores = (meta?.brvm_scores as Record<string, unknown>) ?? {};
 
   const hasCharts = Object.keys(yf_prices).length > 0 || Object.keys(brvm_scores).length > 0;
+  const semaine = week && year ? `S${String(week).padStart(2, '0')}/${year}` : null;
+  const datePub = new Date(article.date_publication).toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  if (meta?.format === FORMAT_FEUILLE && article.content_html) {
+    const edition = NOM_EDITION[String(meta?.edition ?? '')];
+    return (
+      <div className="wk">
+        <nav className="wk-nav print:hidden" aria-label="Navigation de l’hebdo">
+          <Link href="/weekly">← Analyses hebdo</Link>
+          {semaine ? <span>Semaine {semaine}</span> : null}
+        </nav>
+        <article className="wk-feuille">
+          <div className="wk-courant">
+            <span className="wk-marque">WESTBOURSE</span>
+            <span>Hebdo matières premières{semaine ? ` · ${semaine}` : ''}</span>
+          </div>
+          <header className="wk-entete">
+            <h1 className="wk-h1">{article.titre}</h1>
+            {article.resume ? <p className="wk-chapeau">{article.resume}</p> : null}
+            <p className="wk-signature">
+              Rédaction WESTBOURSE · publié le {datePub}
+              {edition ? ` · édition « ${edition} »` : ''}
+            </p>
+            {article.ticker_codes?.length ? (
+              <ul className="wk-valeurs" aria-label="Valeurs citées">
+                {article.ticker_codes.map((t) => (
+                  <li key={t}>
+                    <Link href={`/societes/${t}`}>{t}</Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </header>
+          <div
+            className="wk-corps"
+            dangerouslySetInnerHTML={{ __html: sanitizeReportHtml(article.content_html) }}
+          />
+        </article>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg text-ivory">
@@ -147,7 +199,7 @@ export default async function WeeklyArticlePage(props: { params: Promise<{ slug:
         {/* Footer article */}
         <footer className="border-t border-border pt-6 text-xs text-faint space-y-1">
           <p>Les informations contenues dans cet article sont fournies à titre informatif uniquement et ne constituent pas un conseil en investissement.</p>
-          <p>Sources : yfinance, Banque Mondiale CMO Pink Sheet, actualités sectorielles BRVM.</p>
+          <p>Sources : Yahoo Finance (contrats à terme), Banque mondiale (Pink Sheet), BRVM.</p>
           <p>© {new Date().getFullYear()} WESTBOURSE. Tous droits réservés.</p>
         </footer>
       </div>

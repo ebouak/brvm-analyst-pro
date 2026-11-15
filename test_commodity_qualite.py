@@ -126,8 +126,8 @@ def test_seuils_reconstruits_d_une_ancienne_metadata():
 
 def _texte_valide():
     return q.squelette_editorial(S46, REF).replace(
-        "<strong style=\"color:#0f172a;\">Transmission à la BRVM.</strong>",
-        "<strong>Lecture.</strong> Selon la presse. <strong>Transmission à la BRVM.</strong>")
+        "<p><strong>Transmission à la BRVM.</strong>",
+        "<p><strong>Lecture.</strong> Selon la presse.</p><p><strong>Transmission à la BRVM.</strong>")
 
 
 def test_un_texte_fonde_sur_les_donnees_passe():
@@ -166,7 +166,7 @@ def test_conseil_et_score_mal_lu_refuses():
 
 def test_nettoyage():
     brut = '<p style="line-height:1.75">Argent : 48.67 USD/oz 📉</p>'
-    assert q.nettoyer(brut) == '<p style="line-height:1.75">Argent : 48,67 USD/oz </p>'
+    assert q.nettoyer(brut) == '<p>Argent : 48,67 USD/oz </p>'
 
 
 def test_squelette_publiable_sauf_niveau_lecture():
@@ -215,8 +215,8 @@ def test_les_editions_ordonnent_les_blocs_differemment():
     sq = q.squelette_editorial(_prix(), REF)
     note = g.assemble_content_html(sq, _prix(), _ctx("note"))
     dossier = g.assemble_content_html(sq, _prix(), _ctx("dossier"))
-    assert note.index("Analyse par matière") > note.index("<svg")
-    assert dossier.index("Analyse par matière") < dossier.index("<svg")
+    assert note.index("Analyse par matière") > note.index("wk-figure")
+    assert dossier.index("Analyse par matière") < dossier.index("wk-figure")
 
 
 def test_un_texte_refuse_deux_fois_cede_la_place_au_squelette():
@@ -258,3 +258,58 @@ def test_fenetre_hebdo_independante_du_jour_d_execution():
 def test_fenetre_hebdo_refuse_un_historique_trop_court():
     assert q.fenetre_hebdo([1, 2, 3, 4, 5], [1] * 5, [5] * 5) is None
     assert q.fenetre_hebdo([0, 2, 3, 4, 5, 6], [1] * 6, [7] * 6) is None
+
+
+def test_nettoyage_forme_de_presse():
+    brut = "<p>Le Pétrole Brent cède −2,52 % ; l'Or baisse de -4,63 % et le Sucre gagne +0,93 %.</p>"
+    assert q.nettoyer(brut) == "<p>Le Brent cède 2,52 % ; l'or baisse de 4,63 % et le sucre gagne 0,93 %.</p>"
+
+
+def test_une_matiere_nommee_en_minuscules_est_reconnue():
+    autorises = q.nombres_autorises(S46, week=46, year=2026)
+    texte = q.nettoyer(_texte_valide())  # « Pétrole Brent » devient « Brent »
+    assert "Pétrole Brent" not in q.texte_visible(texte)
+    assert q.verrous(texte, S46, REF, autorises) == []
+
+
+def test_presse_rangee_par_matiere():
+    items = [{"titre": "Le Brent tombe sous 94 dollars", "source_label": "Sika"},
+             {"titre": "L'or chute de 3% sous la pression du dollar", "source_label": "2026-11-12"},
+             {"titre": "Le sucre n° 11 s'assouplit", "source_label": "CMB"},
+             {"titre": "Or, la BRVM reste calme", "source_label": "x"}]
+    par = q.titres_par_matiere(items, S46)
+    assert par["Or"] == ["[2026-11-12] L'or chute de 3% sous la pression du dollar"]
+    assert par["Pétrole Brent"] == ["[Sika] Le Brent tombe sous 94 dollars"]
+    assert par["Cacao"] == []
+
+
+def test_une_ligne_par_valeur_exposee():
+    lignes = q.lignes_exposition({"petrole": (-2.52, "Brent, semaine"), "huile_palme": (1.2, "mois"),
+                                  "caoutchouc": (None, "")}, REF)
+    sogb = [l for l in lignes if l["code"] == "SOGC"]
+    assert len(sogb) == 1 and [m["matiere"] for m in sogb[0]["mouvements"]] == ["Huile de palme", "Caoutchouc"]
+    assert len({l["code"] for l in lignes}) == len(lignes)
+
+
+def test_chapo_factuel():
+    c = q.chapo_article(S46)
+    assert c.startswith("Sur la semaine, l'argent perd 6,05\u00a0%, l'or perd 4,68\u00a0% et le Brent recule de 2,09\u00a0%, à 96,27 dollars.")
+
+
+def test_le_rendu_n_emploie_que_des_balises_admises_par_le_site():
+    import re
+    from pathlib import Path
+    ts = Path(__file__).parent.joinpath("frontend/lib/sanitizeHtml.ts").read_text(encoding="utf-8")
+    tags = set(re.findall(r"'([a-z0-9]+)'", ts[ts.index("ALLOWED_TAGS"):ts.index("ALLOWED_ATTR")]))
+    attrs = set(re.findall(r"'([a-zA-Z-]+)'", ts[ts.index("ALLOWED_ATTR"):ts.index("export function")]))
+    html = g.assemble_content_html(_texte_valide(), _prix(), {**_ctx(), "sources": [{"titre": "t", "url": "https://x.fr", "date": "d"}],
+                                   "expositions": q.lignes_exposition({}, REF), "bilan": [{"franchi": True, "texte": "x"}]})
+    employes = set(re.findall(r"<([a-z0-9]+)[\s>]", html))
+    assert employes <= tags, employes - tags
+    attributs = set(re.findall(r"\s([a-zA-Z-]+)=\"", html))
+    assert attributs <= attrs, attributs - attrs
+
+
+def test_les_apostrophes_survivent_a_l_assainissement():
+    html = g.assemble_content_html("<section><div><h3>L'Or et l'Argent reculent</h3></div></section>", _prix(), _ctx())
+    assert "L'or et l'argent reculent" in html

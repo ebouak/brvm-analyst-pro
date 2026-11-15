@@ -1,0 +1,337 @@
+/**
+ * Hebdo matières premières — feuille de papier, portée par `.wk`.
+ *
+ * MÊME GRAMMAIRE QUE LE DOSSIER VALEUR (`../../rapports/dossier/[code]/dossier.css`) :
+ * mêmes jetons d'encre et de papier, mêmes familles, panneaux numérotés,
+ * mesures encadrées, tableaux à filets. Un lecteur qui passe d'un dossier à
+ * l'hebdo doit reconnaître le même éditeur.
+ *
+ * Deux différences assumées : l'hebdo est une feuille CONTINUE (sa longueur
+ * dépend de la semaine, on ne force pas des A4 à hauteur fixe) et son HTML
+ * vient du générateur Python, qui n'écrit QUE des classes `wk-*` et aucun
+ * style en ligne hors les positions calculées (repères de fourchette).
+ *
+ * Ce fichier est AUSSI lu par `commodity_weekly_generator.py`, qui l'embarque
+ * dans le fichier HTML autonome : une seule source pour le site et l'export.
+ */
+
+.wk {
+  --wk-encre: #12161c;
+  --wk-encre-douce: #5b6672;
+  --wk-faible: #8b949e;
+  --wk-papier: #ffffff;
+  --wk-fond: #f4f6f8;
+  --wk-trame: #dfe4ea;
+  --wk-accent: #0b6c84;
+  --wk-accent-clair: #e6f2f5;
+  --wk-hausse: #15803d;
+  --wk-baisse: #b91c1c;
+  --wk-alerte: #92580b;
+
+  background: var(--wk-fond);
+  color: var(--wk-encre);
+  font-family: var(--font-sans), 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 24px 12px 64px;
+}
+
+.wk * { box-sizing: border-box; }
+
+.wk-nav {
+  width: 210mm;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10pt;
+  color: var(--wk-encre-douce);
+}
+.wk-nav a { color: var(--wk-encre-douce); text-decoration: underline; }
+.wk-nav a:hover { color: var(--wk-encre); }
+
+/* ── Feuille ─────────────────────────────────────────────────────────────── */
+
+.wk-feuille {
+  width: 210mm;
+  margin: 0 auto;
+  padding: 15mm 14mm 12mm;
+  background: var(--wk-papier);
+  box-shadow: 0 1px 3px rgba(18, 22, 28, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 8mm;
+}
+
+.wk-courant {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6mm;
+  border-bottom: 1px solid var(--wk-trame);
+  padding-bottom: 3mm;
+  font-size: 9pt;
+  color: var(--wk-faible);
+}
+.wk-marque {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  color: var(--wk-encre);
+}
+
+.wk-entete { display: flex; flex-direction: column; gap: 3mm; }
+.wk-surtitre { margin: 0; font-size: 9pt; color: var(--wk-accent); font-weight: 600; }
+.wk-h1 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 22pt;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.wk-chapeau { margin: 0; font-size: 12pt; line-height: 1.5; color: var(--wk-encre-douce); max-width: 64ch; text-wrap: pretty; }
+.wk-signature { margin: 0; font-size: 9pt; color: var(--wk-faible); }
+.wk-valeurs { display: flex; flex-wrap: wrap; gap: 2mm; margin: 0; padding: 0; list-style: none; }
+.wk-valeurs a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8.5pt;
+  color: var(--wk-accent);
+  text-decoration: none;
+  border: 1px solid var(--wk-trame);
+  border-radius: 3px;
+  padding: 0.6mm 2mm;
+}
+.wk-valeurs a:hover { border-color: var(--wk-accent); }
+
+/* ── Illustration de tête ────────────────────────────────────────────────── */
+
+.wk-illustration { margin: 0; }
+.wk-illustration svg { display: block; width: 100%; height: auto; border-radius: 3px; }
+.wk-illustration figcaption { margin-top: 1.5mm; font-size: 8pt; color: var(--wk-faible); }
+
+/* ── Niveaux de lecture ──────────────────────────────────────────────────── */
+
+.wk-niveau {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  padding-top: 4mm;
+  border-top: 2px solid var(--wk-encre);
+  font-size: 9pt;
+  color: var(--wk-encre-douce);
+}
+.wk-badge {
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.6mm 2.2mm;
+  border-radius: 2px;
+  background: var(--wk-encre);
+  color: var(--wk-papier);
+}
+.wk-niveau--essentiel .wk-badge { background: var(--wk-hausse); }
+.wk-niveau--investisseur .wk-badge { background: var(--wk-accent); }
+.wk-niveau--pro .wk-badge { background: var(--wk-encre); }
+
+/* ── Panneaux ────────────────────────────────────────────────────────────── */
+
+.wk-panneau { display: flex; flex-direction: column; gap: 2.5mm; }
+
+.wk-titre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 14pt;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+}
+.wk-numero {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9pt;
+  font-weight: 500;
+  color: var(--wk-accent);
+}
+.wk-chapo { margin: 0; font-size: 9.5pt; color: var(--wk-encre-douce); max-width: 66ch; }
+.wk-prose { margin: 0; font-size: 10.5pt; line-height: 1.55; max-width: 68ch; text-wrap: pretty; }
+.wk-note { margin: 0; font-size: 8.5pt; color: var(--wk-faible); max-width: 70ch; }
+
+/* ── Mesures ─────────────────────────────────────────────────────────────── */
+
+.wk-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
+  gap: 3mm;
+  margin: 0;
+}
+.wk-mesure {
+  border: 1px solid var(--wk-trame);
+  border-radius: 3px;
+  padding: 3mm 3.5mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  min-width: 0;
+  break-inside: avoid;
+}
+.wk-mesure dt { font-size: 8pt; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wk-faible); }
+.wk-mesure dd {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13pt;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.wk-mesure dd + dd {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 8pt;
+  font-weight: 400;
+  color: var(--wk-encre-douce);
+}
+
+.wk-hausse { color: var(--wk-hausse); }
+.wk-baisse { color: var(--wk-baisse); }
+.wk-faible { color: var(--wk-faible); }
+
+/* ── Encadrés et listes ──────────────────────────────────────────────────── */
+
+.wk-encadre {
+  border: 1px solid var(--wk-trame);
+  border-left: 3px solid var(--wk-accent);
+  border-radius: 2px;
+  padding: 3mm 4mm;
+  background: var(--wk-papier);
+  break-inside: avoid;
+}
+.wk-encadre h3 { margin: 0 0 1.5mm; font-size: 9pt; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--wk-encre-douce); }
+
+.wk-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.6mm; }
+.wk-liste li {
+  display: grid;
+  grid-template-columns: 3mm 1fr;
+  gap: 3mm;
+  align-items: start;
+  font-size: 10pt;
+  padding-bottom: 1.6mm;
+  border-bottom: 1px solid var(--wk-trame);
+}
+.wk-liste li:last-child { border-bottom: 0; padding-bottom: 0; }
+/* Le filet porte la polarité ; le texte reste en encre. */
+.wk-liste li::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 100%;
+  min-height: 4mm;
+  border-radius: 2px;
+  background: var(--wk-trame);
+}
+.wk-liste li.wk-cede::before { background: var(--wk-baisse); }
+.wk-liste li.wk-tient::before { background: var(--wk-hausse); }
+
+/* ── Tableaux ────────────────────────────────────────────────────────────── */
+
+.wk-tableau-cadre { overflow-x: auto; }
+.wk-tableau { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+.wk-tableau th,
+.wk-tableau td { padding: 1.8mm 2mm; text-align: right; border-bottom: 1px solid var(--wk-trame); vertical-align: middle; }
+.wk-tableau th:first-child,
+.wk-tableau td:first-child { text-align: left; }
+.wk-tableau thead th {
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wk-faible);
+  font-weight: 500;
+  border-bottom: 1px solid var(--wk-encre-douce);
+  white-space: nowrap;
+}
+.wk-tableau td.wk-num { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wk-tableau td.wk-texte { text-align: left; font-size: 9pt; color: var(--wk-encre-douce); }
+.wk-tableau .wk-code { font-family: var(--font-mono), ui-monospace, monospace; font-size: 8pt; color: var(--wk-faible); margin-left: 1.5mm; }
+
+/* Place de la clôture dans la fourchette de la semaine. */
+.wk-position { position: relative; display: block; width: 26mm; height: 1.2mm; margin-left: auto; background: var(--wk-trame); border-radius: 1mm; }
+.wk-position span { position: absolute; top: -1.1mm; width: 3.4mm; height: 3.4mm; margin-left: -1.7mm; border-radius: 50%; background: var(--wk-encre); }
+
+/* ── Graphique ───────────────────────────────────────────────────────────── */
+
+.wk-figure { margin: 0; break-inside: avoid; }
+.wk-figure svg { display: block; width: 100%; height: auto; }
+.wk-figure text { font-family: var(--font-sans), system-ui, sans-serif; font-size: 12px; fill: var(--wk-encre); dominant-baseline: middle; }
+.wk-figure .wk-g-fin { text-anchor: end; }
+.wk-figure .wk-g-val { font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; }
+.wk-figure .wk-g-faible { fill: var(--wk-faible); font-size: 10px; }
+.wk-figure .wk-g-hausse { fill: var(--wk-hausse); }
+.wk-figure .wk-g-baisse { fill: var(--wk-baisse); }
+.wk-figure .wk-g-neutre { fill: var(--wk-faible); }
+.wk-figure figcaption { margin-top: 1.5mm; font-size: 8pt; color: var(--wk-faible); }
+
+/* ── Analyse par matière (texte vérifié) ─────────────────────────────────── */
+
+.wk-legende-preuve { margin: 0; font-size: 8.5pt; color: var(--wk-encre-douce); }
+.wk-legende-preuve strong { color: var(--wk-encre); }
+
+.wk-blocs { display: flex; flex-direction: column; }
+.wk-blocs > div { border-top: 1px solid var(--wk-trame); padding: 4mm 0 1mm; break-inside: avoid; }
+.wk-blocs > div:first-child { border-top: 0; padding-top: 1mm; }
+.wk-blocs h4 { margin: 0 0 1mm; font-size: 8pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wk-accent); }
+.wk-blocs h3 { margin: 0 0 2mm; font-family: var(--font-display), Georgia, serif; font-size: 12.5pt; font-weight: 500; line-height: 1.25; }
+.wk-blocs p { margin: 0 0 2mm; font-size: 10.5pt; line-height: 1.55; max-width: 68ch; text-wrap: pretty; }
+/* Étiquette de preuve : petites capitales, puis le texte en encre. */
+.wk-blocs p > strong:first-child {
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wk-encre-douce);
+  margin-right: 1.5mm;
+}
+
+/* ── Sources et avertissement ────────────────────────────────────────────── */
+
+.wk-sources { margin: 0; padding-left: 4mm; display: flex; flex-direction: column; gap: 1mm; font-size: 8.5pt; color: var(--wk-encre-douce); columns: 1; }
+.wk-sources a { color: var(--wk-encre); text-decoration: underline; text-decoration-color: var(--wk-trame); }
+.wk-sources a:hover { text-decoration-color: var(--wk-encre); }
+
+.wk-pied {
+  margin-top: 2mm;
+  padding-top: 4mm;
+  border-top: 1px solid var(--wk-trame);
+  font-size: 8pt;
+  color: var(--wk-faible);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+}
+.wk-pied strong { color: var(--wk-encre-douce); }
+
+/* ── Impression ──────────────────────────────────────────────────────────── */
+
+@page { size: A4 portrait; margin: 12mm 0; }
+
+@media print {
+  .wk { background: #fff; padding: 0; min-height: 0; }
+  .wk-nav { display: none; }
+  .wk-feuille { box-shadow: none; width: auto; padding: 0 13mm; gap: 6mm; }
+  .wk-panneau, .wk-tableau tr { break-inside: avoid; }
+  .wk-titre, .wk-niveau { break-after: avoid; }
+  .wk-badge, .wk-numero, .wk-liste li::before, .wk-encadre, .wk-figure, .wk-illustration, .wk-position span {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media screen and (max-width: 230mm) {
+  .wk-nav, .wk-feuille { width: 100%; }
+  .wk-feuille { padding: 8mm 6mm; }
+  .wk-h1 { font-size: 18pt; }
+  .wk-position { width: 18mm; }
+}
+
+/* Corps injecté (HTML du générateur) : même rythme vertical que la feuille. */
+.wk-corps { display: flex; flex-direction: column; gap: 8mm; }
