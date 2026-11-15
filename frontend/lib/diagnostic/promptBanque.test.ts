@@ -43,11 +43,11 @@ describe('diagnostic — banque', () => {
 
   it('le prompt bancaire porte PNB, dépôts, crédits et marché — pas la marge brute ni le BFR', () => {
     const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
-    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque', coefficientExploitation: 0.388 });
     expect(p).toContain('## DONNÉES FINANCIÈRES — BANQUE');
     expect(p).toMatch(/Produit net bancaire \(PNB\) \| 276/);
     expect(p).toContain('Dépôts de la clientèle');
-    expect(p).toMatch(/Coefficient d'exploitation 38\.8% \(publié\)/);
+    expect(p).toMatch(/Coefficient d'exploitation 38\.8% \(calculé par WESTBOURSE : charges d'exploitation \/ PNB publiés\)/);
     expect(p).toMatch(/Crédits \/ dépôts 87\.\d%/);
     expect(p).toMatch(/Actions en circulation : 31/);
     expect(p).toMatch(/Volume moyen sur 30 séances : 7/);
@@ -60,7 +60,7 @@ describe('diagnostic — banque', () => {
   it('compression des marges : coefficient d’exploitation pour une banque, jamais de marge EBITDA', () => {
     const n = { ...(inc_n as object), frais_generaux_admin: 107e9 } as never;
     const n1 = { ...(inc_n1 as object), frais_generaux_admin: 99.7e9 } as never;
-    const r = computeRedFlags({ inc_n: n, inc_n1: n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const r = computeRedFlags({ inc_n: n, inc_n1: n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque', coefficients: { n: 0.388, n1: 0.379 } });
     const c = r.checks.find((x) => x.id === 'compression_marges')!;
     expect(c.label).toBe("Dégradation du coefficient d'exploitation");
     expect(c.triggered).toBe(true);            // 38,8 % contre 37,9 %
@@ -108,5 +108,13 @@ describe('diagnostic — banque', () => {
     expect(p).toContain('DCF simplifié (WACC 12–14%');
     expect(p).toContain('## DONNÉES DE MARCHÉ DU TITRE');
     expect(p).not.toContain('ne cite PAS comme lacunes');
+  });
+
+  it('coefficient stocké jamais repris : sans lecture bancaire, il est « N/D » (avenant du 2026-11-15)', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    expect(redFlags.checks.find((x) => x.id === 'compression_marges')!.dataAvailable).toBe(false);
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    expect(p).not.toMatch(/38\.8/);
+    expect(p).not.toMatch(/\(publié\)/);
   });
 });

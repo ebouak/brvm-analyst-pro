@@ -9,6 +9,8 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
 import { buildDiagnosticPrompt } from '@/lib/diagnostic/prompt';
 import { computeRedFlags } from '@/lib/diagnostic/redFlags';
+import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
+import { lireBanque } from '@/lib/bank/lecture';
 import { libelleAbsence, ligneQualiteActif, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
@@ -114,7 +116,17 @@ export async function POST(req: Request, props: { params: Promise<{ code: string
   const m = computeDiagnosticMetrics({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, cours, capitalisation: ratios.capitalisation });
   // Famille comptable : la colonne de l'instrument, sinon le référentiel curé.
   const famille = data.instrument.famille_comptable ?? FAMILLE_PAR_CODE[code] ?? 'general';
-  const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m, famille });
+  // Banque : le coefficient d'exploitation est celui de lib/bank/lecture.ts, le
+  // seul affiché sur le site (avenant du 2026-11-15) ; sans lecture extraite, aucun.
+  const periodesBanque = famille === 'banque' ? await chargerPeriodesBancaires(admin, code) : [];
+  const coefDe = (periode: string | null | undefined) => {
+    const annee = periode ? Number(String(periode).slice(0, 4)) : NaN;
+    if (!Number.isFinite(annee)) return null;
+    const l = lireBanque(periodesBanque, { annee, code: 'exercice' });
+    return l?.extrait ? l.ratios.find((r) => r.cle === 'coefficient_exploitation')?.valeur ?? null : null;
+  };
+  const coefficients = { n: coefDe(inc_n?.periode), n1: coefDe(inc_n1?.periode) };
+  const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m, famille, coefficients });
 
   // Banque sans ratio de solvabilité retenu : ce que disent les documents
   // consultés (sources contradictoires, borne…), plutôt qu'un « N/D » muet.
@@ -157,7 +169,7 @@ export async function POST(req: Request, props: { params: Promise<{ code: string
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
-    interim, contexteQuant, famille, absenceSolvabilite, qualiteActif,
+    interim, contexteQuant, famille, absenceSolvabilite, qualiteActif, coefficientExploitation: coefficients.n,
     marche: {
       actions: data.instrument.shares ?? inc_n?.actions_en_circulation ?? null,
       flottant: (titre as { flottant?: number | null } | null)?.flottant ?? null,
