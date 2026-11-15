@@ -23,6 +23,14 @@ const nextConfig = {
   // existant n'a jamais été linté → on évite de casser les déploiements Vercel.
   // À durcir progressivement (corriger puis passer à false).
   eslint: { ignoreDuringBuilds: true },
+  // Vercel seulement : pas de vérification des types pendant `next build`.
+  // Le 2026-11-15, deux constructions d'aperçu (#308, #310) ont été tuées par
+  // manque de mémoire (OOM, SIGKILL) précisément à « Checking validity of
+  // types », après une compilation réussie ; le projet a dépassé la mémoire du
+  // conteneur Vercel. Le contrôle n'est pas perdu : la CI GitHub (ci.yml,
+  // « Frontend — typecheck + build ») lance `npm run typecheck` puis un build
+  // complet sur chaque PR, et aucune PR n'est fusionnée sans elle.
+  typescript: { ignoreBuildErrors: process.env.VERCEL === '1' },
   async redirects() {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
