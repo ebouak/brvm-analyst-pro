@@ -271,11 +271,12 @@ def lignes_exposition(mouvements: dict[str, tuple[float | None, str]], referenti
             l = par_code.setdefault(e["code"], {"code": e["code"], "nom": NOMS.get(e["code"], e["code"]),
                                                 "canal": e["canal"], "mouvements": [], "lectures": []})
             l["mouvements"].append({"matiere": LIBELLE_MATIERE[matiere], "variation": var, "base": base})
-            lec = lecture_valeur(matiere, var)
-            if lec not in l["lectures"]:
-                l["lectures"].append(lec)
+            l["lectures"].append((LIBELLE_MATIERE[matiere], lecture_valeur(matiere, var)))
     for l in par_code.values():
-        l["lecture"] = " ".join(l.pop("lectures"))
+        lectures = l.pop("lectures")
+        # Plusieurs matières (SOGB) : chaque lecture dit de quelle matière elle parle.
+        l["lecture"] = (lectures[0][1] if len(lectures) == 1
+                        else " ".join(f"{m} : {t[0].lower()}{t[1:]}" for m, t in lectures))
     return list(par_code.values())
 
 
@@ -508,6 +509,10 @@ def verrous(editorial_html: str, prices: list, referentiel: set[str], autorises:
         raisons.append("formulation de conseil en investissement")
     if _RE_SCORE.search(visible):
         raisons.append("score d'exposition présenté comme une note")
+    for para in re.findall(r"<p>\s*<strong>\s*Transmission à la BRVM\.?\s*</strong>(.*?)</p>", txt, re.S):
+        if re.search(r"corr[ée]lation|\br\s*=", texte_visible(para), re.I):
+            raisons.append("transmission décrite par une corrélation au lieu d'un canal")
+            break
     if len(_RE_SANS_CAUSE.findall(visible)) > 2:
         raisons.append("« aucune cause identifiée » répété plus de deux fois")
     etrangers = chiffres_etrangers(txt, autorises)
