@@ -195,14 +195,22 @@ describe('Dangote : faits vérifiés au 15 novembre 2026', () => {
   });
 });
 
+/** Retire les clés `illustration` de section, posées par la migration 0243. */
+function sansIllustrations(c: unknown): unknown {
+  const copie = structuredClone(c) as { lessons: { sections: Record<string, unknown>[] }[] };
+  for (const l of copie.lessons) for (const s of l.sections) delete s.illustration;
+  return copie;
+}
+
 describe('migration 0241 synchronisée avec les JSON', () => {
   const sql = readFileSync(join(__dirname, '../../../../../supabase/migrations/0241_academy_cours_hors_niveaux_relus.sql'), 'utf8');
   for (const slug of SLUGS) {
     it(`${slug} : contenu identique et garde du nombre de leçons`, () => {
-      // Les photos (clé `image`) sont remplacées ensuite par 0244 : elles sont
-      // comparées hors de cette migration (photos.test.ts).
-      const sansImages = (c: unknown) => {
-        const copie = JSON.parse(JSON.stringify(c)) as { lessons: Record<string, unknown>[] };
+      // 0243 ajoute ensuite des schémas (`illustration`) et 0244 remplace les
+      // photos (`image`) : 0241 porte le contenu sans les uns ni les autres.
+      // Les photos sont vérifiées à part (photos.test.ts).
+      const sansAjouts = (c: unknown) => {
+        const copie = JSON.parse(JSON.stringify(sansIllustrations(c))) as { lessons: Record<string, unknown>[] };
         for (const l of copie.lessons) delete l.image;
         return copie;
       };
@@ -210,7 +218,7 @@ describe('migration 0241 synchronisée avec les JSON', () => {
         .map((m) => JSON.parse(m[1]!) as { titre: string; lessons: unknown[] })
         .filter((c) => c.titre === (brut(slug) as { titre: string }).titre);
       expect(blocs).toHaveLength(2);
-      for (const b of blocs) expect(sansImages(b)).toEqual(sansImages(brut(slug)));
+      for (const b of blocs) expect(sansAjouts(b)).toEqual(sansAjouts(brut(slug)));
       const n = sauvegarde.cours[slug]!.content.lessons.length;
       expect(sql).toContain(`jsonb_array_length(content->'lessons') = ${n}`);
       expect(sql).toContain(colonnes[slug]!.resume);

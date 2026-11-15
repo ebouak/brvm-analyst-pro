@@ -91,6 +91,54 @@
      ]
     ],
     "note": "Les montants réels dépendent du cours du droit pendant la période de souscription, et des frais de votre SGI."
+   },
+   "illustration": {
+    "gabarit": "avant_apres",
+    "titre": "Votre part du capital selon votre choix (exemple fictif : 1 action nouvelle pour 4)",
+    "unite": "actions",
+    "part_du_premier": true,
+    "colonnes": [
+     {
+      "label": "Avant l’opération",
+      "segments": [
+       {
+        "label": "Vos actions",
+        "valeur": 400
+       },
+       {
+        "label": "Autres actionnaires",
+        "valeur": 600
+       }
+      ]
+     },
+     {
+      "label": "Vous ne souscrivez pas",
+      "segments": [
+       {
+        "label": "Vos actions",
+        "valeur": 400
+       },
+       {
+        "label": "Autres actionnaires",
+        "valeur": 850
+       }
+      ]
+     },
+     {
+      "label": "Vous souscrivez",
+      "segments": [
+       {
+        "label": "Vos actions",
+        "valeur": 500
+       },
+       {
+        "label": "Autres actionnaires",
+        "valeur": 750
+       }
+      ]
+     }
+    ],
+    "note": "La société fictive compte 1 000 actions et en émet 250. Sans souscrire, vos 400 actions ne pèsent plus que 32 % du capital au lieu de 40 % : c’est cette dilution que la vente des droits compense. En souscrivant vos 100 actions nouvelles, vous gardez 40 %."
    }
   },
   {

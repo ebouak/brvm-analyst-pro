@@ -1,17 +1,16 @@
 'use client';
 
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
-import { Position, OpenPosition } from '@/lib/paper-trading/types';
+import { PaperOpenPosition, Position } from '@/lib/paper-trading/types';
 import { InfoTip } from '@/components/paper-trading/InfoTip';
 import { useState } from 'react';
 
 interface PaperTradingJournalProps {
-  openPositions: OpenPosition[];
+  openPositions: PaperOpenPosition[];
   closedPositions: Position[];
   /** Valeur totale du portefeuille (liquidités + positions) pour calculer le poids. */
   portfolioValue: number;
-  onClose?: (id: string) => void;
-  busy?: boolean;
+  onCreateSell?: (code: string, quantity: number) => void;
 }
 
 const colorOf = (v: number) => (v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-muted');
@@ -22,8 +21,7 @@ export function PaperTradingJournal({
   openPositions,
   closedPositions,
   portfolioValue,
-  onClose,
-  busy,
+  onCreateSell,
 }: PaperTradingJournalProps) {
   const [showOpen, setShowOpen] = useState(true);
 
@@ -57,8 +55,7 @@ export function PaperTradingJournal({
         <OpenPositionsTable
           positions={openPositions}
           portfolioValue={portfolioValue}
-          onClose={onClose}
-          busy={busy}
+          onCreateSell={onCreateSell}
         />
       ) : (
         <ClosedTradesTable trades={closedPositions} />
@@ -71,21 +68,18 @@ export function PaperTradingJournal({
 function OpenPositionsTable({
   positions,
   portfolioValue,
-  onClose,
-  busy,
+  onCreateSell,
 }: {
-  positions: OpenPosition[];
+  positions: PaperOpenPosition[];
   portfolioValue: number;
-  onClose?: (id: string) => void;
-  busy?: boolean;
+  onCreateSell?: (code: string, quantity: number) => void;
 }) {
   if (positions.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-surface p-10 text-center">
         <p className="font-medium text-white">Aucune position ouverte</p>
         <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
-          Ouvrez une position fictive pour tester un signal. Vous suivrez ici, ligne par ligne,
-          votre gain ou perte au cours du jour.
+          Passez un ordre d’achat simulé pour suivre vos titres, leurs cours et votre P&amp;L latent.
         </p>
       </div>
     );
@@ -135,7 +129,7 @@ function OpenPositionsTable({
                 <InfoTip label="Part de cette position dans la valeur totale du portefeuille." />
               </span>
             </th>
-            {onClose && <th className="px-3 py-2.5 text-right font-semibold sr-only">Action</th>}
+            {onCreateSell && <th className="px-3 py-2.5 text-right font-semibold">Disponible</th>}
           </tr>
         </thead>
         <tbody>
@@ -175,16 +169,16 @@ function OpenPositionsTable({
                     </span>
                   </div>
                 </td>
-                {onClose && (
+                {onCreateSell && (
                   <td className="px-3 py-3 text-right">
                     <button
                       type="button"
-                      disabled={busy}
-                      aria-label={`Fermer la position ${p.code}`}
-                      onClick={() => onClose(p.id)}
-                      className="rounded border border-down/40 px-3 py-1 text-xs text-down transition hover:bg-down/10 active:scale-95 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-down/50"
+                      disabled={p.availableShares <= 0}
+                      aria-label={`Créer un ordre de vente pour ${p.code}, ${p.availableShares} titres disponibles`}
+                      onClick={() => onCreateSell(p.code, p.availableShares)}
+                      className="rounded border border-down/40 px-3 py-1 text-xs text-down transition hover:bg-down/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-down/50"
                     >
-                      Fermer
+                      Vendre · {fmtNumber(p.availableShares, 0)}
                     </button>
                   </td>
                 )}
@@ -202,7 +196,7 @@ function OpenPositionsTable({
             <td className={`px-3 py-2.5 text-right tabular font-semibold ${colorOf(totLatent)}`}>
               {arrowOf(totLatent)} {signed(totLatent, fmtFcfa)}
             </td>
-            <td colSpan={onClose ? 2 : 1} />
+            <td colSpan={onCreateSell ? 2 : 1} />
           </tr>
         </tfoot>
       </table>

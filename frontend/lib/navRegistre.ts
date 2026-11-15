@@ -17,13 +17,13 @@
 export type Rubrique = 'aujourdhui' | 'marche' | 'idee' | 'revenus' | 'portefeuille' | 'apprendre';
 
 /** Libellés des six rubriques (variante ambitieuse retenue, spec §5). */
-export const RUBRIQUES: { id: Rubrique; libelle: string }[] = [
-  { id: 'aujourdhui', libelle: "Aujourd'hui" },
-  { id: 'marche', libelle: 'Le marché' },
-  { id: 'idee', libelle: 'Trouver une idée' },
-  { id: 'revenus', libelle: 'Mes revenus' },
-  { id: 'portefeuille', libelle: 'Mon portefeuille' },
-  { id: 'apprendre', libelle: 'Apprendre' },
+export const RUBRIQUES: { id: Rubrique; libelle: string; /** Libellé de la barre du bas (mobile). */ court: string }[] = [
+  { id: 'aujourdhui', libelle: "Aujourd'hui", court: "Aujourd'hui" },
+  { id: 'marche', libelle: 'Le marché', court: 'Marché' },
+  { id: 'idee', libelle: 'Trouver une idée', court: 'Idées' },
+  { id: 'revenus', libelle: 'Mes revenus', court: 'Revenus' },
+  { id: 'portefeuille', libelle: 'Mon portefeuille', court: 'Portefeuille' },
+  { id: 'apprendre', libelle: 'Apprendre', court: 'Apprendre' },
 ];
 
 /**
@@ -65,7 +65,17 @@ interface EntreeCommune {
   description?: string;
   /** Colonne du panneau (1 ou 2) où l'entrée de menu est rangée. Obligatoire pour `statut: 'menu'`. */
   colonne?: 1 | 2;
+  /**
+   * Groupe nommé du panneau de la barre de cote (ex. « Documents »). Une entrée
+   * groupée est montrée dans le panneau de sa rubrique MÊME hors menu
+   * (`secondaire`) : elle porte alors `description` et `colonne` (testé). Le
+   * statut ne change pas (la page garde son parent et son fil d'Ariane).
+   */
+  groupe?: GroupePanneau;
 }
+
+/** Groupes nommés des panneaux de la barre de cote (énumération fermée). */
+export type GroupePanneau = 'Documents';
 
 export type EntreeNav =
   | (EntreeCommune & { statut: 'menu'; raison?: undefined })
@@ -100,15 +110,15 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/actions/[code]/print', libelle: 'Version imprimable', rubrique: 'marche', parent: '/actions/[code]/financials', statut: 'parcours', raison: "sortie d'impression", sansFil: true },
   { chemin: '/actions/[code]/quant', libelle: 'Fiche Quant', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'document de la fiche' },
   { chemin: '/actions/[code]/revue', libelle: 'Revue de résultats', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'document de la fiche' },
-  { chemin: '/rapports/dossiers', libelle: 'Dossiers valeur', rubrique: 'marche', description: 'Un rapport A4 par société', colonne: 1, statut: 'menu' },
-  { chemin: '/rapports/revues', libelle: 'Revues de résultats', rubrique: 'marche', parent: '/rapports/dossiers', statut: 'secondaire', raison: ONGLET('Rapports') },
+  { chemin: '/rapports/dossiers', libelle: 'Dossiers valeur', rubrique: 'marche', description: 'Un rapport A4 par société', colonne: 2, groupe: 'Documents', statut: 'menu' },
+  { chemin: '/rapports/revues', libelle: 'Revues de résultats', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Les derniers comptes publiés, analysés', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: ONGLET('Rapports') },
   { chemin: '/actions/compare', libelle: 'Comparer des actions', rubrique: 'marche', parent: '/actions', statut: 'secondaire', raison: 'lié depuis Actions et la palette' },
   { chemin: '/rapports/dossier/[code]', libelle: 'Dossier A4', rubrique: 'marche', parent: '/actions/[code]', statut: 'parcours', raison: 'document imprimable de la fiche' },
   { chemin: '/societes', libelle: 'Sociétés cotées', libelleMenu: 'Sociétés', rubrique: 'marche', description: 'Annuaire des sociétés cotées', colonne: 1, statut: 'menu' },
   { chemin: '/societes/[code]', libelle: 'Fiche société', rubrique: 'marche', parent: '/societes', statut: 'public', raison: 'fiche publique (SEO)', libelleParam: true },
   { chemin: '/obligations', libelle: 'Obligations', rubrique: 'marche', description: 'Rendement, duration, courbe des taux', colonne: 1, statut: 'menu' },
   { chemin: '/secteurs', libelle: 'Secteurs', rubrique: 'marche', description: 'Performance par secteur', colonne: 1, statut: 'menu' },
-  { chemin: '/heatmap', libelle: 'Heatmap', rubrique: 'marche', description: 'La séance en carte de couleurs', colonne: 2, statut: 'menu' },
+  { chemin: '/heatmap', libelle: 'Heatmap', rubrique: 'marche', description: 'La séance en carte de couleurs', colonne: 1, statut: 'menu' },
   { chemin: '/fondamentaux', libelle: 'Fondamentaux', rubrique: 'marche', description: 'Comptes et ratios comparés', colonne: 2, statut: 'menu' },
   { chemin: '/notations', libelle: 'Notations financières', rubrique: 'marche', parent: '/fondamentaux', statut: 'secondaire', raison: ONGLET('Fondamentaux') },
   { chemin: '/liquidite', libelle: 'Liquidité', rubrique: 'marche', description: 'Combien coûte une vente', colonne: 2, statut: 'menu' },
@@ -153,16 +163,16 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/parametres/alertes', libelle: 'Mes alertes', libelleMenu: 'Alertes', rubrique: 'portefeuille', description: 'Prévenu par e-mail ou messagerie', colonne: 2, statut: 'menu' },
   { chemin: '/premium/paper-trading', libelle: 'Portefeuille virtuel', rubrique: 'portefeuille', description: 'S’entraîner avec un capital virtuel', colonne: 2, statut: 'menu' },
   { chemin: '/classement', libelle: 'Classement des portefeuilles virtuels', rubrique: 'portefeuille', parent: '/premium/paper-trading', statut: 'secondaire', raison: 'lié depuis le portefeuille virtuel' },
-  { chemin: '/dashboard/reports/events', libelle: 'Événements et impact', rubrique: 'marche', parent: '/rapports/dossiers', statut: 'secondaire', raison: ONGLET('Rapports') },
-  { chemin: '/rapports/saison', libelle: 'Saison des résultats', rubrique: 'marche', parent: '/rapports/dossiers', statut: 'secondaire', raison: 'atteinte depuis l’onglet Événements ; derrière la connexion (comme les autres onglets Rapports), donc non indexable' },
+  { chemin: '/dashboard/reports/events', libelle: 'Événements et impact', libelleMenu: 'Événements', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Publications et réaction du cours', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: ONGLET('Rapports') },
+  { chemin: '/rapports/saison', libelle: 'Saison des résultats', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Qui a publié, qui reste attendu', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: 'atteinte depuis l’onglet Événements ; derrière la connexion (comme les autres onglets Rapports), donc non indexable' },
   { chemin: '/dashboard/reports/events/[id]', libelle: "Étude d'événement", rubrique: 'marche', parent: '/dashboard/reports/events', statut: 'parcours', raison: 'détail atteint depuis la liste des événements' },
   { chemin: '/premium/reports', libelle: 'Relevé mensuel', libelleMenu: 'Mon relevé', rubrique: 'portefeuille', description: 'Votre relevé de chaque mois', colonne: 2, statut: 'menu', premium: true },
   { chemin: '/premium/reports/[month]', libelle: 'Rapport mensuel', rubrique: 'portefeuille', parent: '/premium/reports', statut: 'parcours', raison: 'mois atteint depuis l’archive', premium: true, libelleParam: true },
   { chemin: '/rapports/releve/[id]', libelle: 'Relevé mensuel', rubrique: 'portefeuille', parent: '/premium/reports', statut: 'parcours', raison: 'document imprimable du relevé, atteint depuis la bibliothèque (le robot d’impression y entre par un jeton à usage unique)', premium: true },
 
   // ── Apprendre ──────────────────────────────────────────────────────────────
-  { chemin: '/debutant', libelle: 'Débuter', rubrique: 'apprendre', description: 'Les bases pour démarrer', colonne: 1, statut: 'menu' },
   { chemin: '/formations', libelle: 'Formations et conférences', libelleMenu: 'Academy et formations', rubrique: 'apprendre', description: 'Academy, cours et conférences', colonne: 1, statut: 'menu' },
+  { chemin: '/debutant', libelle: 'Débuter', rubrique: 'apprendre', description: 'Les bases pour démarrer', colonne: 1, statut: 'menu' },
   { chemin: '/formations/academy', libelle: 'WestBourse Academy', rubrique: 'apprendre', parent: '/formations', statut: 'public', raison: 'hub de l’Academy (SEO)' },
   { chemin: '/formations/academy/[slug]', libelle: 'Leçon', rubrique: 'apprendre', parent: '/formations/academy', statut: 'public', raison: 'leçon de l’Academy' },
   { chemin: '/formations/academy/certificat', libelle: 'Certificat', rubrique: 'apprendre', parent: '/formations/academy', statut: 'parcours', raison: 'génération du certificat après l’examen' },

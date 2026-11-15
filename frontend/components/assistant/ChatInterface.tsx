@@ -174,7 +174,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-140px-var(--barre-h))] max-w-4xl mx-auto">
       {/* Header — double-bezel inner strip */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-border/60 bg-elevated/50">
         {/* Avatar double-bezel */}

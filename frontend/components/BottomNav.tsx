@@ -2,45 +2,32 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, GraduationCap, LayoutDashboard, LineChart, Search } from 'lucide-react';
-import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
+import { Briefcase, GraduationCap, Grid3x3, LayoutDashboard, LineChart, Lightbulb, Wallet } from 'lucide-react';
 import { rubriqueDe } from '@/lib/nav';
 import type { Rubrique } from '@/lib/navRegistre';
+import { destinationsPouce } from '@/lib/barreDeCote';
+import { OUVRIR_GRILLE_EVENT } from '@/components/layout/barre/BarreDeCote';
 
 /**
- * Barre de navigation mobile fixe (< md), alignée sur les rubriques du menu
- * (spec navigation 2026-11-11 §6) : Aujourd'hui · Marché · Recherche ·
- * Portefeuille · Apprendre. Une case s'allume quand la page courante
- * appartient à sa rubrique dans le registre (lib/navRegistre.ts), sous-pages
- * et pages dynamiques comprises. « Trouver une idée » et « Mes revenus »
- * restent dans le tiroir complet (MobileNav) : aucune case ne s'y allume.
+ * Barre du bas (mobile et tablette, < 1024 px), pour l'accès au pouce : quatre
+ * destinations TIRÉES DU REGISTRE (`destinationsPouce` : la première entrée de
+ * menu de « Aujourd'hui », « Le marché », « Mon portefeuille » et
+ * « Apprendre »), plus la grille, qui ouvre le plein écran de la barre de cote
+ * (les six rubriques). La recherche vit dans la barre du haut. Une case
+ * s'allume quand la page courante appartient à sa rubrique dans le registre.
  */
-type Onglet = { href: string; label: string; rubrique: Rubrique; Icone: typeof LineChart };
+const ICONES: Record<Rubrique, typeof LineChart> = {
+  aujourdhui: LayoutDashboard,
+  marche: LineChart,
+  idee: Lightbulb,
+  revenus: Wallet,
+  portefeuille: Briefcase,
+  apprendre: GraduationCap,
+};
 
-const AVANT: Onglet[] = [
-  { href: '/dashboard', label: "Aujourd'hui", rubrique: 'aujourdhui', Icone: LayoutDashboard },
-  { href: '/actions', label: 'Marché', rubrique: 'marche', Icone: LineChart },
-];
-const APRES: Onglet[] = [
-  { href: '/portefeuille', label: 'Portefeuille', rubrique: 'portefeuille', Icone: Briefcase },
-  { href: '/formations', label: 'Apprendre', rubrique: 'apprendre', Icone: GraduationCap },
-];
+const DESTINATIONS = destinationsPouce();
 
-const CASE = 'flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors';
-
-function Case({ o, rubrique }: { o: Onglet; rubrique: Rubrique | null }) {
-  const actif = o.rubrique === rubrique;
-  return (
-    <Link
-      href={o.href}
-      aria-current={actif ? 'page' : undefined}
-      className={`${CASE} ${actif ? 'text-accent' : 'text-muted hover:text-ivory'}`}
-    >
-      <o.Icone size={20} strokeWidth={1.8} aria-hidden />
-      {o.label}
-    </Link>
-  );
-}
+const CASE = 'flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-ink';
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -49,19 +36,33 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale mobile"
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] print:hidden lg:hidden"
     >
-      {AVANT.map((o) => <Case key={o.href} o={o} rubrique={rubrique} />)}
+      {DESTINATIONS.map((d) => {
+        const Icone = ICONES[d.rubrique];
+        const actif = d.rubrique === rubrique;
+        return (
+          <Link
+            key={d.href}
+            href={d.href}
+            aria-current={actif ? 'page' : undefined}
+            className={`${CASE} ${actif ? 'text-accent-ink' : 'text-muted hover:text-ivory'}`}
+          >
+            <Icone size={20} strokeWidth={1.8} aria-hidden />
+            {d.label}
+          </Link>
+        );
+      })}
       <button
         type="button"
-        aria-label="Rechercher une valeur ou une page"
-        onClick={() => window.dispatchEvent(new Event(OPEN_PALETTE_EVENT))}
-        className={`${CASE} text-muted hover:text-ivory active:scale-95`}
+        aria-label="Toutes les rubriques"
+        aria-haspopup="dialog"
+        onClick={() => window.dispatchEvent(new Event(OUVRIR_GRILLE_EVENT))}
+        className={`${CASE} text-muted hover:text-ivory`}
       >
-        <Search size={20} strokeWidth={1.8} aria-hidden />
-        Recherche
+        <Grid3x3 size={20} strokeWidth={1.8} aria-hidden />
+        Rubriques
       </button>
-      {APRES.map((o) => <Case key={o.href} o={o} rubrique={rubrique} />)}
     </nav>
   );
 }

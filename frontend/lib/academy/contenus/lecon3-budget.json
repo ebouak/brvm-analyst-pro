@@ -56,7 +56,41 @@
         { "titre": "Tout miser sur une valeur", "detail": "Une mauvaise nouvelle sur une société, et c’est tout le capital qui recule." },
         { "titre": "Multiplier les très petits ordres", "detail": "Avec un minimum de frais par ordre, dix petits achats coûtent bien plus qu’un seul." },
         { "titre": "Investir son épargne de précaution", "detail": "L’argent des imprévus doit rester disponible : une action peut être en baisse le jour où vous en avez besoin." }
-      ]
+      ],
+      "illustration": {
+        "gabarit": "avant_apres",
+        "titre": "50 000 FCFA et une valeur qui baisse de 20 % (exemple pédagogique)",
+        "unite": "FCFA",
+        "colonnes": [
+          {
+            "label": "Tout sur une seule valeur",
+            "segments": [
+              {
+                "label": "Ce qui reste",
+                "valeur": 40000
+              },
+              {
+                "label": "Perte",
+                "valeur": 10000
+              }
+            ]
+          },
+          {
+            "label": "Réparti sur cinq valeurs",
+            "segments": [
+              {
+                "label": "Ce qui reste",
+                "valeur": 48000
+              },
+              {
+                "label": "Perte",
+                "valeur": 2000
+              }
+            ]
+          }
+        ],
+        "note": "La même baisse coûte 10 000 FCFA quand tout est placé sur une valeur, et 2 000 FCFA, soit 4 % du portefeuille, quand le budget est réparti en cinq parts égales et qu’une seule des cinq baisse."
+      }
     },
     {
       "type": "retenir",

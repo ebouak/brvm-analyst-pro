@@ -105,6 +105,33 @@
     "frais_generaux": 41.9,
     "cout_risque": 3.6,
     "unite": "Md FCFA"
+   },
+   "illustration": {
+    "gabarit": "cascade",
+    "titre": "SIB, exercice 2025 : du produit net bancaire au résultat net",
+    "unite": "Md FCFA",
+    "reel": true,
+    "source": "Rapport d’activité 2025 de la SIB, publié en avril 2026",
+    "depart": {
+     "label": "Produit net bancaire",
+     "valeur": 108.7
+    },
+    "etapes": [
+     {
+      "label": "Frais généraux",
+      "valeur": -41.9
+     },
+     {
+      "label": "Coût du risque",
+      "valeur": -3.6
+     },
+     {
+      "label": "Impôt et autres (par différence)",
+      "valeur": -7.6
+     }
+    ],
+    "arrivee": "Résultat net 2025",
+    "note": "Le produit net bancaire, le coût du risque et le résultat net sont publiés par la banque. Les frais généraux sont déduits du coefficient d’exploitation publié (38,59 % de 108,7 Md), comme dans le simulateur ; la ligne « impôt et autres » est obtenue par différence et n’est pas un chiffre publié."
    }
   },
   {

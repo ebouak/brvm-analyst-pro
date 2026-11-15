@@ -755,3 +755,14 @@ body::after {
 @keyframes coteFondu { from { opacity: 0; } to { opacity: 1; } }
 .cote-fondu { animation: coteFondu 120ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .cote-fondu { animation: none; } }
+
+/* Hauteur de la barre de cote (lot 7) : les éléments collants des pages s'y
+   arrêtent (`top-[var(--barre-h)]`) et l'ancre ou le focus ne passent plus sous
+   elle (scroll-padding). Nulle sur les pages sans barre ; 44 px une fois la
+   barre compactée, en bureau seulement (la barre mobile garde 56 px). */
+:root { --barre-h: 0px; scroll-padding-top: var(--barre-h); }
+:root:has(#barre-de-cote) { --barre-h: 3.5rem; }
+@media (min-width: 1024px) {
+  :root:has(#barre-de-cote[data-compacte]) { --barre-h: 2.75rem; }
+}
+@media print { :root { --barre-h: 0px !important; } }

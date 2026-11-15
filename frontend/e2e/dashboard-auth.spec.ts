@@ -37,7 +37,8 @@ test('dashboard authentifié : la navigation par <Link> fonctionne (anti-régres
   expect(blockers, 'overlay plein écran interceptant les clics').toBe(0);
 
   // LA régression : depuis /dashboard (page d'entrée), un clic <Link> de la
-  // sidebar doit naviguer.
-  await page.getByRole('link', { name: /^Actions$/i }).first().click({ timeout: 8000 });
+  // navigation doit naviguer (barre de cote, panneau « Le marché »).
+  await page.getByRole('button', { name: 'Le marché' }).click({ timeout: 8000 });
+  await page.locator('#barre-de-cote a[href="/actions"]').click({ timeout: 8000 });
   await expect(page).toHaveURL(/\/actions(?:$|\/|\?)/, { timeout: 10_000 });
 });

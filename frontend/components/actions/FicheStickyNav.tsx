@@ -88,7 +88,7 @@ export function FicheStickyNav({
   // Fond OPAQUE (pas de backdrop-blur) : un backdrop-filter collant par-dessus le
   // canvas du graphique provoque des artefacts de compositing sur Chromium.
   return (
-    <nav aria-label="Rubriques de la fiche" className="sticky top-0 z-30 -mx-4 border-b border-border/60 bg-bg px-4 py-2 md:-mx-6 md:px-6">
+    <nav aria-label="Rubriques de la fiche" className="sticky top-[var(--barre-h)] z-30 -mx-4 border-b border-border/60 bg-bg px-4 py-2 transition-[top] duration-150 motion-reduce:transition-none md:-mx-6 md:px-6">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {compact && cours != null && (
           <span className="mr-1 flex shrink-0 items-center gap-2 border-r border-border/60 pr-3">

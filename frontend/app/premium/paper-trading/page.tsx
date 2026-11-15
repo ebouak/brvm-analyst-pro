@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PaperTradingDashboard } from '@/components/PaperTradingDashboard';
 import { PaperLeaderboard } from '@/components/PaperLeaderboard';
 import { paperTradingService } from '@/lib/paper-trading/service';
@@ -20,23 +20,25 @@ export default function PaperTradingPage() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function checkAccount() {
-      try {
-        const { account: acc } = await paperTradingService.getPositions();
-        setAccount(acc);
-        if (!acc) {
-          setShowModal(true);
-        }
-      } catch (err) {
-        console.error('Failed to check account:', err);
-        setAccount(null);
+  const checkAccount = useCallback(async () => {
+    try {
+      setError(null);
+      const { account: acc } = await paperTradingService.getPositions();
+      setAccount(acc);
+      if (!acc) {
         setShowModal(true);
       }
+    } catch (err) {
+      console.error('Failed to check account:', err);
+      setAccount(null);
+      setShowModal(false);
+      setError('Impossible de vérifier le compte simulé. Réessayez dans quelques instants.');
     }
-
-    checkAccount();
   }, []);
+
+  useEffect(() => {
+    void checkAccount();
+  }, [checkAccount]);
 
   const handleInitialize = async (capital: number) => {
     try {
@@ -58,7 +60,7 @@ export default function PaperTradingPage() {
             Paper Trading
           </h1>
           <p className="text-sm text-muted">
-            Testez vos signaux sans risquer votre capital
+            Simulez des ordres sur les valeurs BRVM, sans engager de capital réel
           </p>
         </div>
 
@@ -78,16 +80,31 @@ export default function PaperTradingPage() {
 
         {account === null && !showModal && (
           <div className="mt-8 bg-surface border border-border rounded-lg p-8 text-center">
-            <p className="text-ivory mb-6">
-              Pas encore de compte paper trading. Créez-en un maintenant.
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowModal(true)}
-              className="bg-accent-ink hover:brightness-110 text-obsidian px-6 py-2 rounded transition"
-            >
-              Initialiser un compte
-            </button>
+            {error ? (
+              <>
+                <p role="alert" className="mb-5 text-sm text-down">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => void checkAccount()}
+                  className="rounded border border-border px-4 py-2 text-sm text-ivory transition hover:bg-elevated"
+                >
+                  Réessayer
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-ivory mb-6">
+                  Pas encore de compte paper trading. Créez-en un maintenant.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(true)}
+                  className="bg-accent-ink hover:brightness-110 text-obsidian px-6 py-2 rounded transition"
+                >
+                  Initialiser un compte
+                </button>
+              </>
+            )}
           </div>
         )}
 
