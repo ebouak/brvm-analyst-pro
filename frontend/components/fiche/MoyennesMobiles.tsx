@@ -1,5 +1,6 @@
 import { fmtDateCourte, fmtFcfa, fmtPctAbs, fmtPctSigne } from '@/lib/format';
-import type { MovingAverageReading } from '@/lib/movingAverages';
+import { MiniGraphiqueMoyennes } from '@/components/fiche/MiniGraphiqueMoyennes';
+import type { DatedClose, MovingAverageReading } from '@/lib/movingAverages';
 import type { SectorBreadthResult } from '@/lib/movingAverages/server';
 
 interface Moyenne {
@@ -12,19 +13,13 @@ interface Moyenne {
 
 interface Props {
   reading: MovingAverageReading;
+  points: DatedClose[];
   breadth: SectorBreadthResult;
   secteur: string | null;
   dateDernierCours: string | null;
   dateSeance: string;
   seancesSansCotation: number | null;
 }
-
-const REGIME = {
-  haussier: 'haussière',
-  baissier: 'baissière',
-  mixte: 'mixte',
-  incomplet: 'incomplète',
-} as const;
 
 function MoyenneCard({ label, fenetre, valeur, ecart, pente }: Moyenne) {
   return (
@@ -43,11 +38,11 @@ function MoyenneCard({ label, fenetre, valeur, ecart, pente }: Moyenne) {
       ) : (
         <dl className="mt-3 space-y-1.5 border-t border-border/70 pt-2.5 text-xs">
           <div className="flex justify-between gap-3">
-            <dt className="text-muted">Écart du cours</dt>
+            <dt className="text-muted">Cours vs moyenne</dt>
             <dd className="tabular text-ivory">{ecart == null ? '—' : fmtPctSigne(ecart)}</dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-muted">Pente sur 5 séances</dt>
+            <dt className="text-muted">Variation de la moyenne · 5 séances</dt>
             <dd className="tabular text-ivory">{pente == null ? '—' : fmtPctSigne(pente)}</dd>
           </div>
         </dl>
@@ -78,6 +73,7 @@ function BreadthLine({
 
 export function MoyennesMobiles({
   reading,
+  points,
   breadth,
   secteur,
   dateDernierCours,
@@ -85,14 +81,10 @@ export function MoyennesMobiles({
   seancesSansCotation,
 }: Props) {
   const moyennes: Moyenne[] = [
-    { label: 'SMA 20', fenetre: 20, valeur: reading.sma20, ecart: reading.distance20Pct, pente: reading.slope20Pct },
-    { label: 'SMA 50', fenetre: 50, valeur: reading.sma50, ecart: reading.distance50Pct, pente: reading.slope50Pct },
-    { label: 'SMA 200', fenetre: 200, valeur: reading.sma200, ecart: reading.distance200Pct, pente: reading.slope200Pct },
+    { label: 'Moyenne mobile', fenetre: 20, valeur: reading.sma20, ecart: reading.distance20Pct, pente: reading.slope20Pct },
+    { label: 'Moyenne mobile', fenetre: 50, valeur: reading.sma50, ecart: reading.distance50Pct, pente: reading.slope50Pct },
+    { label: 'Moyenne mobile', fenetre: 200, valeur: reading.sma200, ecart: reading.distance200Pct, pente: reading.slope200Pct },
   ];
-
-  const structure = reading.regime === 'incomplet'
-    ? 'Structure de tendance incomplète : les moyennes 20 et 50 séances ne sont pas toutes disponibles.'
-    : `Structure ${REGIME[reading.regime]} · ${reading.regimeHorizon === 'complet' ? 'court, moyen et long terme' : 'court et moyen terme seulement'}.`;
 
   return (
     <section aria-labelledby="moyennes-mobiles-title" className="rounded-card border border-border bg-surface p-4 md:p-5">
@@ -118,19 +110,22 @@ export function MoyennesMobiles({
         </p>
       )}
 
+      <MiniGraphiqueMoyennes points={points} reading={reading} asOfDate={dateSeance} />
+
+      <p className="mt-4 text-xs leading-relaxed text-faint">
+        L&apos;écart compare la dernière clôture à la moyenne ; sa variation compare la moyenne actuelle à celle d&apos;il y a 5 séances.
+      </p>
       <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
         {moyennes.map((moyenne) => <MoyenneCard key={moyenne.label} {...moyenne} />)}
       </div>
 
-      <div className="mt-4 rounded-card border border-border/80 bg-bg/35 px-3.5 py-3">
-        <p className="text-xs text-faint">Structure observée</p>
-        <p className="mt-1 text-sm text-ivory">{structure}</p>
-        {reading.crossover && (
-          <p className="mt-2 border-t border-border/70 pt-2 text-xs leading-relaxed text-muted">
-            Croisement SMA20/SMA50 observé {reading.crossover === 'haussier' ? 'à la hausse' : 'à la baisse'} : {fmtDateCourte(reading.date)}.
+      {reading.crossover && (
+        <div className="mt-4 rounded-card border border-border/80 bg-bg/35 px-3.5 py-3">
+          <p className="text-xs leading-relaxed text-muted">
+            Croisement des moyennes 20/50 séances observé {reading.crossover === 'haussier' ? 'à la hausse' : 'à la baisse'} : {fmtDateCourte(reading.date)}.
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="mt-4">
         <h4 className="text-xs font-semibold text-ivory">

@@ -28,6 +28,14 @@ export interface MovingAverageReading {
   crossover: MovingAverageCrossover;
 }
 
+export interface MovingAverageChartPoint {
+  date: string;
+  close: number;
+  sma20: number | null;
+  sma50: number | null;
+  sma200: number | null;
+}
+
 export interface SectorBreadthReading {
   sma50Above: { above: number; total: number; percent: number | null };
   sma200Above: { above: number; total: number; percent: number | null };
@@ -40,12 +48,107 @@ function isValidClose(point: DatedClose): point is DatedClose & { close: number 
   return point.close != null && Number.isFinite(point.close) && point.close > 0;
 }
 
+function isValidDate(date: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const timestamp = Date.parse(`${date}T00:00:00.000Z`);
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === date;
+}
+
 function orderedThrough(points: DatedClose[], asOfDate?: string): DatedClose[] {
   const dated = points
     .filter((point) => point.date <= (asOfDate ?? '9999-12-31'))
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date));
   return dated;
+}
+
+export function buildMovingAverageChart(
+  points: DatedClose[],
+  asOfDate?: string,
+): MovingAverageChartPoint[] {
+  if (asOfDate !== undefined && !isValidDate(asOfDate)) return [];
+
+  const valid = points
+    .filter((point) => isValidDate(point.date) && (asOfDate === undefined || point.date <= asOfDate))
+    .filter(isValidClose)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const closes = valid.map((point) => point.close);
+  const averages: Record<Period, (number | null)[]> = {
+    20: smaSeries(closes, 20),
+    50: smaSeries(closes, 50),
+    200: smaSeries(closes, 200),
+  };
+
+  return valid
+    .map((point, index) => ({
+      date: point.date,
+      close: point.close,
+      sma20: averages[20][index] ?? null,
+      sma50: averages[50][index] ?? null,
+      sma200: averages[200][index] ?? null,
+    }))
+    .slice(-120);
+}
+
+export function describeMovingAveragePosition(reading: MovingAverageReading): string {
+  const positions = [
+    { period: 20, distance: reading.distance20Pct },
+    { period: 50, distance: reading.distance50Pct },
+    { period: 200, distance: reading.distance200Pct },
+  ] as const;
+  const available = positions.filter(
+    (position): position is (typeof positions)[number] & { distance: number } =>
+      position.distance != null && Number.isFinite(position.distance),
+  );
+  const missing = positions.filter(
+    (position) => position.distance == null || !Number.isFinite(position.distance),
+  );
+
+  if (available.length === 0) {
+    return `Lecture incomplète : aucune donnée de position n’est disponible pour les moyennes mobiles à ${missing.map((item) => item.period).join(', ')} séances.`;
+  }
+
+  const groups = {
+    above: available.filter((item) => item.distance > 0).map((item) => item.period),
+    below: available.filter((item) => item.distance < 0).map((item) => item.period),
+    equal: available.filter((item) => item.distance === 0).map((item) => item.period),
+  };
+  const positionText = (position: 'above' | 'below' | 'equal', values: number[]) => {
+    const plural = values.length > 1;
+    const horizon = plural
+      ? `${values.slice(0, -1).join(', ')} et ${values[values.length - 1]}`
+      : String(values[0]);
+    if (position === 'above') {
+      return `au-dessus ${plural ? 'des' : 'de la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+    }
+    if (position === 'below') {
+      return `sous ${plural ? 'les' : 'la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+    }
+    return `au niveau ${plural ? 'des' : 'de la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+  };
+  const populatedGroups = [groups.above, groups.below, groups.equal].filter((group) => group.length > 0);
+  let summary: string;
+
+  if (populatedGroups.length > 1) {
+    const positionsText = [
+      groups.above.length > 0 ? positionText('above', groups.above) : null,
+      groups.below.length > 0 ? positionText('below', groups.below) : null,
+      groups.equal.length > 0 ? positionText('equal', groups.equal) : null,
+    ].filter((part): part is string => part != null);
+    summary = `La position du cours est contrastée selon les horizons : ${positionsText.join('; ')}.`;
+  } else if (groups.above.length > 0) {
+    summary = `Le cours se situe ${positionText('above', groups.above)}.`;
+  } else if (groups.below.length > 0) {
+    summary = `Le cours se situe ${positionText('below', groups.below)}.`;
+  } else {
+    summary = `Le cours se situe ${positionText('equal', groups.equal)}.`;
+  }
+
+  if (missing.length === 0) return summary;
+  const missingHorizons = missing.map((item) => item.period).join(', ');
+  const noun = missing.length === 1 ? 'la moyenne mobile' : 'les moyennes mobiles';
+  return `${summary} Lecture incomplète : données indisponibles pour ${noun} à ${missingHorizons} séances.`;
 }
 
 function safePercent(numerator: number, denominator: number): number | null {

@@ -1694,6 +1694,7 @@ async function FicheAction(props: PropsFiche) {
             moyennesMobiles={
               <MoyennesMobiles
                 reading={movingAverageReading}
+                points={movingAveragePoints}
                 breadth={sectorBreadth}
                 secteur={secteurMoyennes}
                 dateDernierCours={movingAverageReading.date}
