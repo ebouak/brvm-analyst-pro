@@ -1,0 +1,123 @@
+{"page":"/","essai":1,"statut":200,"dnsMs":0.019933,"connexionMs":0.023406,"tlsMs":0.038231,"ttfbS":1.068393,"totalS":1.247956,"octets":38509}
+{"page":"/","essai":2,"statut":200,"dnsMs":0.000705,"connexionMs":0.002140,"tlsMs":0.016731,"ttfbS":0.616702,"totalS":0.798513,"octets":38389}
+{"page":"/","essai":3,"statut":200,"dnsMs":0.000708,"connexionMs":0.002573,"tlsMs":0.017533,"ttfbS":0.448830,"totalS":0.615585,"octets":38477}
+{"page":"/","essai":4,"statut":200,"dnsMs":0.000840,"connexionMs":0.004184,"tlsMs":0.018946,"ttfbS":0.469443,"totalS":0.662351,"octets":38412}
+{"page":"/","essai":5,"statut":200,"dnsMs":0.000724,"connexionMs":0.002117,"tlsMs":0.016885,"ttfbS":0.460449,"totalS":0.625020,"octets":38450}
+ENTETE / | HTTP/2 200 
+ENTETE / | age: 0
+ENTETE / | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE / | content-encoding: br
+ENTETE / | content-type: text/html; charset=utf-8
+ENTETE / | x-vercel-cache: MISS
+ENTETE / | x-vercel-id: iad1::cdg1::v7dwh-1794847631339-6f7570496492
+{"page":"/actions","essai":1,"statut":200,"dnsMs":0.000613,"connexionMs":0.002169,"tlsMs":0.016850,"ttfbS":0.246507,"totalS":0.562736,"octets":32432}
+{"page":"/actions","essai":2,"statut":200,"dnsMs":0.000747,"connexionMs":0.004077,"tlsMs":0.018542,"ttfbS":0.237600,"totalS":0.457043,"octets":32550}
+{"page":"/actions","essai":3,"statut":200,"dnsMs":0.000602,"connexionMs":0.003425,"tlsMs":0.017986,"ttfbS":0.310429,"totalS":0.596377,"octets":32483}
+{"page":"/actions","essai":4,"statut":200,"dnsMs":0.000648,"connexionMs":0.003634,"tlsMs":0.018233,"ttfbS":0.280238,"totalS":0.496071,"octets":32344}
+{"page":"/actions","essai":5,"statut":200,"dnsMs":0.000618,"connexionMs":0.001960,"tlsMs":0.016576,"ttfbS":0.241043,"totalS":0.411251,"octets":32609}
+ENTETE /actions | HTTP/2 200 
+ENTETE /actions | age: 0
+ENTETE /actions | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /actions | content-encoding: br
+ENTETE /actions | content-type: text/html; charset=utf-8
+ENTETE /actions | x-vercel-cache: MISS
+ENTETE /actions | x-vercel-id: iad1::cdg1::hpgqp-1794847634551-3cbda488613b
+{"page":"/actions/SNTS","essai":1,"statut":200,"dnsMs":0.000629,"connexionMs":0.002205,"tlsMs":0.016980,"ttfbS":0.517379,"totalS":1.976533,"octets":43454}
+{"page":"/actions/SNTS","essai":2,"statut":200,"dnsMs":0.000826,"connexionMs":0.004226,"tlsMs":0.019485,"ttfbS":0.256525,"totalS":0.754422,"octets":43265}
+{"page":"/actions/SNTS","essai":3,"statut":200,"dnsMs":0.000957,"connexionMs":0.002722,"tlsMs":0.017999,"ttfbS":0.239548,"totalS":0.669742,"octets":43174}
+{"page":"/actions/SNTS","essai":4,"statut":200,"dnsMs":0.000742,"connexionMs":0.001952,"tlsMs":0.016824,"ttfbS":1.629212,"totalS":2.090391,"octets":43267}
+{"page":"/actions/SNTS","essai":5,"statut":200,"dnsMs":0.000957,"connexionMs":0.004311,"tlsMs":0.019231,"ttfbS":0.252200,"totalS":0.800227,"octets":43281}
+ENTETE /actions/SNTS | HTTP/2 200 
+ENTETE /actions/SNTS | age: 0
+ENTETE /actions/SNTS | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /actions/SNTS | content-encoding: br
+ENTETE /actions/SNTS | content-type: text/html; charset=utf-8
+ENTETE /actions/SNTS | x-vercel-cache: MISS
+ENTETE /actions/SNTS | x-vercel-id: iad1::cdg1::zv5vv-1794847641346-431b993a99da
+{"page":"/societes","essai":1,"statut":200,"dnsMs":0.001162,"connexionMs":0.002573,"tlsMs":0.017439,"ttfbS":0.240935,"totalS":0.733327,"octets":19812}
+{"page":"/societes","essai":2,"statut":200,"dnsMs":0.000805,"connexionMs":0.003447,"tlsMs":0.018345,"ttfbS":0.220005,"totalS":0.262765,"octets":19760}
+{"page":"/societes","essai":3,"statut":200,"dnsMs":0.000766,"connexionMs":0.002369,"tlsMs":0.017103,"ttfbS":0.218582,"totalS":0.305570,"octets":19745}
+{"page":"/societes","essai":4,"statut":200,"dnsMs":0.000761,"connexionMs":0.002224,"tlsMs":0.016990,"ttfbS":0.218028,"totalS":0.301403,"octets":19774}
+{"page":"/societes","essai":5,"statut":200,"dnsMs":0.000750,"connexionMs":0.002366,"tlsMs":0.017178,"ttfbS":0.196492,"totalS":0.219072,"octets":19745}
+ENTETE /societes | HTTP/2 200 
+ENTETE /societes | age: 0
+ENTETE /societes | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /societes | content-encoding: br
+ENTETE /societes | content-type: text/html; charset=utf-8
+ENTETE /societes | x-vercel-cache: MISS
+ENTETE /societes | x-vercel-id: iad1::cdg1::kz7b7-1794847644120-da146823d6fa
+{"page":"/societes/SNTS","essai":1,"statut":200,"dnsMs":0.001629,"connexionMs":0.002835,"tlsMs":0.022509,"ttfbS":0.500700,"totalS":0.584103,"octets":20397}
+{"page":"/societes/SNTS","essai":2,"statut":200,"dnsMs":0.000896,"connexionMs":0.002518,"tlsMs":0.017420,"ttfbS":0.346538,"totalS":0.351190,"octets":20363}
+{"page":"/societes/SNTS","essai":3,"statut":200,"dnsMs":0.000865,"connexionMs":0.002524,"tlsMs":0.017317,"ttfbS":0.335232,"totalS":0.416945,"octets":20403}
+{"page":"/societes/SNTS","essai":4,"statut":200,"dnsMs":0.000945,"connexionMs":0.002084,"tlsMs":0.016824,"ttfbS":0.330399,"totalS":0.413703,"octets":20389}
+{"page":"/societes/SNTS","essai":5,"statut":200,"dnsMs":0.000910,"connexionMs":0.002280,"tlsMs":0.017246,"ttfbS":0.956149,"totalS":1.038816,"octets":20399}
+ENTETE /societes/SNTS | HTTP/2 200 
+ENTETE /societes/SNTS | age: 0
+ENTETE /societes/SNTS | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /societes/SNTS | content-encoding: br
+ENTETE /societes/SNTS | content-type: text/html; charset=utf-8
+ENTETE /societes/SNTS | x-vercel-cache: MISS
+ENTETE /societes/SNTS | x-vercel-id: iad1::cdg1::hrtf8-1794847647279-5707a4daa088
+{"page":"/login","essai":1,"statut":200,"dnsMs":0.000828,"connexionMs":0.002284,"tlsMs":0.018074,"ttfbS":0.288735,"totalS":0.291946,"octets":15069}
+{"page":"/login","essai":2,"statut":200,"dnsMs":0.000754,"connexionMs":0.003638,"tlsMs":0.019429,"ttfbS":0.228417,"totalS":0.232308,"octets":15038}
+{"page":"/login","essai":3,"statut":200,"dnsMs":0.000949,"connexionMs":0.002481,"tlsMs":0.018306,"ttfbS":0.226789,"totalS":0.240043,"octets":15013}
+{"page":"/login","essai":4,"statut":200,"dnsMs":0.000742,"connexionMs":0.002050,"tlsMs":0.017915,"ttfbS":0.248119,"totalS":0.251346,"octets":15038}
+{"page":"/login","essai":5,"statut":200,"dnsMs":0.000953,"connexionMs":0.002155,"tlsMs":0.017927,"ttfbS":0.257100,"totalS":0.339791,"octets":15026}
+ENTETE /login | HTTP/2 200 
+ENTETE /login | age: 0
+ENTETE /login | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /login | content-encoding: br
+ENTETE /login | content-type: text/html; charset=utf-8
+ENTETE /login | x-vercel-cache: MISS
+ENTETE /login | x-vercel-id: iad1::cdg1::hpk25-1794847649036-1808034e7e2e
+{"page":"/pricing","essai":1,"statut":200,"dnsMs":0.000711,"connexionMs":0.002431,"tlsMs":0.017333,"ttfbS":0.289385,"totalS":0.291370,"octets":15741}
+{"page":"/pricing","essai":2,"statut":200,"dnsMs":0.000696,"connexionMs":0.002240,"tlsMs":0.016981,"ttfbS":0.230892,"totalS":0.313949,"octets":15693}
+{"page":"/pricing","essai":3,"statut":200,"dnsMs":0.000687,"connexionMs":0.002228,"tlsMs":0.016813,"ttfbS":0.289912,"totalS":0.373165,"octets":15705}
+{"page":"/pricing","essai":4,"statut":200,"dnsMs":0.000687,"connexionMs":0.002444,"tlsMs":0.017050,"ttfbS":0.336932,"totalS":0.421052,"octets":15731}
+{"page":"/pricing","essai":5,"statut":200,"dnsMs":0.000716,"connexionMs":0.002337,"tlsMs":0.016971,"ttfbS":0.267716,"totalS":0.357615,"octets":15711}
+ENTETE /pricing | HTTP/2 200 
+ENTETE /pricing | age: 0
+ENTETE /pricing | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /pricing | content-encoding: br
+ENTETE /pricing | content-type: text/html; charset=utf-8
+ENTETE /pricing | x-vercel-cache: MISS
+ENTETE /pricing | x-vercel-id: iad1::cdg1::tbgn9-1794847651121-0175d73bf01b
+{"page":"/actualites","essai":1,"statut":200,"dnsMs":0.000674,"connexionMs":0.002058,"tlsMs":0.016875,"ttfbS":0.237428,"totalS":0.406333,"octets":58394}
+{"page":"/actualites","essai":2,"statut":200,"dnsMs":0.000725,"connexionMs":0.003974,"tlsMs":0.018763,"ttfbS":0.228499,"totalS":0.477303,"octets":58432}
+{"page":"/actualites","essai":3,"statut":200,"dnsMs":0.000712,"connexionMs":0.003435,"tlsMs":0.018136,"ttfbS":0.385173,"totalS":0.636266,"octets":58543}
+{"page":"/actualites","essai":4,"statut":200,"dnsMs":0.000887,"connexionMs":0.002230,"tlsMs":0.017028,"ttfbS":0.318975,"totalS":0.569989,"octets":58583}
+{"page":"/actualites","essai":5,"statut":200,"dnsMs":0.000862,"connexionMs":0.002325,"tlsMs":0.017178,"ttfbS":0.204395,"totalS":0.452059,"octets":58653}
+ENTETE /actualites | HTTP/2 200 
+ENTETE /actualites | age: 0
+ENTETE /actualites | cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+ENTETE /actualites | content-encoding: br
+ENTETE /actualites | content-type: text/html; charset=utf-8
+ENTETE /actualites | x-vercel-cache: MISS
+ENTETE /actualites | x-vercel-id: iad1::cdg1::n96ll-1794847654015-5777adcc813b
+{"page":"/logos/SNTS.jpg","essai":1,"statut":200,"dnsMs":0.000769,"connexionMs":0.002470,"tlsMs":0.017465,"ttfbS":0.070859,"totalS":0.070891,"octets":2456}
+{"page":"/logos/SNTS.jpg","essai":2,"statut":200,"dnsMs":0.000640,"connexionMs":0.002346,"tlsMs":0.017148,"ttfbS":0.048184,"totalS":0.048213,"octets":2456}
+{"page":"/logos/SNTS.jpg","essai":3,"statut":200,"dnsMs":0.000655,"connexionMs":0.003690,"tlsMs":0.018355,"ttfbS":0.073857,"totalS":0.073885,"octets":2456}
+{"page":"/logos/SNTS.jpg","essai":4,"statut":200,"dnsMs":0.000625,"connexionMs":0.002450,"tlsMs":0.017335,"ttfbS":0.042150,"totalS":0.042176,"octets":2456}
+{"page":"/logos/SNTS.jpg","essai":5,"statut":200,"dnsMs":0.000663,"connexionMs":0.002304,"tlsMs":0.017213,"ttfbS":0.033418,"totalS":0.033444,"octets":2456}
+ENTETE /logos/SNTS.jpg | HTTP/2 200 
+ENTETE /logos/SNTS.jpg | age: 0
+ENTETE /logos/SNTS.jpg | cache-control: public, max-age=86400, stale-while-revalidate=604800
+ENTETE /logos/SNTS.jpg | content-type: image/jpeg
+ENTETE /logos/SNTS.jpg | x-vercel-cache: HIT
+ENTETE /logos/SNTS.jpg | x-vercel-id: iad1::dwvpm-1794847654775-193db92cbb52
+{"page":"/manifest.json","essai":1,"statut":200,"dnsMs":0.000650,"connexionMs":0.002150,"tlsMs":0.016835,"ttfbS":0.078115,"totalS":0.078142,"octets":681}
+{"page":"/manifest.json","essai":2,"statut":200,"dnsMs":0.000633,"connexionMs":0.002243,"tlsMs":0.016820,"ttfbS":0.055266,"totalS":0.055293,"octets":681}
+{"page":"/manifest.json","essai":3,"statut":200,"dnsMs":0.000652,"connexionMs":0.001913,"tlsMs":0.016428,"ttfbS":0.048358,"totalS":0.048385,"octets":681}
+{"page":"/manifest.json","essai":4,"statut":200,"dnsMs":0.000661,"connexionMs":0.002151,"tlsMs":0.016721,"ttfbS":0.048240,"totalS":0.048268,"octets":681}
+{"page":"/manifest.json","essai":5,"statut":200,"dnsMs":0.000615,"connexionMs":0.003377,"tlsMs":0.018055,"ttfbS":0.054840,"totalS":0.054866,"octets":681}
+ENTETE /manifest.json | HTTP/2 200 
+ENTETE /manifest.json | age: 0
+ENTETE /manifest.json | cache-control: public, max-age=0, must-revalidate
+ENTETE /manifest.json | content-type: application/json; charset=utf-8
+ENTETE /manifest.json | x-vercel-cache: HIT
+ENTETE /manifest.json | x-vercel-id: iad1::gblhx-1794847655132-e1fbf2802584
+CHUNK /_next/static/chunks/webpack-12684069ca70dc4d.js
+ENTETE chunk | HTTP/2 200 
+ENTETE chunk | cache-control: public,max-age=31536000,immutable
+ENTETE chunk | content-encoding: br
+ENTETE chunk | x-vercel-cache: MISS
