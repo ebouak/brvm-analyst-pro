@@ -108,6 +108,8 @@ import ActionMenu from '@/components/actions/ActionMenu';
 import SeasonalityCard from '@/components/seasonality/SeasonalityCard';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
 import { demarrer } from '@/lib/async/demarrer';
+import { Suspense } from 'react';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -270,12 +272,48 @@ async function getData(code: string, fromDate?: string) {
   };
 }
 
-export default async function InstrumentPage(
-  props: {
-    params: Promise<{ code: string }>;
-    searchParams: Promise<{ from?: string; rubrique?: string | string[] }>;
-  }
-) {
+type PropsFiche = {
+  params: Promise<{ code: string }>;
+  searchParams: Promise<{ from?: string; rubrique?: string | string[] }>;
+};
+
+/**
+ * La fiche existe-t-elle ? Même règle que le 404 de `FicheAction` (aucun
+ * historique dans la fenêtre ET aucun instrument), en deux requêtes légères.
+ *
+ * Pourquoi la décider ICI, avant toute frontière Suspense : le squelette de
+ * chargement (règle 1 de l'audit de performance) fait diffuser la réponse en
+ * flux ; un `notFound()` appelé à l'intérieur partirait avec un statut 200
+ * (soft-404, voir components/ui/LoadingSkeleton.tsx et e2e/not-found.spec.ts).
+ */
+async function ficheExiste(code: string, fromDate: string): Promise<boolean> {
+  const sb = createPublicClient();
+  let ligne = sb.from('brvm_actions_daily').select('code').eq('code', code).limit(1);
+  if (fromDate) ligne = ligne.gte('date_marche', fromDate);
+  const [{ data: instr }, { data: lignes }] = await Promise.all([
+    sb.from('brvm_instruments').select('code').eq('code', code).maybeSingle(),
+    ligne,
+  ]);
+  return Boolean(instr) || (lignes?.length ?? 0) > 0;
+}
+
+/**
+ * Page : décide le 404 (statut réel), puis affiche un squelette pendant que la
+ * fiche, lourde, charge ses données. Le clic sur une valeur donne un retour
+ * immédiat au lieu de laisser l'écran précédent figé.
+ */
+export default async function InstrumentPage(props: PropsFiche) {
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams]);
+  const code = decodeURIComponent(params.code).toUpperCase();
+  if (!(await ficheExiste(code, searchParams.from ?? ''))) notFound();
+  return (
+    <Suspense key={`${code}|${searchParams.from ?? ''}`} fallback={<LoadingSkeleton />}>
+      <FicheAction {...props} />
+    </Suspense>
+  );
+}
+
+async function FicheAction(props: PropsFiche) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
