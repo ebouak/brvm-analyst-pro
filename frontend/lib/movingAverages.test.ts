@@ -196,6 +196,7 @@ describe('buildMovingAverageChart', () => {
       expect(description).toMatch(/20/);
       expect(description).toMatch(/50/);
       expect(description).toMatch(/200/);
+      expect(description).toContain('au-dessus des moyennes mobiles à 20, 50 et 200 séances.');
       expect(description).not.toMatch(/acheter|vendre|signal/i);
     });
 

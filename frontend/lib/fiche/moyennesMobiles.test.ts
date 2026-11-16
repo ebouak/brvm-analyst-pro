@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { MoyennesMobiles } from '@/components/fiche/MoyennesMobiles';
-import type { MovingAverageReading } from '@/lib/movingAverages';
+import type { DatedClose, MovingAverageReading } from '@/lib/movingAverages';
 import type { SectorBreadthResult } from '@/lib/movingAverages/server';
 
 const reading: MovingAverageReading = {
@@ -26,11 +26,20 @@ const reading: MovingAverageReading = {
 function render(breadth: SectorBreadthResult, seancesSansCotation = 0): string {
   return renderToStaticMarkup(createElement(MoyennesMobiles, {
     reading,
+    points: [],
     breadth,
     secteur: 'Industrie',
     dateDernierCours: '2026-11-13',
     dateSeance: '2026-11-13',
     seancesSansCotation,
+  }));
+}
+
+function series(length: number): DatedClose[] {
+  return Array.from({ length }, (_, index) => ({
+    code: 'TEST',
+    date: new Date(Date.UTC(2026, 0, index + 1)).toISOString().slice(0, 10),
+    close: 100 + index,
   }));
 }
 
@@ -45,6 +54,7 @@ describe('MoyennesMobiles', () => {
     };
     const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
       reading: fullReading,
+      points: series(220),
       breadth: { status: 'insufficient', reading: null },
       secteur: 'Industrie',
       dateDernierCours: '2026-11-13',
@@ -58,11 +68,57 @@ describe('MoyennesMobiles', () => {
     expect(html).not.toContain('Croisement SMA20/SMA50');
   });
 
+  it('explains and plots the last 120 real closes with a neutral position summary', () => {
+    const fullReading: MovingAverageReading = {
+      ...reading,
+      sma200: 90,
+      distance200Pct: 11.11,
+      slope200Pct: 0.4,
+      regimeHorizon: 'complet',
+    };
+    const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
+      reading: fullReading,
+      points: series(220),
+      breadth: { status: 'insufficient', reading: null },
+      secteur: 'Industrie',
+      dateDernierCours: '2026-11-13',
+      dateSeance: '2026-11-13',
+      seancesSansCotation: 0,
+    }));
+
+    expect(html).toContain('Cours de clôture');
+    expect(html).toContain('Moyenne 20 séances');
+    expect(html).toContain('Moyenne 50 séances');
+    expect(html).toContain('Moyenne 200 séances');
+    expect(html).toContain('120 dernières clôtures');
+    expect(html).toContain('Le cours se situe au-dessus');
+    expect(html).toContain('ne prédit pas le cours');
+    expect(html).toContain('recommandation d');
+  });
+
+  it('keeps unavailable averages out of the chart and explains the short history', () => {
+    const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
+      reading,
+      points: series(30),
+      breadth: { status: 'insufficient', reading: null },
+      secteur: 'Industrie',
+      dateDernierCours: '2026-11-13',
+      dateSeance: '2026-11-13',
+      seancesSansCotation: 0,
+    }));
+
+    expect(html).toContain('30 dernières clôtures');
+    expect(html).toContain('historique insuffisant');
+    expect(html).not.toContain('data-series="sma50"');
+    expect(html).not.toContain('data-series="sma200"');
+  });
+
   it('explains unavailable long-term data and insufficient sector context', () => {
     const html = render({ status: 'insufficient', reading: null });
 
-    expect(html).toContain('SMA 200');
+    expect(html).toContain('Moyenne mobile');
     expect(html).toContain('200 clôtures valides nécessaires');
+    expect(html).toContain('Aucune clôture valide n');
     expect(html).toContain('Données sectorielles insuffisantes');
     expect(html).toContain('Indicateurs descriptifs, non prédictifs');
   });

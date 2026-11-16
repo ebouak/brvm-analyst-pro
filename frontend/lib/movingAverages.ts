@@ -114,24 +114,35 @@ export function describeMovingAveragePosition(reading: MovingAverageReading): st
     below: available.filter((item) => item.distance < 0).map((item) => item.period),
     equal: available.filter((item) => item.distance === 0).map((item) => item.period),
   };
-  const label = (periods: number[]) =>
-    periods.map((period) => `la moyenne mobile à ${period} séances`).join(', ');
+  const positionText = (position: 'above' | 'below' | 'equal', values: number[]) => {
+    const plural = values.length > 1;
+    const horizon = plural
+      ? `${values.slice(0, -1).join(', ')} et ${values[values.length - 1]}`
+      : String(values[0]);
+    if (position === 'above') {
+      return `au-dessus ${plural ? 'des' : 'de la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+    }
+    if (position === 'below') {
+      return `sous ${plural ? 'les' : 'la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+    }
+    return `au niveau ${plural ? 'des' : 'de la'} ${plural ? 'moyennes mobiles' : 'moyenne mobile'} à ${horizon} séances`;
+  };
   const populatedGroups = [groups.above, groups.below, groups.equal].filter((group) => group.length > 0);
   let summary: string;
 
   if (populatedGroups.length > 1) {
     const positionsText = [
-      groups.above.length > 0 ? `au-dessus de ${label(groups.above)}` : null,
-      groups.below.length > 0 ? `sous ${label(groups.below)}` : null,
-      groups.equal.length > 0 ? `au niveau de ${label(groups.equal)}` : null,
+      groups.above.length > 0 ? positionText('above', groups.above) : null,
+      groups.below.length > 0 ? positionText('below', groups.below) : null,
+      groups.equal.length > 0 ? positionText('equal', groups.equal) : null,
     ].filter((part): part is string => part != null);
     summary = `La position du cours est contrastée selon les horizons : ${positionsText.join('; ')}.`;
   } else if (groups.above.length > 0) {
-    summary = `Le cours se situe au-dessus de ${label(groups.above)}.`;
+    summary = `Le cours se situe ${positionText('above', groups.above)}.`;
   } else if (groups.below.length > 0) {
-    summary = `Le cours se situe sous ${label(groups.below)}.`;
+    summary = `Le cours se situe ${positionText('below', groups.below)}.`;
   } else {
-    summary = `Le cours se situe au niveau de ${label(groups.equal)}.`;
+    summary = `Le cours se situe ${positionText('equal', groups.equal)}.`;
   }
 
   if (missing.length === 0) return summary;
