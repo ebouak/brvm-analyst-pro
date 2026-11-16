@@ -81,7 +81,7 @@ export default async function DossiersPage(props: { searchParams: Promise<{ q?: 
             return (
               <li key={l.code} className="flex items-start gap-3 rounded-card border border-border bg-surface p-3">
                 {LOGOS[l.code]
-                  ? <img src={LOGOS[l.code]} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded bg-white object-contain" />
+                  ? <img loading="lazy" decoding="async" src={LOGOS[l.code]} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded bg-white object-contain" />
                   : <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-sunken text-xs font-semibold text-muted">{l.code.slice(0, 2)}</span>}
                 <div className="min-w-0 flex-1">
                   <Link href={`/rapports/dossier/${l.code}`} className="block truncate text-sm font-semibold text-ivory hover:text-accent-ink">

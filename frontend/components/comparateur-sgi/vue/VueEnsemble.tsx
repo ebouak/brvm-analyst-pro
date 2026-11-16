@@ -56,7 +56,7 @@ function Logo({ sgi, taille = 'h-12 w-12' }: { sgi: Sgi; taille?: string }) {
 function Drapeau({ pays, grand = false }: { pays: string; grand?: boolean }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <img loading="lazy" decoding="async"
       src={drapeau(pays)}
       alt={PAYS[pays]?.nom ?? ''}
       width={grand ? 36 : 20}

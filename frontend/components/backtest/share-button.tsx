@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, type ReactNode } from 'react';
-import { toPng } from 'html-to-image';
 
 /**
  * Enveloppe l'infographie et ajoute un bouton « Partager / Télécharger » qui
@@ -15,6 +14,8 @@ export function ShareableInfographic({ children, filename = 'backtest' }: { chil
     if (!ref.current) return;
     setBusy(true);
     try {
+      // html-to-image n'est chargé qu'au clic sur « Partager ».
+      const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(ref.current, { pixelRatio: 2, backgroundColor: '#f9fafb', cacheBust: true });
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `${filename}.png`, { type: 'image/png' });

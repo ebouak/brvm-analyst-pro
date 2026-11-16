@@ -54,7 +54,7 @@ export function ImageGallery({ images, altPrefix = 'Image' }: ImageGalleryProps)
           aria-modal="true"
         >
           <div className="relative w-full max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <img
+            <img loading="lazy" decoding="async"
               src={images[lightboxIndex]!}
               alt={`${altPrefix} ${lightboxIndex + 1}`}
               className="w-full h-full object-contain"

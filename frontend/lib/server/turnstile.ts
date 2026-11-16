@@ -50,6 +50,9 @@ export async function verifyTurnstile(
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form,
       cache: 'no-store',
+      // Délai maximal (règle 12 de l'audit de performance) : un Cloudflare lent
+      // ne doit pas bloquer l'inscription indéfiniment. Échec fermé, comme une panne.
+      signal: AbortSignal.timeout(8_000),
     });
     const json = (await res.json()) as { success?: boolean; 'error-codes'?: string[] };
     if (json.success) return { ok: true };

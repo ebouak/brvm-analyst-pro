@@ -2,6 +2,9 @@ import { secteursCourants } from '@/lib/secteurs/nomenclature';
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
+import { utilisateurCourant } from '@/lib/supabase/session';
+import { createPublicClient } from '@/lib/supabase/public';
+import { unstable_cache } from 'next/cache';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
@@ -58,15 +61,36 @@ import {
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard' };
 
-// PAS de loading.tsx sous /dashboard (retiré le 2026-11-03, mesuré). Avec lui,
-// tout le contenu arrivait dans un bloc caché que seul un script révèle ; sur
-// mobile ce script attendait que le processeur ait fini d'évaluer le JavaScript :
-// LCP 12,0 s (Pixel 7, 4G lente, CPU ×4). Sans lui, le contenu est lu dans
-// l'ordre du HTML : 4,1 s, et 1,7 s sur bureau grâce aux requêtes parallèles.
-// Ne pas le remettre sans refaire cette mesure.
+// loading.tsx sous /dashboard : HISTORIQUE ET MESURES.
+// - 2026-11-03 (Next 14) : retiré. Avec lui, tout le contenu arrivait dans un
+//   bloc caché que seul un script révèle ; sur mobile ce script attendait la fin
+//   de l'évaluation du JavaScript : LCP 12,0 s (Pixel 7, 4G lente, CPU ×4),
+//   contre 4,1 s sans.
+// - 2026-11-16 (Next 15.5 / React 19, audit de performance règle 1) : remis
+//   APRÈS nouvelle mesure, dans les mêmes conditions (viewport mobile, CPU ×4,
+//   4G lente 150 ms / 1,6 Mb/s, médiane de 5), sur un build de production servi
+//   par un faux Supabase à 300 ms par requête :
+//     /dashboard     sans : FCP 1 584 ms, LCP 4 360 ms
+//                    avec : FCP 1 452 ms, LCP 3 856 ms
+//   La régression de 12 s ne se reproduit plus. À CONFIRMER en production
+//   (PageSpeed / Core Web Vitals réels) : si le LCP réel se dégrade, retirer
+//   app/dashboard/loading.tsx et reporter la mesure ici.
 
-async function getData() {
-  const supabase = createClient();
+/**
+ * Données de MARCHÉ du tableau de bord : identiques pour tous les visiteurs.
+ * Mises en cache 60 s côté serveur (règle 10 de l'audit de performance) : la
+ * dizaine de requêtes ne part plus à chaque visite. Les cours bougent toutes
+ * les 15 minutes en séance ; 60 s de retard au plus sont invisibles.
+ *
+ * Client PUBLIC obligatoire : `unstable_cache` interdit la lecture des cookies,
+ * et une donnée partagée ne doit jamais dépendre de la session de quelqu'un.
+ * Ces tables sont en lecture publique (RLS, décision F-04 du 2026-11-11,
+ * migration 0213) : le résultat est le même qu'avec le client de session.
+ * ⚠️ Si l'une d'elles est un jour fermée aux anonymes, sortir sa requête d'ici.
+ */
+const getData = unstable_cache(() => chargerMarche(createPublicClient()), ['dashboard-marche'], { revalidate: 60 });
+
+async function chargerMarche(supabase: ReturnType<typeof createPublicClient>) {
 
   // Trois étapes au lieu de sept allers-retours enchaînés : chaque requête part
   // dès que ce dont elle dépend est connu. Sur mobile, le HTML complet arrive
@@ -224,7 +248,7 @@ interface MarketSummaryRow {
 
 /** Compte, profil et alertes de l'utilisateur — indépendants des données de marché. */
 async function chargerUtilisateur(supa: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supa.auth.getUser();
+  const user = await utilisateurCourant(); // partagé avec le layout (une lecture Auth par rendu)
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   if (!user) {

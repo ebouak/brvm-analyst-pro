@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { pageExiste } from '@/lib/routes/pageExiste';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { lessonSchema, type Lesson } from '../types';
@@ -55,7 +56,7 @@ describe.each([...N3, ...N4])('%s — règles éditoriales', (_f, l, brut) => {
     expect(total, l.titre).toBeGreaterThanOrEqual(2500);
   });
   it('les liens mènent à des pages qui existent', () => {
-    for (const lien of l.liens) expect(existsSync(`${APP}${lien.href.replace(/^\//, '')}/page.tsx`), lien.href).toBe(true);
+    for (const lien of l.liens) expect(pageExiste(APP, lien.href), lien.href).toBe(true);
   });
 });
 

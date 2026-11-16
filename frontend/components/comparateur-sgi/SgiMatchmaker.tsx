@@ -103,7 +103,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   <Globe2 size={26} aria-hidden className={choisi ? 'text-accent-nuit' : 'text-accent'} />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={drapeau(code)} alt="" width={36} height={24} className="h-6 w-9 rounded-[3px] ring-1 ring-border" />
+                  <img loading="lazy" decoding="async" src={drapeau(code)} alt="" width={36} height={24} className="h-6 w-9 rounded-[3px] ring-1 ring-border" />
                 )}
                 {nom}
               </button>

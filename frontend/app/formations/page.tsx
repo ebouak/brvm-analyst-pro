@@ -207,7 +207,7 @@ export default async function FormationsPage() {
                   <div className="aspect-video bg-elevated">
                     {f.cover_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
+                      <img loading="lazy" decoding="async" src={f.cover_url} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-faint">
                         <GraduationCap size={28} strokeWidth={1.5} aria-hidden />

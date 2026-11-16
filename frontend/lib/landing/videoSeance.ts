@@ -46,6 +46,9 @@ export async function getVideoSeance(): Promise<VideoSeance | null> {
     const r = await fetch(`${base}/${CHEMIN}`, {
       // Le fichier change une fois par séance ; cinq minutes suffisent.
       next: { revalidate: 300 },
+      // Délai maximal (règle 12) : cette lecture se fait pendant le rendu de
+      // l'accueil. Stockage lent → section masquée, page servie quand même.
+      signal: AbortSignal.timeout(3_000),
     });
     if (!r.ok) return null;
     const d = (await r.json()) as Partial<VideoSeance>;

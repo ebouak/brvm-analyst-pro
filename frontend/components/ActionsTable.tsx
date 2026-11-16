@@ -99,7 +99,7 @@ function Logo({ code, size }: { code: string; size: 'sm' | 'md' }) {
   const px = size === 'md' ? 36 : 28;
   return LOGOS[code] ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <img loading="lazy" decoding="async"
       src={LOGOS[code]}
       alt=""
       width={px}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { pageExiste } from '@/lib/routes/pageExiste';
 import { fileURLToPath } from 'node:url';
 import { lessonSchema, type Lesson } from '../types';
 import { capitalPourObjectif, simulerReinvestissement } from '../simulations';
@@ -69,7 +69,7 @@ describe.each(LECONS)('leçon %i — règles éditoriales', (n, brut) => {
   });
 
   it('les liens « pratiquer » mènent à des pages qui existent', () => {
-    for (const lien of l.liens) expect(existsSync(`${APP}${lien.href.replace(/^\//, '')}/page.tsx`), lien.href).toBe(true);
+    for (const lien of l.liens) expect(pageExiste(APP, lien.href), lien.href).toBe(true);
   });
 });
 

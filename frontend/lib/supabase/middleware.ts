@@ -61,7 +61,20 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // `getClaims()` et non `getUser()` (règle 3 de l'audit de performance).
+  // `getUser()` interroge Supabase Auth à CHAQUE navigation ; `getClaims()`
+  // rafraîchit la session si besoin (comme avant), puis vérifie la SIGNATURE du
+  // jeton sur place avec la clé publique ECC du projet, mise en cache dans le
+  // module. Si le jeton est signé en symétrique (HS*) ou si WebCrypto manque,
+  // la bibliothèque retombe d'elle-même sur `getUser()`.
+  // Limite connue et acceptée : un compte supprimé garde l'accès au mur jusqu'à
+  // l'expiration de son jeton (1 h au plus). Les pages et les API revérifient
+  // l'utilisateur côté serveur (`utilisateurCourant`, `getUser`).
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims ?? null;
+  const user = claims?.sub
+    ? { id: claims.sub, email: typeof claims.email === 'string' ? claims.email : undefined }
+    : null;
 
   // Mur d'authentification : hors vitrine SEO, un anonyme est renvoyé vers /login
   // (avec ?next pour revenir après connexion). Les pages publiques restent

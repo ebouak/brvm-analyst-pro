@@ -61,7 +61,7 @@ function Tile({ node, logoUrl, teintes }: LogoTileProps) {
         // d'abord porter le code et la variation. Fond `sur-nuit` : clair et
         // identique dans les deux thèmes, comme l'exige un logo.
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <img loading="lazy" decoding="async"
           src={logoUrl}
           alt=""
           aria-hidden

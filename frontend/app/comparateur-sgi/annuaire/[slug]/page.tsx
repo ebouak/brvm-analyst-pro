@@ -283,7 +283,7 @@ export default async function FicheSgiPage(props: { params: Promise<{ slug: stri
                 <dt className="text-[13px] text-muted">Pays du siège</dt>
                 <dd className="flex items-center gap-2 text-sm text-ivory">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={drapeau(sgi.pays)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
+                  <img loading="lazy" decoding="async" src={drapeau(sgi.pays)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
                   {pays?.nom ?? NR}
                 </dd>
               </div>

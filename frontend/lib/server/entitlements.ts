@@ -1,5 +1,6 @@
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { cache } from 'react';
+import { utilisateurCourant, profilCourant } from '@/lib/supabase/session';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 
 /**
@@ -29,18 +30,13 @@ export interface Entitlements {
 
 const ANON: Entitlements = { userId: null, tier: 'free', isPremium: false, isPro: false };
 
-export async function getEntitlements(): Promise<Entitlements> {
-  const supa = createClient();
-  const {
-    data: { user },
-  } = await supa.auth.getUser();
+// `cache` : une page qui appelle `canAccess` cinq fois ne calcule les droits
+// qu'une fois par rendu (règle 3 de l'audit de performance).
+export const getEntitlements = cache(async function getEntitlements(): Promise<Entitlements> {
+  const user = await utilisateurCourant();
   if (!user) return ANON;
 
-  const { data: prof } = await supa
-    .from('profiles')
-    .select('is_premium')
-    .eq('id', user.id)
-    .maybeSingle();
+  const prof = await profilCourant();
 
   const isPremium = Boolean(prof?.is_premium);
   if (!isPremium) return { userId: user.id, tier: 'free', isPremium: false, isPro: false };
@@ -72,4 +68,4 @@ export async function getEntitlements(): Promise<Entitlements> {
     isPremium: true,
     isPro,
   };
-}
+});

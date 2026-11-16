@@ -20,7 +20,7 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeValuation, VERDICT_LABELS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
-import ChartBuilder from '@/components/financials/ChartBuilder';
+import ChartBuilder from '@/components/financials/ChartBuilderLazy';
 import PasseportPopover from '@/components/provenance/PasseportPopover';
 import { buildPassport } from '@/lib/provenance/passport';
 import { loadProvenance } from '@/lib/provenance/queries';

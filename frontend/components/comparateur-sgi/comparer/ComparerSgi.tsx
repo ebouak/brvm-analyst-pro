@@ -71,7 +71,7 @@ function Logo({ sgi }: { sgi: Sgi }) {
       <span aria-hidden>{sgi.nom.slice(0, 2).toUpperCase()}</span>
       {sgi.logo && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <img loading="lazy" decoding="async"
           src={sgi.logo}
           alt=""
           className="absolute inset-0 h-full w-full bg-white object-contain p-0.5"
@@ -86,7 +86,7 @@ function Logo({ sgi }: { sgi: Sgi }) {
 
 function Drapeau({ pays }: { pays: string }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={drapeau(pays)} alt="" width={16} height={11} className="h-[11px] w-4 flex-none rounded-[2px]" />;
+  return <img loading="lazy" decoding="async" src={drapeau(pays)} alt="" width={16} height={11} className="h-[11px] w-4 flex-none rounded-[2px]" />;
 }
 
 function Meilleur() {

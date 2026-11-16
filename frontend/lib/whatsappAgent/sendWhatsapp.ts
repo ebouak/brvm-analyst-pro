@@ -29,6 +29,7 @@ export async function sendWhatsAppReply(to: string, body: string): Promise<boole
         // Limite Cloud API : 4096 caractères par message texte.
         text: { body: body.slice(0, 4096) },
       }),
+      signal: AbortSignal.timeout(10_000), // règle 12 de l'audit de performance
     });
     if (!resp.ok) {
       console.error('whatsappAgent/sendWhatsapp: échec envoi', { status: resp.status });

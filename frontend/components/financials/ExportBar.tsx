@@ -1,7 +1,6 @@
 'use client';
 import { Printer } from 'lucide-react';
 import { useState } from 'react';
-import { generateXlsxBlob } from '@/lib/export/xlsx';
 import type { IncomeStatement, BalanceSheet, CashFlowStatement, FundamentalRatios } from '@/lib/financials/types';
 import type { BankKpis, BankScore } from '@/lib/bank/kpis';
 
@@ -22,6 +21,8 @@ export default function ExportBar({ code, designation, secteur, ratios, incomeSt
   async function handleXls() {
     setLoadingXls(true);
     try {
+      // ExcelJS (~1 Mo) n'est chargé qu'au clic : la fiche financière n'en a pas besoin pour s'afficher.
+      const { generateXlsxBlob } = await import('@/lib/export/xlsx');
       const blob = await generateXlsxBlob({ code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements, bank });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

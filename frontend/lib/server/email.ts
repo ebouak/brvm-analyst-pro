@@ -112,6 +112,9 @@ export async function sendBatch(messages: EmailMessage[]): Promise<EmailResult> 
         method: 'POST',
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(chunk),
+        // Délai maximal (règle 12) : large, car un lot peut porter des PDF en pièce
+        // jointe. Un dépassement compte comme un échec, jamais comme un envoi.
+        signal: AbortSignal.timeout(30_000),
       });
       if (res.ok) sent += chunk.length;
       else if (!firstErr) firstErr = `Resend batch HTTP ${res.status}`;
