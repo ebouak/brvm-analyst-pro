@@ -12,7 +12,7 @@ import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
 import { canAccess } from '@/lib/server/featureAccess';
 import { SectionLock } from '@/components/premium/SectionLock';
-import ChartBuilder from '@/components/financials/ChartBuilder';
+import ChartBuilder from '@/components/financials/ChartBuilderLazy';
 import { buildChartRows } from '@/lib/financials/chartBuilder';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import brvmLogos from '@/lib/brvmLogos.json';
