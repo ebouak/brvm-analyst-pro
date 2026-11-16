@@ -32,6 +32,7 @@ export async function sendTelegramReply(chatId: number | string, text: string): 
         // recevrait alors rien du tout.
         disable_web_page_preview: true,
       }),
+      signal: AbortSignal.timeout(10_000), // règle 12 : Telegram lent ≠ webhook bloqué
     });
     const rep = await r.json().catch(() => ({}));
     if (!rep.ok) {
@@ -67,7 +68,7 @@ export async function sendTelegramPhoto(chatId: number | string, png: Buffer, le
     form.set('chat_id', String(chatId));
     form.set('photo', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'westbourse-recap.png');
     form.set('caption', legende.slice(0, 1024));
-    const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form, signal: AbortSignal.timeout(20_000) });
     const rep = await r.json().catch(() => ({}));
     if (!rep.ok) {
       console.error('telegramAgent/sendTelegram: photo refusée', { description: rep.description ?? `HTTP ${r.status}` });

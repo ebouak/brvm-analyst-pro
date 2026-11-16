@@ -29,6 +29,7 @@ export async function jetonTikTok(): Promise<{ ok: true; token: string } | { ok:
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ client_key: client.id, client_secret: client.secret, grant_type: 'refresh_token', refresh_token: l.refresh_token }),
+    signal: AbortSignal.timeout(DELAI_MS),
   });
   const j = await json(r);
   if (!r.ok || typeof j.access_token !== 'string') return { ok: false, raison: 'Renouvellement TikTok refusé, reconnectez TikTok.' };
@@ -49,12 +50,17 @@ export async function jetonTikTok(): Promise<{ ok: true; token: string } | { ok:
   return relue && valide(relue.expire_le) ? { ok: true, token: relue.access_token } : { ok: false, raison: 'Jeton TikTok illisible, reconnectez TikTok.' };
 }
 
+
+/** Délai maximal des appels LinkedIn / TikTok (règle 12 de l'audit de performance). */
+const DELAI_MS = 20_000;
+
 async function appelTikTok<T>(token: string, chemin: string, corps?: unknown): Promise<T> {
   const r = await fetch(`${TT}${chemin}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
     body: JSON.stringify(corps ?? {}),
     cache: 'no-store',
+    signal: AbortSignal.timeout(DELAI_MS),
   });
   const j = (await r.json().catch(() => ({}))) as { data?: T; error?: { code?: string; message?: string } };
   if (!r.ok || (j.error?.code && j.error.code !== 'ok')) {
@@ -144,10 +150,11 @@ export async function echangerCode(r: Reseau, code: string, redirectUri: string)
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: client.id, client_secret: client.secret }),
+      signal: AbortSignal.timeout(DELAI_MS),
     });
     const jt = await json(t);
     if (!t.ok || typeof jt.access_token !== 'string') throw echec('Jeton LinkedIn', t, jt);
-    const u = await fetch('https://api.linkedin.com/v2/userinfo', { headers: { Authorization: `Bearer ${jt.access_token}` } });
+    const u = await fetch('https://api.linkedin.com/v2/userinfo', { headers: { Authorization: `Bearer ${jt.access_token}` }, signal: AbortSignal.timeout(DELAI_MS) });
     const ju = await json(u);
     if (!u.ok || typeof ju.sub !== 'string') throw echec('Profil LinkedIn', u, ju);
     return {
@@ -165,11 +172,12 @@ export async function echangerCode(r: Reseau, code: string, redirectUri: string)
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ client_key: client.id, client_secret: client.secret, code, grant_type: 'authorization_code', redirect_uri: redirectUri }),
+    signal: AbortSignal.timeout(DELAI_MS),
   });
   const jt = await json(t);
   if (!t.ok || typeof jt.access_token !== 'string') throw echec('Jeton TikTok', t, jt);
   let nom: string | null = null;
-  const u = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=display_name', { headers: { Authorization: `Bearer ${jt.access_token}` } });
+  const u = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=display_name', { headers: { Authorization: `Bearer ${jt.access_token}` }, signal: AbortSignal.timeout(DELAI_MS) });
   if (u.ok) {
     const ju = (await json(u)) as { data?: { user?: { display_name?: string } } };
     nom = ju.data?.user?.display_name ?? null;
