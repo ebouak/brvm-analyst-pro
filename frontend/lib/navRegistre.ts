@@ -109,6 +109,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/actions/[code]/financials', libelle: 'États financiers', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'document de la fiche' },
   { chemin: '/actions/[code]/print', libelle: 'Version imprimable', rubrique: 'marche', parent: '/actions/[code]/financials', statut: 'parcours', raison: "sortie d'impression", sansFil: true },
   { chemin: '/actions/[code]/quant', libelle: 'Fiche Quant', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'document de la fiche' },
+  { chemin: '/actions/[code]/graphique', libelle: 'Graphique avancé', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'outil de la fiche, ouvert depuis le graphique' },
   { chemin: '/actions/[code]/revue', libelle: 'Revue de résultats', rubrique: 'marche', parent: '/actions/[code]', statut: 'public', raison: 'document de la fiche' },
   { chemin: '/rapports/dossiers', libelle: 'Dossiers valeur', rubrique: 'marche', description: 'Un rapport A4 par société', colonne: 2, groupe: 'Documents', statut: 'menu' },
   { chemin: '/rapports/revues', libelle: 'Revues de résultats', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Les derniers comptes publiés, analysés', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: ONGLET('Rapports') },

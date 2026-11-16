@@ -38,6 +38,7 @@ export async function DELETE() {
     'academy_notes',
     'academy_exam_attempts',
     'academy_certificates',
+    'graphique_dessins', // migration 0249 (cascade auth.users en plus)
   ] as const;
 
   for (const t of tables) {

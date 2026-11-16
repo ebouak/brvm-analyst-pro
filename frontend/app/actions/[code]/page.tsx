@@ -1499,6 +1499,15 @@ export default async function InstrumentPage(
           <div>
           <PremiumPanel className="p-0 overflow-hidden">
             <div className="px-4 py-4 md:px-5">
+              <div className="mb-3 flex justify-end">
+                <Link
+                  href={`/actions/${code}/graphique`}
+                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-border px-3 text-xs text-muted transition-colors hover:border-accent hover:text-accent-ink motion-reduce:transition-none"
+                >
+                  Graphique avancé : outils de dessin, comparaison, export des cours
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
               <PriceChart
                 data={priceData}
                 designation={instrument?.designation ?? last.designation ?? code}
