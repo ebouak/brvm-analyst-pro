@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
 import { utilisateurCourant } from '@/lib/supabase/session';
+import { createPublicClient } from '@/lib/supabase/public';
+import { unstable_cache } from 'next/cache';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
@@ -73,8 +75,21 @@ export const metadata = { title: 'Dashboard' };
 //   (PageSpeed / Core Web Vitals réels) : si le LCP réel se dégrade, retirer
 //   app/dashboard/loading.tsx et reporter la mesure ici.
 
-async function getData() {
-  const supabase = createClient();
+/**
+ * Données de MARCHÉ du tableau de bord : identiques pour tous les visiteurs.
+ * Mises en cache 60 s côté serveur (règle 10 de l'audit de performance) : la
+ * dizaine de requêtes ne part plus à chaque visite. Les cours bougent toutes
+ * les 15 minutes en séance ; 60 s de retard au plus sont invisibles.
+ *
+ * Client PUBLIC obligatoire : `unstable_cache` interdit la lecture des cookies,
+ * et une donnée partagée ne doit jamais dépendre de la session de quelqu'un.
+ * Ces tables sont en lecture publique (RLS, décision F-04 du 2026-11-11,
+ * migration 0213) : le résultat est le même qu'avec le client de session.
+ * ⚠️ Si l'une d'elles est un jour fermée aux anonymes, sortir sa requête d'ici.
+ */
+const getData = unstable_cache(() => chargerMarche(createPublicClient()), ['dashboard-marche'], { revalidate: 60 });
+
+async function chargerMarche(supabase: ReturnType<typeof createPublicClient>) {
 
   // Trois étapes au lieu de sept allers-retours enchaînés : chaque requête part
   // dès que ce dont elle dépend est connu. Sur mobile, le HTML complet arrive
