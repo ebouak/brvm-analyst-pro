@@ -122,6 +122,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/fondamentaux', libelle: 'Fondamentaux', rubrique: 'marche', description: 'Comptes et ratios comparés', colonne: 2, statut: 'menu' },
   { chemin: '/notations', libelle: 'Notations financières', rubrique: 'marche', parent: '/fondamentaux', statut: 'secondaire', raison: ONGLET('Fondamentaux') },
   { chemin: '/liquidite', libelle: 'Liquidité', rubrique: 'marche', description: 'Combien coûte une vente', colonne: 2, statut: 'menu' },
+  { chemin: '/nervosite', libelle: 'Nervosité du marché', rubrique: 'marche', racine: true, statut: 'public', raison: 'indice BRVM-V, lié depuis le tableau de bord (SEO)' },
   { chemin: '/premium/classements', libelle: 'Palmarès', rubrique: 'marche', description: 'Palmarès par critère', colonne: 2, statut: 'menu', premium: true },
 
   // ── Trouver une idée ───────────────────────────────────────────────────────
