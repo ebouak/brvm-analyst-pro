@@ -1,0 +1,76 @@
+# Mesure ponctuelle de la PRODUCTION (lecture seule), sur la branche jetable
+# perf/mesure-prod uniquement. Ne publie aucun artefact : seuls des chiffres
+# agrégés (aucune trace, aucun HTML) sont commités dans la branche.
+name: perf-prod (mesure ponctuelle)
+on:
+  push:
+    branches: [perf/mesure-prod]
+    paths: ['.github/perf-prod/declencheur.txt']
+permissions:
+  contents: write
+concurrency: { group: perf-prod, cancel-in-progress: false }
+jobs:
+  mesure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      BASE: https://www.westbourse.com
+      PAGES: "/ /actions /actions/SNTS /societes /societes/SNTS /login /pricing /actualites"
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: perf/mesure-prod }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Réseau, en-têtes, cache
+        run: |
+          mkdir -p resultats
+          .github/perf-prod/reseau.sh "$BASE" $PAGES /logos/SNTS.jpg /manifest.json > resultats/reseau.txt 2>&1 || true
+          JS=$(curl -s "$BASE/" | grep -oE '/_next/static/chunks/[^"]+\.js' | head -1)
+          echo "CHUNK $JS" >> resultats/reseau.txt
+          curl -s -D - -o /dev/null -H 'Accept-Encoding: br, gzip' "$BASE$JS" | tr -d '\r' | grep -iE '^(http/|content-encoding|cache-control|x-vercel-cache)' | sed 's#^#ENTETE chunk | #' >> resultats/reseau.txt
+          cat resultats/reseau.txt | tail -60
+      - name: Lighthouse mobile (3 passages par page)
+        run: |
+          for p in $PAGES; do
+            for i in 1 2 3; do
+              npx -y lighthouse@12 "$BASE$p" --only-categories=performance --output=json --output-path=/tmp/lh.json \
+                --quiet --chrome-flags="--headless=new --no-sandbox" --max-wait-for-load=60000 || { echo "{\"page\":\"$p\",\"passage\":$i,\"erreur\":true}" >> resultats/lighthouse.jsonl; continue; }
+              node .github/perf-prod/extraire-lh.mjs /tmp/lh.json "$p" "$i" >> resultats/lighthouse.jsonl
+            done
+          done
+          wc -l resultats/lighthouse.jsonl
+      - name: Desktop (1 passage par page)
+        run: |
+          for p in $PAGES; do
+            npx -y lighthouse@12 "$BASE$p" --preset=desktop --only-categories=performance --output=json --output-path=/tmp/lhd.json \
+              --quiet --chrome-flags="--headless=new --no-sandbox" || continue
+            node .github/perf-prod/extraire-lh.mjs /tmp/lhd.json "$p" 1 >> resultats/lighthouse-desktop.jsonl
+          done
+      - name: Données réelles (PageSpeed / CrUX, sans clé, peut être refusé)
+        run: |
+          for p in / /actions/SNTS; do
+            curl -s --max-time 120 "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=$BASE$p&strategy=mobile&category=performance" -o /tmp/psi.json || true
+            node -e "
+              const fs=require('fs'); let j; try { j=JSON.parse(fs.readFileSync('/tmp/psi.json','utf8')); } catch { console.log(JSON.stringify({page:'$p', erreur:'illisible'})); process.exit(0); }
+              if (j.error) { console.log(JSON.stringify({page:'$p', erreur:j.error.message})); process.exit(0); }
+              const m=(x)=>x?Object.fromEntries(Object.entries(x.metrics||{}).map(([k,v])=>[k,{p75:v.percentile,cat:v.category}])):null;
+              console.log(JSON.stringify({page:'$p', url:m(j.loadingExperience), urlCategorie:j.loadingExperience?.overall_category, repliOrigine:j.loadingExperience?.origin_fallback??false, origine:m(j.originLoadingExperience), origineCategorie:j.originLoadingExperience?.overall_category, scoreLabo:j.lighthouseResult?.categories?.performance?.score}));
+            " >> resultats/terrain.jsonl
+          done
+          cat resultats/terrain.jsonl
+      - name: Téléphone lent (npm run perf:mobile, 5 passages)
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund --ignore-scripts
+          npx playwright install chromium --with-deps
+          PERF_BASE=$BASE PERF_PASSAGES=5 PERF_PAGES=/,/actions,/actions/SNTS,/societes,/societes/SNTS,/login node scripts/perf-mobile.mjs > ../resultats/perf-mobile.txt 2>&1 || true
+          cat ../resultats/perf-mobile.txt
+      - name: Ranger les chiffres dans la branche
+        run: |
+          git config user.name "perf-prod"
+          git config user.email "perf-prod@users.noreply.github.com"
+          mkdir -p .github/perf-prod/resultats
+          cp resultats/* .github/perf-prod/resultats/
+          git add .github/perf-prod/resultats
+          git commit -m "mesure prod $(date -u +%FT%TZ) [skip ci]" || true
+          git push origin HEAD:perf/mesure-prod
