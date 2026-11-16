@@ -108,6 +108,7 @@ import ActionMenu from '@/components/actions/ActionMenu';
 import SeasonalityCard from '@/components/seasonality/SeasonalityCard';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
 import { demarrer } from '@/lib/async/demarrer';
+import { utilisateurCourant } from '@/lib/supabase/session';
 import { Suspense } from 'react';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -198,7 +199,7 @@ async function getData(code: string, fromDate?: string) {
   if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
 
   // Position de l'utilisateur connecté (pour une lecture du signal selon le PRU).
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await utilisateurCourant();
   const positionPromise = user
     ? supabase
         .from('portfolios_positions')

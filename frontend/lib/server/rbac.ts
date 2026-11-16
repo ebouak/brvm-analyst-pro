@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/server';
+import { cache } from 'react';
+import { utilisateurCourant } from '@/lib/supabase/session';
 import { ADMIN_EMAILS } from './admin-emails';
 import { getMfaStatus } from './mfa';
 
@@ -45,11 +46,9 @@ function serviceDb() {
 }
 
 /** Contexte admin du user courant, ou null s'il n'est pas administrateur. */
-export async function getAdminContext(): Promise<AdminContext | null> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+// `cache` : une fois par rendu, même si layout, page et composants le demandent.
+export const getAdminContext = cache(async function getAdminContext(): Promise<AdminContext | null> {
+  const user = await utilisateurCourant();
   if (!user?.email) return null;
 
   const legacySuper = ADMIN_EMAILS.includes(user.email);
@@ -81,7 +80,7 @@ export async function getAdminContext(): Promise<AdminContext | null> {
   if (!isSuperAdmin && roles.length === 0) return null;
 
   return { userId: user.id, email: user.email, roles, permissions, isSuperAdmin };
-}
+});
 
 /** true si le contexte possède la permission (super_admin = tout). */
 export function can(ctx: AdminContext | null, permission: PermissionCode): boolean {

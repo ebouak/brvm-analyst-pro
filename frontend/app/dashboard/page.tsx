@@ -2,6 +2,7 @@ import { secteursCourants } from '@/lib/secteurs/nomenclature';
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
+import { utilisateurCourant } from '@/lib/supabase/session';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
@@ -223,7 +224,7 @@ interface MarketSummaryRow {
 
 /** Compte, profil et alertes de l'utilisateur — indépendants des données de marché. */
 async function chargerUtilisateur(supa: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supa.auth.getUser();
+  const user = await utilisateurCourant(); // partagé avec le layout (une lecture Auth par rendu)
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   if (!user) {
