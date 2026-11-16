@@ -38,6 +38,7 @@ import BlocMarcheDuJour from '@/components/dashboard/blocs/BlocMarcheDuJour';
 import BlocLectureSeance from '@/components/dashboard/lecture/BlocLectureSeance';
 import { lectureSeance } from '@/lib/dashboard/lectureSeance';
 import { chargerMarcheDuJour } from '@/lib/marche/chargement';
+import { chargerResumeNervosite } from '@/lib/nervosite/lecture';
 import { largeurSeance } from '@/lib/marche/marcheDuJour';
 import { Fragment } from 'react';
 import { PremiumLock } from '@/components/dashboard/PremiumLock';
@@ -305,7 +306,7 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [resultatPortefeuille, dividendes, fermetures, assembleesBoc, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, assembleesBoc, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour, nervosite] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
@@ -321,6 +322,8 @@ export default async function Dashboard() {
     veut('actus') ? chargerCompteMotifs(supa, lastDate) : Promise.resolve(null),
     // « Le marché aujourd'hui » : hors layout, toujours affiché (voir le rendu).
     chargerMarcheDuJour(supa, { dateMarche: lastDate, lignes: actions }),
+    // Porte « Nervosité » du même bloc : `null` si la table est illisible ou vide.
+    chargerResumeNervosite(supa),
   ]);
   // `undefined` = visiteur, `null` = lecture en erreur.
   const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
@@ -555,6 +558,7 @@ export default async function Dashboard() {
                   secteurs={marcheDuJour.secteurs}
                   largeur={largeurSeance(metriques)}
                   obligations={marcheDuJour.obligations}
+                  nervosite={nervosite}
                 />
               </div>
             );

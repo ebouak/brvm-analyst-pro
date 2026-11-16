@@ -16,6 +16,7 @@
  *   tsx src/index.ts dividends             # ingère les dividendes
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts range52               # plus-haut/plus-bas 52 semaines
+ *   tsx src/index.ts nervosite             # indice de nervosité BRVM-V (série complète)
  *   tsx src/index.ts coherence             # balayage hebdomadaire de cohérence
  *   tsx src/index.ts coherence --mock      # démonstration (sans Supabase)
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
@@ -439,6 +440,27 @@ async function main(): Promise<number> {
               rows_extracted: r.nb_titres,
               rows_upserted: r.nb_titres,
               metadata: { date_marche: r.date_marche, nb_scores: r.nb_scores, nb_flux: r.nb_flux },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'nervosite': {
+      // Indice de nervosité BRVM-V (volatilité réalisée du marché large),
+      // recalculé en entier depuis les clôtures. Échec bruyant si rien n'est publiable.
+      const { runNervosite } = await import('./nervosite/runNervosite.js');
+      const res = await monitored(
+        { code: 'nervosite', label: 'Nervosité BRVM-V' },
+        async () => {
+          const r = await runNervosite({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.nb_seances,
+              rows_upserted: r.nb_ecrites,
+              metadata: { date_marche: r.date_marche, valeur: r.valeur, regime: r.regime, raison: r.raison ?? null },
             },
           };
         },

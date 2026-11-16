@@ -22,6 +22,8 @@ export const PUBLIC_EXACT = new Set<string>([
   '/apercu',
   // Transparence : contrôle quotidien contre le Bulletin officiel, opérations sur titres.
   '/qualite-donnees', '/operations-titres',
+  // Indice de nervosité BRVM-V : donnée de marché dérivée des clôtures (SEO).
+  '/nervosite',
   '/crm/opposition',
   '/offre/dossier',
   // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,

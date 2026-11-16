@@ -31,6 +31,8 @@
     "coherence": "tsx src/index.ts coherence",
     "coherence:mock": "tsx src/index.ts coherence --mock",
     "liquidity:mock": "tsx src/index.ts liquidity --mock",
+    "nervosite": "tsx src/index.ts nervosite",
+    "nervosite:mock": "tsx src/index.ts nervosite --mock",
     "events": "tsx src/index.ts events",
     "events:mock": "tsx src/index.ts events --mock",
     "test": "vitest run",

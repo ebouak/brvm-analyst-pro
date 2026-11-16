@@ -34,6 +34,7 @@ const BARE_PREFIXES = [
   '/developers',
   '/qualite-donnees', // PublicShell : sans lui ici, sidebar + en-tête public en double
   '/operations-titres',
+  '/nervosite', // PublicShell, comme /qualite-donnees
   '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)
   '/apercu', // apercu non indexe de la landing bis (meme code que /), hors auth
 ];

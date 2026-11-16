@@ -4,27 +4,31 @@ import { fmtDateFR, fmtNumber, fmtPctSigne } from '@/lib/format';
 import type { ExtremesSecteurs, LargeurSeance } from '@/lib/marche/marcheDuJour';
 import type { RendementObligataire } from '@/lib/marche/chargement';
 import { CadreBloc } from './Cadre';
+import ApercuNervosite from '@/components/nervosite/ApercuNervosite';
+import type { ResumeNervosite } from '@/lib/nervosite/lecture';
 
 const sens = (v: number) => (v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-ivory');
 
 /**
- * « Le marché aujourd'hui » : trois portes chiffrées vers Secteurs, Heatmap et
- * Obligations (composant serveur, aucun état). Chaque chiffre est celui de la
+ * « Le marché aujourd'hui » : quatre portes chiffrées vers Secteurs, Heatmap,
+ * Obligations et Nervosité (composant serveur, aucun état). Chaque chiffre est celui de la
  * page de destination (voir lib/marche/marcheDuJour.ts). Une donnée absente
  * est dite telle quelle : la porte reste ouverte, sans chiffre inventé.
  */
 export default function BlocMarcheDuJour({
-  dateMarche, secteurs, largeur, obligations,
+  dateMarche, secteurs, largeur, obligations, nervosite,
 }: {
   dateMarche: string;
   secteurs: ExtremesSecteurs | null;
   largeur: LargeurSeance | null;
   obligations: RendementObligataire | null;
+  /** `undefined` = porte non montrée ; `null` = lecture impossible, dit tel quel. */
+  nervosite?: ResumeNervosite | null;
 }) {
   const total = largeur ? largeur.hausses + largeur.baisses + largeur.stables : 0;
   return (
     <CadreBloc id="bloc-marche-du-jour" titre="Le marché aujourd’hui" dateReference={dateMarche} legendeDate="Séance du">
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <ul className={`grid grid-cols-1 gap-3 ${nervosite === undefined ? 'sm:grid-cols-3' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
         <Porte href="/secteurs" rubrique="Secteurs" action="Classement des secteurs">
           {secteurs ? (
             <dl className="space-y-1.5 text-sm">
@@ -79,6 +83,12 @@ export default function BlocMarcheDuJour({
             <Absent>Rendement obligataire indisponible.</Absent>
           )}
         </Porte>
+
+        {nervosite !== undefined && (
+          <Porte href="/nervosite" rubrique="Nervosité (BRVM-V)" action="Comprendre l’indice">
+            <ApercuNervosite resume={nervosite} dateMarche={dateMarche} />
+          </Porte>
+        )}
       </ul>
     </CadreBloc>
   );
