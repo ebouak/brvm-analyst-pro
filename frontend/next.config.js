@@ -91,6 +91,22 @@ const nextConfig = {
 
     return [
       {
+        // Cache navigateur des images et vidéos de public/ (règle 27 de l'audit
+        // de performance). Next les sert sinon en `max-age=0` : chaque visite
+        // revalidait logos, drapeaux, photos. Ces fichiers ne portent PAS
+        // d'empreinte dans leur nom, d'où un jour et non un an : un logo
+        // remplacé est pris au plus tard le lendemain, et en arrière-plan
+        // (stale-while-revalidate) sans jamais bloquer l'affichage.
+        // Les JS/CSS de /_next/static sont déjà versionnés et immuables (Next).
+        // sw.js, manifest.json et les pages HTML ne sont PAS concernés.
+        // ⚠️ /api EXCLU : des routes y servent des .mp4/.jpg PRIVÉS (vidéos
+        // Academy derrière abonnement) ; un `public` les laisserait en cache CDN.
+        source: '/((?!api/|_next/).*)\\.(jpg|jpeg|png|webp|avif|gif|svg|ico|mp4|woff2)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
         // Tout SAUF /embed : anti-clickjacking tiers intact.
         source: '/((?!embed).*)',
         headers: [
