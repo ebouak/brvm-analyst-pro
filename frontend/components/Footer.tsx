@@ -179,7 +179,7 @@ export default function Footer() {
             {SOURCES.map((s) => (
               <li key={s.alt} className="flex h-9 items-center rounded-md bg-[#ffffff] px-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt={s.alt} className="h-5 w-auto" />
+                <img loading="lazy" decoding="async" src={s.src} alt={s.alt} className="h-5 w-auto" />
               </li>
             ))}
           </ul>

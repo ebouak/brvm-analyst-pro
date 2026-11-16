@@ -92,7 +92,7 @@ export function SgiCard({
           </div>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={drapeau(s.pays)} alt={`Drapeau ${p.nom}`} width={30} height={20} className="h-5 w-[30px] flex-none rounded-[3px] ring-1 ring-border" title={p.nom} />
+        <img loading="lazy" decoding="async" src={drapeau(s.pays)} alt={`Drapeau ${p.nom}`} width={30} height={20} className="h-5 w-[30px] flex-none rounded-[3px] ring-1 ring-border" title={p.nom} />
       </div>
 
       <div className="mb-4 flex flex-wrap gap-1.5">
@@ -342,7 +342,7 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
             >
               {code !== 'ALL' && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={drapeau(code)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
+                <img loading="lazy" decoding="async" src={drapeau(code)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
               )}
               {code === 'ALL' ? 'Tous les pays' : PAYS[code].nom}
               <span className={pressed ? 'opacity-80' : 'opacity-60'}>{n}</span>
@@ -407,7 +407,7 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-2.5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={drapeau(e.sgi.pays)} alt={PAYS[e.sgi.pays]?.nom ?? ''} width={20} height={13} className="h-[13px] w-5 flex-none rounded-[2px] ring-1 ring-border" />
+                        <img loading="lazy" decoding="async" src={drapeau(e.sgi.pays)} alt={PAYS[e.sgi.pays]?.nom ?? ''} width={20} height={13} className="h-[13px] w-5 flex-none rounded-[2px] ring-1 ring-border" />
                         <span className="font-medium text-ivory">{e.sgi.nom}</span>
                       </span>
                     </td>

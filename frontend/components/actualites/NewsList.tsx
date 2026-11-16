@@ -83,7 +83,7 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
             <div key={item.id} className="flex gap-3 bg-surface border border-border rounded-xl p-4 hover:border-accent/30 transition-colors">
               {item.image_url && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.image_url} alt="" className="hidden sm:block h-16 w-24 shrink-0 rounded-lg object-cover border border-border/60" />
+                <img loading="lazy" decoding="async" src={item.image_url} alt="" className="hidden sm:block h-16 w-24 shrink-0 rounded-lg object-cover border border-border/60" />
               )}
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
