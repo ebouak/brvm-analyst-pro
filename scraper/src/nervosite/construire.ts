@@ -10,12 +10,15 @@
  *    (`rendementsLog` : les variations au-delà de ±8,5 % sont neutralisées) ;
  * 2. rendement du « marché large » d'une séance = moyenne simple des rendements
  *    des titres cotés ce jour-là (`rendementMarche`) ;
- * 3. série de l'indice (`serieNervosite`), puis rang de chaque valeur dans
- *    l'historique CONNU À CETTE DATE (fenêtre croissante, jamais de valeur
- *    future), et régime déduit de ce rang.
+ * 3. série de l'indice (`serieNervosite`), puis rang de chaque valeur parmi
+ *    les 1 250 dernières valeurs connues à cette date (≈ 5 ans, séance comprise,
+ *    jamais de valeur future : `rangsGlissants`), et régime déduit de ce rang.
+ *    Une fenêtre glissante plutôt que tout l'historique : les premières années,
+ *    plus agitées, classaient sinon 47 % des séances récentes en « calme ».
  */
 import {
-  rendementsLog, rendementMarche, serieNervosite, rangHistorique, regime, type Regime,
+  rendementsLog, rendementMarche, serieNervosite, rangsGlissants, regime,
+  FENETRE_RANG, MIN_RANG, type Regime,
 } from './pure/nervosite.js';
 
 /**
@@ -36,7 +39,9 @@ export const MIN_TITRES = 5;
  * Pas de rang (donc pas de régime) tant que l'indice n'a pas un an de valeurs
  * derrière lui : classer une valeur parmi trois autres ne dirait rien.
  */
-export const MIN_HISTORIQUE_RANG = 250;
+export const MIN_HISTORIQUE_RANG = MIN_RANG;
+/** Fenêtre du rang, en séances (≈ 5 ans). */
+export { FENETRE_RANG };
 
 export interface CoursLigne {
   code: string;
@@ -50,7 +55,7 @@ export interface LigneNervosite {
   valeur: number | null;
   rapide: number | null;
   lente: number | null;
-  /** Rang 0-100 de `valeur` parmi les valeurs connues jusqu'à cette séance incluse. */
+  /** Rang 0-100 de `valeur` parmi les 1 250 dernières valeurs connues, cette séance incluse. */
   rang: number | null;
   regime: Regime | null;
   /** Nombre de titres dont le rendement entre dans la moyenne de la séance. */
@@ -103,16 +108,12 @@ const arrondi = (x: number | null) => (x == null ? null : Math.round(x * 10_000)
 export function construireSerie(lignes: readonly CoursLigne[], debut = DEBUT_SERIE): LigneNervosite[] {
   const seances = rendementsParSeance(lignes, debut);
   const points = serieNervosite(seances.map((s) => s.rendement));
-  const historique: number[] = [];
+  // Garde-fou : `regime(NaN)` vaudrait « tendu » ; on ne l'appelle donc jamais
+  // sans un rang calculé sur un historique suffisant (`null` sinon).
+  const rangs = rangsGlissants(points.map((p) => p.valeur), FENETRE_RANG, MIN_RANG);
   return seances.map((s, i) => {
     const p = points[i]!;
-    let rang: number | null = null;
-    if (p.valeur !== null) {
-      historique.push(p.valeur);
-      // Garde-fou : `regime(NaN)` vaudrait « tendu » ; on ne l'appelle donc
-      // jamais sans un rang calculé sur un historique suffisant.
-      if (historique.length >= MIN_HISTORIQUE_RANG) rang = rangHistorique(p.valeur, historique);
-    }
+    const rang = rangs[i] ?? null;
     return {
       date_marche: s.date_marche,
       valeur: arrondi(p.valeur),

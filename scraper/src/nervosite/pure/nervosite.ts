@@ -98,6 +98,31 @@ export function rangHistorique(valeur: number, historique: readonly number[]): n
   return (100 * n) / historique.length;
 }
 
+/** Fenêtre du rang : les 1 250 dernières séances au plus (≈ 5 ans), la séance comprise. */
+export const FENETRE_RANG = 1250;
+/** Pas de rang sous 250 valeurs : classer une valeur parmi trois autres ne dirait rien. */
+export const MIN_RANG = 250;
+
+/**
+ * Rang (0 à 100) de chaque valeur parmi les `fenetre` dernières valeurs connues
+ * à sa date, elle-même comprise. Jamais de valeur future ; une valeur plus
+ * ancienne que la fenêtre n'influe plus. Une entrée `null` n'a pas de rang et
+ * n'entre pas dans l'historique. Sous `min` valeurs dans la fenêtre : `null`.
+ */
+export function rangsGlissants(
+  valeurs: readonly (number | null)[],
+  fenetre = FENETRE_RANG,
+  min = MIN_RANG,
+): (number | null)[] {
+  const historique: number[] = [];
+  return valeurs.map((v) => {
+    if (v === null || !Number.isFinite(v)) return null;
+    historique.push(v);
+    if (historique.length > fenetre) historique.shift();
+    return historique.length >= min ? rangHistorique(v, historique) : null;
+  });
+}
+
 /** Régime, défini par le rang dans l'historique et non par un seuil fixe. */
 export function regime(rang: number): Regime {
   if (rang < 25) return 'calme';
