@@ -44,6 +44,7 @@ export async function GET() {
     emailsBienvenue,
     userEntitlements,
     monthlyReports,
+    graphiqueDessins,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -88,6 +89,8 @@ export async function GET() {
       .from('monthly_reports')
       .select('id, month, report_url, report_json, sent_at, created_at, updated_at')
       .eq('user_id', user.id),
+    // Tracés du graphique avancé, par valeur (migration 0249).
+    supabase.from('graphique_dessins').select('*').eq('user_id', user.id),
   ]);
 
   // Messages du formulaire de contact (migration 0158) : la table n'a aucune
@@ -180,6 +183,8 @@ export async function GET() {
     user_entitlements: userEntitlements.data ?? [],
     // Relevés mensuels : contenu figé du relevé (valeur, lignes, dividendes) et dates de génération / d'envoi.
     monthly_reports: monthlyReports.data ?? [],
+    // Tracés posés sur le graphique avancé (lignes, Fibonacci, annotations), par valeur.
+    graphique_dessins: graphiqueDessins.data ?? [],
     // Messages envoyés via le formulaire de contact avec l'adresse du compte.
     contact_messages: contactMessages,
     // CRM : intérêt pour l'offre, relances et notes vous concernant, opposition.
