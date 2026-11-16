@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { BellPlus, Download, FileText, History, MessageSquareText, Star } from 'lucide-react';
+import { BellPlus, CandlestickChart, Download, FileText, History, MessageSquareText, Star } from 'lucide-react';
 import type { Metadata } from 'next';
 import brvmSectors from '@/lib/brvmSectors.json';
 import { createClient } from '@/lib/supabase/server';
@@ -1499,12 +1499,14 @@ export default async function InstrumentPage(
           <div>
           <PremiumPanel className="p-0 overflow-hidden">
             <div className="px-4 py-4 md:px-5">
-              <div className="mb-3 flex justify-end">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted">Courbe de clôture et volumes de chaque séance.</p>
                 <Link
                   href={`/actions/${code}/graphique`}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-border px-3 text-xs text-muted transition-colors hover:border-accent hover:text-accent-ink motion-reduce:transition-none"
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-accent/60 bg-accent/10 px-3 text-sm font-medium text-accent-ink transition-colors hover:border-accent hover:bg-accent/20 motion-reduce:transition-none"
                 >
-                  Graphique avancé : outils de dessin, comparaison, export des cours
+                  <CandlestickChart className="h-4 w-4" aria-hidden />
+                  Graphique avancé : bougies, outils de dessin, comparaison, export
                   <span aria-hidden>→</span>
                 </Link>
               </div>
