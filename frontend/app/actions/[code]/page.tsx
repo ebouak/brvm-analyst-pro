@@ -193,14 +193,25 @@ async function getData(code: string, fromDate?: string) {
   // performance) : 600 lignes par fiche, sans id, created_at, updated_at ni
   // bornes 52 semaines (recalculées ici par plageSurFenetre). Toutes ces
   // colonnes existent d'après supabase/migrations (0001, 0020, 0031).
-  let histQuery = supabase
-    .from('brvm_actions_daily')
-    .select('code, date_marche, designation, pays, secteur, cours_precedent, cours_jour, variation_pct, volume, nb_transactions, valeur_echangee, ouverture, plus_haut, plus_bas, beta_1an, valorisation')
-    .eq('code', code)
-    .order('date_marche', { ascending: false })
-    .limit(HISTORY);
-
-  if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
+  // FILET : si la base refusait cette liste (colonne renommée ou absente),
+  // la fiche reprend la lecture complète au lieu de tomber en erreur, et le
+  // signale dans les journaux pour qu'on corrige la liste.
+  const COLONNES_HISTORIQUE = 'code, date_marche, designation, pays, secteur, cours_precedent, cours_jour, variation_pct, volume, nb_transactions, valeur_echangee, ouverture, plus_haut, plus_bas, beta_1an, valorisation';
+  const requeteHistorique = (colonnes: string) => {
+    let q = supabase
+      .from('brvm_actions_daily')
+      .select(colonnes)
+      .eq('code', code)
+      .order('date_marche', { ascending: false })
+      .limit(HISTORY);
+    if (fromDate) q = q.gte('date_marche', fromDate);
+    return q;
+  };
+  const histQuery = Promise.resolve(requeteHistorique(COLONNES_HISTORIQUE)).then(async (r) => {
+    if (!r.error) return r;
+    console.error('[fiche-action] colonnes refusées, repli sur select(*) :', r.error.message);
+    return requeteHistorique('*');
+  });
 
   // Position de l'utilisateur connecté (pour une lecture du signal selon le PRU).
   const user = await utilisateurCourant();
@@ -257,7 +268,7 @@ async function getData(code: string, fromDate?: string) {
     ]);
 
   return {
-    rows: ((hist ?? []) as ActionDaily[]).reverse(),
+    rows: ((hist ?? []) as unknown as ActionDaily[]).reverse(),
     instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; flottant?: number | null; vol_moyen_30j?: number | null; notation_json?: {
         agence: string; note: string; perspective: string; date_notation: string; source_url?: string;
         court_terme?: string | null; long_terme?: string | null;
