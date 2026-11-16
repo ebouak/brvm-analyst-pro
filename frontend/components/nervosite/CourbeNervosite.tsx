@@ -9,6 +9,10 @@ import { fmtDateFR } from '@/lib/format';
  * `composantes` ajoute la composante rapide (λ = 0,94) et la lente
  * (250 séances). Une séance sans valeur coupe le tracé, elle n'est jamais
  * reliée par une droite qui ferait croire à une mesure.
+ *
+ * Hors mode compact, le graphique garde 640 px de large au minimum : sous
+ * cette largeur ses graduations deviendraient illisibles. Le parent le place
+ * dans un cadre `overflow-x-auto` (défilement dans le cadre, jamais la page).
  */
 export default function CourbeNervosite({
   lignes,
@@ -58,7 +62,7 @@ export default function CourbeNervosite({
   const iDerniere = derniere ? lignes.lastIndexOf(derniere) : -1;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className={compacte ? 'block h-full w-full' : 'h-auto w-full'} role="img" aria-label={titre} preserveAspectRatio={compacte ? 'none' : undefined}>
+    <svg viewBox={`0 0 ${W} ${H}`} className={compacte ? 'block h-full w-full' : 'h-auto w-full min-w-[640px]'} role="img" aria-label={titre} preserveAspectRatio={compacte ? 'none' : undefined}>
       {graduations.map((v) => (
         <g key={v}>
           <line x1={G.l} x2={W - G.r} y1={y(v)} y2={y(v)} className="stroke-border" strokeWidth={1} />

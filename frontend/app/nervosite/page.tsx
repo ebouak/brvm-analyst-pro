@@ -109,7 +109,7 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
           Une valeur par semaine (dernière séance). Plus haut : <span className="tabular text-muted">{fmtNervosite(s.plusHaut.valeur)}</span> le{' '}
           {fmtDateFR(s.plusHaut.date)} · plus bas : <span className="tabular text-muted">{fmtNervosite(s.plusBas.valeur)}</span> le {fmtDateFR(s.plusBas.date)}.
         </p>
-        <div className="mt-3 rounded-xl border border-border bg-surface p-3">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-surface p-3">
           <CourbeNervosite lignes={hebdo} titre={`Indice BRVM-V par semaine, du ${fmtDateFR(hebdo[0]!.date_marche)} au ${fmtDateFR(hebdo.at(-1)!.date_marche)}`} />
         </div>
       </section>
@@ -117,7 +117,7 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
       <section aria-labelledby="t-an">
         <h2 id="t-an" className="font-display text-lg text-ivory">Les {unAn.length} dernières séances</h2>
         <Legende />
-        <div className="mt-3 rounded-xl border border-border bg-surface p-3">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-surface p-3">
           <CourbeNervosite lignes={unAn} composantes reperes="trimestres" titre={`Indice BRVM-V et ses deux composantes sur ${unAn.length} séances`} />
         </div>
         <p className="mt-2 text-xs text-faint">
