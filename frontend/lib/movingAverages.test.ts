@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { analyzeMovingAverages, calculateSectorBreadth } from './movingAverages';
-import type { DatedClose } from './movingAverages';
+import {
+  analyzeMovingAverages,
+  buildMovingAverageChart,
+  calculateSectorBreadth,
+  describeMovingAveragePosition,
+} from './movingAverages';
+import type { DatedClose, MovingAverageReading } from './movingAverages';
 
 function series(length: number, closeAt: (index: number) => number | null): DatedClose[] {
   return Array.from({ length }, (_, index) => ({
@@ -100,3 +105,140 @@ describe('calculateSectorBreadth', () => {
     });
   });
 });
+
+describe('buildMovingAverageChart', () => {
+    it('orders reversed data, filters invalid closes and returns the last 120 valid observations', () => {
+      const observations = series(220, (index) => index + 100);
+      const input = [
+        ...observations,
+        { code: 'TEST', date: '2025-01-15', close: null },
+        { code: 'TEST', date: '2025-01-16', close: -10 },
+        { code: 'TEST', date: '2025-01-17', close: Number.POSITIVE_INFINITY },
+        { code: 'TEST', date: '2025-01-18', close: Number.NaN },
+        { code: 'TEST', date: '2025-02-30', close: 999 },
+      ].reverse();
+
+      const result = buildMovingAverageChart(input);
+
+      expect(result).toHaveLength(120);
+      expect(result[0]).toMatchObject({
+        date: observations[100]!.date,
+        close: 200,
+        sma20: 190.5,
+        sma50: 175.5,
+        sma200: null,
+      });
+      expect(result.at(-1)).toMatchObject({
+        date: observations[219]!.date,
+        close: 319,
+        sma20: 309.5,
+        sma50: 294.5,
+        sma200: 219.5,
+      });
+      expect(result.map((point) => point.date)).toEqual(
+        [...result.map((point) => point.date)].sort(),
+      );
+    });
+
+    it('computes SMA200 against the full valid series before taking the final 120 points', () => {
+      const result = buildMovingAverageChart(series(220, (index) => index + 100));
+
+      expect(result[98]?.sma200).toBeNull();
+      expect(result[99]?.sma200).toBe(199.5);
+    });
+
+    it('does not include observations after the requested date', () => {
+      const observations = series(220, (index) => index + 100);
+      const result = buildMovingAverageChart([...observations].reverse(), observations[210]!.date);
+
+      expect(result.at(-1)?.date).toBe(observations[210]!.date);
+      expect(result).toHaveLength(120);
+    });
+
+    it('keeps unavailable averages null when the history is too short', () => {
+      const result = buildMovingAverageChart(series(19, () => 100));
+
+      expect(result).toHaveLength(19);
+      expect(result.every((point) => point.sma20 === null && point.sma50 === null && point.sma200 === null)).toBe(true);
+    });
+  });
+
+  function reading(
+    distances: Partial<Pick<MovingAverageReading, 'distance20Pct' | 'distance50Pct' | 'distance200Pct'>>,
+  ): MovingAverageReading {
+    return {
+      date: null,
+      close: null,
+      observations: 0,
+      sma20: null,
+      sma50: null,
+      sma200: null,
+      distance20Pct: null,
+      distance50Pct: null,
+      distance200Pct: null,
+      slope20Pct: null,
+      slope50Pct: null,
+      slope200Pct: null,
+      regime: 'incomplet',
+      regimeHorizon: 'incomplet',
+      crossover: null,
+      ...distances,
+    };
+  }
+
+  describe('describeMovingAveragePosition', () => {
+    it('describes the course above every available average without turning it into advice', () => {
+      const description = describeMovingAveragePosition(
+        reading({ distance20Pct: 1, distance50Pct: 2, distance200Pct: 3 }),
+      );
+
+      expect(description).toMatch(/au-dessus/i);
+      expect(description).toMatch(/20/);
+      expect(description).toMatch(/50/);
+      expect(description).toMatch(/200/);
+      expect(description).not.toMatch(/acheter|vendre|signal/i);
+    });
+
+    it('describes the course below every available average', () => {
+      const description = describeMovingAveragePosition(
+        reading({ distance20Pct: -1, distance50Pct: -2, distance200Pct: -3 }),
+      );
+
+      expect(description).toMatch(/sous|en dessous/i);
+      expect(description).toMatch(/20/);
+      expect(description).toMatch(/50/);
+      expect(description).toMatch(/200/);
+    });
+
+    it('describes equal positions as being at the averages', () => {
+      const description = describeMovingAveragePosition(
+        reading({ distance20Pct: 0, distance50Pct: 0, distance200Pct: 0 }),
+      );
+
+      expect(description).toMatch(/au niveau|à proximité|confond/i);
+      expect(description).toMatch(/20/);
+      expect(description).toMatch(/50/);
+      expect(description).toMatch(/200/);
+    });
+
+    it('reports distinct positions when horizons disagree', () => {
+      const description = describeMovingAveragePosition(
+        reading({ distance20Pct: 1, distance50Pct: -1, distance200Pct: 0 }),
+      );
+
+      expect(description).toMatch(/contrast|différ|selon les horizons/i);
+      expect(description).toMatch(/20/);
+      expect(description).toMatch(/50/);
+      expect(description).toMatch(/200/);
+    });
+
+    it('names missing horizons in an incomplete reading', () => {
+      const description = describeMovingAveragePosition(
+        reading({ distance20Pct: 1, distance50Pct: null, distance200Pct: null }),
+      );
+
+      expect(description).toMatch(/incomplète/i);
+      expect(description).toMatch(/50/);
+      expect(description).toMatch(/200/);
+    });
+  });
