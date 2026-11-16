@@ -58,7 +58,7 @@ export default function CourbeNervosite({
   const iDerniere = derniere ? lignes.lastIndexOf(derniere) : -1;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={titre} preserveAspectRatio={compacte ? 'none' : undefined}>
+    <svg viewBox={`0 0 ${W} ${H}`} className={compacte ? 'block h-full w-full' : 'h-auto w-full'} role="img" aria-label={titre} preserveAspectRatio={compacte ? 'none' : undefined}>
       {graduations.map((v) => (
         <g key={v}>
           <line x1={G.l} x2={W - G.r} y1={y(v)} y2={y(v)} className="stroke-border" strokeWidth={1} />
