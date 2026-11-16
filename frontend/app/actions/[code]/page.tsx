@@ -189,9 +189,13 @@ const HISTORY = 600;
 async function getData(code: string, fromDate?: string) {
   const supabase = createClient();
 
+  // Colonnes lues par la page, et elles seules (règle 24 de l'audit de
+  // performance) : 600 lignes par fiche, sans id, created_at, updated_at ni
+  // bornes 52 semaines (recalculées ici par plageSurFenetre). Toutes ces
+  // colonnes existent d'après supabase/migrations (0001, 0020, 0031).
   let histQuery = supabase
     .from('brvm_actions_daily')
-    .select('*')
+    .select('code, date_marche, designation, pays, secteur, cours_precedent, cours_jour, variation_pct, volume, nb_transactions, valeur_echangee, ouverture, plus_haut, plus_bas, beta_1an, valorisation')
     .eq('code', code)
     .order('date_marche', { ascending: false })
     .limit(HISTORY);
