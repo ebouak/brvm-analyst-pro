@@ -107,6 +107,7 @@ import ThesisPanel from '@/components/theses/ThesisPanel';
 import ActionMenu from '@/components/actions/ActionMenu';
 import SeasonalityCard from '@/components/seasonality/SeasonalityCard';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
+import { demarrer } from '@/lib/async/demarrer';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -278,35 +279,49 @@ export default async function InstrumentPage(
   const searchParams = await props.searchParams;
   const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
+  const fromDate = searchParams.from ?? '';
+  const rubrique = rubriqueDepuis(searchParams.rubrique);
 
+  // ── Vague 1 : tout ce qui ne dépend que du code part EN MÊME TEMPS ──────────
+  // (règle 16 de l'audit de performance). Chaque résultat reste attendu à
+  // l'endroit où il sert ; voir lib/async/demarrer.ts.
+  //
   // Indicateurs techniques (RSI, MACD, moyennes mobiles, lecture, explication IA).
   // Niveau requis LU EN BASE (feature_flags → `indicateurs_techniques`), éditable
   // dans /admin/features. Le cours et le volume, eux, restent publics.
-  const [gateIndicateurs, gateSignaux, gateFonda, gateValo, gateLectureSeance] = await Promise.all([
+  const pGates = demarrer(Promise.all([
     canAccess('indicateurs_techniques'), // verdict, config technique, RSI/MACD
     canAccess('signaux'),                // signal quantitatif
     canAccess('fondamentaux'),           // analyse fondamentale
     canAccess('dcf'),                    // valorisation
     canAccess('lecture_seance'),         // « Ce que dit la séance » (carnet commenté)
-  ]);
-
+  ]));
   // États financiers complets pour le constructeur de graphique — chargés
   // seulement si l'accès fondamental est ouvert (aucun coût pour les anonymes,
   // qui ne verraient qu'un cadenas de toute façon).
-  const financials = gateFonda.allowed ? await loadCompanyFinancials(code) : null;
+  const pFinancials = demarrer(pGates.then(([, , fonda]) => (fonda.allowed ? loadCompanyFinancials(code) : null)));
+  const pData = demarrer(getData(code, fromDate || undefined));
+  const pAdmin = demarrer(getAdminContext());
+  const pValuation = demarrer(getValuation(code).catch(() => null));
+  const pScoring = demarrer(getScoring(code).catch(() => null));
+  const pForum = demarrer(listTopics(0, code));
+  const pFraicheur = demarrer(loadFreshnessInputs());
+  const pSgiFrais = demarrer(getSgiFrais().catch(() => []));
+  // Saisonnalité (série mensuelle compacte ; React.cache déduplique avec /saisonnalite).
+  const pSaison = demarrer(getMonthlyReturns(code).catch(() => []));
+  // Profil de la société (0201) : public, sources officielles seulement.
+  const pProfil = demarrer(createClient().from('societes_profils').select('presentation, historique, identite, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle());
+
+  const [gateIndicateurs, gateSignaux, gateFonda, gateValo, gateLectureSeance] = await pGates;
+  const financials = await pFinancials;
   const chartRows = financials
     ? buildChartRows(financials.incomeStatements, financials.balanceSheets, financials.cashFlowStatements)
     : [];
-  const fromDate = searchParams.from ?? '';
-  const rubrique = rubriqueDepuis(searchParams.rubrique);
-  const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
+  const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await pData;
   // Bouton « Corriger » réservé aux admins (la route /api/fundamentals revérifie).
-  const canEditFondamentaux = can(await getAdminContext(), 'content.write');
-  const [valuation, scoring] = await Promise.all([
-    getValuation(code).catch(() => null),
-    getScoring(code).catch(() => null),
-  ]);
-  const { topics: forumTopics, authors: forumAuthors } = await listTopics(0, code);
+  const canEditFondamentaux = can(await pAdmin, 'content.write');
+  const [valuation, scoring] = await Promise.all([pValuation, pScoring]);
+  const { topics: forumTopics, authors: forumAuthors } = await pForum;
 
   if (rows.length === 0) {
     // Code inexistant : vrai 404 (pas d'état vide en 200). Instrument connu sans historique : état vide.
@@ -398,7 +413,7 @@ export default async function InstrumentPage(
   const up      = (last.variation_pct ?? 0) >= 0;
 
   // Fraîcheur des cours : dernière collecte intraday + dernière séance en base.
-  const fInputs = await loadFreshnessInputs();
+  const fInputs = await pFraicheur;
   const fraicheur = computeFreshness(fInputs.derniereCollecte, fInputs.derniereSeance, new Date());
   const dateSeanceAnalyse = fInputs.derniereSeance ?? last.date_marche;
   const movingAveragePoints = rows.map((row) => ({
@@ -407,6 +422,138 @@ export default async function InstrumentPage(
     close: row.cours_jour ?? null,
   }));
   const movingAverageReading = analyzeMovingAverages(movingAveragePoints, dateSeanceAnalyse);
+
+  // ── Vague 2 : requêtes qui n'attendent que la dernière séance ─────────────
+  // Envoyées ensemble ; chacune est attendue plus bas, là où elle sert.
+  const liqDailyClient = createPublicClient();
+  // Liquidité v2 (table liquidity_daily), puis les fourchettes du marché à la même séance.
+  const pLiqRow = demarrer(liqDailyClient
+    .from('liquidity_daily')
+    .select('*')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle());
+  const pSpreadRows = demarrer(pLiqRow.then(async ({ data }): Promise<{ data: unknown[] | null }> => {
+    const seance = (data as { date_marche?: string } | null)?.date_marche ?? null;
+    if (!seance) return { data: null };
+    const r = await liqDailyClient.from('liquidity_daily').select('spread_pct').eq('date_marche', seance).not('spread_pct', 'is', null);
+    return { data: r.data };
+  }));
+  // Instantanés intraday de la dernière séance (volume CUMULÉ), pour le graphique de séance.
+  const pSnapRows = demarrer(liqDailyClient
+    .from('brvm_intraday_snapshots')
+    .select('captured_at, close, volume')
+    .eq('code', code)
+    .eq('date_marche', last.date_marche)
+    .order('captured_at', { ascending: true }));
+  // Combined Alpha : même lecture que /actions/[code]/quant (dernier run WB_COMBINED_ALPHA).
+  const pScoresCA = demarrer(Promise.resolve(liqDailyClient
+    .from('quant_model_runs')
+    .select('id')
+    .eq('model_code', 'WB_COMBINED_ALPHA')
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()).then(async ({ data: runCA }): Promise<{ data: unknown[] | null }> => {
+    if (!runCA) return { data: null };
+    const r = await liqDailyClient
+      .from('quant_model_scores')
+      .select('*')
+      .eq('security_id', code)
+      .eq('run_id', (runCA as { id: string }).id)
+      .order('score_date', { ascending: false })
+      .limit(1);
+    return { data: r.data };
+  }));
+  // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
+  // de celle des cours, le bulletin paraissant après la clôture.
+  const pCarnet = demarrer(liqDailyClient
+    .from('brvm_carnet_daily')
+    .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle());
+  // Actualités de la valeur — rapprochées de la séance par leur SEULE date.
+  // Jamais datées dans le futur : une publication à venir ne commente pas une
+  // séance passée.
+  const pActus = demarrer(liqDailyClient
+    .from('brvm_news')
+    .select('titre, date_publication')
+    .not('hidden', 'is', true) // modération rédactionnelle
+    .eq('instrument_code', code)
+    .lte('date_publication', new Date().toISOString().slice(0, 10))
+    .order('date_publication', { ascending: false })
+    .limit(3));
+  const pSectorBreadth = demarrer(gateIndicateurs.allowed
+    ? loadSectorBreadth(SECTORS_BY_CODE[code] ?? null, movingAverageReading.date ?? dateSeanceAnalyse)
+    : Promise.resolve({ status: 'insufficient' as const, reading: null }));
+  // Clôtures complètes pour 5A / Max : PostgREST tronque à 1000 lignes, on pagine.
+  const pHistoriqueComplet = demarrer((async () => {
+    const lignes: { date_marche: string; cours_jour: number | null }[] = [];
+    for (let page = 0; page < 20; page++) {
+      const { data: lot } = await liqDailyClient
+        .from('brvm_actions_daily')
+        .select('date_marche, cours_jour')
+        .eq('code', code)
+        .gt('cours_jour', 0)
+        .order('date_marche', { ascending: true })
+        .range(page * 1000, page * 1000 + 999);
+      const l = (lot ?? []) as { date_marche: string; cours_jour: number | null }[];
+      lignes.push(...l);
+      if (l.length < 1000) break;
+    }
+    return lignes;
+  })());
+  // Événements de marché de la société, et ce que le cours a fait après.
+  // Chargés SEULEMENT si la lecture de séance est accessible : inutile de payer
+  // ces requêtes pour un bloc que <SectionLock> affichera à la place.
+  const pEvenements = demarrer(gateLectureSeance.allowed ? (async () => {
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    let idxQuery = liqDailyClient
+      .from('brvm_indices_daily')
+      .select('date_marche, valeur')
+      .eq('code', 'BRVMC') // BRVM Composite — même code que lib/reports.ts et app/dashboard/page.tsx.
+      .order('date_marche', { ascending: false })
+      .limit(HISTORY);
+    if (fromDate) idxQuery = idxQuery.gte('date_marche', fromDate);
+
+    const [{ data: evtsRows }, { data: idxRows }] = await Promise.all([
+      liqDailyClient
+        .from('market_events')
+        .select('event_date, event_type, title')
+        .eq('instrument_code', code)
+        // Jamais un événement daté dans le futur — même principe que les
+        // actualités : une publication à venir ne commente pas une séance
+        // passée. `selectionnerEvenements` l'exclurait de toute façon, mais
+        // filtrer ici évite qu'un événement futur ne prenne, à tort, une des
+        // 8 places retenues au détriment d'un événement passé pertinent.
+        .lte('event_date', aujourdhui)
+        .order('event_date', { ascending: false })
+        .limit(8),
+      idxQuery,
+    ]);
+    return { aujourdhui, evtsRows, idxRows };
+  })() : Promise.resolve(null));
+  const aujourdhuiIso = new Date().toISOString().slice(0, 10);
+  const pPresseProchain = demarrer(Promise.all([
+    liqDailyClient
+      .from('brvm_news')
+      .select('id, titre, date_publication, source, source_label, source_url')
+      .contains('ticker_codes', [code])
+      .not('hidden', 'is', true) // modération rédactionnelle
+      .lte('date_publication', aujourdhuiIso)
+      .order('date_publication', { ascending: false })
+      .limit(80),
+    liqDailyClient
+      .from('market_events')
+      .select('title, event_date')
+      .eq('instrument_code', code)
+      .gt('event_date', aujourdhuiIso)
+      .order('event_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]));
   let latestCloseIndex = -1;
   for (let index = rows.length - 1; index >= 0; index -= 1) {
     const close = rows[index]?.cours_jour;
@@ -446,6 +593,8 @@ export default async function InstrumentPage(
   // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
   const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
   const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  // Trimestre / semestre de l'année en cours, tant que l'exercice n'est pas publié (attendu plus bas).
+  const pIntermediaire = demarrer(exCourant ? chargerIntermediaire(createPublicClient(), code, fundamentals) : Promise.resolve(null));
 
   // Rendement dividende — SOURCE UNIQUE : `dividendeCourant` (dernier dividende
   // > 0, lignes triées par exercice décroissant). Pastille, grille de séance,
@@ -499,43 +648,16 @@ export default async function InstrumentPage(
     cours_jour: r.cours_jour ?? null,
     valeur_echangee: (r as { valeur_echangee?: number | null }).valeur_echangee ?? null,
   }));
-  // Liquidité v2 (table liquidity_daily) — fallback calcul legacy si table vide.
-  const liqDailyClient = createPublicClient();
-  const { data: liqRow } = await liqDailyClient
-    .from('liquidity_daily')
-    .select('*')
-    .eq('code', code)
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Liquidité v2 (table liquidity_daily, lancée en vague 2) — fallback calcul legacy si table vide.
+  const { data: liqRow } = await pLiqRow;
   const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
 
   // Instantanés intraday de la dernière séance (volume CUMULÉ), pour le graphique de séance.
-  const { data: snapRows } = await liqDailyClient
-    .from('brvm_intraday_snapshots')
-    .select('captured_at, close, volume')
-    .eq('code', code)
-    .eq('date_marche', last.date_marche)
-    .order('captured_at', { ascending: true });
+  const { data: snapRows } = await pSnapRows;
   const instantanes = ((snapRows ?? []) as { captured_at: string; close: number | null; volume: number | null }[]).filter((s) => s.close != null && s.close > 0);
 
   // Combined Alpha : même lecture que /actions/[code]/quant (dernier run WB_COMBINED_ALPHA).
-  const { data: runCA } = await liqDailyClient
-    .from('quant_model_runs')
-    .select('id')
-    .eq('model_code', 'WB_COMBINED_ALPHA')
-    .order('calculation_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const { data: scoresCA } = runCA
-    ? await liqDailyClient
-        .from('quant_model_scores')
-        .select('*')
-        .eq('security_id', code)
-        .eq('run_id', (runCA as { id: string }).id)
-        .order('score_date', { ascending: false })
-        .limit(1)
-    : { data: null };
+  const { data: scoresCA } = await pScoresCA;
   const combinedAlphaRow = ((scoresCA as unknown[] | null)?.[0] ?? null) as {
     combined_alpha_score: number | null; price_momentum_score: number | null; value_score: number | null;
     earnings_quality_score: number | null; financial_strength_score: number | null; dividend_quality_score: number | null;
@@ -565,35 +687,19 @@ export default async function InstrumentPage(
 
   // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
   // de celle des cours, le bulletin paraissant après la clôture.
-  const { data: carnetRow } = await liqDailyClient
-    .from('brvm_carnet_daily')
-    .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
-    .eq('code', code)
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const { data: carnetRow } = await pCarnet;
   const carnet = (carnetRow ?? null) as CarnetRow | null;
 
   // Actualités de la valeur — rapprochées de la séance par leur SEULE date.
   // Jamais datées dans le futur : une publication à venir ne commente pas une
   // séance passée.
-  const { data: actusRows } = await liqDailyClient
-    .from('brvm_news')
-    .select('titre, date_publication')
-    .not('hidden', 'is', true) // modération rédactionnelle
-    .eq('instrument_code', code)
-    .lte('date_publication', new Date().toISOString().slice(0, 10))
-    .order('date_publication', { ascending: false })
-    .limit(3);
+  const { data: actusRows } = await pActus;
   const actualites = (actusRows ?? []) as { titre: string; date_publication: string }[];
 
   // Fourchettes du marché à la même séance : sans elles, « 1,75 % » ne se
   // compare à rien. Seules les valeurs dont la fourchette est RÉELLEMENT
   // mesurée entrent dans le classement — jamais celles qui n'en ont pas.
-  const seanceLiq = (liqRow as { date_marche?: string } | null)?.date_marche ?? null;
-  const { data: spreadRows } = seanceLiq
-    ? await liqDailyClient.from('liquidity_daily').select('spread_pct').eq('date_marche', seanceLiq).not('spread_pct', 'is', null)
-    : { data: null };
+  const { data: spreadRows } = await pSpreadRows;
   const spreads = ((spreadRows ?? []) as { spread_pct: number }[]).map((r) => r.spread_pct).sort((a, b) => a - b);
   const propreSpread = (liqRow as { spread_pct?: number | null } | null)?.spread_pct ?? null;
   const contexteCarnet = spreads.length > 0
@@ -617,7 +723,7 @@ export default async function InstrumentPage(
   };
 
   // Trimestre / semestre de l'année en cours, tant que l'exercice n'est pas publié.
-  const intermediaire = exCourant ? await chargerIntermediaire(createPublicClient(), code, fundamentals) : null;
+  const intermediaire = await pIntermediaire;
   const economieSociete = exCourant
     ? {
         intermediaire,
@@ -638,31 +744,9 @@ export default async function InstrumentPage(
   // calculé plus haut) : inutile de payer ces requêtes pour un bloc que
   // <SectionLock> affichera à la place de <CarnetCommentaire>.
   let mesuresEvenements: MesureEvenement[] = [];
-  if (gateLectureSeance.allowed) {
-    const aujourdhui = new Date().toISOString().slice(0, 10);
-    let idxQuery = liqDailyClient
-      .from('brvm_indices_daily')
-      .select('date_marche, valeur')
-      .eq('code', 'BRVMC') // BRVM Composite — même code que lib/reports.ts et app/dashboard/page.tsx.
-      .order('date_marche', { ascending: false })
-      .limit(HISTORY);
-    if (fromDate) idxQuery = idxQuery.gte('date_marche', fromDate);
-
-    const [{ data: evtsRows }, { data: idxRows }] = await Promise.all([
-      liqDailyClient
-        .from('market_events')
-        .select('event_date, event_type, title')
-        .eq('instrument_code', code)
-        // Jamais un événement daté dans le futur — même principe que les
-        // actualités ci-dessus : une publication à venir ne commente pas une
-        // séance passée. `selectionnerEvenements` l'exclurait de toute façon,
-        // mais filtrer ici évite qu'un événement futur ne prenne, à tort, une
-        // des 8 places retenues au détriment d'un événement passé pertinent.
-        .lte('event_date', aujourdhui)
-        .order('event_date', { ascending: false })
-        .limit(8),
-      idxQuery,
-    ]);
+  const evenementsCharges = await pEvenements;
+  if (evenementsCharges) {
+    const { aujourdhui, evtsRows, idxRows } = evenementsCharges;
 
     const retenus = selectionnerEvenements((evtsRows ?? []) as EvenementMarche[], aujourdhui, 3);
 
@@ -704,7 +788,7 @@ export default async function InstrumentPage(
     }
   }
 
-  const sgiFrais = await getSgiFrais().catch(() => []);
+  const sgiFrais = await pSgiFrais;
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)
     .filter((c): c is number => c != null && c > 0);
@@ -714,10 +798,7 @@ export default async function InstrumentPage(
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
   const secteurMoyennes = SECTORS_BY_CODE[code] ?? null;
-  const breadthDate = movingAverageReading.date ?? dateSeanceAnalyse;
-  const sectorBreadth = gateIndicateurs.allowed
-    ? await loadSectorBreadth(secteurMoyennes, breadthDate)
-    : { status: 'insufficient' as const, reading: null };
+  const sectorBreadth = await pSectorBreadth;
 
   // Rendement dividende net d'IRVM, selon la BASE du montant : un montant déjà
   // net (calendrier officiel) n'est jamais retaxé — double IRVM corrigée le
@@ -752,8 +833,8 @@ export default async function InstrumentPage(
     { label: 'Cassure baissière 20j', ok: det.breakoutDown },
   ].filter((d) => d.ok !== undefined);
 
-  // Saisonnalité (série mensuelle compacte ; React.cache déduplique avec /saisonnalite).
-  const seasonalityReturns = await getMonthlyReturns(code).catch(() => []);
+  // Saisonnalité (lancée en vague 1).
+  const seasonalityReturns = await pSaison;
 
   // ── Lecture technique unique (remplace jauge, analyse technique, signal et lecture commentée) ──
   const lecture = lectureTechnique({
@@ -898,29 +979,16 @@ export default async function InstrumentPage(
   const historiqueDiv = divRows.filter((d) => d.montant > 0).slice(0, 5);
 
   // ══ Vue d'ensemble ══════════════════════════════════════════════════════
-  const aujourdhuiIso = new Date().toISOString().slice(0, 10);
-  // Clôtures complètes pour 5A / Max : PostgREST tronque à 1000 lignes, on pagine.
-  const historiqueComplet: { date_marche: string; cours_jour: number | null }[] = [];
-  for (let page = 0; page < 20; page++) {
-    const { data: lot } = await liqDailyClient
-      .from('brvm_actions_daily')
-      .select('date_marche, cours_jour')
-      .eq('code', code)
-      .gt('cours_jour', 0)
-      .order('date_marche', { ascending: true })
-      .range(page * 1000, page * 1000 + 999);
-    const l = (lot ?? []) as { date_marche: string; cours_jour: number | null }[];
-    historiqueComplet.push(...l);
-    if (l.length < 1000) break;
-  }
+  // Clôtures complètes pour 5A / Max (paginées, lancées en vague 2).
+  const historiqueComplet = await pHistoriqueComplet;
   const seriesCours = seriesParPeriode(historiqueComplet);
   // 1J : graphique de séance s'il se trace, ou le constat « pas de transaction » ; sinon pas d'onglet 1J.
   const transactionsSeance = depuisPremiereTransaction(instantanes).length;
   const seanceTracable = transactionsSeance >= 2;
   const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
 
-  // Profil de la société (0201) : public, sources officielles seulement.
-  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, historique, identite, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
+  // Profil de la société (0201), lancé en vague 1.
+  const { data: profilRow } = await pProfil;
   const profil = normaliserProfil(profilRow);
   // Points clés tirés de NOS comptes et dividendes : verrouillés comme les fondamentaux.
   const pointsProfil = gateFonda.allowed ? pointsCles({
@@ -930,24 +998,7 @@ export default async function InstrumentPage(
     dividendes: divRows.map((d) => ({ exercice: d.exercice, montant: d.montant })),
   }) : [];
 
-  const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
-    liqDailyClient
-      .from('brvm_news')
-      .select('id, titre, date_publication, source, source_label, source_url')
-      .contains('ticker_codes', [code])
-      .not('hidden', 'is', true) // modération rédactionnelle
-      .lte('date_publication', aujourdhuiIso)
-      .order('date_publication', { ascending: false })
-      .limit(80),
-    liqDailyClient
-      .from('market_events')
-      .select('title, event_date')
-      .eq('instrument_code', code)
-      .gt('event_date', aujourdhuiIso)
-      .order('event_date', { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const [{ data: presseRows }, { data: prochainRow }] = await pPresseProchain;
   const groupesActus = regrouperActualites(
     publications.map((p) => ({ id: String(p.id), libelle: p.libelle, date_publication: p.date_publication, type_publication: p.type_publication, source_url: p.source_url })),
     (presseRows ?? []) as NewsEntree[],
