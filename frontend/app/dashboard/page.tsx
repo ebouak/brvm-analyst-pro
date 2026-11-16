@@ -58,12 +58,20 @@ import {
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard' };
 
-// PAS de loading.tsx sous /dashboard (retiré le 2026-11-03, mesuré). Avec lui,
-// tout le contenu arrivait dans un bloc caché que seul un script révèle ; sur
-// mobile ce script attendait que le processeur ait fini d'évaluer le JavaScript :
-// LCP 12,0 s (Pixel 7, 4G lente, CPU ×4). Sans lui, le contenu est lu dans
-// l'ordre du HTML : 4,1 s, et 1,7 s sur bureau grâce aux requêtes parallèles.
-// Ne pas le remettre sans refaire cette mesure.
+// loading.tsx sous /dashboard : HISTORIQUE ET MESURES.
+// - 2026-11-03 (Next 14) : retiré. Avec lui, tout le contenu arrivait dans un
+//   bloc caché que seul un script révèle ; sur mobile ce script attendait la fin
+//   de l'évaluation du JavaScript : LCP 12,0 s (Pixel 7, 4G lente, CPU ×4),
+//   contre 4,1 s sans.
+// - 2026-11-16 (Next 15.5 / React 19, audit de performance règle 1) : remis
+//   APRÈS nouvelle mesure, dans les mêmes conditions (viewport mobile, CPU ×4,
+//   4G lente 150 ms / 1,6 Mb/s, médiane de 5), sur un build de production servi
+//   par un faux Supabase à 300 ms par requête :
+//     /dashboard     sans : FCP 1 584 ms, LCP 4 360 ms
+//                    avec : FCP 1 452 ms, LCP 3 856 ms
+//   La régression de 12 s ne se reproduit plus. À CONFIRMER en production
+//   (PageSpeed / Core Web Vitals réels) : si le LCP réel se dégrade, retirer
+//   app/dashboard/loading.tsx et reporter la mesure ici.
 
 async function getData() {
   const supabase = createClient();
