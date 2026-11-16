@@ -7,10 +7,10 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  construireSerie, rendementsParSeance, MIN_TITRES, MIN_HISTORIQUE_RANG, type CoursLigne,
+  construireSerie, rendementsParSeance, MIN_TITRES, MIN_HISTORIQUE_RANG, FENETRE_RANG, type CoursLigne,
 } from '../src/nervosite/construire.js';
 import { ecrireNervosite, lignesMock, runNervosite, TABLE_NERVOSITE } from '../src/nervosite/runNervosite.js';
-import { serieNervosite, rendementsLog, rendementMarche } from '../src/nervosite/pure/nervosite.js';
+import { serieNervosite, rendementsLog, rendementMarche, rangsGlissants } from '../src/nervosite/pure/nervosite.js';
 
 const RACINE = join(__dirname, '..', '..');
 
@@ -109,6 +109,24 @@ describe('série BRVM-V', () => {
   it('le rang ne dépend que du passé : ajouter des séances ne change pas les lignes anciennes', () => {
     const courte = construireSerie(lignes.filter((l) => l.date_marche <= serie[620]!.date_marche), '2020-01-01');
     expect(courte.at(-1)).toEqual(serie[620]);
+  });
+
+  it('le rang est calculé sur les 1 250 dernières valeurs au plus', () => {
+    expect(FENETRE_RANG).toBe(1250);
+    const longues = fabrique(1700, 8, (j, k) => Math.sin(j * 1.7 + k * 0.9) * (j < 400 ? 0.02 : 0.004));
+    const s = construireSerie(longues, '2020-01-01');
+    const valeurs = s.map((l) => l.valeur);
+    const brutes = serieNervosite(rendementsParSeance(longues, '2020-01-01').map((x) => x.rendement)).map((p) => p.valeur);
+    const attendus = rangsGlissants(brutes, FENETRE_RANG, MIN_HISTORIQUE_RANG);
+    s.forEach((l, i) => {
+      const a = attendus[i];
+      expect(l.rang).toBe(a === null || a === undefined ? null : Math.round(a * 100) / 100);
+    });
+    expect(valeurs.filter((v) => v !== null).length).toBeGreaterThan(FENETRE_RANG + 100);
+    // Les 400 premières séances, agitées, sont sorties de la fenêtre à la fin :
+    // sur tout l'historique, la dernière séance paraîtrait plus calme qu'elle n'est.
+    const surTout = rangsGlissants(brutes, Infinity, MIN_HISTORIQUE_RANG).at(-1)!;
+    expect(attendus.at(-1)!).toBeGreaterThan(surTout);
   });
 
   it('la volatilité triple à la fin : la valeur monte et le régime finit tendu', () => {

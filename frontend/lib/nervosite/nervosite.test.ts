@@ -3,7 +3,7 @@
  * assertions, `assert.ok` → `toBe(true)`, `assert.equal` → `toBe` (égalité stricte).
  */
 import { test, expect } from 'vitest';
-import { nervosite, serieNervosite, rendementsLog, rendementMarche, rangHistorique, regime, FENETRE_LENTE } from './nervosite';
+import { nervosite, serieNervosite, rendementsLog, rendementMarche, rangHistorique, rangsGlissants, regime, FENETRE_LENTE, FENETRE_RANG, MIN_RANG } from './nervosite';
 
 /** Générateur pseudo-aléatoire reproductible, loi normale. */
 function gauss(graine: number) {
@@ -67,4 +67,49 @@ test('rang et régime', () => {
   expect(regime(50)).toBe('normal');
   expect(regime(80)).toBe('agité');
   expect(regime(96)).toBe('tendu');
+});
+
+test('rang glissant : fenêtre de 1 250 séances, 5 ans environ', () => {
+  expect(FENETRE_RANG).toBe(1250);
+  expect(MIN_RANG).toBe(250);
+});
+
+test('rang glissant : une valeur sortie de la fenêtre n’influe plus', () => {
+  // Une seule valeur très haute en tête, puis 1 300 valeurs croissantes de 1 à 1 300.
+  const valeurs = [1e9, ...Array.from({ length: 1300 }, (_, i) => i + 1)];
+  const r = rangsGlissants(valeurs);
+  // Dernière séance : la valeur 1e9 a quitté la fenêtre, 1 300 est la plus haute → 100.
+  expect(r.at(-1)).toBe(100);
+  // Tant que 1e9 est dans la fenêtre, la plus haute valeur récente n'atteint pas 100.
+  expect(r[1249]!).toBeLessThan(100);
+  // Avec la fenêtre de toute l'histoire, elle n'y arriverait jamais.
+  const tout = rangsGlissants(valeurs, Infinity);
+  expect(tout.at(-1)!).toBeLessThan(100);
+});
+
+test('rang glissant : la séance est comparée aux 1 250 dernières valeurs, elle comprise', () => {
+  const valeurs = Array.from({ length: 2000 }, (_, i) => (i * 7919) % 1000);
+  const r = rangsGlissants(valeurs);
+  for (const i of [249, 1000, 1249, 1250, 1999]) {
+    const fen = valeurs.slice(Math.max(0, i - FENETRE_RANG + 1), i + 1);
+    expect(r[i]).toBe(rangHistorique(valeurs[i]!, fen));
+  }
+});
+
+test('rang glissant : aucune valeur future', () => {
+  const valeurs = Array.from({ length: 1600 }, (_, i) => Math.sin(i) * 10);
+  const complet = rangsGlissants(valeurs);
+  const tronque = rangsGlissants(valeurs.slice(0, 900));
+  expect(complet.slice(0, 900)).toEqual(tronque);
+});
+
+test('rang glissant : pas de rang sous 250 valeurs, les absences ne comptent pas', () => {
+  const valeurs: (number | null)[] = [null, null, ...Array.from({ length: 300 }, (_, i) => i)];
+  const r = rangsGlissants(valeurs);
+  expect(r[0]).toBeNull();
+  expect(r[1]).toBeNull();
+  // 249e valeur réelle (index 2 + 248) : pas encore de rang ; 250e : rang.
+  expect(r[2 + 248]).toBeNull();
+  expect(r[2 + 249]).toBe(100);
+  expect(rangsGlissants([1, 2, 3])).toEqual([null, null, null]);
 });

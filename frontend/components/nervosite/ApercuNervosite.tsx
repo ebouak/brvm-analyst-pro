@@ -32,7 +32,7 @@ export default function ApercuNervosite({ resume, dateMarche }: { resume: Resume
       )}
       <p className="mt-1.5 text-[11px] text-faint">
         {derniere.regime
-          ? <>Régime fixé par le rang dans l’historique (<span className="tabular">{Math.round(derniere.rang!)}</span> / 100)</>
+          ? <>Régime fixé par le rang sur les cinq dernières années (<span className="tabular">{Math.round(derniere.rang!)}</span> / 100)</>
           : 'Régime non classé : historique de l’indice trop court'}
         {derniere.date_marche !== dateMarche && (
           <span className="text-warn"> · séance du {fmtDateFR(derniere.date_marche)}</span>

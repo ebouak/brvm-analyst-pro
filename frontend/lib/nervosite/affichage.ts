@@ -65,10 +65,12 @@ export function versLigne(r: Record<string, unknown>): LigneNervosite {
   };
 }
 
-/** Phrase de rang, dérivée du seul chiffre stocké. */
-export function phraseRang(rang: number, depuis: string): string {
-  const annee = depuis.slice(0, 4);
-  return `Au niveau ou au-dessus de ${Math.round(rang)} % des valeurs observées depuis ${annee}, ce jour compris.`;
+/**
+ * Phrase de rang, dérivée du seul chiffre stocké. Le rang est calculé sur les
+ * 1 250 dernières séances au plus (≈ 5 ans, `FENETRE_RANG` de nervosite.ts).
+ */
+export function phraseRang(rang: number): string {
+  return `Au niveau ou au-dessus de ${Math.round(rang)} % des valeurs des cinq dernières années, ce jour compris.`;
 }
 
 /** Format « 12,3 % » d'une valeur annualisée. */

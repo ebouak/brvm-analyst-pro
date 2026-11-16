@@ -8,14 +8,14 @@ import {
   BORNES_REGIME, LIBELLE_REGIME, TON_REGIME, echantillonHebdo, fmtNervosite, phraseRang, syntheseSerie,
   type LigneNervosite,
 } from '@/lib/nervosite/affichage';
-import { FENETRE_INIT, FENETRE_LENTE, LAMBDA, SEUIL_ABERRANT, SEANCES_PAR_AN, type Regime } from '@/lib/nervosite/nervosite';
+import { FENETRE_INIT, FENETRE_LENTE, FENETRE_RANG, LAMBDA, SEUIL_ABERRANT, SEANCES_PAR_AN, type Regime } from '@/lib/nervosite/nervosite';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Indice de nervosité BRVM-V · volatilité du marché BRVM',
   description:
-    "BRVM-V mesure, séance après séance, l'agitation du marché boursier régional de l'UEMOA : volatilité réalisée du marché large, en pourcentage annualisé, avec son rang dans l'historique. Méthode et limites publiées.",
+    "BRVM-V mesure, séance après séance, l'agitation du marché boursier régional de l'UEMOA : volatilité réalisée du marché large, en pourcentage annualisé, avec son rang sur les cinq dernières années. Méthode et limites publiées.",
   alternates: { canonical: '/nervosite' },
 };
 
@@ -95,7 +95,7 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
                 )}
               </p>
               <p className="mt-1 text-xs text-faint">Volatilité annualisée du marché large, {d.n_titres} titres ce jour-là</p>
-              {d.rang !== null && <p className="mt-2 text-sm text-muted">{phraseRang(d.rang, s.debut)}</p>}
+              {d.rang !== null && <p className="mt-2 text-sm text-muted">{phraseRang(d.rang)}</p>}
             </>
           )}
         </div>
@@ -130,8 +130,9 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
         <h2 id="t-regimes" className="font-display text-lg text-ivory">Les quatre régimes</h2>
         <p className="mt-1 max-w-3xl text-sm text-muted">
           Le régime ne dépend pas d’un seuil fixe : il dépend du <span className="text-ivory">rang</span> de la valeur du
-          jour parmi toutes les valeurs connues jusqu’à cette séance. Un marché « tendu » est donc tendu par rapport à sa
-          propre histoire, pas par rapport à une autre bourse.
+          jour parmi les valeurs des cinq dernières années ({fmtNumber(FENETRE_RANG, 0)} séances au plus, ce jour compris,
+          jamais de valeur postérieure). Un marché « tendu » est donc tendu par rapport à sa propre histoire récente,
+          pas par rapport à une autre bourse ni à des années où la cote était différente.
         </p>
         <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-surface">
           <table className="w-full text-sm">
@@ -157,7 +158,8 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
         </div>
         <p className="mt-2 text-xs text-faint">
           {fmtNumber(totalClasse, 0)} séances classées sur {fmtNumber(s.seancesAvecValeur, 0)} dotées d’une valeur : la
-          première année de valeurs sert d’historique au rang et n’est pas classée.
+          première année de valeurs sert d’historique au rang et n’est pas classée. Avant cinq ans de valeurs, le rang
+          porte sur toutes celles connues à la date.
         </p>
       </section>
     </div>
@@ -216,7 +218,7 @@ function Methode({ minTitres }: { minTitres: number | null }) {
         <li>Un marché étroit : une poignée de valeurs fait l’essentiel des échanges, et quelques séances agitées suffisent à déplacer l’indice.</li>
         <li>Moyenne simple, non pondérée : une petite capitalisation compte autant que Sonatel.</li>
         <li>Une valeur peu échangée garde souvent le même cours d’une séance à l’autre ; ses rendements nuls tirent l’indice vers le bas.</li>
-        <li>Les premières années de la base comptent moins de titres que la cote actuelle : l’indice de 2008 et celui d’aujourd’hui ne portent pas sur le même marché, et le rang compare la séance du jour à toute cette histoire.</li>
+        <li>Les premières années de la base comptent moins de titres que la cote actuelle : l’indice de 2008 et celui d’aujourd’hui ne portent pas sur le même marché. C’est pourquoi le rang compare la séance aux cinq dernières années seulement, et non à toute cette histoire : les premières années, plus agitées, faisaient paraître calme une séance ordinaire. Le régime d’une séance ancienne reste celui calculé avec les cinq années qui la précèdent.</li>
       </ul>
       <p>
         Les cours viennent des publications de la BRVM, relus chaque séance. Voir aussi la{' '}

@@ -53,6 +53,6 @@ describe('synthèse', () => {
 describe('formats', () => {
   it('pourcentage annualisé à une décimale, rang arrondi', () => {
     expect(fmtNervosite(12.345)).toMatch(/^12,3\s%$/);
-    expect(phraseRang(82.4, '2008-01-02')).toBe('Au niveau ou au-dessus de 82 % des valeurs observées depuis 2008, ce jour compris.');
+    expect(phraseRang(82.4)).toBe('Au niveau ou au-dessus de 82 % des valeurs des cinq dernières années, ce jour compris.');
   });
 });

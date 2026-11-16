@@ -7,16 +7,13 @@ import {
   HistogramSeries,
   AreaSeries,
   LineSeries,
-  CandlestickSeries,
   type IChartApi,
   type AreaData,
   type HistogramData,
   type LineData,
-  type CandlestickData,
   type HistogramSeriesOptions,
   type AreaSeriesOptions,
   type LineSeriesOptions,
-  type CandlestickSeriesOptions,
   type DeepPartial,
   type IRange,
   type Time,
@@ -29,6 +26,7 @@ import {
   rsiSeries,
   macdSeries,
 } from '@/lib/indicators';
+import { agregerHebdo, serieCloture, serieVolume } from '@/lib/fiche/serieCours';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,32 +115,6 @@ const DRAW_TOOLS: { key: DrawTool; label: string; title: string }[] = [
 ];
 const DRAW_COLOR = '#56D7FD'; // cyan
 
-/** Agrège des séances journalières en bougies hebdomadaires (lundi ISO). */
-function toWeeklyBars(pts: PricePoint[]): PricePoint[] {
-  const byWeek = new Map<string, { opens: number[]; highs: number[]; lows: number[]; closes: number[]; volumes: number[] }>();
-  for (const p of pts) {
-    if (!p.close) continue;
-    const d = new Date(p.date);
-    // Décalage vers le lundi de la semaine
-    const day = d.getDay() || 7;
-    d.setDate(d.getDate() - day + 1);
-    const key = d.toISOString().slice(0, 10);
-    if (!byWeek.has(key)) byWeek.set(key, { opens: [], highs: [], lows: [], closes: [], volumes: [] });
-    const w = byWeek.get(key)!;
-    w.closes.push(p.close);
-    w.volumes.push(p.volume ?? 0);
-  }
-  const result: PricePoint[] = [];
-  for (const [date, w] of [...byWeek.entries()].sort()) {
-    result.push({
-      date,
-      close: w.closes[w.closes.length - 1] ?? null,
-      volume: w.volumes.reduce((a, b) => a + b, 0),
-    });
-  }
-  return result;
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toTime(dateStr: string): Time {
@@ -210,7 +182,6 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState<Set<IndicatorKey>>(new Set(DEFAULT_VISIBLE));
   const [period, setPeriod] = useState<PeriodKey>('1A');
-  const [chartType, setChartType] = useState<'line' | 'candle'>('line');
   const [resolution, setResolution] = useState<ResolutionKey>('1J');
   const [drawTool, setDrawTool] = useState<DrawTool>('select');
   const [drawings, setDrawings] = useState<Drawing[]>([]);
@@ -330,7 +301,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
     if (!mounted || !mainRef.current || data.length === 0) return;
 
     // Résolution : agrégation hebdomadaire si sélectionnée
-    const resolved = resolution === '1S' ? toWeeklyBars(data) : data;
+    const resolved = resolution === '1S' ? agregerHebdo(data) : data;
 
     // Slice data by selected period
     const maxBars = PERIOD_BARS[period];
@@ -342,17 +313,6 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
     // Use 0 only for indicator calc, but track which indices have real close
     const closesRaw = sliced.map((d) => d.close);
     const closesForCalc = closesRaw.map((c) => c ?? 0);
-
-    // Build pseudo-OHLCV: open = prev close, high/low ±0.1%
-    const candleData: CandlestickData[] = sliced
-      .filter((d) => d.close != null)
-      .map((d, i, arr) => {
-        const close = d.close as number;
-        const open = i > 0 && arr[i - 1]!.close != null ? (arr[i - 1]!.close as number) : close;
-        const high = Math.max(open, close) * 1.001;
-        const low = Math.min(open, close) * 0.999;
-        return { time: toTime(d.date), open, high, low, close };
-      });
 
     // ── Main chart ────────────────────────────────────────────────────────
     const mainEl = mainRef.current;
@@ -372,47 +332,27 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       priceScaleId: 'vol',
     } as DeepPartial<HistogramSeriesOptions>);
     main.priceScale('vol').applyOptions({ scaleMargins: { top: 0.75, bottom: 0 } });
-    const volData: HistogramData[] = sliced
-      .filter((d) => d.volume != null)
-      .map((d) => ({ time: toTime(d.date), value: d.volume as number }));
+    // Un volume absent n'est pas un zéro : la séance n'a simplement pas de barre.
+    const volData: HistogramData[] = serieVolume(sliced).map((p) => ({ time: toTime(p.date), value: p.valeur }));
     volSeries.setData(volData);
 
-    // Price series: area or candlestick
+    // Courbe de clôture. Aucune bougie : ce graphique ne reçoit ni ouverture ni
+    // plus haut / plus bas, et les fabriquer afficherait des cours qui n'ont pas
+    // existé. Les vraies bougies sont dans le graphique avancé.
     chartRef.current = main;
 
-    // Keep a reference to apply markers on
-    let priceSeries: ReturnType<typeof main.addSeries<any>> | null = null;
-
-    if (chartType === 'candle') {
-      const s = main.addSeries(CandlestickSeries, {
-        upColor: THEME.up,
-        downColor: THEME.down,
-        borderUpColor: THEME.up,
-        borderDownColor: THEME.down,
-        wickUpColor: THEME.up,
-        wickDownColor: THEME.down,
-        priceScaleId: 'right',
-        priceFormat: { type: 'price', precision: 0, minMove: 1 },
-      } as DeepPartial<CandlestickSeriesOptions>);
-      s.setData(candleData);
-      priceSeries = s;
-    } else {
-      const s = main.addSeries(AreaSeries, {
-        lineColor: THEME.white,
-        topColor: 'rgba(230,233,240,0.12)',
-        bottomColor: 'transparent',
-        lineWidth: 2,
-        priceScaleId: 'right',
-        crosshairMarkerVisible: true,
-        crosshairMarkerRadius: 4,
-        priceFormat: { type: 'price', precision: 0, minMove: 1 },
-      } as DeepPartial<AreaSeriesOptions>);
-      const areaData: AreaData[] = sliced
-        .filter((d) => d.close != null)
-        .map((d) => ({ time: toTime(d.date), value: d.close as number }));
-      s.setData(areaData);
-      priceSeries = s;
-    }
+    const priceSeries = main.addSeries(AreaSeries, {
+      lineColor: THEME.white,
+      topColor: 'rgba(230,233,240,0.12)',
+      bottomColor: 'transparent',
+      lineWidth: 2,
+      priceScaleId: 'right',
+      crosshairMarkerVisible: true,
+      crosshairMarkerRadius: 4,
+      priceFormat: { type: 'price', precision: 0, minMove: 1 },
+    } as DeepPartial<AreaSeriesOptions>);
+    const areaData: AreaData[] = serieCloture(sliced).map((p) => ({ time: toTime(p.date), value: p.valeur }));
+    priceSeries.setData(areaData);
 
     priceSeriesRef.current = priceSeries;
 
@@ -637,7 +577,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       rsiChart?.remove();
       macdChart?.remove();
     };
-  }, [mounted, data, visible, period, chartType, resolution, markers]);
+  }, [mounted, data, visible, period, resolution, markers]);
 
   // ── Toggle helper ─────────────────────────────────────────────────────────
   function toggle(key: IndicatorKey) {
@@ -686,7 +626,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
           )}
         </div>
 
-        {/* Controls: resolution + chart type + period */}
+        {/* Contrôles : résolution + période */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Résolution temporelle */}
           <div className="flex gap-0.5 border border-border rounded overflow-hidden">
@@ -702,23 +642,6 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 }`}
               >
                 {label}
-              </button>
-            ))}
-          </div>
-          {/* Type de graphique */}
-          <div className="flex gap-0.5 border border-border rounded overflow-hidden">
-            {(['line', 'candle'] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setChartType(t)}
-                className={`text-xs px-2.5 py-0.5 transition ${
-                  chartType === t
-                    ? 'bg-up/20 text-up [[data-theme=light]_&]:bg-up/10'
-                    : 'text-muted hover:text-up'
-                }`}
-              >
-                {t === 'line' ? 'Ligne' : 'Bougies'}
               </button>
             ))}
           </div>
