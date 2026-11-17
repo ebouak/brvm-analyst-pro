@@ -1,5 +1,5 @@
 /**
- * Indice de nervosité BRVM (« BRVM-V »).
+ * Indice de nervosité WESTBOURSE, calculé à partir du marché BRVM.
  *
  * La BRVM n'a pas de marché d'options : on ne peut pas calculer une volatilité
  * implicite comme le VIX. Cet indice mesure donc la volatilité RÉALISÉE,

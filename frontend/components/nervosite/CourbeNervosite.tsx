@@ -2,7 +2,7 @@ import { etendue, fmtNervosite, type LigneNervosite } from '@/lib/nervosite/affi
 import { fmtDateFR } from '@/lib/format';
 
 /**
- * Courbe de l'indice de nervosité, SVG pur rendu côté serveur (aucun JS
+ * Courbe de l'indice de nervosité WESTBOURSE, SVG pur rendu côté serveur (aucun JS
  * client, lisible à l'impression). Les couleurs passent par les jetons du
  * design system : elles suivent le mode clair comme le sombre.
  *

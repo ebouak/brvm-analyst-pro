@@ -8,6 +8,7 @@ const LEFT = 58;
 const RIGHT = 8;
 const TOP = 12;
 const BOTTOM = 155;
+const MAX_DATE_TICKS = 6;
 
 const SERIES = [
   { key: 'close', label: 'Cours de clôture', color: '--color-accent', dash: undefined },
@@ -65,6 +66,17 @@ export function MiniGraphiqueMoyennes({
     ...(chart.some((point) => point.sma200 != null) ? ['sma200' as const] : []),
   ]);
   const count = chart.length;
+  const dateTickCount = Math.min(count, MAX_DATE_TICKS);
+  const dateTicks = Array.from({ length: dateTickCount }, (_, tickIndex) => {
+    const pointIndex = dateTickCount === 1
+      ? 0
+      : Math.round((tickIndex * (count - 1)) / (dateTickCount - 1));
+    return {
+      point: chart[pointIndex]!,
+      x: LEFT + (pointIndex / Math.max(count - 1, 1)) * (WIDTH - LEFT - RIGHT),
+      anchor: tickIndex === 0 ? 'start' : tickIndex === dateTickCount - 1 ? 'end' : 'middle',
+    } as const;
+  });
   const chartTitle = count
     ? `Cours et moyennes mobiles du ${fmtDateCourte(chart[0]!.date)} au ${fmtDateCourte(chart[count - 1]!.date)}`
     : 'Historique des moyennes mobiles indisponible';
@@ -129,11 +141,43 @@ export function MiniGraphiqueMoyennes({
                 />
               ) : null;
             })}
+            <line
+              x1={LEFT}
+              x2={WIDTH - RIGHT}
+              y1={161}
+              y2={161}
+              stroke="rgb(var(--color-border))"
+              vectorEffect="non-scaling-stroke"
+              aria-hidden="true"
+            />
+            {dateTicks.map(({ point, x, anchor }) => (
+              <g key={point.date}>
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={158}
+                  y2={164}
+                  stroke="rgb(var(--color-faint))"
+                  vectorEffect="non-scaling-stroke"
+                  aria-hidden="true"
+                />
+                <text
+                  data-date-tick={point.date}
+                  x={x}
+                  y={178}
+                  textAnchor={anchor}
+                  fill="rgb(var(--color-faint))"
+                  fontSize="10"
+                  fontVariant="tabular-nums"
+                >
+                  <title>{fmtDateCourte(point.date)}</title>
+                  {fmtDateCourte(point.date)}
+                </text>
+              </g>
+            ))}
           </svg>
-          <div className="mt-1 flex justify-between gap-2 text-[10px] text-faint">
-            <span className="tabular">{fmtDateCourte(chart[0]!.date)}</span>
-            <span className="tabular">{fmtDateCourte(chart[count - 1]!.date)}</span>
-            <span>FCFA</span>
+          <div className="mt-1 flex justify-end text-[10px] text-faint">
+            <span>Dates des séances · FCFA</span>
           </div>
         </>
       )}
