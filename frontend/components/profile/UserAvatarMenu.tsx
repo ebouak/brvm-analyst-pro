@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { logout as deconnexionServeur } from '@/app/login/actions';
 import UserAvatar from './UserAvatar';
 import { phReset } from '@/lib/analytics/posthogClient';
 import { MENU_COMPTE } from '@/lib/nav';
@@ -49,10 +50,13 @@ export default function UserAvatarMenu({ isAdmin = false }: { isAdmin?: boolean 
   }, [open]);
 
   async function logout() {
-    await createClient().auth.signOut();
+    // Session du navigateur, puis action serveur (cookies effacés côté serveur,
+    // redirection vers /login) : voir BarreDeCote.deconnecter.
+    try { await createClient().auth.signOut(); } catch { /* l'action serveur suit */ }
     // Évite d'attribuer la prochaine session (poste partagé) à cette personne.
     void phReset();
-    router.push('/login'); router.refresh();
+    await deconnexionServeur();
+    router.refresh();
   }
 
   if (authed === false) {
