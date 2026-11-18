@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// ISR (2026-11-18, quota CPU Vercel) : liste des pages citables, mise à jour
+// rare. Client sans cookies : rien ne dépend de la session.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Analyses BRVM — rendement, fiscalité, comparatifs',

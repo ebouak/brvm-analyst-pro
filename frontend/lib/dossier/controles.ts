@@ -18,7 +18,7 @@ const annuel = (p: string | null | undefined) => p != null && /^\d{4}$/.test(p);
 const suffixe = (p: string) => p.replace(/^\d{4}-?/, '');
 
 type Entree = Pick<DossierValeur, 'chiffres_cles' | 'identite' | 'trajectoire' | 'qualite_resultat'> & {
-  suivi: Pick<DossierValeur['suivi'], 'intermediaire'>;
+  suivi: Pick<DossierValeur['suivi'], 'intermediaire'> & Partial<Pick<DossierValeur['suivi'], 'famille'>>;
 } & Partial<Pick<DossierValeur, 'placement' | 'bande_per' | 'reactions' | 'per_glissant'>>;
 
 export function controlerDossier(d: Entree): string[] {
@@ -43,7 +43,7 @@ export function controlerDossier(d: Entree): string[] {
   }
   for (const [libelle, v] of [['un an', c.croissance_ca_1an], ['deux ans', c.croissance_ca_2ans]] as const) {
     if (v != null && Math.abs(v) > 2) {
-      a.push(`Croissance du chiffre d’affaires sur ${libelle} de ${(v * 100).toFixed(0)} % : à vérifier (unité ou période).`);
+      a.push(`Croissance du ${d.suivi?.famille === 'banque' ? 'produit net bancaire' : 'chiffre d’affaires'} sur ${libelle} de ${(v * 100).toFixed(0)} % : à vérifier (unité ou période).`);
     }
   }
   const actions = d.identite.actions;

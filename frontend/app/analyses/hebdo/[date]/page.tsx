@@ -11,7 +11,20 @@ import { EnTeteCote } from '@/components/marche/EnTeteCote';
 import { LigneSource } from '@/components/marche/LigneSource';
 import type { HebdoMetrics } from '@/lib/hebdo/types';
 
-export const dynamic = 'force-dynamic';
+// ISR (2026-11-18, quota CPU Vercel) : une édition datée ne change plus après
+// publication, sauf dépublication (visible au plus une heure après).
+export const revalidate = 3600;
+
+/**
+ * Liste VIDE, volontairement (2026-11-18, quota CPU Vercel). Sans
+ * `generateStaticParams`, Next rend une route à segment dynamique À CHAQUE
+ * requête : le `revalidate` ci-dessus n'avait aucun effet. Avec une liste vide,
+ * rien n'est construit au build ; chaque page est rendue à sa première visite
+ * puis servie depuis le cache ISR. Une clé inconnue répond toujours 404.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 
 interface Item { code: string; sens: string; raison: string; metrics: HebdoMetrics; narratif_md: string; post_long: string; post_court: string; ordre: number }
 

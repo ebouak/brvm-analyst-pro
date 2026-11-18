@@ -15,6 +15,10 @@
 .bk-duo .dv-grille { grid-template-columns: 1fr 1fr; gap: 2.5mm; }
 .bk-duo .dv-mesure { padding: 2mm 3mm; }
 .bk-duo .dv-mesure dd { font-size: 11pt; }
+/* Dossier sans cascade : compte de résultat puis encours empilés, aussi serrés qu'en duo. */
+.bk-pile .dv-grille { gap: 2.5mm; }
+.bk-pile .dv-mesure { padding: 2mm 3mm; }
+.bk-pile .dv-mesure dd { font-size: 11pt; }
 /* Revue : cascade à gauche, ratios d'exploitation empilés à droite. */
 .bk-duo--revue { margin-top: 6mm; }
 .bk-duo--revue .doc-mesures { margin: 0; grid-template-columns: 1fr; row-gap: 4mm; }

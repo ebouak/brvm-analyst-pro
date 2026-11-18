@@ -5,7 +5,9 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, EmptyStatePremium } from '@/components/ui/premium';
 import { fromDailyRow, LIQUIDITY_LABELS, type LiquidityDailyRow } from '@/lib/liquidity';
 
-export const dynamic = 'force-dynamic';
+// ISR (2026-11-18, quota CPU Vercel) : liquidity_daily est recalculée une fois
+// par séance (score.yml, 16:00 UTC) ; une heure de cache suffit.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Liquidité du marché BRVM — scores par titre',

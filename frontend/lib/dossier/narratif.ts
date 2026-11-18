@@ -66,7 +66,7 @@ const SEUILS = {
   ROE_ELEVE: 0.15,
   /** Multiple des capitaux propres au-delà duquel la prime est notable. */
   PB_PRIME: 3,
-  /** Recul de chiffre d'affaires jugé préoccupant sur un exercice. */
+  /** Recul du revenu (chiffre d'affaires, PNB d'une banque) jugé préoccupant sur un exercice. */
   CA_RECUL: -0.1,
   /** Sous ce nombre de titres échangés, l'exécution devient un vrai sujet. */
   VOLUME_FAIBLE: 5000,
@@ -153,18 +153,26 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   // ── Activité ────────────────────────────────────────────────────────────
+  /* Une banque n'a pas de chiffre d'affaires : son revenu est le produit net
+     bancaire. Les libellés seuls changent, les seuils restent les mêmes. */
+  /* Libellés d'une non-banque inchangés AU CARACTÈRE PRÈS (apostrophe droite
+     comprise) : le `fait` entre dans l'empreinte du squelette de prose, et
+     changer un seul caractère écarterait toutes les proses polies. */
+  const voc = d.suivi?.famille === 'banque'
+    ? { revenu: 'Produit net bancaire', revenuMinuscule: 'produit net bancaire' }
+    : { revenu: "Chiffre d'affaires", revenuMinuscule: "chiffre d'affaires" };
   if (c.croissance_ca_1an != null) {
     if (c.croissance_ca_1an < SEUILS.CA_RECUL) {
       const deux = c.croissance_ca_2ans != null ? `, ${pct(c.croissance_ca_2ans, 1)} sur deux exercices` : '';
       risques.push({
-        texte: `Chiffre d'affaires en recul : ${pct(c.croissance_ca_1an, 1)} sur un exercice${deux}`,
-        fait: "un chiffre d'affaires en recul",
+        texte: `${voc.revenu} en recul : ${pct(c.croissance_ca_1an, 1)} sur un exercice${deux}`,
+        fait: `un ${voc.revenuMinuscule} en recul`,
         mesure: c.croissance_ca_1an,
       });
     } else if (c.croissance_ca_1an > 0.05) {
       forces.push({
-        texte: `Chiffre d'affaires en progression : ${pct(c.croissance_ca_1an, 1)}`,
-        fait: "un chiffre d'affaires en progression",
+        texte: `${voc.revenu} en progression : ${pct(c.croissance_ca_1an, 1)}`,
+        fait: `un ${voc.revenuMinuscule} en progression`,
         mesure: c.croissance_ca_1an,
       });
     }

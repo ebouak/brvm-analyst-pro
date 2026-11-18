@@ -26,5 +26,7 @@ export const config = {
   // Aucun élargissement de surface exposée : tout `public/` est déjà servi
   // statiquement par Next, le middleware n'est pas ce qui le protège —
   // `_next/static` et les images en sont exclus pour la même raison.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm)$).*)'],
+  // `avif|ico|woff2?|css|map` ajoutés le 2026-11-18 (quota CPU Vercel) : fichiers
+  // de public/ et polices, sans session à rafraîchir ni mur à franchir.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|mp4|webm|woff2?|css|map)$).*)'],
 };

@@ -9,6 +9,17 @@ import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/comp
 
 export const revalidate = 300;
 
+/**
+ * Liste VIDE, volontairement (2026-11-18, quota CPU Vercel). Sans
+ * `generateStaticParams`, Next rend une route à segment dynamique À CHAQUE
+ * requête : le `revalidate` ci-dessus n'avait aucun effet. Avec une liste vide,
+ * rien n'est construit au build ; chaque page est rendue à sa première visite
+ * puis servie depuis le cache ISR. Une clé inconnue répond toujours 404.
+ */
+export async function generateStaticParams() {
+  return [];
+}
+
 const Nb = ({ children }: { children: React.ReactNode }) => <span className="tabular">{children}</span>;
 const fr = libelleClasse;
 const cf = (c: string) => (c === 'high' ? 'Élevée' : c === 'medium' ? 'Moyenne' : c === 'low' ? 'Faible' : 'Insuffisante');

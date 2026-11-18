@@ -17,6 +17,17 @@ import DecryptageVue from '@/components/decryptage/DecryptageVue';
  * 404, pas un 200 diffusé en flux (CLAUDE.md, soft-404 du 2026-09-17).
  */
 export const revalidate = 300;
+
+/**
+ * Liste VIDE, volontairement (2026-11-18, quota CPU Vercel). Sans
+ * `generateStaticParams`, Next rend une route à segment dynamique À CHAQUE
+ * requête : le `revalidate` ci-dessus n'avait aucun effet. Avec une liste vide,
+ * rien n'est construit au build ; chaque page est rendue à sa première visite
+ * puis servie depuis le cache ISR. Une clé inconnue répond toujours 404.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 async function charger(slug: string): Promise<Article | null> {

@@ -1,16 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import ConditionalShell from '@/components/ConditionalShell';
 import NonEmbedChrome from '@/components/layout/NonEmbedChrome';
 import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
-import OnboardingModal from '@/components/OnboardingModal';
-import { BeginnerModeProvider } from '@/lib/beginner-mode';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import SplashScreen from '@/components/brand/SplashScreen';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import PostHogInit from '@/components/analytics/PostHogInit';
-import { utilisateurCourant, profilCourant } from '@/lib/supabase/session';
+import SessionShell from '@/components/session/SessionShell';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { classesPolices } from '@/lib/vitrine/polices';
 
@@ -246,33 +243,15 @@ export const viewport: Viewport = {
   themeColor: '#07080a',
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Session + profil. CRITIQUE : ce bloc ne doit JAMAIS jeter — une exception
-  // ici fait tomber TOUTES les pages sur l'error boundary globale (« Une
-  // erreur est survenue »). En cas d'indisponibilité Auth/DB, on retombe sur
-  // l'état déconnecté (shell public) au lieu de casser le site.
-  let hasUser = false;
-  let isAdmin = false;
-  let isPremium = false;
-  let onboardingDone = true;
-  let initialBeginner = false;
-  try {
-    // Lus une fois par rendu et partagés avec les pages (lib/supabase/session.ts).
-    const user = await utilisateurCourant();
-    hasUser = Boolean(user);
-    isAdmin = user?.email === 'ebouak@gmail.com';
-    isPremium = isAdmin;
-    if (user) {
-      // Même ligne profiles que getEntitlements : une seule lecture par rendu.
-      const profile = await profilCourant();
-      if (!isPremium) isPremium = profile?.is_premium ?? false;
-      onboardingDone = profile?.onboarding_done ?? isAdmin; // superadmin = skip onboarding
-      initialBeginner = profile?.mode_debutant ?? false;
-    }
-  } catch {
-    // Auth/DB injoignable : rendu public par défaut, jamais d'écran d'erreur global.
-  }
-
+/**
+ * ⚠️ AUCUNE lecture de session ici (ni `cookies()`, ni `headers()`, ni
+ * `utilisateurCourant()`). Le layout racine enveloppe TOUTES les routes : une
+ * seule lecture de cookie les rendait toutes dynamiques, le cache ISR des pages
+ * publiques ne servait jamais, et Vercel a suspendu le site le 2026-11-18 pour
+ * dépassement du temps CPU. La session est lue dans le navigateur par
+ * `SessionShell` (components/session/SessionShell.tsx).
+ */
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`dark ${classesPolices}`}>
       <head>
@@ -303,16 +282,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SplashScreen />
         </NonEmbedChrome>
         <ConsentProvider>
-          <BeginnerModeProvider initial={initialBeginner}>
-            <ConditionalShell isPremium={isPremium} isAdmin={isAdmin} connecte={hasUser}>{children}</ConditionalShell>
-            <NonEmbedChrome>
-              <CommandPaletteProvider />
-              <ServiceWorkerRegister />
-              {hasUser && !onboardingDone && <OnboardingModal />}
-              <CookieBanner />
-              <PostHogInit />
-            </NonEmbedChrome>
-          </BeginnerModeProvider>
+          <SessionShell
+            chrome={
+              <>
+                <CommandPaletteProvider />
+                <ServiceWorkerRegister />
+                <CookieBanner />
+                <PostHogInit />
+              </>
+            }
+          >
+            {children}
+          </SessionShell>
         </ConsentProvider>
       </body>
     </html>
