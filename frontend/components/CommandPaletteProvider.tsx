@@ -1,9 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import { buildSearchItems } from '@/lib/search-index';
 import CommandPalette from '@/components/CommandPalette';
 
+/**
+ * Rendu dans le layout RACINE : client SANS cookies obligatoire. Le client lié à
+ * la session (`@/lib/supabase/server`) lit `cookies()` et rendait ainsi toutes
+ * les routes dynamiques. `brvm_instruments` est en lecture publique.
+ */
 export default async function CommandPaletteProvider() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   const { data: instruments } = await supabase
     .from('brvm_instruments')

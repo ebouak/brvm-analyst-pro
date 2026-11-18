@@ -9,7 +9,21 @@ import { SectionHeader } from '@/components/ui/premium';
 import SignupCta from '@/components/public/SignupCta';
 import { jsonLdScript } from '@/lib/jsonLd';
 
-export const dynamic = 'force-dynamic';
+// ISR (2026-11-18, quota CPU Vercel) : page citable rendue à la première visite
+// puis servie depuis le cache, au plus une heure. Un slug inconnu répond 404
+// (notFound() hors Suspense, aucun loading.tsx au-dessus).
+export const revalidate = 3600;
+
+/**
+ * Liste VIDE, volontairement (2026-11-18, quota CPU Vercel). Sans
+ * `generateStaticParams`, Next rend une route à segment dynamique À CHAQUE
+ * requête : le `revalidate` ci-dessus n'avait aucun effet. Avec une liste vide,
+ * rien n'est construit au build ; chaque page est rendue à sa première visite
+ * puis servie depuis le cache ISR. Une clé inconnue répond toujours 404.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
 const nf = new Intl.NumberFormat('fr-FR');

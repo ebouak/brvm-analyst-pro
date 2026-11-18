@@ -8,7 +8,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/dashboard', '/portefeuille', '/parametres', '/account', '/admin', '/premium', '/print'],
+        // Ajouts du 2026-11-18 (quota CPU Vercel) : chemins rendus à chaque
+        // visite et sans valeur de référencement. `/apercu` est déjà en noindex,
+        // `/embed/` se lit dans l'iframe d'un site tiers, `/rapports/` et
+        // `/auth/` exigent une session, et `/login?…` / `/signup?…` sont les
+        // redirections du mur (une variante par lien fermé suivi par le robot).
+        // `/login` et `/signup` eux-mêmes restent indexables.
+        disallow: [
+          '/api/', '/dashboard', '/portefeuille', '/parametres', '/account', '/admin', '/premium', '/print',
+          '/apercu', '/embed/', '/rapports/', '/auth/', '/login?', '/signup?',
+        ],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
