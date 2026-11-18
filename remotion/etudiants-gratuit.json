@@ -1,5 +1,5 @@
 {
-  "_": "Vidéo étudiants n°1 (2026-11-18) « Apprendre la Bourse sans risquer un franc ». Source unique : titres affichés ET voix off (etudiants.tsx, etudiants-voix.mjs). Écrans = captures réelles (public/etudiants/ecrans, voir etudiants-captures.cjs) : pages publiques sur la production, portefeuille virtuel sur un serveur LOCAL avec le compte de test gratuit qa-e2e-debutant (ordre SNTS saisi puis supprimé par qa-sessions-locales.mjs --fermer). Sources : liste du plan Gratuit = page /pricing (relevée le 2026-11-18) ; feature_flags.paper_trading = free et /premium/paper-trading exempté du mur Premium (frontend/lib/auth/cheminsPremium.ts) ; un ordre simulé s'exécute à une séance POSTÉRIEURE à sa saisie (lib/paper-trading/orders.ts, evaluatePaperOrder).",
+  "_": "Vidéo étudiants n°1 (2026-11-18) « Apprendre la Bourse sans risquer un franc ». Source unique : titres affichés ET voix off (etudiants.tsx, etudiants-voix.mjs). Écrans = captures réelles (public/etudiants/ecrans, voir etudiants-captures.cjs) : pages publiques sur la production, portefeuille virtuel sur un serveur LOCAL avec le compte de test gratuit qa-e2e-debutant (ordre SNTS saisi puis supprimé par qa-sessions-locales.mjs --fermer). Sources : liste du plan Gratuit = page /pricing (relevée le 2026-11-18) ; feature_flags.paper_trading = free et /premium/paper-trading exempté du mur Premium (frontend/lib/auth/cheminsPremium.ts) ; un ordre simulé s'exécute à une séance POSTÉRIEURE à sa saisie (lib/paper-trading/orders.ts, evaluatePaperOrder). v2 (2026-11-18, demande de l'exploitant) : tableau de bord et heatmap (compte gratuit, captures locales), outils gratuits (/simulateur-budget, /comparateur-sgi/simuler, pages publiques), WhatsApp et Telegram (section #canaux de la page d'accueil : réponses produites par le service et lien de la Chaîne / du canal). Commandes COURS/DIV/PALMARES sans compte (lib/whatsapp/commandes.ts, 30 par heure et par conversation) ; vidéo de séance publiée sur la Chaîne et le canal (video/publie.mjs).",
   "id": "gratuit",
   "voixTts": "fr-FR-DeniseNeural",
   "debit": "+6%",
@@ -37,6 +37,44 @@
       }
     },
     {
+      "id": "tableau",
+      "titre": [
+        "Ton tableau",
+        "de bord"
+      ],
+      "accent": "de bord",
+      "voix": "Avec ton compte gratuit, ton tableau de bord résume la séance en un coup d'œil.",
+      "ecran": "dashboard",
+      "pastilles": [
+        {
+          "mot": "séance",
+          "texte": "Compte gratuit"
+        }
+      ],
+      "loupe": {
+        "src": "loupe-dashboard",
+        "mot": "coup",
+        "largeur": 860,
+        "y": 860
+      }
+    },
+    {
+      "id": "heatmap",
+      "titre": [
+        "Toute la séance",
+        "en couleurs"
+      ],
+      "accent": "en couleurs",
+      "voix": "La heatmap montre toute la séance d'un regard : chaque case est une société, colorée selon sa variation.",
+      "ecran": "heatmap",
+      "loupe": {
+        "src": "loupe-heatmap",
+        "mot": "case",
+        "largeur": 860,
+        "y": 820
+      }
+    },
+    {
       "id": "fiche",
       "titre": [
         "Chaque société",
@@ -50,6 +88,60 @@
         "mot": "carnet",
         "largeur": 820,
         "y": 700
+      }
+    },
+    {
+      "id": "outils",
+      "titre": [
+        "Des outils",
+        "gratuits"
+      ],
+      "accent": "gratuits",
+      "voix": "Des outils gratuits aussi : que faire de ton budget, et combien coûte vraiment ta SGI.",
+      "ecran": "outil-budget",
+      "loupe": {
+        "src": "loupe-sgi-titre",
+        "mot": "combien",
+        "largeur": 880,
+        "y": 820
+      }
+    },
+    {
+      "id": "whatsapp",
+      "titre": [
+        "WhatsApp,",
+        "gratuit"
+      ],
+      "accent": "gratuit",
+      "voix": "Sur WhatsApp, c'est gratuit, même sans compte : écris COURS SNTS, DIV ou PALMARES, et la réponse arrive avec les chiffres de la dernière séance.",
+      "ecran": "v-canaux",
+      "loupe": {
+        "src": "loupe-wa-commandes",
+        "mot": "COURS",
+        "largeur": 800,
+        "y": 720
+      }
+    },
+    {
+      "id": "abonnement",
+      "titre": [
+        "Abonne-toi,",
+        "c'est gratuit"
+      ],
+      "accent": "c'est gratuit",
+      "voix": "Abonne-toi gratuitement à la Chaîne WhatsApp et au canal Telegram : la vidéo de chaque séance arrive toute seule.",
+      "ecran": "v-canaux",
+      "loupe": {
+        "src": "loupe-wa-chaine",
+        "mot": "Chaîne",
+        "largeur": 860,
+        "y": 700
+      },
+      "loupe2": {
+        "src": "loupe-telegram",
+        "mot": "Telegram",
+        "largeur": 500,
+        "y": 470
       }
     },
     {
@@ -93,7 +185,7 @@
         "résultats"
       ],
       "accent": "résultats",
-      "voix": "Ton ordre est traité à la séance suivante, au vrai cours de clôture. Ensuite, tu suis ta position et ton résultat. Tu te trompes ? Aucun franc perdu : tu apprends.",
+      "voix": "Ton ordre est traité sur la séance suivante, au vrai cours de clôture. Puis tu suis ta position et ton résultat : aucun franc perdu, tu apprends.",
       "ecran": "pt-suivi",
       "mention": "Simulation : aucun argent réel",
       "loupe": {

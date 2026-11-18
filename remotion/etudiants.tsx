@@ -47,6 +47,8 @@ type SceneE = {
   voix: string;
   ecran?: string;
   loupe?: Loupe;
+  /** Seconde loupe : remplace la première à son mot. */
+  loupe2?: Loupe;
   pastilles?: Pastille[];
   mention?: string;
   fin?: Fin;
@@ -188,10 +190,10 @@ function Mention({ texte }: { texte: string }) {
 }
 
 // ── Loupe : un morceau de la capture, sorti en grand devant le téléphone ────
-function LoupeVue({ l, debut }: { l: Loupe; debut: number }) {
+function LoupeVue({ l, debut, fin = Infinity }: { l: Loupe; debut: number; fin?: number }) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  if (f < debut) return null;
+  if (f < debut || f >= fin) return null;
   const p = spring({ frame: f - debut, fps, config: { damping: 15, stiffness: 150 } });
   const largeur = l.largeur ?? 860;
   return (
@@ -314,11 +316,11 @@ export default function Etudiants({ video, durees, mots }: Props) {
         return (
           <Sequence key={s.id} from={from} durationInFrames={lg} name={s.id}>
             <Audio src={staticFile(`etudiants/${plan.id}/${s.id}.mp3`)} />
-            {s.loupe && (
-              <Sequence from={instantMot(m, s.loupe.mot)} layout="none">
+            {[s.loupe, s.loupe2].filter((l): l is Loupe => !!l).map((l) => (
+              <Sequence key={l.src} from={instantMot(m, l.mot)} layout="none">
                 <Audio src={staticFile('sfx/souffle.wav')} volume={0.18} />
               </Sequence>
-            )}
+            ))}
             <Cadre longueur={lg}>
               {s.fin ? (
                 <CarteFin s={s} />
@@ -327,7 +329,8 @@ export default function Etudiants({ video, durees, mots }: Props) {
                   <Titre s={s} />
                   {s.ecran && <Telephone s={s} />}
                   {(s.pastilles ?? []).map((pa, i) => <PastilleVue key={i} i={i} texte={pa.texte} debut={instantMot(m, pa.mot)} />)}
-                  {s.loupe && <LoupeVue l={s.loupe} debut={instantMot(m, s.loupe.mot)} />}
+                  {s.loupe && <LoupeVue l={s.loupe} debut={instantMot(m, s.loupe.mot)} fin={s.loupe2 ? instantMot(m, s.loupe2.mot) : Infinity} />}
+                  {s.loupe2 && <LoupeVue l={s.loupe2} debut={instantMot(m, s.loupe2.mot)} />}
                 </>
               )}
               <SousTitres mots={m} />
