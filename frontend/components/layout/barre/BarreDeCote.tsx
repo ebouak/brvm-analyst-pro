@@ -24,6 +24,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import BeginnerToggle from '@/components/BeginnerToggle';
 import { OPEN_PALETTE_EVENT } from '@/components/CommandPalette';
 import { createClient } from '@/lib/supabase/client';
+import { logout } from '@/app/login/actions';
 import { phCapture, phReset } from '@/lib/analytics/posthogClient';
 import { isNavItemActive, rubriqueDe } from '@/lib/nav';
 import type { Rubrique } from '@/lib/navRegistre';
@@ -378,10 +379,14 @@ export default function BarreDeCote({
   const ctx = contexte ? formaterContexte(contexte) : null;
 
   async function deconnecter() {
-    await createClient().auth.signOut();
+    // D'abord la session du navigateur, puis l'action serveur qui efface les
+    // cookies de session côté serveur et redirige vers /login. Sans elle, un
+    // cookie survivant faisait passer le middleware pour « connecté » et la
+    // déconnexion semblait sans effet (signalé le 2026-11-18).
+    try { await createClient().auth.signOut(); } catch { /* l'action serveur suit */ }
     void phReset();
     fermer();
-    router.push('/login');
+    await logout();
     router.refresh();
   }
 
