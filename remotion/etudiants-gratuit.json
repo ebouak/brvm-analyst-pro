@@ -18,7 +18,13 @@
           "mot": "apprendre",
           "texte": "Vrais cours de la BRVM"
         }
-      ]
+      ],
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 50,
+        "a": 300
+      }
     },
     {
       "id": "gratuit",
@@ -29,11 +35,11 @@
       "accent": "Gratuit",
       "voix": "Sur WESTBOURSE, le plan gratuit te donne les cours de la séance, la fiche de chaque société, les fondamentaux et les dividendes.",
       "ecran": "pricing",
-      "loupe": {
-        "src": "loupe-gratuit",
-        "mot": "cours",
-        "largeur": 640,
-        "y": 520
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 60,
+        "a": 110
       }
     },
     {
@@ -51,11 +57,11 @@
           "texte": "Compte gratuit"
         }
       ],
-      "loupe": {
-        "src": "loupe-dashboard",
-        "mot": "coup",
-        "largeur": 860,
-        "y": 860
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 80,
+        "a": 300
       }
     },
     {
@@ -70,8 +76,14 @@
       "loupe": {
         "src": "loupe-heatmap",
         "mot": "case",
-        "largeur": 860,
-        "y": 820
+        "largeur": 960,
+        "y": 760
+      },
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 80,
+        "a": 300
       }
     },
     {
@@ -83,11 +95,11 @@
       "accent": "à la loupe",
       "voix": "Pour chaque société : le cours sur un an, et même le carnet d'ordres de la dernière séance.",
       "ecran": "snts-carnet",
-      "loupe": {
-        "src": "loupe-carnet",
-        "mot": "carnet",
-        "largeur": 820,
-        "y": 700
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 70,
+        "a": 80
       }
     },
     {
@@ -102,8 +114,14 @@
       "loupe": {
         "src": "loupe-sgi-titre",
         "mot": "combien",
-        "largeur": 880,
-        "y": 820
+        "largeur": 1000,
+        "y": 760
+      },
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 90,
+        "a": 110
       }
     },
     {
@@ -115,11 +133,11 @@
       "accent": "gratuit",
       "voix": "Sur WhatsApp, c'est gratuit, même sans compte : écris COURS SNTS, DIV ou PALMARES, et la réponse arrive avec les chiffres de la dernière séance.",
       "ecran": "v-canaux",
-      "loupe": {
-        "src": "loupe-wa-commandes",
-        "mot": "COURS",
-        "largeur": 800,
-        "y": 720
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 120,
+        "a": 300
       }
     },
     {
@@ -130,18 +148,19 @@
       ],
       "accent": "c'est gratuit",
       "voix": "Abonne-toi gratuitement à la Chaîne WhatsApp et au canal Telegram : la vidéo de chaque séance arrive toute seule.",
-      "ecran": "v-canaux",
+      "ecran": "v-canaux-tg",
       "loupe": {
         "src": "loupe-wa-chaine",
         "mot": "Chaîne",
-        "largeur": 860,
-        "y": 700
+        "largeur": 1000,
+        "y": 760,
+        "jusqua": "Telegram"
       },
-      "loupe2": {
-        "src": "loupe-telegram",
-        "mot": "Telegram",
-        "largeur": 500,
-        "y": 470
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 0,
+        "a": 20
       }
     },
     {
@@ -159,7 +178,13 @@
           "mot": "capital",
           "texte": "Capital fictif"
         }
-      ]
+      ],
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 215,
+        "a": 225
+      }
     },
     {
       "id": "ordre",
@@ -176,7 +201,13 @@
           "mot": "action",
           "texte": "Vrai carnet de la BRVM"
         }
-      ]
+      ],
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 25,
+        "a": 150
+      }
     },
     {
       "id": "suivi",
@@ -188,11 +219,11 @@
       "voix": "Ton ordre est traité sur la séance suivante, au vrai cours de clôture. Puis tu suis ta position et ton résultat : aucun franc perdu, tu apprends.",
       "ecran": "pt-suivi",
       "mention": "Simulation : aucun argent réel",
-      "loupe": {
-        "src": "loupe-ordre",
-        "mot": "suis",
-        "largeur": 860,
-        "y": 760
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 30,
+        "a": 300
       }
     },
     {
