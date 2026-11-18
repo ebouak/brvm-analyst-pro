@@ -646,7 +646,9 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
             chapo={`Du produit net bancaire au résultat net, ${lb.libelle}${lb.sources[0]?.document_libelle ? `, d'après « ${lb.sources[0].document_libelle} »` : ''}. Chaque marche est un agrégat publié ; « autres éléments et impôt » est l'écart restant.`}
           >
             {/* Feuille à hauteur fixe (avec le dividende) : cascade et encours côte à côte. */}
-            <div className={cascade ? 'bk-duo' : undefined}>
+            {/* Sans cascade (agrégats incomplets), les deux grilles s'empilent : on les
+                resserre comme en duo, sinon la feuille déborde (SIBC : +14 px, mesuré). */}
+            <div className={cascade ? 'bk-duo' : 'bk-pile'}>
               {cascade ? (
                 <CascadeBancaire illustration={cascade} compacte />
               ) : (
