@@ -3,8 +3,11 @@ import Link from 'next/link';
 import { EnTeteCote } from '@/components/marche/EnTeteCote';
 import { Chapitre } from '@/components/fiche/Chapitre';
 import { LigneSource } from '@/components/marche/LigneSource';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
 
-export const revalidate = 86400;
+// Réservé aux Premium (même garde que /conseiller) : rendu par utilisateur.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Comment nous avons mesuré le Conseiller',
@@ -18,7 +21,18 @@ const LIGNES: { reco: string; cas: string; sens: string; ecart: string }[] = [
   { reco: 'Conserver', cas: '985', sens: '—', ecart: '−5,0 pt' },
 ];
 
-export default function TrackRecordPage() {
+export default async function TrackRecordPage() {
+  const gate = await canAccess('conseiller');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="Le bilan du Conseiller"
+        hint="Comment l'ancien moteur a été mesuré, et ce que nous montrons à la place."
+      />
+    );
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <EnTeteCote
