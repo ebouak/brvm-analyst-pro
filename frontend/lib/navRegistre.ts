@@ -163,8 +163,6 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/portefeuille/import', libelle: 'Importer un relevé SGI', rubrique: 'portefeuille', parent: '/portefeuille', statut: 'secondaire', raison: 'lié depuis le portefeuille' },
   { chemin: '/journal', libelle: 'Journal de décision', libelleMenu: 'Journal', rubrique: 'portefeuille', description: 'Noter pourquoi vous décidez', colonne: 1, statut: 'menu' },
   { chemin: '/parametres/alertes', libelle: 'Mes alertes', libelleMenu: 'Alertes', rubrique: 'portefeuille', description: 'Prévenu par e-mail ou messagerie', colonne: 2, statut: 'menu' },
-  { chemin: '/premium/paper-trading', libelle: 'Portefeuille virtuel', libelleMenu: 'S’entraîner (portefeuille virtuel)', rubrique: 'apprendre', description: 'S’entraîner sans argent réel', colonne: 1, statut: 'menu' },
-  { chemin: '/classement', libelle: 'Classement des portefeuilles virtuels', rubrique: 'apprendre', parent: '/premium/paper-trading', statut: 'secondaire', raison: 'lié depuis le portefeuille virtuel' },
   { chemin: '/dashboard/reports/events', libelle: 'Événements et impact', libelleMenu: 'Événements', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Publications et réaction du cours', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: ONGLET('Rapports') },
   { chemin: '/rapports/saison', libelle: 'Saison des résultats', rubrique: 'marche', parent: '/rapports/dossiers', description: 'Qui a publié, qui reste attendu', colonne: 2, groupe: 'Documents', statut: 'secondaire', raison: 'atteinte depuis l’onglet Événements ; derrière la connexion (comme les autres onglets Rapports), donc non indexable' },
   { chemin: '/dashboard/reports/events/[id]', libelle: "Étude d'événement", rubrique: 'marche', parent: '/dashboard/reports/events', statut: 'parcours', raison: 'détail atteint depuis la liste des événements' },
@@ -175,6 +173,8 @@ export const REGISTRE: EntreeNav[] = [
   // ── Apprendre ──────────────────────────────────────────────────────────────
   { chemin: '/formations', libelle: 'Formations et conférences', libelleMenu: 'Academy et formations', rubrique: 'apprendre', description: 'Academy, cours et conférences', colonne: 1, statut: 'menu' },
   { chemin: '/debutant', libelle: 'Débuter', rubrique: 'apprendre', description: 'Les bases pour démarrer', colonne: 1, statut: 'menu' },
+  { chemin: '/premium/paper-trading', libelle: 'Portefeuille virtuel', libelleMenu: 'S’entraîner (portefeuille virtuel)', rubrique: 'apprendre', description: 'S’entraîner sans argent réel', colonne: 1, statut: 'menu' },
+  { chemin: '/classement', libelle: 'Classement des portefeuilles virtuels', rubrique: 'apprendre', parent: '/premium/paper-trading', statut: 'secondaire', raison: 'lié depuis le portefeuille virtuel' },
   { chemin: '/formations/academy', libelle: 'WestBourse Academy', rubrique: 'apprendre', parent: '/formations', statut: 'public', raison: 'hub de l’Academy (SEO)' },
   { chemin: '/formations/academy/[slug]', libelle: 'Leçon', rubrique: 'apprendre', parent: '/formations/academy', statut: 'public', raison: 'leçon de l’Academy' },
   { chemin: '/formations/academy/certificat', libelle: 'Certificat', rubrique: 'apprendre', parent: '/formations/academy', statut: 'parcours', raison: 'génération du certificat après l’examen' },
