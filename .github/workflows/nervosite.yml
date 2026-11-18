@@ -1,0 +1,56 @@
+name: Indice de nervosité BRVM-V
+
+# Pourquoi un workflow à part : planifié comme job de score.yml (cron 16:00,
+# `needs: score`), le calcul héritait des retards de ce cron — mesuré du 6 au
+# 18 novembre 2026, des runs à 21:44, 22:09, 23:26 UTC. La valeur du jour
+# n'apparaissait qu'en fin de soirée, parfois le lendemain.
+#
+# Deux passages lun-ven :
+#   - 16:30 UTC, après la clôture (15:00 UTC) ;
+#   - 07:30 UTC le lendemain (mar-sam), rattrapage si le premier a été retardé
+#     ou a échoué, et reprise d'une clôture corrigée dans la soirée.
+# Le calcul est IDEMPOTENT : la série entière est recalculée depuis les
+# clôtures et upsertée sur `date_marche` (runNervosite.ts). Relancer réécrit
+# les mêmes valeurs, rien ne se duplique.
+#
+# Échoue (code 1) si aucune valeur n'est publiable : un run vert prouve une
+# écriture. Le badge du site, lui, compare la date publiée à la dernière
+# séance en base (lib/nervosite/badge.ts) : un retard se voit même si ce
+# workflow reste muet.
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    - cron: '30 16 * * 1-5'
+    - cron: '30 7 * * 2-6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: nervosite
+  cancel-in-progress: false
+
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
+jobs:
+  nervosite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Run nervosite
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npm run nervosite

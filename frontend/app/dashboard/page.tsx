@@ -41,7 +41,8 @@ import BlocMarcheDuJour from '@/components/dashboard/blocs/BlocMarcheDuJour';
 import BlocLectureSeance from '@/components/dashboard/lecture/BlocLectureSeance';
 import { lectureSeance } from '@/lib/dashboard/lectureSeance';
 import { chargerMarcheDuJour } from '@/lib/marche/chargement';
-import { chargerResumeNervosite } from '@/lib/nervosite/lecture';
+import { chargerBadgeNervosite, chargerResumeNervosite } from '@/lib/nervosite/lecture';
+import BadgeNervosite from '@/components/nervosite/BadgeNervosite';
 import { largeurSeance } from '@/lib/marche/marcheDuJour';
 import { Fragment } from 'react';
 import { PremiumLock } from '@/components/dashboard/PremiumLock';
@@ -330,7 +331,7 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [resultatPortefeuille, dividendes, fermetures, assembleesBoc, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour, nervosite] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, assembleesBoc, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour, nervosite, badgeNervosite] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
@@ -348,6 +349,8 @@ export default async function Dashboard() {
     chargerMarcheDuJour(supa, { dateMarche: lastDate, lignes: actions }),
     // Porte « Nervosité » du même bloc : `null` si la table est illisible ou vide.
     chargerResumeNervosite(supa),
+    // Pastille régime + fraîcheur de l'en-tête (« indisponible » si illisible).
+    chargerBadgeNervosite(supa),
   ]);
   // `undefined` = visiteur, `null` = lecture en erreur.
   const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
@@ -529,6 +532,7 @@ export default async function Dashboard() {
           <nav className="flex flex-wrap items-center gap-2" aria-label="Navigation rapide">
             <PastilleSeance />
             <FreshnessBadge fraicheur={fraicheurCours} />
+            <BadgeNervosite badge={badgeNervosite} />
             {user && (
               <Link href="/dashboard/personnaliser" className="rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:text-accent hover:border-accent/40 transition-colors" title={dashboardLayout ? 'Ordre personnalisé enregistré : il remplace l’ordre automatique de votre profil' : 'Personnaliser le tableau de bord'}>
                 {dashboardLayout ? 'Ordre personnalisé' : 'Personnaliser'}

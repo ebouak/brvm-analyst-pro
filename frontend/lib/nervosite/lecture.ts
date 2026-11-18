@@ -1,6 +1,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { versLigne, type LigneNervosite } from './affichage';
+import { calculerBadge, type BadgeNervosite } from './badge';
 
 const TABLE = 'brvm_nervosite_daily';
 const COLONNES = 'date_marche, valeur, rapide, lente, rang, regime, n_titres';
@@ -61,4 +62,30 @@ export async function chargerResumeNervosite(sb: SupabaseClient): Promise<Resume
   if (!derniere) return null;
   const debut = premier.error ? null : ((premier.data?.[0]?.date_marche as string | undefined)?.slice(0, 10) ?? null);
   return { derniere, debut, courbe: lignes.filter((l) => l.valeur !== null) };
+}
+
+/**
+ * Pastille régime + fraîcheur (`./badge.ts`). Deux lectures : la dernière ligne
+ * de l'indice, puis les dates de séance de `brvm_actions_daily` à partir de la
+ * sienne (≈ 48 lignes par séance : 1000 lignes couvrent une vingtaine de
+ * séances de retard, bien au-delà de ce que la pastille a besoin de compter).
+ * Une lecture en échec rend `null` à `calculerBadge`, qui répond
+ * « indisponible » — jamais « à jour » par défaut.
+ */
+export async function chargerBadgeNervosite(sb: SupabaseClient, maintenant = new Date()): Promise<BadgeNervosite> {
+  const der = await sb.from(TABLE).select(COLONNES).order('date_marche', { ascending: false }).limit(1);
+  if (der.error) console.error('[nervosite] badge illisible :', der.error.message);
+  const brute = der.error ? undefined : (der.data?.[0] as Record<string, unknown> | undefined);
+  const derniere = brute ? versLigne(brute) : null;
+  if (!derniere) return calculerBadge({ derniere: null, seances: null, maintenant });
+
+  const s = await sb
+    .from('brvm_actions_daily')
+    .select('date_marche')
+    .gte('date_marche', derniere.date_marche)
+    .order('date_marche', { ascending: false })
+    .limit(PAGE);
+  if (s.error) console.error('[nervosite] séances illisibles :', s.error.message);
+  const seances = s.error ? null : ((s.data ?? []) as { date_marche: string }[]).map((r) => String(r.date_marche).slice(0, 10));
+  return calculerBadge({ derniere, seances, maintenant });
 }

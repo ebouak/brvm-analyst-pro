@@ -32,6 +32,8 @@ import {
   LIENS_COMPTE, PANNEAUX, REPLI_VIVANT, RUBRIQUES_BARRE, codeContexte, etatSeance, formaterContexte, hrefPanneau, panneauDe,
   type Apercu, type ContexteValeur, type EtatSeance, type LienPanneau,
 } from '@/lib/barreDeCote';
+import BadgeNervosite from '@/components/nervosite/BadgeNervosite';
+import type { BadgeNervosite as Badge } from '@/lib/nervosite/badge';
 
 type Session = 'inconnu' | 'anonyme' | 'connecte';
 type Cellule = Rubrique;
@@ -80,6 +82,37 @@ function useSeance(): EtatSeance | null {
     return () => window.clearInterval(t);
   }, []);
   return s;
+}
+
+/**
+ * Pastille de nervosité : demandée une fois, quand le navigateur est libre,
+ * à une route publique mise en cache par le CDN (`/api/nervosite/badge`). Le
+ * layout racine reste statique : aucune lecture de session ni de cookie.
+ * Échec ou délai dépassé : rien n'est affiché (pas de pastille non étayée).
+ */
+function useBadgeNervosite(): Badge | null {
+  const [badge, setBadge] = useState<Badge | null>(null);
+  useEffect(() => {
+    let actif = true;
+    const ctl = new AbortController();
+    const charger = () => {
+      const t = window.setTimeout(() => ctl.abort(), 4000);
+      fetch('/api/nervosite/badge', { signal: ctl.signal })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: { badge?: Badge } | null) => { if (actif && j?.badge) setBadge(j.badge); })
+        .catch(() => {})
+        .finally(() => window.clearTimeout(t));
+    };
+    // Safari n'a pas requestIdleCallback : repli sur un court délai.
+    const inactif = typeof window.requestIdleCallback === 'function';
+    const id = inactif ? window.requestIdleCallback(charger, { timeout: 2000 }) : window.setTimeout(charger, 300);
+    return () => {
+      actif = false;
+      ctl.abort();
+      if (inactif) window.cancelIdleCallback(id); else window.clearTimeout(id);
+    };
+  }, []);
+  return badge;
 }
 
 type Chargement = Apercu | 'echec';
@@ -202,6 +235,7 @@ export default function BarreDeCote({
   const router = useRouter();
   const session = useSession(connecteInitial);
   const seance = useSeance();
+  const nervosite = useBadgeNervosite();
   const connecte = session === 'connecte';
   const acces: Acces = { connecte, premium: isPremium };
   const { apercus, charger } = useApercus(connecte);
@@ -441,6 +475,23 @@ export default function BarreDeCote({
           {cellule('aujourdhui', <>{seanceCellule}<ChevronDown aria-hidden className="h-3.5 w-3.5 shrink-0 opacity-60" /></>)}
           {RUBRIQUES_BARRE.map((id) => cellule(id, <span>{panneauDe(id).libelle}</span>))}
 
+          {/* Pastille de nervosité, posée seulement là où la barre a la place
+              (mesuré le 2026-11-18, visiteur anonyme, cas le plus chargé) :
+              compacte ≈ 83 px, complète ≈ 257 px. De 1536 à ~1700 px la barre
+              n'a déjà plus de marge (le libellé « Chercher une valeur »
+              apparaît à 1536) : aucune pastille, pour ne pas rogner
+              « Créer un compte ». Le texte complet reste dans aria-label. */}
+          {nervosite && (
+            <>
+              <div className={`${FILET} hidden items-center px-2 min-[1440px]:flex min-[1536px]:hidden min-[1760px]:flex min-[1920px]:hidden`}>
+                <BadgeNervosite badge={nervosite} compacte />
+              </div>
+              <div className={`${FILET} hidden items-center px-3 min-[1920px]:flex`}>
+                <BadgeNervosite badge={nervosite} />
+              </div>
+            </>
+          )}
+
           {code && (
             <div
               aria-live="polite"
@@ -562,6 +613,11 @@ export default function BarreDeCote({
             <Search aria-hidden className="h-4 w-4 shrink-0" />
             <span className="truncate">Chercher une valeur</span>
           </button>
+          {nervosite && (
+            <div className={`${FILET} flex shrink-0 items-center px-2`}>
+              <BadgeNervosite badge={nervosite} compacte />
+            </div>
+          )}
           <button
             type="button"
             aria-label="Ouvrir le menu"
