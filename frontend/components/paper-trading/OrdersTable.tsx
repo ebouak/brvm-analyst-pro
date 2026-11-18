@@ -36,6 +36,9 @@ function reasonLabel(reason: string | null): string | null {
     reserved_shares_exhausted: 'Titres réservés épuisés',
     missing_or_invalid_fixing_or_volume: 'Fixing ou volume indisponible',
     missing_eligible_boc_snapshot: 'BOC admissible indisponible',
+    // Posé par paper_annuler_ordre (0244) : sans lui, un ordre annulé
+    // affichait « Évaluation en attente » sous le badge « Annulé ».
+    cancelled_by_user: 'Annulé par vous',
   };
   return labels[reason] ?? 'Évaluation en attente';
 }

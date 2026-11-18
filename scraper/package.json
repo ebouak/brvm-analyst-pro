@@ -82,8 +82,6 @@
     "bdfin:market:date": "tsx src/index.ts bdfin:market:date",
     "daily:full": "tsx src/index.ts daily:full",
     "daily:full:mock": "tsx src/index.ts daily:full --mock",
-    "paper-trading:auto": "tsx src/index.ts paper-trading:auto",
-    "paper-trading:auto:mock": "tsx src/index.ts paper-trading:auto --mock",
     "obscura:start": "obscura serve --port 9222 --stealth",
     "carnet": "tsx src/index.ts carnet",
     "carnet:date": "tsx src/index.ts carnet",

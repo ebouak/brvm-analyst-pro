@@ -6,6 +6,7 @@
 //                                       lance TOUTE la suite Playwright avec elles
 //   npm run e2e:connecte -- e2e/screener.spec.ts   → idem, fichiers choisis
 //   node scripts/qa-sessions-locales.mjs --fermer  → révoque les sessions de test
+//                                       et supprime leur portefeuille virtuel
 //
 // POURQUOI LOCAL : la connexion exige un jeton anti-robot jusque dans Supabase
 // (`captcha_failed` sans lui). Ouvrir une session à la CI demanderait une porte
@@ -160,6 +161,10 @@ async function fermer() {
   for (const email of Object.values(COMPTES)) {
     const u = await chercherCompte(email);
     if (!u || u.app_metadata?.qa_e2e !== true) continue;
+    // Portefeuille virtuel ouvert par e2e/paper-trading.spec.ts : supprimé
+    // (ordres, exécutions et positions suivent par cascade sur account_id).
+    const { error: ePaper } = await admin.from('paper_trading_accounts').delete().eq('user_id', u.id);
+    verifier(`portefeuille virtuel de ${email}`, ePaper);
     const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email });
     verifier(`lien ${email}`, error);
     const pub = createClient(URL_SB, CLE_PUBLIQUE, { auth: { persistSession: false }, global: { headers: ENTETES } });

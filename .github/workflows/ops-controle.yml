@@ -2,7 +2,7 @@ name: Tour de contrôle — workflows
 
 # Pourquoi : seules les commandes du scraper enveloppées dans `monitored`
 # écrivent dans scraper_runs. alerts.yml, video-seance.yml, dossier.yml,
-# crm-sequences.yml, paper-trading-auto.yml, commodity-weekly.yml… n'y
+# crm-sequences.yml, commodity-weekly.yml… n'y
 # apparaissent pas. Et GitHub DÉSACTIVE en silence les workflows planifiés
 # d'un dépôt public après 60 jours sans activité : un cron coupé ne produit
 # aucun run, donc aucun échec visible.

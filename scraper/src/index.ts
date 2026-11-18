@@ -33,8 +33,6 @@
  *   tsx src/index.ts monthly-reports 2026-06  # mois spécifique
  *   tsx src/index.ts monthly-reports --dry-run # mode test (rien n'est écrit)
  *   tsx src/index.ts releve:envoi [AAAA-MM]  # envoyer les relevés dont le PDF est prêt
- *   tsx src/index.ts paper-trading:auto    # ouvrir positions depuis signaux forts
- *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
  *   tsx src/index.ts communaute            # membres du canal Telegram -> communaute_releves
@@ -76,7 +74,6 @@ const UEMOA_COUNT = UEMOA.length;
 import { runObligations } from './scrapers/runObligations.js';
 import { runCommodities } from './commodities/runCommodities.js';
 import { runValidation } from './validation/runValidation.js';
-import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 import { runBrief } from './brief/runBrief.js';
 import { runVeille } from './runners/runVeille.js';
 import { runForumTrending } from './crons/forum-trending.js';
@@ -1389,11 +1386,6 @@ async function main(): Promise<number> {
         },
       );
       return res.echecs > 0 ? 1 : 0;
-    }
-    case 'paper-trading:auto': {
-      const res = await runPaperTradingAuto();
-      console.log(JSON.stringify(res, null, 2));
-      return res.status === 'error' ? 1 : 0;
     }
     case 'veille': {
       const date = positional[0];

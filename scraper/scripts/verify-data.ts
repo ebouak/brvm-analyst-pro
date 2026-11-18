@@ -9,7 +9,6 @@
  *   daily             — bloquant : ≥ 1 cotation pour la séance du jour
  *   score             — bloquant : ≥ 1 signal calculé pour la séance du jour
  *   monthly <YYYY-MM> — informatif : nb de rapports générés pour le mois
- *   paper             — informatif : nb de positions ouvertes aujourd'hui
  *   events            — informatif : nb d'événements ingérés dans les dernières 24h
  *   dividends         — informatif : nb de dividendes ingérés dans les dernières 24h
  *   dividends-calendrier — bloquant : ≥ 20 dividendes du calendrier officiel datés (2 derniers exercices)
@@ -184,19 +183,6 @@ async function main(): Promise<void> {
       break;
     }
 
-    case 'paper': {
-      const { count, error } = await client
-        .from('paper_trading_positions')
-        .select('*', { count: 'exact', head: true })
-        .eq('entry_date', today);
-      if (error) {
-        console.error('❌ Échec requête:', error.message);
-        process.exit(1);
-      }
-      console.log(`ℹ️ ${count ?? 0} position(s) ouverte(s) le ${today} (0 = aucun signal fort, normal)`);
-      break;
-    }
-
     case 'events': {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { count, error } = await client
@@ -261,7 +247,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper | events | dividends | dividends-calendrier | alerts`);
+      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | events | dividends | dividends-calendrier | alerts`);
       process.exit(1);
   }
 }
