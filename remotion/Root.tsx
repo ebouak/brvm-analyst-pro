@@ -7,6 +7,7 @@ import SeanceSite, { calculerSeanceSite } from './seance-site';
 import Ecosysteme, { calculerEcosysteme } from './ecosysteme';
 import Canaux, { calculerCanaux } from './canaux';
 import AcademyLecon, { calculerLecon } from './academy-lecon';
+import Etudiants, { calculerEtudiants } from './etudiants';
 
 // 16 s × 30 fps = 480 frames (intro 75 + 4 écrans × 83 + outro 72 = 479 ≤ 480)
 export function RemotionRoot() {
@@ -103,6 +104,29 @@ export function RemotionRoot() {
         height={1080}
         defaultProps={{ lecon: 'n1-l1', section: null, plan: null }}
         calculateMetadata={calculerLecon}
+      />
+      {/* Deux présentations pour les étudiants (2026-11-18), verticales, voix off
+          et sous-titres mot à mot. Durée dérivée des pistes de voix
+          (public/etudiants/<video>/durees.json, etudiants-voix.mjs). */}
+      <Composition
+        id="etudiants-gratuit"
+        component={Etudiants}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ video: 'gratuit' as const, durees: null, mots: null }}
+        calculateMetadata={calculerEtudiants}
+      />
+      <Composition
+        id="etudiants-academy"
+        component={Etudiants}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ video: 'academy' as const, durees: null, mots: null }}
+        calculateMetadata={calculerEtudiants}
       />
     </>
   );

@@ -1,0 +1,121 @@
+{
+  "_": "Vidéo étudiants n°1 (2026-11-18) « Apprendre la Bourse sans risquer un franc ». Source unique : titres affichés ET voix off (etudiants.tsx, etudiants-voix.mjs). Écrans = captures réelles (public/etudiants/ecrans, voir etudiants-captures.cjs) : pages publiques sur la production, portefeuille virtuel sur un serveur LOCAL avec le compte de test gratuit qa-e2e-debutant (ordre SNTS saisi puis supprimé par qa-sessions-locales.mjs --fermer). Sources : liste du plan Gratuit = page /pricing (relevée le 2026-11-18) ; feature_flags.paper_trading = free et /premium/paper-trading exempté du mur Premium (frontend/lib/auth/cheminsPremium.ts) ; un ordre simulé s'exécute à une séance POSTÉRIEURE à sa saisie (lib/paper-trading/orders.ts, evaluatePaperOrder).",
+  "id": "gratuit",
+  "voixTts": "fr-FR-DeniseNeural",
+  "debit": "+6%",
+  "scenes": [
+    {
+      "id": "accroche",
+      "titre": [
+        "Investir à la BRVM",
+        "sans argent ?"
+      ],
+      "accent": "sans argent ?",
+      "voix": "Tu veux investir à la BRVM, mais tu n'as pas encore d'argent ? Commence par apprendre. Gratuitement.",
+      "ecran": "snts",
+      "pastilles": [
+        {
+          "mot": "apprendre",
+          "texte": "Vrais cours de la BRVM"
+        }
+      ]
+    },
+    {
+      "id": "gratuit",
+      "titre": [
+        "Le plan",
+        "Gratuit"
+      ],
+      "accent": "Gratuit",
+      "voix": "Sur WESTBOURSE, le plan gratuit te donne les cours de la séance, la fiche de chaque société, les fondamentaux et les dividendes.",
+      "ecran": "pricing",
+      "loupe": {
+        "src": "loupe-gratuit",
+        "mot": "cours",
+        "largeur": 640,
+        "y": 520
+      }
+    },
+    {
+      "id": "fiche",
+      "titre": [
+        "Chaque société",
+        "à la loupe"
+      ],
+      "accent": "à la loupe",
+      "voix": "Pour chaque société : le cours sur un an, et même le carnet d'ordres de la dernière séance.",
+      "ecran": "snts-carnet",
+      "loupe": {
+        "src": "loupe-carnet",
+        "mot": "carnet",
+        "largeur": 820,
+        "y": 700
+      }
+    },
+    {
+      "id": "virtuel",
+      "titre": [
+        "Ton portefeuille",
+        "virtuel"
+      ],
+      "accent": "virtuel",
+      "voix": "Et surtout, entraîne-toi avec un portefeuille virtuel. Tu choisis ton capital de départ, en argent fictif.",
+      "ecran": "pt-capital",
+      "mention": "Simulation : aucun argent réel",
+      "pastilles": [
+        {
+          "mot": "capital",
+          "texte": "Capital fictif"
+        }
+      ]
+    },
+    {
+      "id": "ordre",
+      "titre": [
+        "Passe ton",
+        "premier ordre"
+      ],
+      "accent": "premier ordre",
+      "voix": "Choisis une action, et passe ton ordre d'achat, comme sur le vrai marché.",
+      "ecran": "pt-ordre",
+      "mention": "Simulation : aucun argent réel",
+      "pastilles": [
+        {
+          "mot": "action",
+          "texte": "Vrai carnet de la BRVM"
+        }
+      ]
+    },
+    {
+      "id": "suivi",
+      "titre": [
+        "Suis tes",
+        "résultats"
+      ],
+      "accent": "résultats",
+      "voix": "Ton ordre est traité à la séance suivante, au vrai cours de clôture. Ensuite, tu suis ta position et ton résultat. Tu te trompes ? Aucun franc perdu : tu apprends.",
+      "ecran": "pt-suivi",
+      "mention": "Simulation : aucun argent réel",
+      "loupe": {
+        "src": "loupe-ordre",
+        "mot": "suis",
+        "largeur": 860,
+        "y": 760
+      }
+    },
+    {
+      "id": "fin",
+      "titre": [
+        "Crée ton compte",
+        "gratuit"
+      ],
+      "accent": "gratuit",
+      "voix": "Crée ton compte gratuit sur westbourse point com. Investir comporte des risques : apprends d'abord.",
+      "fin": {
+        "phrase": "Apprends la Bourse avant d'y mettre un franc.",
+        "badge": "Gratuit",
+        "adresse": "westbourse.com"
+      }
+    }
+  ]
+}
