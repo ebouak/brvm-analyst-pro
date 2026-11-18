@@ -1,20 +1,31 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useConsent } from './ConsentProvider';
 import { CookiePreferences } from './CookiePreferences';
 import { defaultDenied, acceptAll } from '@/lib/consent/state';
+import { quandPolicesPretes } from '@/lib/consent/attentePolices';
 
 // Style unique pour les deux choix : poids visuel strictement identique.
 const CHOIX = 'flex min-h-[40px] flex-1 items-center justify-center whitespace-nowrap rounded-full border border-ivory/40 bg-ivory/5 px-3 py-2 text-[13px] font-semibold sm:text-sm text-ivory hover:bg-ivory/15 sm:flex-none sm:px-5';
 
 export function CookieBanner() {
   const { needsChoice, open, save } = useConsent();
+  // Bandeau montré une fois les polices chargées : sa hauteur ne change plus
+  // ensuite, donc aucun décalage de mise en page (voir lib/consent/attentePolices).
+  // Sans effet sur le consentement : rien n'est autorisé tant qu'aucun choix
+  // n'est enregistré.
+  const [policesPretes, setPolicesPretes] = useState(false);
+  useEffect(
+    () => quandPolicesPretes(typeof document !== 'undefined' ? document.fonts : undefined, () => setPolicesPretes(true)),
+    [],
+  );
 
   return (
     <>
       <CookiePreferences />
-      {needsChoice && (
+      {needsChoice && policesPretes && (
         // Jetons du thème (suit clair/sombre). « Refuser » et « Tout accepter » :
         // même style, même taille (CNIL : refuser aussi simple qu'accepter).
         <div data-bandeau-cookies="" className="print:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:py-4">
