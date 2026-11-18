@@ -3,6 +3,8 @@ import { urlSure } from '@/lib/urlSure';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
+import { chargerBadgeNervosite } from '@/lib/nervosite/lecture';
+import BadgeNervosite from '@/components/nervosite/BadgeNervosite';
 import { chargerIntermediaire } from '@/lib/financials/interimServer';
 import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
@@ -202,8 +204,9 @@ export default async function CompanyPage(props: PageProps) {
   // Conséquence assumée : cette page publique et indexée ne montre JAMAIS
   // l'analyse, même à un abonné connecté — la lecture complète reste sur
   // /actions/[code], qui peut se permettre d'être dynamique.
-  const [{ instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet, bulletin }, { required: accesLectureSeance }] =
-    await Promise.all([getCompany(code), requiredAccess('lecture_seance')]);
+  // Pastille de nervosité : marché entier, lecture publique (l'ISR reste intact).
+  const [{ instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet, bulletin }, { required: accesLectureSeance }, badgeNervosite] =
+    await Promise.all([getCompany(code), requiredAccess('lecture_seance'), chargerBadgeNervosite(createPublicClient())]);
 
   if (!instrument) notFound();
 
@@ -388,6 +391,10 @@ export default async function CompanyPage(props: PageProps) {
             </h1>
             <p className="mt-1 text-sm text-faint">
               {instrument.secteur ?? 'BRVM'} · {instrument.pays ?? 'UEMOA'}
+            </p>
+            <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-faint">
+              <span>Marché :</span>
+              <BadgeNervosite badge={badgeNervosite} />
             </p>
           </div>
           <div className="flex items-center gap-4">

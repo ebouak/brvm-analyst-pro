@@ -3,7 +3,9 @@ import Link from 'next/link';
 import PublicShell from '@/components/public/PublicShell';
 import CourbeNervosite from '@/components/nervosite/CourbeNervosite';
 import { createPublicClient } from '@/lib/supabase/public';
-import { chargerSerieNervosite } from '@/lib/nervosite/lecture';
+import { chargerBadgeNervosite, chargerSerieNervosite } from '@/lib/nervosite/lecture';
+import BadgeNervosite from '@/components/nervosite/BadgeNervosite';
+import type { BadgeNervosite as Badge } from '@/lib/nervosite/badge';
 import {
   BORNES_REGIME, LIBELLE_REGIME, TON_REGIME, echantillonHebdo, fmtNervosite, phraseRang, syntheseSerie,
   type LigneNervosite,
@@ -29,8 +31,10 @@ const virgule = (x: number) => x.toLocaleString('fr-FR');
  */
 export default async function Page() {
   let serie: LigneNervosite[] | null = null;
+  let badge: Badge | null = null;
   try {
-    serie = await chargerSerieNervosite(createPublicClient());
+    const sb = createPublicClient();
+    [serie, badge] = await Promise.all([chargerSerieNervosite(sb), chargerBadgeNervosite(sb)]);
   } catch {
     serie = null;
   }
@@ -40,6 +44,7 @@ export default async function Page() {
     <PublicShell>
       <header className="mb-8 border-b border-border pb-4">
         <h1 className="font-display text-3xl text-ivory md:text-4xl">Indice de nervosité WESTBOURSE</h1>
+        {badge && <BadgeNervosite badge={badge} className="mt-3" />}
         <p className="mt-2 max-w-3xl text-sm text-muted">
           Cet indice mesure la volatilité réalisée des actions cotées à la BRVM, exprimée en pourcentage annualisé.
           Il indique l’ampleur des variations passées, pas leur direction : plus il est haut, plus les cours ont
