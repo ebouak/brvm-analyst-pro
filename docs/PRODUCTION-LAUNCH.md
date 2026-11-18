@@ -180,7 +180,6 @@ cd scraper
 npm run intraday:mock       # Should succeed
 npm run daily:full:mock     # Should succeed
 npm run monthly-reports:test -- 2026-05  # Dry-run
-npm run paper-trading:auto:mock  # Should succeed
 ```
 
 Expected: All green (data in memory, no DB writes)
@@ -190,10 +189,9 @@ Expected: All green (data in memory, no DB writes)
 cd scraper
 npm run intraday            # Real BRVM data
 npm run daily:full          # Real data
-npm run paper-trading:auto  # Check positions created
 ```
 
-Expected: Data in Supabase, positions in DB
+Expected: Data in Supabase
 
 ### Test 3: Manual Workflow Trigger
 1. Go to GitHub Actions

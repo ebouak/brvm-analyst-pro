@@ -167,12 +167,10 @@ npm run monthly-reports:test     # Dry-run sans email/DB
 
 ### P0 (Critique) — À faire immédiatement
 
-1. **Paper Trading Auto** (1-2 jours)
-   - Créer cron scraper: `npm run paper-trading:auto-open`
-   - Lire `signals_daily` du jour
-   - Créer positions si signal_strength > threshold
-   - Workflow GitHub Actions + Vercel cron
-   - Commite: `feat(paper-trading): auto-open positions from daily signals`
+1. ~~**Paper Trading Auto**~~ — **ABANDONNÉ (2026-11-17)** : la tâche
+   ouvrait des positions dans les comptes des utilisateurs sans leur accord
+   (désactivée le 2026-11-06, portefeuilles remis à zéro par `0246`). Le
+   portefeuille virtuel est MANUEL uniquement ; workflow et runner supprimés.
 
 2. **Rapport mensuel email** (1 jour)
    - Configurer `RESEND_API_KEY` (si pas déjà fait)
