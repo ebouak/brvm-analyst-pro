@@ -131,7 +131,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/scanner', libelle: 'Scanner technique', rubrique: 'idee', parent: '/screener', statut: 'secondaire', raison: ONGLET('Filtrer'), premium: true },
   { chemin: '/screener/intraday', libelle: 'Screener intraday', rubrique: 'idee', parent: '/screener', statut: 'secondaire', raison: 'vue de séance, liée depuis Filtrer et la palette' },
   { chemin: '/signaux', libelle: 'Signaux', rubrique: 'idee', description: 'Rebonds détectés par le moteur', colonne: 1, statut: 'menu', premium: true },
-  { chemin: '/conseiller', libelle: 'Conseiller', rubrique: 'idee', description: 'Pistes selon votre profil', colonne: 1, statut: 'menu' },
+  { chemin: '/conseiller', libelle: 'Conseiller', rubrique: 'idee', description: 'Pistes selon votre profil', colonne: 1, statut: 'menu', premium: true },
   { chemin: '/conseiller/track-record', libelle: 'Bilan du Conseiller', rubrique: 'idee', parent: '/conseiller', statut: 'secondaire', raison: 'lié depuis le Conseiller' },
   { chemin: '/saisonnalite', libelle: 'Saisonnalité', rubrique: 'idee', description: 'Les mois forts et faibles', colonne: 1, statut: 'menu', premium: true },
   { chemin: '/saisonnalite/ce-mois-ci', libelle: 'Ce mois-ci', rubrique: 'idee', parent: '/saisonnalite', statut: 'secondaire', raison: 'lié depuis Saisonnalité' },
