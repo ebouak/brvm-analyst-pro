@@ -115,6 +115,7 @@ describe('MoyennesMobiles', () => {
     }));
 
     expect(html.match(/data-date-tick=/g)).toHaveLength(6);
+    expect(html).toContain('aria-label="5 mai 2026"');
     expect(html).toContain('5 mai 2026');
   });
 

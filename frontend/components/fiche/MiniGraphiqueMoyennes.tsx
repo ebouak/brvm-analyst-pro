@@ -150,7 +150,7 @@ export function MiniGraphiqueMoyennes({
               vectorEffect="non-scaling-stroke"
               aria-hidden="true"
             />
-            {dateTicks.map(({ point, x, anchor }) => (
+            {dateTicks.map(({ point, x }) => (
               <g key={point.date}>
                 <line
                   x1={x}
@@ -161,21 +161,33 @@ export function MiniGraphiqueMoyennes({
                   vectorEffect="non-scaling-stroke"
                   aria-hidden="true"
                 />
-                <text
-                  data-date-tick={point.date}
-                  x={x}
-                  y={178}
-                  textAnchor={anchor}
-                  fill="rgb(var(--color-faint))"
-                  fontSize="10"
-                  fontVariant="tabular-nums"
-                >
-                  <title>{fmtDateCourte(point.date)}</title>
-                  {fmtDateCourte(point.date)}
-                </text>
               </g>
             ))}
           </svg>
+          <div className="relative mt-1 h-7 text-[9px] leading-tight text-faint">
+            {dateTicks.map(({ point, x, anchor }) => {
+              const transform = anchor === 'start'
+                ? 'translateX(0)'
+                : anchor === 'end'
+                  ? 'translateX(-100%)'
+                  : 'translateX(-50%)';
+              return (
+                <span
+                  key={point.date}
+                  data-date-tick={point.date}
+                  aria-label={fmtDateCourte(point.date)}
+                  title={fmtDateCourte(point.date)}
+                  className="absolute top-0 whitespace-nowrap tabular"
+                  style={{
+                    left: `${(x / WIDTH) * 100}%`,
+                    transform,
+                  }}
+                >
+                  {fmtDateCourte(point.date)}
+                </span>
+              );
+            })}
+          </div>
           <div className="mt-1 flex justify-end text-[10px] text-faint">
             <span>Dates des séances · FCFA</span>
           </div>
