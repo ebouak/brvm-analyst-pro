@@ -8,7 +8,8 @@ import { EmptyStatePremium } from '@/components/ui/premium';
 import { EnTeteCote } from '@/components/marche/EnTeteCote';
 import { LigneSource } from '@/components/marche/LigneSource';
 
-export const dynamic = 'force-dynamic';
+// ISR (2026-11-18, quota CPU Vercel) : édition hebdomadaire (samedi).
+export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Analyses hebdomadaires BRVM — valeurs en vue',
   description: 'Chaque semaine, l’analyse technique des valeurs BRVM les plus actives : cours, RSI, niveaux à surveiller.',

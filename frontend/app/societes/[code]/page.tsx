@@ -33,6 +33,17 @@ import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnost
 // ISR : aligné sur la fréquence intraday (15 min)
 export const revalidate = 900;
 
+/**
+ * Liste VIDE, volontairement (2026-11-18, quota CPU Vercel). Sans
+ * `generateStaticParams`, Next rend une route à segment dynamique À CHAQUE
+ * requête : le `revalidate` ci-dessus n'avait aucun effet. Avec une liste vide,
+ * rien n'est construit au build ; chaque page est rendue à sa première visite
+ * puis servie depuis le cache ISR. Une clé inconnue répond toujours 404.
+ */
+export async function generateStaticParams() {
+  return [];
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 /** « 2025-11-07 » → « 7 nov. 2025 » (UTC : une date seule ne doit pas glisser d'un jour). */

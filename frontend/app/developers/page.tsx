@@ -2,9 +2,9 @@ import Link from 'next/link';
 import FilAriane from '@/components/nav/FilAriane';
 import ApiAccessForm from '@/components/developers/ApiAccessForm';
 
-// Le formulaire de demande de clé est un composant client : la page ne peut plus
-// être prérendue statiquement (le manifeste RSC échoue au build sinon).
-export const dynamic = 'force-dynamic';
+// Page de contenu fixe (le formulaire est un composant client) : prérendue au
+// build depuis le 2026-11-18. L'ancien `force-dynamic` contournait un échec de
+// prérendu sous Next 14 ; il est levé en Next 15 (build vérifié).
 
 export const metadata = {
   title: 'API Développeurs',

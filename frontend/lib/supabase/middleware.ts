@@ -41,7 +41,26 @@ function porteUnJetonDeReleve(request: NextRequest): boolean {
   return jetonRenduPlausible(request.headers.get(EN_TETE_RELEVE));
 }
 
+/**
+ * Le visiteur porte-t-il un cookie de session Supabase (`sb-<ref>-auth-token`,
+ * éventuellement découpé en `.0`, `.1`…) ? PUR, testé.
+ */
+export function porteCookieSession(noms: string[]): boolean {
+  return noms.some((n) => n.startsWith('sb-') && n.includes('-auth-token'));
+}
+
 export async function updateSession(request: NextRequest) {
+  // Chemin court (2026-11-18, quota CPU Vercel) : un visiteur SANS cookie de
+  // session sur une page publique n'a rien à rafraîchir ni à vérifier. Le
+  // middleware s'exécute à CHAQUE requête, y compris celles servies ensuite
+  // depuis le cache : on n'y construit plus de client Supabase pour rien.
+  // Sans cookie, `getClaims()` rendait de toute façon `null` : le résultat
+  // est identique (aucune redirection sur un chemin public).
+  const sansSession = !porteCookieSession(request.cookies.getAll().map((c) => c.name));
+  if (sansSession && isPublicPath(request.nextUrl.pathname) && !estCheminPremium(request.nextUrl.pathname)) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
