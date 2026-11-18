@@ -75,7 +75,13 @@ async function loupeElement(n, url, nom, texte, anc, fin) {
   await el.scrollIntoViewIfNeeded();
   await p.waitForTimeout(1500);
   await fermerInvitations(p);
-  await p.addStyleTag({ content: 'header, nav, [class*="sticky"], [class*="fixed"] { visibility: hidden !important; }' });
+  // Masque seulement ce qui est collé à l'écran (barre du haut, barre du bas), pas les titres des cartes.
+  await p.evaluate(() => {
+    for (const n of document.querySelectorAll('body *')) {
+      const pos = getComputedStyle(n).position;
+      if (pos === 'fixed' || pos === 'sticky') n.style.visibility = 'hidden';
+    }
+  });
   const b = await el.boundingBox();
   const bas = fin ? (await p.getByText(fin, { exact: false }).first().boundingBox()).y - 4 : b.y + b.height;
   await p.screenshot({ path: path.join(OUT, `${nom}.png`), clip: { x: b.x, y: b.y, width: b.width, height: bas - b.y } });
