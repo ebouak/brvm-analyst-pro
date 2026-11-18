@@ -22,7 +22,7 @@ export const PUBLIC_EXACT = new Set<string>([
   '/apercu',
   // Transparence : contrôle quotidien contre le Bulletin officiel, opérations sur titres.
   '/qualite-donnees', '/operations-titres',
-  // Indice de nervosité BRVM-V : donnée de marché dérivée des clôtures (SEO).
+  // Indice de nervosité WESTBOURSE : donnée de marché dérivée des clôtures (SEO).
   '/nervosite',
   '/crm/opposition',
   '/offre/dossier',

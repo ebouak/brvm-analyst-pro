@@ -1,5 +1,5 @@
 /**
- * Affichage de l'indice de nervosité BRVM-V. PUR : aucune lecture de base.
+ * Affichage de l'indice de nervosité WESTBOURSE. PUR : aucune lecture de base.
  *
  * Les lignes viennent de `brvm_nervosite_daily`, écrites par le scraper
  * (`scraper/src/nervosite/`) avec le module `./nervosite.ts`. Rien ici ne

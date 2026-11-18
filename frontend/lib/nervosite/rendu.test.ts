@@ -3,6 +3,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import ApercuNervosite from '@/components/nervosite/ApercuNervosite';
 import CourbeNervosite from '@/components/nervosite/CourbeNervosite';
+import BlocMarcheDuJour from '@/components/dashboard/blocs/BlocMarcheDuJour';
 import type { LigneNervosite } from './affichage';
 
 const ligne = (date_marche: string, valeur: number | null, extra: Partial<LigneNervosite> = {}): LigneNervosite => ({
@@ -40,8 +41,30 @@ describe('aperçu du tableau de bord — rendu sans données', () => {
     const c = [ligne('2026-11-12', 11.4), ligne('2026-11-13', 11.2, { rang: 56.39, regime: 'normal' })];
     const html = sain(renderToStaticMarkup(h(ApercuNervosite, { resume: { derniere: c[1]!, debut: '2008-01-21', courbe: c }, dateMarche: '2026-11-14' })));
     expect(html).toContain('Normal');
-    expect(html).toContain('>56<');
+    expect(html).toContain('56 % des séances');
     expect(html).toContain('séance du 13/11/2026');
+  });
+});
+
+describe('indice de nervosité sur le tableau de bord', () => {
+  it('uses the WESTBOURSE name and explains its annualized value and historical rank', () => {
+    const d = ligne('2026-11-16', 11.3, { rang: 93, regime: 'tendu' });
+    const html = sain(renderToStaticMarkup(h(BlocMarcheDuJour, {
+      dateMarche: '2026-11-16',
+      secteurs: null,
+      largeur: null,
+      obligations: null,
+      nervosite: {
+        derniere: d,
+        debut: '2021-11-16',
+        courbe: [ligne('2026-11-13', 11.4), d],
+      },
+    })));
+
+    expect(html).toContain('Indice de nervosité WESTBOURSE');
+    expect(html).toContain('ampleur des variations récentes');
+    expect(html).toContain('93 % des séances');
+    expect(html).not.toContain('BRVM-V');
   });
 });
 

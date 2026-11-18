@@ -13,9 +13,9 @@ import { fmtDateFR, fmtNumber } from '@/lib/format';
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
-  title: 'Indice de nervosité BRVM-V · volatilité du marché BRVM',
+  title: 'Indice de nervosité WESTBOURSE · marché des actions BRVM',
   description:
-    "BRVM-V mesure, séance après séance, l'agitation du marché boursier régional de l'UEMOA : volatilité réalisée du marché large, en pourcentage annualisé, avec son rang sur les cinq dernières années. Méthode et limites publiées.",
+    "L’indice de nervosité WESTBOURSE mesure l’ampleur des variations observées sur le marché des actions BRVM, en pourcentage annualisé, avec son rang historique sur cinq ans au plus. Méthode et limites publiées.",
   alternates: { canonical: '/nervosite' },
 };
 
@@ -23,7 +23,7 @@ const REGIMES: Regime[] = ['calme', 'normal', 'agité', 'tendu'];
 const virgule = (x: number) => x.toLocaleString('fr-FR');
 
 /**
- * Page publique de l'indice de nervosité BRVM-V. Tout chiffre vient de
+ * Page publique de l'indice de nervosité WESTBOURSE. Tout chiffre vient de
  * `brvm_nervosite_daily` (calculée par le scraper) ou des constantes du module
  * de calcul : rien n'est saisi à la main. Pas de loading.tsx (règle anti-soft-404).
  */
@@ -39,17 +39,17 @@ export default async function Page() {
   return (
     <PublicShell>
       <header className="mb-8 border-b border-border pb-4">
-        <h1 className="font-display text-3xl text-ivory md:text-4xl">Nervosité du marché BRVM</h1>
+        <h1 className="font-display text-3xl text-ivory md:text-4xl">Indice de nervosité WESTBOURSE</h1>
         <p className="mt-2 max-w-3xl text-sm text-muted">
-          L’indice <span className="text-ivory">BRVM-V</span> mesure l’agitation du marché boursier régional : la
-          volatilité réalisée de l’ensemble des actions cotées, exprimée en pourcentage annualisé, comme le VIX
-          américain. Plus il est haut, plus les cours ont bougé ces dernières séances.
+          Cet indice mesure la volatilité réalisée des actions cotées à la BRVM, exprimée en pourcentage annualisé.
+          Il indique l’ampleur des variations passées, pas leur direction : plus il est haut, plus les cours ont
+          bougé ces dernières séances.
         </p>
       </header>
 
       {serie === null ? (
         <p className="rounded-xl border border-warn/40 bg-warn/10 p-4 text-sm text-warn">
-          L’indice n’a pas pu être lu pour le moment. Nous ne publions pas de valeur que nous ne pouvons pas relire.
+          L’indice WESTBOURSE n’a pas pu être lu pour le moment. Nous ne publions pas de valeur que nous ne pouvons pas relire.
         </p>
       ) : !synthese ? (
         <p className="rounded-xl border border-border bg-surface p-4 text-sm text-muted">
@@ -110,7 +110,7 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
           {fmtDateFR(s.plusHaut.date)} · plus bas : <span className="tabular text-muted">{fmtNervosite(s.plusBas.valeur)}</span> le {fmtDateFR(s.plusBas.date)}.
         </p>
         <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-surface p-3">
-          <CourbeNervosite lignes={hebdo} titre={`Indice BRVM-V par semaine, du ${fmtDateFR(hebdo[0]!.date_marche)} au ${fmtDateFR(hebdo.at(-1)!.date_marche)}`} />
+          <CourbeNervosite lignes={hebdo} titre={`Indice de nervosité WESTBOURSE par semaine, du ${fmtDateFR(hebdo[0]!.date_marche)} au ${fmtDateFR(hebdo.at(-1)!.date_marche)}`} />
         </div>
       </section>
 
@@ -118,7 +118,7 @@ function Resultats({ serie, s }: { serie: LigneNervosite[]; s: NonNullable<Retur
         <h2 id="t-an" className="font-display text-lg text-ivory">Les {unAn.length} dernières séances</h2>
         <Legende />
         <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-surface p-3">
-          <CourbeNervosite lignes={unAn} composantes reperes="trimestres" titre={`Indice BRVM-V et ses deux composantes sur ${unAn.length} séances`} />
+          <CourbeNervosite lignes={unAn} composantes reperes="trimestres" titre={`Indice de nervosité WESTBOURSE et ses deux composantes sur ${unAn.length} séances`} />
         </div>
         <p className="mt-2 text-xs text-faint">
           La composante rapide réagit en quelques séances, la lente retient une année : quand la rapide passe au-dessus,
@@ -179,7 +179,7 @@ function Composante({ titre, valeur, note }: { titre: string; valeur: number | n
 function Legende() {
   return (
     <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted" aria-label="Légende">
-      <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block h-0.5 w-5 bg-accent" />Indice BRVM-V</li>
+      <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block h-0.5 w-5 bg-accent" />Indice WESTBOURSE</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block h-px w-5 bg-muted" />Composante rapide</li>
       <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block w-5 border-t-2 border-dashed border-warn" />Composante lente</li>
     </ul>
@@ -192,7 +192,7 @@ function Methode({ minTitres }: { minTitres: number | null }) {
       <h2 id="t-methode" className="font-display text-lg text-ivory">Méthode</h2>
       <p>
         <span className="text-ivory">Pourquoi pas un VIX ?</span> Le VIX se déduit du prix des options sur indice. La
-        BRVM n’a pas de marché d’options : aucune volatilité « implicite » n’est observable. BRVM-V mesure donc la
+        BRVM n’a pas de marché d’options : aucune volatilité « implicite » n’est observable. L’indice WESTBOURSE mesure donc la
         volatilité <span className="text-ivory">réalisée</span>, celle que les cours ont effectivement eue.
       </p>
       <p>

@@ -96,6 +96,29 @@ describe('MoyennesMobiles', () => {
     expect(html).toContain('recommandation d');
   });
 
+  it('shows explicit dates for intermediate sessions on the chart axis', () => {
+    const fullReading: MovingAverageReading = {
+      ...reading,
+      sma200: 90,
+      distance200Pct: 11.11,
+      slope200Pct: 0.4,
+      regimeHorizon: 'complet',
+    };
+    const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
+      reading: fullReading,
+      points: series(220),
+      breadth: { status: 'insufficient', reading: null },
+      secteur: 'Industrie',
+      dateDernierCours: '2026-11-13',
+      dateSeance: '2026-11-13',
+      seancesSansCotation: 0,
+    }));
+
+    expect(html.match(/data-date-tick=/g)).toHaveLength(6);
+    expect(html).toContain('aria-label="5 mai 2026"');
+    expect(html).toContain('5 mai 2026');
+  });
+
   it('keeps unavailable averages out of the chart and explains the short history', () => {
     const html = renderToStaticMarkup(createElement(MoyennesMobiles, {
       reading,

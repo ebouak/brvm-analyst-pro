@@ -85,7 +85,7 @@ export default function BlocMarcheDuJour({
         </Porte>
 
         {nervosite !== undefined && (
-          <Porte href="/nervosite" rubrique="Nervosité (BRVM-V)" action="Comprendre l’indice">
+          <Porte href="/nervosite" rubrique="Indice de nervosité WESTBOURSE" action="Comprendre l’indice">
             <ApercuNervosite resume={nervosite} dateMarche={dateMarche} />
           </Porte>
         )}
