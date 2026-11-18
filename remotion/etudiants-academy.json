@@ -1,0 +1,131 @@
+{
+  "_": "Vidéo étudiants n°2 (2026-11-18) « La formation Bourse à vie ». Source unique : titres affichés ET voix off. Sources : prix = public.chariow_products, product_code academy:integrale, amount 9000 XOF, active (lu le 2026-11-18) et affiché tel quel sur /formations/academy ; « à vie » = droitNiveauValide (lib/billing/chariow/regles.ts) et texte de la page : une refonte majeure publiée plus de 12 mois après l'achat n'est pas incluse, les certificats restent acquis ; 4 niveaux = NIVEAUX (lib/academy/types.ts) ; leçon 0 gratuite = Lecon0Carte ; seuil d'examen 70 % = lib/academy/exam.ts ; exemples réels = lib/academy/donneesReelles.ts. Écrans : Academy connectée sur un serveur LOCAL avec le compte de test Premium qa-e2e-actif (leçon 8 du niveau 1), bloc d'achat sur la production.",
+  "id": "academy",
+  "voixTts": "fr-FR-DeniseNeural",
+  "debit": "+6%",
+  "scenes": [
+    {
+      "id": "accroche",
+      "titre": [
+        "Comprendre",
+        "la Bourse"
+      ],
+      "accent": "la Bourse",
+      "voix": "Tu veux vraiment comprendre la Bourse, et pas seulement suivre des conseils ? Voici la WESTBOURSE Academy.",
+      "ecran": "ac-hub",
+      "pastilles": [
+        {
+          "mot": "Academy",
+          "texte": "Leçon 0 gratuite"
+        }
+      ]
+    },
+    {
+      "id": "niveaux",
+      "titre": [
+        "Quatre",
+        "niveaux"
+      ],
+      "accent": "niveaux",
+      "voix": "Quatre niveaux : l'initiation à la BRVM, l'analyse fondamentale, l'analyse technique, puis le niveau expert.",
+      "ecran": "ac-niveaux",
+      "pastilles": [
+        {
+          "mot": "initiation",
+          "texte": "1 · Initiation"
+        },
+        {
+          "mot": "fondamentale",
+          "texte": "2 · Fondamental"
+        },
+        {
+          "mot": "technique",
+          "texte": "3 · Technique"
+        },
+        {
+          "mot": "expert",
+          "texte": "4 · Expert"
+        }
+      ]
+    },
+    {
+      "id": "simulateur",
+      "titre": [
+        "Des leçons",
+        "interactives"
+      ],
+      "accent": "interactives",
+      "voix": "Les leçons sont interactives : tu changes le capital, la durée, le rendement, et le simulateur recalcule devant toi.",
+      "ecran": "l8-simu",
+      "loupe": {
+        "src": "loupe-simu",
+        "mot": "recalcule",
+        "largeur": 800,
+        "y": 760
+      }
+    },
+    {
+      "id": "reel",
+      "titre": [
+        "Les vraies",
+        "données"
+      ],
+      "accent": "données",
+      "voix": "Les exemples viennent des vraies données de la BRVM : derniers dividendes, cours de la dernière séance.",
+      "ecran": "l8-reel",
+      "loupe": {
+        "src": "loupe-reel",
+        "mot": "dividendes",
+        "largeur": 880,
+        "y": 820
+      }
+    },
+    {
+      "id": "quiz",
+      "titre": [
+        "Quiz, examen",
+        "et certificat"
+      ],
+      "accent": "certificat",
+      "voix": "Des quiz pour vérifier que tu as compris. Puis un examen par niveau : à soixante-dix pour cent de bonnes réponses, ton certificat est à toi.",
+      "ecran": "l8-quiz",
+      "loupe": {
+        "src": "loupe-examen",
+        "mot": "examen",
+        "largeur": 900,
+        "y": 820
+      }
+    },
+    {
+      "id": "prix",
+      "titre": [
+        "À vie, pour",
+        "9 000 FCFA"
+      ],
+      "accent": "9 000 FCFA",
+      "voix": "La formation complète, les quatre niveaux, coûte neuf mille francs CFA, en un seul paiement. L'accès est à vie, et un mois Premium est offert.",
+      "ecran": "ac-achat",
+      "loupe": {
+        "src": "loupe-prix",
+        "mot": "neuf",
+        "largeur": 880,
+        "y": 800
+      }
+    },
+    {
+      "id": "fin",
+      "titre": [
+        "Commence par",
+        "la leçon 0"
+      ],
+      "accent": "la leçon 0",
+      "voix": "Commence par la leçon zéro, gratuite, sur westbourse point com. Investir comporte des risques : forme-toi d'abord.",
+      "fin": {
+        "phrase": "La formation Bourse à vie, interactive et à jour.",
+        "badge": "Leçon 0 gratuite",
+        "adresse": "westbourse.com/formations/academy",
+        "note": "Accès à vie : une refonte majeure publiée plus de 12 mois après l'achat n'est pas incluse."
+      }
+    }
+  ]
+}
