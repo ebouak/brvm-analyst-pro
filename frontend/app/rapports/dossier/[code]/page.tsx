@@ -231,6 +231,10 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const encoursB = lb ? encoursDossier(lb, BORNES.encoursBancaires) : null;
   const evolution = traj.length >= 2 ? evolutionResultat(traj[traj.length - 1]!.resultat_net, traj[traj.length - 2]!.resultat_net) : null;
   const dette = c.dette_perimetre === 'long_terme' ? 'dette à plus d’un an' : 'dette financière';
+  /* Une banque n'a pas de chiffre d'affaires : son revenu est le produit net
+     bancaire (famille comptable de build.ts, FAMILLE_PAR_CODE). Pour les autres
+     familles, chaque libellé reste celui d'avant, au caractère près. */
+  const estBanque = d.suivi.famille === 'banque';
 
   /* « Depuis la dernière édition » : l'édition courante (mesures vivantes) contre
      l'édition STRICTEMENT antérieure figée en base. Sans édition antérieure, ou
@@ -325,7 +329,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
       <CouverturePhoto
         entete={entete} societe={nomComplet} code={id.code} logo={LOGOS[id.code] ?? null} photo={photo}
         surtitre={['Dossier valeur', id.secteur, id.pays].filter(Boolean).join(' · ')}
-        constat={constatIntermediaire(inter) ?? constatCouverture({ exercice: c.exercice, resultatNet: c.resultat_net, resultatNetPrecedent: precedent?.resultat_net ?? null })}
+        constat={constatIntermediaire(inter, estBanque ? 'produit net bancaire' : undefined) ?? constatCouverture({ exercice: c.exercice, resultatNet: c.resultat_net, resultatNetPrecedent: precedent?.resultat_net ?? null })}
         total={TOTAL_FEUILLES}
         chiffres={[
           c.cours != null ? { libelle: 'Cours', valeur: `${fmtNumber(c.cours)} FCFA`, note: [c.date_cours ? `au ${fmtDateCourte(c.date_cours)}` : null, d.suivi.performance.var_ytd != null ? `${pourcent(d.suivi.performance.var_ytd)} depuis janvier` : null].filter(Boolean).join(' · ') } : null,
@@ -339,11 +343,11 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
         declaration={declarationEssentiel({
           societe: nomComplet, exercice: c.exercice, ca: c.chiffre_affaires, caPrecedent: precedent?.chiffre_affaires ?? null,
           resultatNet: c.resultat_net, resultatNetPrecedent: precedent?.resultat_net ?? null,
-        }) ?? 'Les comptes du dernier exercice ne sont pas disponibles.'}
+        }, estBanque ? 'produit net bancaire' : undefined) ?? 'Les comptes du dernier exercice ne sont pas disponibles.'}
         chiffres={[
-          { libelle: 'Chiffre d’affaires', ...separe(c.chiffre_affaires), note: c.croissance_ca_1an != null ? `${pourcent(c.croissance_ca_1an)} sur un an` : null },
+          { libelle: estBanque ? 'Produit net bancaire' : 'Chiffre d’affaires', ...separe(c.chiffre_affaires), note: c.croissance_ca_1an != null ? `${pourcent(c.croissance_ca_1an)} sur un an` : null },
           { libelle: 'Résultat net', ...separe(c.resultat_net), note: evolution ? `${evolution} sur un an` : null },
-          { libelle: 'Marge nette', valeur: c.resultat_net != null && c.chiffre_affaires ? fmtNumber((c.resultat_net / c.chiffre_affaires) * 100, 1) : null, unite: '%', note: 'résultat net rapporté au chiffre d’affaires' },
+          { libelle: 'Marge nette', valeur: c.resultat_net != null && c.chiffre_affaires ? fmtNumber((c.resultat_net / c.chiffre_affaires) * 100, 1) : null, unite: '%', note: estBanque ? 'résultat net rapporté au produit net bancaire' : 'résultat net rapporté au chiffre d’affaires' },
           { libelle: 'Dividende par action', valeur: divCourant ? fmtNumber(divCourant.montant, Number.isInteger(divCourant.montant) ? 0 : 2) : null, unite: 'FCFA', note: div.rendement != null ? `rendement de ${fmtNumber(div.rendement * 100, 2)}\u00a0% au cours actuel${div.exercice ? `, exercice ${div.exercice}` : ''}` : null },
         ]}
       >
@@ -351,7 +355,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           <section className="doc-recent" aria-label="Dernière publication">
             <p className="doc-surtitre">Dernière publication · {inter.libelle}</p>
             <dl>
-              <div><dt>Chiffre d’affaires</dt><dd>{inter.revenu != null ? `${fmtFcfa(inter.revenu)} FCFA` : 'non publié'}</dd>{varInter(inter.revenu, inter.revenuPrecedent) && <small>{varInter(inter.revenu, inter.revenuPrecedent)} sur la même période</small>}</div>
+              <div><dt>{estBanque ? 'Produit net bancaire' : 'Chiffre d’affaires'}</dt><dd>{inter.revenu != null ? `${fmtFcfa(inter.revenu)} FCFA` : 'non publié'}</dd>{varInter(inter.revenu, inter.revenuPrecedent) && <small>{varInter(inter.revenu, inter.revenuPrecedent)} sur la même période</small>}</div>
               <div><dt>Résultat net</dt><dd>{inter.resultatNet != null ? `${fmtFcfa(inter.resultatNet)} FCFA` : 'non publié'}</dd>{varInter(inter.resultatNet, inter.resultatNetPrecedent) && <small>{varInter(inter.resultatNet, inter.resultatNetPrecedent)} sur la même période</small>}</div>
             </dl>
             <p className="doc-recent-note">Comparé {/^\d/.test(inter.libellePrecedent) ? 'aux' : 'au'} {inter.libellePrecedent}. Détail au {renvoi('intermediaire')}.</p>
@@ -405,8 +409,8 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               <h3>Activité</h3>
               <p>
                 {c.chiffre_affaires != null
-                  ? <><strong>{cfa(c.chiffre_affaires)}</strong> de chiffre d&apos;affaires{c.exercice ? ` en ${c.exercice}` : ''}{c.croissance_ca_1an != null ? `, ${pourcent(c.croissance_ca_1an)} sur un exercice` : ''}.</>
-                  : 'Chiffre d’affaires non disponible.'}
+                  ? <><strong>{cfa(c.chiffre_affaires)}</strong> {estBanque ? 'de produit net bancaire' : "de chiffre d'affaires"}{c.exercice ? ` en ${c.exercice}` : ''}{c.croissance_ca_1an != null ? `, ${pourcent(c.croissance_ca_1an)} sur un exercice` : ''}.</>
+                  : estBanque ? 'Produit net bancaire non disponible.' : 'Chiffre d’affaires non disponible.'}
               </p>
             </div>
             <div className="dv-encadre">
@@ -531,7 +535,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           chapo="Montants tels que publiés par la société, repris des états financiers en base."
         >
           <dl className="dv-grille">
-            <Mesure libelle="Chiffre d'affaires" valeur={cfa(c.chiffre_affaires)} />
+            <Mesure libelle={estBanque ? 'Produit net bancaire' : "Chiffre d'affaires"} valeur={cfa(c.chiffre_affaires)} />
             <Mesure
               libelle="Résultat net"
               valeur={cfa(c.resultat_net)}
@@ -550,7 +554,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               }
             />
             <Mesure
-              libelle="Croissance du CA"
+              libelle={estBanque ? 'Croissance du PNB' : 'Croissance du CA'}
               valeur={pourcent(c.croissance_ca_1an)}
               ton={c.croissance_ca_1an == null ? undefined : c.croissance_ca_1an >= 0 ? 'hausse' : 'baisse'}
               note={
@@ -1183,7 +1187,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                 </thead>
                 <tbody>
                   {([
-                    ['Chiffre d’affaires', d.suivi.intermediaire.revenu, d.suivi.intermediaire.revenuPrecedent],
+                    [estBanque ? 'Produit net bancaire' : 'Chiffre d’affaires', d.suivi.intermediaire.revenu, d.suivi.intermediaire.revenuPrecedent],
                     ['Résultat net', d.suivi.intermediaire.resultatNet, d.suivi.intermediaire.resultatNetPrecedent],
                   ] as const).map(([poste, n0, n1]) => {
                     const v = n0 != null && n1 != null && n1 !== 0 ? (n0 - n1) / Math.abs(n1) : null;
@@ -1200,7 +1204,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
               </table>
               {d.suivi.intermediaire.glissant && (
                 <p className="dv-chapo" style={{ marginTop: '2mm', marginBottom: 0 }}>
-                  Sur les {d.suivi.intermediaire.glissant.libelle} : chiffre d’affaires {cfa(d.suivi.intermediaire.glissant.revenu) ?? 'non calculable'},
+                  Sur les {d.suivi.intermediaire.glissant.libelle} : {estBanque ? 'produit net bancaire' : 'chiffre d’affaires'} {cfa(d.suivi.intermediaire.glissant.revenu) ?? 'non calculable'},
                   résultat net {cfa(d.suivi.intermediaire.glissant.resultatNet) ?? 'non calculable'}. Comptes intermédiaires non audités comme les comptes annuels.
                 </p>
               )}

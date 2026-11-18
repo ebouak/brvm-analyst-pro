@@ -90,11 +90,13 @@ export function piliersThese(e: EntreePiliers): Pilier[] {
   const divs = e.dividendes.filter((d) => Number.isFinite(d));
   const divBaisse = divs.some((d, i) => i > 0 && d < divs[i - 1]);
   const margeTend = tendance(e.margeExp, e.margeExpPrecedente, 0.01);
+  // Une banque n'a pas de chiffre d'affaires : son revenu est le produit net bancaire.
+  const banque = e.famille === 'banque';
   return [
     {
-      cle: 'croissance', libelle: 'Croissance du chiffre d’affaires', unite: '%',
+      cle: 'croissance', libelle: banque ? 'Croissance du produit net bancaire' : 'Croissance du chiffre d’affaires', unite: '%',
       mesure: e.croissanceCA, precedente: null, tendance: null,
-      seuil: 'Chiffre d’affaires du dernier exercice en hausse sur un an.',
+      seuil: banque ? 'Produit net bancaire du dernier exercice en hausse sur un an.' : 'Chiffre d’affaires du dernier exercice en hausse sur un an.',
       statut: statut(e.croissanceCA != null, (e.croissanceCA ?? 0) > 0),
     },
     {

@@ -76,12 +76,12 @@ export function constatValorisation(per: number | null, medianePer: number | nul
 export function declarationEssentiel(e: {
   societe: string; exercice: string | null; ca: number | null; caPrecedent: number | null;
   resultatNet: number | null; resultatNetPrecedent: number | null;
-}): string | null {
+}, revenuLibelle = 'chiffre d’affaires'): string | null {
   if (e.exercice == null || e.ca == null) {
     return constatCouverture({ exercice: e.exercice, resultatNet: e.resultatNet, resultatNetPrecedent: e.resultatNetPrecedent });
   }
   const evo = (a: number, b: number | null) => (b != null && b > 0 ? ` (${pct(((a - b) / b) * 100)})` : '');
-  let s = `En ${e.exercice}, ${e.societe} a réalisé ${fmtFcfa(e.ca)} FCFA de chiffre d’affaires${evo(e.ca, e.caPrecedent)}`;
+  let s = `En ${e.exercice}, ${e.societe} a réalisé ${fmtFcfa(e.ca)} FCFA de ${revenuLibelle}${evo(e.ca, e.caPrecedent)}`;
   if (e.resultatNet != null) {
     s += e.resultatNet >= 0
       ? ` pour un résultat net de ${fmtFcfa(e.resultatNet)} FCFA${evo(e.resultatNet, e.resultatNetPrecedent)}`
