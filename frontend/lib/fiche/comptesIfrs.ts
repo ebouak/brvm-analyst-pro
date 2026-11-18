@@ -120,6 +120,8 @@ export function comptesIfrs(p: {
   cours: number | null;
   titres: number | null;
   capitalisation: number | null;
+  /** Banque : le revenu se nomme produit net bancaire (phrase Sika). */
+  banque?: boolean;
 }): ComparatifIfrs | null {
   const l = p.ligne;
   if (!l || p.exercice == null || l.exercice !== p.exercice) return null;
@@ -151,7 +153,7 @@ export function comptesIfrs(p: {
   return {
     exercice: l.exercice, ifrs, syscohada, surPartDuGroupe, lignes,
     source: { url: l.source_url, titre: l.source_titre, verifieLe: l.verifie_le },
-    sika: ligneSika(l.comparaison_sika),
+    sika: ligneSika(l.comparaison_sika, p.banque),
   };
 }
 
@@ -165,11 +167,11 @@ const LIBELLE_POSTE: Record<string, string> = {
 const ARRONDI_SIKA = 500_000;
 
 /** Phrase de comparaison avec Sika Finance, dérivée des seuls postes stockés. */
-export function ligneSika(c: ComparaisonSika | null): string | null {
+export function ligneSika(c: ComparaisonSika | null, banque = false): string | null {
   if (!c || c.postes.length === 0) return null;
   const ref = c.referentiel_sika ?? 'non précisé';
   const parties = c.postes.map((q) => {
-    const nom = LIBELLE_POSTE[q.poste] ?? q.poste;
+    const nom = banque && q.poste === 'chiffre_affaires' ? 'produit net bancaire' : LIBELLE_POSTE[q.poste] ?? q.poste;
     const base = `${nom} ${fmtFcfa(q.sika)} FCFA`;
     if (!q.comparable) return `${base}, non comparable (référentiel ${ref})`;
     if (Math.abs(q.ecart) <= ARRONDI_SIKA) return `${base}, concordant à l'arrondi près`;

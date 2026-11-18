@@ -6,12 +6,16 @@ export interface FluxCR { ressources: Noeud[]; emplois: Noeud[]; total: number }
  * emplois = charges d'exploitation (CA − résultat d'exploitation) + hors exploitation négatif + impôt + bénéfice.
  * Quatre postes publiés suffisent ; un poste manquant → null, jamais un flux estimé.
  */
-export function fluxCompteResultat(p: { chiffreAffaires: number | null; resultatExploitation: number | null; resultatAvantImpot: number | null; resultatNet: number | null }): FluxCR | null {
+export function fluxCompteResultat(p: {
+  chiffreAffaires: number | null; resultatExploitation: number | null; resultatAvantImpot: number | null; resultatNet: number | null;
+  /** Libellé du revenu : « Produit net bancaire » pour une banque. */
+  libelleRevenu?: string;
+}): FluxCR | null {
   const { chiffreAffaires: ca, resultatExploitation: re, resultatAvantImpot: rai, resultatNet: rn } = p;
   if (ca == null || re == null || rai == null || rn == null) return null;
   if (ca <= 0 || ca - re < 0) return null; // CA non comparable (ex. banques)
   const hors = rai - re, impot = rai - rn;
-  const ressources: Noeud[] = [{ cle: 'chiffreAffaires', libelle: "Chiffre d'affaires", valeur: ca }];
+  const ressources: Noeud[] = [{ cle: 'chiffreAffaires', libelle: p.libelleRevenu ?? "Chiffre d'affaires", valeur: ca }];
   const emplois: Noeud[] = [{ cle: 'chargesExploitation', libelle: "Charges d'exploitation", valeur: ca - re }];
   if (hors !== 0) (hors > 0 ? ressources : emplois).push({ cle: 'horsExploitation', libelle: 'Hors exploitation', valeur: Math.abs(hors) });
   if (impot > 0) emplois.push({ cle: 'impot', libelle: 'Impôt', valeur: impot });

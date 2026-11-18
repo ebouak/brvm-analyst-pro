@@ -34,20 +34,25 @@ const fmtVal = (unit: UnitClass) => (v: number) => {
 
 const GROUPES = ['Compte de résultat', 'Bilan', 'Flux de trésorerie', 'Par action', 'Ratios'] as const;
 
-export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
+export default function ChartBuilder({ rows, banque = false }: { rows: ChartRow[]; /** Banque : le revenu est un produit net bancaire, pas un chiffre d'affaires. */ banque?: boolean }) {
+  // Même catalogue, seul le libellé du revenu change pour une banque.
+  const catalogue = useMemo(
+    () => (banque ? SERIES_CATALOG.map((s) => (s.id === 'revenu' ? { ...s, label: 'Produit net bancaire' } : s)) : SERIES_CATALOG),
+    [banque],
+  );
   const [selection, setSelection] = useState<string[]>(DEFAULT_SELECTION);
   // Mode « base 100 » : toutes les séries partagent un seul axe (indice), ce qui
   // lève la limite des deux familles d'unités — on peut alors tout superposer.
   const [indice, setIndice] = useState(false);
 
   const plan = useMemo(() => planAxes(selection), [selection]);
-  const defs = useMemo(() => new Map<string, (typeof SERIES_CATALOG)[number]>(SERIES_CATALOG.map((s) => [s.id, s])), []);
+  const defs = useMemo(() => new Map<string, (typeof SERIES_CATALOG)[number]>(catalogue.map((s) => [s.id, s])), [catalogue]);
 
   // Ne proposer que les séries ayant au moins un point non nul : cocher une
   // série vide produirait un graphique muet sans explication.
   const disponibles = useMemo(
-    () => new Set<string>(SERIES_CATALOG.filter((s) => rows.some((r) => r[s.id] != null)).map((s) => s.id)),
-    [rows],
+    () => new Set<string>(catalogue.filter((s) => rows.some((r) => r[s.id] != null)).map((s) => s.id)),
+    [rows, catalogue],
   );
 
   const basculer = (id: string) => {
@@ -86,7 +91,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
 
       <div className="flex flex-wrap gap-x-4 gap-y-2">
         {GROUPES.map((g) => {
-          const series = SERIES_CATALOG.filter((s) => s.groupe === g && disponibles.has(s.id));
+          const series = catalogue.filter((s) => s.groupe === g && disponibles.has(s.id));
           if (series.length === 0) return null;
           return (
             <fieldset key={g} className="min-w-[10rem]">
@@ -137,7 +142,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
                 labelStyle={{ color: '#e5e7eb' }}
                 formatter={(v: number, name: string) => {
                   if (indice) return [`${nf.format(Math.round(v * 10) / 10)} (base 100)`, name];
-                  const def = SERIES_CATALOG.find((s) => s.label === name);
+                  const def = catalogue.find((s) => s.label === name);
                   return [def ? fmtVal(def.unit)(v) : nf.format(v), name];
                 }}
               />
@@ -163,7 +168,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
 
       <p className="text-[11px] text-faint">
         Séries dérivées des états financiers publiés (une valeur manquante laisse un trou, rien n’est estimé).
-        Marges = résultat / CA ; ROE = résultat net / capitaux propres.
+        Marges = résultat / {banque ? 'PNB' : 'CA'} ; ROE = résultat net / capitaux propres.
       </p>
     </div>
   );

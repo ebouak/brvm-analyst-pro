@@ -97,6 +97,7 @@ export default async function FinancialsPage(props: Props) {
       exercice: retenu.exercice,
       syscohada: { resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere },
       cours: coursRef, titres: data.instrument.shares, capitalisation: rb.capitalisation,
+      banque: data.instrument.famille_comptable === 'banque',
     })
     : null;
 
@@ -157,6 +158,7 @@ export default async function FinancialsPage(props: Props) {
     fluxParExercice[y] = fluxCompteResultat({
       chiffreAffaires: st.revenu_total, resultatExploitation: st.resultat_exploitation,
       resultatAvantImpot: st.resultat_avant_impots, resultatNet: st.resultat_net,
+      libelleRevenu: data.instrument.famille_comptable === 'banque' ? 'Produit net bancaire' : undefined,
     });
   }
   // Flux du bilan : dette = court + long terme si les deux existent, sinon la valeur extraite du même exercice.
@@ -369,7 +371,7 @@ export default async function FinancialsPage(props: Props) {
         {data.incomeStatements.length > 0 && (
           <div>
             <p className="text-xs text-muted mb-3 px-0.5">Vue en flux</p>
-            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} bilanParExercice={bilanParExercice} />
+            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} bilanParExercice={bilanParExercice} banque={isBank} />
           </div>
         )}
 
@@ -444,7 +446,7 @@ export default async function FinancialsPage(props: Props) {
                 <p className="text-xs text-muted mb-3 px-0.5">
                   Graphique personnalisé
                 </p>
-                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
+                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} banque={isBank} />
               </div>
             )}
           </>

@@ -11,6 +11,8 @@ interface Props {
   exercices: number[];
   /** Flux du bilan par exercice (`fluxBilan`) ; null = terme manquant. */
   bilanParExercice?: Record<number, FluxBilan | null>;
+  /** Banque : le revenu est un produit net bancaire, pas un chiffre d'affaires. */
+  banque?: boolean;
 }
 
 type Onglet = 'cr' | 'bilan' | 'flux';
@@ -122,7 +124,7 @@ function VueBarres({ f }: { f: FluxCR }) {
 
 const bouton = styleOnglet;
 
-export default function FluxComptable({ parExercice, exercices, bilanParExercice = {} }: Props) {
+export default function FluxComptable({ parExercice, exercices, bilanParExercice = {}, banque = false }: Props) {
   const tries = [...exercices].sort((a, b) => b - a);
   const [exercice, setExercice] = useState<number | null>(tries[0] ?? null);
   const [onglet, setOnglet] = useState<Onglet>('cr');
@@ -159,7 +161,7 @@ export default function FluxComptable({ parExercice, exercices, bilanParExercice
       <div className="mt-5">
         {onglet === 'cr' ? (
           f ? (vue === 'flux' ? <VueFlux f={f} /> : <VueBarres f={f} />)
-            : <p className="text-sm text-muted">Flux non disponible pour cet exercice : un des quatre postes publiés (chiffre d&apos;affaires, résultat d&apos;exploitation, avant impôt, net) manque ou n&apos;est pas comparable.</p>
+            : <p className="text-sm text-muted">Flux non disponible pour cet exercice : un des quatre postes publiés ({banque ? 'produit net bancaire' : "chiffre d'affaires"}, résultat d&apos;exploitation, avant impôt, net) manque ou n&apos;est pas comparable.</p>
         ) : onglet === 'bilan' ? (
           b ? (
             <VueFlux f={{ ressources: [b.actif], emplois: b.passifs, total: b.actif.valeur }} titreCentre="Total actif"
