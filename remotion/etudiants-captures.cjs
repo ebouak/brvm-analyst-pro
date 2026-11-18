@@ -4,6 +4,7 @@
 // jamais un écran redessiné.
 //
 //   node etudiants-captures.cjs public              pages publiques (production)
+//   node etudiants-captures.cjs public-v2           seulement les ajouts v2 (outils, WhatsApp, Telegram)
 //   node etudiants-captures.cjs connecte            Academy + portefeuille virtuel (serveur LOCAL)
 //   node etudiants-captures.cjs loupes              recadrages
 //
@@ -64,9 +65,14 @@ async function vues(navigateur, url, liste, cookies) {
   return { ctx, p };
 }
 
-/** Loupe = la boîte RÉELLE d'un élément (de son ancêtre `anc` jusqu'au texte `fin`), en-têtes collants masqués. */
-async function loupeElement(n, url, nom, texte, anc, fin) {
-  const ctx = await contexte(n);
+/**
+ * Loupe = une zone RÉELLE de la page : largeur de l'élément ancêtre de `texte`
+ * (`anc`), du haut de cet ancêtre (ou du texte `haut`) jusqu'à son bas (ou
+ * jusqu'au-dessus du texte `fin`, ou jusqu'au bas du texte `bas`). Les éléments
+ * collés à l'écran (barres du haut et du bas, boutons flottants) sont masqués.
+ */
+async function loupeElement(n, url, nom, texte, anc, fin, opts = {}) {
+  const ctx = await contexte(n, opts.cookies);
   const p = await ctx.newPage();
   await p.goto(url, { waitUntil: 'load', timeout: 180000 });
   await p.waitForTimeout(5000);
@@ -75,16 +81,20 @@ async function loupeElement(n, url, nom, texte, anc, fin) {
   await el.scrollIntoViewIfNeeded();
   await p.waitForTimeout(1500);
   await fermerInvitations(p);
-  // Masque seulement ce qui est collé à l'écran (barre du haut, barre du bas), pas les titres des cartes.
   await p.evaluate(() => {
     for (const n of document.querySelectorAll('body *')) {
       const pos = getComputedStyle(n).position;
       if (pos === 'fixed' || pos === 'sticky') n.style.visibility = 'hidden';
     }
   });
-  const b = await el.boundingBox();
-  const bas = fin ? (await p.getByText(fin, { exact: false }).first().boundingBox()).y - 4 : b.y + b.height;
-  await p.screenshot({ path: path.join(OUT, `${nom}.png`), clip: { x: b.x, y: b.y, width: b.width, height: bas - b.y } });
+  // Coordonnées de PAGE (la capture est pleine page : une carte peut dépasser l'écran).
+  const boite = (loc) => loc.evaluate((x) => { const r = x.getBoundingClientRect(); return { x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height }; });
+  const b = await boite(el);
+  const haut = opts.haut ? (await boite(p.getByText(opts.haut, { exact: false }).first())).y - 10 : b.y;
+  let bas = b.y + b.h;
+  if (fin) bas = (await boite(p.getByText(fin, { exact: false }).first())).y - 4;
+  if (opts.bas) { const z = await boite(p.getByText(opts.bas, { exact: false }).first()); bas = z.y + z.h + 12; }
+  await p.screenshot({ path: path.join(OUT, `${nom}.png`), fullPage: true, clip: { x: b.x, y: haut, width: b.w, height: bas - haut } });
   console.log('loupe', nom);
   await ctx.close();
 }
@@ -95,6 +105,19 @@ async function publiques(n) {
   await (await vues(n, `${PROD}/societes/SNTS`, [['snts'], ['snts-carnet', "Carnet d'ordres", 90]])).ctx.close();
   await (await vues(n, `${PROD}/pricing`, [['pricing', 'Suivre la séance et l', 120]])).ctx.close();
   await (await vues(n, `${PROD}/formations/academy`, [['ac-achat', 'Acheter la formation', 200]])).ctx.close();
+  await publiquesV2(n);
+}
+
+/** v2 : outils gratuits et canaux WhatsApp / Telegram (section #canaux de la page d'accueil). */
+async function publiquesV2(n) {
+  await (await vues(n, `${PROD}/simulateur-budget`, [['outil-budget']])).ctx.close();
+  await (await vues(n, `${PROD}/comparateur-sgi/simuler`, [['outil-sgi']])).ctx.close();
+  await (await vues(n, `${PROD}/`, [['v-canaux', 'La BRVM vient à vous', 90]])).ctx.close();
+  const carte = "*[contains(concat(' ', normalize-space(@class), ' '), ' v-canal ')]";
+  await loupeElement(n, `${PROD}/`, 'loupe-wa-commandes', 'Posez la question', carte, 'PALMARES', { haut: 'COURS SNTS' });
+  await loupeElement(n, `${PROD}/`, 'loupe-wa-chaine', 'Posez la question', carte, null, { haut: 'Réponses produites par le service' });
+  await loupeElement(n, `${PROD}/`, 'loupe-telegram', 'arrive tout seul', carte);
+  await loupeElement(n, `${PROD}/comparateur-sgi/simuler`, 'loupe-sgi', 'Votre scénario', "*[contains(@class, 'rounded')]", 'Achats sur la période');
 }
 
 async function connectees(n) {
@@ -135,6 +158,9 @@ function loupes() {
   rec('l8-quiz', 'loupe-quiz', 980, 1150, 95, 200);
   rec('ac-niveaux', 'loupe-examen', 1080, 480, 45, 1225);
   rec('ac-achat', 'loupe-prix', 960, 460, 100, 1105);
+  rec('outil-sgi', 'loupe-sgi-titre', 1170, 740, 0, 180);
+  rec('heatmap', 'loupe-heatmap', 960, 540, 105, 1615);
+  rec('dashboard', 'loupe-dashboard', 1076, 520, 47, 1830);
 }
 
 (async () => {
@@ -143,6 +169,7 @@ function loupes() {
   const n = await chromium.launch();
   try {
     if (mode === 'public') await publiques(n);
+    else if (mode === 'public-v2') await publiquesV2(n);
     else if (mode === 'connecte') await connectees(n);
     else throw new Error('mode : public | connecte | loupes');
   } finally {
