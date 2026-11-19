@@ -25,3 +25,14 @@ test('plafonne les autres articles à trois, et rien sans article', () => {
   assert.equal(r.autres.length, 3);
   assert.deepEqual(choisirUne([], maintenant), { une: null, autres: [] });
 });
+
+test('une avant-première prioritaire reste à la une même devant un décryptage récent', () => {
+  const liste = [
+    art('snts', 'decryptage', '2026-10-29T09:00:00Z'),
+    { ...art('coris', 'analyse', '2026-10-28T09:00:00Z'), featured: true },
+  ];
+  const r = choisirUne(liste, maintenant);
+  assert.equal(r.une.slug, 'coris');
+  assert.equal(r.une.featured, true);
+  assert.deepEqual(r.autres.map((a) => a.slug), ['snts']);
+});
