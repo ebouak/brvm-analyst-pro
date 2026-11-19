@@ -40,6 +40,9 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Alerte critique : appel vocal via /api/voix/alerte (facultatif).
+          VOIX_ALERTE_URL: ${{ vars.VOIX_ALERTE_URL }}
+          VOIX_ALERTE_SECRET: ${{ secrets.VOIX_ALERTE_SECRET }}
           # ⚠️ LES CLÉS LLM NE SONT PAS PASSÉES ICI, DÉLIBÉRÉMENT.
           # `resolveApiKeyForScraper()` lit l'environnement AVANT la table
           # `api_keys`. Mesuré le 2026-09-26 : le secret GitHub

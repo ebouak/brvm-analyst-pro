@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Politique de confidentialité' };
 
 export default function ConfidentialitePage() {
   return (
-    <LegalPage title="Politique de confidentialité" updatedAt="2026-11-11">
+    <LegalPage title="Politique de confidentialité" updatedAt="2026-11-19">
       <section>
         <h2>Responsable de traitement</h2>
         <p>
@@ -29,6 +29,11 @@ export default function ConfidentialitePage() {
             <strong>Messages WhatsApp</strong> envoyés au numéro WESTBOURSE : numéro (ou identifiant WhatsApp),
             nom affiché, contenu des messages et des notes vocales transcrites, réponses adressées. L&apos;audio
             des notes vocales n&apos;est pas conservé.
+          </li>
+          <li>
+            <strong>Rappel par l&apos;assistant vocal</strong> : si vous cochez la case prévue sur le formulaire de
+            contact, votre numéro de téléphone et la date de votre accord ; lors de l&apos;appel, sa durée, son
+            issue et sa transcription écrite. Sans case cochée, le numéro n&apos;est pas enregistré.
           </li>
           <li>
             <strong>Relation commerciale</strong> : pages de l&apos;offre Premium consultées en étant connecté,
@@ -59,6 +64,13 @@ export default function ConfidentialitePage() {
             Réponses de l&apos;assistant WhatsApp aux questions que vous lui adressez : mesures précontractuelles et
             intérêt légitime à répondre à votre demande. Tapez EFFACER pour effacer l&apos;historique de la conversation.
           </li>
+          <li>
+            Rappel par l&apos;assistant vocal automatisé de WESTBOURSE, à votre demande : consentement (case
+            décochée par défaut). L&apos;assistant se présente comme automatisé, répond à des questions générales
+            sur le service, ne donne aucun conseil d&apos;investissement et ne vous demande aucune donnée
+            personnelle ; il peut vous passer un membre de l&apos;équipe si vous le demandez. Pour retirer votre
+            accord : dites « stop » pendant l&apos;appel, ou écrivez à support@westbourse.com.
+          </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>
@@ -84,6 +96,7 @@ export default function ConfidentialitePage() {
           <li>Messages du formulaire de contact et réponses : 12 mois après le dernier échange.</li>
           <li>Conversations WhatsApp et Telegram avec l&apos;assistant : 90 jours (30 jours si elles ne sont liées à aucun compte) ; codes d&apos;appairage : supprimés un jour après leur expiration.</li>
           <li>Envois de dossiers par e-mail ou messagerie : 90 jours.</li>
+          <li>Rappel par l&apos;assistant vocal : transcription de l&apos;appel 30 jours ; durée, issue et coût de l&apos;appel 12 mois ; numéro de téléphone avec le message de contact (12 mois après le dernier échange). Si vous avez dit « stop », nous conservons seulement une empreinte du numéro, pour ne plus l&apos;appeler.</li>
           <li>Relation commerciale : consultations 90 jours, messages de proposition et notes 24 mois ; liste d&apos;opposition : conservée.</li>
           <li>Sessions d&apos;examen de l&apos;Academy : 7 jours. Certificats : jusqu&apos;à leur révocation ou la suppression du compte.</li>
           <li>Recherche en langage naturel : empreinte 24 heures ; compteurs de quota 30 jours ; décisions d&apos;aiguillage WhatsApp 90 jours.</li>
@@ -102,6 +115,11 @@ export default function ConfidentialitePage() {
           <li><strong>Resend</strong> — envoi des e-mails transactionnels et newsletter.</li>
           <li>
             <strong>Cloudflare</strong> — acheminement des e-mails adressés à support@westbourse.com.
+          </li>
+          <li>
+            <strong>Bland</strong> (États-Unis) — passe les appels de l&apos;assistant vocal : reçoit votre numéro
+            et votre voix pendant l&apos;appel et en produit la transcription. L&apos;appel n&apos;est pas enregistré
+            en audio à notre demande.
           </li>
           <li>
             <strong>Hetzner</strong> (Allemagne) — hébergement du serveur qui relie le numéro WhatsApp
@@ -178,7 +196,7 @@ export default function ConfidentialitePage() {
         <h3>Pays de traitement et transferts hors UEMOA et hors Union européenne</h3>
         <ul>
           <li>France / Union européenne : Supabase (base de données hébergée à Paris), Mistral AI, PostHog, Sentry (collecte en Allemagne), Hetzner (Allemagne).</li>
-          <li>États-Unis : Vercel, Resend, Cloudflare, Google (Gemini), xAI, Meta (WhatsApp) ; l&apos;hébergement exact peut varier selon le service.</li>
+          <li>États-Unis : Vercel, Resend, Cloudflare, Google (Gemini), xAI, Meta (WhatsApp), Bland (appels vocaux) ; l&apos;hébergement exact peut varier selon le service.</li>
           <li>Chine : DeepSeek, établi dans un pays sans décision d&apos;adéquation de l&apos;Union européenne.</li>
           <li>TypeSafe, Telegram, CinetPay, Chariow : selon l&apos;infrastructure propre à chaque prestataire.</li>
         </ul>

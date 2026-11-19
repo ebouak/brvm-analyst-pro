@@ -56,12 +56,20 @@ jobs:
           echo "❌ Daily full scrape failed after $MAX_RETRIES attempts"
           exit 1
 
+      # Lancé même si la collecte a échoué : c'est précisément le cas où la
+      # séance manque. Au passage de clôture (16:00 UTC) d'un jour de séance,
+      # une séance absente déclenche l'alerte CRITIQUE (Telegram + appel vocal
+      # via /api/voix/alerte, une fois par fenêtre de 6 h).
       - name: Verify data was inserted
         working-directory: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        if: success()
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VOIX_ALERTE_URL: ${{ vars.VOIX_ALERTE_URL }}
+          VOIX_ALERTE_SECRET: ${{ secrets.VOIX_ALERTE_SECRET }}
+        if: ${{ !cancelled() }}
         run: npx tsx scripts/verify-data.ts daily
 
       - name: Notify failure on Slack (optional)

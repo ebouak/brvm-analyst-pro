@@ -4,6 +4,7 @@ import { ACCUSE_FENETRE_SECONDES, accuseReception, normaliserEmail } from '@/lib
 import { sendEmail } from '@/lib/server/email';
 import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { champsRappel } from '@/lib/voix/numero';
 
 /**
  * Encart « Salut, on se parle ? » — relais email vers la boîte support, puis
@@ -13,6 +14,9 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
  * demande ; conservation 12 mois après la dernière activité. Une empreinte
  * SHA-256 de l'adresse est aussi écrite dans rate_limit_hits pour limiter les
  * accusés (purgée après 24 h). Aucun contenu de message n'est journalisé.
+ * Numéro de téléphone (0250) : seulement si la case de rappel vocal est
+ * cochée (consentement daté), pour un rappel par l'assistant vocal (Bland,
+ * États-Unis) déclenché à la main depuis /admin/contact. Même conservation.
  * Voir docs/RGPD.md.
  */
 export async function POST(req: NextRequest) {
@@ -24,11 +28,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' }, { status: 429 });
     }
 
-    const { prenom = '', email = '', message = '', page = '' } = (await req.json()) as {
+    const { prenom = '', email = '', message = '', page = '', telephone, rappelVocal } = (await req.json()) as {
       prenom?: string;
       email?: string;
       message?: string;
       page?: string;
+      telephone?: unknown;
+      rappelVocal?: unknown;
     };
 
     // Champs mono-ligne (prénom, email, page) : retire TOUT caractère de
@@ -52,6 +58,12 @@ export async function POST(req: NextRequest) {
     if (m.length < 2) {
       return NextResponse.json({ error: 'Message trop court.' }, { status: 400 });
     }
+    // Rappel vocal (migration 0250) : consentement DISTINCT, case décochée par
+    // défaut. Sans case cochée, le numéro est ignoré — jamais enregistré.
+    const rappel = champsRappel({ telephone, consent: rappelVocal }, new Date());
+    if (!rappel.ok) {
+      return NextResponse.json({ error: rappel.erreur }, { status: 400 });
+    }
 
     const to = process.env.CONTACT_EMAIL_TO ?? 'ebouak@gmail.com';
     const esc = (s: string) =>
@@ -73,6 +85,27 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       console.warn('[contact] message non enregistré :', (err as Error).message);
     }
+    // Numéro + consentement écrits À PART : si la colonne manque (0250 non
+    // appliquée) ou si l'écriture échoue, le message reste enregistré et
+    // l'email au support le dit — jamais de consentement perdu en silence.
+    let rappelNonEnregistre = false;
+    if (rappel.telephone && messageId) {
+      const { error } = await getServiceClient()
+        .from('contact_messages')
+        .update({ telephone: rappel.telephone, rappel_vocal_consent_at: rappel.consentAt })
+        .eq('id', messageId);
+      if (error) {
+        rappelNonEnregistre = true;
+        console.warn('[contact] demande de rappel vocal non enregistrée :', error.code ?? error.message);
+      }
+    } else if (rappel.telephone) {
+      rappelNonEnregistre = true;
+    }
+    const ligneRappel = rappel.telephone
+      ? rappelNonEnregistre
+        ? `<p style="color:#b42318"><strong>Rappel vocal demandé mais NON enregistré</strong> — numéro non conservé ; répondre par email.</p>`
+        : `<p><strong>Rappel vocal :</strong> demandé (consentement enregistré) — bouton dans la console.</p>`
+      : '';
     const lienConsole = messageId
       ? `<p><a href="https://www.westbourse.com/admin/contact/${messageId}" style="color:#2a8aa8;font-weight:bold">Répondre depuis la console →</a></p>`
       : `<p style="color:#b42318"><strong>Non enregistré en base</strong> — répondez depuis cet email.</p>`;
@@ -89,6 +122,7 @@ export async function POST(req: NextRequest) {
           <p><strong>Prénom :</strong> ${esc(p) || '—'}</p>
           <p><strong>Email :</strong> ${esc(e)}</p>
           <p><strong>Page :</strong> ${esc(pageLabel) || '—'}</p>
+          ${ligneRappel}
           <p><strong>Message :</strong></p>
           <p style="white-space:pre-wrap;background:#eef8fb;border-radius:6px;padding:10px 12px">${esc(m)}</p>
         </div>

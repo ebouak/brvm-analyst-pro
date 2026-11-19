@@ -5,6 +5,9 @@ import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 import { loadMessageContact, STATUT_CONTACT_LABEL } from '@/lib/admin/contact';
 import { LIVRAISON_LABEL } from '@/lib/contact/livraison';
 import ReponseForm from './ReponseForm';
+import RappelVocal from './RappelVocal';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { chargerRappelVocal } from '@/lib/voix/lecture';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Message de contact — Administration' };
@@ -20,6 +23,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const m = await loadMessageContact(params.id);
   if (!m) notFound();
   const peutRepondre = ctx.isSuperAdmin || ctx.permissions.has('support.reply');
+  // Lu à part : sans la migration 0250, la fiche reste lisible et la section le dit.
+  const rappel = await chargerRappelVocal(getServiceClient(), m.id);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
@@ -38,6 +43,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-ivory">{m.message}</p>
         </div>
       </PremiumPanel>
+
+      {(rappel.aNumero || !rappel.disponible) && (
+        <PremiumPanel>
+          <RappelVocal messageId={m.id} etat={rappel} peutRappeler={peutRepondre} />
+        </PremiumPanel>
+      )}
 
       {m.statut === 'repondu' ? (
         <PremiumPanel>
