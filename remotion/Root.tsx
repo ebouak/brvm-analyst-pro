@@ -128,6 +128,17 @@ export function RemotionRoot() {
         defaultProps={{ video: 'academy' as const, durees: null, mots: null }}
         calculateMetadata={calculerEtudiants}
       />
+      {/* Tutoriel : se connecter par e-mail, relier Telegram et WhatsApp, la partie Actions. */}
+      <Composition
+        id="tuto-connexion"
+        component={Etudiants}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ video: 'tuto' as const, durees: null, mots: null }}
+        calculateMetadata={calculerEtudiants}
+      />
     </>
   );
 }

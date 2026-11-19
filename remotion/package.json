@@ -15,7 +15,8 @@
     "academy:publie": "node academy-publie.mjs n1-l1",
     "academy": "node academy-voix.mjs n1-l1 && remotion render index.ts academy-lecon out/academy-n1-l1.mp4 --codec h264 --crf 20 --props={\"lecon\":\"n1-l1\",\"section\":null}",
     "voix:etudiants": "node etudiants-voix.mjs",
-    "render:etudiants": "node etudiants-voix.mjs && remotion render index.ts etudiants-gratuit out/westbourse-etudiants-gratuit.mp4 --codec h264 --crf 18 && remotion render index.ts etudiants-academy out/westbourse-etudiants-academy.mp4 --codec h264 --crf 18"
+    "render:etudiants": "node etudiants-voix.mjs && remotion render index.ts etudiants-gratuit out/westbourse-etudiants-gratuit.mp4 --codec h264 --crf 18 && remotion render index.ts etudiants-academy out/westbourse-etudiants-academy.mp4 --codec h264 --crf 18",
+    "render:tuto": "node etudiants-voix.mjs tuto && remotion render index.ts tuto-connexion out/westbourse-tuto-connexion.mp4 --codec h264 --crf 18 --timeout=120000"
   },
   "dependencies": {
     "@remotion/cli": "4.0.236",

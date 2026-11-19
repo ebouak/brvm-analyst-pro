@@ -7,6 +7,8 @@
 //   node etudiants-captures.cjs public-v2           seulement les ajouts v2 (outils, WhatsApp, Telegram)
 //   node etudiants-captures.cjs connecte            Academy + portefeuille virtuel (serveur LOCAL)
 //   node etudiants-captures.cjs loupes              recadrages
+//   node etudiants-captures.cjs tuto-public         tutoriel : inscription, Actions (production)
+//   node etudiants-captures.cjs tuto-connecte       tutoriel : liaison Telegram / WhatsApp (serveur LOCAL, compte de test)
 //
 // « connecte » exige : `next start -p 3100` dans frontend/, puis
 // `node frontend/scripts/qa-sessions-locales.mjs` (comptes de test qa-e2e-*).
@@ -163,6 +165,100 @@ function loupes() {
   rec('dashboard', 'loupe-dashboard', 1076, 520, 47, 1830);
 }
 
+
+// ── Tutoriel « se connecter, relier Telegram et WhatsApp, la partie Actions » ──
+
+/** Remplit un champ SANS envoyer le formulaire (aucune touche Entrée, aucun clic d'envoi). */
+async function remplirSansEnvoyer(p, selecteur, valeur) {
+  const champ = p.locator(selecteur).first();
+  await champ.click();
+  await champ.fill(valeur);
+  await p.waitForTimeout(1200);
+}
+
+/**
+ * Masque à l'image un code d'appairage et son QR : flou appliqué dans la page
+ * AVANT la capture. Le code n'est jamais écrit dans un fichier ni un journal.
+ */
+async function masquerCode(p, code) {
+  await p.evaluate((c) => {
+    for (const n of document.querySelectorAll('body *')) {
+      const propre = [...n.childNodes].filter((x) => x.nodeType === 3).map((x) => x.textContent).join('');
+      if (propre.includes(c)) { n.style.filter = 'blur(12px)'; n.style.userSelect = 'none'; }
+    }
+    // Le QR encode le code : flouté aussi.
+    for (const svg of document.querySelectorAll('svg')) {
+      const r = svg.getBoundingClientRect();
+      if (r.width > 100 && r.height > 100 && svg.closest('div')?.textContent?.includes('Envoyez ce code')) svg.style.filter = 'blur(14px)';
+    }
+  }, code);
+  await p.waitForTimeout(400);
+}
+
+async function tutoPubliques(n) {
+  // Inscription / connexion : capture de la page, puis adresse VISIBLEMENT fictive tapée, jamais envoyée.
+  let { ctx, p } = await vues(n, `${PROD}/signup`, [['tuto-signup']]);
+  await remplirSansEnvoyer(p, 'input[type="email"]', 'prenom@exemple.com');
+  await p.screenshot({ path: path.join(OUT, 'tuto-signup-rempli.png') });
+  console.log('capture tuto-signup-rempli');
+  await ctx.close();
+  // Actions : la cote du jour, puis une recherche (filtre local, aucun envoi).
+  ({ ctx, p } = await vues(n, `${PROD}/actions`, [['tuto-actions', 'La cote du jour', 90]]));
+  await remplirSansEnvoyer(p, 'input[placeholder="Code ou nom"]', 'SONATEL');
+  await p.screenshot({ path: path.join(OUT, 'tuto-actions-recherche.png') });
+  console.log('capture tuto-actions-recherche');
+  await ctx.close();
+  await (await vues(n, `${PROD}/actions/SNTS`, [['tuto-snts'], ['tuto-snts-cours', 'Le cours', 90], ['tuto-snts-seance', 'sur la séance', 160]])).ctx.close();
+  await (await vues(n, `${PROD}/societes/SNTS`, [['tuto-carnet', "Carnet d'ordres", 90]])).ctx.close();
+}
+
+/**
+ * Liaison Telegram et WhatsApp sur le serveur LOCAL, compte de test GRATUIT
+ * (qa-e2e-debutant). Générer un code écrit une ligne dans telegram_pairing_codes
+ * / whatsapp_pairing_codes : rien n'est envoyé au bot ni au numéro, le code est
+ * flouté à l'image, et les lignes du compte de test sont supprimées ensuite
+ * (voir le rapport de la PR : nettoyage vérifié en base).
+ */
+async function tutoConnectees(n) {
+  const ctx = await contexte(n, 'debutant-cookies.json');
+  const p = await ctx.newPage();
+  const codes = [];
+  p.on('response', async (r) => {
+    if (/\/api\/(telegram|whatsapp)\/pairing$/.test(r.url()) && r.request().method() === 'POST') {
+      try { const j = await r.json(); if (j.code) codes.push(j.code); } catch {}
+    }
+  });
+  const r = await p.goto(`${LOCAL}/parametres/alertes`, { waitUntil: 'load', timeout: 180000 });
+  if (!r || r.status() !== 200) throw new Error(`/parametres/alertes : statut ${r && r.status()}`);
+  await p.waitForTimeout(7000);
+  const aller = async (texte, decalage) => {
+    const y = await p.getByText(texte, { exact: false }).first().evaluate((x) => x.getBoundingClientRect().top + window.scrollY);
+    await p.evaluate((v) => window.scrollTo(0, v), Math.max(0, y - decalage));
+    await p.waitForTimeout(1500);
+  };
+  // Telegram : avant, puis après « Générer mon code » (code flouté).
+  await aller('Recevez vos alertes directement dans Telegram', 170);
+  await p.screenshot({ path: path.join(OUT, 'tuto-tg.png') });
+  await p.getByRole('button', { name: 'Générer mon code' }).first().click();
+  await p.waitForTimeout(3000);
+  if (!codes.length) throw new Error('aucun code Telegram reçu');
+  await masquerCode(p, codes[codes.length - 1]);
+  await aller('Recevez vos alertes directement dans Telegram', 170);
+  await p.screenshot({ path: path.join(OUT, 'tuto-tg-code.png') });
+  // WhatsApp : avant, puis après « Lier mon numéro WhatsApp » (code et QR floutés).
+  await aller('WhatsApp — alertes, point du soir et assistant', 110);
+  await p.screenshot({ path: path.join(OUT, 'tuto-wa.png') });
+  await p.locator('label:has-text("brief quotidien") input[type="checkbox"]').first().check();
+  await p.getByRole('button', { name: 'Lier mon numéro WhatsApp' }).first().click();
+  await p.waitForTimeout(3000);
+  if (codes.length < 2) throw new Error('aucun code WhatsApp reçu');
+  await masquerCode(p, codes[codes.length - 1]);
+  await aller('WhatsApp — alertes, point du soir et assistant', 110);
+  await p.screenshot({ path: path.join(OUT, 'tuto-wa-code.png') });
+  console.log(`captures tuto-tg, tuto-tg-code, tuto-wa, tuto-wa-code (${codes.length} codes générés, floutés)`);
+  await ctx.close();
+}
+
 (async () => {
   const mode = process.argv[2];
   if (mode === 'loupes') return loupes();
@@ -171,6 +267,8 @@ function loupes() {
     if (mode === 'public') await publiques(n);
     else if (mode === 'public-v2') await publiquesV2(n);
     else if (mode === 'connecte') await connectees(n);
+    else if (mode === 'tuto-public') await tutoPubliques(n);
+    else if (mode === 'tuto-connecte') await tutoConnectees(n);
     else throw new Error('mode : public | connecte | loupes');
   } finally {
     await n.close();

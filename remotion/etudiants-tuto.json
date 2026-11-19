@@ -1,0 +1,194 @@
+{
+  "_": "Tutoriel (2026-11-19) « se connecter, relier Telegram et WhatsApp, la partie Actions ». Même gabarit que les vidéos étudiants (etudiants.tsx). Parcours lus dans le code : connexion et inscription = le même écran (app/login/SignInClient.tsx) : adresse e-mail OU Google ; signInWithOtp avec shouldCreateUser, donc AUCUN mot de passe, un code à 6 chiffres envoyé par e-mail puis verifyOtp ; vérification anti-robot Cloudflare Turnstile. Telegram et WhatsApp ne servent PAS à se connecter : on y RELIE sa conversation à son compte, dans Mes alertes (/parametres/alertes) : un code à usage unique (POST /api/telegram/pairing, /api/whatsapp/pairing) envoyé depuis sa propre messagerie, ce qui prouve la possession (components/settings/TelegramPrefs.tsx, WhatsAppPrefs.tsx, QR = lien wa.me avec le code seul, lib/whatsapp/qrAppairage.ts). Point de clôture : envoyé à tout compte relié qui l'active (brief_whatsapp / brief_telegram, défaut false ; scraper/src/cloture/runCloture.ts, sans filtre Premium) ; alertes personnelles = Premium (feature_flags.alertes). Actions : /actions et /actions/SNTS publics (production) ; tri ActionsTable SORT_OPTIONS ; carnet d'ordres = Bulletin officiel de la cote (/societes/SNTS). Écrans de liaison : serveur LOCAL, compte de test gratuit qa-e2e-debutant, codes floutés à l'image, rien envoyé au bot ni au numéro, codes supprimés ensuite.",
+  "id": "tuto",
+  "voixTts": "fr-FR-DeniseNeural",
+  "debit": "+6%",
+  "scenes": [
+    {
+      "id": "accroche",
+      "titre": [
+        "Bien démarrer",
+        "sur WESTBOURSE"
+      ],
+      "accent": "WESTBOURSE",
+      "voix": "En une minute : crée ton compte, relie Telegram et WhatsApp, puis explore la partie Actions.",
+      "ecran": "tuto-signup",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 40,
+        "a": 80
+      }
+    },
+    {
+      "id": "email",
+      "titre": [
+        "Ton compte,",
+        "par e-mail"
+      ],
+      "accent": "par e-mail",
+      "voix": "Entre ton adresse e-mail, ou continue avec Google. Pas de mot de passe : tu reçois un code à six chiffres par e-mail, tu le saisis, et c'est prêt.",
+      "ecran": "tuto-signup-rempli",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 80,
+        "a": 120
+      },
+      "pastilles": [
+        {
+          "mot": "code",
+          "texte": "Code à 6 chiffres"
+        }
+      ]
+    },
+    {
+      "id": "telegram",
+      "titre": [
+        "Relie ton",
+        "Telegram"
+      ],
+      "accent": "Telegram",
+      "voix": "Telegram ne sert pas à te connecter : tu y relies ton compte. Dans Mes alertes, génère ton code et envoie-le au bot WESTBOURSE. Ce message prouve que la conversation est à toi.",
+      "ecran": "tuto-tg-code",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 0,
+        "a": 40
+      },
+      "pastilles": [
+        {
+          "mot": "Mes",
+          "texte": "Mes alertes"
+        }
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "titre": [
+        "Relie ton",
+        "WhatsApp"
+      ],
+      "accent": "WhatsApp",
+      "voix": "Pour WhatsApp, c'est pareil : coche ton accord, génère le code, puis touche « Ouvrir WhatsApp avec le code » et envoie-le. Sur ordinateur, un QR code fait la même chose.",
+      "ecran": "tuto-wa-code",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 0,
+        "a": 60
+      }
+    },
+    {
+      "id": "gains",
+      "titre": [
+        "Gratuit",
+        "ou Premium ?"
+      ],
+      "accent": "ou Premium ?",
+      "voix": "Une fois relié, tu peux recevoir le point de clôture chaque soir, gratuitement, comme les commandes, la Chaîne et le canal. Les alertes personnelles sont Premium.",
+      "ecran": "tuto-wa",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 0,
+        "a": 20
+      }
+    },
+    {
+      "id": "actions",
+      "titre": [
+        "La partie",
+        "Actions"
+      ],
+      "accent": "Actions",
+      "voix": "Dans Actions, toute la cote du jour. Trie par hausses, baisses, volume ou secteur.",
+      "ecran": "tuto-actions",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 20,
+        "a": 120
+      }
+    },
+    {
+      "id": "recherche",
+      "titre": [
+        "Cherche",
+        "une valeur"
+      ],
+      "accent": "une valeur",
+      "voix": "Tape un nom, par exemple SONATEL : la fiche est à un clic.",
+      "ecran": "tuto-actions-recherche",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 100,
+        "a": 140
+      }
+    },
+    {
+      "id": "fiche",
+      "titre": [
+        "La fiche",
+        "d'une valeur"
+      ],
+      "accent": "d'une valeur",
+      "voix": "Sur la fiche : le cours, puis les chiffres clés, comme le résultat, le PER ou le dernier dividende.",
+      "ecran": "tuto-snts-cours",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 40,
+        "a": 200
+      }
+    },
+    {
+      "id": "graphique",
+      "titre": [
+        "Le graphique",
+        "de la séance"
+      ],
+      "accent": "de la séance",
+      "voix": "Le graphique suit la séance, relevé par relevé, avec les plus hauts et plus bas sur un an.",
+      "ecran": "tuto-snts-seance",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 30,
+        "a": 250
+      }
+    },
+    {
+      "id": "carnet",
+      "titre": [
+        "Le carnet",
+        "d'ordres"
+      ],
+      "accent": "d'ordres",
+      "voix": "Et le carnet d'ordres de la dernière séance, publié par la BRVM.",
+      "ecran": "tuto-carnet",
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 20,
+        "a": 60
+      }
+    },
+    {
+      "id": "fin",
+      "titre": [
+        "À toi",
+        "de jouer"
+      ],
+      "accent": "de jouer",
+      "voix": "Crée ton compte gratuit sur westbourse point com. Investir comporte des risques : apprends d'abord.",
+      "fin": {
+        "phrase": "Ton compte, Telegram, WhatsApp et toute la cote.",
+        "badge": "Gratuit",
+        "adresse": "westbourse.com"
+      }
+    }
+  ]
+}
