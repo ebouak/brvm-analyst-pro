@@ -37,7 +37,8 @@ import ACADEMY from './etudiants-academy.json';
  * habillée aux couleurs du thème clair de westbourse.com.
  */
 
-type Loupe = { src: string; mot: string; largeur?: number; y?: number };
+/** `largeur` ne dépasse jamais la largeur de la source (aucun agrandissement au-delà de sa résolution). */
+type Loupe = { src: string; mot: string; largeur: number; y?: number; /** mot qui la retire */ jusqua?: string };
 type Pastille = { mot: string; texte: string };
 type Fin = { phrase: string; badge: string; adresse: string; note?: string };
 type SceneE = {
@@ -46,6 +47,8 @@ type SceneE = {
   accent: string;
   voix: string;
   ecran?: string;
+  /** Zone utile de la capture, en px CSS (largeur `w` depuis `x`), défilée du haut `de` au haut `a`. */
+  cadre?: { x: number; w: number; de: number; a: number };
   loupe?: Loupe;
   /** Seconde loupe : remplace la première à son mot. */
   loupe2?: Loupe;
@@ -74,11 +77,17 @@ const C = {
 };
 
 // Gabarit vertical (zones sûres : rien d'essentiel sous 1800 px).
-const ECRAN_L = 498; // largeur de l'écran du téléphone
-const ECRAN_H = Math.round((ECRAN_L * 844) / 390);
-const BORD_TEL = 14;
-const TEL_HAUT = 452;
-const SOUS_TITRE_Y = 1588;
+/* Gabarit v3 (2026-11-19) : l'écran occupe la largeur utile. Zones sûres des
+   formats verticaux : rien d'essentiel sous 1690 px (12 % du bas : sous-titres au-dessus) ; les
+   sous-titres laissent libre la colonne de droite (boutons de l'application). */
+const ECRAN_X = 40;
+const ECRAN_L = 1080 - 2 * ECRAN_X; // 1000 px
+const ECRAN_HAUT = 318;
+const ECRAN_BAS = 1800; // le bas de l'écran passe sous les sous-titres ; rien d'essentiel n'y est cadré
+const ECRAN_H = ECRAN_BAS - ECRAN_HAUT;
+const DPR = 3; // captures à deviceScaleFactor 3
+const SOURCE_L = 1170; // largeur des captures, en pixels source
+const SOUS_TITRE_HAUT = 1508;
 
 const longueur = (d: number, derniere: boolean) => Math.ceil((d + RESPIRATION + (derniere ? FIN_TENUE : 0)) * FPS);
 
@@ -124,26 +133,26 @@ function Tuile({ taille, prog = 1 }: { taille: number; prog?: number }) {
 function EnTete() {
   return (
     <>
-      <div style={{ position: 'absolute', top: 66, left: 64, right: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: SANS, fontSize: 40, fontWeight: 700, color: C.encre, letterSpacing: '-0.01em' }}>westbourse.com</span>
-        <Tuile taille={78} />
+      <div style={{ position: 'absolute', top: 40, left: ECRAN_X, right: ECRAN_X, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: SANS, fontSize: 34, fontWeight: 700, color: C.encre, letterSpacing: '-0.01em' }}>westbourse.com</span>
+        <Tuile taille={62} />
       </div>
-      <div style={{ position: 'absolute', top: 172, left: 64, right: 64, height: 2, background: C.bord }} />
+      <div style={{ position: 'absolute', top: 120, left: ECRAN_X, right: ECRAN_X, height: 2, background: C.bord }} />
     </>
   );
 }
 
-// ── Titre de scène : deux lignes, un mot-clé en couleur d'accent ────────────
+// ── Titre de scène : deux lignes compactes, un mot-clé en couleur d'accent ──
 function Titre({ s }: { s: SceneE }) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   return (
-    <div style={{ position: 'absolute', top: 206, left: 50, right: 50, textAlign: 'center' }}>
+    <div style={{ position: 'absolute', top: 136, left: ECRAN_X, right: ECRAN_X, textAlign: 'center' }}>
       {s.titre.map((ligne, i) => {
         const p = spring({ frame: f - 2 - i * 4, fps, config: { damping: 16, stiffness: 140 } });
         const morceaux = ligne.includes(s.accent) ? ligne.split(s.accent) : [ligne];
         return (
-          <div key={i} style={{ fontFamily: SANS, fontSize: 94, fontWeight: 800, lineHeight: 1.04, letterSpacing: '-0.03em', color: C.encre, opacity: p, transform: `translateY(${(1 - p) * 40}px)` }}>
+          <div key={i} style={{ fontFamily: SANS, fontSize: 76, fontWeight: 800, lineHeight: 1.0, letterSpacing: '-0.03em', color: C.encre, opacity: p, transform: `translateY(${(1 - p) * 30}px)` }}>
             {morceaux.length === 2 ? (<>{morceaux[0]}<span style={{ color: C.accent }}>{s.accent}</span>{morceaux[1]}</>) : ligne}
           </div>
         );
@@ -152,36 +161,39 @@ function Titre({ s }: { s: SceneE }) {
   );
 }
 
-// ── Téléphone : cadre + vraie capture qui défile ────────────────────────────
-function Telephone({ s }: { s: SceneE }) {
+// ── Écran : la zone utile d'une vraie capture, en grand, qui défile lentement ──
+function Ecran({ s, assombri }: { s: SceneE; assombri: number }) {
   const f = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
   const p = spring({ frame: f, fps, config: { damping: 18, stiffness: 90 } });
-  // Lente poussée sur l'écran : du mouvement sans rien redessiner.
-  const zoom = interpolate(f, [0, 8 * fps], [1, 1.035], clamp);
-  const largeur = ECRAN_L + 2 * BORD_TEL;
+  const c = s.cadre ?? { x: 14, w: 362, de: 0, a: 0 };
+  // Échelle : px de la vidéo par px SOURCE. Jamais au-delà de 1 (pas d'agrandissement flou).
+  const echelle = Math.min(1, ECRAN_L / (c.w * DPR));
+  const y = interpolate(f, [10, Math.max(11, durationInFrames - 24)], [c.de, c.a], { ...clamp, easing: EASE }) * DPR * echelle;
   return (
     <div style={{
-      position: 'absolute', top: TEL_HAUT, left: (1080 - largeur) / 2, width: largeur, height: ECRAN_H + 2 * BORD_TEL,
-      borderRadius: 74, background: '#16130F', padding: BORD_TEL,
-      boxShadow: '0 40px 90px rgba(32,28,23,.22), 0 6px 18px rgba(32,28,23,.12)',
-      opacity: Math.min(1, p * 1.3), transform: `translateY(${(1 - p) * 120}px)`,
+      position: 'absolute', top: ECRAN_HAUT, left: ECRAN_X, width: ECRAN_L, height: ECRAN_H,
+      borderRadius: 40, overflow: 'hidden', background: C.fond, border: `2px solid ${C.bordFort}`,
+      boxShadow: '0 30px 70px rgba(32,28,23,.20), 0 4px 14px rgba(32,28,23,.10)',
+      opacity: Math.min(1, p * 1.3), transform: `translateY(${(1 - p) * 80}px)`,
     }}>
-      <div style={{ position: 'relative', width: ECRAN_L, height: ECRAN_H, borderRadius: 60, overflow: 'hidden', background: C.fond }}>
-        <Img src={staticFile(`etudiants/ecrans/${s.ecran}.png`)} style={{ position: 'absolute', top: 0, left: 0, width: ECRAN_L, height: ECRAN_H, transform: `scale(${zoom})`, transformOrigin: '50% 30%' }} />
-      </div>
+      <Img src={staticFile(`etudiants/ecrans/${s.ecran}.png`)} style={{
+        position: 'absolute', top: 0, left: -c.x * DPR * echelle, width: SOURCE_L * echelle,
+        transform: `translateY(${-y}px)`,
+      }} />
+      <AbsoluteFill style={{ background: 'rgba(20,17,13,.55)', opacity: assombri }} />
       {s.mention && <Mention texte={s.mention} />}
     </div>
   );
 }
 
-/** « Simulation : aucun argent réel » — posée sur le bas du téléphone, toujours visible. */
+/** « Simulation : aucun argent réel » — en haut de l'écran, toujours visible. */
 function Mention({ texte }: { texte: string }) {
   const f = useCurrentFrame();
   const p = p01(f, 14, 26);
   return (
-    <div style={{ position: 'absolute', left: -40, right: -40, bottom: 34, display: 'flex', justifyContent: 'center', opacity: p }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 26px', borderRadius: 999, background: '#FFF7E8', border: `2px solid ${C.avert}`, fontFamily: SANS, fontSize: 31, fontWeight: 700, color: C.avert, boxShadow: '0 10px 30px rgba(32,28,23,.16)' }}>
+    <div style={{ position: 'absolute', left: 0, right: 0, top: 22, display: 'flex', justifyContent: 'center', opacity: p }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 28px', borderRadius: 999, background: '#FFF7E8', border: `3px solid ${C.avert}`, fontFamily: SANS, fontSize: 34, fontWeight: 800, color: C.avert, boxShadow: '0 10px 30px rgba(32,28,23,.22)' }}>
         <span style={{ width: 16, height: 16, borderRadius: 8, background: C.avert }} />
         {texte}
       </div>
@@ -189,23 +201,28 @@ function Mention({ texte }: { texte: string }) {
   );
 }
 
-// ── Loupe : un morceau de la capture, sorti en grand devant le téléphone ────
+// ── Loupe : un morceau de capture, sorti devant l'écran assombri ─────────────
 function LoupeVue({ l, debut, fin = Infinity }: { l: Loupe; debut: number; fin?: number }) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   if (f < debut || f >= fin) return null;
   const p = spring({ frame: f - debut, fps, config: { damping: 15, stiffness: 150 } });
-  const largeur = l.largeur ?? 860;
+  const largeur = Math.min(l.largeur, 1000);
   return (
     <div style={{
-      position: 'absolute', left: (1080 - largeur) / 2, width: largeur, top: l.y ?? 760,
-      borderRadius: 30, overflow: 'hidden', background: C.surface, border: `2px solid ${C.bord}`,
-      boxShadow: '0 34px 80px rgba(32,28,23,.28), 0 4px 14px rgba(32,28,23,.12)',
-      opacity: Math.min(1, p * 1.4), transform: `scale(${0.82 + 0.18 * p}) translateY(${(1 - p) * 60}px)`,
+      position: 'absolute', left: (1080 - largeur) / 2, width: largeur, top: l.y ?? 520,
+      borderRadius: 28, overflow: 'hidden', background: C.surface, border: `4px solid ${C.accent}`,
+      boxShadow: '0 40px 90px rgba(0,0,0,.45), 0 0 0 10px rgba(255,255,255,.85)',
+      opacity: Math.min(1, p * 1.4), transform: `scale(${0.86 + 0.14 * p}) translateY(${(1 - p) * 50}px)`,
     }}>
       <Img src={staticFile(`etudiants/ecrans/${l.src}.png`)} style={{ display: 'block', width: '100%' }} />
     </div>
   );
+}
+
+/** Assombrissement de l'écran pendant qu'une loupe est posée : [début, fin] en images. */
+function assombrissement(f: number, plages: [number, number][]): number {
+  return Math.max(0, ...plages.map(([a, b]) => Math.min(p01(f, a, a + 8), 1 - p01(f, b - 6, b))));
 }
 
 function PastilleVue({ texte, debut, i }: { texte: string; debut: number; i: number }) {
@@ -213,11 +230,10 @@ function PastilleVue({ texte, debut, i }: { texte: string; debut: number; i: num
   const { fps } = useVideoConfig();
   if (f < debut) return null;
   const p = spring({ frame: f - debut, fps, config: { damping: 14, stiffness: 160 } });
-  const gauche = i % 2 === 0;
   return (
-    <div style={{ position: 'absolute', top: 640 + i * 118, ...(gauche ? { left: 54 } : { right: 54 }), opacity: p, transform: `translateX(${(1 - p) * (gauche ? -50 : 50)}px)` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 30px', borderRadius: 999, background: C.surface, border: `2px solid ${C.bord}`, boxShadow: '0 14px 36px rgba(32,28,23,.18)', fontFamily: SANS, fontSize: 36, fontWeight: 700, color: C.encre }}>
-        <span style={{ width: 22, height: 22, borderRadius: 11, border: `6px solid ${C.accent}`, background: C.surface }} />
+    <div style={{ position: 'absolute', top: ECRAN_HAUT + 110 + i * 104, left: ECRAN_X + 24, opacity: p, transform: `translateX(${(1 - p) * -50}px)` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 30px', borderRadius: 999, background: C.surface, border: `3px solid ${C.accent}`, boxShadow: '0 14px 36px rgba(32,28,23,.28)', fontFamily: SANS, fontSize: 38, fontWeight: 800, color: C.encre }}>
+        <span style={{ width: 20, height: 20, borderRadius: 10, background: C.accent }} />
         {texte}
       </div>
     </div>
@@ -255,8 +271,8 @@ function SousTitres({ mots }: { mots: Mot[] }) {
   const debutPage = Math.round((page[0].startMs / 1000) * FPS);
   const p = p01(f, debutPage - 3, debutPage + 3);
   return (
-    <div style={{ position: 'absolute', top: SOUS_TITRE_Y, left: 70, right: 70, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ maxWidth: 900, padding: '14px 26px', borderRadius: 22, background: C.surface, boxShadow: '0 12px 34px rgba(32,28,23,.14)', textAlign: 'center', fontFamily: SANS, fontSize: 54, fontWeight: 800, lineHeight: 1.3, color: C.encre, opacity: p, transform: `translateY(${(1 - p) * 14}px)` }}>
+    <div style={{ position: 'absolute', top: SOUS_TITRE_HAUT, left: ECRAN_X + 16, right: 150, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ maxWidth: 860, padding: '14px 26px', borderRadius: 22, background: C.surface, border: `2px solid ${C.bordFort}`, boxShadow: '0 14px 40px rgba(20,17,13,.35)', textAlign: 'center', fontFamily: SANS, fontSize: 54, fontWeight: 800, lineHeight: 1.3, color: C.encre, opacity: p, transform: `translateY(${(1 - p) * 14}px)` }}>
         {page.map((m, i) => {
           const actif = ms >= m.startMs && (i === page.length - 1 ? ms <= m.endMs + 250 : ms < page[i + 1].startMs);
           return (
@@ -300,6 +316,23 @@ function Cadre({ longueur, children }: { longueur: number; children: React.React
   return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
 }
 
+/** Fin de la première loupe : au mot de la seconde, ou à son mot `jusqua`. */
+function finLoupe(s: SceneE, m: Mot[], defaut: number): number {
+  if (s.loupe2) return instantMot(m, s.loupe2.mot);
+  if (s.loupe?.jusqua) return instantMot(m, s.loupe.jusqua);
+  return defaut;
+}
+
+/** Écran d'une scène, assombri pendant ses loupes. */
+function EcranScene({ s, m }: { s: SceneE; m: Mot[] }) {
+  const f = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const plages: [number, number][] = [];
+  if (s.loupe) plages.push([instantMot(m, s.loupe.mot), finLoupe(s, m, durationInFrames)]);
+  if (s.loupe2) plages.push([instantMot(m, s.loupe2.mot), durationInFrames]);
+  return <Ecran s={s} assombri={assombrissement(f, plages)} />;
+}
+
 // ── Montage ─────────────────────────────────────────────────────────────────
 export default function Etudiants({ video, durees, mots }: Props) {
   const plan = PLANS[video];
@@ -327,9 +360,9 @@ export default function Etudiants({ video, durees, mots }: Props) {
               ) : (
                 <>
                   <Titre s={s} />
-                  {s.ecran && <Telephone s={s} />}
+                  {s.ecran && <EcranScene s={s} m={m} />}
                   {(s.pastilles ?? []).map((pa, i) => <PastilleVue key={i} i={i} texte={pa.texte} debut={instantMot(m, pa.mot)} />)}
-                  {s.loupe && <LoupeVue l={s.loupe} debut={instantMot(m, s.loupe.mot)} fin={s.loupe2 ? instantMot(m, s.loupe2.mot) : Infinity} />}
+                  {s.loupe && <LoupeVue l={s.loupe} debut={instantMot(m, s.loupe.mot)} fin={finLoupe(s, m, Infinity)} />}
                   {s.loupe2 && <LoupeVue l={s.loupe2} debut={instantMot(m, s.loupe2.mot)} />}
                 </>
               )}

@@ -18,7 +18,13 @@
           "mot": "Academy",
           "texte": "Leçon 0 gratuite"
         }
-      ]
+      ],
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 80,
+        "a": 300
+      }
     },
     {
       "id": "niveaux",
@@ -46,7 +52,13 @@
           "mot": "expert",
           "texte": "4 · Expert"
         }
-      ]
+      ],
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 60,
+        "a": 300
+      }
     },
     {
       "id": "simulateur",
@@ -60,8 +72,14 @@
       "loupe": {
         "src": "loupe-simu",
         "mot": "recalcule",
-        "largeur": 800,
-        "y": 760
+        "largeur": 960,
+        "y": 640
+      },
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 40,
+        "a": 300
       }
     },
     {
@@ -73,11 +91,11 @@
       "accent": "données",
       "voix": "Les exemples viennent des vraies données de la BRVM : derniers dividendes, cours de la dernière séance.",
       "ecran": "l8-reel",
-      "loupe": {
-        "src": "loupe-reel",
-        "mot": "dividendes",
-        "largeur": 880,
-        "y": 820
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 70,
+        "a": 300
       }
     },
     {
@@ -92,8 +110,14 @@
       "loupe": {
         "src": "loupe-examen",
         "mot": "examen",
-        "largeur": 900,
+        "largeur": 1000,
         "y": 820
+      },
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 50,
+        "a": 60
       }
     },
     {
@@ -105,11 +129,11 @@
       "accent": "9 000 FCFA",
       "voix": "La formation complète, les quatre niveaux, coûte neuf mille francs CFA, en un seul paiement. L'accès est à vie, et un mois Premium est offert.",
       "ecran": "ac-achat",
-      "loupe": {
-        "src": "loupe-prix",
-        "mot": "neuf",
-        "largeur": 880,
-        "y": 800
+      "cadre": {
+        "x": 14,
+        "w": 362,
+        "de": 160,
+        "a": 200
       }
     },
     {
