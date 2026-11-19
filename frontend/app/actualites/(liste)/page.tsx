@@ -53,6 +53,23 @@ export default async function ActualitesPage() {
         <ViewTabs tabs={INTEL_TABS} current="/actualites" />
       </div>
 
+      <section aria-labelledby="analyse-coris" className="mt-8 rounded-card border border-border bg-surface p-5">
+        <p id="analyse-coris" className="text-xs text-accent-ink">Analyse de marché</p>
+        <Link
+          href="/analyses/coris-bank-ipo-2027"
+          className="mt-2 block font-display text-2xl text-ivory transition-colors hover:text-accent-ink"
+        >
+          81 milliards FCFA : les deux IPO Coris peuvent-elles déplacer la liquidité BRVM ?
+        </Link>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+          Article illustré : ampleur des offres, précédent Bridge Bank, comportement autour des
+          dividendes et matrice de réaction par type d’investisseur.
+        </p>
+        <Link href="/analyses/coris-bank-ipo-2027" className="mt-4 inline-block text-sm font-medium text-accent-ink">
+          Lire l’article →
+        </Link>
+      </section>
+
       {articles.length > 0 && (
         <section aria-labelledby="nos-articles">
           <Chapitre

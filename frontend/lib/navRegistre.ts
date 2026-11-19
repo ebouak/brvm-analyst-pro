@@ -100,6 +100,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/premium/calendrier', libelle: 'Dates clés', rubrique: 'aujourdhui', parent: '/calendrier', statut: 'secondaire', raison: ONGLET("l'Agenda"), premium: true },
   { chemin: '/analyses', libelle: 'Analyses', rubrique: 'aujourdhui', description: 'Lectures du marché, sourcées', colonne: 2, statut: 'menu' },
   { chemin: '/analyses/[slug]', libelle: 'Analyse', rubrique: 'aujourdhui', parent: '/analyses', statut: 'public', raison: 'analyse citable (SEO)' },
+  { chemin: '/analyses/coris-bank-ipo-2027', libelle: 'Double IPO Coris et liquidité BRVM', rubrique: 'aujourdhui', parent: '/analyses', statut: 'public', raison: 'étude financière publiée en avant-première' },
   { chemin: '/analyses/hebdo', libelle: 'Valeurs de la semaine', rubrique: 'aujourdhui', parent: '/analyses', statut: 'public', raison: 'index hebdomadaire (SEO)' },
   { chemin: '/analyses/hebdo/[date]', libelle: 'Valeurs de la semaine', rubrique: 'aujourdhui', parent: '/analyses/hebdo', statut: 'public', raison: 'semaine datée (SEO)', libelleParam: true },
 
