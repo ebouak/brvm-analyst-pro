@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { secretRenduDossierValide } from '@/lib/dossier/renderSecret';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -68,14 +69,10 @@ function isPublicPath(pathname: string): boolean {
  */
 function isRenderAuthorized(request: NextRequest): boolean {
   if (!request.nextUrl.pathname.startsWith('/rapports/dossier/')) return false;
-  const attendu = process.env.DOSSIER_RENDER_SECRET;
-  const fourni = request.headers.get('x-dossier-render');
-  if (!attendu || !fourni || attendu.length < 32) return false;
-  let diff = attendu.length ^ fourni.length;
-  for (let i = 0; i < attendu.length; i++) {
-    diff |= attendu.charCodeAt(i) ^ (fourni.charCodeAt(i % fourni.length) || 0);
-  }
-  return diff === 0;
+  return secretRenduDossierValide(
+    process.env.DOSSIER_RENDER_SECRET,
+    request.headers.get('x-dossier-render'),
+  );
 }
 
 export async function updateSession(request: NextRequest) {

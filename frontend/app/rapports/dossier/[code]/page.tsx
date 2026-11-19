@@ -1,4 +1,5 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
@@ -10,6 +11,8 @@ import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dos
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
 import { perAffichable, distributionAffichable, horsExploitation, dividendeCourant, evolutionResultat } from '@/lib/fiche/affichage';
 import ImprimerDossier from './ImprimerDossier';
+import { accesDossier } from '@/lib/dossier/acces';
+import { secretRenduDossierValide } from '@/lib/dossier/renderSecret';
 import './dossier.css';
 
 /**
@@ -167,6 +170,16 @@ function zoneRsi(rsi: number | null): string | null {
 
 export default async function DossierPage(props: { params: Promise<{ code: string }> }) {
   const params = await props.params;
+  const code = params.code.toUpperCase();
+  const renduServeur = secretRenduDossierValide(
+    process.env.DOSSIER_RENDER_SECRET,
+    (await headers()).get('x-dossier-render'),
+  );
+  if (!renduServeur) {
+    const acces = await accesDossier(code);
+    if (!acces.complet) redirect(`/analyses/dossiers/${code}`);
+  }
+
   const sb = createClient();
   /* Médianes des comparables : même source que le diagnostic (dernier calcul
      Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et
@@ -175,7 +188,7 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const medianes =
     svc && url
-      ? (await chargerContexteQuant(createSbAdmin(url, svc, { auth: { persistSession: false } }), params.code.toUpperCase())).medianes
+      ? (await chargerContexteQuant(createSbAdmin(url, svc, { auth: { persistSession: false } }), code)).medianes
       : null;
   const d = await buildDossier(sb, params.code, { medianes });
   if (!d) notFound();

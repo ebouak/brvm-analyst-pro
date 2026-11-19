@@ -144,6 +144,23 @@ export function droitNiveauValide(d: DroitNiveau, refonteLe: string | null, main
  */
 export const CODE_FORMATION = 'academy:integrale';
 
+/** Code de société envoyé uniquement pour choisir le dossier acheté. */
+export function codeSujetValide(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z0-9]{2,8}$/.test(code) ? code : null;
+}
+
+export type SujetAchat =
+  | { ok: true; code: string | null }
+  | { ok: false; message: string };
+
+export function sujetAchat(kind: string, value: unknown): SujetAchat {
+  if (kind !== 'dossier') return { ok: true, code: null };
+  const code = codeSujetValide(value);
+  return code ? { ok: true, code } : { ok: false, message: 'Choisissez une société.' };
+}
+
 /**
  * Niveaux ouverts par un ensemble de droits achetés. Un droit à un niveau ouvre
  * ce niveau ; le droit « formation complète » ouvre les quatre. Chaque niveau
@@ -174,6 +191,7 @@ export function niveauxDesDroits(
 export const corpsCheckout = z
   .object({
     productCode: z.string().regex(/^[a-z0-9:_-]{3,60}$/),
+    subjectCode: z.string().regex(/^[A-Za-z0-9]{2,8}$/).optional(),
     firstName: z.string().trim().min(1).max(50),
     lastName: z.string().trim().min(1).max(50),
     phone: z

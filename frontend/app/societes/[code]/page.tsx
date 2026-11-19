@@ -485,13 +485,13 @@ export default async function CompanyPage(props: PageProps) {
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border/60 pt-4">
             <p className="max-w-xl text-sm text-faint">
               La suite (valorisation détaillée, forces, risques relevés et conclusion) est
-              réservée aux membres.
+              disponible dans le dossier complet.
             </p>
             <Link
-              href="/signup"
+              href={`/analyses/dossiers/${code}`}
               className="rounded-lg bg-accent-ink px-4 py-2 text-sm font-medium text-bg transition-[background-color,transform] hover:bg-gold-2 active:scale-[0.98]"
             >
-              Lire la suite avec un compte gratuit
+              Lire les deux pages ouvertes
             </Link>
           </div>
         </section>

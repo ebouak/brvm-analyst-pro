@@ -36,6 +36,7 @@ export default function AchatChariow({
   connecte,
   retour,
   cta = 'Acheter',
+  subjectCode,
 }: {
   productCode: string;
   libelle: string;
@@ -45,6 +46,7 @@ export default function AchatChariow({
   /** Page où revenir après connexion. */
   retour: string;
   cta?: string;
+  subjectCode?: string;
 }) {
   const id = useId();
   const [ouvert, setOuvert] = useState(false);
@@ -73,6 +75,7 @@ export default function AchatChariow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productCode,
+          ...(subjectCode ? { subjectCode } : {}),
           firstName: String(f.get('prenom') ?? ''),
           lastName: String(f.get('nom') ?? ''),
           phone: { number: String(f.get('telephone') ?? ''), countryCode: String(f.get('pays') ?? 'CI') },

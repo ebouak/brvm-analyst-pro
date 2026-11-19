@@ -5,7 +5,9 @@ import { prixDuCycle } from '@/lib/billing/dates';
 import { niveauxAchetes, niveauxARemettreAJour } from '@/lib/server/academyAccess';
 import { produitParCode } from './catalogue';
 import { chariowConfigure, ErreurChariow, initierCheckout } from './client';
-import type { CorpsCheckout } from './regles';
+import { sujetAchat, type CorpsCheckout } from './regles';
+import { pdfFrais } from '@/lib/crm/jetonBonus';
+import { evaluerAccesDossier } from '@/lib/dossier/accesPur';
 
 /**
  * Démarre un achat Chariow pour l'utilisateur de la SESSION.
@@ -48,11 +50,47 @@ export async function demarrerAchat(args: {
 
   const produit = await produitParCode(corps.productCode);
   if (!produit) return { ok: false, statut: 404, message: 'Cette offre n’est pas disponible.' };
+  const sujet = sujetAchat(produit.kind, corps.subjectCode);
+  if (!sujet.ok) return { ok: false, statut: 400, message: sujet.message };
 
   const db = getServiceClient();
 
   // ── Garde-fous propres au type de produit ──
-  if (produit.kind === 'pass') {
+  if (produit.kind === 'dossier') {
+    if (produit.montant !== 1500 || produit.devise !== 'XOF') {
+      console.error('chariow/checkout: tarif dossier invalide', { code: produit.productCode });
+      return { ok: false, statut: 409, message: 'Configuration tarifaire invalide. Contactez-nous.' };
+    }
+    const code = sujet.code;
+    if (!code) return { ok: false, statut: 400, message: 'Choisissez une société.' };
+
+    const [{ data: instrument, error: errInstrument }, { data: objets, error: errListe }, { data: droits, error: errDroits }] =
+      await Promise.all([
+        db.from('brvm_instruments').select('code').eq('code', code).eq('type', 'action').eq('actif', true).maybeSingle(),
+        db.storage.from('dossiers').list(code, { search: 'dernier.pdf' }),
+        db
+          .from('user_entitlements')
+          .select('product_code, expires_at, revoked_at')
+          .eq('user_id', userId)
+          .eq('product_code', `dossier:${code}`),
+      ]);
+    if (errInstrument || errListe || errDroits) {
+      console.error('[chariow/checkout] vérification dossier impossible', {
+        instrument: errInstrument?.code,
+        stockage: errListe?.message,
+        droits: errDroits?.code,
+      });
+      return { ok: false, statut: 503, message: 'Vérification temporairement impossible. Réessayez.' };
+    }
+    if (!instrument) return { ok: false, statut: 404, message: 'Cette société n’est pas disponible.' };
+    const maj = objets?.find((objet) => objet.name === 'dernier.pdf')?.updated_at ?? null;
+    if (!pdfFrais(maj, new Date())) {
+      return { ok: false, statut: 409, message: 'Le dossier n’est pas assez récent pour être vendu. Réessayez après sa prochaine actualisation.' };
+    }
+    if (evaluerAccesDossier(code, false, (droits ?? []) as Parameters<typeof evaluerAccesDossier>[2]).complet) {
+      return { ok: false, statut: 409, message: 'Vous possédez déjà ce dossier.' };
+    }
+  } else if (produit.kind === 'pass') {
     // Le prix affiché sur /pricing vient de subscription_plans : le pass doit
     // coûter EXACTEMENT la même chose, sinon on encaisserait un autre prix que
     // celui que le client a lu.
@@ -103,6 +141,7 @@ export async function demarrerAchat(args: {
       amount: produit.montant,
       currency: produit.devise,
       status: 'pending',
+      subject_code: sujet.code,
     })
     .select('id')
     .single();
@@ -124,7 +163,11 @@ export async function demarrerAchat(args: {
       phone: { number: corps.phone.number, country_code: corps.phone.countryCode },
       // Simple retour visuel : cette page n'accorde JAMAIS rien.
       redirect_url: `${urlApp()}/paiement/succes?txn=${transactionId}`,
-      custom_metadata: { txn: transactionId, code: produit.productCode },
+      custom_metadata: {
+        txn: transactionId,
+        code: produit.productCode,
+        ...(sujet.code ? { subject: sujet.code } : {}),
+      },
       ...(ip ? { customer_ip: ip } : {}),
     });
 

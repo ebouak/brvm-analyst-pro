@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { accesDossier } from '@/lib/dossier/acces';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,17 @@ export async function GET(_req: Request, props: { params: Promise<{ code: string
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 });
 
+  const acces = await accesDossier(code);
+  if (acces.motif === 'indisponible') {
+    return NextResponse.json({ error: 'Vérification des droits temporairement impossible.' }, { status: 503 });
+  }
+  if (!acces.complet) {
+    return NextResponse.json(
+      { error: 'Ce dossier doit être acheté ou inclus dans votre abonnement Premium.', achat: `/analyses/dossiers/${code}` },
+      { status: 403 },
+    );
+  }
+
   const admin = getServiceClient();
   const { data, error } = await admin.storage.from('dossiers').createSignedUrl(`${code}/dernier.pdf`, DUREE_SECONDES, {
     download: `westbourse-dossier-${code}.pdf`,
@@ -33,7 +45,7 @@ export async function GET(_req: Request, props: { params: Promise<{ code: string
     /* Pas encore produit pour cette valeur (nouveau code, ou lot du samedi pas
        encore passé). On le dit ; la page imprimable reste disponible. */
     return NextResponse.json(
-      { error: "Aucun PDF n'a encore été produit pour cette valeur. La page du dossier reste imprimable.", page: `/rapports/dossier/${code}` },
+      { error: "Aucun PDF n'a encore été produit pour cette valeur. Consultez la fiche du dossier.", page: `/analyses/dossiers/${code}` },
       { status: 404 },
     );
   }

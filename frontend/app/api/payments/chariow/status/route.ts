@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
   const lire = () => db
     .from('billing_transactions')
-    .select('status, objet, product_code, paid_at, provider_sale_id, created_at')
+    .select('status, objet, product_code, subject_code, paid_at, provider_sale_id, created_at')
     .eq('id', txn)
     .eq('provider', 'chariow')
     .maybeSingle();
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json(
-    { status: data.status, objet: data.objet, productCode: data.product_code, paidAt: data.paid_at },
+    { status: data.status, objet: data.objet, productCode: data.product_code, subjectCode: data.subject_code, paidAt: data.paid_at },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

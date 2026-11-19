@@ -9,7 +9,7 @@ export function documentsFiche(code: string) {
   return [
     { href: `/actions/${code}/revue`, label: 'Revue de résultats' },
     { href: `/actions/${code}/financials`, label: 'États financiers' },
-    { href: `/rapports/dossier/${code}`, label: 'Dossier A4' },
+    { href: `/analyses/dossiers/${code}`, label: 'Dossier valeur' },
     { href: `/actions/${code}/quant`, label: 'Fiche Quant' },
   ];
 }

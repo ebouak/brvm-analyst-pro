@@ -18,6 +18,7 @@ const INTERVALLE_MS = 3000;
 export default function SuiviPaiement({ txn }: { txn: string }) {
   const [etat, setEtat] = useState<Etat>('attente');
   const [objet, setObjet] = useState<string | null>(null);
+  const [subjectCode, setSubjectCode] = useState<string | null>(null);
 
   useEffect(() => {
     let essais = 0;
@@ -32,8 +33,9 @@ export default function SuiviPaiement({ txn }: { txn: string }) {
           setEtat('inconnu');
           return;
         }
-        const j = (await r.json()) as { status?: string; objet?: string };
+        const j = (await r.json()) as { status?: string; objet?: string; subjectCode?: string };
         setObjet(j.objet ?? null);
+        setSubjectCode(j.subjectCode ?? null);
         if (j.status === 'paid') return setEtat('paid');
         if (j.status === 'failed') return setEtat('failed');
       } catch {
@@ -54,7 +56,9 @@ export default function SuiviPaiement({ txn }: { txn: string }) {
   const destination =
     objet === 'pass'
       ? { href: '/dashboard', label: 'Aller au tableau de bord' }
-      : { href: '/formations/academy', label: 'Ouvrir l’Academy' };
+      : subjectCode
+        ? { href: `/analyses/dossiers/${subjectCode}`, label: 'Ouvrir mon dossier' }
+        : { href: '/formations/academy', label: 'Ouvrir l’Academy' };
 
   return (
     <div role="status" aria-live="polite" className="rounded-xl border border-border bg-surface p-6">
