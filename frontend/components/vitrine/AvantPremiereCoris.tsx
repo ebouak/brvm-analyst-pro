@@ -25,7 +25,7 @@ export function AvantPremiereCoris() {
           <span><strong>0,42 %</strong> de la capitalisation</span>
         </div>
         <Link href="/analyses/coris-bank-ipo-2027" className="vitrine-avp__cta">
-          Lire l’analyse → 
+          Lire l’analyse →
         </Link>
       </div>
     </section>
