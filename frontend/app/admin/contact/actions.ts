@@ -11,6 +11,10 @@ import { renduReponse, renduReponseWhatsapp } from '@/lib/contact/rendu';
 import { passerelleWhatsapp } from '@/lib/whatsapp/passerelle';
 import { produitParCode } from '@/lib/billing/chariow/catalogue';
 import { CODE_FORMATION } from '@/lib/billing/chariow/regles';
+import { actualiserAppel, lancerAppel } from '@/lib/voix/appel';
+import { chargerRappelVocal } from '@/lib/voix/lecture';
+import { estE164 } from '@/lib/voix/numero';
+import { parametresRappel } from '@/lib/voix/script';
 
 /**
  * Actions de la console /admin/contact. Toutes passent par requirePermission
@@ -151,4 +155,61 @@ export async function changerStatut(id: string, statut: 'clos' | 'spam' | 'nouve
   revalidatePath('/admin/contact');
   revalidatePath(`/admin/contact/${id}`);
   return { ok: true };
+}
+
+// ── Rappel par l'assistant vocal (migration 0250) ───────────────────────────
+// MANUEL uniquement : un clic, une confirmation, un appel. Consentement et
+// opposition revérifiés ICI juste avant l'appel ; jamais de réessai automatique.
+
+export async function rappelerVocal(id: string): Promise<Retour> {
+  const ctx = await requirePermission('support.reply');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false, message: 'Identifiant invalide.' };
+  const db = getServiceClient();
+
+  const etat = await chargerRappelVocal(db, id);
+  if (!etat.disponible) return { ok: false, message: etat.raisonIndisponible ?? 'Rappel vocal indisponible.' };
+  if (!etat.eligibilite.ok) return { ok: false, message: etat.eligibilite.raison };
+
+  // Le numéro n'est lu qu'ici, côté serveur, et ne quitte le serveur que vers Bland.
+  const { data: m } = await db.from('contact_messages').select('telephone, rappel_vocal_consent_at').eq('id', id).maybeSingle();
+  if (!m?.telephone || !m.rappel_vocal_consent_at) return { ok: false, message: 'Consentement au rappel vocal introuvable.' };
+
+  const transfert = process.env.BLAND_NUMERO_EXPLOITANT?.trim();
+  const r = await lancerAppel(db, {
+    motif: 'rappel_contact',
+    sourceId: id,
+    numero: m.telephone as string,
+    parametres: parametresRappel(estE164(transfert) ? transfert : null),
+    creePar: ctx.userId,
+  });
+
+  await db.from('contact_messages').update({ derniere_activite_at: new Date().toISOString() }).eq('id', id);
+  await recordAudit(ctx, {
+    action: 'contact.rappel_vocal',
+    resourceType: 'contact_message',
+    resourceId: id,
+    severity: r.ok ? 'info' : 'warning',
+    metadata: r.ok ? { ok: true, appel: r.appelId } : { ok: false, code: r.code, ...(r.statut ? { statut: r.statut } : {}) },
+  });
+  revalidatePath(`/admin/contact/${id}`);
+  if (r.ok) return { ok: true };
+  if (r.statut === 'peut_etre_parti') {
+    return { ok: false, message: `Réponse de Bland non reçue (${r.raison}) : l’appel est PEUT-ÊTRE parti. Ne relancez pas avant d’avoir vérifié.` };
+  }
+  return { ok: false, message: r.raison };
+}
+
+export async function actualiserAppelVocal(messageId: string, appelId: string): Promise<Retour> {
+  const ctx = await requirePermission('support.reply');
+  if (!/^[0-9a-f-]{36}$/i.test(messageId) || !/^[0-9a-f-]{36}$/i.test(appelId)) return { ok: false, message: 'Identifiant invalide.' };
+  const db = getServiceClient();
+  // L'appel doit appartenir à ce message : pas de relecture d'un appel d'alerte depuis la console contact.
+  const { data: l } = await db.from('appels_vocaux').select('id').eq('id', appelId).eq('motif', 'rappel_contact').eq('source_id', messageId).maybeSingle();
+  if (!l) return { ok: false, message: 'Appel introuvable pour ce message.' };
+  const r = await actualiserAppel(db, appelId);
+  if (r.ok && r.stop) {
+    await recordAudit(ctx, { action: 'contact.rappel_vocal_stop', resourceType: 'contact_message', resourceId: messageId, severity: 'info', metadata: { appel: appelId } });
+  }
+  revalidatePath(`/admin/contact/${messageId}`);
+  return r.ok ? { ok: true } : { ok: false, message: r.raison };
 }

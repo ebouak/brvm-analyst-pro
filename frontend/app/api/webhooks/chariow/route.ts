@@ -143,6 +143,9 @@ export async function POST(req: Request) {
   } catch (e) {
     // Base injoignable au journal : 500 → Chariow réessaiera (jusqu'à ~3 h).
     console.error('chariow/webhook: échec de traitement —', (e as { code?: string }).code ?? (e as Error).name);
+    // Paiement possiblement débité sans accès accordé : alerte CRITIQUE (Telegram
+    // + appel vocal, au plus une fois par fenêtre de 6 h). Aucune donnée client.
+    await alerterExploitant('webhook en échec de traitement (base injoignable ?) — Chariow réessaiera ; vérifier les ventes en attente.', { critique: true });
     return NextResponse.json({ error: 'traitement impossible' }, { status: 500 });
   }
 }

@@ -18,6 +18,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { appendFileSync } from 'node:fs';
 import { evaluerFraicheurIntraday } from '../src/monitoring/fraicheurIntraday.js';
+import { alerterExploitant } from '../src/alerts/alerteExploitant.js';
+import { doitAlerterSeanceAbsente } from '../src/alerts/seanceAbsente.js';
 
 function setOutput(key: string, value: string): void {
   const file = process.env.GITHUB_OUTPUT;
@@ -96,6 +98,20 @@ async function main(): Promise<void> {
       }
       if ((count ?? 0) === 0) {
         console.error(`❌ Aucune cotation insérée pour ${today}`);
+        // Passage de CLÔTURE (cron 16:00 UTC) d'un jour de séance : alerte
+        // CRITIQUE (Telegram + appel vocal, une fois par fenêtre de 6 h). Le
+        // passage du matin et les jours fériés n'appellent pas.
+        const { data: ferie } = await client
+          .from('market_calendar').select('date').eq('date', today).eq('is_trading_day', false);
+        const feries = new Set(((ferie ?? []) as { date: string }[]).map((r) => r.date));
+        if (doitAlerterSeanceAbsente(new Date(), feries)) {
+          const res = await alerterExploitant({
+            sujet: 'WESTBOURSE · séance absente à la clôture',
+            corps: `Aucune cotation en base pour la séance du ${today} au passage de clôture.`,
+            critique: 'seance_absente',
+          });
+          if (res?.status !== 'sent') console.error('⚠️ Alerte Telegram de séance absente NON envoyée');
+        }
         process.exit(1);
       }
       console.log(`✅ ${count} cotations pour la séance du ${today}`);

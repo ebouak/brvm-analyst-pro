@@ -1586,6 +1586,40 @@ lancés par `commodity-weekly.yml` AVANT la génération. Non exécuté en réel
 - **Non fait** : effet d'un scénario sur le RÉSULTAT des distributeurs (stocks
   non publiés) ; huile de palme et caoutchouc restent mensuels (Banque mondiale).
 
+### Ajouts (passage 2026-11-19) — Appels vocaux Bland : rappel sur demande, alerte exploitant
+
+Migration `0250_appels_vocaux.sql` **à appliquer**. Usages 1 (ligne entrante) et 3
+(rappel de session par cron) **REPORTÉS** — l'usage 3 attend la mesure du taux de
+décroché de l'usage 2 (conseil Fable) : ne pas le construire avant.
+
+- **Modules** `frontend/lib/voix/` : purs et testés (`numero.ts` E.164 + empreinte
+  HMAC, `fenetre.ts` 6 h, `stop.ts`, `script.ts`, `statut.ts` lecture Bland +
+  éligibilité) ; serveur : `bland.ts` (client mince, `authorization` SANS Bearer,
+  aucun réessai), `appel.ts` (orchestration), `lecture.ts`, `rgpd.ts`.
+- **Ordre d'un appel** : empreinte → opposition revérifiée → plafond du jour
+  (`VOIX_MAX_JOUR`, 10, tous motifs) → INSERTION `en_cours` → POST Bland. Délai
+  dépassé ou 5xx = `peut_etre_parti`, **jamais de réessai automatique**.
+- **Aucun numéro en clair dans `appels_vocaux`** : empreinte `BLAND_HASH_SECRET`.
+  ⚠️ Faire tourner ce secret rend la liste `oppositions_vocales` inopérante.
+- **Usage 2** : case DÉCOCHÉE par défaut sur l'encart de contact ; sans elle le
+  numéro n'est pas enregistré (la base le refuse aussi). Bouton « Rappeler
+  (assistant vocal) » sur `/admin/contact/[id]` (`support.reply`, deux temps),
+  « Actualiser » relit `GET /calls/{id}` ; « stop » dans les paroles de la
+  PERSONNE → opposition. **Pas d'appel depuis `/admin/crm`** : le consentement
+  recontact ne couvre pas un robot. Script FIXE et neutre (le numéro déclaré
+  peut être celui d'un tiers).
+- **Usage 4** : `alerterExploitant(…, { critique })` (frontend) et
+  `scraper/src/alerts/alerteExploitant.ts` (copie, à tenir des deux côtés)
+  appellent en plus l'exploitant. Côté site, appel direct ; côté scraper,
+  `POST /api/voix/alerte` (Bearer `VOIX_ALERTE_SECRET`, types en liste FERMÉE).
+  Verrou en base `unique(motif, source_id)` sur `<type>:<fenêtre 6 h>`. Quatre
+  cas seulement : séance absente au passage de clôture (`verify-data daily`,
+  désormais lancé même si la collecte échoue), panne LLM TOTALE, Chariow (webhook
+  en échec / accord refusé), session WhatsApp hors WORKING.
+- **Contrôle** : `/admin/controle` signale toute ligne non terminale de plus de
+  24 h et les transcriptions absentes ; table illisible = « inconnu ». Pas de cron.
+
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

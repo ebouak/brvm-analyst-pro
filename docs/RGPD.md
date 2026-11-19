@@ -145,6 +145,36 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   finalité, même base légale, même conservation (12 mois), même accès (service_role seul). Accusé
   automatique FIXE, en réponse seulement, une fois par 24 h. Hetzner ajouté aux sous-traitants.
 
+**Appels vocaux — rappel sur demande et alerte exploitant (2026-11-19, migration 0250)**
+- Données : numéro de téléphone laissé sur le formulaire de contact
+  (`contact_messages.telephone`, E.164, **seulement si** la case de rappel vocal est cochée) et
+  date du consentement (`rappel_vocal_consent_at`, posée par le serveur) ; journal
+  `appels_vocaux` (motif, empreinte HMAC-SHA256 du numéro — **aucun numéro en clair** —,
+  identifiant Bland, statut, durée, prix, qui a raccroché, transcription) ; liste
+  `oppositions_vocales` (empreinte seule).
+- Finalités : (1) rappeler, à la main depuis `/admin/contact`, une personne qui l'a demandé ;
+  (2) appeler l'exploitant pour une alerte d'exploitation critique (son propre numéro,
+  `BLAND_NUMERO_EXPLOITANT`, variable serveur).
+- Base légale : **consentement**, distinct et daté, case décochée par défaut (« J'accepte d'être
+  rappelé·e par l'assistant vocal automatisé de WESTBOURSE à ce numéro. »). Le consentement de
+  recontact du CRM ne couvre PAS un appel robot : aucun appel depuis `/admin/crm`.
+- Sous-traitant : **Bland** (États-Unis) reçoit le numéro et la voix pendant l'appel
+  (`record: false` : pas d'enregistrement audio demandé), et produit la transcription.
+- Conservation : transcription **30 jours** ; métadonnées d'appel **12 mois** (choix de
+  l'exploitant) ; numéro = rétention de `contact_messages` (12 mois après la dernière activité) ;
+  liste d'opposition conservée (empreinte seule), comme `crm_oppositions`.
+- Retrait : dire « stop » pendant l'appel (détecté dans la transcription → opposition), ou écrire à
+  support@westbourse.com. Opposition revérifiée juste avant chaque appel.
+- Droits : export (`/api/account/export`, rubrique `rappels_vocaux`, adresse **confirmée**
+  seulement) ; suppression de compte : numéro et consentement retirés des messages, appels et
+  transcriptions effacés, opposition conservée.
+- Sécurité : RLS activée sans policy (service_role seul) sur `appels_vocaux` et
+  `oppositions_vocales` ; contrainte E.164 et « pas de numéro sans consentement » en base ;
+  `BLAND_API_KEY`, `BLAND_HASH_SECRET` serveur seulement ; le numéro n'est jamais renvoyé au
+  navigateur de la console ni écrit dans un journal ; script d'appel FIXE, neutre (le numéro
+  déclaré peut appartenir à un tiers : ni prénom ni contenu du message lus), sans conseil ni
+  chiffre de marché ; plafond `VOIX_MAX_JOUR` (10 par défaut) tous motifs.
+
 **Formulaire de contact (`/api/contact`) — accusé de réception (2026-10-15)**
 - Données : prénom, email, message, page — **non persistés** : relayés par email à la
   boîte support (`CONTACT_EMAIL_TO`), qui peut répondre directement (en-tête
@@ -307,7 +337,8 @@ La politique publique `/confidentialite` énumère désormais, d'après le code 
 Resend, Cloudflare (e-mail et Turnstile), Hetzner, DeepSeek / Google Gemini / xAI (cascade de
 rédaction), Mistral AI (import de relevés, OCR de publications), PostHog (UE, après consentement),
 Sentry (collecte `ingest.de`), CinetPay, Chariow, Telegram, WhatsApp (Meta), TypeSafe (Jev),
-synthèse vocale (Microsoft Edge TTS, ElevenLabs — textes de marché uniquement, sans donnée personnelle).
+synthèse vocale (Microsoft Edge TTS, ElevenLabs — textes de marché uniquement, sans donnée personnelle),
+Bland (appels vocaux sur consentement, États-Unis — numéro et voix, migration 0250).
 
 Transferts de données personnelles vers des fournisseurs d'IA :
 - `app/api/ai/chat/route.ts` : si la question évoque le portefeuille, positions (code, quantité, PRU),
@@ -316,7 +347,7 @@ Transferts de données personnelles vers des fournisseurs d'IA :
   (cascade `lib/import/llmProviders.ts`). Rate-limit par IP, fail-closed depuis le lot D.
 
 Pays : UE (Mistral, PostHog, Sentry DE, Hetzner DE) ; États-Unis (Vercel, Resend, Cloudflare, Google,
-xAI, Meta) ; Chine (DeepSeek) ; **à préciser** : Supabase (région), TypeSafe, Telegram, CinetPay,
+xAI, Meta, Bland) ; Chine (DeepSeek) ; **à préciser** : Supabase (région), TypeSafe, Telegram, CinetPay,
 Chariow. Les conditions de réutilisation/entraînement de chaque fournisseur d'IA restent **à vérifier**.
 
 Durées (source : `purge_rgpd_retention()`, migration 0193, et les migrations citées plus haut) :
@@ -324,7 +355,8 @@ Durées (source : `purge_rgpd_retention()`, migration 0193, et les migrations ci
 12 mois ; `crm_actions` : 24 mois ; `crm_signaux`, `dossier_envois`, `*_conversations` (liées),
 `whatsapp_aiguillages` : 90 jours ; conversations WhatsApp sans compte : 30 jours ;
 `academy_exam_sessions` : 7 jours ; cache de recherche : 24 h ; quotas : 30 jours ;
-`formation_inscriptions` : 3 ans après la session. **Non trouvées dans le code** (déclarées
+`formation_inscriptions` : 3 ans après la session ; `appels_vocaux` : transcription 30 jours,
+ligne 12 mois (migration 0250). **Non trouvées dans le code** (déclarées
 « à préciser » sur la page publique) : durée de conservation chez PostHog et Sentry, durée
 comptable précise des justificatifs.
 

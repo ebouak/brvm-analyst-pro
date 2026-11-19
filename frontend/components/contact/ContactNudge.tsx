@@ -4,6 +4,7 @@ import { Mail } from 'lucide-react';
 import { X as IconeFermer } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 /**
  * Encart de contact non-intrusif « Salut, on se parle ? ».
@@ -14,7 +15,8 @@ import { usePathname } from 'next/navigation';
  *
  * RGPD : aucune donnée n'est stockée côté navigateur hormis l'horodatage de
  * fermeture (préférence d'affichage). Le message est relayé par email via
- * /api/contact (pas de persistance en base).
+ * /api/contact. Le numéro de téléphone n'est envoyé que si la case de rappel
+ * vocal (décochée par défaut) est cochée.
  */
 
 const STORAGE_KEY = 'wb_contact_nudge_done';
@@ -42,6 +44,10 @@ export function ContactNudge() {
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  // Rappel vocal : case DÉCOCHÉE par défaut ; le numéro n'est envoyé que si elle est cochée.
+  const [rappel, setRappel] = useState(false);
+  const [telephone, setTelephone] = useState('');
+  const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const cardRef = useRef<HTMLDivElement>(null);
   const dwellTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,7 +109,8 @@ export function ContactNudge() {
 
   async function sendByEmail() {
     if (status === 'sending') return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.trim().length < 2) {
+    setErreurServeur(null);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.trim().length < 2 || (rappel && !telephone.trim())) {
       setStatus('error');
       return;
     }
@@ -112,9 +119,19 @@ export function ContactNudge() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, email, message, page: pathname }),
+        body: JSON.stringify({
+          prenom,
+          email,
+          message,
+          page: pathname,
+          ...(rappel ? { telephone, rappelVocal: true } : {}),
+        }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const corps = (await res.json().catch(() => null)) as { error?: string } | null;
+        if (res.status === 400 && corps?.error) setErreurServeur(corps.error);
+        throw new Error();
+      }
       setStatus('sent');
       remember();
       setTimeout(() => setOpen(false), 2200);
@@ -187,8 +204,36 @@ export function ContactNudge() {
               className="w-full resize-none rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
 
+            <label className="flex items-start gap-2 text-[11px] leading-snug text-muted">
+              <input
+                type="checkbox"
+                checked={rappel}
+                onChange={(e) => setRappel(e.target.checked)}
+                className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-accent"
+              />
+              <span>
+                J&apos;accepte d&apos;être rappelé·e par l&apos;assistant vocal automatisé de WESTBOURSE à ce numéro.{' '}
+                <Link href="/confidentialite" className="underline underline-offset-2 hover:text-ivory">
+                  Confidentialité
+                </Link>
+              </span>
+            </label>
+            {rappel && (
+              <input
+                type="tel"
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                placeholder="Numéro avec indicatif, ex. +225…"
+                aria-label="Numéro de téléphone pour le rappel"
+                autoComplete="tel"
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/30"
+              />
+            )}
+
             {status === 'error' && (
-              <p className="text-xs text-down">Vérifiez l&apos;email et votre message, puis réessayez.</p>
+              <p className="text-xs text-down">
+                {erreurServeur ?? (rappel && !telephone.trim() ? 'Indiquez le numéro auquel vous rappeler.' : "Vérifiez l'email et votre message, puis réessayez.")}
+              </p>
             )}
 
             <div className="flex gap-2">

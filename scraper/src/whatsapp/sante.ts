@@ -9,7 +9,7 @@
  *
  * Le message d'alerte ne contient ni numéro ni identifiant de compte.
  */
-import { sendTelegramText } from '../alerts/channels.js';
+import { alerterExploitant } from '../alerts/alerteExploitant.js';
 
 const DELAI_MS = 10_000;
 const SAINS = new Set(['WORKING', 'STARTING']);
@@ -56,6 +56,7 @@ export async function runSanteWhatsapp(opts: { mock: boolean }): Promise<{ nivea
   const verdict = evaluerSessionWhatsapp(obs);
   if (verdict.niveau === 'ok' || opts.mock) return { ...verdict, alerteEnvoyee: false };
 
-  const res = await sendTelegramText({ subject: '📵 WhatsApp — passerelle en panne', body: verdict.message, operateur: true });
+  // Alerte critique : appel vocal en plus du Telegram (une fois par fenêtre de 6 h).
+  const res = await alerterExploitant({ sujet: '📵 WhatsApp — passerelle en panne', corps: verdict.message, critique: 'whatsapp_session' });
   return { ...verdict, alerteEnvoyee: !!res && res.status === 'sent' };
 }

@@ -76,6 +76,7 @@ export async function POST(req: Request) {
         `session « ${ev.session ?? '?'} » au statut ${ev.statut}. Déconnexion ou bannissement possible : ` +
           `vérifier https://wa.westbourse.com (et relancer l'association si besoin).`,
         '📵 WhatsApp',
+        { critique: 'whatsapp_session' },
       );
     }
     return NextResponse.json({ ok: true });

@@ -40,5 +40,8 @@ jobs:
           WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Alerte critique : appel vocal via /api/voix/alerte (facultatif).
+          VOIX_ALERTE_URL: ${{ vars.VOIX_ALERTE_URL }}
+          VOIX_ALERTE_SECRET: ${{ secrets.VOIX_ALERTE_SECRET }}
           LOG_LEVEL: info
         run: npx tsx src/index.ts whatsapp:sante

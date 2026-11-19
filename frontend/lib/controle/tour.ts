@@ -6,6 +6,8 @@ import { evaluerTaches } from './taches';
 import { chargerTaches } from './lectureTaches';
 import { evaluerDonnees } from './donnees';
 import { chargerDonnees } from './lectureDonnees';
+import { evaluerAppelsVocaux } from './voix';
+import { chargerAppelsVocaux } from './lectureVoix';
 
 export interface Tour {
   signaux: Signal[];
@@ -21,7 +23,7 @@ export interface Tour {
  * section vide qui passerait pour saine.
  */
 export async function chargerTour(maintenant = new Date()): Promise<Tour> {
-  const [envois, taches, donnees] = await Promise.allSettled([chargerEnvois(), chargerTaches(), chargerDonnees()]);
+  const [envois, taches, donnees, voix] = await Promise.allSettled([chargerEnvois(), chargerTaches(), chargerDonnees(), chargerAppelsVocaux(maintenant)]);
   const signaux: Signal[] = [];
   signaux.push(
     ...(envois.status === 'fulfilled'
@@ -37,6 +39,11 @@ export async function chargerTour(maintenant = new Date()): Promise<Tour> {
     ...(donnees.status === 'fulfilled'
       ? evaluerDonnees(donnees.value, maintenant)
       : [signalInconnu('donnees', 'donnees:lecture', 'Fraîcheur des données', 'tables de marché et vidéo de séance')]),
+  );
+  signaux.push(
+    ...(voix.status === 'fulfilled'
+      ? evaluerAppelsVocaux(voix.value, maintenant)
+      : [signalInconnu('envois', 'envois:appels_vocaux', 'Appels vocaux', 'appels_vocaux — migration 0250 appliquée ?')]),
   );
   return {
     signaux: trierSignaux(signaux),

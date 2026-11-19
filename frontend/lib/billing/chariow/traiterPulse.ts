@@ -43,7 +43,8 @@ export interface Deps {
   lireVente(saleId: string): Promise<VenteChariow>;
   /** accorder_achat(p_transaction, p_sale) — idempotent. */
   accorder(txnId: string, saleId: string): Promise<string>;
-  alerter(texte: string): Promise<void>;
+  /** `critique` : client débité sans accès — appelle aussi l'exploitant (voix, 0250). */
+  alerter(texte: string, opts?: { critique?: boolean }): Promise<void>;
 }
 
 export interface Reponse {
@@ -141,6 +142,6 @@ export async function traiterPulse(
   if (resultat === 'module_accorde' || resultat === 'pass_accorde' || resultat === 'deja') {
     return fin('traite', resultat, txn.id);
   }
-  await deps.alerter(`transaction ${txn.id} : accord refusé (${resultat}).`);
+  await deps.alerter(`transaction ${txn.id} : accord refusé (${resultat}).`, { critique: true });
   return fin('a_verifier', resultat, txn.id);
 }

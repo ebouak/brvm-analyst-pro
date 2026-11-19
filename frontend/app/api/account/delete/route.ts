@@ -9,6 +9,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { effacerRappelsVocaux } from '@/lib/voix/rgpd';
 
 export async function DELETE() {
   const supabase = createClient();
@@ -102,6 +103,15 @@ export async function DELETE() {
     if (emailCrm !== user.email) await admin.from('leads_brvm').delete().eq('email', emailCrm);
   }
   await admin.from('crm_actions').delete().eq('user_id', user.id);
+
+  // 2quinquies-bis. Rappels vocaux (0250) : numéro + consentement retirés des
+  //          messages de l'adresse CONFIRMÉE, appels et transcriptions effacés.
+  //          `oppositions_vocales` (empreinte seule) est conservée, comme
+  //          crm_oppositions. Un échec est journalisé sans donnée personnelle.
+  if (user.email && user.email_confirmed_at) {
+    const erreurVoix = await effacerRappelsVocaux(admin, user.email.trim().toLowerCase());
+    if (erreurVoix) console.error('[account/delete] rappels vocaux non effacés :', erreurVoix);
+  }
 
   // 2sexies. Photo de profil : bucket PUBLIC `newsletter-assets`, avatars/<id>.<ext>.
   //          Sans cette purge, l'image resterait accessible par URL après effacement.

@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { exporterRappelsVocaux } from '@/lib/voix/rgpd';
 
 export async function GET() {
   const supabase = createClient();
@@ -106,6 +107,15 @@ export async function GET() {
     contactMessages = data ?? [];
   }
 
+  // Rappels vocaux (migration 0250) : numéro et consentement portés par les
+  // messages de contact de l'adresse CONFIRMÉE, appels rattachés à ces
+  // messages, opposition par empreinte. Lu à part et tolérant : sans la
+  // migration, l'export reste complet pour le reste et le dit.
+  const rappelsVocaux = await exporterRappelsVocaux(
+    getServiceClient(),
+    user.email && user.email_confirmed_at ? user.email.trim().toLowerCase() : null,
+  );
+
   // CRM (migration 0172) : tables sans policy, lecture service_role FILTRÉE.
   // L'e-mail ne sert de clé que s'il est confirmé (même règle que contact_messages).
   // Deux requêtes plutôt qu'un `.or()` : une adresse peut légalement contenir
@@ -187,6 +197,8 @@ export async function GET() {
     graphique_dessins: graphiqueDessins.data ?? [],
     // Messages envoyés via le formulaire de contact avec l'adresse du compte.
     contact_messages: contactMessages,
+    // Rappels par l'assistant vocal : numéro laissé, consentement, appels et transcriptions (30 j).
+    rappels_vocaux: rappelsVocaux,
     // CRM : intérêt pour l'offre, relances et notes vous concernant, opposition.
     crm_signaux: crmSignaux,
     crm_actions: crmActions,

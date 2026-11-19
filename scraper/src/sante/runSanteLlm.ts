@@ -9,7 +9,7 @@
  * HTTP réel le révèle (voir `evaluerSante.ts` pour les règles de classement).
  */
 import { resolveApiKeyForScraper } from '../hebdo/apiKey.js';
-import { sendTelegramText } from '../alerts/channels.js';
+import { alerterExploitant } from '../alerts/alerteExploitant.js';
 import { logger } from '../logger.js';
 import {
   evaluerSante,
@@ -109,7 +109,13 @@ export async function runSanteLlm(): Promise<RunSanteLlmResult> {
     // `operateur: true` explicite : ce message vise la conversation de
     // l'exploitant, pas un utilisateur — voir le commentaire de sendTelegram
     // dans src/alerts/channels.ts (aucun repli implicite n'existe).
-    const res = await sendTelegramText({ subject: sujet, body: message, operateur: true });
+    // Panne TOTALE = alerte critique : appel vocal en plus du Telegram
+    // (src/alerts/alerteExploitant.ts, une fois par fenêtre de 6 h).
+    const res = await alerterExploitant({
+      sujet,
+      corps: message,
+      ...(verdict.niveau === 'total' ? { critique: 'llm_panne_totale' as const } : {}),
+    });
     alerteEnvoyee = res?.status === 'sent';
     if (!alerteEnvoyee) {
       logger.error({ res }, 'Alerte santé LLM non envoyée (Telegram non configuré ou en échec)');
