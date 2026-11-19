@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: SITE_URL, changeFrequency: 'daily', priority: 1 },
     { url: `${SITE_URL}/societes`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/actualites`, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/analyses/coris-bank-ipo-2027`, lastModified: new Date('2026-11-19'), changeFrequency: 'weekly', priority: 0.85 },
     { url: `${SITE_URL}/brief`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/simulateur`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/comparateur-sgi`, changeFrequency: 'monthly', priority: 0.7 },

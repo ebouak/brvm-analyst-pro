@@ -15,6 +15,10 @@ export interface ArticleLanding {
   chapo: string;
   date_fait: string;
   publie_le: string | null;
+  href?: string;
+  imageSrc?: string;
+  featured?: boolean;
+  label?: string;
 }
 
 export const FRAICHEUR_UNE_JOURS = 30;
@@ -27,6 +31,10 @@ export function choisirUne(
 ): { une: ArticleLanding | null; autres: ArticleLanding[] } {
   if (articles.length === 0) return { une: null, autres: [] };
   const limite = maintenant.getTime() - FRAICHEUR_UNE_JOURS * 86_400_000;
+  const featured = articles.find((a) => a.featured);
+  if (featured) {
+    return { une: featured, autres: articles.filter((a) => a !== featured).slice(0, NB_AUTRES) };
+  }
   const decryptage = articles.find(
     (a) => a.type === 'decryptage' && a.publie_le != null && new Date(a.publie_le).getTime() >= limite,
   );

@@ -12,7 +12,9 @@ const jour = (iso: string) => {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
   return Number.isNaN(d.getTime()) ? iso : DATE.format(d);
 };
-const kicker = (a: ArticleLanding) => `${LIBELLE_TYPE[a.type] ?? 'Article'}${a.code ? ` · ${a.code}` : ''} · ${jour(a.date_fait)}`;
+const kicker = (a: ArticleLanding) => `${a.label ?? LIBELLE_TYPE[a.type] ?? 'Analyse'}${a.code ? ` · ${a.code}` : ''} · ${jour(a.date_fait)}`;
+const href = (a: ArticleLanding) => a.href ?? `/actualites/${a.slug}`;
+const image = (a: ArticleLanding) => a.imageSrc ?? `/api/articles/${encodeURIComponent(a.slug)}/image`;
 
 export function NosArticles({ une, autres }: { une: ArticleLanding | null; autres: ArticleLanding[] }) {
   if (!une) return null;
@@ -28,10 +30,10 @@ export function NosArticles({ une, autres }: { une: ArticleLanding | null; autre
         </Link>
       </div>
       <div className={`articles-grid${autres.length === 0 ? ' seul' : ''}`}>
-        <Link href={`/actualites/${une.slug}`} className="card art-une">
+        <Link href={href(une)} className="card art-une">
           {/* Image générée par /api/articles/[slug]/image (mise en cache 24 h) ; décorative, le titre suit. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/api/articles/${encodeURIComponent(une.slug)}/image`} alt="" width={1200} height={630} loading="lazy" decoding="async" />
+          <img src={image(une)} alt="" width={1200} height={630} loading="lazy" decoding="async" />
           <div className="art-txt">
             <h3>{une.titre}</h3>
             <p className="meta">{kicker(une)}</p>
@@ -45,7 +47,7 @@ export function NosArticles({ une, autres }: { une: ArticleLanding | null; autre
           <ul className="art-liste">
             {autres.map((a) => (
               <li key={a.slug}>
-                <Link href={`/actualites/${a.slug}`} className="card art-mini">
+                <Link href={href(a)} className="card art-mini">
                   <h3>{a.titre}</h3>
                   <p className="meta">{kicker(a)}</p>
                   <p>{a.chapo}</p>
