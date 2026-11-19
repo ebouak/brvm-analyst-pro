@@ -21,6 +21,7 @@ import type { EtapeMethode } from '@/components/vitrine/MethodeEtapes';
 import { chargerDemosOutils, chargerDecouvrir } from '@/lib/vitrine/outils';
 import { OUTILS, accesOutil, rubriqueOutil, campagnesPub } from '@/lib/vitrine/outilsPur';
 import { CanauxFlottants } from '@/components/vitrine/CanauxFlottants';
+import { AvantPremiereCoris } from '@/components/vitrine/AvantPremiereCoris';
 
 /** Fait réel d'une étape de la méthode (null = la donnée manque, l'étape s'affiche sans). */
 interface Fait { libelle: string; valeur: string; detail: string; href?: string; hrefLabel?: string }
@@ -139,6 +140,7 @@ export default async function Landing() {
 
       {/* Refonte « vitrine » (PR 1, spec 2026-11-12) : sections 3.2 à 3.6. */}
       <Ouverture o={{ dateLongue: d.dateMarche ? dateLongue(d.dateMarche) : null, enSeance: estEnSeance(new Date()), membres, nbValeurs: d.nbActions || NB_SOCIETES_COTEES }} />
+      <AvantPremiereCoris />
       <Indice d={sceneIndice(d.brvmC?.valeur ?? null, d.brvmC?.variation ?? null, d.brvmCSerie)} releve={releveTxt} hausses={d.hausses} stables={d.inchangees} baisses={d.baisses} />
       <BandeauSeance lignes={motsBandeau(chiffres)} />
       <SectionMosaique cases={cases} releve={releveTxt} />
