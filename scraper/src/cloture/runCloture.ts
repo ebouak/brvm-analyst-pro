@@ -15,6 +15,7 @@ import { envoyerImageWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } 
 import { recapConfiguree, telechargerRecap } from '../recap/telecharger.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 import { variationsAberrantes } from './plausibilite.js';
+import { lireConfirmation } from './confirmation.js';
 import {
   composerCloture,
   type AlerteDeclenchee,
@@ -176,6 +177,9 @@ export async function runCloture(
     const aberrantes = variationsAberrantes(cotes as { code: string; variation_pct: number | null }[]);
     if (aberrantes.length) logger.error({ dateMarche, aberrantes }, 'Variation impossible (opération sur titres non enregistrée ?)');
 
+    const confirmation = await lireConfirmation(sb, dateMarche);
+    logger.info({ dateMarche, confirmee: confirmation.confirmee }, `Clôture : ${confirmation.raison}`);
+
     /* Mêmes contrôles que la vidéo (video/genere.mjs) : un cron publie sans
        relecture humaine, mieux vaut un soir de silence qu'un message faux. */
     const ageJours = Math.floor((Date.now() - Date.parse(`${dateMarche}T12:00:00Z`)) / 86_400_000);
@@ -186,6 +190,11 @@ export async function runCloture(
       capitaux_non_nuls: capitauxTotal > 0,
       variations_non_plates: hausses + baisses > 0,
       variations_plausibles: aberrantes.length === 0,
+      /* 7e contrôle (8e côté vidéo) : chiffres DÉFINITIFS. Sans un run `daily`
+         réussi de cette séance, terminé après 15:00 UTC avec au moins 20
+         actions, la ligne du jour peut n'être que l'intraday. Une lecture en
+         erreur lève et fait échouer le run (jamais un oui par défaut). */
+      cloture_confirmee: confirmation.confirmee,
     };
     const manquants = Object.entries(controles)
       .filter(([, v]) => !v)
@@ -197,7 +206,7 @@ export async function runCloture(
         dateMarche,
         recipients: 0,
         sent: 0,
-        message: manquants.join(', '),
+        message: manquants.join(', ') + (confirmation.confirmee ? '' : ` (${confirmation.raison})`),
       };
     }
 
@@ -371,6 +380,26 @@ export async function runCloture(
       return recapCache.get(uid)!;
     };
 
+    /* REVÉRIFICATION JUSTE AVANT L'ENVOI. `dejaEnvoye` est lu une fois, avant
+       la boucle ; or le workflow vidéo peut désormais tourner plusieurs fois
+       par séance. On relit le journal pour CE destinataire et CE canal
+       immédiatement avant l'envoi irréversible. Lecture en erreur : on
+       n'envoie pas (un doublon ne se rattrape pas, un oubli se relance). */
+    const dejaJournalise = async (userId: string, canal: 'telegram' | 'whatsapp'): Promise<boolean> => {
+      const { data: l, error: e } = await sb
+        .from('notifications_log')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('channel', canal)
+        .eq('message', canal === 'whatsapp' ? markerWa : marker)
+        .limit(1);
+      if (e) {
+        logger.warn({ userId, code: e.code }, 'notifications_log illisible — envoi différé');
+        return true;
+      }
+      return (l ?? []).length > 0;
+    };
+
     // 4. Composition et envoi, un utilisateur à la fois.
     let sent = 0;
     for (const d of destinataires) {
@@ -420,6 +449,8 @@ export async function runCloture(
         sent++;
         continue;
       }
+
+      if (await dejaJournalise(d.user_id, d.canal)) continue;
 
       if (d.canal === 'whatsapp') {
         await pauseEntreEnvois();

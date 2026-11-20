@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
 import { sujet, texte, html, esc as echappe } from './brief.mjs';
 import { marqueurBucket, publierChaine } from './chaineWhatsapp.mjs';
+import { cheminDestination, cheminTermine } from './cloture.mjs';
 import { creerReseaux, publierVideoLinkedIn, commentaireLinkedIn } from './reseaux.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,6 +42,7 @@ if (!m.publiable) {
     .map(([k]) => k)
     .join(', ');
   console.log(`PUBLICATION ANNULEE — la seance ne passe pas les controles : ${manque}`);
+  if (m.cloture && !m.cloture.confirmee) console.log(`  clôture : ${m.cloture.raison}`);
   console.log("Aucun envoi. Mieux vaut un jour sans video qu'un post public faux.");
   process.exit(0);
 }
@@ -128,11 +130,50 @@ const lire = (...cles) => {
 const URL_SB = lire('SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL');
 const SERVICE = lire('SUPABASE_SERVICE_ROLE_KEY');
 const BUCKET = 'seance-video';
+
+/* VERROUS PAR DESTINATION. Depuis que la vidéo part à la fin de chaque
+   `bdfin.yml` (déclenché plusieurs fois par séance), deux exécutions peuvent
+   viser la même séance. Avant CHAQUE envoi irréversible, on prend un marqueur
+   `publication/<séance>/<destination>.json` en création seule (409 s'il
+   existe) : c'est la revérification juste avant l'envoi, et elle est
+   atomique. Un envoi en échec retire son marqueur pour qu'une relance
+   réessaie. Sans clé service (essai local), pas de verrou : comportement
+   d'avant. */
+const verrou = (destination) =>
+  URL_SB && SERVICE
+    ? marqueurBucket({ urlSupabase: URL_SB, entetes: entetesSupabase(SERVICE), seance: m.seance, chemin: cheminDestination(m.seance, destination) })
+    : null;
+/**
+ * 'libre' (marqueur pris, ou pas de verrou), 'fait' (déjà publié pour cette
+ * séance) ou 'illisible' (le stockage ne répond pas : on n'envoie PAS, et
+ * c'est compté en échec — un doublon public ne se rattrape pas).
+ */
+const prendre = async (v, nom) => {
+  if (!v) return 'libre';
+  try {
+    return (await v.creer()) ? 'libre' : 'fait';
+  } catch (e) {
+    console.error(`${nom} : verrou illisible — ${e.message}`);
+    journal.push(`${nom} : ECHEC — verrou illisible (${e.message})`);
+    return 'illisible';
+  }
+};
+
 /* URL publique de la vidéo du jour, renseignée par l'étape 2 : la Chaîne
    WhatsApp (étape 3b) la fait télécharger par la passerelle. */
 let urlVideoPublique = null;
 
-if (URL_SB && SERVICE) {
+const verrouSite = URL_SB && SERVICE ? verrou('site') : null;
+const etatSite = URL_SB && SERVICE ? await prendre(verrouSite, 'Site') : null;
+if (etatSite === 'illisible') {
+  echecs.push('landing');
+} else if (etatSite === 'fait') {
+  /* Déjà hébergée pour cette séance : on ne réécrit pas (une relance aurait
+     pu tirer un autre modèle). L'URL reste connue pour la Chaîne. */
+  urlVideoPublique = `${URL_SB}/storage/v1/object/public/${BUCKET}/seance/${m.seance}.mp4`;
+  console.log('Landing : deja hebergee pour cette seance — rien reecrit');
+  journal.push('Site : déjà en ligne (relance ignorée)');
+} else if (etatSite === 'libre') {
   try {
     const envoyer = async (chemin, corps, type, cache) => {
       const r = await fetch(`${URL_SB}/storage/v1/object/${BUCKET}/${chemin}`, {
@@ -212,6 +253,7 @@ if (URL_SB && SERVICE) {
     console.error(`Landing : ECHEC — ${e.message}`);
     journal.push(`Site : ECHEC — ${e.message}`);
     echecs.push('landing');
+    await verrouSite?.retirer().catch(() => {});
   }
 } else {
   console.log('Landing : ignore (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents)');
@@ -234,7 +276,14 @@ const JETON_TG = lire('TELEGRAM_BOT_TOKEN');
    cloture pour qu'il renvoie la MEME video sans la televerser a nouveau. */
 let fileIdVideo = null;
 
-if (CANAL && JETON_TG) {
+const verrouCanal = CANAL && JETON_TG ? verrou('telegram-canal') : null;
+const etatCanal = CANAL && JETON_TG ? await prendre(verrouCanal, 'Canal Telegram') : null;
+if (etatCanal === 'illisible') echecs.push('canal-telegram');
+if (etatCanal === 'fait') {
+  console.log('Canal Telegram : deja publie pour cette seance — rien envoye');
+  journal.push('Canal Telegram : déjà publié (relance ignorée)');
+}
+if (etatCanal === 'libre') {
   try {
     const form = new FormData();
     form.set('chat_id', CANAL);
@@ -268,8 +317,9 @@ if (CANAL && JETON_TG) {
     console.error(`Canal Telegram : ECHEC — ${e.message}`);
     journal.push(`Canal Telegram : ECHEC — ${e.message}`);
     echecs.push('canal-telegram');
+    await verrouCanal?.retirer().catch(() => {});
   }
-} else {
+} else if (etatCanal === null) {
   console.log('Canal Telegram : ignore (TELEGRAM_CANAL / TELEGRAM_BOT_TOKEN absents)');
 }
 
@@ -317,7 +367,14 @@ const FB_PAGE = process.env.FB_PAGE_ID;
 const FB_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const FB_V = process.env.FB_API_VERSION || 'v21.0';
 
-if (FB_PAGE && FB_TOKEN) {
+const verrouFb = FB_PAGE && FB_TOKEN ? verrou('facebook') : null;
+const etatFb = FB_PAGE && FB_TOKEN ? await prendre(verrouFb, 'Facebook') : null;
+if (etatFb === 'illisible') echecs.push('facebook');
+if (etatFb === 'fait') {
+  console.log('Facebook : deja publie pour cette seance — rien envoye');
+  journal.push('Facebook : déjà publié (relance ignorée)');
+}
+if (etatFb === 'libre') {
   try {
     const brouillon = process.env.FB_BROUILLON === 'true';
     const form = new FormData();
@@ -343,8 +400,9 @@ if (FB_PAGE && FB_TOKEN) {
     console.error(`Facebook : ECHEC — ${e.message}`);
     journal.push(`Facebook : ECHEC — ${e.message}`);
     echecs.push('facebook');
+    await verrouFb?.retirer().catch(() => {});
   }
-} else {
+} else if (etatFb === null) {
   console.log('Facebook : ignore (FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN absents)');
 }
 
@@ -687,13 +745,29 @@ const corpsHtml = [
   '</div>',
 ].join('');
 
-await notifier(corpsTexte, corpsHtml, SUJET);
+/* Une seule notification d'exploitation par séance, même si plusieurs
+   passages publient chacun une partie. Verrou illisible : on notifie quand
+   même — un doublon vers l'exploitant vaut mieux qu'un silence. */
+const etatNotif = await prendre(verrou('notification'), 'Notification du soir');
+if (etatNotif !== 'fait') await notifier(corpsTexte, corpsHtml, SUJET);
+else console.log('Notification du soir : deja envoyee pour cette seance');
 
 /* ------------------------------------------------------------- 7. bilan */
 
 if (echecs.length) {
   console.error(`Echec de publication : ${echecs.join(', ')}`);
   process.exit(1);
+}
+
+/* Séance entièrement publiée : la porte (porte.mjs) ne relancera plus le
+   rendu pour elle. Posé seulement sans AUCUN échec, sinon une relance doit
+   pouvoir compléter ; les verrous par destination empêchent les doublons. */
+if (URL_SB && SERVICE) {
+  try {
+    await marqueurBucket({ urlSupabase: URL_SB, entetes: entetesSupabase(SERVICE), seance: m.seance, chemin: cheminTermine(m.seance) }).creer();
+  } catch (e) {
+    console.error(`Marqueur de séance publiée non posé — ${e.message}`);
+  }
 }
 if (envois === 0) {
   console.log('Aucune plateforme configuree — video generee, rien envoye.');

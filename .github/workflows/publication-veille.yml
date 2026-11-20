@@ -1,0 +1,45 @@
+name: Veille — séance sans publication
+
+# Indépendant du chaînage bdfin.yml → video-seance.yml : si la clôture n'est
+# jamais confirmée, ou si le chaînage ne part pas, aucune vidéo ne sort — et
+# rien d'autre ne le dirait. Ce contrôle juge le RÉSULTAT : le marqueur
+# `chaine/<séance>.json` du bucket seance-video (posé seulement quand la
+# Chaîne WhatsApp a reçu la vidéo). Jour ouvré sans marqueur → alerte Telegram
+# à l'exploitant (TELEGRAM_CHAT_ID), avec la raison, et run ROUGE (visible
+# dans /admin/controle via ops_workflows). Jamais de saut silencieux.
+#
+# Le cron GitHub part souvent en retard : la séance visée est celle de
+# (maintenant − 23 h), donc un passage à 06:00 le lendemain juge encore la
+# bonne journée (video/cloture.mjs, `jourVeille`).
+on:
+  schedule:
+    - cron: '0 23 * * 1-5'
+  workflow_dispatch: {}
+
+concurrency:
+  group: publication-veille
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: video
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      # Aucune dépendance npm : fetch natif.
+      - name: Vérifier la publication de la séance
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node veille-publication.mjs
