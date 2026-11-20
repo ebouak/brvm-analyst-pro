@@ -15,6 +15,7 @@ import {
   type Detachement,
 } from '@/lib/fundamentals';
 import { computeLevels, type Levels } from '@/lib/hebdo/levels';
+import { lireDividende } from '@/lib/hebdo/rendementDividende';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
@@ -154,6 +155,15 @@ export interface FocusDividende {
   ex_date: string | null;
   payment_date: string | null;
   rendement: number | null;
+  /**
+   * Pourquoi `rendement` est null alors qu'un dividende positif existe : règle
+   * unique `lib/hebdo/rendementDividende.ts`. `ancien` = payé il y a plus de
+   * 12 mois (sans date : fin d'exercice + 18 mois) ; `anormal` = plus de 3 fois
+   * la médiane des exercices précédents, ou rendement > 25 %. Le montant reste
+   * citable comme « dernier dividende versé », jamais rapporté au cours.
+   * Cas d'origine : FTSC, exercice 2024, 1 726,56 net payé le 30/09/2025.
+   */
+  rendement_non_calcule?: 'dividende_ancien' | 'dividende_anormal' | null;
   payout: number | null;
   /** Historique par exercice, zéros compris — l'irrégularité est une information. */
   historique: { exercice: number | null; montant: number | null }[];
@@ -436,16 +446,48 @@ export async function buildDossier(
     base_fiscale: 'brut' | 'net' | 'inconnu' | null;
     source: string | null;
   }[];
-  const divRetenu = dividendes.find((d) => Number(d.montant) > 0) ?? null;
+  /* Le plus récent = le dernier EXERCICE, pas la première ex_date : les lignes
+     sans ex_date sont rangées en fin de requête, et FTSC (exercice 2024,
+     1 726,56 net, payé le 30/09/2025, sans ex_date) passait derrière
+     l'exercice 2023 (130 FCFA). Même choix que lireDividende. Une ligne sans
+     exercice n'est retenue qu'à défaut de toute autre. */
+  const positifs = dividendes.filter((d) => Number(d.montant) > 0);
+  const divRetenu =
+    positifs
+      .filter((d) => d.exercice != null)
+      .sort((a, b) => (b.exercice! - a.exercice!) || String(b.ex_date ?? '').localeCompare(String(a.ex_date ?? '')))[0] ??
+    positifs[0] ??
+    null;
   if (!divRetenu) lacunes.push('Aucun dividende positif enregistré : rendement et taux de distribution non calculables.');
 
+  /* Rendement au cours du jour : même règle que les articles et l'analyse
+     hebdo. Un dividende payé il y a plus d'un an, ou hors de l'historique, ne
+     se rapporte PAS au cours (FTSC : 1 726,56 net payé le 30/09/2025 donnait
+     « ~108 % du cours » en novembre 2026). Le rendement est retiré PARTOUT où
+     le dossier le lit (ratios, panneau, comparables, narratif, instantané). */
+  const lectureDiv = lireDividende(
+    dividendes.map((x) => ({ exercice: x.exercice, montant: x.montant != null ? Number(x.montant) : null, payment_date: x.payment_date })),
+    cours,
+    derniere?.date_marche ?? new Date().toISOString().slice(0, 10),
+  );
+  const rendementNonCalcule: FocusDividende['rendement_non_calcule'] =
+    lectureDiv?.mode === 'sans_rendement' ? (lectureDiv.motif === 'ancien' ? 'dividende_ancien' : 'dividende_anormal') : null;
+  if (rendementNonCalcule) {
+    lacunes.push(
+      rendementNonCalcule === 'dividende_ancien'
+        ? 'Le dernier dividende enregistré a été payé il y a plus de douze mois : il n’est pas rapporté au cours actuel, aucun rendement n’est affiché.'
+        : 'Le dernier dividende enregistré sort nettement de l’historique de la société : il n’est pas rapporté au cours actuel, aucun rendement n’est affiché.',
+    );
+  }
   /* Une base fiscale inconnue rend le rendement incertain du taux de l'impôt sur
      le revenu des valeurs mobilières, qui dépend du pays. Le taire reviendrait à publier un pourcentage dont on
      ne sait pas s'il est net ou brut. */
   if (divRetenu && (divRetenu.base_fiscale == null || divRetenu.base_fiscale === 'inconnu')) {
     lacunes.push(
       `La source « ${divRetenu.source ?? 'inconnue'} » ne précise pas si le dividende est brut ou net : ` +
-        (tauxIrvm
+        (rendementNonCalcule
+          ? 'le montant affiché peut l’être avant ou après l’impôt sur le revenu des valeurs mobilières.'
+          : tauxIrvm
           ? `le rendement affiché est incertain à hauteur de l'impôt sur le revenu des valeurs mobilières (${tauxIrvm} au ${fisc.pays}).`
           : "le rendement affiché est incertain à hauteur de l'impôt sur le revenu des valeurs mobilières, dont le taux dépend du pays de l'émetteur."),
     );
@@ -470,7 +512,15 @@ export async function buildDossier(
     : null;
   // Ratios publics : un seul calcul (ratiosBilan), identique à la fiche, /financials et /revue.
   const ratios = ratiosBrut
-    ? { ...ratiosBrut, capitalisation: rb.capitalisation, bpa: rb.bpa.valeur, per: rb.per.valeur, pb: rb.pb, ps: rb.ps, roe: rb.roe, margeNette: rb.margeNette, gearing: rb.gearing }
+    ? {
+        ...ratiosBrut,
+        capitalisation: rb.capitalisation, bpa: rb.bpa.valeur, per: rb.per.valeur, pb: rb.pb, ps: rb.ps, roe: rb.roe, margeNette: rb.margeNette, gearing: rb.gearing,
+        rendementDiv: rendementNonCalcule ? null : ratiosBrut.rendementDiv,
+        /* Même dividende, même réserve : rapporté au bénéfice du dernier
+           exercice, il donnait 5 225 % pour FTSC (versement 2024 face au BPA
+           d'un autre exercice). Pas de taux de distribution sur cette base. */
+        payout: rendementNonCalcule ? null : ratiosBrut.payout,
+      }
     : null;
 
   /* Rapporter un dividende NET à un bénéfice par action BRUT minore le taux de
@@ -732,7 +782,8 @@ export async function buildDossier(
       exercice: divRetenu?.exercice ?? null,
       ex_date: divRetenu?.ex_date ?? null,
       payment_date: divRetenu?.payment_date ?? null,
-      rendement: ratios?.rendementDiv ?? null,
+      rendement: rendementNonCalcule ? null : (ratios?.rendementDiv ?? null),
+      rendement_non_calcule: rendementNonCalcule,
       payout: ratios?.payout ?? null,
       historique: dividendes
         .filter((d) => d.exercice != null)

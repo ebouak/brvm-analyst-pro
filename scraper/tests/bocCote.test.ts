@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { lireCoteBoc, dateSeanceBoc, referencePlausible, type ItemPdf } from '../src/boc/cote.js';
+import { lireCoteBoc, lireCoteBocControlee, dateSeanceBoc, referencePlausible, type ItemPdf } from '../src/boc/cote.js';
 
 /* Extraction réelle du Bulletin Officiel de la Cote du 22/09/2026 (pages 3 et
    4 : tableau des actions). Produite depuis tests/fixtures/boc_20260922.pdf. */
@@ -64,5 +64,31 @@ describe('référence : la valeur échangée longue ne la remplace pas', () => {
     expect(referencePlausible(927230, 1700)).toBeNull();
     expect(referencePlausible(1650, 1700)).toBe(1650);
     expect(referencePlausible(1495, null)).toBe(1495); // valeur suspendue : rien à comparer
+  });
+});
+
+/* Même contrôle que l'ingestion des dividendes (separerIncoherents) : une ligne
+   dont montant ÷ référence ne redonne pas le rendement publié n'alimente pas
+   dividende_net de boc_cote_daily, et elle est NOMMÉE dans `rejets`. */
+describe('cote : dividende incohérent écarté et nommé, cote conservée', () => {
+  it('bulletin réel du 22/09 : aucun rejet, lecture identique à lireCoteBoc', () => {
+    const r = lireCoteBocControlee(pages);
+    expect(r.rejets).toEqual([]);
+    expect(r.cotes).toEqual(lus);
+  });
+
+  it('SNTS avec un montant mal lu (17400 au lieu de 1740) : dividende retiré, clôture et PER gardés', () => {
+    const ySnts = pages.flat().find((i) => i.s === 'SNTS' && i.x < 60)!.y;
+    const fausses = pages.map((items) =>
+      items.map((i) => (Math.abs(i.y - ySnts) <= 2 && i.s === '1740' ? { ...i, s: '17400' } : i)),
+    );
+    const r = lireCoteBocControlee(fausses);
+    expect(r.rejets.map((j) => j.code)).toEqual(['SNTS']);
+    expect(r.rejets[0]!.motif).toMatch(/rendement incohérent/);
+    expect(r.cotes.find((l) => l.code === 'SNTS')).toEqual({
+      code: 'SNTS', statut: 'cote', cours_cloture: 41985, cours_reference: 41985, per: 10.15,
+      rendement_net_pct: null, dividende_net: null, dividende_date: null,
+    });
+    expect(r.cotes.length).toBe(lus.length);
   });
 });

@@ -1,6 +1,7 @@
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import { dividendeCourant, horsExploitation } from '@/lib/fiche/affichage';
 import { lireCodePeriode, MOIS } from '@/lib/financials/interim';
+import { lireDividende } from '@/lib/hebdo/rendementDividende';
 import type { DossierValeur } from './build';
 
 /**
@@ -211,7 +212,23 @@ export function construireNarratif(d: DossierValeur): Narratif {
     [{ montant: d.dividende.montant ?? 0, exercice: d.dividende.exercice, ex_date: d.dividende.ex_date, payment_date: d.dividende.payment_date }],
     c.exercice != null ? Number(c.exercice) : null,
   )?.ancien ?? false;
-  if (d.dividende.montant != null && d.dividende.montant > 0 && d.dividende.rendement != null && !divAncien) {
+  /* Règle unique des textes publiés (lib/hebdo/rendementDividende.ts) : un
+     dividende payé il y a plus d'un an ou hors de l'historique n'est pas
+     rapporté au cours. `build.ts` retire déjà le rendement ; on relit la règle
+     ici pour qu'un dossier construit autrement (instantané, test) ne puisse
+     pas réintroduire la force FTSC « 1 726,56 FCFA net, soit ~108 % du cours ». */
+  const lecture = d.dividende.montant != null && d.dividende.montant > 0
+    ? lireDividende(
+        [
+          ...d.dividende.historique.filter((h) => h.exercice !== d.dividende.exercice),
+          { exercice: d.dividende.exercice, montant: d.dividende.montant, payment_date: d.dividende.payment_date },
+        ],
+        c.cours,
+        c.date_cours ?? d.genere_le,
+      )
+    : null;
+  const rendementRefuse = d.dividende.rendement_non_calcule != null || lecture?.mode === 'sans_rendement';
+  if (d.dividende.montant != null && d.dividende.montant > 0 && d.dividende.rendement != null && !divAncien && !rendementRefuse) {
     const base =
       d.dividende.base_fiscale === 'net' ? ' net'
       : d.dividende.base_fiscale === 'brut' ? ' brut'

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chiffresParAction, classerNotions, lireListeValeurs, sansSignal, type LeconIndex } from './chatbotPur';
+import { chiffresParAction, classerNotions, lireListeValeurs, rendementPourAgent, sansSignal, type LeconIndex } from './chatbotPur';
 
 const LECONS: LeconIndex[] = [
   { cours: 'Niveau 2', slug: 'academy-niveau-2-fondamental', titre: 'Leçon 2 — Le PER : évaluer la cherté d’une action' },
@@ -66,5 +66,30 @@ describe('chiffresParAction', () => {
     const r = chiffresParAction({ ...snts, resultatNet: -6_130_000_000, bpa: -313, dpa: 0, titres: 19_600_000, cours: 1720 });
     expect(r?.bpa_fcfa).toBe(-313);
     expect(r?.per).toBeNull();
+  });
+});
+
+describe('rendementPourAgent (règle unique lib/hebdo/rendementDividende.ts)', () => {
+  it('FTSC : 1 726,56 net payé le 30/09/2025, cours 1 600 au 19/11/2026 → pas de rendement, motif ancien', () => {
+    const r = rendementPourAgent([{ exercice: 2024, montant: 1726.56, payment_date: '2025-09-30' }], 1600, '2026-11-19');
+    expect(r).toEqual({ rendement_pct: null, rendement_non_calcule: 'dividende_ancien' });
+  });
+  it('dividende hors historique (> 3 fois la médiane) récent → motif anormal', () => {
+    const r = rendementPourAgent(
+      [{ exercice: 2025, montant: 900, payment_date: '2026-07-01' }, { exercice: 2024, montant: 100 }, { exercice: 2023, montant: 120 }],
+      10000, '2026-11-19',
+    );
+    expect(r).toEqual({ rendement_pct: null, rendement_non_calcule: 'dividende_anormal' });
+  });
+  it('dividende récent et normal → rendement au centième, inchangé', () => {
+    const r = rendementPourAgent(
+      [{ exercice: 2025, montant: 1655, payment_date: '2026-05-20' }, { exercice: 2024, montant: 1600 }],
+      25000, '2026-11-19',
+    );
+    expect(r).toEqual({ rendement_pct: 6.62, rendement_non_calcule: null });
+  });
+  it('sans cours → rien', () => {
+    expect(rendementPourAgent([{ exercice: 2025, montant: 100, payment_date: '2026-06-01' }], null, '2026-11-19'))
+      .toEqual({ rendement_pct: null, rendement_non_calcule: null });
   });
 });

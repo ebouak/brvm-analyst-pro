@@ -494,13 +494,17 @@ async function main(): Promise<number> {
         { code: 'boc-cote', label: 'Cote officielle (BOC)' },
         async () => {
           const r = await runCoteBoc({ date: positional[0] });
+          for (const j of r.rejets) console.log(`REJET  ${j.code.padEnd(6)} ${j.motif} — dividende non écrit dans boc_cote_daily`);
+          if (r.rejets.length > 0) {
+            console.log(`::warning title=Cote officielle::${r.rejets.length} dividende(s) rejeté(s), rendement incohérent : ${r.rejets.map((j) => j.code).join(', ')}`);
+          }
           return {
             value: r,
             outcome: {
               status: 'success',
               rows_extracted: r.lues,
               rows_upserted: r.ecrites,
-              metadata: { date_marche: r.date, suspendues: r.suspendues, saute: r.saute },
+              metadata: { date_marche: r.date, suspendues: r.suspendues, saute: r.saute, dividendes_rejetes: r.rejets.map((j) => ({ code: j.code, motif: j.motif })) },
             },
           };
         },
