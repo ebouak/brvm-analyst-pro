@@ -32,7 +32,7 @@ import './coris-ipo.css';
 export const dynamic = 'force-static';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
-const TITLE = 'Coris en bourse : 81 milliards peuvent-ils faire bouger la BRVM ?';
+const TITLE = 'Coris Bank Côte d’Ivoire en bourse : l’étude de l’OPV à 7 720 FCFA';
 const DESCRIPTION =
   'Coris Bank Côte d’Ivoire cède 20 % de son capital à 7 720 FCFA du 30 novembre au 4 décembre 2026. Étude de l’offre, de la valorisation, des dividendes attendus et des effets sur la liquidité de la BRVM.';
 const MODIFIE_LE = '2026-11-20T22:00:00+01:00';
@@ -128,7 +128,7 @@ export default function CorisIpoArticle() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/brvm-logo.png" alt="Bourse Régionale des Valeurs Mobilières" width="136" height="72" />
             </div>
-            <h1>81 milliards.<br />Deux IPO Coris.<br />Un test de liquidité.</h1>
+            <h1>62,7 milliards.<br />Une OPV Coris.<br />Un test de liquidité.</h1>
           </div>
           <div className="coris-headline__deck">
             <p>{DESCRIPTION}</p>
@@ -534,7 +534,7 @@ export default function CorisIpoArticle() {
           <div className="coris-section__intro">
             <span className="coris-section__number">09</span>
             <p className="coris-rubrique">Le vrai sujet : d’où viendra le cash ?</p>
-            <h2>81 milliards souscrits ne signifient pas 81 milliards vendus sur le secondaire.</h2>
+            <h2>62,7 milliards souscrits ne signifient pas 62,7 milliards vendus sur le secondaire.</h2>
           </div>
           <div className="coris-copy coris-copy--two">
             <p>
