@@ -1619,6 +1619,33 @@ décroché de l'usage 2 (conseil Fable) : ne pas le construire avant.
 - **Contrôle** : `/admin/controle` signale toute ligne non terminale de plus de
   24 h et les transcriptions absentes ; table illisible = « inconnu ». Pas de cron.
 
+### Ajouts (passage 2026-11-20) — Publication du soir sur clôture confirmée
+
+Migration `0251_dispatch_cloture.sql` **à appliquer**.
+
+- **Clôture confirmée** = un run `daily` (source `daily` de `scraper_sources`,
+  workflow **`bdfin.yml`**) `success`, `metadata.date_marche` = la séance,
+  `finished_at` ≥ séance 15:00 UTC, `metadata.nb_actions` ≥ 20. Règle tenue À
+  TROIS endroits : `video/cloture.mjs`, `scraper/src/cloture/confirmation.ts`,
+  `public.cloture_confirmee()` (0251). ⚠️ `scrape-daily.yml` ne lance PAS la
+  commande `daily` (il lance `intraday`) : ne jamais le prendre pour la preuve.
+- 8ᵉ contrôle `cloture_confirmee` dans `genere.mjs` (motif dans `seance.json`) ;
+  `runCloture` refuse aussi sans elle, et relit `notifications_log` juste avant
+  chaque envoi.
+- **pg_cron** (0251) déclenche `bdfin.yml` à 15:20, 15:50, 16:30, 17:30 UTC tant
+  que la clôture n'est pas confirmée ; `video-seance.yml` part sur
+  `workflow_run` de bdfin.yml, derrière `porte.mjs` (rien à faire → vert sans
+  rendu). Cron 16:45 gardé en rattrapage.
+- **Verrous** : `publication/<séance>/<destination>.json` (site, telegram-canal,
+  facebook, notification) en création seule avant chaque envoi, et
+  `publication/<séance>.json` quand tout est parti. La Chaîne garde
+  `chaine/<séance>.json`, LinkedIn/TikTok `publications_sociales`.
+- **Veille** `publication-veille.yml` (23:00 UTC) : jour ouvré sans
+  `chaine/<séance>.json` → Telegram exploitant + run rouge, avec la raison.
+- ⚠️ BDFIN a parfois UNE SÉANCE DE RETARD toute la soirée (05/11 et 17/11/2026 :
+  les runs de 22:00-23:36 lisaient la veille). Ces jours-là, plus de vidéo
+  automatique : la veille le signale, la décision reste humaine.
+
 
 ## 9. Bugs connus / limites
 

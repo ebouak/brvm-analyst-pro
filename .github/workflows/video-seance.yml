@@ -10,7 +10,22 @@ name: Vidéo de séance
 # TIKTOK_REFRESH_TOKEN. Une plateforme non configurée est ignorée, pas en échec.
 
 on:
+  # DÉCLENCHEMENT PRINCIPAL (2026-11-20) : à la fin de chaque run de
+  # `bdfin.yml`, qui exécute la commande `daily` — la consolidation de clôture.
+  # pg_cron (migration 0251) déclenche bdfin.yml à 15:20, 15:50, 16:30 et
+  # 17:30 UTC tant que la clôture n'est pas confirmée. La porte (porte.mjs)
+  # vérifie ensuite qu'un run `daily` RÉUSSI de la séance, terminé après
+  # 15:00 UTC avec ≥ 20 actions, existe : sinon rien n'est généré ni publié.
+  # Plusieurs passages par séance sont normaux ; le marqueur
+  # `publication/<séance>.json` et les verrous par destination empêchent
+  # toute double publication.
+  workflow_run:
+    workflows: ['Scrape BDFIN (séance quotidienne)']
+    types: [completed]
   schedule:
+    # RATTRAPAGE seulement : si le chaînage ne s'est pas produit. La porte
+    # s'applique de la même façon (clôture confirmée, pas encore publiée).
+    #
     # 16:45 UTC du lundi au vendredi.
     #
     # Pourquoi cette heure, et pas 18:00 comme auparavant :
@@ -47,6 +62,10 @@ permissions:
 
 jobs:
   video:
+    # Sur chaînage : seulement si bdfin.yml a réussi. Un échec de la collecte
+    # n'est pas silencieux pour autant : la veille de 23:00
+    # (publication-veille.yml) alerte l'exploitant si la Chaîne n'a rien reçu.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     # 35 et non plus 25 : le rendu Remotion (borné à 12 min) s'ajoute ;
     # 47 depuis la version 16:9 du site (bornée à 12 min elle aussi).
@@ -65,11 +84,25 @@ jobs:
         with:
           node-version: '22'
 
+      # AVANT tout le reste (ffmpeg, Chromium, rendu ≈ 40 min) : la plupart des
+      # passages déclenchés par bdfin.yml n'ont rien à faire. Sans dépendance
+      # npm (fetch natif). Rouge seulement si la base ne répond pas.
+      - name: Porte — clôture confirmée et séance non publiée
+        id: porte
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Dispatch manuel sans publication : générer pour voir, sans porte.
+          GENERATION_SEULE: ${{ github.event_name == 'workflow_dispatch' && !inputs.publier && 'true' || 'false' }}
+        run: node porte.mjs
+
       - uses: actions/setup-python@v7
+        if: steps.porte.outputs.generer == 'true'
         with:
           python-version: '3.12'
 
       - name: Installer ffmpeg et les polices
+        if: steps.porte.outputs.generer == 'true'
         # ffmpeg est présent sur l'image du runner, mais on ne le suppose pas.
         # Les polices comptent : le rendu se fait dans un navigateur, et sans
         # elles Chromium retomberait sur une fonte de secours étroite.
@@ -78,20 +111,25 @@ jobs:
           sudo apt-get install -y fonts-liberation fonts-dejavu-core
 
       - name: Installer edge-tts
+        if: steps.porte.outputs.generer == 'true'
         run: python -m pip install --quiet edge-tts
 
       - name: Installer les dépendances
+        if: steps.porte.outputs.generer == 'true'
         run: npm ci
 
       # Le récit (modèle, angle, phrases, garde-fou des chiffres) est testé
       # avant chaque génération : un gabarit cassé ne doit jamais parler.
       - name: Tester le récit
+        if: steps.porte.outputs.generer == 'true'
         run: npm test
 
       - name: Installer Chromium
+        if: steps.porte.outputs.generer == 'true'
         run: npx playwright install chromium --with-deps
 
       - name: Générer la vidéo
+        if: steps.porte.outputs.generer == 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -111,6 +149,7 @@ jobs:
         # seance.json, publie.mjs le met dans le brief de l'exploitant, et une
         # annotation apparaît sur le run.
         id: animer
+        if: steps.porte.outputs.generer == 'true'
         continue-on-error: true
         timeout-minutes: 12
         working-directory: remotion
@@ -126,6 +165,7 @@ jobs:
         # jour. Un ajout, jamais une condition : en échec, rendu-anime.mjs
         # l'écrit (paysage_raison) et le site garde la verticale.
         id: animer_site
+        if: steps.porte.outputs.generer == 'true'
         continue-on-error: true
         timeout-minutes: 12
         working-directory: remotion
@@ -135,12 +175,12 @@ jobs:
         # Toujours exécuté, même si le rendu a échoué : c'est lui qui écrit le
         # repli. Ne retient l'animée que si elle vient de la MÊME lecture que
         # la voix et qu'elle est complète (voir video/rendu-anime.mjs).
-        if: always()
+        if: always() && steps.porte.outputs.generer == 'true'
         run: node rendu-anime.mjs
 
       - name: Publier sur la landing, Facebook et TikTok
         id: publier
-        if: github.event_name == 'schedule' || inputs.publier
+        if: steps.porte.outputs.a_publier == 'true'
         env:
           # Indispensables : c'est par elles que la vidéo est hébergée dans le
           # bucket public `seance-video`, que lit la landing. Sans elles cette
@@ -178,7 +218,9 @@ jobs:
       # son file_id pour l'adresser à chaque abonné sans la re-téléverser.
       # Voir docs/superpowers/specs/2026-09-08-cloture-telegram-design.md.
       - name: Point de clôture Telegram et WhatsApp
-        if: github.event_name == 'schedule' || inputs.publier
+        # Même porte que la vidéo, et runCloture revérifie la clôture confirmée
+        # puis le journal de chaque destinataire juste avant l'envoi.
+        if: steps.porte.outputs.a_publier == 'true'
         working-directory: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -210,7 +252,7 @@ jobs:
         # dans /parametres/alertes. Aucun abonné = succès, pas échec.
         # L'envoi de DÉCOUVERTE (à tous) n'est pas ici : il se déclenche à la
         # main, parce qu'il contredit une promesse faite aux lecteurs.
-        if: github.event_name == 'schedule' || inputs.publier
+        if: steps.porte.outputs.a_publier == 'true'
         working-directory: video
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -229,7 +271,7 @@ jobs:
         #
         # La table campagne_envois le rend structurellement unique par
         # adresse : une seconde exécution n’enverrait rien à personne.
-        if: inputs.decouverte
+        if: inputs.decouverte && steps.porte.outputs.generer == 'true'
         working-directory: video
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -240,7 +282,7 @@ jobs:
       - name: Conserver la vidéo
         # always() : une vidéo correcte refusée par une plateforme reste
         # téléchargeable et publiable à la main.
-        if: always()
+        if: always() && steps.porte.outputs.generer == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: seance-${{ github.run_number }}

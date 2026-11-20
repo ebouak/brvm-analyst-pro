@@ -47,8 +47,11 @@ export function legendeWhatsapp(m) {
  * upsert : le stockage refuse un objet existant (409), ce qui fait du marqueur
  * un verrou « une publication par séance » sans table supplémentaire.
  */
-export function marqueurBucket({ urlSupabase, entetes, seance, bucket = 'seance-video', fetchImpl = fetch }) {
-  const objet = `${urlSupabase}/storage/v1/object/${bucket}/chaine/${seance}.json`;
+export function marqueurBucket({ urlSupabase, entetes, seance, chemin = `chaine/${seance}.json`, bucket = 'seance-video', fetchImpl = fetch }) {
+  /* `chemin` : depuis le déclenchement sur clôture (plusieurs passages par
+     séance), le même verrou garde aussi le canal Telegram, Facebook, le site
+     et la notification (`publication/<séance>/<destination>.json`). */
+  const objet = `${urlSupabase}/storage/v1/object/${bucket}/${chemin}`;
   return {
     async creer() {
       const r = await fetchImpl(objet, {

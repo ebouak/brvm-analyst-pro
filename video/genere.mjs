@@ -26,6 +26,8 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { composerRecit, chiffresAutorises, chiffresEtrangers } from './recit.mjs';
+import { evaluerCloture, lireRunsDaily } from './cloture.mjs';
+import { entetesSupabase } from './supabaseEntetes.mjs';
 
 /* Chemins deduits du fichier lui-meme : le script doit tourner aussi bien sur
    le poste de l'auteur que sur un runner GitHub, ou aucun chemin Windows
@@ -566,8 +568,27 @@ const AGE_MAX = Number(process.env.VIDEO_AGE_MAX_JOURS || 5);
 const aberrantes = cotes.filter((a) => Math.abs(a.variation_pct) > 50).map((a) => `${a.code} ${a.variation_pct} %`);
 if (aberrantes.length) console.error('variation impossible :', aberrantes.join(', '));
 const ageJours = Math.floor((Date.now() - Date.parse(`${seance}T12:00:00Z`)) / 86400000);
+/* CLÔTURE CONFIRMÉE (8e contrôle). Les sept autres jugent la cohérence des
+   chiffres, aucun ne dit s'ils sont DÉFINITIFS : la ligne du jour existe dès
+   l'intraday. Seul un run `daily` réussi, de cette séance, terminé après
+   15:00 UTC et ayant écrit au moins 20 actions, le prouve (voir cloture.mjs).
+   Une lecture impossible vaut refus, avec sa raison : jamais un oui par défaut. */
+const SERVICE_SB = lire('SUPABASE_SERVICE_ROLE_KEY');
+let cloture;
+if (!SERVICE_SB) {
+  cloture = { confirmee: false, raison: 'clé service absente : scraper_runs illisible', run_id: null, fin: null };
+} else {
+  try {
+    cloture = evaluerCloture(seance, await lireRunsDaily({ urlSupabase: URL_SB, entetes: entetesSupabase(SERVICE_SB), seance }));
+  } catch (e) {
+    cloture = { confirmee: false, raison: `scraper_runs illisible : ${e.message}`, run_id: null, fin: null };
+  }
+}
+console.log(`cloture_confirmee : ${cloture.confirmee} — ${cloture.raison}`);
+
 const controles = {
   seance_recente: ageJours <= AGE_MAX,
+  cloture_confirmee: cloture.confirmee,
   assez_de_valeurs: cotes.length >= 20,
   composite_present: !!composite,
   capitaux_non_nuls: T > 0,
@@ -661,6 +682,8 @@ writeFileSync(
       texte: TEXTE,
       fichier: sortie,
       controles,
+      /* Motif écrit : un refus doit se lire dans la fiche, pas seulement se deviner. */
+      cloture,
       publiable,
     },
     null,
@@ -675,5 +698,6 @@ console.log(
         Object.entries(controles)
           .filter(([, v]) => !v)
           .map(([k]) => k)
-          .join(', '),
+          .join(', ') +
+        (cloture.confirmee ? '' : ` (${cloture.raison})`),
 );
