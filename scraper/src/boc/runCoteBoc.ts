@@ -2,7 +2,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { listerBulletins, telechargerPdf, type BulletinPublie } from '../carnet/fetch.js';
 import { itemsDesPages } from '../dividends/runDividendesBoc.js';
-import { lireCoteBoc, dateSeanceBoc, type CoteBoc } from './cote.js';
+import { lireCoteBocControlee, dateSeanceBoc, type CoteBoc, type RejetBoc } from './cote.js';
 
 /**
  * Collecte de la cote officielle (Bulletin Officiel de la Cote) dans
@@ -31,6 +31,8 @@ export interface CoteRunResult {
   suspendues: string[];
   ecrites: number;
   saute: boolean;
+  /** Lignes de dividende écartées (rendement incohérent) : la cote est écrite, pas le dividende. */
+  rejets: RejetBoc[];
 }
 
 export function versBase(l: CoteBoc, date: string, url: string) {
@@ -61,7 +63,7 @@ export async function runCoteBoc(opts: { date?: string } = {}): Promise<CoteRunR
   if (eCount) throw new Error(`boc_cote_daily illisible : ${eCount.message}`);
   if ((count ?? 0) >= MIN_VALEURS && !opts.date) {
     logger.info({ date: cible.date, lignes: count }, 'cote du bulletin déjà collectée, rien à faire');
-    return { date: cible.date, lues: count ?? 0, suspendues: [], ecrites: 0, saute: true };
+    return { date: cible.date, lues: count ?? 0, suspendues: [], ecrites: 0, saute: true, rejets: [] };
   }
 
   const pages = await itemsDesPages(await telechargerPdf(cible.url));
@@ -69,7 +71,10 @@ export async function runCoteBoc(opts: { date?: string } = {}): Promise<CoteRunR
   if (dateLue && dateLue !== cible.date) {
     throw new Error(`bulletin incohérent : fichier du ${cible.date}, pied de page du ${dateLue} — rien n'est écrit`);
   }
-  const lues = lireCoteBoc(pages);
+  const { cotes: lues, rejets } = lireCoteBocControlee(pages);
+  for (const r of rejets) {
+    logger.warn({ code: r.code, motif: r.motif, bulletin: cible.date }, 'cote officielle : dividende rejeté, non écrit dans boc_cote_daily');
+  }
   if (lues.length < MIN_VALEURS) {
     throw new Error(`seulement ${lues.length} valeurs lues dans ${cible.url} : lecture suspecte, rien n'est écrit`);
   }
@@ -84,6 +89,7 @@ export async function runCoteBoc(opts: { date?: string } = {}): Promise<CoteRunR
     suspendues: lues.filter((l) => l.statut === 'suspendu').map((l) => l.code),
     ecrites: rows.length,
     saute: false,
+    rejets,
   };
   logger.info(res, 'cote officielle collectée');
   return res;

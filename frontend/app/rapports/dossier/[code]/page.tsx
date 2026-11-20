@@ -348,7 +348,11 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
           { libelle: estBanque ? 'Produit net bancaire' : 'Chiffre d’affaires', ...separe(c.chiffre_affaires), note: c.croissance_ca_1an != null ? `${pourcent(c.croissance_ca_1an)} sur un an` : null },
           { libelle: 'Résultat net', ...separe(c.resultat_net), note: evolution ? `${evolution} sur un an` : null },
           { libelle: 'Marge nette', valeur: c.resultat_net != null && c.chiffre_affaires ? fmtNumber((c.resultat_net / c.chiffre_affaires) * 100, 1) : null, unite: '%', note: estBanque ? 'résultat net rapporté au produit net bancaire' : 'résultat net rapporté au chiffre d’affaires' },
-          { libelle: 'Dividende par action', valeur: divCourant ? fmtNumber(divCourant.montant, Number.isInteger(divCourant.montant) ? 0 : 2) : null, unite: 'FCFA', note: div.rendement != null ? `rendement de ${fmtNumber(div.rendement * 100, 2)}\u00a0% au cours actuel${div.exercice ? `, exercice ${div.exercice}` : ''}` : null },
+          { libelle: 'Dividende par action', valeur: divCourant ? fmtNumber(divCourant.montant, Number.isInteger(divCourant.montant) ? 0 : 2) : null, unite: 'FCFA', note: div.rendement != null
+            ? `rendement de ${fmtNumber(div.rendement * 100, 2)}\u00a0% au cours actuel${div.exercice ? `, exercice ${div.exercice}` : ''}`
+            : div.rendement_non_calcule
+              ? `dernier dividende vers\u00e9${div.exercice ? `, exercice ${div.exercice}` : ''}${div.payment_date ? `, pay\u00e9 le ${fmtDateFR(div.payment_date)}` : ''}`
+              : null },
         ]}
       >
         {inter && (
@@ -747,8 +751,17 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                 <Mesure
                   libelle="Rendement"
                   valeur={part(div.rendement, 2)}
+                  motif={
+                    div.rendement_non_calcule === 'dividende_ancien'
+                      ? 'non calculé : payé il y a plus d’un an'
+                      : div.rendement_non_calcule === 'dividende_anormal'
+                        ? 'non calculé : hors de l’historique'
+                        : undefined
+                  }
                   note={
-                    div.base_fiscale === 'net'
+                    div.rendement_non_calcule
+                      ? 'Non rapporté au cours actuel.'
+                      : div.base_fiscale === 'net'
                       ? 'Rendement net du cours actuel.'
                       : div.base_fiscale === 'brut'
                         ? 'Rendement brut du cours actuel.'
@@ -758,9 +771,11 @@ export default async function DossierPage(props: { params: Promise<{ code: strin
                 <Mesure
                   libelle="Taux de distribution"
                   valeur={part(distribution.valeur)}
-                  motif={distribution.motif}
+                  motif={div.rendement_non_calcule ? 'non calculé, même raison' : distribution.motif}
                   note={
-                    div.base_fiscale === 'net'
+                    div.rendement_non_calcule
+                      ? undefined
+                      : div.base_fiscale === 'net'
                       ? `Rapporte un dividende net à un bénéfice brut : minoré${id.taux_irvm != null ? ` d'environ ${taux(id.taux_irvm)}` : " du taux de l'impôt retenu à la source"}.`
                       : 'Part du résultat net distribuée.'
                   }

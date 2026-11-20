@@ -2,6 +2,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getLastMarketDate } from '@/lib/marketDate';
+import { rendementPourAgent } from '@/lib/agent/chatbotPur';
 
 /**
  * Boîte à outils de l'agent conversationnel.
@@ -141,7 +142,7 @@ export const OUTILS: DefinitionOutil[] = [
     function: {
       name: 'dividendes_valeur',
       description:
-        'Dividendes versés par une société : montant, exercice, date de détachement, date de paiement, et rendement calculé sur le cours actuel. À utiliser pour « quel dividende », « quel rendement », « quand est le détachement ».',
+        'Dividendes versés par une société : montant, exercice, date de détachement, date de paiement, et rendement calculé sur le cours actuel (null avec rendement_non_calcule quand le dernier dividende est ancien ou hors norme : ne jamais le recalculer). À utiliser pour « quel dividende », « quel rendement », « quand est le détachement ».',
       parameters: {
         type: 'object',
         properties: {
@@ -352,14 +353,32 @@ async function dividendesValeur(db: SupabaseClient, saisie: string) {
   }
 
   const cours = (a?.cours_jour as number | null) ?? null;
-  const dernier = fiables[0];
   const divs2 = fiables;
+  /* Rendement : calculé seulement si les deux termes existent, jamais estimé,
+     et selon la règle unique des textes publiés (lib/hebdo/rendementDividende.ts).
+     Un dividende payé il y a plus de 12 mois ou hors de l'historique n'est PAS
+     rapporté au cours : FTSC (1 726,56 net payé le 30/09/2025, cours ~1 600)
+     aurait donné « 108 % ». `rendement_non_calcule` dit pourquoi, pour que
+     l'agent ne fasse pas la division lui-même — et s'il la faisait, le verrou
+     des chiffres du chatbot la rejetterait (le quotient n'est dans aucun retour). */
+  const rdt = rendementPourAgent(
+    fiables.map((d) => ({ exercice: d.exercice, montant: Number(d.montant), payment_date: d.payment_date })),
+    cours,
+    asOf ?? new Date().toISOString().slice(0, 10),
+  );
   return {
     code,
     cours_actuel: cours,
-    // Rendement calculé seulement si les deux termes existent : jamais estimé.
-    rendement_pct:
-      cours && cours > 0 && dernier.montant != null ? (Number(dernier.montant) / cours) * 100 : null,
+    rendement_pct: rdt.rendement_pct,
+    ...(rdt.rendement_non_calcule
+      ? {
+          rendement_non_calcule: rdt.rendement_non_calcule,
+          consigne:
+            rdt.rendement_non_calcule === 'dividende_ancien'
+              ? 'Dernier dividende payé il y a plus de douze mois : le citer comme « dernier dividende versé » avec son exercice et sa date de paiement, sans le rapporter au cours et sans calculer de rendement.'
+              : 'Dernier dividende hors de l’historique de la société : le citer comme « dernier dividende versé » avec son exercice, sans le rapporter au cours et sans calculer de rendement.',
+        }
+      : {}),
     dividendes: divs2.map((d) => ({
       exercice: d.exercice,
       montant: `${fr(Number(d.montant))} ${d.devise ?? 'FCFA'}`,

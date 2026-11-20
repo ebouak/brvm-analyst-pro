@@ -1,4 +1,5 @@
 import { computeRatios } from '../fundamentals';
+import { lireDividende, type LigneDividende } from '../hebdo/rendementDividende';
 
 /**
  * Parties PURES des outils de l'assistant WhatsApp (lib/agent/outilsChatbot.ts).
@@ -115,4 +116,27 @@ export function chiffresParAction(e: EntreeParAction): ChiffresParAction | null 
     per: per != null && per > 0 ? Math.round(per * 10) / 10 : null,
     base_per: 'résultat net consolidé, intérêts minoritaires inclus',
   };
+}
+
+export interface RendementAgent {
+  /** Dernier dividende ÷ cours, en %, arrondi au centième ; null si non calculé. */
+  rendement_pct: number | null;
+  /**
+   * Pourquoi le rendement n'est pas calculé alors qu'un dividende existe. Règle
+   * unique des textes publiés (lib/hebdo/rendementDividende.ts) : payé il y a
+   * plus de 12 mois, ou hors de l'historique (> 3 fois la médiane des exercices
+   * précédents, ou > 25 %). Cas d'origine : FTSC, 1 726,56 FCFA net (exercice
+   * 2024) payé le 30/09/2025, rapporté à un cours de ~1 600 en novembre 2026.
+   */
+  rendement_non_calcule: 'dividende_ancien' | 'dividende_anormal' | null;
+}
+
+/** Rendement que l'agent a le droit d'annoncer : la même règle que les articles et le dossier. */
+export function rendementPourAgent(lignes: LigneDividende[], cours: number | null, dateSeance: string): RendementAgent {
+  const l = lireDividende(lignes, cours, dateSeance);
+  if (!l) return { rendement_pct: null, rendement_non_calcule: null };
+  if (l.mode === 'sans_rendement') {
+    return { rendement_pct: null, rendement_non_calcule: l.motif === 'ancien' ? 'dividende_ancien' : 'dividende_anormal' };
+  }
+  return { rendement_pct: Math.round(l.rendementPct * 100) / 100, rendement_non_calcule: null };
 }

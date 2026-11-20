@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { construireNarratif } from './narratif.ts';
+import { construireSquelette, chargerProse } from './prose.ts';
 
 /**
  * Le narratif est déterministe : mêmes chiffres, mêmes phrases. Ces tests
@@ -154,5 +155,95 @@ test('un dividende de l exercice precedent reste un point d appui', () => {
   const d = neic();
   d.chiffres_cles.exercice = '2025';
   d.dividende.exercice = 2024;
+  /* Daté : sans date de paiement, un dividende 2024 serait « ancien » après le
+     30/06/2026 (règle unique lib/hebdo/rendementDividende.ts). */
+  d.dividende.payment_date = '2025-07-15';
+  d.chiffres_cles.date_cours = '2026-05-15';
   assert.ok(construireNarratif(d).forces.some((a) => a.texte.startsWith('Dividende')));
+});
+
+/* ── Règle unique du rendement (lib/hebdo/rendementDividende.ts) ──────────
+   Cas d'origine : FTSC, exercice 2024, 1 726,56 FCFA net payé le 30/09/2025,
+   cours ~1 600 en novembre 2026. Le dossier écrivait « Dividende de
+   1 726,56 FCFA net, soit ~108 % du cours ». */
+function ftsc() {
+  const d = vide();
+  d.identite.code = 'FTSC';
+  d.chiffres_cles.exercice = '2024';
+  d.chiffres_cles.cours = 1600;
+  d.chiffres_cles.date_cours = '2026-11-19';
+  d.dividende.montant = 1726.56;
+  d.dividende.base_fiscale = 'net';
+  d.dividende.exercice = 2024;
+  d.dividende.ex_date = '2025-09-25';
+  d.dividende.payment_date = '2025-09-30';
+  d.dividende.historique = [{ exercice: 2022, montant: 0 }, { exercice: 2023, montant: 0 }, { exercice: 2024, montant: 1726.56 }];
+  return d;
+}
+
+test('FTSC : un dividende payé il y a plus de douze mois ne devient pas un rendement, même si le dossier en porte un', () => {
+  const d = ftsc();
+  d.dividende.rendement = 1726.56 / 1600; // dossier construit sans la règle
+  const n = construireNarratif(d);
+  const tout = [...n.forces, ...n.risques].map((a) => a.texte).join(' | ');
+  assert.ok(!/du cours/.test(tout), tout);
+  assert.ok(!tout.includes('1 726,56') || !tout.includes('%'), tout);
+  assert.ok(!n.forces.some((a) => a.texte.startsWith('Dividende')));
+});
+
+test('FTSC : rendement retiré par build (rendement_non_calcule) => aucune force de dividende', () => {
+  const d = ftsc();
+  d.dividende.rendement = null;
+  d.dividende.rendement_non_calcule = 'dividende_ancien';
+  assert.ok(!construireNarratif(d).forces.some((a) => a.texte.startsWith('Dividende')));
+});
+
+test('dividende anormal (plus de 3 fois la médiane des exercices antérieurs) : pas de force de rendement', () => {
+  const d = ftsc();
+  d.chiffres_cles.date_cours = '2025-10-15'; // payé il y a 15 jours : pas ancien
+  d.dividende.historique = [{ exercice: 2022, montant: 100 }, { exercice: 2023, montant: 110 }, { exercice: 2024, montant: 1726.56 }];
+  d.dividende.rendement = 0.2; // sous 25 % : seul l'historique le trahit
+  d.chiffres_cles.cours = 1726.56 / 0.2;
+  assert.ok(!construireNarratif(d).forces.some((a) => a.texte.startsWith('Dividende')));
+});
+
+test('dividende récent et normal : la force de rendement est inchangée', () => {
+  const d = vide();
+  d.chiffres_cles.exercice = '2025';
+  d.chiffres_cles.cours = 25000;
+  d.chiffres_cles.date_cours = '2026-11-19';
+  d.dividende.montant = 1500;
+  d.dividende.base_fiscale = 'net';
+  d.dividende.exercice = 2025;
+  d.dividende.payment_date = '2026-05-20';
+  d.dividende.rendement = 0.06;
+  d.dividende.historique = [{ exercice: 2023, montant: 1400 }, { exercice: 2024, montant: 1450 }, { exercice: 2025, montant: 1500 }];
+  const f = construireNarratif(d).forces.find((a) => a.texte.startsWith('Dividende'));
+  assert.ok(f);
+  assert.match(f.texte, /^Dividende de 1.500,00 FCFA net, soit 6,00 % du cours$/);
+});
+
+test('FTSC : la prose polie d avant la règle est écartée, le dossier retombe sur le squelette sans chiffre', async () => {
+  /* Avant : force « un dividende net versé » présente (règle non appliquée). */
+  const avant = ftsc();
+  avant.dividende.exercice = 2025; avant.dividende.payment_date = '2026-09-30'; avant.dividende.rendement = 0.05;
+  avant.dividende.historique = [];
+  avant.chiffres_cles.cours = 1726.56 / 0.05;
+  const skAvant = construireSquelette(avant, construireNarratif(avant));
+  assert.match(skAvant.sections[0].texte, /dividende net versé/);
+
+  const apres = ftsc();
+  apres.dividende.rendement = null; apres.dividende.rendement_non_calcule = 'dividende_ancien';
+  apres.lacunes = ['Le dernier dividende enregistré a été payé il y a plus de douze mois.'];
+  const sk = construireSquelette(apres, construireNarratif(apres));
+  assert.notEqual(sk.empreinte, skAvant.empreinte);
+  const texte = sk.sections.map((x) => x.texte).join(' ');
+  assert.ok(!/dividende net versé/.test(texte), texte);
+  assert.ok(!/%/.test(texte));
+  assert.ok(sk.sections.every((x) => x.texte.length > 40));
+
+  const sb = { from: () => ({ select: () => ({ eq: () => ({ order: () => ({ limit: () => ({ maybeSingle: async () => ({ data: { genere_le: '2026-11-14', sections: skAvant.sections, empreinte: skAvant.empreinte } }) }) }) }) }) }) };
+  const p = await chargerProse(sb, 'FTSC', sk);
+  assert.equal(p.source, 'squelette');
+  assert.deepEqual(p.sections, sk.sections);
 });

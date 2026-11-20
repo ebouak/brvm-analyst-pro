@@ -17,9 +17,9 @@
  * qui porte les en-têtes, puis conservées pour la page de continuation.
  */
 import { parseFrNumber } from '../utils/parseNumber.js';
-import { lireDerniersDividendes, type ItemPdf } from '../dividends/boc.js';
+import { lireDerniersDividendes, separerIncoherents, type DividendeBoc, type ItemPdf, type RejetBoc } from '../dividends/boc.js';
 
-export type { ItemPdf };
+export type { ItemPdf, RejetBoc };
 
 export interface CoteBoc {
   code: string;
@@ -52,8 +52,27 @@ export function referencePlausible(reference: number | null, cloture: number | n
 }
 
 export function lireCoteBoc(pages: ItemPdf[][]): CoteBoc[] {
+  return lireCoteBocControlee(pages).cotes;
+}
+
+/**
+ * Comme lireCoteBoc, et nomme les lignes de dividende REJETÉES par le même
+ * contrôle que l'ingestion des dividendes (dividends/boc.ts, separerIncoherents :
+ * montant ÷ référence doit redonner le rendement net publié à 0,5 point près).
+ * Une ligne rejetée n'alimente NI dividende_net, NI rendement_net_pct, NI
+ * dividende_date de boc_cote_daily : sinon le contrôle quotidien des écarts
+ * prendrait une lecture fautive pour la référence. La cote (clôture, PER,
+ * statut) de la valeur reste écrite. L'appelant journalise `rejets` : pas de
+ * saut silencieux.
+ */
+export function lireCoteBocControlee(pages: ItemPdf[][]): { cotes: CoteBoc[]; rejets: RejetBoc[] } {
+  const { retenus, rejets } = separerIncoherents(lireDerniersDividendes(pages));
+  const cotes = lireCote(pages, new Map(retenus.map((d) => [d.code, d])));
+  return { cotes, rejets };
+}
+
+function lireCote(pages: ItemPdf[][], dividendes: Map<string, DividendeBoc>): CoteBoc[] {
   let col = { ...DEFAUT };
-  const dividendes = new Map(lireDerniersDividendes(pages).map((d) => [d.code, d]));
   const sortie: CoteBoc[] = [];
   const vus = new Set<string>();
 
