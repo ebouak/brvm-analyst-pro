@@ -3,6 +3,7 @@ import { getLoginMarket } from '../login/getLoginMarket';
 import { LoginMarketBar } from '@/components/auth/LoginMarketBar';
 import { fromSur } from '@/lib/auth/urlsAcces';
 import { libellePage } from '@/lib/nav';
+import { normaliserSrc } from '@/lib/acquisition/suivi';
 
 export const revalidate = 300;
 
@@ -14,7 +15,7 @@ function emailSaisie(v: string | undefined): string | undefined {
 
 export default async function SignupPage(
   props: {
-    searchParams: Promise<{ error?: string; next?: string; email?: string }>;
+    searchParams: Promise<{ error?: string; next?: string; email?: string; src?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -22,6 +23,9 @@ export default async function SignupPage(
   // Page protégée demandée : on le dit, avec son libellé s'il est connu.
   const demandee = fromSur(searchParams.next);
   const libelle = libellePage(demandee);
+  // Source de campagne (affiche, délégué…) : transmise sans être affichée, comptée
+  // une fois l'inscription réussie (agrégé, aucune donnée personnelle — lib/acquisition).
+  const src = searchParams.src !== undefined ? normaliserSrc(searchParams.src) : undefined;
   return (
     <div className="relative min-h-screen">
       <LoginMarketBar asOf={market.asOf} ticks={market.ticks} candles={market.candles} />
@@ -37,7 +41,7 @@ export default async function SignupPage(
           </p>
         </div>
       )}
-      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" next={searchParams.next} emailInitial={emailSaisie(searchParams.email)} />
+      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" next={searchParams.next} emailInitial={emailSaisie(searchParams.email)} src={src} />
     </div>
   );
 }

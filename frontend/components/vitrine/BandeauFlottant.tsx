@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CANAUX } from '@/lib/canaux';
+import { cheminSuivi } from '@/lib/acquisition/suivi';
 import { bandeauVisible } from '@/lib/vitrine/basPur';
 import { LienInscription } from './LienInscription';
 import { LienCanal } from './LienCanal';
@@ -56,7 +56,7 @@ export function BandeauFlottant() {
     <div className="v-flottant bande-sombre" role="region" aria-label="Créer un compte">
       <span className="v-flottant-texte">La BRVM au chiffre près. <span>Gratuit, sans carte bancaire.</span></span>
       <LienInscription emplacement="bandeau" libelle="Créer mon compte" className="v-bouton v-bouton--compact" />
-      <LienCanal href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="bandeau" className="v-bouton-second">WhatsApp</LienCanal>
+      <LienCanal href={cheminSuivi('chaine', 'accueil-bandeau')} canal="whatsapp" emplacement="bandeau" className="v-bouton-second">WhatsApp</LienCanal>
       <button type="button" className="v-flottant-fermer" aria-label="Masquer ce bandeau" onClick={fermer}>
         <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>

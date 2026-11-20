@@ -4,7 +4,7 @@ import { Sequence } from './mouvement/Sequence';
 import { TraceCourbe } from './mouvement/TraceCourbe';
 import { BarreQuiPousse } from './mouvement/BarreQuiPousse';
 import { Compteur } from './mouvement/Compteur';
-import { CANAUX } from '@/lib/canaux';
+import { cheminSuivi } from '@/lib/acquisition/suivi';
 
 export interface DonneesFilm {
   dateLongue: string;
@@ -76,8 +76,8 @@ export function FilmSeance({ f }: { f: DonneesFilm }) {
         <div key="appel" className="v-film-scene">
           <span className="v-film-date">Recevez-la <span className="vitrine-accent">chaque soir.</span></span>
           <span className="v-film-canaux">
-            <a href={CANAUX.whatsappChaine} target="_blank" rel="noopener">WhatsApp</a>
-            <a href={CANAUX.telegram} target="_blank" rel="noopener">Telegram</a>
+            <a href={cheminSuivi('chaine', 'accueil-film-fin')} target="_blank" rel="noopener">WhatsApp</a>
+            <a href={cheminSuivi('telegram', 'accueil-film-fin')} target="_blank" rel="noopener">Telegram</a>
             <a href="#v-canaux">E-mail</a>
           </span>
         </div>,

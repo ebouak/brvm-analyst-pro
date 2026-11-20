@@ -25,6 +25,9 @@ export const PUBLIC_EXACT = new Set<string>([
   // Indice de nervosité WESTBOURSE : donnée de marché dérivée des clôtures (SEO).
   '/nervosite',
   '/crm/opposition',
+  // Liens de suivi de la Chaîne WhatsApp / du canal Telegram (affiches, délégués) :
+  // ils comptent puis redirigent, un visiteur sans compte doit pouvoir les suivre.
+  '/chaine', '/telegram',
   '/offre/dossier',
   // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,
   // il répondait 307 vers /login et aucun navigateur ne pouvait le lire
