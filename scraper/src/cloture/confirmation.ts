@@ -10,7 +10,7 @@
  *
  * DUPLICATION ASSUMÉE : video/cloture.mjs porte la même règle (deux paquets
  * distincts, comme scraper/src/hebdo/pure/). Toute correction des deux côtés.
- * La fonction SQL `public.cloture_confirmee` (migration 0251) aussi.
+ * La fonction SQL `public.cloture_confirmee` (migration 0252) aussi.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 

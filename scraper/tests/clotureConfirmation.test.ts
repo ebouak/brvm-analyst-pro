@@ -71,7 +71,7 @@ describe('lireConfirmation', () => {
   });
 });
 
-describe('decisionDispatch (référence de la fonction SQL 0251)', () => {
+describe('decisionDispatch (référence de la fonction SQL 0252)', () => {
   const base = { isodow: 4, jourFerme: false, confirmee: false, runEnCours: false, jetonPresent: true };
   it('jour ouvré, non confirmée → dispatch', () => {
     expect(decisionDispatch(base)).toEqual({ dispatcher: true, raison: 'dispatch' });

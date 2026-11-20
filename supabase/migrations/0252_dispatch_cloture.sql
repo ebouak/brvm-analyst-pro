@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0251 — Déclencher la consolidation de clôture dès 15:20 UTC (option C).
+-- 0252 — Déclencher la consolidation de clôture dès 15:20 UTC (option C).
 --
 -- POURQUOI. La vidéo de séance, la Chaîne WhatsApp, le canal Telegram et les
 -- points de clôture privés ne doivent partir que sur des chiffres DÉFINITIFS.

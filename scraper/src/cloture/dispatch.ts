@@ -2,7 +2,7 @@
  * Décision de déclenchement de la consolidation de clôture (`bdfin.yml`).
  *
  * RÉFÉRENCE TESTÉE de la fonction SQL `public.dispatch_cloture_si_necessaire()`
- * (migration 0251), appelée par pg_cron à 15:20, 15:50, 16:30 et 17:30 UTC.
+ * (migration 0252), appelée par pg_cron à 15:20, 15:50, 16:30 et 17:30 UTC.
  * Le SQL ne se teste pas ici ; cette fonction en fixe la règle, et la
  * migration la reproduit branche pour branche. Toute correction des deux côtés.
  */

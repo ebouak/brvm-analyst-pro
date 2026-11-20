@@ -12,7 +12,7 @@ name: Vidéo de séance
 on:
   # DÉCLENCHEMENT PRINCIPAL (2026-11-20) : à la fin de chaque run de
   # `bdfin.yml`, qui exécute la commande `daily` — la consolidation de clôture.
-  # pg_cron (migration 0251) déclenche bdfin.yml à 15:20, 15:50, 16:30 et
+  # pg_cron (migration 0252) déclenche bdfin.yml à 15:20, 15:50, 16:30 et
   # 17:30 UTC tant que la clôture n'est pas confirmée. La porte (porte.mjs)
   # vérifie ensuite qu'un run `daily` RÉUSSI de la séance, terminé après
   # 15:00 UTC avec ≥ 20 actions, existe : sinon rien n'est généré ni publié.
