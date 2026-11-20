@@ -184,9 +184,8 @@ export default function CorisIpoArticle() {
           <div className="coris-copy">
             <p>
               Coris Bank International Côte d’Ivoire (CBI CI) ouvre la marche : souscription du
-              30 novembre au 4 décembre 2026, première cotation le 15 janvier 2027. Coris Bank
-              Bénin suivrait en janvier ; au 20 novembre, aucune note d’information n’est publiée
-              pour elle, seule la presse évoque environ 19 Md.
+              30 novembre au 4 décembre 2026, première cotation le 15 janvier 2027. L’introduction
+              de Coris Bank Bénin est annoncée ; ses conditions ne sont pas publiées.
             </p>
             <p>
               La question laissée ouverte la veille est tranchée pour CBI CI : c’est une
