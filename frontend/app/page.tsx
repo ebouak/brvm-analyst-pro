@@ -40,7 +40,7 @@ export const metadata = {
     'Cours BRVM environ toutes les 15 minutes en séance, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
   alternates: {
     canonical: '/',
-    types: { 'application/rss+xml': [{ url: '/api/rss', title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
+    types: { 'application/rss+xml': [{ url: '/rss.xml', title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
   },
 };
 

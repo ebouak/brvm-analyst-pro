@@ -91,7 +91,7 @@ export const metadata: Metadata = {
   // /methodologie, etc. comme doublons de l'accueil. Chaque page pose le sien ; à défaut,
   // le moteur retient l'URL de la page.
   alternates: {
-    types: { 'application/rss+xml': [{ url: `${SITE_URL}/api/rss`, title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
+    types: { 'application/rss+xml': [{ url: `${SITE_URL}/rss.xml`, title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
   },
 };
 
