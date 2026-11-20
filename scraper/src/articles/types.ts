@@ -81,7 +81,11 @@ export interface Contexte {
 export interface Reperes {
   bpa: number | null;
   exercice_bpa: string | null;
-  dividendes: { exercice: number; montant: number }[]; // du plus récent au plus ancien
+  /**
+   * Du plus récent au plus ancien, montants > 0 seulement : une ligne à zéro
+   * est une donnée absente, pas une absence de dividende.
+   */
+  dividendes: { exercice: number; montant: number; payment_date?: string | null }[];
   liquidite_classe: string | null;
   liquidite_score: number | null;
   signal: string | null;

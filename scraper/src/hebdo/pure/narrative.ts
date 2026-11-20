@@ -193,9 +193,14 @@ function sectionValorisation(m: HebdoMetrics, p: Plume): string | null {
   }
   const d = a.dividende;
   if (d) {
-    let t = `Le dernier dividende, ${p.prix(d.montant)} net par action au titre de ${p.annee(d.exercice)}, représente ${p.pct(d.rendementPct)} du cours`;
-    if (d.rendementMedianeSecteur != null) t += ` (médiane du secteur : ${p.pct(d.rendementMedianeSecteur)}, sur ${p.nombre(d.nbPairs)} valeurs)`;
-    phrases.push(`${t}.`);
+    if (d.rendementPct == null) {
+      // Ancien ou anormal (lib/hebdo/rendementDividende.ts) : montant versé, sans rapport au cours.
+      phrases.push(`Dernier dividende versé : ${p.prix(d.montant)} net par action (exercice ${p.annee(d.exercice)}${d.payeLe ? `, payé le ${p.date(d.payeLe, true)}` : ''}).`);
+    } else {
+      let t = `Le dernier dividende, ${p.prix(d.montant)} net par action au titre de ${p.annee(d.exercice)}, représente ${p.pct(d.rendementPct)} du cours`;
+      if (d.rendementMedianeSecteur != null) t += ` (médiane du secteur : ${p.pct(d.rendementMedianeSecteur)}, sur ${p.nombre(d.nbPairs)} valeurs)`;
+      phrases.push(`${t}.`);
+    }
   }
   if (b && b.resultatNet > 0 && b.variationNetPct != null) {
     let t = `Le bénéfice net ${p.annee(b.exercice)} (${p.montant(b.resultatNet)}) ${b.variationNetPct >= 0 ? 'progresse' : 'recule'} de ${p.pct(b.variationNetPct, 1)} sur un an`;

@@ -8,6 +8,7 @@
  * la phrase correspondante disparaît du narratif.
  */
 import { MARGE_SORTIE_PCT, pasDeCotation } from './levels.js';
+import { lireDividende } from './rendementDividende.js';
 import type { CarnetFige, EvenementFige, HebdoAnalyse } from './types.js';
 
 /** Indices sectoriels BRVM, par libellé de secteur de `brvm_instruments`. */
@@ -183,12 +184,26 @@ export function perFiable(
  * `montant = exercice` de l'ancien import), exercice de deux ans au plus.
  */
 export function dividendeNet(rows: DividendeLigne[], anneeSeance: number): { exercice: number; montant: number } | null {
-  const ok = rows
-    .filter((r) => r.base_fiscale === 'net' && r.montant != null && r.montant > 0 && r.exercice != null)
-    .filter((r) => r.montant !== r.exercice && anneeSeance - (r.exercice ?? 0) <= AGE_COMPTES_MAX)
+  const ok = dividendesNets(rows)
+    .filter((r) => anneeSeance - (r.exercice ?? 0) <= AGE_COMPTES_MAX)
     .sort((a, b) => (b.exercice ?? 0) - (a.exercice ?? 0));
   const d = ok[0];
   return d ? { exercice: d.exercice!, montant: d.montant! } : null;
+}
+
+/** Lignes nettes exploitables (sans filtre d'âge) : l'historique dont la règle du rendement a besoin. */
+function dividendesNets(rows: DividendeLigne[]): DividendeLigne[] {
+  return rows.filter((r) => r.base_fiscale === 'net' && r.montant != null && r.montant > 0 && r.exercice != null && r.montant !== r.exercice);
+}
+
+/**
+ * Ce que le texte peut dire du dernier dividende net : un rendement au cours,
+ * ou seulement le montant versé s'il est ancien ou anormal (règle unique,
+ * ./rendementDividende). null : aucun dividende net exploitable.
+ */
+export function lectureDividendeNet(rows: DividendeLigne[], anneeSeance: number, cours: number | null, dateSeance: string) {
+  if (!dividendeNet(rows, anneeSeance)) return null;
+  return lireDividende(dividendesNets(rows), cours, dateSeance);
 }
 
 export function qualiteBenefice(rows: IncomeAnnuel[], anneeSeance: number): HebdoAnalyse['benefice'] {
@@ -287,9 +302,11 @@ export function construireAnalyse(e: EntreeAnalyse): HebdoAnalyse {
 
   const per = perFiable(e.income, e.titres, dernier, anneeSeance);
   const perPairs = e.pairs.map((p) => perFiable(p.income, p.titres, p.cours, anneeSeance)?.per).filter((x): x is number => x != null);
-  const div = dividendeNet(e.dividendes, anneeSeance);
+  const div = lectureDividendeNet(e.dividendes, anneeSeance, dernier ?? null, e.dateEdition);
+  // Médiane du secteur : seulement les rendements que la règle laisse écrire
+  // (un dividende ancien ou anormal d'un pair fausserait la comparaison).
   const rdtPairs = e.pairs
-    .map((p) => { const d = dividendeNet(p.dividendes, anneeSeance); return d && p.cours ? (d.montant / p.cours) * 100 : null; })
+    .map((p) => { const d = lectureDividendeNet(p.dividendes, anneeSeance, p.cours, e.dateEdition); return d?.mode === 'rendement' ? d.rendementPct : null; })
     .filter((x): x is number => x != null);
   const med = (xs: number[], arr: (x: number) => number) => (xs.length >= PAIRS_MIN ? arr(mediane(xs)!) : null);
 
@@ -323,14 +340,17 @@ export function construireAnalyse(e: EntreeAnalyse): HebdoAnalyse {
     valorisation: per
       ? { ...per, perMedianeSecteur: med(perPairs, r1), nbPairsPer: perPairs.length }
       : null,
-    dividende: div && dernier
-      ? {
-          exercice: div.exercice,
-          montant: div.montant,
-          rendementPct: r2((div.montant / dernier) * 100),
-          rendementMedianeSecteur: med(rdtPairs, r2),
-          nbPairs: rdtPairs.length,
-        }
+    dividende: div
+      ? div.mode === 'rendement'
+        ? {
+            exercice: div.exercice,
+            montant: div.montant,
+            rendementPct: r2(div.rendementPct),
+            payeLe: div.payment_date,
+            rendementMedianeSecteur: med(rdtPairs, r2),
+            nbPairs: rdtPairs.length,
+          }
+        : { exercice: div.exercice, montant: div.montant, rendementPct: null, payeLe: div.payment_date, rendementMedianeSecteur: null, nbPairs: 0 }
       : null,
     benefice: qualiteBenefice(e.income, anneeSeance),
     evenements: evenementsSemaine(e),

@@ -85,8 +85,10 @@ async function chargerReperes(code: string): Promise<Reperes> {
   const [res, divs, liq, sig] = await Promise.all([
     sb.from('income_statements').select('periode,benefice_par_action').eq('code', code).eq('type_periode', 'annuel')
       .not('benefice_par_action', 'is', null).order('periode', { ascending: false }).limit(1),
-    sb.from('dividends').select('exercice,montant').eq('code', code).gt('montant', 0).not('exercice', 'is', null)
-      .order('exercice', { ascending: false }).limit(2),
+    // Historique (montants > 0) : la règle du rendement compare le dernier
+    // dividende à la médiane des exercices précédents (hebdo/pure/rendementDividende).
+    sb.from('dividends').select('exercice,montant,payment_date').eq('code', code).gt('montant', 0).not('exercice', 'is', null)
+      .order('exercice', { ascending: false }).limit(10),
     sb.from('liquidity_daily').select('score,classe').eq('code', code).order('date_marche', { ascending: false }).limit(1),
     sb.from('signals_daily').select('signal').eq('code', code).order('date_marche', { ascending: false }).limit(1),
   ]);
@@ -96,7 +98,8 @@ async function chargerReperes(code: string): Promise<Reperes> {
   return {
     bpa: r ? Number(r.benefice_par_action) : null,
     exercice_bpa: r?.periode ?? null,
-    dividendes: ((divs.data ?? []) as { exercice: number; montant: number }[]).map((x) => ({ exercice: x.exercice, montant: Number(x.montant) })),
+    dividendes: ((divs.data ?? []) as { exercice: number; montant: number; payment_date: string | null }[])
+      .map((x) => ({ exercice: x.exercice, montant: Number(x.montant), payment_date: x.payment_date })),
     liquidite_classe: l?.classe ?? null,
     liquidite_score: l?.score ?? null,
     signal: s?.signal ?? null,

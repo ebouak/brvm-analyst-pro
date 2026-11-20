@@ -15,7 +15,7 @@ const ici = dirname(fileURLToPath(import.meta.url));
 const SOURCE = join(ici, '..', '..', 'frontend', 'lib', 'hebdo');
 const CIBLE = join(ici, '..', 'src', 'hebdo', 'pure');
 
-export const MODULES = ['types', 'levels', 'select', 'narrative', 'format', 'context', 'fundamentals', 'post', 'analyse'];
+export const MODULES = ['types', 'levels', 'select', 'narrative', 'format', 'context', 'fundamentals', 'post', 'analyse', 'rendementDividende'];
 
 export const ENTETE =
   '// COPIE de frontend/lib/hebdo — frontend et scraper sont deux paquets TS distincts\n' +

@@ -2,6 +2,7 @@
  * Détecteurs du lot 1 : la base dit ce qui s'est passé, ces fonctions disent
  * ce qui mérite un article. Pures — le runner leur passe la donnée.
  */
+import { dividendeAncien, lireDividende } from '../hebdo/pure/rendementDividende.js';
 import { ecartJours, joursOuvresEntre } from './calendrier.js';
 import type { Contexte, CoursRow, DividendeRow, Fait, OperationRow } from './types.js';
 
@@ -22,9 +23,15 @@ const INDICES = ['BRVMC', 'BRVM30', 'BRVMPRES'];
 
 const arrondi = (x: number, d: number) => Number(x.toFixed(d));
 
-function rendement(montant: number, cours: CoursRow | undefined): number | null {
-  const c = cours?.cours_jour;
-  return c && c > 0 ? arrondi((montant / c) * 100, 2) : null;
+/**
+ * Rendement au cours du jour, seulement si la règle unique le permet
+ * (hebdo/pure/rendementDividende) : ni ancien, ni supérieur à 25 %. La
+ * comparaison à l'historique se fait à la rédaction, qui le connaît.
+ */
+function rendement(d: DividendeRow, cours: CoursRow | undefined, seance: string): number | null {
+  const c = cours?.cours_jour ?? null;
+  const l = lireDividende([{ exercice: d.exercice, montant: d.montant, payment_date: d.payment_date }], c, seance);
+  return l?.mode === 'rendement' ? arrondi(l.rendementPct, 2) : null;
 }
 
 function dividendes(ctx: Contexte, rows: DividendeRow[]): Fait[] {
@@ -38,11 +45,14 @@ function dividendes(ctx: Contexte, rows: DividendeRow[]): Fait[] {
       payment_date: d.payment_date,
       cours: ctx.cours[d.code]?.cours_jour ?? null,
       date_cours: ctx.derniereSeance,
-      rendement: rendement(d.montant, ctx.cours[d.code]),
+      rendement: rendement(d, ctx.cours[d.code], ctx.derniereSeance),
       source: d.source,
     };
     const inscrit = d.created_at.slice(0, 10);
-    if (d.source && SOURCES_FIABLES.has(d.source) && ecartJours(inscrit, ctx.aujourdhui) <= 3) {
+    // Une ligne INSCRITE récemment n'est pas un dividende ANNONCÉ récemment : le
+    // Bulletin officiel inscrit des dividendes payés jusqu'à trois ans plus tôt.
+    // « X versera… » sur un dividende payé il y a plus d'un an serait faux.
+    if (d.source && SOURCES_FIABLES.has(d.source) && ecartJours(inscrit, ctx.aujourdhui) <= 3 && !dividendeAncien(d, ctx.derniereSeance)) {
       faits.push({ type: 'dividende_annonce', code: d.code, cle: String(d.exercice), dateFait: inscrit, donnees });
     }
     if (d.ex_date) {

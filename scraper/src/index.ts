@@ -944,7 +944,12 @@ async function main(): Promise<number> {
           );
         }
       }
-      console.log(`${r.bulletin}\n${JSON.stringify(parEcart)} — ${r.ecrites ? `${r.ecrites} ligne(s) écrite(s)` : 'à blanc, rien écrit'}`);
+      for (const j of r.rejets) console.log(`REJET  ${j.code.padEnd(6)} ${j.motif} — ligne non écrite`);
+      // Annotation visible sur le run GitHub : une ligne rejetée n'est pas un saut silencieux.
+      if (r.rejets.length && process.env.GITHUB_ACTIONS) {
+        console.log(`::warning title=Bulletin officiel::${r.rejets.length} dividende(s) rejeté(s), rendement incohérent : ${r.rejets.map((j) => j.code).join(', ')}`);
+      }
+      console.log(`${r.bulletin}\n${JSON.stringify({ ...parEcart, rejets: r.rejets.length })} — ${r.ecrites ? `${r.ecrites} ligne(s) écrite(s)` : 'à blanc, rien écrit'}`);
       return 0;
     }
 

@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { computeLevels, pasDeCotation, MARGE_SORTIE_PCT } from '../src/hebdo/pure/levels.js';
 
 const RACINE = join(__dirname, '..', '..');
-const MODULES = ['types', 'levels', 'select', 'narrative', 'format', 'context', 'fundamentals', 'post', 'analyse'];
+const MODULES = ['types', 'levels', 'select', 'narrative', 'format', 'context', 'fundamentals', 'post', 'analyse', 'rendementDividende'];
 
 /** Retire l'en-tête « COPIE » et ramène les imports à la forme du frontend. */
 function normalise(scraper: string): string {

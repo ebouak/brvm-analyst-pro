@@ -15,6 +15,7 @@
  * l'en sépare. Aucun objectif de cours, aucune « conviction », aucune position.
  */
 import type { DossierValeur } from '@/lib/dossier/build';
+import { lireDividende } from '@/lib/hebdo/rendementDividende';
 import type { Narratif } from '@/lib/dossier/narratif';
 import type { Pilier } from '@/lib/dossier/suivi';
 import type { ComptesGroupe, EditorialValeur, RisqueEditorial, Source } from '@/lib/articles/decryptageEditorial';
@@ -278,6 +279,21 @@ export function construireDonnees(
   const med = d.suivi.medianes;
   const ligneMed = (libelle: string) => med?.lignes.find((l) => l.libelle === libelle) ?? null;
   const seances = (extras.seances ?? []).filter((s) => s.cours_jour != null);
+  /* Rendement au cours : seulement si la règle unique le permet
+     (lib/hebdo/rendementDividende) — un dividende payé il y a plus de 12 mois,
+     ou hors norme face à l'historique (> 3 × la médiane, ou > 25 %), est cité
+     comme « dernier dividende versé », jamais rapporté au cours du jour. */
+  const lectureDiv = lireDividende(
+    d.dividende.historique.map((h) => ({
+      exercice: h.exercice,
+      montant: h.montant,
+      payment_date: h.exercice === d.dividende.exercice ? d.dividende.payment_date : null,
+    })),
+    cours,
+    c.date_cours ?? aujourdhui.slice(0, 10),
+  );
+  const rendementDiv =
+    lectureDiv?.mode === 'rendement' && lectureDiv.exercice === d.dividende.exercice ? d.dividende.rendement : null;
   const jour = aujourdhui.slice(0, 10);
 
   // Résultat part du groupe : le PER et le P/B reviennent aux seuls actionnaires de la société.
@@ -370,13 +386,20 @@ export function construireDonnees(
     stats.push({ label: 'Capitalisation', valeur: `${nb(c.capitalisation / 1e9, 0)} Md FCFA`, sous: actionsNb ? `${actions(actionsNb)} d’actions` : null, ton: null });
   if (perRetenu != null)
     stats.push({ label: perGroupe != null ? 'PER (BPA groupe)' : 'PER', valeur: fois(perRetenu), sous: perMediane != null ? `médiane ${fois(perMediane)}` : null, ton: null });
-  if (d.dividende.rendement != null && d.dividende.montant != null) {
+  if (rendementDiv != null && d.dividende.montant != null) {
     const net = d.dividende.base_fiscale === 'net';
     const brut = comptes?.dividende_brut && cours ? comptes.dividende_brut / cours : null;
     stats.push({
       label: net ? 'Rendement net' : 'Rendement',
-      valeur: pct(d.dividende.rendement, 2),
+      valeur: pct(rendementDiv, 2),
       sous: `${F(d.dividende.montant)}${net ? ' net' : ''}${brut != null ? ` · ${pct(brut, 2)} brut` : ''}`,
+      ton: null,
+    });
+  } else if (lectureDiv?.mode === 'sans_rendement' && lectureDiv.exercice === d.dividende.exercice) {
+    stats.push({
+      label: 'Dernier dividende versé',
+      valeur: `${F(lectureDiv.montant)}${d.dividende.base_fiscale === 'net' ? ' net' : ''}`,
+      sous: `exercice ${lectureDiv.exercice}${lectureDiv.payment_date ? `, payé le ${dateLongue(lectureDiv.payment_date)}` : ''}`,
       ton: null,
     });
   }
@@ -545,8 +568,8 @@ export function construireDonnees(
         case 'VE / EBITDA':
           return 'Valeur d’entreprise nette de trésorerie';
         case 'Rendement du dividende':
-          return d.dividende.rendement != null && cours != null
-            ? `${pct(d.dividende.rendement, 2)}${d.dividende.base_fiscale === 'net' ? ' net' : ''} au cours de ${F(cours)}`
+          return rendementDiv != null && cours != null
+            ? `${pct(rendementDiv, 2)}${d.dividende.base_fiscale === 'net' ? ' net' : ''} au cours de ${F(cours)}`
             : '';
         case 'Taux de distribution':
           return comptes?.dividende_brut && bpaGroupe ? `${pct(comptes.dividende_brut / bpaGroupe)} brut sur résultat part du groupe` : '';
@@ -586,13 +609,18 @@ export function construireDonnees(
       rentabilite: [barre('ROE', 'ROE'), barre('ROA', 'ROA'), barre('BPA sur 3 ans', 'Croissance du BPA (3 ans)')].filter(
         (b) => b.valeur != null && b.mediane != null,
       ),
-      lignes: med.lignes.map((l) => ({
-        indicateur: NOM[l.libelle] ?? l.libelle,
-        valeur: val(l.valeur, l.unite, l.libelle),
-        mediane: val(l.mediane, l.unite, l.libelle),
-        lecture: l.lecture ? LECTURE[l.lecture] ?? null : null,
-        precision: precision(l.libelle, l.valeur),
-      })),
+      lignes: med.lignes.map((l) => {
+        // Même règle que la carte : un rendement de dividende ancien ou hors
+        // norme n'est pas publié, ni sa lecture face à la médiane.
+        const masque = l.libelle === 'Rendement du dividende' && rendementDiv == null;
+        return {
+          indicateur: NOM[l.libelle] ?? l.libelle,
+          valeur: masque ? '—' : val(l.valeur, l.unite, l.libelle),
+          mediane: val(l.mediane, l.unite, l.libelle),
+          lecture: !masque && l.lecture ? LECTURE[l.lecture] ?? null : null,
+          precision: precision(l.libelle, l.valeur),
+        };
+      }),
       note: notes.length ? notes.join(' ') : null,
     };
   }
@@ -677,7 +705,9 @@ export function construireDonnees(
     if (net != null && brut != null && d.dividende.base_fiscale === 'net' && cours != null)
       precisions.push({
         titre: 'Brut et net',
-        texte: `Le dividende de l’exercice ${d.dividende.exercice} est de ${F(brut)} brut, soit ${F(net)} net après ${pct(1 - net / brut, 0)} de retenue (IRVM). Le rendement est de ${pct(net / cours, 2)} net et ${pct(brut / cours, 2)} brut au cours de ${F(cours)}.`,
+        texte:
+          `Le dividende de l’exercice ${d.dividende.exercice} est de ${F(brut)} brut, soit ${F(net)} net après ${pct(1 - net / brut, 0)} de retenue (IRVM).` +
+          (rendementDiv != null ? ` Le rendement est de ${pct(net / cours, 2)} net et ${pct(brut / cours, 2)} brut au cours de ${F(cours)}.` : ''),
       });
     const payout = ligneMed('Taux de distribution')?.valeur ?? null;
     if (brut != null && net != null && bpaGroupe)

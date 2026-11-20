@@ -9,6 +9,7 @@
  * sont des faits mesurés, jamais une recommandation.
  */
 import type { SkeletonSection } from '../hebdo/polish.js';
+import { dividendeHorsHistorique, lireDividende } from '../hebdo/pure/rendementDividende.js';
 import type { Mouvement } from './detecteurs.js';
 import { nomDit } from './noms.js';
 import type { Fait, RecordValeur, Reperes } from './types.js';
@@ -119,7 +120,35 @@ const SIGNAL: Record<string, string> = {
   HOLD: 'neutre — le moteur ne relève ni signal d’achat ni signal de vente',
 };
 
-function reperesSection(o: Outils, cours: number | null, haut: number | null, bas: number | null): SkeletonSection | null {
+/**
+ * Ligne « dividende » des repères. Règle unique (hebdo/pure/rendementDividende) :
+ * un dividende ancien (payé il y a plus de 12 mois) ou anormal (> 3 fois la
+ * médiane des exercices précédents, ou rendement > 25 %) n'est JAMAIS rapporté
+ * au cours du jour — il est cité comme dernier dividende versé, avec son
+ * exercice et sa date de paiement, sans adjectif (aucune source en base ne dit
+ * « exceptionnel »). Les montants nuls sont des données absentes, ignorées :
+ * on ne retombe pas sur un exercice plus ancien sans écrire lequel.
+ * Le BPA a sa propre ligne : un dividende et un BPA d'exercices différents ne
+ * sont jamais rapprochés dans une même phrase.
+ */
+export function ligneDividende(p: Plume, dividendes: Reperes['dividendes'], cours: number | null, dateSeance: string): string | null {
+  const l = lireDividende(dividendes, cours, dateSeance);
+  if (!l) return null;
+  if (l.mode === 'sans_rendement') {
+    return `- **Dernier dividende versé** : ${p.f(l.montant)} F (exercice ${p.nom(String(l.exercice))}${l.payment_date ? `, payé le ${p.date(l.payment_date)}` : ''}).`;
+  }
+  // Évolution : seulement face à l'exercice IMMÉDIATEMENT précédent, et s'il
+  // n'était pas lui-même hors norme (sinon « baisse de 95 % » après une
+  // distribution ponctuelle).
+  const d1 = dividendes.find((x) => x.exercice === l.exercice - 1 && x.montant > 0);
+  const evolution =
+    d1 && !dividendeHorsHistorique(d1, dividendes)
+      ? ` Il était de ${p.f(d1.montant)} F au titre de l’exercice ${p.nom(String(d1.exercice))}, soit une ${l.montant >= d1.montant ? 'hausse' : 'baisse'} de ${p.pct(((l.montant - d1.montant) / d1.montant) * 100, 1)}.`
+      : '';
+  return `- **Rendement** : dividende de ${p.f(l.montant)} F au titre de l’exercice ${p.nom(String(l.exercice))}, soit ${p.pct(l.rendementPct)} au cours du jour.${evolution}`;
+}
+
+function reperesSection(o: Outils, cours: number | null, haut: number | null, bas: number | null, dateSeance: string): SkeletonSection | null {
   const { p, reperes: r } = o;
   const lignes: string[] = [];
   if (r?.bpa && r.bpa > 0 && cours) {
@@ -127,16 +156,8 @@ function reperesSection(o: Outils, cours: number | null, haut: number | null, ba
       `- **Valorisation** : ${p.n(cours / r.bpa, 1)} fois le bénéfice par action de l’exercice ${p.nom(r.exercice_bpa ?? '')} (${p.f(r.bpa)} F).`,
     );
   }
-  const [d0, d1] = r?.dividendes ?? [];
-  if (d0 && cours) {
-    const evolution =
-      d1 && d1.montant > 0
-        ? ` Il était de ${p.f(d1.montant)} F au titre de l’exercice ${p.nom(String(d1.exercice))}, soit une ${d0.montant >= d1.montant ? 'hausse' : 'baisse'} de ${p.pct(((d0.montant - d1.montant) / d1.montant) * 100, 1)}.`
-        : '';
-    lignes.push(
-      `- **Rendement** : dividende de ${p.f(d0.montant)} F au titre de l’exercice ${p.nom(String(d0.exercice))}, soit ${p.pct((d0.montant / cours) * 100)} au cours du jour.${evolution}`,
-    );
-  }
+  const div = r ? ligneDividende(p, r.dividendes, cours, dateSeance) : null;
+  if (div) lignes.push(div);
   if (r?.liquidite_classe && r.liquidite_score != null) {
     lignes.push(`- **Liquidité** : classe ${r.liquidite_classe}, score de ${p.n(r.liquidite_score)} sur ${p.n(100)}.`);
   }
@@ -167,14 +188,29 @@ function dividende(f: Fait, o: Outils): Corps {
     .join(', ')
     .replace(/^p/, 'P');
   const datesPhrase = dates ? `${dates}.` : '';
+  // Même règle que les repères : le dividende du fait, jugé contre l'historique
+  // des exercices précédents. Ancien ou anormal → aucun rendement écrit.
+  const dateCours = str(d.date_cours);
+  const exerciceFait = num(d.exercice);
+  const lecture =
+    rend != null && cours != null && dateCours && exerciceFait != null
+      ? lireDividende(
+          [
+            { exercice: exerciceFait, montant: num(d.montant), payment_date: paie },
+            ...(o.reperes?.dividendes ?? []).filter((x) => x.exercice < exerciceFait),
+          ],
+          cours,
+          dateCours,
+        )
+      : null;
   const rendementPhrase =
-    rend != null && cours != null && str(d.date_cours)
-      ? `Ce dividende représente un rendement de ${p.pct(rend)} au cours de clôture du ${p.date(str(d.date_cours)!)} (${p.f(cours)} F).`
+    lecture?.mode === 'rendement' && lecture.exercice === exerciceFait && cours != null && dateCours
+      ? `Ce dividende représente un rendement de ${p.pct(lecture.rendementPct)} au cours de clôture du ${p.date(dateCours)} (${p.f(cours)} F).`
       : '';
   const annonce = `${nom} distribuera ${montant} F par action au titre de l’exercice ${exercice}.`;
 
   if (f.type === 'dividende_annonce') {
-    const reperes = reperesSection(o, cours, null, null);
+    const reperes = reperesSection(o, cours, null, null, dateCours ?? '');
     return {
       titre: `${nom} versera ${montant} F par action au titre de l’exercice ${exercice}`,
       chapo: [rendementPhrase, datesPhrase].filter(Boolean).join(' ') || annonce,
@@ -388,7 +424,7 @@ function seance(f: Fait, o: Outils): Corps {
   if (lecture.length) sections.push({ titre: 'Notre lecture', texte: lecture.join(' ') });
   sections.push({ titre: nom, texte: lignesValeur.join(' ') });
   if (autres.length) sections.push({ titre: 'Les autres mouvements', texte: autres.join(' ') });
-  const reperes = reperesSection(o, cours, num(d.cours_haut_52s), num(d.cours_bas_52s));
+  const reperes = reperesSection(o, cours, num(d.cours_haut_52s), num(d.cours_bas_52s), f.cle);
   if (reperes) sections.push(reperes);
 
   const titre =
