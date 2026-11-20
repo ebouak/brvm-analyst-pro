@@ -42,3 +42,14 @@ export function fromDeRetour(retour: string | null | undefined): string | null {
   if (!retour || !retour.includes('?')) return null;
   return fromSur(new URLSearchParams(retour.slice(retour.indexOf('?') + 1)).get('from'));
 }
+
+/**
+ * Compte déjà connecté qui ouvre /signup avec un `next` (ex. bouton « Recevoir
+ * mes alertes » d'une page ISR, qui ne peut pas savoir s'il est connecté) :
+ * destination assainie, ou null pour laisser /signup s'afficher. Sans `next`,
+ * rien ne change : /signup reste la page qu'elle était.
+ */
+export function destinationInscritConnecte(pathname: string, next: string | null | undefined): string | null {
+  if (pathname !== '/signup') return null;
+  return fromSur(next);
+}
