@@ -83,8 +83,12 @@ export interface HebdoAnalyse {
   };
   /** PER sur le résultat net consolidé ; null si les comptes ne sont pas fiables. */
   valorisation: { exercice: string; bpa: number; per: number; perMedianeSecteur: number | null; nbPairsPer: number } | null;
-  /** Dernier dividende NET connu (calendrier officiel). */
-  dividende: { exercice: number; montant: number; rendementPct: number; rendementMedianeSecteur: number | null; nbPairs: number } | null;
+  /**
+   * Dernier dividende NET connu (calendrier officiel). `rendementPct` null : le
+   * dividende est ancien ou anormal (lib/hebdo/rendementDividende.ts), il est
+   * cité sans rapport au cours, avec sa date de paiement `payeLe` si connue.
+   */
+  dividende: { exercice: number; montant: number; rendementPct: number | null; payeLe?: string | null; rendementMedianeSecteur: number | null; nbPairs: number } | null;
   /** Qualité du dernier bénéfice annuel. */
   benefice: {
     exercice: string;

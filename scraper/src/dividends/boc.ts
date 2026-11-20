@@ -30,6 +30,51 @@ export interface DividendeBoc {
   montant: number;
   date_paiement: string;
   rendement_net_pct: number | null;
+  /** Cours de référence publié sur la MÊME ligne ; null s'il est illisible. */
+  cours_reference: number | null;
+}
+
+/**
+ * Écart toléré, en points, entre le rendement recalculé (montant ÷ cours de
+ * référence) et le rendement net publié sur la même ligne. Le bulletin arrondit
+ * à deux décimales : un écart réel de lecture se compte en dizaines de points.
+ */
+export const TOLERANCE_RENDEMENT_POINTS = 0.5;
+
+export interface RejetBoc {
+  code: string;
+  boc: DividendeBoc;
+  motif: string;
+}
+
+/**
+ * CONTRÔLE DE COHÉRENCE. Le bulletin publie, sur la ligne de chaque valeur, le
+ * dividende, le cours de référence ET le rendement net qui les relie. Si le
+ * montant lu ÷ la référence lue ne redonne pas le rendement publié, l'une des
+ * trois cases a été mal lue (colonne décalée, cellule voisine) : la ligne est
+ * REJETÉE et nommée, jamais écrite. Sans rendement publié ou sans référence
+ * lisible, rien à recouper : la ligne passe comme avant.
+ */
+export function controlerRendement(d: DividendeBoc): string | null {
+  if (d.rendement_net_pct == null || d.cours_reference == null || d.cours_reference <= 0) return null;
+  const calcule = (d.montant / d.cours_reference) * 100;
+  if (Math.abs(calcule - d.rendement_net_pct) <= TOLERANCE_RENDEMENT_POINTS) return null;
+  return (
+    `rendement incohérent : ${d.montant} ÷ ${d.cours_reference} (référence) = ${calcule.toFixed(2)} %, ` +
+    `le bulletin publie ${d.rendement_net_pct} % sur la même ligne`
+  );
+}
+
+/** Sépare les lignes cohérentes des lignes à rejeter (voir controlerRendement). */
+export function separerIncoherents(lus: DividendeBoc[]): { retenus: DividendeBoc[]; rejets: RejetBoc[] } {
+  const retenus: DividendeBoc[] = [];
+  const rejets: RejetBoc[] = [];
+  for (const d of lus) {
+    const motif = controlerRendement(d);
+    if (motif) rejets.push({ code: d.code, boc: d, motif });
+    else retenus.push(d);
+  }
+  return { retenus, rejets };
 }
 
 const MOIS: Record<string, string> = {
@@ -46,7 +91,9 @@ function dateBoc(s: string): string | null {
 }
 
 /** Positions d'en-tête relevées sur le bulletin du 09/10/2026, en repli. */
-const DEFAUT = { dividende: 454, date: 498, rdt: 525, per: 561 };
+const DEFAUT = { dividende: 454, date: 498, rdt: 525, per: 561, reference: 359, variationAnnee: 399 };
+
+const NOMBRE = /^-?\d[\d  ]*(,\d+)?$/;
 
 export function lireDerniersDividendes(pages: ItemPdf[][]): DividendeBoc[] {
   // Colonnes : relues sur la première page qui porte les en-têtes, puis
@@ -62,6 +109,10 @@ export function lireDerniersDividendes(pages: ItemPdf[][]): DividendeBoc[] {
         date: items.find((i) => i.s === 'Date' && i.x > div)?.x ?? col.date,
         rdt: en(/^Rdt\. Net$/) ?? col.rdt,
         per: items.find((i) => i.s === 'PER' && i.x > div)?.x ?? col.per,
+        // Même page que « Dernier dividende » : une autre page peut porter un
+        // autre tableau avec ses propres « Référence ».
+        reference: en(/^Référence$/) ?? col.reference,
+        variationAnnee: en(/^Variation de$/) ?? col.variationAnnee,
       };
     }
     const codes = items.filter((i) => i.x < 60 && /^[A-Z][A-Z0-9]{2,5}$/.test(i.s));
@@ -71,6 +122,11 @@ export function lireDerniersDividendes(pages: ItemPdf[][]): DividendeBoc[] {
       const montantBrut = dans(col.dividende - 25, col.date - 3).find((i) => /^\d[\d  ]*(,\d+)?$/.test(i.s));
       const dateBrute = dans(col.date - 10, col.rdt - 2).map((i) => dateBoc(i.s)).find(Boolean);
       const rdtBrut = dans(col.rdt - 5, col.per - 5).find((i) => /%$/.test(i.s));
+      /* Référence = le nombre le plus À DROITE de la fenêtre, comme boc/cote.ts :
+         la valeur échangée, alignée à droite, peut déborder sur son début. */
+      const refBrute = dans(col.reference - 15, col.variationAnnee + 10)
+        .filter((i) => NOMBRE.test(i.s))
+        .sort((a, b) => b.x - a.x)[0];
       const montant = montantBrut ? parseFrNumber(montantBrut.s) : null;
       if (montant == null || montant <= 0 || !dateBrute) continue;
       sortie.push({
@@ -78,6 +134,7 @@ export function lireDerniersDividendes(pages: ItemPdf[][]): DividendeBoc[] {
         montant,
         date_paiement: dateBrute,
         rendement_net_pct: rdtBrut ? parseFrNumber(rdtBrut.s.replace('%', '')) : null,
+        cours_reference: refBrute ? parseFrNumber(refBrute.s) : null,
       });
     }
   }

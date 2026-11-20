@@ -17,7 +17,7 @@ import { logger } from '../logger.js';
 import { sha256 } from '../utils/hash.js';
 import { garderEchelle } from './operations.js';
 import { listerBulletins, telechargerPdf } from '../carnet/fetch.js';
-import { lireDerniersDividendes, type DividendeBoc, type ItemPdf } from './boc.js';
+import { lireDerniersDividendes, separerIncoherents, type DividendeBoc, type ItemPdf, type RejetBoc } from './boc.js';
 
 export type Ecart = 'concordant' | 'date_manquante' | 'montant_different' | 'absent' | 'ancien' | 'calendrier';
 
@@ -68,11 +68,17 @@ export async function itemsDesPages(pdf: Uint8Array): Promise<ItemPdf[][]> {
   return pages;
 }
 
-export async function runDividendesBoc(opts: { ecrire?: boolean } = {}): Promise<{ bulletin: string; lignes: LigneRapport[]; ecrites: number }> {
+export async function runDividendesBoc(
+  opts: { ecrire?: boolean } = {},
+): Promise<{ bulletin: string; lignes: LigneRapport[]; rejets: RejetBoc[]; ecrites: number }> {
   const [dernier] = await listerBulletins();
   if (!dernier) throw new Error('aucun bulletin officiel listé');
-  const lus = lireDerniersDividendes(await itemsDesPages(await telechargerPdf(dernier.url)));
-  if (lus.length < 20) throw new Error(`seulement ${lus.length} dividendes lus dans ${dernier.url} : lecture suspecte, rien n'est fait`);
+  const tous = lireDerniersDividendes(await itemsDesPages(await telechargerPdf(dernier.url)));
+  if (tous.length < 20) throw new Error(`seulement ${tous.length} dividendes lus dans ${dernier.url} : lecture suspecte, rien n'est fait`);
+  // Montant ÷ référence ≠ rendement publié sur la même ligne : lecture fautive.
+  // La ligne n'est ni rapprochée ni écrite ; elle est nommée dans le rapport.
+  const { retenus: lus, rejets } = separerIncoherents(tous);
+  for (const r of rejets) logger.warn({ code: r.code, motif: r.motif, bulletin: dernier.date }, 'bulletin officiel : ligne de dividende rejetée');
 
   const sb = getSupabase();
   const { data, error } = await sb
@@ -109,6 +115,9 @@ export async function runDividendesBoc(opts: { ecrire?: boolean } = {}): Promise
     if (e) throw new Error(`upsert dividends (brvm-boc) : ${e.message}`);
     ecrites = rows.length;
   }
-  logger.info({ bulletin: dernier.date, lus: lus.length, a_corriger: aEcrire.length, ecrites, ecrire: Boolean(opts.ecrire) }, 'dividendes du bulletin officiel');
-  return { bulletin: dernier.url, lignes, ecrites };
+  logger.info(
+    { bulletin: dernier.date, lus: tous.length, rejets: rejets.length, a_corriger: aEcrire.length, ecrites, ecrire: Boolean(opts.ecrire) },
+    'dividendes du bulletin officiel',
+  );
+  return { bulletin: dernier.url, lignes, rejets, ecrites };
 }

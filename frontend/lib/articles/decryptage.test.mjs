@@ -125,3 +125,41 @@ test('ne recommande jamais et n’emploie pas d’emoji', () => {
   assert.ok(!/[✅❌]/u.test(JSON.stringify(d)));
   assert.equal(a.slug, 'decryptage-snts-2026-10-29');
 });
+
+test('un dividende payé il y a plus de 12 mois n’est jamais rapporté au cours (FTSC, 19/11/2026)', () => {
+  const ancien = {
+    ...dossier,
+    chiffres_cles: { ...dossier.chiffres_cles, cours: 1590, date_cours: '2026-11-19' },
+    dividende: { ...dossier.dividende, montant: 1726.56, exercice: 2024, rendement: 1.0859, ex_date: null, payment_date: '2025-09-30', historique: [{ exercice: 2023, montant: 79.2 }, { exercice: 2024, montant: 1726.56 }, { exercice: 2025, montant: 0 }] },
+  };
+  const x = composerDecryptage(ancien, narratif, faits, 'Filtisac', '2026-11-20T08:00:00Z', { ...extras, editorial: { ...editorial, comptes: null } }).chiffres.decryptage;
+  assert.equal(x.stats.find((s) => s.label.startsWith('Rendement')), undefined);
+  const carte = x.stats.find((s) => s.label === 'Dernier dividende versé');
+  assert.ok(carte, JSON.stringify(x.stats));
+  assert.match(carte.sous, /exercice 2024, payé le 30 septembre 2025/);
+  assert.ok(!JSON.stringify(x).includes('108,59'), 'aucun 108,59 % publié');
+});
+
+test('un dividende récent et normal garde son rendement', () => {
+  assert.equal(d.stats.find((s) => s.label === 'Rendement net').valeur, '4,14 %');
+});
+
+test('la ligne « Rendement » du tableau comparatif est masquée pour un dividende ancien', () => {
+  const ancien = {
+    ...dossier,
+    chiffres_cles: { ...dossier.chiffres_cles, cours: 1590, date_cours: '2026-11-19' },
+    dividende: { ...dossier.dividende, montant: 1726.56, exercice: 2024, rendement: 1.0859, payment_date: '2025-09-30', historique: [{ exercice: 2024, montant: 1726.56 }] },
+  };
+  ancien.suivi = {
+    ...dossier.suivi,
+    medianes: { ...dossier.suivi.medianes, lignes: [...dossier.suivi.medianes.lignes, { libelle: 'Rendement du dividende', unite: '%', valeur: 108.6, mediane: 5.1, lecture: 'favorable' }] },
+  };
+  const x = composerDecryptage(ancien, narratif, faits, 'Filtisac', '2026-11-20T08:00:00Z', { ...extras, editorial: { ...editorial, comptes: null } }).chiffres.decryptage;
+  const ligne = x.comparables.lignes.find((l) => l.indicateur === 'Rendement');
+  assert.equal(ligne.valeur, '—');
+  assert.equal(ligne.lecture, null);
+  assert.equal(ligne.precision, '');
+  // Le même tableau garde la ligne pour un dividende récent et normal.
+  const normal = composerDecryptage({ ...dossier, suivi: ancien.suivi }, narratif, faits, 'Sonatel', '2026-10-29T08:00:00Z', extras).chiffres.decryptage;
+  assert.equal(normal.comparables.lignes.find((l) => l.indicateur === 'Rendement').valeur, '108,6 %');
+});

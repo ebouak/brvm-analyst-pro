@@ -168,6 +168,32 @@ describe('défaut 4 — le bénéfice et ce que paie le marché', () => {
     expect(perFiable(rows, 16_460_840, 42_950, 2026)!.per).toBe(15.4);
     expect(perFiable(rows, 16_460_840, 42_950, 2029)).toBeNull();
   });
+  it('rendement gardé pour un dividende récent et normal (SLBC, payé le 30/07/2026)', () => {
+    const t = sectionDe(metricsSlbc(), TITRES.valorisation);
+    expect(t).toMatch(/Le dernier dividende, 1 871,76 FCFA net par action au titre de 2025, représente 4,36 % du cours/);
+  });
+  it('dividende payé il y a plus de 12 mois : montant versé, jamais rapporté au cours (FTSC, 19/11/2026)', () => {
+    const m = metricsSlbc({
+      dateEdition: '2026-11-13',
+      dividendes: [
+        { exercice: 2024, montant: 1726.56, base_fiscale: 'net', ex_date: null, payment_date: '2025-09-30' },
+        { exercice: 2025, montant: 0, base_fiscale: 'net', ex_date: null, payment_date: null },
+      ],
+    });
+    const t = sectionDe(m, TITRES.valorisation);
+    expect(t).toMatch(/Dernier dividende versé : 1 726,56 FCFA net par action \(exercice 2024, payé le 30 septembre 2025\)\./);
+    expect(t).not.toMatch(/représente [\d,]+ % du cours|exceptionnel/);
+    expect(m.analyse!.dividende!.rendementPct).toBeNull();
+  });
+  it('dividende hors historique (> 3 fois la médiane) : pas de rendement, et exclu de la médiane du secteur', () => {
+    const m = metricsSlbc({
+      dividendes: [
+        { exercice: 2025, montant: 1871.76, base_fiscale: 'net', ex_date: null, payment_date: '2026-07-30' },
+        { exercice: 2024, montant: 400, base_fiscale: 'net', ex_date: null, payment_date: '2025-07-30' },
+      ],
+    });
+    expect(m.analyse!.dividende).toMatchObject({ rendementPct: null, nbPairs: 0, rendementMedianeSecteur: null });
+  });
   it('dividendeNet ignore les bases inconnues, les zéros et les lignes montant = exercice', () => {
     expect(dividendeNet([{ exercice: 2025, montant: 2025, base_fiscale: 'net', ex_date: null, payment_date: null }], 2026)).toBeNull();
     expect(dividendeNet([{ exercice: 2025, montant: 0, base_fiscale: 'net', ex_date: null, payment_date: null }], 2026)).toBeNull();
