@@ -7,7 +7,7 @@ export const NEWS_WINDOW_MS = 48 * 60 * 60 * 1000;
 export const CORIS_ARTICLE: SyndicationArticle = {
   slug: 'coris-bank-ipo-2027',
   title: 'Coris en bourse : 81 milliards peuvent-ils faire bouger la BRVM ?',
-  description: 'WESTBOURSE analyse les introductions annoncées de Coris Bank Côte d’Ivoire et Coris Bank Bénin, leurs 81 Md FCFA d’IPO et les scénarios de liquidité sur la BRVM.',
+  description: 'WESTBOURSE étudie l’OPV de Coris Bank Côte d’Ivoire (20 % à 7 720 FCFA, du 30 novembre au 4 décembre 2026) : offre, valorisation, dividendes attendus et effets sur la liquidité de la BRVM.',
   url: `${SITE_URL}/analyses/coris-bank-ipo-2027`,
   publishedAt: '2026-11-19T13:00:00.000Z',
   imageUrl: `${SITE_URL}/analyses/coris-bank-ipo-2027/opengraph-image`,

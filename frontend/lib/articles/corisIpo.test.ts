@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { calculerWpli, CORIS_IPOS, CORIS_RATIOS, DIVIDENDE_WINDOW, MARCHE } from './corisIpo';
+import {
+  calculerWpli,
+  CORIS_IPOS,
+  CORIS_RATIOS,
+  dividendesProjetes,
+  DIVIDENDE_WINDOW,
+  MARCHE,
+  OFFRE_CBI_CI,
+  VALORISATION_CBI_CI,
+} from './corisIpo';
 
 describe('article IPO Coris', () => {
   it('réconcilie les deux montants annoncés', () => {
@@ -41,5 +50,26 @@ describe('article IPO Coris', () => {
     expect(calculerWpli({ souscriptionsMd: 81, partVentes: 0.25, valeur20jMd: 0 })).toEqual({
       statut: 'indisponible',
     });
+  });
+
+  it('retrouve le montant global de la note à partir des deux catégories', () => {
+    expect(OFFRE_CBI_CI.actionsPublic + OFFRE_CBI_CI.actionsPersonnel).toBe(OFFRE_CBI_CI.actionsOffertes);
+    expect(VALORISATION_CBI_CI.montantRecalculeMd * 1e9).toBeCloseTo(OFFRE_CBI_CI.montantGlobal, 0);
+    expect(OFFRE_CBI_CI.actionsOffertes / OFFRE_CBI_CI.actionsTotal).toBeCloseTo(0.2, 10);
+  });
+
+  it('recoupe la valorisation et les multiples publiés par la note', () => {
+    expect(VALORISATION_CBI_CI.valorisationMd).toBeCloseTo(314.976, 3);
+    expect(OFFRE_CBI_CI.prixPublic / VALORISATION_CBI_CI.bpa2025).toBeCloseTo(OFFRE_CBI_CI.perNote, 1);
+    const bvps = (OFFRE_CBI_CI.fondsPropres2025Md * 1e9) / OFFRE_CBI_CI.actionsTotal;
+    expect(OFFRE_CBI_CI.prixPublic / bvps).toBeCloseTo(OFFRE_CBI_CI.pbNote, 1);
+  });
+
+  it('dérive le dividende 2026 du plan et du taux de 65 %', () => {
+    const [premier] = dividendesProjetes();
+    expect(premier.exercice).toBe(2026);
+    expect(premier.dpa).toBeCloseTo(519.9, 1);
+    expect(premier.rendementBrutPct).toBeCloseTo(6.73, 2);
+    expect(premier.rendementNetPct).toBeCloseTo(5.93, 2);
   });
 });

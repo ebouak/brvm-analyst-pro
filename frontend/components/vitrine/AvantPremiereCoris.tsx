@@ -13,11 +13,11 @@ export function AvantPremiereCoris() {
         />
       </Link>
       <div className="vitrine-avp__body">
-        <p className="vitrine-avp__eyebrow">Avant-première · Recherche WESTBOURSE · 19 novembre 2026</p>
+        <p className="vitrine-avp__eyebrow">Recherche WESTBOURSE · mis à jour le 20 novembre 2026</p>
         <h2 id="h-coris-avp">81 milliards FCFA. Deux IPO Coris. Un test de liquidité.</h2>
         <p>
-          Mesure des flux potentiels, précédent Bridge Bank, comportement autour des
-          dividendes et simulateur WPLI.
+          L’offre CBI CI à 7 720 FCFA du 30 novembre au 4 décembre : valorisation,
+          dividendes attendus, points de vigilance et effets sur la liquidité.
         </p>
         <div className="vitrine-avp__facts" aria-label="Trois chiffres clés">
           <span><strong>81 Md</strong> annoncés</span>

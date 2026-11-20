@@ -1,14 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
+  ACTIONNARIAT_CBI_CI,
+  CALENDRIER_CBI_CI,
   COMPARABLES,
+  COMPARABLES_MULTIPLES,
   CORIS_IPOS,
   CORIS_RATIOS,
   DIVIDENDE_STATS,
   INDICATEURS_SUIVI,
   MARCHE,
   SCENARIOS,
+  METHODES_VALORISATION,
+  OFFRE_CBI_CI,
   SOURCES,
+  VALORISATION_CBI_CI,
+  VIGILANCES_CBI_CI,
+  dividendesProjetes,
 } from '@/lib/articles/corisIpo';
 import {
   BridgeEventChart,
@@ -26,7 +34,8 @@ export const dynamic = 'force-static';
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 const TITLE = 'Coris en bourse : 81 milliards peuvent-ils faire bouger la BRVM ?';
 const DESCRIPTION =
-  'Coris Bank Côte d’Ivoire et Coris Bank Bénin préparent 81 Md FCFA d’IPO. Analyse des flux, du précédent Bridge et des comportements autour des dividendes.';
+  'Coris Bank Côte d’Ivoire cède 20 % de son capital à 7 720 FCFA du 30 novembre au 4 décembre 2026. Étude de l’offre, de la valorisation, des dividendes attendus et des effets sur la liquidité de la BRVM.';
+const MODIFIE_LE = '2026-11-20T22:00:00+01:00';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -37,6 +46,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     publishedTime: '2026-11-19T14:00:00+01:00',
+    modifiedTime: MODIFIE_LE,
     authors: ['WESTBOURSE Recherche'],
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
@@ -85,7 +95,7 @@ export default function CorisIpoArticle() {
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: '2026-11-19T14:00:00+01:00',
-    dateModified: '2026-11-19T14:00:00+01:00',
+    dateModified: MODIFIE_LE,
     author: { '@type': 'Organization', name: 'WESTBOURSE Recherche' },
     publisher: { '@type': 'Organization', name: 'WESTBOURSE' },
     mainEntityOfPage: `${SITE}/analyses/coris-bank-ipo-2027`,
@@ -104,7 +114,7 @@ export default function CorisIpoArticle() {
           <span> / </span>
           <Link href="/actualites">Marchés</Link>
         </nav>
-        <span>RECHERCHE · 19 NOVEMBRE 2026</span>
+        <span>RECHERCHE · MIS À JOUR LE 20 NOVEMBRE 2026</span>
       </header>
 
       <article>
@@ -124,8 +134,8 @@ export default function CorisIpoArticle() {
             <p>{DESCRIPTION}</p>
             <div>
               <span>Par WESTBOURSE Recherche</span>
-              <span>9 min de lecture</span>
-              <span>Mis à jour le 19 novembre 2026</span>
+              <span>14 min de lecture</span>
+              <span>Mis à jour le 20 novembre 2026, avec la note d’information</span>
             </div>
           </div>
         </header>
@@ -146,6 +156,11 @@ export default function CorisIpoArticle() {
               Le précédent Bridge montre un effet plausible mais court. Les dividendes racontent une
               autre histoire : anticipation avant le détachement, puis pression après. Ce sont deux
               calendriers de trésorerie différents, qu’il faut lire séparément.
+            </p>
+            <p>
+              <strong>Mise à jour du 20 novembre.</strong> La note d’information de CBI CI est
+              publiée : prix, calendrier, valorisation et plan d’affaires sont désormais connus.
+              Les sections 01 à 05 en tirent l’étude complète de l’offre.
             </p>
             <div className="coris-lede__verdict">
               <span>EN UNE PHRASE</span>
@@ -168,16 +183,15 @@ export default function CorisIpoArticle() {
           </div>
           <div className="coris-copy">
             <p>
-              Coris Bank International Côte d’Ivoire et Coris Bank Bénin sont annoncées à la BRVM
-              à quelques jours d’intervalle en janvier 2027. Les autorisations de l’AMF-UMOA sont
-              présentées comme obtenues. Les campagnes de communication doivent encore fixer le
-              prix, le nombre d’actions, la part du capital et les dates exactes.
+              Coris Bank International Côte d’Ivoire (CBI CI) ouvre la marche : souscription du
+              30 novembre au 4 décembre 2026, première cotation le 15 janvier 2027. Coris Bank
+              Bénin suivrait en janvier ; au 20 novembre, aucune note d’information n’est publiée
+              pour elle, seule la presse évoque environ 19 Md.
             </p>
             <p>
-              Une distinction est décisive : une <strong>OPV</strong> vend des actions existantes
-              et rémunère les actionnaires sortants ; une augmentation de capital apporte des fonds
-              à la banque. Sans prospectus, il est prématuré d’annoncer que les 81 Md renforceront
-              intégralement les fonds propres.
+              La question laissée ouverte la veille est tranchée pour CBI CI : c’est une
+              <strong> OPV</strong>. Coris Holding vend des actions existantes ; les 62,7 Md lui
+              reviennent et ne renforcent pas les fonds propres de la banque.
             </p>
           </div>
           <div className="coris-operation-brands">
@@ -241,31 +255,196 @@ export default function CorisIpoArticle() {
               </article>
             ))}
           </div>
-          <aside className="coris-ratio-note">
-            <div>
-              <p className="coris-rubrique">Valorisation bancaire</p>
-              <h3>Les ratios décisifs restent à calculer.</h3>
-              <p>
-                Sans prix d’introduction, nombre d’actions et fonds propres par titre, aucun PER ni
-                P/B fiable ne peut être publié. Les prospectus devront aussi documenter NPL,
-                coût du risque, CET1 et périmètre exact des fonds propres.
-              </p>
-            </div>
-            <dl>
-              <div><dt>PER</dt><dd>Prix / bénéfice par action</dd><span>Prospectus requis</span></div>
-              <div><dt>P/B</dt><dd>Prix / fonds propres par action</dd><span>Prospectus requis</span></div>
-              <div><dt>NPL</dt><dd>Créances douteuses / encours</dd><span>Non publié ici</span></div>
-              <div><dt>CET1</dt><dd>Fonds propres prudentiels / actifs pondérés</dd><span>Non publié ici</span></div>
-            </dl>
-            <p className="coris-comparables">
-              Comparables à surveiller après publication des prix : {COMPARABLES.join(' · ')}.
+          
+        </section>
+
+        <section className="coris-section coris-section--split" id="offre">
+          <div className="coris-section__intro">
+            <span className="coris-section__number">02</span>
+            <p className="coris-rubrique">L’offre CBI CI</p>
+            <h2>8,16 millions d’actions à 7 720 FCFA, cédées par Coris Holding.</h2>
+          </div>
+          <div className="coris-copy">
+            <p>
+              L’offre porte sur 20 % du capital, soit {number(OFFRE_CBI_CI.actionsOffertes)} actions
+              sur {number(OFFRE_CBI_CI.actionsTotal)}. Au prix public, la banque vaut{' '}
+              {number(VALORISATION_CBI_CI.valorisationMd, 1)} Md FCFA. Le montant global de{' '}
+              {number(OFFRE_CBI_CI.montantGlobal)} FCFA combine deux prix : {number(OFFRE_CBI_CI.actionsPublic)}{' '}
+              actions à {number(OFFRE_CBI_CI.prixPublic)} FCFA pour le public et{' '}
+              {number(OFFRE_CBI_CI.actionsPersonnel)} à {number(OFFRE_CBI_CI.prixPersonnel)} FCFA pour le
+              personnel du groupe, bloquées trois ans.
             </p>
-          </aside>
+            <p>
+              Toute personne physique ou morale peut souscrire, résidente ou non de l’UEMOA, depuis
+              un compte-titres chez une SGI du syndicat (chef de file : Coris Bourse). Un seul ordre
+              par investisseur, entièrement couvert, irrévocable à la clôture. En cas de demande
+              excédentaire, chaque souscripteur reçoit d’abord une quantité minimale, puis le reste
+              est réparti au prorata. Les fonds sont bloqués jusqu’à l’allocation ; l’excédent revient
+              sous 48 heures.
+            </p>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Calendrier indicatif de la note d’information</caption>
+              <thead><tr><th>Date</th><th>Étape</th></tr></thead>
+              <tbody>
+                {CALENDRIER_CBI_CI.map((ligne) => (
+                  <tr key={ligne.date}><th>{ligne.date}</th><td>{ligne.etape}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Actionnariat de CBI CI avant et après l’offre</caption>
+              <thead><tr><th>Actionnaire</th><th>Avant</th><th>Après</th></tr></thead>
+              <tbody>
+                {ACTIONNARIAT_CBI_CI.map((ligne) => (
+                  <tr key={ligne.nom}>
+                    <th>{ligne.nom}</th>
+                    <td>{ligne.avant === 0 ? '—' : `${number(ligne.avant, 2)} %`}</td>
+                    <td>{number(ligne.apres, 2)} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="coris-caption">
+            Visa AMF-UMOA {OFFRE_CBI_CI.visa}, code ISIN {OFFRE_CBI_CI.isin}, admission demandée au
+            compartiment Prestige. La note prévoit d’affecter le produit à l’expansion du groupe, à sa
+            trésorerie et à la croissance de la filiale.
+          </p>
+        </section>
+
+        <section className="coris-section coris-section--split" id="valorisation">
+          <div className="coris-section__intro">
+            <span className="coris-section__number">03</span>
+            <p className="coris-rubrique">Valorisation</p>
+            <h2>Un prix au milieu des estimations, plus cher que les banques cotées sur le PER.</h2>
+          </div>
+          <div className="coris-copy">
+            <p>
+              Au prix d’offre, la note fait ressortir un PER de {number(OFFRE_CBI_CI.perNote, 2)}x et un
+              P/B de {number(OFFRE_CBI_CI.pbNote, 2)}x sur les comptes 2025 (bénéfice par action :{' '}
+              {number(VALORISATION_CBI_CI.bpa2025)} FCFA). C’est plus que les banques cotées fin 2025 sur
+              le bénéfice, mais dans leur fourchette sur les fonds propres, et proche de Bridge Bank à son
+              introduction.
+            </p>
+            <p>
+              L’évaluateur retient environ 314 Md FCFA, au cœur de six estimations allant de{' '}
+              {number(METHODES_VALORISATION[0].valeurMd, 0)} à{' '}
+              {number(METHODES_VALORISATION[METHODES_VALORISATION.length - 1].valeurMd, 0)} Md. Les
+              dividendes actualisés et l’excès de fonds propres reposent sur le plan d’affaires, qui
+              prévoit +28 % de PNB dès 2026.
+            </p>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Valeur de 100 % des fonds propres selon l’évaluateur (Md FCFA)</caption>
+              <thead><tr><th>Méthode</th><th>Valeur</th><th>Écart au prix d’offre</th></tr></thead>
+              <tbody>
+                {METHODES_VALORISATION.map((ligne) => (
+                  <tr key={ligne.methode}>
+                    <th>{ligne.methode}</th>
+                    <td>{number(ligne.valeurMd, 1)}</td>
+                    <td>{number((ligne.valeurMd / VALORISATION_CBI_CI.valorisationMd - 1) * 100, 0)} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Multiples de comparaison retenus par la note</caption>
+              <thead><tr><th>Banque</th><th>Référence</th><th>PER</th><th>P/B</th></tr></thead>
+              <tbody>
+                {COMPARABLES_MULTIPLES.map((ligne) => (
+                  <tr key={ligne.banque}>
+                    <th>{ligne.banque}</th>
+                    <td>{ligne.reference}</td>
+                    <td>{number(ligne.per, 2)}x</td>
+                    <td>{number(ligne.pb, 2)}x</td>
+                  </tr>
+                ))}
+                <tr>
+                  <th>CBI CI</th>
+                  <td>Prix d’offre, comptes 2025</td>
+                  <td>{number(OFFRE_CBI_CI.perNote, 2)}x</td>
+                  <td>{number(OFFRE_CBI_CI.pbNote, 2)}x</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="coris-comparables">
+            Autres valeurs bancaires à surveiller après la cotation : {COMPARABLES.join(' · ')}.
+          </p>
+        </section>
+
+        <section className="coris-section coris-section--split" id="dividendes-attendus">
+          <div className="coris-section__intro">
+            <span className="coris-section__number">04</span>
+            <p className="coris-rubrique">Dividendes attendus</p>
+            <h2>Un rendement de 6,7 % brut dès 2026, si le plan se réalise.</h2>
+          </div>
+          <div className="coris-copy">
+            <p>
+              La banque vise une distribution de 65 % du résultat sur 2026-2030, contre 42 % en
+              moyenne depuis 2020. Les souscripteurs ont droit au dividende de l’exercice 2026, versé
+              en 2027.
+            </p>
+            <p>
+              Ces montants sont des projections : ils supposent que le résultat progresse de 33 % en
+              2026 et que la solvabilité permette de distribuer 65 %. L’IRVM dépend du pays de
+              résidence ; le tableau retient 12 %, le taux ivoirien des personnes physiques.
+            </p>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Dividende par action et rendement au prix d’offre (calculs WESTBOURSE)</caption>
+              <thead><tr><th>Exercice</th><th>Résultat prévu</th><th>Dividende par action</th><th>Rendement brut</th><th>Net d’IRVM</th></tr></thead>
+              <tbody>
+                {dividendesProjetes().map((ligne) => (
+                  <tr key={ligne.exercice}>
+                    <th>{ligne.exercice}</th>
+                    <td>{number(ligne.resultatMd, 1)} Md</td>
+                    <td>{number(ligne.dpa)} FCFA</td>
+                    <td>{number(ligne.rendementBrutPct, 1)} %</td>
+                    <td>{number(ligne.rendementNetPct, 1)} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="coris-section coris-section--split" id="vigilance">
+          <div className="coris-section__intro">
+            <span className="coris-section__number">05</span>
+            <p className="coris-rubrique">Points de vigilance</p>
+            <h2>Le capital, la concentration et la cession, plus que la qualité des crédits.</h2>
+          </div>
+          <div className="coris-copy">
+            <p>
+              Le taux brut de créances douteuses baisse depuis 2023 (6,74 % en 2025) et la banque est
+              notée A+ par Bloomfield. Les risques propres à l’offre sont ailleurs.
+            </p>
+          </div>
+          <div className="coris-table-wrap">
+            <table className="coris-data-table">
+              <caption>Ce que dit la note d’information</caption>
+              <thead><tr><th>Point</th><th>Fait</th></tr></thead>
+              <tbody>
+                {VIGILANCES_CBI_CI.map(([point, fait]) => (
+                  <tr key={point}><th>{point}</th><td>{fait}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="coris-section" id="bridge">
           <div className="coris-section__intro">
-            <span className="coris-section__number">02</span>
+            <span className="coris-section__number">06</span>
             <p className="coris-rubrique">Le précédent Bridge</p>
             <h2>Le premier mouvement de cash s’observe dans le carnet, pas dans la surface des indices.</h2>
           </div>
@@ -296,7 +475,7 @@ export default function CorisIpoArticle() {
 
         <section className="coris-section coris-section--dividend" id="dividendes">
           <div className="coris-section__intro">
-            <span className="coris-section__number">03</span>
+            <span className="coris-section__number">07</span>
             <p className="coris-rubrique">Dividendes : une autre mécanique</p>
             <h2>Le coupon attire le cash avant le détachement. Il ne le garantit pas après.</h2>
           </div>
@@ -317,7 +496,7 @@ export default function CorisIpoArticle() {
 
         <section className="coris-section" id="comportements">
           <div className="coris-section__intro">
-            <span className="coris-section__number">04</span>
+            <span className="coris-section__number">08</span>
             <p className="coris-rubrique">Matrice comportementale</p>
             <h2>Qui bouge, quand et sous quelle contrainte.</h2>
           </div>
@@ -354,7 +533,7 @@ export default function CorisIpoArticle() {
 
         <section className="coris-section coris-section--cash" id="origine-cash">
           <div className="coris-section__intro">
-            <span className="coris-section__number">05</span>
+            <span className="coris-section__number">09</span>
             <p className="coris-rubrique">Le vrai sujet : d’où viendra le cash ?</p>
             <h2>81 milliards souscrits ne signifient pas 81 milliards vendus sur le secondaire.</h2>
           </div>
@@ -375,7 +554,7 @@ export default function CorisIpoArticle() {
 
         <section className="coris-section coris-section--structure" id="impact-structurel">
           <div className="coris-section__intro">
-            <span className="coris-section__number">06</span>
+            <span className="coris-section__number">10</span>
             <p className="coris-rubrique">Effet structurel</p>
             <h2>Le succès ne se mesure pas seulement au montant collecté.</h2>
           </div>
@@ -401,7 +580,7 @@ export default function CorisIpoArticle() {
 
         <section className="coris-section coris-section--scenarios" id="scenarios">
           <div className="coris-section__intro">
-            <span className="coris-section__number">07</span>
+            <span className="coris-section__number">11</span>
             <p className="coris-rubrique">Trois scénarios, sans probabilité artificielle</p>
             <h2>La provenance du cash décide de la trajectoire.</h2>
           </div>
@@ -476,8 +655,9 @@ export default function CorisIpoArticle() {
           <div>
             <p>
               Analyse fondée sur les données WESTBOURSE du 26 mai au 19 novembre 2026,
-              les annonces Coris publiées le 17 novembre, le précédent Bridge Bank et le
-              relevé intraday BRVM du 19 novembre.
+              la note d’information de CBI CI visée par l’AMF-UMOA (OA/26-05) et publiée le
+              20 novembre, le précédent Bridge Bank et le relevé intraday BRVM du 19 novembre.
+              Dividendes par action et rendements sont des calculs WESTBOURSE.
             </p>
             <p>
               Les coïncidences de dates ne prouvent pas seules une causalité. Cette analyse est
