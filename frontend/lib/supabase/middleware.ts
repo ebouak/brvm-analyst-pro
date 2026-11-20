@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { isAdminEmail } from '@/lib/server/admin-emails';
-import { urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
+import { destinationInscritConnecte, urlConnexion, urlPortePremium } from '@/lib/auth/urlsAcces';
 import { isPublicPath } from '@/lib/auth/cheminsPublics';
 import { estCheminPremium } from '@/lib/auth/cheminsPremium';
 import { secretRenduValide, EN_TETE_RENDU, PREFIXE_RENDU } from '@/lib/dossier/renduAutorise';
@@ -94,6 +94,16 @@ export async function updateSession(request: NextRequest) {
   const user = claims?.sub
     ? { id: claims.sub, email: typeof claims.email === 'string' ? claims.email : undefined }
     : null;
+
+  // Déjà connecté sur /signup?next=… (bouton « Recevoir mes alertes » d'une page
+  // ISR, qui ne lit pas la session) : directement vers `next`. Les cookies
+  // éventuellement rafraîchis voyagent avec la redirection.
+  const versNext = user ? destinationInscritConnecte(request.nextUrl.pathname, request.nextUrl.searchParams.get('next')) : null;
+  if (versNext) {
+    const r = NextResponse.redirect(new URL(versNext, request.url));
+    response.cookies.getAll().forEach((c) => r.cookies.set(c));
+    return r;
+  }
 
   // Mur d'authentification : hors vitrine SEO, un anonyme est renvoyé vers /login
   // (avec ?next pour revenir après connexion). Les pages publiques restent

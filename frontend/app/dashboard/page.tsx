@@ -46,7 +46,7 @@ import BadgeNervosite from '@/components/nervosite/BadgeNervosite';
 import { largeurSeance } from '@/lib/marche/marcheDuJour';
 import { Fragment } from 'react';
 import { PremiumLock } from '@/components/dashboard/PremiumLock';
-import { BoutonChaine } from '@/components/canaux/BoutonChaine';
+import { BoutonsWhatsapp } from '@/components/canaux/BoutonsWhatsapp';
 import { MacroBanner } from '@/components/MacroBanner';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
@@ -534,7 +534,7 @@ export default async function Dashboard() {
             <PastilleSeance />
             <FreshnessBadge fraicheur={fraicheurCours} />
             <BadgeNervosite badge={badgeNervosite} />
-            <BoutonChaine src="dashboard" />
+            <BoutonsWhatsapp src="dashboard" connecte={Boolean(user)} sousTitre={false} className="w-full sm:w-auto" />
             {user && (
               <Link href="/dashboard/personnaliser" className="rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:text-accent hover:border-accent/40 transition-colors" title={dashboardLayout ? 'Ordre personnalisé enregistré : il remplace l’ordre automatique de votre profil' : 'Personnaliser le tableau de bord'}>
                 {dashboardLayout ? 'Ordre personnalisé' : 'Personnaliser'}

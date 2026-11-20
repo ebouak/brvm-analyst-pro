@@ -10,7 +10,7 @@ import { jsonLdScript } from '@/lib/jsonLd';
 import { COLONNES_ARTICLE, LIBELLE_TYPE, type Article } from '@/lib/articles/types';
 import type { DecryptageDonnees } from '@/lib/articles/decryptage';
 import DecryptageVue from '@/components/decryptage/DecryptageVue';
-import { BoutonChaine } from '@/components/canaux/BoutonChaine';
+import { BoutonsWhatsapp } from '@/components/canaux/BoutonsWhatsapp';
 
 /*
  * Article de presse généré depuis la donnée BRVM (spec 2026-10-28). Public, ISR.
@@ -91,8 +91,8 @@ export default async function ArticlePage(props: { params: Promise<{ slug: strin
   // Fin de lecture : suivre la séance chaque soir, sans compte (liens de suivi, src=article).
   const suivre = (
     <aside className="space-y-3 rounded-xl border border-border bg-surface p-4" aria-labelledby="suivre-titre">
-      <p id="suivre-titre" className="text-sm text-ivory">Recevez la vidéo de chaque séance, gratuitement et sans compte.</p>
-      <BoutonChaine src="article" variante="pleine" avecTelegram />
+      <p id="suivre-titre" className="text-sm text-ivory">Suivez la séance sur WhatsApp : la vidéo du soir sur la Chaîne, les cours à la demande, vos alertes avec un compte gratuit.</p>
+      <BoutonsWhatsapp src="article" variante="pleine" avecTelegram />
     </aside>
   );
 

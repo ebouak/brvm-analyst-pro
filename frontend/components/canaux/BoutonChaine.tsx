@@ -1,6 +1,10 @@
 import { MessageCircle, Send } from 'lucide-react';
 import { cheminSuivi } from '@/lib/acquisition/suivi';
 
+/** Forme commune des boutons de canaux (≥ 44 px de haut, focus visible). */
+export const BASE =
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
 /**
  * « Suivre la Chaîne WhatsApp » — composant UNIQUE du site (accueil, tableau de
  * bord, fin d'article). Rendu serveur, aucun JavaScript : les pages ISR restent
@@ -27,12 +31,9 @@ export function BoutonChaine({
   className?: string;
 }) {
   const pleine = variante === 'pleine';
-  const base =
-    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
   const chaine = pleine
-    ? `${base} bg-up px-5 text-sm text-bg hover:bg-up/90`
-    : `${base} border border-up/50 px-4 text-sm text-up hover:bg-up/10`;
-  const telegram = `${base} border border-border-strong px-4 text-sm text-ivory hover:border-accent/50 hover:text-accent-ink`;
+    ? `${BASE} bg-up px-5 text-sm text-bg hover:bg-up/90`
+    : `${BASE} border border-up/50 px-4 text-sm text-up hover:bg-up/10`;
   const lien = (
     <a
       href={cheminSuivi('chaine', src)}
@@ -49,16 +50,23 @@ export function BoutonChaine({
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {lien}
-      <a
-        href={cheminSuivi('telegram', src)}
-        target="_blank"
-        rel="noopener"
-        className={telegram}
-        aria-label="Suivre le canal Telegram WESTBOURSE (ouvre Telegram)"
-      >
-        <Send aria-hidden className="h-4 w-4 shrink-0" strokeWidth={2} />
-        <span>Canal Telegram</span>
-      </a>
+      <LienTelegram src={src} />
     </div>
+  );
+}
+
+/** Lien secondaire vers le canal Telegram (même mécanisme de suivi que la Chaîne). */
+export function LienTelegram({ src, className = '' }: { src: string; className?: string }) {
+  return (
+    <a
+      href={cheminSuivi('telegram', src)}
+      target="_blank"
+      rel="noopener"
+      className={`${BASE} border border-border-strong px-4 text-sm text-ivory hover:border-accent/50 hover:text-accent-ink ${className}`}
+      aria-label="Suivre le canal Telegram WESTBOURSE (ouvre Telegram)"
+    >
+      <Send aria-hidden className="h-4 w-4 shrink-0" strokeWidth={2} />
+      <span>Canal Telegram</span>
+    </a>
   );
 }

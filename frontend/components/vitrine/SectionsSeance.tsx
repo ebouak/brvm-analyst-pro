@@ -17,6 +17,7 @@ import { FilmSeance, type DonneesFilm } from './FilmSeance';
 import { LienInscription } from './LienInscription';
 import { LienCanal } from './LienCanal';
 import { BoutonChaine } from '@/components/canaux/BoutonChaine';
+import { BoutonsWhatsapp } from '@/components/canaux/BoutonsWhatsapp';
 import { cheminSuivi } from '@/lib/acquisition/suivi';
 import { fmtNumber } from '@/lib/format';
 import type { SceneIndice as Indice, CaseValeur } from '@/lib/vitrine/seance';
@@ -60,6 +61,11 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
           <span>Ou suivez la séance sans compte</span>
           <BoutonChaine src="accueil" />
           <LienCanal className="v-bouton-second" href={cheminSuivi('telegram', 'accueil')} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>
+        </div>
+        {/* Les deux autres boutons WhatsApp, sous la ligne des canaux : la ligne
+            existante ne bouge pas (rien ne se décale au-dessus, H1 = LCP intact). */}
+        <div className="vh-entree mx-auto mt-3 w-full max-w-md sm:max-w-none" style={rang(11)}>
+          <BoutonsWhatsapp src="accueil" inclureChaine={false} className="sm:justify-center" />
         </div>
       </div>
     </section>
