@@ -24,6 +24,7 @@ export default function SignInClient({
   subtitle = 'Connexion ou inscription',
   next,
   emailInitial,
+  src,
 }: {
   /** Adresse saisie sur l'accueil : préremplit le formulaire, le parcours reste inchangé. */
   emailInitial?: string;
@@ -32,6 +33,8 @@ export default function SignInClient({
   subtitle?: string;
   /** Destination post-connexion explicite (ex. depuis /societes → /actions/CODE). Prioritaire sur le comportement par défaut (bienvenue/dashboard). */
   next?: string;
+  /** Source de campagne de /signup?src= (déjà normalisée) : comptée après une inscription réussie. */
+  src?: string;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -100,7 +103,7 @@ export default function SignInClient({
         await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${resoudreOauthOrigin()}/auth/callback?next=${encodeURIComponent(next ?? '/dashboard')}`,
+            redirectTo: `${resoudreOauthOrigin()}/auth/callback?next=${encodeURIComponent(next ?? '/dashboard')}${src ? `&src=${encodeURIComponent(src)}` : ''}`,
           },
         });
       }}
@@ -147,6 +150,15 @@ export default function SignInClient({
           if (!user) return;
           // Pays du compte (segmentation CRM) : l'en-tête est lu côté serveur, best-effort.
           void fetch('/api/crm/geo', { method: 'POST', keepalive: true }).catch(() => {});
+          // Source de campagne : le serveur ne compte que si le compte vient d'être créé.
+          if (src) {
+            void fetch('/api/acquisition/inscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ src }),
+              keepalive: true,
+            }).catch(() => {});
+          }
           phIdentify(user.id, { email: user.email });
           // plan: 'free' est un fait (tout nouveau compte démarre gratuit) —
           // pas de propriété 'source' inventée : $initial_referrer, déjà

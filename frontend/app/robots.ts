@@ -17,6 +17,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/', '/dashboard', '/portefeuille', '/parametres', '/account', '/admin', '/premium', '/print',
           '/apercu', '/embed/', '/rapports/', '/auth/', '/login?', '/signup?',
+          // Liens de suivi (redirections comptées) : un robot n'a rien à y voir.
+          '/chaine', '/telegram',
         ],
       },
     ],

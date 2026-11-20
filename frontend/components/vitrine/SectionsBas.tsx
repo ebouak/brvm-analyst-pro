@@ -13,6 +13,7 @@ import { Vague, VagueElement } from './mouvement/Vague';
 import { LienInscription } from './LienInscription';
 import { LienCanal, SuiviAbonnement } from './LienCanal';
 import { CANAUX, lienWhatsappNumero } from '@/lib/canaux';
+import { cheminSuivi } from '@/lib/acquisition/suivi';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { EchangeWhatsapp } from '@/lib/vitrine/basPur';
@@ -120,7 +121,7 @@ export function SectionCanaux({ c }: { c: DonneesCanaux }) {
               </Vague>
             ) : <p className="v-note" style={{ marginTop: 'auto' }}>Exemple non disponible : aucune séance en base.</p>}
             {c.whatsapp.length > 0 && <p className="v-note">Réponses produites par le service à partir des chiffres de la dernière séance. Source BRVM.</p>}
-            <LienCanal href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="canaux" className="v-bouton v-bouton--whatsapp">Suivre la Chaîne</LienCanal>
+            <LienCanal href={cheminSuivi('chaine', 'accueil-canaux')} canal="whatsapp" emplacement="canaux" className="v-bouton v-bouton--whatsapp">Suivre la Chaîne</LienCanal>
             <p className="v-note v-canal-pied">
               Ou écrivez <LienCanal href={lienWhatsappNumero('AIDE')} canal="whatsapp-numero" emplacement="canaux" className="v-lien-discret">AIDE au {CANAUX.whatsappNumero}</LienCanal>
               {' '}· COURS, DIV et PALMARES sans compte{c.quotaGratuit != null ? ` · ${c.quotaGratuit} question${c.quotaGratuit > 1 ? 's' : ''} par jour à l'assistant avec un compte gratuit lié` : ''}
@@ -139,7 +140,7 @@ export function SectionCanaux({ c }: { c: DonneesCanaux }) {
                 </Vague>
               </div>
             ) : <p className="v-note" style={{ marginTop: 'auto' }}>Brief non disponible pour le moment.</p>}
-            <LienCanal href={CANAUX.telegram} canal="telegram" emplacement="canaux" className="v-bouton">Ouvrir le canal</LienCanal>
+            <LienCanal href={cheminSuivi('telegram', 'accueil-canaux')} canal="telegram" emplacement="canaux" className="v-bouton">Ouvrir le canal</LienCanal>
             <p className="v-note v-canal-pied">{telegramCourt} · sans compte Westbourse</p>
           </Apparition>
 

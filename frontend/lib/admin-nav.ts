@@ -36,6 +36,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/leads', label: 'Leads débutants', permission: 'leads.read' },
   { href: '/admin/crm', label: 'CRM · proches du Premium', permission: 'crm.read' },
   { href: '/admin/audience', label: 'Audience (PostHog)', permission: 'crm.read' },
+  { href: '/admin/acquisition', label: 'Acquisition par source', permission: 'crm.read' },
   { href: '/admin/reports', label: 'Rapports IA', permission: 'content.read' },
   { href: '/admin/import-fondamentaux', label: 'Import fondamentaux (IA)', permission: 'content.write' },
   { href: '/admin/import-sgi-tarifs', label: 'Import tarifs SGI', permission: 'content.write' },

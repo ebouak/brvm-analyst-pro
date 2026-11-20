@@ -1,8 +1,10 @@
 // Échange le code OAuth (Google) contre une session Supabase, puis redirige.
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { enregistrerPays } from '@/lib/crm/geoServeur';
 import { estNouveauCompte, nextSur, versEcranWhatsapp } from '@/lib/bienvenue/redirection';
+import { estInscriptionRecente, normaliserSrc } from '@/lib/acquisition/suivi';
+import { incrementerAcquisition } from '@/lib/acquisition/compteur';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -36,6 +38,12 @@ export async function GET(request: Request) {
   // Pays du compte (en-tête Vercel, côté serveur) : best-effort, jamais bloquant.
   // Sans attendre : la redirection ne doit pas dépendre de cette écriture (enregistrerPays ne lève jamais).
   if (user) void enregistrerPays(user.id, request.headers).catch(() => {});
+  // Inscription Google venue d'un lien de campagne (/signup?src=) : comptée, agrégée,
+  // seulement pour un compte créé à l'instant (une connexion n'est pas une inscription).
+  const src = searchParams.get('src');
+  if (user && src !== null && estInscriptionRecente(user.created_at, new Date())) {
+    after(() => incrementerAcquisition(normaliserSrc(src), 'inscription').then(() => undefined));
+  }
   const destination = user && estNouveauCompte(user.created_at, new Date()) ? versEcranWhatsapp(next) : next;
   return NextResponse.redirect(`${origin}${destination}`);
 }

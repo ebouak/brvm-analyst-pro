@@ -16,7 +16,8 @@ import { Mosaique } from './Mosaique';
 import { FilmSeance, type DonneesFilm } from './FilmSeance';
 import { LienInscription } from './LienInscription';
 import { LienCanal } from './LienCanal';
-import { CANAUX } from '@/lib/canaux';
+import { BoutonChaine } from '@/components/canaux/BoutonChaine';
+import { cheminSuivi } from '@/lib/acquisition/suivi';
 import { fmtNumber } from '@/lib/format';
 import type { SceneIndice as Indice, CaseValeur } from '@/lib/vitrine/seance';
 import { classesPolicesTitre } from '@/lib/vitrine/policesTitre';
@@ -28,9 +29,6 @@ export interface DonneesOuverture {
   nbValeurs: number;
 }
 
-const IcoWhatsapp = () => (
-  <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="v-up"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5.2A8.5 8.5 0 1 1 21 11.5z" /></svg>
-);
 const IcoTelegram = () => (
   <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="v-accent"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z" /></svg>
 );
@@ -60,8 +58,8 @@ export function Ouverture({ o }: { o: DonneesOuverture }) {
         </p>
         <div className="v-canaux-ligne vh-entree" style={rang(10)} data-canaux-ouverture="">
           <span>Ou suivez la séance sans compte</span>
-          <LienCanal className="v-bouton-second" href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="ouverture"><IcoWhatsapp />WhatsApp</LienCanal>
-          <LienCanal className="v-bouton-second" href={CANAUX.telegram} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>
+          <BoutonChaine src="accueil" />
+          <LienCanal className="v-bouton-second" href={cheminSuivi('telegram', 'accueil')} canal="telegram" emplacement="ouverture"><IcoTelegram />Telegram</LienCanal>
         </div>
       </div>
     </section>
@@ -143,8 +141,8 @@ export function SectionFilm({ f, dateCourte }: { f: DonneesFilm; dateCourte: str
         <Apparition className="v-incitation">
           <span className="v-carte-titre">Le film de la séance, chaque soir, <span className="vitrine-accent">sans compte.</span></span>
           <span className="v-canaux-boutons">
-            <LienCanal href={CANAUX.whatsappChaine} canal="whatsapp" emplacement="film" className="v-bouton v-bouton--whatsapp">Suivre sur WhatsApp</LienCanal>
-            <LienCanal href={CANAUX.telegram} canal="telegram" emplacement="film" className="v-bouton">Suivre sur Telegram</LienCanal>
+            <LienCanal href={cheminSuivi('chaine', 'accueil-film')} canal="whatsapp" emplacement="film" className="v-bouton v-bouton--whatsapp">Suivre sur WhatsApp</LienCanal>
+            <LienCanal href={cheminSuivi('telegram', 'accueil-film')} canal="telegram" emplacement="film" className="v-bouton">Suivre sur Telegram</LienCanal>
           </span>
         </Apparition>
       </div>

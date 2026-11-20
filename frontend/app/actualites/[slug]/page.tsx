@@ -10,6 +10,7 @@ import { jsonLdScript } from '@/lib/jsonLd';
 import { COLONNES_ARTICLE, LIBELLE_TYPE, type Article } from '@/lib/articles/types';
 import type { DecryptageDonnees } from '@/lib/articles/decryptage';
 import DecryptageVue from '@/components/decryptage/DecryptageVue';
+import { BoutonChaine } from '@/components/canaux/BoutonChaine';
 
 /*
  * Article de presse généré depuis la donnée BRVM (spec 2026-10-28). Public, ISR.
@@ -87,6 +88,14 @@ export default async function ArticlePage(props: { params: Promise<{ slug: strin
       </nav>
   );
 
+  // Fin de lecture : suivre la séance chaque soir, sans compte (liens de suivi, src=article).
+  const suivre = (
+    <aside className="space-y-3 rounded-xl border border-border bg-surface p-4" aria-labelledby="suivre-titre">
+      <p id="suivre-titre" className="text-sm text-ivory">Recevez la vidéo de chaque séance, gratuitement et sans compte.</p>
+      <BoutonChaine src="article" variante="pleine" avecTelegram />
+    </aside>
+  );
+
   if (a.type === 'decryptage' && decryptage?.version === 1) {
     return (
       <article className="mx-auto max-w-5xl space-y-8 px-4 py-8">
@@ -94,6 +103,7 @@ export default async function ArticlePage(props: { params: Promise<{ slug: strin
         {nav}
         <DecryptageVue d={decryptage} />
         <p className="text-xs text-faint">{date} · La rédaction WESTBOURSE</p>
+        {suivre}
       </article>
     );
   }
@@ -136,6 +146,8 @@ export default async function ArticlePage(props: { params: Promise<{ slug: strin
           </ul>
         </aside>
       ) : null}
+
+      {suivre}
 
       {a.sources.length > 0 ? (
         <footer className="border-t border-border/60 pt-4 text-xs text-faint">

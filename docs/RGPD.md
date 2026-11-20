@@ -25,6 +25,7 @@ Audit initial : 2026-06-16.
 | `forum_topics` / `forum_posts` | pseudonyme (`display_name`), contenu des messages, horodatage | Discussion communautaire | Intérêt légitime + action volontaire de l'utilisateur | Jusqu'à suppression par l'auteur ou masquage admin | ✅ (`/api/account/export`) | Anonymisation automatique à la suppression du compte (`author_id` → NULL, affichage « Utilisateur supprimé ») |
 
 | `recherche_societes_cache`, `rate_limit_hits` (route `recherche-societes`) | Aucun texte de recherche (empreinte SHA-256 seule) ; identifiant de compte **haché** pour le quota | Recherche des sociétés en langage naturel (Jev) | Contrat (exécution du service) | Cache 24 h ; quota : fenêtre d'une heure | N/A (rien de rattaché au compte) | Purge `purge_rgpd_retention()` || `whatsapp_aiguillages`, `jev_budget` | Aucune (intention retenue, décision, probabilité ; compteur journalier) | Aiguillage des messages WhatsApp libres (Jev) | Intérêt légitime (répondre au message reçu) | 90 jours ; budget 30 jours | N/A (rien de rattaché à une personne) | Purge `purge_rgpd_retention()` |
+| `acquisition_compteurs` (migration 0251) | **Aucune** : compteur agrégé (étiquette de campagne, jour, événement, nombre) ; ni IP, ni identifiant, ni cookie, ni User-Agent stocké | Mesure des liens de suivi `/chaine`, `/telegram`, `/signup?src=` | Intérêt légitime (statistique agrégée) | 24 mois | N/A (rien de rattaché à une personne) | Purge `purge_rgpd_retention()` |
 
 > IP et user-agent (`admin_audit_logs`) sont des données personnelles : limiter la
 > rétention et ne pas les exposer hors admin.
@@ -330,6 +331,15 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - **Conservation** : tant que la fonction est exercée ; une ligne périmée est remplacée, pas archivée.
 - **Droits** : une personne concernée peut demander la rectification ou le retrait par le formulaire de contact. La table n'est pas rattachée à un compte utilisateur : elle n'entre pas dans l'export ni dans la suppression de compte.
 - **Sécurité** : lecture publique, écriture service_role seule. Écriture testée à la clé publique : 42501.
+
+### Liens de suivi de la Chaîne WhatsApp et du canal Telegram (`acquisition_compteurs`, migration 0251)
+
+- **Données** : aucune donnée personnelle. Une ligne = (source, jour UTC, événement, nombre). La source est une étiquette de **campagne** choisie par l'exploitant (`affiche`, `delegue-<ecole>-<classe>`, `accueil`…), validée `^[a-z0-9-]{1,40}$` ; elle ne doit jamais contenir un nom de personne.
+- **Collecte** : `/chaine?src=` et `/telegram?src=` comptent une visite puis redirigent (302) vers la Chaîne ou le canal ; `/signup?src=` compte une inscription si le compte vient d'être créé (moins de 30 min). Rien n'est rattaché au compte, aucune colonne n'est ajoutée à `profiles`. Ni IP, ni User-Agent, ni cookie : le User-Agent n'est lu qu'en mémoire pour écarter les robots et les aperçus de lien, puis oublié.
+- **Finalité** : savoir quelles campagnes amènent des abonnés et des inscriptions. **Base légale** : intérêt légitime ; aucun traceur, donc aucun consentement cookies requis (§3).
+- **Conservation** : 24 mois (`purge_rgpd_retention`).
+- **Droits** : sans objet (aucune personne identifiable) ; hors export et suppression de compte.
+- **Sécurité** : RLS activée sans policy, `revoke all` sur la table ; fonction `acquisition_incrementer` révoquée pour `public, anon, authenticated`, appelée côté serveur en service_role. Plafond de 300 sources nouvelles par jour (au-delà : `debordement`).
 
 ## 7. Destinataires, transferts et durées (mise à jour 2026-11-11, audit F-10)
 
