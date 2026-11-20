@@ -29,7 +29,8 @@ export const PUBLIC_EXACT = new Set<string>([
   // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,
   // il répondait 307 vers /login et aucun navigateur ne pouvait le lire
   // (constaté le 2026-09-28). /manifest.webmanifest reste pour compatibilité.
-  '/robots.txt', '/sitemap.xml', '/manifest.webmanifest', '/manifest.json',
+  '/robots.txt', '/sitemap.xml', '/news-sitemap.xml', '/rss.xml',
+  '/manifest.webmanifest', '/manifest.json',
   // Contact de signalement de failles (RFC 9116), à renouveler avant son
   // champ Expires. Sans cette entrée, il répondrait 307 vers /login.
   '/.well-known/security.txt',
