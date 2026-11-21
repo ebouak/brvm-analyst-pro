@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Coris en bourse : 81 milliards et liquidité BRVM';
+export const alt = 'OPV Coris Bank International Côte d’Ivoire : étude WESTBOURSE';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -23,16 +23,16 @@ export default function Image() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, fontWeight: 700 }}>
           <span>WESTBOURSE RECHERCHE</span>
-          <span style={{ color: '#076880' }}>IPO · LIQUIDITÉ · BRVM</span>
+          <span style={{ color: '#076880' }}>OPV · VALORISATION · BRVM</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 48 }}>
           <div style={{ display: 'flex', flexDirection: 'column', width: 740 }}>
-            <span style={{ color: '#076880', fontSize: 22, letterSpacing: 4 }}>19 NOVEMBRE 2026</span>
+            <span style={{ color: '#076880', fontSize: 22, letterSpacing: 4 }}>20 NOVEMBRE 2026</span>
             <strong style={{ fontSize: 82, lineHeight: 0.93, letterSpacing: -4 }}>
-              81 milliards. Deux IPO Coris.
+              CBI CI : 20 % à 7 720 FCFA.
             </strong>
             <span style={{ marginTop: 20, fontSize: 31, lineHeight: 1.2, color: '#625e54' }}>
-              Le test de liquidité de la BRVM.
+              315 Md de valorisation, 12,8× le résultat 2025.
             </span>
           </div>
           <div
@@ -49,13 +49,13 @@ export default function Image() {
               border: '3px solid #76d3dc',
             }}
           >
-            <span style={{ fontSize: 18, letterSpacing: 3 }}>FLUX ANNONCÉS</span>
-            <strong style={{ fontSize: 68, letterSpacing: -4 }}>81 Md</strong>
-            <span style={{ fontSize: 18 }}>7,3× une séance</span>
+            <span style={{ fontSize: 18, letterSpacing: 3 }}>MONTANT OFFERT</span>
+            <strong style={{ fontSize: 60, letterSpacing: -4 }}>62,7 Md</strong>
+            <span style={{ fontSize: 18 }}>5,7× une séance</span>
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #171612', paddingTop: 16, fontSize: 20 }}>
-          <span>Coris CI 62 Md · Coris Bénin 19 Md</span>
+          <span>Souscription 30 nov. – 4 déc. · Cotation 15 janv. 2027</span>
           <span>westbourse.com</span>
         </div>
       </div>

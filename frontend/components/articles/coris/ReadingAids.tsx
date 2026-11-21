@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 
 const SECTIONS = [
-  ['operations', '01 · Opérations'],
-  ['bridge', '02 · Bridge'],
-  ['dividendes', '03 · Dividendes'],
-  ['comportements', '04 · Comportements'],
-  ['origine-cash', '05 · WPLI'],
-  ['impact-structurel', '06 · Structure'],
-  ['scenarios', '07 · Scénarios'],
+  ['operation', '01 · Opération'],
+  ['souscrire', '03 · Souscrire'],
+  ['analyse-financiere', '05 · Comptes'],
+  ['plan', '07 · Plan'],
+  ['valorisation', '08 · Valorisation'],
+  ['dividendes', '09 · Dividendes'],
+  ['effet-brvm', '10 · BRVM'],
+  ['risques', '11 · Risques'],
 ] as const;
 
 export default function ReadingAids() {
