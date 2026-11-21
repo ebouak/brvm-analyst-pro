@@ -15,6 +15,7 @@ import { SANS } from './polices';
 import { EASE } from './ecosysteme';
 import GRATUIT from './etudiants-gratuit.json';
 import ACADEMY from './etudiants-academy.json';
+import TUTO from './etudiants-tuto.json';
 
 /**
  * Deux vidéos de présentation pour les étudiants (2026-11-18), verticales
@@ -58,11 +59,12 @@ type SceneE = {
 };
 type Plan = { id: string; scenes: SceneE[] };
 type Mot = { text: string; startMs: number; endMs: number };
-type Props = { video: 'gratuit' | 'academy'; durees: Record<string, number> | null; mots: Record<string, Mot[]> | null };
+type Props = { video: 'gratuit' | 'academy' | 'tuto'; durees: Record<string, number> | null; mots: Record<string, Mot[]> | null };
 
 const PLANS: Record<Props['video'], Plan> = {
   gratuit: GRATUIT as unknown as Plan,
   academy: ACADEMY as unknown as Plan,
+  tuto: TUTO as unknown as Plan,
 };
 
 const FPS = 30;
