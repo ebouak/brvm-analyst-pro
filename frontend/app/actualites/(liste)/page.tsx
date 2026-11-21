@@ -59,11 +59,11 @@ export default async function ActualitesPage() {
           href="/analyses/coris-bank-ipo-2027"
           className="mt-2 block font-display text-2xl text-ivory transition-colors hover:text-accent-ink"
         >
-          81 milliards FCFA : les deux IPO Coris peuvent-elles déplacer la liquidité BRVM ?
+          OPV Coris Bank International Côte d’Ivoire : 20 % du capital à 7 720 FCFA, que vaut l’offre ?
         </Link>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Article illustré : ampleur des offres, précédent Bridge Bank, comportement autour des
-          dividendes et matrice de réaction par type d’investisseur.
+          Étude complète d’après la note d’information : calendrier, allocation, comptes, plan
+          d’affaires, valorisation, dividendes projetés, risques et effet sur la BRVM.
         </p>
         <Link href="/analyses/coris-bank-ipo-2027" className="mt-4 inline-block text-sm font-medium text-accent-ink">
           Lire l’article →
