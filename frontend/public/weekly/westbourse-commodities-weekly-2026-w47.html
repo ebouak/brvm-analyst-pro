@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matières premières S47/2026 : l&#x27;argent recule de 16,31 %</title>
+<meta name="description" content="Sur la semaine, l&#x27;argent perd 16,31 %, l&#x27;or perd 9,54 % et le Brent recule de 3,41 %, à 92,57 dollars. Ce que ces mouvements changent, ou ne changent pas, pour les valeurs cotées à la BRVM.">
+<meta property="og:title" content="Matières premières S47/2026 : l&#x27;argent recule de 16,31 %">
+<meta property="og:type" content="article">
+<style>
+:root { --font-sans: 'Helvetica Neue', Arial; --font-display: Georgia; --font-mono: ui-monospace; }
+body { margin: 0; }
+/**
+ * Hebdo matières premières — feuille de papier, portée par `.wk`.
+ *
+ * MÊME GRAMMAIRE QUE LE DOSSIER VALEUR (`../../rapports/dossier/[code]/dossier.css`) :
+ * mêmes jetons d'encre et de papier, mêmes familles, panneaux numérotés,
+ * mesures encadrées, tableaux à filets. Un lecteur qui passe d'un dossier à
+ * l'hebdo doit reconnaître le même éditeur.
+ *
+ * Deux différences assumées : l'hebdo est une feuille CONTINUE (sa longueur
+ * dépend de la semaine, on ne force pas des A4 à hauteur fixe) et son HTML
+ * vient du générateur Python, qui n'écrit QUE des classes `wk-*` et aucun
+ * style en ligne hors les positions calculées (repères de fourchette).
+ *
+ * Ce fichier est AUSSI lu par `commodity_weekly_generator.py`, qui l'embarque
+ * dans le fichier HTML autonome : une seule source pour le site et l'export.
+ */
+
+.wk {
+  --wk-encre: #12161c;
+  --wk-encre-douce: #5b6672;
+  --wk-faible: #8b949e;
+  --wk-papier: #ffffff;
+  --wk-fond: #f4f6f8;
+  --wk-trame: #dfe4ea;
+  --wk-accent: #0b6c84;
+  --wk-accent-clair: #e6f2f5;
+  --wk-hausse: #15803d;
+  --wk-baisse: #b91c1c;
+  --wk-alerte: #92580b;
+
+  background: var(--wk-fond);
+  color: var(--wk-encre);
+  font-family: var(--font-sans), 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 24px 12px 64px;
+}
+
+.wk * { box-sizing: border-box; }
+
+.wk-nav {
+  width: 210mm;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10pt;
+  color: var(--wk-encre-douce);
+}
+.wk-nav a { color: var(--wk-encre-douce); text-decoration: underline; }
+.wk-nav a:hover { color: var(--wk-encre); }
+
+/* ── Feuille ─────────────────────────────────────────────────────────────── */
+
+.wk-feuille {
+  width: 210mm;
+  margin: 0 auto;
+  padding: 15mm 14mm 12mm;
+  background: var(--wk-papier);
+  box-shadow: 0 1px 3px rgba(18, 22, 28, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 8mm;
+}
+
+.wk-courant {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6mm;
+  border-bottom: 1px solid var(--wk-trame);
+  padding-bottom: 3mm;
+  font-size: 9pt;
+  color: var(--wk-faible);
+}
+.wk-marque {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  color: var(--wk-encre);
+}
+
+.wk-entete { display: flex; flex-direction: column; gap: 3mm; }
+.wk-surtitre { margin: 0; font-size: 9pt; color: var(--wk-accent); font-weight: 600; }
+.wk-h1 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 22pt;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.wk-chapeau { margin: 0; font-size: 12pt; line-height: 1.5; color: var(--wk-encre-douce); max-width: 64ch; text-wrap: pretty; }
+.wk-signature { margin: 0; font-size: 9pt; color: var(--wk-faible); }
+.wk-valeurs { display: flex; flex-wrap: wrap; gap: 2mm; margin: 0; padding: 0; list-style: none; }
+.wk-valeurs a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8.5pt;
+  color: var(--wk-accent);
+  text-decoration: none;
+  border: 1px solid var(--wk-trame);
+  border-radius: 3px;
+  padding: 0.6mm 2mm;
+}
+.wk-valeurs a:hover { border-color: var(--wk-accent); }
+
+/* ── Illustration de tête ────────────────────────────────────────────────── */
+
+.wk-illustration { margin: 0; }
+.wk-illustration svg { display: block; width: 100%; height: auto; border-radius: 3px; }
+.wk-illustration figcaption { margin-top: 1.5mm; font-size: 8pt; color: var(--wk-faible); }
+
+/* ── Niveaux de lecture ──────────────────────────────────────────────────── */
+
+.wk-niveau {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  padding-top: 4mm;
+  border-top: 2px solid var(--wk-encre);
+  font-size: 9pt;
+  color: var(--wk-encre-douce);
+}
+.wk-badge {
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.6mm 2.2mm;
+  border-radius: 2px;
+  background: var(--wk-encre);
+  color: var(--wk-papier);
+}
+.wk-niveau--essentiel .wk-badge { background: var(--wk-hausse); }
+.wk-niveau--investisseur .wk-badge { background: var(--wk-accent); }
+.wk-niveau--pro .wk-badge { background: var(--wk-encre); }
+
+/* ── Panneaux ────────────────────────────────────────────────────────────── */
+
+.wk-panneau { display: flex; flex-direction: column; gap: 2.5mm; }
+
+.wk-titre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 14pt;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+}
+.wk-numero {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9pt;
+  font-weight: 500;
+  color: var(--wk-accent);
+}
+.wk-chapo { margin: 0; font-size: 9.5pt; color: var(--wk-encre-douce); max-width: 66ch; }
+.wk-prose { margin: 0; font-size: 10.5pt; line-height: 1.55; max-width: 68ch; text-wrap: pretty; }
+.wk-note { margin: 0; font-size: 8.5pt; color: var(--wk-faible); max-width: 70ch; }
+
+/* ── Mesures ─────────────────────────────────────────────────────────────── */
+
+.wk-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
+  gap: 3mm;
+  margin: 0;
+}
+.wk-mesure {
+  border: 1px solid var(--wk-trame);
+  border-radius: 3px;
+  padding: 3mm 3.5mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  min-width: 0;
+  break-inside: avoid;
+}
+.wk-mesure dt { font-size: 8pt; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wk-faible); }
+.wk-mesure dd {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13pt;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.wk-mesure dd + dd {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 8pt;
+  font-weight: 400;
+  color: var(--wk-encre-douce);
+}
+
+.wk-hausse { color: var(--wk-hausse); }
+.wk-baisse { color: var(--wk-baisse); }
+.wk-faible { color: var(--wk-faible); }
+
+/* ── Encadrés et listes ──────────────────────────────────────────────────── */
+
+.wk-encadre {
+  border: 1px solid var(--wk-trame);
+  border-left: 3px solid var(--wk-accent);
+  border-radius: 2px;
+  padding: 3mm 4mm;
+  background: var(--wk-papier);
+  break-inside: avoid;
+}
+.wk-encadre h3 { margin: 0 0 1.5mm; font-size: 9pt; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--wk-encre-douce); }
+
+.wk-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.6mm; }
+.wk-liste li {
+  display: grid;
+  grid-template-columns: 3mm 1fr;
+  gap: 3mm;
+  align-items: start;
+  font-size: 10pt;
+  padding-bottom: 1.6mm;
+  border-bottom: 1px solid var(--wk-trame);
+}
+.wk-liste li:last-child { border-bottom: 0; padding-bottom: 0; }
+/* Le filet porte la polarité ; le texte reste en encre. */
+.wk-liste li::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 100%;
+  min-height: 4mm;
+  border-radius: 2px;
+  background: var(--wk-trame);
+}
+.wk-liste li.wk-cede::before { background: var(--wk-baisse); }
+.wk-liste li.wk-tient::before { background: var(--wk-hausse); }
+
+/* ── Tableaux ────────────────────────────────────────────────────────────── */
+
+.wk-tableau-cadre { overflow-x: auto; }
+.wk-tableau { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+.wk-tableau th,
+.wk-tableau td { padding: 1.8mm 2mm; text-align: right; border-bottom: 1px solid var(--wk-trame); vertical-align: middle; }
+.wk-tableau th:first-child,
+.wk-tableau td:first-child { text-align: left; }
+.wk-tableau thead th {
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wk-faible);
+  font-weight: 500;
+  border-bottom: 1px solid var(--wk-encre-douce);
+  white-space: nowrap;
+}
+.wk-tableau td.wk-num { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wk-tableau td.wk-texte { text-align: left; font-size: 9pt; color: var(--wk-encre-douce); }
+.wk-tableau .wk-code { font-family: var(--font-mono), ui-monospace, monospace; font-size: 8pt; color: var(--wk-faible); margin-left: 1.5mm; }
+
+/* Place de la clôture dans la fourchette de la semaine. */
+.wk-position { position: relative; display: block; width: 26mm; height: 1.2mm; margin-left: auto; background: var(--wk-trame); border-radius: 1mm; }
+.wk-position span { position: absolute; top: -1.1mm; width: 3.4mm; height: 3.4mm; margin-left: -1.7mm; border-radius: 50%; background: var(--wk-encre); }
+
+/* ── Graphique ───────────────────────────────────────────────────────────── */
+
+.wk-figure { margin: 0; break-inside: avoid; }
+.wk-figure svg { display: block; width: 100%; height: auto; }
+.wk-figure text { font-family: var(--font-sans), system-ui, sans-serif; font-size: 12px; fill: var(--wk-encre); dominant-baseline: middle; }
+.wk-figure .wk-g-fin { text-anchor: end; }
+.wk-figure .wk-g-val { font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; }
+.wk-figure .wk-g-faible { fill: var(--wk-faible); font-size: 10px; }
+.wk-figure .wk-g-hausse { fill: var(--wk-hausse); }
+.wk-figure .wk-g-baisse { fill: var(--wk-baisse); }
+.wk-figure .wk-g-neutre { fill: var(--wk-faible); }
+.wk-figure figcaption { margin-top: 1.5mm; font-size: 8pt; color: var(--wk-faible); }
+
+/* ── Analyse par matière (texte vérifié) ─────────────────────────────────── */
+
+.wk-legende-preuve { margin: 0; font-size: 8.5pt; color: var(--wk-encre-douce); }
+.wk-legende-preuve strong { color: var(--wk-encre); }
+
+.wk-blocs { display: flex; flex-direction: column; }
+.wk-blocs > div { border-top: 1px solid var(--wk-trame); padding: 4mm 0 1mm; break-inside: avoid; }
+.wk-blocs > div:first-child { border-top: 0; padding-top: 1mm; }
+.wk-blocs h4 { margin: 0 0 1mm; font-size: 8pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wk-accent); }
+.wk-blocs h3 { margin: 0 0 2mm; font-family: var(--font-display), Georgia, serif; font-size: 12.5pt; font-weight: 500; line-height: 1.25; }
+.wk-blocs p { margin: 0 0 2mm; font-size: 10.5pt; line-height: 1.55; max-width: 68ch; text-wrap: pretty; }
+/* Étiquette de preuve : petites capitales, puis le texte en encre. */
+.wk-blocs p > strong:first-child {
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wk-encre-douce);
+  margin-right: 1.5mm;
+}
+
+/* ── Sources et avertissement ────────────────────────────────────────────── */
+
+.wk-sources { margin: 0; padding-left: 4mm; display: flex; flex-direction: column; gap: 1mm; font-size: 8.5pt; color: var(--wk-encre-douce); columns: 1; }
+.wk-sources a { color: var(--wk-encre); text-decoration: underline; text-decoration-color: var(--wk-trame); }
+.wk-sources a:hover { text-decoration-color: var(--wk-encre); }
+
+.wk-pied {
+  margin-top: 2mm;
+  padding-top: 4mm;
+  border-top: 1px solid var(--wk-trame);
+  font-size: 8pt;
+  color: var(--wk-faible);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+}
+.wk-pied strong { color: var(--wk-encre-douce); }
+
+/* ── Impression ──────────────────────────────────────────────────────────── */
+
+@page { size: A4 portrait; margin: 12mm 0; }
+
+@media print {
+  .wk { background: #fff; padding: 0; min-height: 0; }
+  .wk-nav { display: none; }
+  .wk-feuille { box-shadow: none; width: auto; padding: 0 13mm; gap: 6mm; }
+  .wk-panneau, .wk-tableau tr { break-inside: avoid; }
+  .wk-titre, .wk-niveau { break-after: avoid; }
+  .wk-badge, .wk-numero, .wk-liste li::before, .wk-encadre, .wk-figure, .wk-illustration, .wk-position span {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media screen and (max-width: 230mm) {
+  .wk-nav, .wk-feuille { width: 100%; }
+  .wk-feuille { padding: 8mm 6mm; }
+  .wk-h1 { font-size: 18pt; }
+  .wk-position { width: 18mm; }
+}
+
+/* Corps injecté (HTML du générateur) : même rythme vertical que la feuille. */
+.wk-corps { display: flex; flex-direction: column; gap: 8mm; }
+
+</style>
+</head>
+<body>
+<div class="wk">
+<article class="wk-feuille">
+<div class="wk-courant"><span class="wk-marque">WESTBOURSE</span><span>Hebdo matières premières</span></div>
+<header class="wk-entete">
+<h1 class="wk-h1">Matières premières S47/2026 : l&#x27;argent recule de 16,31 %</h1>
+<p class="wk-chapeau">Sur la semaine, l&#x27;argent perd 16,31 %, l&#x27;or perd 9,54 % et le Brent recule de 3,41 %, à 92,57 dollars. Ce que ces mouvements changent, ou ne changent pas, pour les valeurs cotées à la BRVM.</p>
+<p class="wk-signature">Rédaction WESTBOURSE · semaine 47/2026 · clôtures du vendredi · édition « Dossier de la semaine »</p>
+</header>
+<figure class="wk-illustration"><svg viewBox="0 0 640 200" role="img" aria-label="Illustration : lingots d&#x27;or et d&#x27;argent"><rect x="0" y="0" width="640" height="200" fill="#e6f2f5"></rect><rect x="0" y="160" width="640" height="40" fill="#cfe3ea"></rect><g stroke="#12161c" stroke-width="2"><path d="M190 160 L212 118 H308 L330 160 Z" fill="#d9a93a"></path><path d="M212 118 L224 104 H320 L308 118 Z" fill="#f0cb6b"></path><path d="M308 118 L320 104 L342 146 L330 160 Z" fill="#b58322"></path><path d="M320 160 L342 118 H438 L460 160 Z" fill="#c9ced3"></path><path d="M342 118 L354 104 H450 L438 118 Z" fill="#e8ecef"></path><path d="M438 118 L450 104 L472 146 L460 160 Z" fill="#9ba3aa"></path><path d="M255 118 L277 76 H373 L395 118 Z" fill="#e2b544"></path><path d="M277 76 L289 62 H385 L373 76 Z" fill="#f6d987"></path><path d="M373 76 L385 62 L407 104 L395 118 Z" fill="#b58322"></path></g></svg><figcaption>Illustration WESTBOURSE : lingots d&#x27;or et d&#x27;argent. Le plus fort mouvement de la semaine concerne l&#x27;argent.</figcaption></figure>
+<div class="wk-niveau wk-niveau--essentiel"><span class="wk-badge">Essentiel</span><span>Pour tous : la semaine en trente secondes</span></div>
+<dl class="wk-grille"><div class="wk-mesure"><dt>Plus forte baisse</dt><dd class="wk-baisse">−16,31 %</dd><dd>Argent · 41,03 USD/oz</dd></div><div class="wk-mesure"><dt>Plus forte hausse</dt><dd class="wk-hausse">+0,12 %</dd><dd>Cacao · 5 125 USD/t</dd></div><div class="wk-mesure"><dt>Brent en francs CFA</dt><dd class="wk-baisse">55 354 F</dd><dd>par baril · −2,70 % sur la semaine</dd></div><div class="wk-mesure"><dt>Sens du marché</dt><dd class="">0 / 7 / 1</dd><dd>hausses / baisses / stables</dd></div></dl><ul class="wk-liste"><li>Le mouvement de la semaine : l&#x27;argent perd 16,31 %, à 41,03 USD/oz.</li><li>Une matière première qui bouge ne fait pas, à elle seule, bouger une action : le panneau « Valeurs BRVM exposées » dit par quel canal elle peut peser.</li></ul>
+<div class="wk-encadre"><h3>Depuis la dernière édition : les seuils que nous surveillions</h3><ul class="wk-liste"><li class="wk-cede"><span><strong>Seuil franchi.</strong> Argent : le plus bas de 48,40 USD/oz a été enfoncé (nouveau plus bas : 40,93).</span></li><li class="wk-cede"><span><strong>Seuil franchi.</strong> Or : le plus bas de 3 856,70 USD/oz a été enfoncé (nouveau plus bas : 3 502,90).</span></li><li class="wk-tient"><span><strong>Seuil tenu.</strong> Brent : le plus bas de 89,15 USD/bbl a tenu (plus bas de la semaine : 90,06).</span></li></ul></div>
+<div class="wk-niveau wk-niveau--investisseur"><span class="wk-badge">Investisseur</span><span>Pour suivre la cote : l'analyse</span></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">01</span>Analyse par matière</h2><p class="wk-legende-preuve"><strong>Fait vérifié</strong> : chiffre de marché contrôlé. <strong>Lecture</strong> : explication donnée par une source nommée. <strong>Hypothèse</strong> : ce qui pourrait suivre, sans certitude.</p><div class="wk-blocs">
+<div>
+<h4>Métaux précieux</h4>
+<h3>L'argent recule de 16,31 % et clôture près du plus bas</h3>
+<p><strong>Fait vérifié.</strong> L'argent clôture à 41,03 USD/oz. L'argent recule de 16,31 % sur la semaine. La fourchette va de 40,93 à 47,83 et l'amplitude atteint 16,8 %. La clôture se situe à 1 % de la fourchette, près du plus bas. L'argent vaut 789 FCFA/gramme et recule de 15,70 % en FCFA.</p>
+<p><strong>Lecture.</strong> Les attentes de hausse des taux s'intensifient [Revue hebdomadaire]. Le choc de liquidité s'aggrave [Revue hebdomadaire]. L'argent plonge vers un nouveau plus bas de phase [Revue hebdomadaire]. Les sources citent un sixième déficit d'offre consécutif [2026-11-13].</p>
+<p><strong>Hypothèse.</strong> Si l'argent casse 40,93 USD/oz, le choc de liquidité pourrait prolonger la baisse. Une reprise vers 47,83 USD/oz resterait tributaire d'un apaisement des attentes de hausse des taux.</p>
+<p><strong>Transmission à la BRVM.</strong> Il n'existe aucune société cotée exposée directement à l'argent. Aucun canal de transmission n'atteint un émetteur de la cote.</p>
+</div>
+<div>
+<h4>Métaux précieux</h4>
+<h3>L'or recule de 9,54 % et termine près du plus bas</h3>
+<p><strong>Fait vérifié.</strong> L'or clôture à 3 515,40 USD/oz et recule de 9,54 %. La fourchette va de 3 502,90 à 3 904,30 et la clôture se situe à 3 % de la fourchette, près du plus bas. L'or vaut 67 584 FCFA/gramme et recule de 8,88 % en FCFA.</p>
+<p><strong>Lecture.</strong> L'or chute vers 3,800$ alors que les faucons de la Fed renforcent [2026-11-18]. L'or évolue au plus bas depuis plus d'un an [LFM la radio].</p>
+<p><strong>Hypothèse.</strong> Si l'or cède 3 502,90 USD/oz, les faucons de la Fed pourraient prolonger la baisse.</p>
+<p><strong>Transmission à la BRVM.</strong> Il n'existe aucune société cotée exposée directement à l'or.</p>
+</div>
+<div>
+<h4>Énergie</h4>
+<h3>Le WTI recule de 5,17 % pour une troisième perte</h3>
+<p><strong>Fait vérifié.</strong> Le pétrole WTI clôture à 83,98 USD/bbl et recule de 5,17 %. Le pétrole WTI vaut 50 218 FCFA/baril et recule de 4,47 % en FCFA.</p>
+<p><strong>Lecture.</strong> Les prix du pétrole se redressent mais subissent une troisième perte hebdomadaire consécutive [2026-11-20]. Le pétrole WTI tente de repasser au-dessus de 83,00 $ sur fond de tensions géopolitiques croissantes [2026-11-19].</p>
+<p><strong>Hypothèse.</strong> Si le WTI cède 81,55 USD/bbl, le marché pourrait rester sous pression.</p>
+<p><strong>Transmission à la BRVM.</strong> Vivo Energy CI (SHEC), TotalEnergies Marketing CI (TTLC) et TotalEnergies Marketing Sénégal (TTLS) transmettent via stocks et trésorerie. Les prix à la pompe restent administrés.</p>
+</div>
+<div>
+<h4>Énergie</h4>
+<h3>Le Brent recule de 3,41 % avant l'OPEP+</h3>
+<p><strong>Fait vérifié.</strong> Le pétrole Brent clôture à 92,57 USD/bbl et recule de 3,41 %. Le pétrole Brent vaut 55 354 FCFA/baril et recule de 2,70 % en FCFA.</p>
+<p><strong>Lecture.</strong> Le cours du Brent à 92,22 $ marque une troisième baisse hebdomadaire avant l'OPEP+ [2026-11-20]. Le Brent repasse sous 92 dollars et l'excédent d'offre pèse plus qu'Ormuz [2026-11-18].</p>
+<p><strong>Hypothèse.</strong> Si le Brent cède 90,06 USD/bbl, l'excédent d'offre pourrait peser encore.</p>
+<p><strong>Transmission à la BRVM.</strong> SMB CI (SMBC) utilise le brut comme matière première du bitume.</p>
+</div>
+<div>
+<h4>Agriculture</h4>
+<h3>Le sucre recule de 7,50 % et termine près du plus bas</h3>
+<p><strong>Fait vérifié.</strong> Le sucre clôture à 17,03 USc/lb, recule de 7,50 % et termine près du plus bas. Le sucre vaut 225 FCFA/kg et recule de 6,82 % en FCFA.</p>
+<p><strong>Lecture.</strong> Le cours du sucre recule cette semaine [Grandes cultures, Tendance des marchés]. L'ICE No.11 recule et le FOB raffiné brésilien reste ferme [CMB News].</p>
+<p><strong>Hypothèse.</strong> Si le sucre cède 16,82 USc/lb, le repli de l'ICE No.11 pourrait continuer.</p>
+<p><strong>Transmission à la BRVM.</strong> Sucrivoire (SCRC) transmet le sucre via un prix de vente domestique encadré. Le cours mondial demeure une référence indirecte.</p>
+</div>
+<div>
+<h4>Agriculture</h4>
+<h3>Le coton recule de 4,20 % et reste dans une fourchette</h3>
+<p><strong>Fait vérifié.</strong> Le coton clôture à 75,47 USc/lb et recule de 4,20 %. Le coton vaut 995 FCFA/kg et recule de 3,50 % en FCFA.</p>
+<p><strong>Lecture.</strong> L'USDA décrit des prix au comptant plus fermes et une récolte en progrès [IndexBox]. Les arrivages de coton se resserrent dans le nord de l'Inde tandis que les contrats à terme restent dans une fourchette [CMB News].</p>
+<p><strong>Hypothèse.</strong> Si le coton cède 74,85 USc/lb, les contrats à terme pourraient quitter la fourchette.</p>
+<p><strong>Transmission à la BRVM.</strong> Il n'existe aucune société cotée exposée directement au coton.</p>
+</div>
+<div>
+<h4>Agriculture</h4>
+<h3>Le café recule et le cacao progresse de 0,12 %</h3>
+<p><strong>Fait vérifié.</strong> Le café clôture à 274,85 USc/lb, recule de 1,36 % et termine près du plus bas. Le café vaut 3 623 FCFA/kg et recule de 0,64 % en FCFA. Le cacao clôture à 5 125 USD/t, progresse de 0,12 % et termine près du plus haut. Le cacao vaut 3 065 FCFA/kg et progresse de 0,85 % en FCFA.</p>
+<p><strong>Lecture.</strong> Aucune cause identifiée dans nos sources.</p>
+<p><strong>Hypothèse.</strong> Si le café cède 273,05 USc/lb, le repli pourrait continuer. Si le cacao dépasse 5 250 USD/t, la hausse pourrait se poursuivre.</p>
+<p><strong>Transmission à la BRVM.</strong> Il n'existe aucune société cotée exposée directement au café ni au cacao.</p>
+</div>
+</div></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">02</span>Tableau de bord de la semaine</h2><p class="wk-chapo">Huit contrats à terme de référence, clôtures du vendredi.</p><figure class="wk-figure"><svg viewBox="0 0 640 232" role="img" aria-label="Variations des matières premières sur cinq séances"><line x1="360" y1="6" x2="360" y2="226" stroke="#8b949e" stroke-width="1"></line><text class="wk-g-fin" x="160" y="22">Cacao</text><rect class="wk-g-neutre" x="360.0" y="14" width="1.5" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="22">+0,12 %</text><text class="wk-g-fin" x="160" y="48">Café</text><rect class="wk-g-baisse" x="345.0" y="40" width="15.0" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="48">−1,36 %</text><text class="wk-g-fin" x="160" y="74">Brent</text><rect class="wk-g-baisse" x="322.4" y="66" width="37.6" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="74">−3,41 %</text><text class="wk-g-fin" x="160" y="100">Coton</text><rect class="wk-g-baisse" x="313.6" y="92" width="46.4" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="100">−4,20 %</text><text class="wk-g-fin" x="160" y="126">WTI</text><rect class="wk-g-baisse" x="302.9" y="118" width="57.1" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="126">−5,17 %</text><text class="wk-g-fin" x="160" y="152">Sucre</text><rect class="wk-g-baisse" x="277.2" y="144" width="82.8" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="152">−7,50 %</text><text class="wk-g-fin" x="160" y="178">Or</text><rect class="wk-g-baisse" x="254.7" y="170" width="105.3" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="178">−9,54 %</text><text class="wk-g-fin" x="160" y="204">Argent</text><rect class="wk-g-baisse" x="180.0" y="196" width="180.0" height="16" rx="2"></rect><text class="wk-g-val wk-g-fin" x="636" y="204">−16,31 %</text></svg><figcaption>Variation sur cinq séances, de la clôture du vendredi précédent à celle de vendredi.</figcaption></figure><div class="wk-tableau-cadre"><table class="wk-tableau"><thead><tr><th>Contrat</th><th>Clôture</th><th>Semaine</th><th>Fourchette</th><th>Amplitude</th><th>Position</th></tr></thead><tbody><tr><td><strong>Argent</strong><span class="wk-code">SI=F</span></td><td class="wk-num">41,03 <span class="wk-faible">USD/oz</span></td><td class="wk-num wk-baisse">▼ −16,31 %</td><td class="wk-num">40,93 – 47,83</td><td class="wk-num">16,8 %</td><td><span class="wk-position"><span style="left:1%"></span></span></td></tr><tr><td><strong>Or</strong><span class="wk-code">GC=F</span></td><td class="wk-num">3 515,40 <span class="wk-faible">USD/oz</span></td><td class="wk-num wk-baisse">▼ −9,54 %</td><td class="wk-num">3 502,90 – 3 904,30</td><td class="wk-num">11,4 %</td><td><span class="wk-position"><span style="left:3%"></span></span></td></tr><tr><td><strong>Sucre</strong><span class="wk-code">SB=F</span></td><td class="wk-num">17,03 <span class="wk-faible">USc/lb</span></td><td class="wk-num wk-baisse">▼ −7,50 %</td><td class="wk-num">16,82 – 18,43</td><td class="wk-num">9,5 %</td><td><span class="wk-position"><span style="left:13%"></span></span></td></tr><tr><td><strong>WTI</strong><span class="wk-code">CL=F</span></td><td class="wk-num">83,98 <span class="wk-faible">USD/bbl</span></td><td class="wk-num wk-baisse">▼ −5,17 %</td><td class="wk-num">81,55 – 89,49</td><td class="wk-num">9,5 %</td><td><span class="wk-position"><span style="left:31%"></span></span></td></tr><tr><td><strong>Coton</strong><span class="wk-code">CT=F</span></td><td class="wk-num">75,47 <span class="wk-faible">USc/lb</span></td><td class="wk-num wk-baisse">▼ −4,20 %</td><td class="wk-num">74,85 – 78,75</td><td class="wk-num">5,2 %</td><td><span class="wk-position"><span style="left:16%"></span></span></td></tr><tr><td><strong>Brent</strong><span class="wk-code">BZ=F</span></td><td class="wk-num">92,57 <span class="wk-faible">USD/bbl</span></td><td class="wk-num wk-baisse">▼ −3,41 %</td><td class="wk-num">90,06 – 96,76</td><td class="wk-num">7,2 %</td><td><span class="wk-position"><span style="left:37%"></span></span></td></tr><tr><td><strong>Café</strong><span class="wk-code">KC=F</span></td><td class="wk-num">274,85 <span class="wk-faible">USc/lb</span></td><td class="wk-num wk-baisse">▼ −1,36 %</td><td class="wk-num">273,05 – 288,30</td><td class="wk-num">5,5 %</td><td><span class="wk-position"><span style="left:12%"></span></span></td></tr><tr><td><strong>Cacao</strong><span class="wk-code">CC=F</span></td><td class="wk-num">5 125 <span class="wk-faible">USD/t</span></td><td class="wk-num ">■ +0,12 %</td><td class="wk-num">4 833 – 5 250</td><td class="wk-num">8,1 %</td><td><span class="wk-position"><span style="left:70%"></span></span></td></tr></tbody></table></div><p class="wk-note">Position : place de la clôture dans la fourchette de la semaine, du plus bas (à gauche) au plus haut (à droite). Amplitude : écart entre plus haut et plus bas, rapporté à la clôture.</p></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">03</span>Valeurs BRVM exposées</h2><div class="wk-tableau-cadre"><table class="wk-tableau"><thead><tr><th>Valeur</th><th>Matière et mouvement</th><th>Canal de transmission</th><th>Lecture</th></tr></thead><tbody><tr><td><strong>Vivo Energy CI</strong><span class="wk-code">SHEC</span></td><td class="wk-texte">Pétrole −3,41 % (Brent, semaine)</td><td class="wk-texte">Stocks et trésorerie ; prix à la pompe administrés</td><td class="wk-texte">Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé.</td></tr><tr><td><strong>TotalEnergies Marketing CI</strong><span class="wk-code">TTLC</span></td><td class="wk-texte">Pétrole −3,41 % (Brent, semaine)</td><td class="wk-texte">Stocks et trésorerie ; prix à la pompe administrés</td><td class="wk-texte">Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé.</td></tr><tr><td><strong>TotalEnergies Marketing Sénégal</strong><span class="wk-code">TTLS</span></td><td class="wk-texte">Pétrole −3,41 % (Brent, semaine)</td><td class="wk-texte">Stocks et trésorerie ; prix à la pompe administrés</td><td class="wk-texte">Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé.</td></tr><tr><td><strong>SMB CI</strong><span class="wk-code">SMBC</span></td><td class="wk-texte">Pétrole −3,41 % (Brent, semaine)</td><td class="wk-texte">Le brut est la matière première du bitume</td><td class="wk-texte">Effet ambigu : stocks dévalorisés, besoin de trésorerie allégé.</td></tr><tr><td><strong>Sucrivoire</strong><span class="wk-code">SCRC</span></td><td class="wk-texte">Sucre −7,50 % (sucre brut, semaine)</td><td class="wk-texte">Prix de vente domestique encadré ; cours mondial en référence indirecte</td><td class="wk-texte">Effet limité : le prix de vente domestique est encadré.</td></tr><tr><td><strong>Palm CI</strong><span class="wk-code">PALC</span></td><td class="wk-texte">Huile de palme −5,08 % (mois de 2026-10, Banque mondiale)</td><td class="wk-texte">Prix de vente de l&#x27;huile brute</td><td class="wk-texte">Prix de vente orienté à la baisse.</td></tr><tr><td><strong>SOGB</strong><span class="wk-code">SOGC</span></td><td class="wk-texte">Huile de palme −5,08 % (mois de 2026-10, Banque mondiale) ; Caoutchouc +5,81 % (mois de 2026-10, Banque mondiale)</td><td class="wk-texte">Prix de vente de l&#x27;huile brute et du caoutchouc</td><td class="wk-texte">Huile de palme : prix de vente orienté à la baisse. Caoutchouc : prix de vente orienté à la hausse.</td></tr><tr><td><strong>SAPH</strong><span class="wk-code">SPHC</span></td><td class="wk-texte">Caoutchouc +5,81 % (mois de 2026-10, Banque mondiale)</td><td class="wk-texte">Prix de vente du caoutchouc naturel</td><td class="wk-texte">Prix de vente orienté à la hausse.</td></tr></tbody></table></div><p class="wk-note">Ce tableau décrit par où un cours peut atteindre les comptes d'une société. Il ne note pas les titres et ne dit pas dans quel sens ils évolueront.</p></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">04</span>Scénarios : et si le Brent bougeait de 10 % ?</h2><div class="wk-tableau-cadre"><table class="wk-tableau"><thead><tr><th>Scénario</th><th>Écart</th><th>Baril</th><th>Litre de brut</th></tr></thead><tbody><tr><td><strong>Brent à 85 USD</strong></td><td class="wk-num">−8,2 %</td><td class="wk-num">50 828 F</td><td class="wk-num">319,7 F</td></tr><tr><td><strong>Brent à 100 USD</strong></td><td class="wk-num">+8,0 %</td><td class="wk-num">59 797 F</td><td class="wk-num">376,1 F</td></tr></tbody></table></div><p class="wk-note">Calcul à change constant depuis la clôture de 92,57 USD. Ce ne sont pas des prévisions. Le litre de brut n'est pas le prix à la pompe, fixé par les États ; l'effet sur le résultat des distributeurs cotés n'est pas chiffré, leurs niveaux de stock n'étant pas publiés.</p></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">05</span>Les mêmes prix en francs CFA</h2><div class="wk-tableau-cadre"><table class="wk-tableau"><thead><tr><th>Matière</th><th>Prix</th><th>En dollars</th><th>En francs CFA</th></tr></thead><tbody><tr><td><strong>Argent</strong></td><td class="wk-num">789 <span class="wk-faible">FCFA/gramme</span></td><td class="wk-num wk-baisse">−16,31 %</td><td class="wk-num wk-baisse">−15,70 %</td></tr><tr><td><strong>Or</strong></td><td class="wk-num">67 584 <span class="wk-faible">FCFA/gramme</span></td><td class="wk-num wk-baisse">−9,54 %</td><td class="wk-num wk-baisse">−8,88 %</td></tr><tr><td><strong>Sucre</strong></td><td class="wk-num">225 <span class="wk-faible">FCFA/kg</span></td><td class="wk-num wk-baisse">−7,50 %</td><td class="wk-num wk-baisse">−6,82 %</td></tr><tr><td><strong>WTI</strong></td><td class="wk-num">50 218 <span class="wk-faible">FCFA/baril</span></td><td class="wk-num wk-baisse">−5,17 %</td><td class="wk-num wk-baisse">−4,47 %</td></tr><tr><td><strong>Coton</strong></td><td class="wk-num">995 <span class="wk-faible">FCFA/kg</span></td><td class="wk-num wk-baisse">−4,20 %</td><td class="wk-num wk-baisse">−3,50 %</td></tr><tr><td><strong>Brent</strong></td><td class="wk-num">55 354 <span class="wk-faible">FCFA/baril</span></td><td class="wk-num wk-baisse">−3,41 %</td><td class="wk-num wk-baisse">−2,70 %</td></tr><tr><td><strong>Café</strong></td><td class="wk-num">3 623 <span class="wk-faible">FCFA/kg</span></td><td class="wk-num wk-baisse">−1,36 %</td><td class="wk-num wk-baisse">−0,64 %</td></tr><tr><td><strong>Cacao</strong></td><td class="wk-num">3 065 <span class="wk-faible">FCFA/kg</span></td><td class="wk-num ">+0,12 %</td><td class="wk-num wk-hausse">+0,85 %</td></tr></tbody></table></div><p class="wk-note">1 dollar = 598,0 FCFA : parité fixe de 655,957 FCFA pour 1 euro, euro à 1,0970 dollar. La variation en francs CFA ajoute l'effet du change à celle du cours.</p></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">06</span>Seuils à surveiller la semaine prochaine</h2><ul class="wk-liste"><li><span>Argent : plus bas de la semaine à <strong>40,93 USD/oz</strong></span></li><li><span>Or : plus bas de la semaine à <strong>3 502,90 USD/oz</strong></span></li><li><span>Sucre : plus bas de la semaine à <strong>16,82 USc/lb</strong></span></li></ul><p class="wk-note">Le prochain numéro dira si chacun a tenu ou cédé.</p></div>
+<div class="wk-niveau wk-niveau--pro"><span class="wk-badge">Pro</span><span>Pour aller plus loin : méthode, corrélations, sources</span></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">07</span>Méthode et limites</h2><ul class="wk-liste"><li><span>Variations de clôture à clôture sur cinq séances, contrat à terme le plus proche (Yahoo Finance).</span></li><li><span>Chaque chiffre du texte est comparé aux données avant publication ; un chiffre absent des données fait refuser le texte.</span></li><li><span>Les explications reprennent des titres de presse datés et nommés ; ce ne sont pas des certitudes.</span></li><li><span>Huile de palme et caoutchouc : moyennes mensuelles de la Banque mondiale, sans cotation hebdomadaire.</span></li></ul></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">08</span>Corrélations historiques</h2><div class="wk-tableau-cadre"><table class="wk-tableau"><thead><tr><th>Filière</th><th>Valeurs</th><th>Corrélation</th><th>Intensité</th><th>Période</th></tr></thead><tbody><tr><td><strong>Huile de palme</strong></td><td class="wk-num">PALC, SOGC</td><td class="wk-num">+0,26</td><td class="wk-texte">faible</td><td class="wk-num">59 mois</td></tr><tr><td><strong>Caoutchouc</strong></td><td class="wk-num">SPHC, SOGC</td><td class="wk-num">−0,06</td><td class="wk-texte">faible</td><td class="wk-num">59 mois</td></tr><tr><td><strong>Sucre</strong></td><td class="wk-num">SCRC</td><td class="wk-num">+0,00</td><td class="wk-texte">faible</td><td class="wk-num">59 mois</td></tr></tbody></table></div><p class="wk-note">Corrélation de Pearson entre les variations mensuelles du cours de la matière (Banque mondiale) et du cours moyen des actions (BRVM). Une corrélation faible ne permet pas de déduire un cours d'action d'un mouvement de matière première.</p></div>
+<div class="wk-panneau"><h2 class="wk-titre"><span class="wk-numero">09</span>Sources consultées</h2><ol class="wk-sources"><li><a href="https://www.agri-mutuel.com/cultures/le-cours-du-sucre-recule-cette-semaine/" target="_blank" rel="noopener noreferrer">- Le cours du sucre recule cette semaine - Grandes cultures, Tendance des marchés</a> — 2026-11-20</li><li><a href="https://www.coface.com/fr/actualites-economie-conseils-d-experts/sugar-market-under-pressure-el-nino-and-biofuels-further-tighten-global-supply" target="_blank" rel="noopener noreferrer">Sugar prices surge as El Niño and biofuels tighten global ...</a> — 2026-11-09</li><li><a href="https://financefeeds.com/fr/cours-brent-92-22-troisieme-baisse-hebdomadaire-avant-opep/" target="_blank" rel="noopener noreferrer">Cours du Brent à 92,22 $ : Troisième baisse hebdomadaire avant l&#x27;OPEP+</a> — 2026-11-20</li><li><a href="https://elwatan.dz/petrole-les-cours-rebondissent-mais-le-marche-reste-sous-pression/" target="_blank" rel="noopener noreferrer">Pétrole : Les cours rebondissent, mais le marché reste sous pression</a> — 2026-11-11</li><li><a href="https://prixdubaril.com/news-petrole/75226-le-brent-repasse-sous-92-dollars-l-excedent-d-offre-pese-plus-qu-ormuz.html" target="_blank" rel="noopener noreferrer">Le Brent repasse sous 92 dollars, l&#x27;excédent d&#x27;offre pèse plus qu&#x27;Ormuz</a> — 2026-11-18</li><li><a href="https://fr.economies.com/stocks/united-states-news/les-prix-du-p%C3%A9trole-se-redressent,-mais-subissent-une-troisi%C3%A8me-perte-hebdomadaire-cons%C3%A9cutive.-3467" target="_blank" rel="noopener noreferrer">Les prix du pétrole se redressent, mais subissent une troisième perte hebdomadaire consécutive.</a> — 2026-11-20</li><li><a href="https://financefeeds.com/fr/cours-brent-9584-semaine-apres-deuxieme-perte/" target="_blank" rel="noopener noreferrer">Cours du Brent : 95,84 $ samedi, semaine à venir après une deuxième perte hebdomadaire, haussier 98 $, baissier 91 $</a> — 2026-11-14</li><li><a href="https://financefeeds.com/fr/prix-brent-98-32-samedi-accord-iran-cpi-semaine/" target="_blank" rel="noopener noreferrer">Prix du Brent : 98,32 $ samedi avec les paris sur un accord États-Unis-Iran et l&#x27;IPC de mardi qui encadrent la semaine</a> — 2026-11-07</li><li><a href="https://www.tmgm.com/fr/analysis/market-news/article/wti-oil-attampts-to-return-above-8300-as-geopolitical-tensions-grow-202611191301" target="_blank" rel="noopener noreferrer">Le pétrole WTI tente de repasser au-dessus de 83,00 $ sur fond de tensions géopolitiques croissantes</a> — 2026-11-19</li><li><a href="https://www.tmgm.com/fr/analysis/market-news/article/wti-oil-hesitates-above-87-amid-rising-geopolitical-fears-and-oversupply-warnings-202611160949" target="_blank" rel="noopener noreferrer">Le pétrole WTI hésite au-dessus de 87 $ sur fond de craintes géopolitiques croissantes et de mises en garde contre une offre excédentaire</a> — 2026-11-16</li><li><a href="https://commodity-board.com/le-sucre-brut-s-adoucit-sous-18-c-lb-alors-que-la-courbe-s-aplatit-fob-bresil-stable" target="_blank" rel="noopener noreferrer">Point sur le marché de la canne à sucre : l’ICE No.11 recule, le FOB raffiné brésilien reste ferme — CMB News</a> — 2026-11-19</li><li><a href="https://www.indexbox.io/fr/blog/usda-weekly-cotton-review-spot-prices-firm-as-harvest-advances/" target="_blank" rel="noopener noreferrer">Revue USDA du marché du coton : prix au comptant plus fermes et récolte en progrès - Actualités et statistiques - IndexBox</a> — 2026-11-20</li><li><a href="https://fr.finance.yahoo.com/actualites/l-or-chute-3-800-014150295.html" target="_blank" rel="noopener noreferrer">L&#x27;or chute vers 3.800$ alors que les faucons de la Fed renforcent les ...</a> — 2026-11-18</li><li><a href="https://kivia.finance/actualites/article/sika-commodities-weekly-45-des-marches-contrastes-entre-repli-du-petrole-et-rebond-du-ca-65745" target="_blank" rel="noopener noreferrer">SIKA COMMODITIES WEEKLY 45 : Des marchés contrastés, entre…</a> — 2026-11-16</li><li><a href="https://news.metal.com/fr/newscontent/NV5URUIRPZTJTKBFKVE55A6YBXHNMWJ6GD623ZA-les-attentes-de-hausse-des-taux-sintensifient-le-choc-de-liquidit%C3%A9-saggrave-largent-plonge-vers-un-nouveau-plus-bas-de-phase-revue-hebdomadaire-de-largent-smm" target="_blank" rel="noopener noreferrer">Les attentes de hausse des taux s&#x27;intensifient, le choc de liquidité s&#x27;aggrave ; l&#x27;argent plonge vers un nouveau plus bas de phase [Revue hebdomadaire de l&#x27;argent SMM] - Shanghai Metals Market (SMM)</a> — 2026-11-19</li><li><a href="https://www.lfm.ch/actualite/international/lor-evolue-au-plus-bas-depuis-plus-dun-an/" target="_blank" rel="noopener noreferrer">L&#x27;or évolue au plus bas depuis plus d&#x27;un an | LFM la radio</a> — 2026-11-20</li><li><a href="https://fr.finance.yahoo.com/actualites/l-or-remonte-au-dessus-013344893.html" target="_blank" rel="noopener noreferrer">L&#x27;or remonte au-dessus de 3.900$ après un plus bas de 13 ...</a> — 2026-11-13</li><li><a href="https://commodity-board.com/un-bilan-mondial-du-coton-plus-tendu-en-2026-27-soutient-les-prix-tandis-que-la-demande-reste-incertaine" target="_blank" rel="noopener noreferrer">Un bilan mondial du coton plus tendu en 2026/27 soutient les prix, tandis ...</a> — 2026-11-13</li><li><a href="https://www.veracash.com/fr/blog/actualites/lor-repasse-les-4-100-pendant-que-wall-street-digere-le-choc" target="_blank" rel="noopener noreferrer">L’or repasse les 4 100 $ pendant que Wall Street digère le choc</a> — 2026-11-09</li><li><a href="https://commodity-board.com/la-baisse-des-arrivages-raffermit-le-coton-dans-le-nord-de-l-inde-tandis-que-les-contrats-a-terme-restent-dans-une-fourchette" target="_blank" rel="noopener noreferrer">Les arrivages de coton se resserrent dans le nord de l’Inde tandis que les contrats à terme restent dans une fourchette — CMB News</a> — 2026-11-17</li><li><a href="https://news.metal.com/fr/newscontent/DJRSOSFW3TNZJJUASWYZZBQCHF3XP3XYYHKPMGQ-prix-de-largent-sixi%C3%A8me-d%C3%A9ficit-doffre-cons%C3%A9cutif-quand-la-cassure-se-produira-t-elle" target="_blank" rel="noopener noreferrer">Prix de l&#x27;argent : sixième déficit d&#x27;offre consécutif — quand la cassure se produira-t-elle ?</a> — 2026-11-13</li></ol></div>
+<div class="wk-pied"><p><strong>Avertissement.</strong> Document d'information produit par WESTBOURSE. Il ne constitue ni un conseil en investissement ni une sollicitation d'achat ou de vente. Les performances passées ne préjugent pas des performances futures.</p><p><strong>Sources des données.</strong> Contrats à terme : Yahoo Finance (COMEX, NYMEX, ICE). Cours mensuels : Banque mondiale (Pink Sheet). Actions : BRVM.</p><p>© 2026 WESTBOURSE.</p></div>
+</article>
+</div>
+</body>
+</html>
