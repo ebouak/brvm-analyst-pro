@@ -20,7 +20,7 @@ export function AvantPremiereCoris() {
           dividendes attendus, points de vigilance et effets sur la liquidité.
         </p>
         <div className="vitrine-avp__facts" aria-label="Trois chiffres clés">
-          <span><strong>62,7 Md</strong> mis en vente</span>
+          <span><strong>62,7 Md</strong> offerts au public</span>
           <span><strong>5,7×</strong> une séance observée</span>
           <span><strong>0,33 %</strong> de la capitalisation</span>
         </div>
