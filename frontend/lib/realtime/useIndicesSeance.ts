@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { estEnSeance } from '@/lib/freshness';
 import { majIndice, type IndiceDirect } from './indices';
+import { estEnDirect } from './recomposer';
 import type { FlashDirection } from './mergeActions';
 
 /**
@@ -26,24 +27,32 @@ export function useIndicesSeance<T extends IndiceDirect>(
 
   useEffect(() => { courant.current = base; setIndices(base); }, [base]);
 
+  const [jour, setJour] = useState<string | null>(null);
   useEffect(() => {
-    const maj = () => setEnSeance(estEnSeance(new Date()));
+    const maj = () => {
+      const maintenant = new Date();
+      setEnSeance(estEnSeance(maintenant));
+      setJour(maintenant.toISOString().slice(0, 10));
+    };
     maj();
     const t = setInterval(maj, 60_000);
     return () => clearInterval(t);
   }, []);
 
-  const enDirect = enSeance && dateMarche != null;
+  // On écoute la date du JOUR, jamais celle rendue par le serveur : avant le
+  // premier relevé, elle désigne la séance précédente (revue Fable).
+  const ecoute = enSeance && dateMarche != null ? jour : null;
+  const enDirect = estEnDirect({ enSeance, dateMarche, jour, majRecue: derniereMaj != null });
 
   useEffect(() => {
-    if (!enDirect || !dateMarche) return;
+    if (!ecoute) return;
     const supabase = createClient();
     const minuteurs = timers.current;
     const channel = supabase
-      .channel(`indices-live-${dateMarche}`)
+      .channel(`indices-live-${ecoute}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'brvm_indices_daily', filter: `date_marche=eq.${dateMarche}` },
+        { event: '*', schema: 'public', table: 'brvm_indices_daily', filter: `date_marche=eq.${ecoute}` },
         (payload) => {
           const recu = payload.new as Partial<IndiceDirect> | null;
           if (!recu || typeof recu.code !== 'string') return;
@@ -68,7 +77,7 @@ export function useIndicesSeance<T extends IndiceDirect>(
       supabase.removeChannel(channel);
       Object.values(minuteurs).forEach(clearTimeout);
     };
-  }, [enDirect, dateMarche]);
+  }, [ecoute]);
 
   return { indices, flashes, enDirect, derniereMaj };
 }
