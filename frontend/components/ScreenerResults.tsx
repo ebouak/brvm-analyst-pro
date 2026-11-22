@@ -3,6 +3,7 @@
 import { SearchX } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { ActionRow } from '@/lib/screener/filters';
 import ExportButton from '@/components/ExportButton';
 import type { CsvColumn } from '@/lib/export';
@@ -59,6 +60,9 @@ function scoreClass(s: number | null): string {
 export default function ScreenerResults({ results }: { results: ActionRow[] }) {
   const [sortKey, setSortKey] = useState<SortKey>('score_signal');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  // Les lignes glissent à leur nouvelle place au tri ; coupé si l'utilisateur
+  // demande moins d'animations.
+  const calme = useReducedMotion();
 
   const sorted = [...results].sort((a, b) => {
     const aVal = a[sortKey] ?? 0;
@@ -116,7 +120,12 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
           </thead>
           <tbody>
             {sorted.map((r) => (
-              <tr key={r.code} className="border-b border-border/50 last:border-0 hover:bg-white/[0.02] transition">
+              <motion.tr
+                key={r.code}
+                layout={calme ? false : 'position'}
+                transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+                className="border-b border-border/50 last:border-0 hover:bg-white/[0.02] transition-colors"
+              >
                 <td className="px-4 py-2.5">
                   <Link href={`/actions/${r.code}`} className="text-ivory font-semibold hover:text-accent transition">
                     {r.code}
@@ -146,7 +155,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
                     Fiche →
                   </Link>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>

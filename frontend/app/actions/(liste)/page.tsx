@@ -180,6 +180,7 @@ export default async function ActionsPage(props: { searchParams?: Promise<{ sect
             sparklines={sparklines}
             initialSecteur={initialSecteur}
             showMetrics={gate.allowed}
+            dateMarche={lastDate}
           />
         </PremiumPanel>
         {/* Pied de cote : d'où viennent les chiffres et ce qu'ils mesurent.

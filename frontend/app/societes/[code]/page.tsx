@@ -23,6 +23,7 @@ import EstimateurLiquidite from '@/components/fiche/EstimateurLiquidite';
 import { fiabiliteDividende, FENETRE_ANS } from '@/lib/dividendes/fiabilite';
 import { perAffichable, roeAffichable, montantDividende, dividendesAffichables, dividendePourRendement } from '@/lib/fiche/affichage';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
+import { PrixFicheSociete } from '@/components/marche/CoursValeurDirect';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
 import { lireBanque } from '@/lib/bank/lecture';
@@ -399,24 +400,14 @@ export default async function CompanyPage(props: PageProps) {
           </div>
           <div className="flex items-center gap-4">
             <RatingBadge scoreTotal={signal?.score_total} confiance={signal?.confiance} size="lg" />
-            <div className="text-right">
-              <p className="tabular text-2xl text-ivory">
-                {fmtNumber(cours)} <span className="text-sm text-muted">FCFA</span>
-              </p>
-              <p className="text-sm text-faint">
-                {variation != null && (
-                  <span
-                    className={`tabular ${
-                      Number(variation.toFixed(2)) > 0 ? 'text-up' : Number(variation.toFixed(2)) < 0 ? 'text-down' : 'text-muted'
-                    }`}
-                  >
-                    {fmtPctSigne(variation)}
-                  </span>
-                )}
-                {variation != null && last && ' · '}
-                {last && <>séance du {dateSeanceLongue(last.date_marche)}</>}
-              </p>
-            </div>
+            {/* Cours, variation : suivis en direct pendant la séance. */}
+            <PrixFicheSociete
+              code={code}
+              dateMarche={last?.date_marche ?? null}
+              cours={cours}
+              variation={variation}
+              seance={last ? <>séance du {dateSeanceLongue(last.date_marche)}</> : undefined}
+            />
           </div>
         </div>
       </header>

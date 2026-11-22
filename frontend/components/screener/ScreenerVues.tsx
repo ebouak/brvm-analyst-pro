@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { LayoutGrid, Rows3, Grid3x3 } from 'lucide-react';
 import type { ActionRow } from '@/lib/screener/filters';
 import ScreenerResults from '@/components/ScreenerResults';
@@ -85,11 +86,14 @@ export default function ScreenerVues({ results }: { results: ActionRow[] }) {
 }
 
 function Cartes({ results }: { results: ActionRow[] }) {
+  // Une carte qui change de place glisse au lieu de sauter (coupé si
+  // l'utilisateur demande moins d'animations).
+  const calme = useReducedMotion();
   if (!results.length) return <p className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-muted">Aucune valeur ne correspond aux filtres.</p>;
   return (
     <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {results.map((r) => (
-        <li key={r.code}>
+        <motion.li key={r.code} layout={calme ? false : 'position'} transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}>
           <Link href={`/actions/${r.code}`} className="block rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent/40">
             <div className="flex items-baseline justify-between gap-2">
               <span className="font-mono text-sm font-medium text-ivory">{r.code}</span>
@@ -113,7 +117,7 @@ function Cartes({ results }: { results: ActionRow[] }) {
               ))}
             </dl>
           </Link>
-        </li>
+        </motion.li>
       ))}
     </ul>
   );

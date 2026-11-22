@@ -1,5 +1,10 @@
+'use client';
+
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { fmtNumber, fmtPctSigne } from '@/lib/format';
+import type { FlashDirection } from '@/lib/realtime/mergeActions';
+import { FlashValue } from '@/components/ui/FlashValue';
 import { cheminSparkline } from '@/lib/dashboard/graphe';
 import { TeteBloc } from './Grille';
 
@@ -17,7 +22,13 @@ function Sparkline({ serie }: { serie: number[] }) {
 }
 
 /** Spec §12 — plus fortes hausses ou baisses, tendance sur 20 séances. */
-export default function Mouvements({ id, titre, lignes }: { id: string; titre: string; lignes: LigneMouvement[] }) {
+export default function Mouvements({ id, titre, lignes, flashes = {} }: {
+  id: string; titre: string; lignes: LigneMouvement[];
+  /** Flash vert/rouge par code quand un cours arrive en direct. */
+  flashes?: Record<string, FlashDirection>;
+}) {
+  // Une valeur qui entre, sort ou change de rang glisse au lieu de sauter.
+  const calme = useReducedMotion();
   return (
     <section aria-labelledby={id} className="py-5 lg:px-5">
       <TeteBloc id={id} titre={titre} droite={<Link href="/actions" className="text-xs text-accent-ink hover:underline">Tout le marché</Link>} />
@@ -33,16 +44,23 @@ export default function Mouvements({ id, titre, lignes }: { id: string; titre: s
               </tr>
             </thead>
             <tbody>
-              {lignes.map((l, i) => (
-                <tr key={`${l.code}-${i}`} className="border-t border-border">
+              {lignes.map((l) => (
+                <motion.tr
+                  key={l.code}
+                  layout={calme ? false : 'position'}
+                  transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+                  className="border-t border-border"
+                >
                   <th scope="row" className="px-1 py-1.5 text-left font-normal">
                     <Link href={`/actions/${l.code}`} className="tabular block text-[13px] text-ivory hover:text-accent-ink">{l.code}</Link>
                     <span className="block max-w-[16ch] truncate text-[11.5px] text-faint" title={l.nom}>{l.nom}</span>
                   </th>
-                  <td className="tabular whitespace-nowrap px-1 py-1.5 text-right text-ivory">{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</td>
+                  <td className="tabular whitespace-nowrap px-1 py-1.5 text-right text-ivory">
+                    <FlashValue direction={flashes[l.code]}>{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</FlashValue>
+                  </td>
                   <td className={`tabular whitespace-nowrap px-1 py-1.5 text-right ${l.variation == null ? 'text-faint' : l.variation > 0 ? 'text-up' : l.variation < 0 ? 'text-down' : 'text-muted'}`}>{l.variation != null ? fmtPctSigne(l.variation) : '—'}</td>
                   <td className="px-1 py-1.5 text-right"><Sparkline serie={l.serie} /></td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
