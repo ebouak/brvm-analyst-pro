@@ -15,6 +15,11 @@ import PortefeuilleExport from '@/components/PortefeuilleExport';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
 import PositionRowActions from '@/components/PositionRowActions';
 import RecapBouton from '@/components/portfolio/RecapBouton';
+import { valoriser } from '@/lib/portfolio/valoriserDirect';
+import {
+  CoursDirectProvider, CoursPosition, DateCoursPosition, ValeurPosition, PnlPosition,
+  KpiValorisation, KpiPnl, EnDirectPortefeuille, TotalValeur, TotalPnl,
+} from '@/components/portfolio/CoursDirect';
 import { computePositions, sectorBreakdown, concentrationHHI, bestWorst, nbHoldings } from '@/lib/portfolio/metrics';
 import {
   SectionHeader,
@@ -157,28 +162,22 @@ export default async function PortefeuillePage(
   const liquidites = liqPos ? liqPos.prix_entree : null;
   const equityPos = pos.filter((p) => p.code !== 'LIQUIDITES');
 
-  // Valorisation des positions actions (au cours du marché) + secteur.
-  const rows = equityPos.map((p) => {
-    const last = lastPrice[p.code] ?? null;
-    const cost = p.quantite * p.prix_entree;
-    const value = last != null ? p.quantite * last : null;
-    const pnl = value != null ? value - cost : null;
-    const pnlPct = cost > 0 && pnl != null ? (pnl / cost) * 100 : null;
-    const secteur = secteurByCode[p.code] ?? 'Autres';
-    return { ...p, last, cost, value, pnl, pnlPct, secteur };
-  });
+  // Valorisation des positions actions (au cours du marché) + secteur. Même
+  // fonction que les cellules en direct (`valoriser`) : serveur et direct ne
+  // peuvent pas diverger pour un même cours.
+  const valo = valoriser(equityPos, lastPrice, liquidites);
+  const rows = equityPos.map((p, i) => ({ ...p, ...valo.lignes[i]!, secteur: secteurByCode[p.code] ?? 'Autres' }));
 
   // Métriques agrégées
   const computed = computePositions(
     equityPos.map((p) => ({ ...p, secteur: secteurByCode[p.code] ?? 'Autres', last: lastPrice[p.code] ?? null }))
   ).rows;
-  const totalCost = rows.reduce((s, r) => s + r.cost, 0);
-  const equityValue = rows.reduce((s, r) => s + (r.value ?? 0), 0);
-  const totalPnl = equityValue - totalCost;
-  const totalPnlPct = totalCost > 0 ? totalPnl / totalCost : null;
+  const { totalCost, equityValue, totalValue } = valo;
 
-  // Valeur totale = actions + liquidités.
-  const totalValue = equityValue + (liquidites ?? 0);
+  // Cours en direct : seule la séance la plus récente des positions est écoutée.
+  const positionsDirect = equityPos.map((p) => ({ code: p.code, quantite: p.quantite, prix_entree: p.prix_entree }));
+  const coursDepart = equityPos.map((p) => ({ code: p.code, cours_jour: lastPrice[p.code] ?? null, variation_pct: null }));
+  const dateMarcheDirect = Object.values(lastPriceDate).filter((d): d is string => !!d).sort().at(-1) ?? null;
 
   // Répartition sectorielle
   const sectorRows = sectorBreakdown([
@@ -211,7 +210,6 @@ export default async function PortefeuillePage(
     }
   }
 
-  const pnlDir: 'up' | 'down' | 'flat' = totalPnl > 0 ? 'up' : totalPnl < 0 ? 'down' : 'flat';
   const change30Dir: 'up' | 'down' | 'flat' =
     portfolioValueChange30d != null
       ? portfolioValueChange30d > 0 ? 'up' : portfolioValueChange30d < 0 ? 'down' : 'flat'
@@ -250,27 +248,17 @@ export default async function PortefeuillePage(
         <div className="gold-rule mt-6" />
       </div>
 
+      <CoursDirectProvider cours={coursDepart} dateMarche={dateMarcheDirect}>
       <PortfolioTabs>
         <div className="max-w-7xl mx-auto px-6 pb-12 space-y-8">
 
+          <EnDirectPortefeuille />
+
           {/* ── KPI principaux ─────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-rise-in">
-            <MetricCard
-              label="Valorisation totale"
-              value={fmtFcfa(totalValue)}
-              unit="FCFA"
-              delta={liquidites != null ? `dont ${fmtFcfa(liquidites)} cash` : 'actions uniquement'}
-              deltaDir="flat"
-              accent="gold"
-            />
-            <MetricCard
-              label="P&L latent"
-              value={`${totalPnl >= 0 ? '+' : ''}${fmtFcfa(totalPnl)}`}
-              unit="FCFA"
-              delta={totalPnlPct != null ? `${totalPnlPct >= 0 ? '+' : ''}${(totalPnlPct * 100).toFixed(1)}% / coût` : undefined}
-              deltaDir={pnlDir}
-              accent={pnlDir === 'up' ? 'emerald' : 'neutral'}
-            />
+            {/* Valorisation et plus-value suivent les cours en direct pendant la séance. */}
+            <KpiValorisation positions={positionsDirect} liquidites={liquidites} />
+            <KpiPnl positions={positionsDirect} />
             <MetricCard
               label="Coût total (PRU)"
               value={fmtFcfa(totalCost)}
@@ -401,14 +389,12 @@ export default async function PortefeuillePage(
                                 <Sparkline data={sparklines[r.code]!} up={(r.pnlPct ?? 0) >= 0} width={64} height={22} />
                               ) : <span className="text-faint text-xs">—</span>}
                             </td>
-                            <td className="px-4 py-3 text-right tabular text-ivory">{fmtNumber(r.last)}</td>
+                            <td className="px-4 py-3 text-right tabular text-ivory"><CoursPosition code={r.code} /></td>
                             <td className="px-4 py-3 text-center text-xs text-faint hidden md:table-cell">{fmtDateCourte(r.date_entree)}</td>
-                            <td className="px-4 py-3 text-center text-xs text-faint hidden md:table-cell">{fmtDateCourte(lastPriceDate[r.code])}</td>
-                            <td className="px-4 py-3 text-right tabular text-ivory font-medium">{r.value != null ? fmtFcfa(r.value) : '—'}</td>
-                            <td className={`px-4 py-3 text-right tabular font-semibold ${r.pnl == null ? 'text-faint' : r.pnl >= 0 ? 'text-up' : 'text-down'}`}>
-                              {r.pnl != null
-                                ? `${r.pnl >= 0 ? '+' : ''}${fmtFcfa(r.pnl)} (${r.pnlPct?.toFixed(1)}%)`
-                                : '—'}
+                            <td className="px-4 py-3 text-center text-xs text-faint hidden md:table-cell"><DateCoursPosition code={r.code} dateServeur={lastPriceDate[r.code] ?? null} /></td>
+                            <td className="px-4 py-3 text-right tabular text-ivory font-medium"><ValeurPosition position={{ code: r.code, quantite: r.quantite, prix_entree: r.prix_entree }} /></td>
+                            <td className="px-4 py-3 text-right tabular font-semibold">
+                              <PnlPosition position={{ code: r.code, quantite: r.quantite, prix_entree: r.prix_entree }} />
                             </td>
                             <td className="px-4 py-3">
                               <PositionRowActions position={{ id: r.id, code: r.code, quantite: r.quantite, prix_entree: r.prix_entree, date_entree: r.date_entree, note: r.note }} />
@@ -439,9 +425,9 @@ export default async function PortefeuillePage(
                             <td className="px-4 py-3 text-xs text-faint font-semibold" colSpan={8}>
                               Total portefeuille
                             </td>
-                            <td className="px-4 py-3 text-right tabular text-ivory font-bold">{fmtFcfa(totalValue)}</td>
-                            <td className={`px-4 py-3 text-right tabular font-bold ${totalPnl >= 0 ? 'text-up' : 'text-down'}`}>
-                              {totalPnl >= 0 ? '+' : ''}{fmtFcfa(totalPnl)}
+                            <td className="px-4 py-3 text-right tabular text-ivory font-bold"><TotalValeur positions={positionsDirect} liquidites={liquidites} /></td>
+                            <td className="px-4 py-3 text-right tabular font-bold">
+                              <TotalPnl positions={positionsDirect} />
                             </td>
                             <td className="px-4 py-3" />
                           </tr>
@@ -685,6 +671,7 @@ export default async function PortefeuillePage(
 
         </div>
       </PortfolioTabs>
+      </CoursDirectProvider>
     </div>
   );
 }

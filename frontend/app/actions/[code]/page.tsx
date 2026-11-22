@@ -79,6 +79,7 @@ import { selectionnerEvenements, type EvenementMarche, type MesureEvenement } fr
 import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa, fmtDateCourte, fmtPctAbs } from '@/lib/format';
+import { PrixFicheAction } from '@/components/marche/CoursValeurDirect';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
 import { analyzeMovingAverages } from '@/lib/movingAverages';
 import { loadSectorBreadth } from '@/lib/movingAverages/server';
@@ -638,9 +639,7 @@ async function FicheAction(props: PropsFiche) {
   const lastMa50 = ma50[ma50.length - 1] ?? null;
   const lastMa200 = ma200[ma200.length - 1] ?? null;
 
-  // Variation absolue
-  const varAbs = last.cours_precedent != null && last.cours_jour != null
-    ? last.cours_jour - last.cours_precedent : null;
+  // Variation absolue : calculée par PrixFicheAction (elle suit le cours en direct).
 
   // Comptes du dernier exercice publié, et celui d'avant pour l'évolution.
   const exBrut = fundamentals.length > 0 ? pickBestFundamental(fundamentals) : null;
@@ -1206,26 +1205,22 @@ async function FicheAction(props: PropsFiche) {
                 </div>
 
                 {/* Prix principal */}
-                <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-1.5">
-                  <span className="tabular font-mono text-4xl md:text-5xl font-bold tracking-tight text-ivory leading-none">
-                    {fmtNumber(last.cours_jour)}
-                  </span>
-                  <span className="text-muted text-base mb-1">FCFA</span>
-                  {varAbs != null && (
-                    <span className={`tabular font-mono text-base font-semibold mb-1 ${up ? 'text-up' : 'text-down'}`}>
-                      {up ? '+' : ''}{fmtNumber(varAbs)}{' '}
-                      <span className="text-sm opacity-80">
-                        ({pctFr(last.variation_pct ?? 0, 2, true)})
-                      </span>
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p className="text-[11px] text-faint">
-                    Séance du <span className="text-muted">{fmtDateCourte(last.date_marche)}</span>
-                  </p>
-                  <FreshnessBadge fraicheur={fraicheur} />
-                </div>
+                {/* Cours, variation : suivis en direct pendant la séance. */}
+                <PrixFicheAction
+                  code={code}
+                  dateMarche={last.date_marche}
+                  cours={last.cours_jour}
+                  variation={last.variation_pct}
+                  coursPrecedent={last.cours_precedent ?? null}
+                  apres={
+                    <>
+                      <p className="text-[11px] text-faint">
+                        Séance du <span className="text-muted">{fmtDateCourte(last.date_marche)}</span>
+                      </p>
+                      <FreshnessBadge fraicheur={fraicheur} />
+                    </>
+                  }
+                />
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link

@@ -24,7 +24,7 @@ import Ouverture, { fmtIndice, fmtMd, type Chiffre } from '@/components/dashboar
 import { GrilleInterne, Cellule, Bloc, TeteBloc } from '@/components/dashboard/surface/Grille';
 import Trajectoire from '@/components/dashboard/surface/Trajectoire';
 import LargeurMoteur from '@/components/dashboard/surface/LargeurMoteur';
-import Mouvements from '@/components/dashboard/surface/Mouvements';
+import MouvementsSeance from '@/components/dashboard/surface/MouvementsSeance';
 import Secteurs from '@/components/dashboard/surface/Secteurs';
 import SignauxRecents from '@/components/dashboard/surface/SignauxRecents';
 import type { NoteSeance } from '@/lib/dashboard/signauxProches';
@@ -318,9 +318,7 @@ export default async function Dashboard() {
     );
   }
 
-  const withVar = actions.filter((a) => a.variation_pct != null);
-  const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
-  const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
+  // Plus fortes hausses et baisses : calculées en direct par MouvementsSeance.
 
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -399,7 +397,6 @@ export default async function Dashboard() {
     .filter((i) => i.date_marche === lastDate && INDICES_SECTORIELS.includes(i.code) && i.variation_pct != null)
     .map((i) => ({ code: i.code, nom: (i.libelle ?? i.code).replace(/^BRVM\s*-\s*/i, ''), variation: Number(i.variation_pct) }));
   const meneurSecteur = [...secteursJour].sort((a, b) => b.variation - a.variation)[0] ?? null;
-  const versLigne = (a: ActionDaily) => ({ code: a.code, nom: a.designation?.trim() || a.code, cours: a.cours_jour, variation: a.variation_pct, serie: sparklines[a.code] ?? [] });
   // Indices publiés à une autre séance que les cours : ignorés (affichés « — »).
   const memeSeance = (c: string) => indices.find((i) => i.code === c && i.date_marche === lastDate);
   const brvmcJour = memeSeance('BRVMC');
@@ -409,9 +406,9 @@ export default async function Dashboard() {
   const varValeur = summary?.valeur_transactions != null && summaryPrev?.valeur_transactions ? (summary.valeur_transactions / summaryPrev.valeur_transactions - 1) * 100 : null;
   const titresEchanges = actions.reduce((t, a) => t + (a.volume ?? 0), 0);
   const chiffres: Chiffre[] = [
-    { libelle: 'BRVM Composite', valeur: fmtIndice(brvmcJour?.valeur ?? null), variation: brvmcJour?.variation_pct ?? null },
-    { libelle: 'BRVM 30', valeur: fmtIndice(b30?.valeur ?? null), variation: b30?.variation_pct ?? null },
-    { libelle: 'BRVM Prestige', valeur: fmtIndice(prestige?.valeur ?? null), variation: prestige?.variation_pct ?? null },
+    { libelle: 'BRVM Composite', valeur: fmtIndice(brvmcJour?.valeur ?? null), variation: brvmcJour?.variation_pct ?? null, indice: 'BRVMC' },
+    { libelle: 'BRVM 30', valeur: fmtIndice(b30?.valeur ?? null), variation: b30?.variation_pct ?? null, indice: 'BRVM30' },
+    { libelle: 'BRVM Prestige', valeur: fmtIndice(prestige?.valeur ?? null), variation: prestige?.variation_pct ?? null, indice: 'BRVMPRES' },
     { libelle: 'Valeur échangée', valeur: fmtMd(summary?.valeur_transactions ?? null), variation: varValeur, note: 'vs veille' },
     { libelle: 'Capitalisation actions', valeur: fmtMd(summary?.capitalisation_actions ?? null), variation: varCap, note: 'vs veille' },
     { libelle: 'Titres échangés', valeur: actions.some((a) => a.volume != null) ? fmtNumber(titresEchanges, 0) : '—', variation: null, note: `${actions.length} valeurs cotées` },
@@ -439,6 +436,11 @@ export default async function Dashboard() {
           valeurEchangeeVeille: summaryPrev?.valeur_transactions ?? null,
         })}
         chiffres={chiffres}
+        // Seuls les indices de la MÊME séance que les cours partent au direct :
+        // un indice d'une autre séance reste « — », comme au rendu serveur.
+        indices={[brvmcJour, b30, prestige]
+          .filter((i): i is IndiceDaily => i != null)
+          .map((i) => ({ code: i.code, valeur: i.valeur, variation_pct: i.variation_pct }))}
       />
     ),
     seance: (
@@ -451,8 +453,11 @@ export default async function Dashboard() {
     ),
     indices: (
       <GrilleInterne>
-        <Cellule span={4}><Mouvements id="t-hausses" titre="Plus fortes hausses" lignes={gainers.map(versLigne)} /></Cellule>
-        <Cellule span={4}><Mouvements id="t-baisses" titre="Plus fortes baisses" lignes={losers.map(versLigne)} /></Cellule>
+        <MouvementsSeance
+          actions={actions.map((a) => ({ code: a.code, designation: a.designation, cours_jour: a.cours_jour, variation_pct: a.variation_pct }))}
+          sparklines={sparklines}
+          dateMarche={lastDate}
+        />
         <Cellule span={4}><Secteurs secteurs={secteursJour} /></Cellule>
       </GrilleInterne>
     ),

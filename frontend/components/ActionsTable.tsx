@@ -2,6 +2,10 @@
 import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
+import { FlashValue } from '@/components/ui/FlashValue';
+import { EnDirect } from '@/components/ui/EnDirect';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import SignalBadge from './SignalBadge';
@@ -122,8 +126,15 @@ export default function ActionsTable({
   sparklines = {},
   initialSecteur = '',
   showMetrics = true,
+  dateMarche = null,
 }: {
   actions: ActionDaily[];
+  /**
+   * Séance affichée. Fournie, elle active les cours en direct PENDANT la
+   * séance (voir `useCoursSeance`). Absente (pages publiques), le tableau reste
+   * tel que le serveur l'a rendu.
+   */
+  dateMarche?: string | null;
   signals: Record<string, SignalDaily>;
   sparklines?: Record<string, number[]>;
   initialSecteur?: string;
@@ -146,6 +157,15 @@ export default function ActionsTable({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersId = useId();
 
+  // Cours en direct pendant la séance ; les champs serveur (désignation,
+  // secteur, pays) sont conservés par `recomposer`.
+  const { rows: cours, flashes, enDirect, derniereMaj } = useCoursSeance(actions, dateMarche);
+  // Glissement des lignes quand l'ordre change (tri, filtre, nouveau cours).
+  // Coupé si l'utilisateur demande moins d'animations.
+  const calme = useReducedMotion();
+  const glisse = calme ? false : ('position' as const);
+  const transitionLigne = { duration: 0.25, ease: [0.2, 0, 0, 1] as const };
+
   const paysOptions = useMemo(
     () => [...new Set(actions.map((a) => a.pays).filter(Boolean))].sort() as string[],
     [actions],
@@ -156,7 +176,7 @@ export default function ActionsTable({
   );
 
   const rows = useMemo(() => {
-    let r = actions.filter((a) => {
+    let r = cours.filter((a) => {
       if (q && !`${a.code} ${a.designation ?? ''}`.toLowerCase().includes(q.toLowerCase())) return false;
       if (pays && a.pays !== pays) return false;
       if (secteur && a.secteur !== secteur) return false;
@@ -179,7 +199,7 @@ export default function ActionsTable({
       return asc ? cmp : -cmp;
     });
     return r;
-  }, [actions, q, pays, secteur, minVol, perf, sortKey, asc]);
+  }, [cours, q, pays, secteur, minVol, perf, sortKey, asc]);
 
   /*
    * Colonne Signal : le moteur s'abstient le plus souvent (CLAUDE.md §9). Une
@@ -332,6 +352,12 @@ export default function ActionsTable({
         </div>
       </div>
 
+      {enDirect && (
+        <div className="px-4 py-2 border-b border-border/60">
+          <EnDirect enDirect={enDirect} derniereMaj={derniereMaj} />
+        </div>
+      )}
+
       {noSignalNote}
 
       {/* ── Mobile (< md) : une carte par valeur ──────────────────────────── */}
@@ -344,7 +370,7 @@ export default function ActionsTable({
         {rows.map((a) => {
           const sig = showMetrics ? signals[a.code] : undefined;
           return (
-            <li key={a.code}>
+            <motion.li key={a.code} layout={glisse} transition={transitionLigne}>
               <Link
                 href={`/actions/${a.code}`}
                 className={`flex items-center gap-3 px-4 py-3 min-h-[56px] hover:bg-white/[0.02] ${FOCUS} focus-visible:ring-inset ${EASE}`}
@@ -363,7 +389,7 @@ export default function ActionsTable({
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)} <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
+                  <div className="tabular text-ivory font-medium"><FlashValue direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashValue> <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
                   <div className={`tabular text-sm font-medium ${tonVariation(a.variation_pct)}`}>
                     <Variation v={a.variation_pct} />
                   </div>
@@ -372,7 +398,7 @@ export default function ActionsTable({
                   </div>
                 </div>
               </Link>
-            </li>
+            </motion.li>
           );
         })}
       </ul>
@@ -422,8 +448,10 @@ export default function ActionsTable({
               const serie = sparklines[a.code];
               const serieMonte = serie && serie.length >= 2 ? serie[serie.length - 1]! >= serie[0]! : true;
               return (
-                <tr
+                <motion.tr
                   key={a.code}
+                  layout={glisse}
+                  transition={transitionLigne}
                   className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group`}
                 >
                   {/* ── Code + Désignation ─────────────────────────────── */}
@@ -455,7 +483,7 @@ export default function ActionsTable({
 
                   {/* ── Cours ─────────────────────────────────────────── */}
                   <td className="px-4 py-3 text-right tabular text-ivory font-medium">
-                    {fmtNumber(a.cours_jour)}
+                    <FlashValue direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashValue>
                   </td>
 
                   {/* ── Variation % ───────────────────────────────────── */}
@@ -508,7 +536,7 @@ export default function ActionsTable({
                       </td>
                     </>
                   )}
-                </tr>
+                </motion.tr>
               );
             })}
           </tbody>
