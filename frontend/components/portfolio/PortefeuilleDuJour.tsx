@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { construireRejeu, type Releve } from '@/lib/realtime/rejeu';
 import { valeurPortefeuilleDuJour } from '@/lib/realtime/courbe';
-import { fmtFcfa, fmtPctSigne } from '@/lib/format';
+import { fmtDateCourte, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
 import CourbeDuJour from '@/components/marche/CourbeDuJour';
 import { useCoursDirect } from './CoursDirect';
@@ -24,7 +24,12 @@ export default function PortefeuilleDuJour({ positions, releves, veilles }: {
   /** Clôture de la veille par code. */
   veilles: Record<string, number | null>;
 }) {
-  const { prix, enDirect, derniereMaj } = useCoursDirect();
+  const { prix, enDirect, derniereMaj, dateMarche } = useCoursDirect();
+  // « Aujourd'hui » seulement si la séance affichée EST celle du jour : un
+  // dimanche, c'est la séance du vendredi, et le titre doit le dire.
+  const duJour = dateMarche != null && dateMarche === new Date().toISOString().slice(0, 10);
+  const titre = duJour || !dateMarche ? 'Votre portefeuille aujourd’hui' : `Votre portefeuille sur la séance du ${fmtDateCourte(dateMarche)}`;
+  const reperePrecedent = duJour || !dateMarche ? 'clôture d’hier' : 'clôture précédente';
   const images = useMemo(() => construireRejeu(releves), [releves]);
   const { reference, points } = useMemo(() => valeurPortefeuilleDuJour(positions, images, veilles), [positions, images, veilles]);
 
@@ -50,8 +55,8 @@ export default function PortefeuilleDuJour({ positions, releves, veilles }: {
     <section aria-labelledby="pf-jour" className="rounded-xl border border-border bg-surface p-4">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <h2 id="pf-jour" className="text-sm font-semibold text-ivory">Votre portefeuille aujourd’hui</h2>
-          <p className="text-[11px] text-faint">Positions en actions, par rapport à la clôture d’hier</p>
+          <h2 id="pf-jour" className="text-sm font-semibold text-ivory">{titre}</h2>
+          <p className="text-[11px] text-faint">Positions en actions, par rapport à la {reperePrecedent}</p>
         </div>
         <p className={`tabular text-2xl font-semibold ${tonEcart}`}>
           <ChiffreRoulant valeur={ecart} format={(x) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${fmtFcfa(Math.abs(x))}`} />
@@ -62,7 +67,7 @@ export default function PortefeuilleDuJour({ positions, releves, veilles }: {
       <CourbeDuJour
         points={points}
         reference={reference}
-        libelleReference="clôture d’hier"
+        libelleReference={reperePrecedent}
         direct={direct}
         libelle="Valeur de vos positions en actions"
         unite="FCFA"
