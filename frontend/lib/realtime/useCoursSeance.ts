@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { estEnSeance } from '@/lib/freshness';
 import { useRealtimeActions } from './useRealtimeActions';
-import { recomposer } from './recomposer';
+import { recomposer, estEnDirect, valeursChangees } from './recomposer';
 import { lignesAuMoment, veillesDe } from './rejeu';
 import { useRejeu } from '@/components/rejeu/RejeuProvider';
 import type { FlashDirection, RealtimeActionRow } from './mergeActions';
@@ -11,14 +11,18 @@ import type { FlashDirection, RealtimeActionRow } from './mergeActions';
 /**
  * Cours en direct pour les pages de l'application (hors landing).
  *
- * - N'écoute QUE pendant la séance (`estEnSeance`) : hors séance, aucune
- *   connexion ouverte, et rien ne prétend être « en direct ».
+ * - N'écoute QUE pendant la séance (`estEnSeance`), et sur la date du JOUR,
+ *   pas sur celle rendue par le serveur : avant le premier relevé (9 h 00 →
+ *   ~9 h 15), un onglet ouvert depuis la veille ou un jour férié, la page
+ *   montre la séance précédente — écouter cette date-là ne recevrait jamais
+ *   rien (revue Fable du 2026-11-22).
+ * - `enDirect` n'est vrai que si les cours affichés sont ceux du jour, ou dès
+ *   qu'un cours du jour est réellement arrivé (`estEnDirect`).
  * - Ne touche jamais aux champs serveur des lignes (voir `recomposer`).
- * - Sans `dateMarche`, ou en cas d'échec d'abonnement, les lignes de départ
- *   restent affichées telles quelles.
+ * - Sans `dateMarche` (page statique, /apercu), aucun abonnement.
  * - Dans un RejeuProvider en cours de lecture, les lignes sont celles du
- *   relevé rejoué (`lignesAuMoment`) : la page rejoue sans rien savoir du
- *   rejeu. `enRejeu` le signale ; `enDirect` est alors faux.
+ *   relevé rejoué (`lignesAuMoment`). `enRejeu` le signale ; `enDirect` est
+ *   alors faux.
  *
  * `base` doit être une référence stable (useMemo côté appelant), sinon
  * `useRealtimeActions` se resynchronise à chaque rendu.
@@ -29,33 +33,41 @@ export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?:
 ): {
   rows: T[];
   flashes: Record<string, FlashDirection>;
-  /** Vrai pendant la séance, quand l'abonnement est ouvert (et hors rejeu). */
+  /** Vrai pendant la séance, quand les cours affichés sont ceux du jour (et hors rejeu). */
   enDirect: boolean;
   /** Vrai pendant un rejeu de séance. */
   enRejeu: boolean;
-  /** Instant de la dernière mise à jour reçue (ou du relevé rejoué). */
+  /** Instant du dernier cours réellement reçu (ou du relevé rejoué). */
   derniereMaj: Date | null;
 } {
-  // Faux au premier rendu (serveur compris) : pas d'écart d'hydratation.
+  // Faux / nul au premier rendu (serveur compris) : pas d'écart d'hydratation.
   const [enSeance, setEnSeance] = useState(false);
+  const [jour, setJour] = useState<string | null>(null);
   useEffect(() => {
-    const maj = () => setEnSeance(estEnSeance(new Date()));
+    const maj = () => {
+      const maintenant = new Date();
+      setEnSeance(estEnSeance(maintenant));
+      setJour(maintenant.toISOString().slice(0, 10));
+    };
     maj();
     const t = setInterval(maj, 60_000);
     return () => clearInterval(t);
   }, []);
 
-  const enDirect = enSeance && dateMarche != null;
-  const { rows: recus, flashes } = useRealtimeActions(base, enDirect ? dateMarche : null);
+  const ecoute = enSeance && dateMarche != null ? jour : null;
+  const { rows: recus, flashes } = useRealtimeActions(base, ecoute);
   const rows = useMemo(() => recomposer(base, recus), [base, recus]);
 
+  // Seul un VRAI changement de valeur compte comme mise à jour : une relecture
+  // identique (retour d'onglet) ou vide (avant le premier relevé) ne date rien.
   const [derniereMaj, setDerniereMaj] = useState<Date | null>(null);
-  const premier = useRef(true);
+  const affichees = useRef(rows);
   useEffect(() => {
-    // Le premier passage est l'état serveur, pas une mise à jour reçue.
-    if (premier.current) { premier.current = false; return; }
-    if (recus !== base) setDerniereMaj(new Date());
-  }, [recus, base]);
+    if (valeursChangees(affichees.current, rows)) setDerniereMaj(new Date());
+    affichees.current = rows;
+  }, [rows]);
+
+  const enDirect = estEnDirect({ enSeance, dateMarche, jour, majRecue: derniereMaj != null });
 
   // Rejeu de séance : l'image courante remplace les cours, rien d'autre.
   const rejeu = useRejeu();

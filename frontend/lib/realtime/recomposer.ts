@@ -47,6 +47,33 @@ export function recomposer<T extends RealtimeActionRow>(
   });
 }
 
+/**
+ * « En direct » n'est vrai que si l'on montre la séance du JOUR : soit la page
+ * a été rendue avec les cours du jour, soit un cours du jour est réellement
+ * arrivé depuis. Avant le premier relevé (9 h 00 → ~9 h 15), un onglet ouvert
+ * depuis la veille ou un jour férié en semaine ne prétendent rien.
+ * (Revue Fable du 2026-11-22 : l'abonnement écoutait la séance précédente et
+ * affichait « En direct » sans jamais rien recevoir.)
+ */
+export function estEnDirect(o: {
+  enSeance: boolean;
+  dateMarche: string | null;
+  jour: string | null;
+  majRecue: boolean;
+}): boolean {
+  if (!o.enSeance || o.dateMarche == null || o.jour == null) return false;
+  return o.dateMarche === o.jour || o.majRecue;
+}
+
+/** Vrai si une colonne de marché a changé entre deux états affichés. */
+export function valeursChangees(avant: readonly RealtimeActionRow[], apres: readonly RealtimeActionRow[]): boolean {
+  if (avant.length !== apres.length) return true;
+  return apres.some((r, i) => {
+    const a = avant[i]!;
+    return a.code !== r.code || a.cours_jour !== r.cours_jour || a.variation_pct !== r.variation_pct || (a.volume ?? null) !== (r.volume ?? null);
+  });
+}
+
 /** Heure d'une mise à jour, au format affiché « HH:MM » (heure d'Abidjan = UTC). */
 export function heureMaj(d: Date): string {
   return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;

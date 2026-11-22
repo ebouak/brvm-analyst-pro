@@ -85,6 +85,9 @@ export default function AlertesEnDirect() {
       }
       // Ce qui est déjà vrai à l'arrivée ne sera pas annoncé comme un franchissement.
       let etat = etatInitial(alertes, depart);
+      // Une valeur sans cours de départ (aucune ligne récente) : son PREMIER
+      // cours reçu fixe l'état, il n'annonce rien (revue Fable).
+      const connues = new Set(depart.map((d) => d.code));
 
       canal = sb
         .channel(`alertes-live-${jour}`)
@@ -96,6 +99,10 @@ export default function AlertesEnDirect() {
             if (!recu || !codes.includes(recu.code)) return;
             const r = franchissements(alertes, etat, recu);
             etat = r.etat;
+            if (!connues.has(recu.code)) {
+              connues.add(recu.code);
+              return;
+            }
             for (const a of r.declenchees) {
               if (dejaVue(a.id, jour)) continue;
               marquerVue(a.id, jour);

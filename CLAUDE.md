@@ -1655,7 +1655,11 @@ pas touchée** : ni `components/landing`, ni `components/vitrine`, ni
 
 - **Direct** : `useCoursSeance` (abonnement Realtime **seulement pendant la
   séance**) alimente `/actions`, `/dashboard`, `/portefeuille`, les fiches et
-  la carte de chaleur. `recomposer` n'écrase que les colonnes de marché : les
+  la carte de chaleur. ⚠️ Il écoute la date du JOUR, jamais la `dateMarche`
+  rendue par le serveur (qui désigne la séance précédente avant le premier
+  relevé, sur un onglet de la veille ou un jour férié), et « En direct » ne
+  s'affiche que via `estEnDirect` (cours du jour affichés ou reçus) — revue
+  Fable du 2026-11-22. `recomposer` n'écrase que les colonnes de marché : les
   champs serveur ne disparaissent jamais. ⚠️ Un seul abonnement par sujet de
   canal et par page (deux `cours-live-<date>` peuvent se fermer l'un l'autre).
 - **Portefeuille** : serveur et direct partagent `valoriser` (pur, testé).
