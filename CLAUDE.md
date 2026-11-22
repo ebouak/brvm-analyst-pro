@@ -1682,6 +1682,10 @@ pas touchée** : ni `components/landing`, ni `components/vitrine`, ni
   séance. ⚠️ Ne pas relancer une animation en recréant le nœud (`key`) autour
   d'un `ChiffreRoulant` : il perdrait son roulement. Tout est coupé sous
   `prefers-reduced-motion`. Rien n'est animé sur les signaux.
+  ⚠️ **Pas de roulement ni d'effet sur l'argent de l'utilisateur**
+  (valorisation, plus-value, variation du portefeuille) : en faire un
+  spectacle pousse à réagir (revue Fable du 2026-11-22). Le roulement est
+  réservé aux données de MARCHÉ (cours, indices, bilan de séance).
 
 
 ## 9. Bugs connus / limites

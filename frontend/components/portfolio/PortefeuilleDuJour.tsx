@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { construireRejeu, type Releve } from '@/lib/realtime/rejeu';
 import { valeurPortefeuilleDuJour } from '@/lib/realtime/courbe';
 import { fmtDateCourte, fmtFcfa, fmtPctSigne } from '@/lib/format';
-import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
 import CourbeDuJour from '@/components/marche/CourbeDuJour';
 import { useCoursDirect } from './CoursDirect';
 
@@ -59,7 +58,7 @@ export default function PortefeuilleDuJour({ positions, releves, veilles }: {
           <p className="text-[11px] text-faint">Positions en actions, par rapport à la {reperePrecedent}</p>
         </div>
         <p className={`tabular text-2xl font-semibold ${tonEcart}`}>
-          <ChiffreRoulant valeur={ecart} format={(x) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${fmtFcfa(Math.abs(x))}`} />
+          {`${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${fmtFcfa(Math.abs(ecart))}`}
           <span className="ml-1 text-sm font-normal text-muted">FCFA</span>
           {pct != null && <span className="ml-2 text-sm">{fmtPctSigne(pct)}</span>}
         </p>

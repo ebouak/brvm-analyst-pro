@@ -6,7 +6,6 @@ import type { FlashDirection } from '@/lib/realtime/mergeActions';
 import { valoriser, type PositionValorisable } from '@/lib/portfolio/valoriserDirect';
 import { fmtNumber, fmtFcfa, fmtDateCourte } from '@/lib/format';
 import { FlashFort } from '@/components/ui/FlashFort';
-import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
 import { EnDirect } from '@/components/ui/EnDirect';
 import { MetricCard } from '@/components/ui/premium';
 
@@ -94,7 +93,7 @@ export function KpiValorisation({ positions, liquidites }: { positions: Position
   return (
     <MetricCard
       label="Valorisation totale"
-      value={<ChiffreRoulant valeur={v.totalValue} format={fmtFcfa} />}
+      value={fmtFcfa(v.totalValue)}
       unit="FCFA"
       delta={liquidites != null ? `dont ${fmtFcfa(liquidites)} cash` : 'actions uniquement'}
       deltaDir="flat"
@@ -110,7 +109,7 @@ export function KpiPnl({ positions }: { positions: PositionValorisable[] }) {
   return (
     <MetricCard
       label="P&L latent"
-      value={<ChiffreRoulant valeur={v.totalPnl} format={(x) => `${x >= 0 ? '+' : ''}${fmtFcfa(x)}`} />}
+      value={`${v.totalPnl >= 0 ? '+' : ''}${fmtFcfa(v.totalPnl)}`}
       unit="FCFA"
       delta={v.totalPnlPct != null ? `${v.totalPnlPct >= 0 ? '+' : ''}${(v.totalPnlPct * 100).toFixed(1)}% / coût` : undefined}
       deltaDir={dir}
