@@ -90,7 +90,9 @@ export default function CourbeDuJour({
           strokeWidth={compacte ? 1.5 : 2}
           strokeLinejoin="round"
           strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
+          // PAS de vector-effect="non-scaling-stroke" ici : combiné à
+          // pathLength, Chrome calcule mal le pointillé de l'animation et le
+          // tracé s'arrête avant le dernier point (constaté en production).
           className="courbe-trace"
         />
         <circle
