@@ -28,6 +28,7 @@ import { chromium } from 'playwright';
 import { composerRecit, chiffresAutorises, chiffresEtrangers } from './recit.mjs';
 import { evaluerCloture, lireRunsDaily } from './cloture.mjs';
 import { entetesSupabase } from './supabaseEntetes.mjs';
+import { nettoyerResume, coursSeance, pointsIntraday, construireAgenda } from './briefDonnees.mjs';
 
 /* Chemins deduits du fichier lui-meme : le script doit tourner aussi bien sur
    le poste de l'auteur que sur un runner GitHub, ou aucun chemin Windows
@@ -75,7 +76,7 @@ const [{ date_marche: seance }] = await api(
   'brvm_actions_daily?select=date_marche&order=date_marche.desc&limit=1',
 );
 const actions = await api(
-  `brvm_actions_daily?select=code,designation,cours_jour,variation_pct,volume,valeur_echangee,nb_transactions&date_marche=eq.${seance}`,
+  `brvm_actions_daily?select=code,designation,cours_jour,cours_precedent,variation_pct,volume,valeur_echangee,nb_transactions&date_marche=eq.${seance}`,
 );
 const indices = await api(
   `brvm_indices_daily?select=code,valeur,variation_pct&date_marche=eq.${seance}`,
@@ -113,6 +114,25 @@ const actus = await api(
     `&date_publication=gte.${veille}&date_publication=lte.${seance}` +
     '&hidden=is.false&order=date_publication.desc,score_impact.desc.nullslast&limit=12',
 ).catch(() => []);
+
+/* ── Brief écrit, v2 (2026-11-23) : trois lectures d'ENRICHISSEMENT ─────────
+   Même règle que l'historique de l'indice : chacune a son `.catch`, une panne
+   retire son bloc, jamais la séance. Toutes passent ICI, une fois : le brief
+   et l'envoi ne relisent pas la base.
+   - courbe du jour du Composite : relevés réels (brvm_indices_snapshots, 0256) ;
+   - agenda : dividendes et assemblées des sept jours qui suivent la séance. */
+const relevesIndice = await api(
+  `brvm_indices_snapshots?select=captured_at,valeur&code=eq.BRVMC&date_marche=eq.${seance}&order=captured_at.asc`,
+).catch(() => []);
+const finAgenda = new Date(new Date(`${seance}T12:00:00Z`).getTime() + 7 * 86400000).toISOString().slice(0, 10);
+const [divAgenda, agAgenda, dernierBoc] = await Promise.all([
+  api(
+    'dividends?select=code,exercice,ex_date,payment_date,montant' +
+      `&or=(and(ex_date.gt.${seance},ex_date.lte.${finAgenda}),and(payment_date.gt.${seance},payment_date.lte.${finAgenda}))`,
+  ).catch(() => []),
+  api(`boc_assemblees?select=code,nature_cle,date_ag,dernier_bulletin&date_ag=gt.${seance}&date_ag=lte.${finAgenda}`).catch(() => []),
+  api('boc_assemblees?select=dernier_bulletin&order=dernier_bulletin.desc&limit=1').catch(() => []),
+]);
 
 /* La valeur echangee n'est pas toujours publiee par la source intraday. On
    estime alors par cours x volume - comme le fait le produit ailleurs - et on
@@ -203,8 +223,10 @@ const classees = [...candidates].sort(
   (a, b) => Number(concerneLeMarche(b)) - Number(concerneLeMarche(a)),
 );
 
-const phare = classees[0] ?? null;
-const autresActus = classees.filter((n) => n !== phare).slice(0, 3);
+// Un résumé de mur payant (« réservé aux membres… ») n'est pas un résumé.
+const sansMur = (n) => (n ? { ...n, resume: nettoyerResume(n.resume) } : n);
+const phare = sansMur(classees[0] ?? null);
+const autresActus = classees.slice(1, 4).map(sansMur);
 
 const fr = (x, d = 2) => x.toFixed(d).replace('.', ',');
 const sg = (x, d = 2) => `${x >= 0 ? '+' : '−'}${fr(Math.abs(x), d)}`;
@@ -646,6 +668,16 @@ writeFileSync(
       transactions,
       historique_indice: historiqueIndice,
       actualites: { phare, autres: autresActus },
+      /* Brief v2 : cours de chaque valeur (« Votre séance », calculé à l'envoi,
+         jamais stocké), courbe du jour du Composite, agenda des sept jours. */
+      cours_seance: coursSeance(actions),
+      intraday_indice: pointsIntraday(relevesIndice),
+      agenda: construireAgenda({
+        seance,
+        dividendes: divAgenda,
+        assemblees: agAgenda,
+        dernierBulletin: dernierBoc?.[0]?.dernier_bulletin ?? null,
+      }),
       duree_s: dureeVoix,
       /* Quelle voix a parlé, et pourquoi pas celle de l'auteur le cas échéant. */
       voix_moteur: voixMoteur,

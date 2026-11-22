@@ -35,12 +35,13 @@
  *     rapporte qui l'a ouvert contredirait cette promesse au premier envoi.
  *     Le taux d'ouverture est perdu, et c'est assumé.
  *
- * ── POURQUOI PAS DE GRAPHE INTRADAY ──
- * `brvm_intraday_snapshots` ne contient que des ACTIONS (47 codes le
- * 24/09/2026, aucun indice). Une courbe « 09h → 16h » du Composite serait donc
- * inventée de bout en bout. On trace les 20 dernières SÉANCES, qui existent —
- * en cellules de tableau, parce que le SVG est retiré par plusieurs clients de
- * messagerie.
+ * ── LE GRAPHE INTRADAY, ET POURQUOI IL A ATTENDU ──
+ * Jusqu'au 2026-11-22, `brvm_intraday_snapshots` ne contenait que des ACTIONS :
+ * une courbe « 09h → 16h » du Composite aurait été inventée. Depuis la
+ * migration 0256, `brvm_indices_snapshots` relève l'indice à chaque passage :
+ * la courbe du jour s'affiche dès trois relevés réels. Les 20 dernières
+ * SÉANCES restent tracées à côté — en cellules de tableau, parce que le SVG
+ * est retiré par plusieurs clients de messagerie.
  */
 
 /* ───────────────────────── Direction artistique ───────────────────────── */
@@ -61,6 +62,8 @@ const C = {
   hausseFond: '#D9F0E7',
   baisseFond: '#FADFDB',
 };
+
+import { nettoyerResume } from './briefDonnees.mjs';
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -141,9 +144,34 @@ function lecture(m) {
    Ce n'est pas un repli négligeable : une part des lecteurs ne verra que
    celle-ci, et plusieurs filtres anti-spam la comparent au HTML. */
 
-export function texte(m) {
+export function texte(m, { perso = null } = {}) {
   const l = [sujet(m), '', 'À RETENIR', ''];
   faits(m).forEach((f, i) => l.push(`${String(i + 1).padStart(2, '0')}. ${f}`));
+
+  if (perso) {
+    l.push('', 'VOTRE SÉANCE', '');
+    l.push(
+      `Variation du jour de vos positions en actions : ${fcfaSigne(perso.ecart)}${perso.pct != null ? ` (${sg(perso.pct)} %)` : ''}.`,
+    );
+    perso.lignes.slice(0, 6).forEach((x) =>
+      l.push(`  ${x.code} · ${ent(x.quantite)} × ${ent(x.cours)} FCFA · ${x.variation_pct != null ? `${sg(x.variation_pct)} %` : '—'} · ${fcfaSigne(x.ecart)}`),
+    );
+    l.push(`Voir le portefeuille : ${SITE}/portefeuille`);
+  }
+
+  const jourIdx = m.intraday_indice ?? [];
+  if (jourIdx.length >= 3) {
+    const vals = jourIdx.map((x) => x.valeur);
+    l.push('', 'LA SÉANCE, RELEVÉ PAR RELEVÉ', '');
+    l.push(
+      `BRVM Composite : ${jourIdx.length} relevés de ${heureUtc(jourIdx[0].t)} à ${heureUtc(jourIdx[jourIdx.length - 1].t)} UTC, entre ${fr(Math.min(...vals))} et ${fr(Math.max(...vals))} points.`,
+    );
+  }
+
+  if ((m.agenda ?? []).length) {
+    l.push('', 'À L’AGENDA DES PROCHAINS JOURS', '');
+    m.agenda.forEach((i) => l.push(`  ${jourCourt(i.date)} · ${libelleAgenda(i)}`));
+  }
 
   const h = m.meilleures5 ?? m.meilleures ?? [];
   const b = m.pires5 ?? m.pires ?? [];
@@ -161,13 +189,14 @@ export function texte(m) {
   const phare = m.actualites?.phare;
   if (phare) {
     l.push('', 'INFORMATION DU JOUR', '', phare.titre);
-    if (phare.resume) l.push(String(phare.resume).slice(0, 320));
+    if (nettoyerResume(phare.resume)) l.push(nettoyerResume(phare.resume).slice(0, 320));
     if (phare.source_url) l.push(phare.source_url);
   }
 
   l.push(
     '',
     `Vidéo de la séance : ${SITE}/#seance-${m.seance}`,
+    `Rejouer la séance : ${SITE}/actions`,
     `Analyse complète : ${SITE}`,
     '',
     'Chiffres issus de la séance officielle de la BRVM.',
@@ -204,14 +233,15 @@ export function texte(m) {
        totalité des articles récents (0 sur 6 au 25/09/2026). Mettre une image
        générique à la place reviendrait à illustrer un article avec une photo
        qui ne le concerne pas.
-     · La COURBE INTRADAY « 09h → 16h ». `brvm_intraday_snapshots` ne contient
-       que des actions, aucun indice : cette courbe serait inventée de bout en
-       bout. Elle est remplacée par les 20 dernières séances, réelles.
+     · La COURBE INTRADAY « 09h → 16h », jusqu'au 2026-11-22 : aucun relevé
+       d'indice n'existait. Depuis la migration 0256, la collecte relève le
+       Composite à chaque passage : la courbe du jour s'affiche dès trois
+       relevés réels (« La séance, relevé par relevé »), sinon les 20 dernières
+       séances seules.
 
-   Les pastilles rondes dorées du bandeau KPI sont conservées comme ANNEAUX,
-   sans glyphe : une icône de messagerie ne se dessine ni en SVG (retiré par
-   plusieurs clients) ni en émoji (le projet s'en interdit l'usage décoratif).
-   L'anneau porte le rythme visuel sans prétendre illustrer quoi que ce soit.
+   Les pastilles rondes dorées du bandeau KPI, conservées comme anneaux vides
+   jusqu'à la v1, ont été retirées en v2 : vides, elles se lisaient comme des
+   icônes manquantes.
    ═══════════════════════════════════════════════════════════════════════ */
 
 /** Colonne d'une rangée à deux blocs. `part` vaut 'large' (≈2/3) ou 'egal'. */
@@ -233,16 +263,117 @@ const carte = (titre, corps, { pad = '18px 20px' } = {}) => `
   <tr><td style="padding:${pad}">${corps}</td></tr>
 </table>`;
 
-/** L'anneau doré du bandeau KPI. Aucun glyphe : voir l'en-tête. */
-const anneau = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:9px"><tr><td style="width:30px;height:30px;border:1px solid ${C.or};border-radius:15px;background:rgba(201,164,92,.16);font-size:0;line-height:30px">&nbsp;</td></tr></table>`;
+/* ── Brief v2 (2026-11-23) ─────────────────────────────────────────────────
+   Le bandeau perd ses anneaux vides et ses chiffres coupés sur trois lignes :
+   chaque mesure tient sur UNE ligne (libellé à gauche, valeur à droite), et la
+   largeur du marché devient une barre. Les blocs « Votre séance », « La séance,
+   relevé par relevé » et « À l'agenda » lisent seance.json (même lecture que
+   la vidéo) ; « Votre séance » est calculé à l'envoi, jamais stocké. Le
+   doublon « Chiffres clés » disparaît. */
 
-/** Une colonne du bandeau KPI sombre. */
-const kpiSombre = (label, valeur, { premier = false } = {}) => `
-<td valign="top" style="padding:0 14px;${premier ? '' : `border-left:1px solid #1D3A5C;`}">
-  ${anneau}
-  <p style="margin:0;font-family:${SANS};font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8AA3BF;line-height:1.45">${esc(label)}</p>
-  <p style="margin:5px 0 0;font-family:${SERIF};font-size:17px;font-weight:700;color:${C.blanc};line-height:1.25">${esc(valeur)}</p>
-</td>`;
+/** Une mesure du bandeau sombre, sur une ligne. */
+const kpiLigne = (label, valeur, { premier = false } = {}) => `
+<tr>
+  <td style="padding:${premier ? '0' : '10px'} 0 10px;${premier ? '' : 'border-top:1px solid #1D3A5C;'}font-family:${SANS};font-size:12px;color:#8AA3BF">${esc(label)}</td>
+  <td style="padding:${premier ? '0' : '10px'} 0 10px 12px;${premier ? '' : 'border-top:1px solid #1D3A5C;'}font-family:${SERIF};font-size:16px;font-weight:700;color:${C.blanc};text-align:right;white-space:nowrap">${esc(valeur)}</td>
+</tr>`;
+
+/** Largeur du marché : hausses, inchangées, baisses, en une barre proportionnelle. */
+function barreLargeur(m) {
+  const total = (m.hausses ?? 0) + (m.baisses ?? 0) + (m.stables ?? 0);
+  if (!total) return '';
+  const cellule = (n, fond) =>
+    n > 0 ? `<td style="width:${((n / total) * 100).toFixed(2)}%;height:8px;background:${fond};font-size:0;line-height:0">&nbsp;</td>` : '';
+  return `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px"><tr>
+    ${cellule(m.hausses, '#2FBF8F')}${cellule(m.stables, '#4A5E77')}${cellule(m.baisses, '#E86A5A')}
+  </tr></table>
+  <p style="margin:8px 0 0;font-family:${SANS};font-size:12px;line-height:1.5;color:#9FB3C8">
+    <span style="color:#5FD3A8;font-weight:600">${m.hausses} en hausse</span> · ${m.stables} inchangées · <span style="color:#FF8A7A;font-weight:600">${m.baisses} en baisse</span> sur ${m.valeurs} valeurs cotées
+  </p>`;
+}
+
+const heureUtc = (iso) => {
+  const d = new Date(iso);
+  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+};
+const jourCourt = (date) =>
+  new Date(`${date}T12:00:00Z`).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+
+/** Courbe du jour du Composite, en cellules : relevés réels (0256). Absente sous trois relevés. */
+function courbeJour(m) {
+  const p = m.intraday_indice ?? [];
+  if (p.length < 3) return null;
+  const vals = p.map((x) => x.valeur);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const amp = max - min || 1;
+  const barres = p
+    .map(
+      (x, i) =>
+        `<td valign="bottom" style="padding:0 1px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%"><tr><td style="height:${8 + Math.round(((x.valeur - min) / amp) * 52)}px;background:${i === p.length - 1 ? C.nuit : C.turquoise};font-size:0;line-height:0">&nbsp;</td></tr></table></td>`,
+    )
+    .join('');
+  return `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr style="height:60px">${barres}</tr>
+  </table>
+  <p style="margin:9px 0 0;font-family:${SANS};font-size:10.5px;line-height:1.55;color:${C.faible}">
+    ${p.length} relevés de la collecte, de ${heureUtc(p[0].t)} à ${heureUtc(p[p.length - 1].t)} UTC ; de ${esc(fr(min))} à ${esc(fr(max))} points.
+  </p>`;
+}
+
+const NATURE_AG = { ordinaire: 'ordinaire', extraordinaire: 'extraordinaire', mixte: 'mixte' };
+const libelleAgenda = (i) =>
+  i.type === 'detachement'
+    ? `Détachement du dividende de ${i.code} · ${ent(i.montant)} FCFA net par action`
+    : i.type === 'paiement'
+      ? `Paiement du dividende de ${i.code} · ${ent(i.montant)} FCFA net par action`
+      : `Assemblée générale${NATURE_AG[i.nature] ? ` ${NATURE_AG[i.nature]}` : ''} de ${i.code}`;
+
+/** À l'agenda : les sept jours qui suivent la séance. Absent sans événement fiable. */
+function blocAgenda(m) {
+  const a = m.agenda ?? [];
+  if (!a.length) return null;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    ${a
+      .map(
+        (i, k) => `<tr>
+      <td valign="top" style="padding:8px 14px 8px 0;${k ? `border-top:1px solid ${C.trait};` : ''}font-family:${SERIF};font-size:13.5px;font-weight:700;color:${C.nuit};white-space:nowrap">${esc(jourCourt(i.date))}</td>
+      <td style="padding:8px 0;${k ? `border-top:1px solid ${C.trait};` : ''}font-family:${SANS};font-size:13px;line-height:1.5;color:${C.texte}">${esc(libelleAgenda(i))}</td>
+    </tr>`,
+      )
+      .join('')}
+  </table>
+  <p style="margin:10px 0 0;font-family:${SANS};font-size:11px;line-height:1.6;color:${C.faible}">Dates du calendrier officiel et du Bulletin officiel de la cote. Un détachement réduit mécaniquement le cours du montant détaché.</p>`;
+}
+
+const fcfaSigne = (x) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${ent(Math.abs(Math.round(x)))} FCFA`;
+
+/** Votre séance : variation du jour de VOS positions (calculée à l'envoi, jamais stockée). */
+function blocVotreSeance(perso) {
+  if (!perso) return '';
+  const teinte = perso.ecart > 0 ? C.hausse : perso.ecart < 0 ? C.baisse : C.second;
+  const lignes = perso.lignes.slice(0, 6);
+  return `<tr><td style="padding:12px 12px 0;background:${C.creme}">${carte(
+    'Votre séance',
+    `<p style="margin:0;font-family:${SERIF};font-size:26px;font-weight:700;color:${teinte};line-height:1.15">${esc(fcfaSigne(perso.ecart))}${perso.pct != null ? `<span style="font-family:${SANS};font-size:14px;font-weight:600"> &nbsp;${esc(sg(perso.pct))} %</span>` : ''}</p>
+     <p style="margin:4px 0 14px;font-family:${SANS};font-size:12px;color:${C.faible}">Variation du jour de vos positions en actions · valeur au cours de clôture : ${esc(ent(perso.valeur))} FCFA</p>
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+       ${lignes
+         .map(
+           (l) => `<tr>
+         <td style="padding:7px 0;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12.5px;font-weight:600;color:${C.texte}">${esc(l.code)}</td>
+         <td style="padding:7px 0;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12px;color:${C.second};text-align:right;white-space:nowrap">${esc(ent(l.quantite))} × ${esc(ent(l.cours))}</td>
+         <td style="padding:7px 0 7px 10px;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12px;color:${l.variation_pct > 0 ? C.hausse : l.variation_pct < 0 ? C.baisse : C.second};text-align:right;white-space:nowrap">${l.variation_pct != null ? `${esc(sg(l.variation_pct))} %` : '—'}</td>
+         <td style="padding:7px 0 7px 10px;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12.5px;font-weight:600;color:${C.texte};text-align:right;white-space:nowrap">${esc(fcfaSigne(l.ecart))}</td>
+       </tr>`,
+         )
+         .join('')}
+     </table>
+     <p style="margin:11px 0 0;font-family:${SANS};font-size:11px;line-height:1.6;color:${C.faible}">Positions de votre portefeuille WESTBOURSE, comparées à la clôture précédente. Liquidités exclues.${perso.sansCours ? ` ${perso.sansCours} valeur${perso.sansCours > 1 ? 's' : ''} sans cours de séance, non comptée${perso.sansCours > 1 ? 's' : ''}.` : ''}${perso.lignes.length > lignes.length ? ` ${perso.lignes.length - lignes.length} autre${perso.lignes.length - lignes.length > 1 ? 's' : ''} ligne${perso.lignes.length - lignes.length > 1 ? 's' : ''} dans votre portefeuille.` : ''} <a href="${SITE}/portefeuille" style="color:${C.nuit};font-weight:600">Voir le portefeuille →</a></p>`,
+  )}</td></tr>`;
+}
 
 /** Une ligne de palmarès : valeur, cours, variation, barre d'amplitude. */
 function ligneMouvement(v, max, hausse) {
@@ -297,7 +428,7 @@ function courbeIndice(m) {
     <tr style="height:60px">${barres}</tr>
   </table>
   <p style="margin:9px 0 0;font-family:${SANS};font-size:10.5px;line-height:1.55;color:${C.faible}">
-    ${h.length} dernières séances, de ${esc(fr(min))} à ${esc(fr(max))} points. La BRVM ne publiant pas d’historique intraday de l’indice, aucune courbe de la journée n’est possible.
+    ${h.length} dernières séances, de ${esc(fr(min))} à ${esc(fr(max))} points.
   </p>`;
 }
 
@@ -310,7 +441,7 @@ function courbeIndice(m) {
  *                 découverte : un abonné qui a coché la case ne doit jamais
  *                 lire « vous recevez ceci une seule fois » — ce serait faux.
  */
-export function html(m, { avertissement = null } = {}) {
+export function html(m, { avertissement = null, perso = null } = {}) {
   const hausses = m.meilleures5 ?? m.meilleures ?? [];
   const baisses = m.pires5 ?? m.pires ?? [];
   const maxH = Math.max(...hausses.map((v) => Math.abs(v.variation_pct)), 0);
@@ -334,15 +465,15 @@ export function html(m, { avertissement = null } = {}) {
                 : `<p style="margin:0;font-family:${SANS};font-size:13px;line-height:1.6;color:#9FB3C8">Indice non disponible pour cette séance.</p>`
             }
           </td>
-          <td valign="top">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-              ${m.composite ? kpiSombre('Clôture', `${fr(m.composite.valeur)} pts`, { premier: true }) : ''}
-              ${kpiSombre('Hausse / baisse / stable', `${m.hausses} / ${m.baisses} / ${m.stables}`, { premier: !m.composite })}
-              ${kpiSombre('Capitaux échangés', fcfa(m.capitaux_fcfa))}
-              ${m.ligne_lourde ? kpiSombre('Premier échangé', `${m.ligne_lourde.code} · ${fr(m.ligne_lourde.part_pct, 1)} %`) : ''}
-            </tr></table>
+          <td valign="top" style="padding-left:18px">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              ${kpiLigne(m.capitaux_estimes ? 'Capitaux échangés (estimés)' : 'Capitaux échangés', fcfa(m.capitaux_fcfa), { premier: true })}
+              ${m.transactions != null ? kpiLigne('Transactions', ent(m.transactions)) : ''}
+              ${m.ligne_lourde ? kpiLigne('Premier échangé', `${m.ligne_lourde.code} · ${fr(m.ligne_lourde.part_pct, 1)} %`) : ''}
+            </table>
           </td>
         </tr></table>
+        ${barreLargeur(m)}
       </td></tr>
     </table>
   </td></tr>`;
@@ -351,7 +482,7 @@ export function html(m, { avertissement = null } = {}) {
   const corpsPhare = phare
     ? `${phare.secteur ? `<p style="margin:0 0 8px"><span style="display:inline-block;padding:3px 9px;background:${C.creme};border:1px solid ${C.trait};font-family:${SANS};font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:${C.second}">${esc(phare.secteur)}</span></p>` : ''}
        <p style="margin:0 0 9px;font-family:${SERIF};font-size:18px;line-height:1.35;font-weight:700;color:${C.nuit}">${esc(phare.titre)}</p>
-       ${phare.resume ? `<p style="margin:0 0 13px;font-family:${SANS};font-size:13px;line-height:1.65;color:${C.second}">${esc(String(phare.resume).slice(0, 260))}</p>` : ''}
+       ${nettoyerResume(phare.resume) ? `<p style="margin:0 0 13px;font-family:${SANS};font-size:13px;line-height:1.65;color:${C.second}">${esc(nettoyerResume(phare.resume).slice(0, 260))}</p>` : ''}
        ${phare.source_url ? `<p style="margin:0"><a href="${esc(phare.source_url)}" style="font-family:${SANS};font-size:12.5px;font-weight:600;color:${C.nuit};text-decoration:none;border-bottom:2px solid ${C.turquoise};padding-bottom:1px">Lire l’analyse complète →</a></p>` : ''}`
     : /* AUCUN ARTICLE FABRIQUÉ : sans actualité, on donne les faits et on le dit. */
       `<p style="margin:0 0 11px;font-family:${SANS};font-size:12px;line-height:1.6;color:${C.faible}">Aucune actualité éditoriale n’est disponible pour cette séance. Voici ce que disent les chiffres.</p>
@@ -378,24 +509,16 @@ export function html(m, { avertissement = null } = {}) {
     </table>`
     : `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.faible}">Aucune autre actualité publiée sur la période.</p>`;
 
-  /* ── Chiffres clés : uniquement ce qui existe ── */
-  const clés = [
-    [fcfa(m.capitaux_fcfa), 'Capitaux échangés'],
-    [String(m.valeurs), 'Valeurs traitées'],
-    m.transactions != null ? [ent(m.transactions), 'Transactions'] : null,
-    m.ligne_lourde ? [`${fr(m.ligne_lourde.part_pct, 1)} %`, `Poids du premier échange (${m.ligne_lourde.code})`] : null,
-  ].filter(Boolean);
-
-  const corpsClés = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-    ${clés
-      .map(
-        ([v, k], i) => `<tr><td style="padding:${i === 0 ? '0' : '11px'} 0 11px;${i === 0 ? '' : `border-top:1px solid ${C.trait};`}">
-        <p style="margin:0;font-family:${SERIF};font-size:20px;font-weight:700;color:${C.nuit};line-height:1.2">${esc(v)}</p>
-        <p style="margin:3px 0 0;font-family:${SANS};font-size:11px;color:${C.faible}">${esc(k)}</p>
-      </td></tr>`,
-      )
-      .join('')}
-  </table>`;
+  /* ── Courbes et agenda (v2) : chacun absent faute de données ── */
+  const jour = courbeJour(m);
+  const agenda = blocAgenda(m);
+  const pleineLargeur = (titre, corps) => `<tr><td style="padding:12px 12px 0;background:${C.creme}">${carte(titre, corps)}</td></tr>`;
+  const blocCourbes = jour
+    ? rangee([
+        colonne(carte('La séance, relevé par relevé', jour)),
+        colonne(carte('Les 20 dernières séances', courbeIndice(m))),
+      ])
+    : pleineLargeur('Les 20 dernières séances du BRVM Composite', courbeIndice(m));
 
   /* ── Secteurs : une MESURE, jamais une explication ── */
   const secteurs = (m.secteurs ?? []).filter((s) => s.part_pct >= 1).slice(0, 4);
@@ -439,7 +562,7 @@ export function html(m, { avertissement = null } = {}) {
   <tr><td style="padding:18px 20px;background:${C.blanc};border:1px solid ${C.trait};border-bottom:none">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="font-family:${SERIF};font-size:22px;font-weight:700;letter-spacing:.04em;color:${C.nuit}">WESTBOURSE<span style="display:block;font-family:${SANS};font-size:8.5px;font-weight:600;letter-spacing:.22em;color:${C.or};padding-top:3px">INFORMER · ANALYSER · ÉCLAIRER</span></td>
-      <td style="text-align:right;font-family:${SANS};font-size:9px;line-height:1.6;letter-spacing:.12em;text-transform:uppercase;color:${C.faible};border-left:1px solid ${C.trait};padding-left:16px;width:150px">La référence<br>sur les marchés africains</td>
+      <td style="text-align:right;font-family:${SANS};font-size:11px;line-height:1.5;color:${C.faible};border-left:1px solid ${C.trait};padding-left:16px;width:160px">Bourse régionale<br>des valeurs mobilières</td>
     </tr></table>
   </td></tr>
 
@@ -447,27 +570,28 @@ export function html(m, { avertissement = null } = {}) {
   <tr><td style="padding:26px 20px 24px;background:${C.blanc};border:1px solid ${C.trait};border-top:none">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px"><tr>
       <td style="width:26px;height:2px;background:${C.or};font-size:0;line-height:0">&nbsp;</td>
-      <td style="padding-left:10px;font-family:${SANS};font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:${C.second}">Newsletter quotidienne</td>
+      <td style="padding-left:10px;font-family:${SANS};font-size:12px;font-weight:600;color:${C.second}">Brief de clôture</td>
     </tr></table>
     <p style="margin:0 0 10px;font-family:${SERIF};font-size:34px;line-height:1.12;font-weight:700;color:${C.nuit}">Séance du<br>${esc(m.date_fr)}</p>
-    <p style="margin:0;font-family:${SANS};font-size:13.5px;line-height:1.65;color:${C.second}">Toute l’actualité et les chiffres clés de la BRVM en un coup d’œil.</p>
+    <p style="margin:0;font-family:${SANS};font-size:14px;line-height:1.65;color:${C.second}">${esc(faits(m)[0] ?? 'Les chiffres de la séance de la BRVM.')}</p>
   </td></tr>
 
   ${bandeau}
 
-  ${rangee([
-    colonne(carte('Information phare du jour', corpsPhare), 'large'),
-    colonne(carte('Autres actualités du jour', corpsAutres), 'etroit'),
-  ])}
+  ${blocVotreSeance(perso)}
 
   ${rangee([
     colonne(carte('Les plus fortes hausses', tableauMouvements(hausses, maxH, true))),
     colonne(carte('Les plus fortes baisses', tableauMouvements(baisses, maxB, false))),
   ])}
 
+  ${blocCourbes}
+
+  ${agenda ? pleineLargeur('À l’agenda des prochains jours', agenda) : ''}
+
   ${rangee([
-    colonne(carte('Évolution de l’indice BRVM Composite', courbeIndice(m))),
-    colonne(carte('Chiffres clés de la séance', corpsClés)),
+    colonne(carte('Information phare du jour', corpsPhare), 'large'),
+    colonne(carte('Autres actualités du jour', corpsAutres), 'etroit'),
   ])}
 
   ${blocSecteurs}
@@ -490,7 +614,8 @@ export function html(m, { avertissement = null } = {}) {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
           <td valign="middle" style="font-family:${SERIF};font-size:15px;font-weight:700;letter-spacing:.04em;color:${C.blanc}">WESTBOURSE<span style="display:block;font-family:${SANS};font-size:8px;font-weight:600;letter-spacing:.16em;color:#6F869E;padding-top:3px">L’ACTUALITÉ DES MARCHÉS AFRICAINS</span></td>
           <td valign="middle" align="right">
-            <a href="${SITE}/#seance-${esc(m.seance)}" style="display:inline-block;padding:11px 22px;border:1px solid ${C.turquoise};border-radius:22px;font-family:${SANS};font-size:13px;font-weight:600;color:${C.turquoise};text-decoration:none">Voir la vidéo de la séance →</a>
+            <a href="${SITE}/#seance-${esc(m.seance)}" style="display:inline-block;margin:4px 0;padding:11px 20px;background:${C.turquoise};border-radius:22px;font-family:${SANS};font-size:13px;font-weight:600;color:${C.nuit};text-decoration:none">Voir la vidéo de la séance</a>
+            <a href="${SITE}/actions" style="display:inline-block;margin:4px 0 4px 6px;padding:10px 18px;border:1px solid ${C.turquoise};border-radius:22px;font-family:${SANS};font-size:13px;font-weight:600;color:${C.turquoise};text-decoration:none">Rejouer la séance</a>
           </td>
         </tr></table>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;border-top:1px solid #1D3A5C"><tr><td style="padding-top:13px">
