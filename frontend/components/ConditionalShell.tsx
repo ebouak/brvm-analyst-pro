@@ -9,6 +9,7 @@ import ContactNudge from '@/components/contact/ContactNudge';
 import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
 import GeoCompte from '@/components/crm/GeoCompte';
 import FilAriane, { FilArianeProvider } from '@/components/nav/FilAriane';
+import AlertesEnDirect from '@/components/alertes/AlertesEnDirect';
 
 /** Routes publiques (landing + auth) : sans encart ni fil applicatifs. */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -154,6 +155,9 @@ export default function ConditionalShell({
       </main>
       {barre && <BottomNav />}
       {showNudge && <ContactNudge />}
+      {/* Vos alertes de prix, vues en direct dans la page (en séance, compte
+          connecté, alerte de prix active ; sinon rien, aucune connexion). */}
+      {connecte && <AlertesEnDirect />}
     </div>
     </FilArianeProvider>
   );

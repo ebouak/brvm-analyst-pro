@@ -338,6 +338,36 @@ export async function insertIntradaySnapshots(snapshot: MarketSnapshot): Promise
   return rows.length;
 }
 
+/**
+ * Lignes de relevé des INDICES pour une capture (pur, testé). Un indice sans
+ * valeur publiée n'est pas relevé : un trou n'est pas un point de courbe.
+ */
+export function lignesReleveIndices(snapshot: Pick<MarketSnapshot, 'indices' | 'date_marche'>) {
+  return snapshot.indices
+    .filter((i) => i.valeur != null && Number.isFinite(i.valeur))
+    .map((i) => ({
+      code: i.code,
+      date_marche: snapshot.date_marche,
+      valeur: i.valeur,
+      variation_pct: i.variation_pct ?? null,
+    }));
+}
+
+/**
+ * Historise les indices d'une capture intraday : AJOUTE une ligne par indice
+ * dans brvm_indices_snapshots (migration 0256), horodatée à `now()`. Même
+ * principe que insertIntradaySnapshots : brvm_indices_daily est écrasée à
+ * chaque passage, cette table garde la courbe du jour.
+ */
+export async function insertIndexSnapshots(snapshot: MarketSnapshot): Promise<number> {
+  const rows = lignesReleveIndices(snapshot);
+  if (rows.length === 0) return 0;
+  const sb = getSupabase();
+  const { error } = await sb.from('brvm_indices_snapshots').insert(rows);
+  if (error) throw new Error(`insert brvm_indices_snapshots: ${error.message}`);
+  return rows.length;
+}
+
 export async function upsertObligations(snapshot: MarketSnapshot): Promise<number>;
 export async function upsertObligations(obligations: Array<{
   code: string;

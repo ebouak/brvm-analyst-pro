@@ -4,8 +4,11 @@ import { useMemo, type ReactNode } from 'react';
 import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
 import { fmtNumber, fmtPctSigne } from '@/lib/format';
 import { pctFr } from '@/lib/fiche/affichage';
-import { FlashValue } from '@/components/ui/FlashValue';
+import type { PointCourbe } from '@/lib/realtime/courbe';
+import { FlashFort } from '@/components/ui/FlashFort';
+import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
 import { EnDirect } from '@/components/ui/EnDirect';
+import CourbeDuJour from '@/components/marche/CourbeDuJour';
 
 /**
  * Cours d'UNE valeur suivi en direct pendant la séance (fiche action, fiche
@@ -19,8 +22,8 @@ function useCoursValeur(code: string, dateMarche: string | null, cours: number |
   return { cours: l.cours_jour, variation: l.variation_pct, flash: flashes[code], enDirect, derniereMaj };
 }
 
-/** Bloc « prix principal » de la fiche action. */
-export function PrixFicheAction({ code, dateMarche, cours, variation, coursPrecedent, apres }: {
+/** Bloc « prix principal » de la fiche action, avec la courbe du jour. */
+export function PrixFicheAction({ code, dateMarche, cours, variation, coursPrecedent, apres, courbe = [] }: {
   code: string;
   dateMarche: string | null;
   cours: number | null;
@@ -29,15 +32,24 @@ export function PrixFicheAction({ code, dateMarche, cours, variation, coursPrece
   coursPrecedent: number | null;
   /** Ligne « Séance du … » et badge de fraîcheur, rendus par le serveur. */
   apres?: ReactNode;
+  /** Relevés de la séance (brvm_intraday_snapshots), déjà réduits en points. */
+  courbe?: PointCourbe[];
 }) {
   const v = useCoursValeur(code, dateMarche, cours, variation);
   const varAbs = coursPrecedent != null && v.cours != null ? v.cours - coursPrecedent : null;
   const up = (v.variation ?? 0) >= 0;
+  // Un cours reçu en direct prolonge la courbe ; jamais hors séance.
+  const direct = useMemo(
+    () => (v.enDirect && v.derniereMaj && v.cours != null ? { t: v.derniereMaj.getTime(), v: v.cours } : null),
+    [v.enDirect, v.derniereMaj, v.cours],
+  );
   return (
     <>
       <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-1.5">
         <span className="tabular font-mono text-4xl md:text-5xl font-bold tracking-tight text-ivory leading-none">
-          <FlashValue direction={v.flash}>{fmtNumber(v.cours)}</FlashValue>
+          <FlashFort direction={v.flash}>
+            <ChiffreRoulant valeur={v.cours} format={(x) => fmtNumber(x)} />
+          </FlashFort>
         </span>
         <span className="text-muted text-base mb-1">FCFA</span>
         {varAbs != null && (
@@ -53,6 +65,15 @@ export function PrixFicheAction({ code, dateMarche, cours, variation, coursPrece
         {apres}
         <EnDirect enDirect={v.enDirect} derniereMaj={v.derniereMaj} />
       </div>
+      <CourbeDuJour
+        points={courbe}
+        reference={coursPrecedent}
+        libelleReference="clôture veille"
+        direct={direct}
+        libelle={`Cours de ${code}`}
+        unite="FCFA"
+        className="mt-3 max-w-md"
+      />
     </>
   );
 }
@@ -71,7 +92,10 @@ export function PrixFicheSociete({ code, dateMarche, cours, variation, seance }:
   return (
     <div className="text-right">
       <p className="tabular text-2xl text-ivory">
-        <FlashValue direction={v.flash}>{fmtNumber(v.cours)}</FlashValue> <span className="text-sm text-muted">FCFA</span>
+        <FlashFort direction={v.flash}>
+          <ChiffreRoulant valeur={v.cours} format={(x) => fmtNumber(x)} />
+        </FlashFort>{' '}
+        <span className="text-sm text-muted">FCFA</span>
       </p>
       <p className="text-sm text-faint">
         {v.variation != null && (

@@ -80,6 +80,7 @@ import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa, fmtDateCourte, fmtPctAbs } from '@/lib/format';
 import { PrixFicheAction } from '@/components/marche/CoursValeurDirect';
+import { pointsDuJour } from '@/lib/realtime/courbe';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
 import { analyzeMovingAverages } from '@/lib/movingAverages';
 import { loadSectorBreadth } from '@/lib/movingAverages/server';
@@ -466,6 +467,17 @@ async function FicheAction(props: PropsFiche) {
   const last    = rows[rows.length - 1]!;
   const prev    = rows[rows.length - 2] ?? null;
   const up      = (last.variation_pct ?? 0) >= 0;
+
+  // Courbe du jour : les relevés réels de la séance (≤ 30, lecture publique).
+  const { data: relevesValeur } = await createPublicClient()
+    .from('brvm_intraday_snapshots')
+    .select('captured_at, close')
+    .eq('code', code)
+    .eq('date_marche', last.date_marche)
+    .order('captured_at', { ascending: true });
+  const courbeJour = pointsDuJour(
+    ((relevesValeur ?? []) as { captured_at: string; close: number | null }[]).map((r) => ({ captured_at: r.captured_at, valeur: r.close })),
+  );
 
   // Fraîcheur des cours : dernière collecte intraday + dernière séance en base.
   const fInputs = await pFraicheur;
@@ -1212,6 +1224,7 @@ async function FicheAction(props: PropsFiche) {
                   cours={last.cours_jour}
                   variation={last.variation_pct}
                   coursPrecedent={last.cours_precedent ?? null}
+                  courbe={courbeJour}
                   apres={
                     <>
                       <p className="text-[11px] text-faint">

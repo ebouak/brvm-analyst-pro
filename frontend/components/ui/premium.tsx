@@ -87,7 +87,8 @@ export function MetricCard({
   accent = 'neutral',
 }: {
   label: string;
-  value: string;
+  /** Texte, ou un nœud (chiffres qui roulent) : la carte l'affiche tel quel. */
+  value: ReactNode;
   delta?: string;
   deltaDir?: 'up' | 'down' | 'flat';
   unit?: string;

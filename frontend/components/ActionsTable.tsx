@@ -4,7 +4,7 @@ import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
-import { FlashValue } from '@/components/ui/FlashValue';
+import { FlashFort } from '@/components/ui/FlashFort';
 import { EnDirect } from '@/components/ui/EnDirect';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
@@ -370,7 +370,12 @@ export default function ActionsTable({
         {rows.map((a) => {
           const sig = showMetrics ? signals[a.code] : undefined;
           return (
-            <motion.li key={a.code} layout={glisse} transition={transitionLigne}>
+            <motion.li
+              key={a.code}
+              layout={glisse}
+              transition={transitionLigne}
+              className={flashes[a.code] ? `ligne-flash-${flashes[a.code]}` : undefined}
+            >
               <Link
                 href={`/actions/${a.code}`}
                 className={`flex items-center gap-3 px-4 py-3 min-h-[56px] hover:bg-white/[0.02] ${FOCUS} focus-visible:ring-inset ${EASE}`}
@@ -389,7 +394,7 @@ export default function ActionsTable({
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="tabular text-ivory font-medium"><FlashValue direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashValue> <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
+                  <div className="tabular text-ivory font-medium"><FlashFort direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort> <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
                   <div className={`tabular text-sm font-medium ${tonVariation(a.variation_pct)}`}>
                     <Variation v={a.variation_pct} />
                   </div>
@@ -452,7 +457,8 @@ export default function ActionsTable({
                   key={a.code}
                   layout={glisse}
                   transition={transitionLigne}
-                  className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group`}
+                  // Ligne balayée par la couleur du mouvement (direct ou rejeu).
+                  className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group ${flashes[a.code] ? `ligne-flash-${flashes[a.code]}` : ''}`}
                 >
                   {/* ── Code + Désignation ─────────────────────────────── */}
                   <td className="px-4 py-3">
@@ -483,7 +489,7 @@ export default function ActionsTable({
 
                   {/* ── Cours ─────────────────────────────────────────── */}
                   <td className="px-4 py-3 text-right tabular text-ivory font-medium">
-                    <FlashValue direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashValue>
+                    <FlashFort direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort>
                   </td>
 
                   {/* ── Variation % ───────────────────────────────────── */}

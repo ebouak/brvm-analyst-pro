@@ -5,7 +5,8 @@ import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
 import type { FlashDirection } from '@/lib/realtime/mergeActions';
 import { valoriser, type PositionValorisable } from '@/lib/portfolio/valoriserDirect';
 import { fmtNumber, fmtFcfa, fmtDateCourte } from '@/lib/format';
-import { FlashValue } from '@/components/ui/FlashValue';
+import { FlashFort } from '@/components/ui/FlashFort';
+import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
 import { EnDirect } from '@/components/ui/EnDirect';
 import { MetricCard } from '@/components/ui/premium';
 
@@ -27,7 +28,13 @@ interface Etat {
 
 const Ctx = createContext<Etat | null>(null);
 
-export interface CoursDepart { code: string; cours_jour: number | null; variation_pct: number | null }
+export interface CoursDepart {
+  code: string;
+  cours_jour: number | null;
+  variation_pct: number | null;
+  /** Clôture de la veille : référence de la courbe « aujourd'hui ». */
+  cours_precedent?: number | null;
+}
 
 export function CoursDirectProvider({ cours, dateMarche, children }: {
   cours: CoursDepart[];
@@ -52,10 +59,12 @@ export function CoursDirectProvider({ cours, dateMarche, children }: {
 
 const VIDE: Etat = { prix: {}, flashes: {}, recus: new Set(), enDirect: false, derniereMaj: null, dateMarche: null };
 const useEtat = () => useContext(Ctx) ?? VIDE;
+/** Cours en direct du portefeuille, pour les blocs qui en dérivent (courbe du jour). */
+export const useCoursDirect = useEtat;
 
 export function CoursPosition({ code }: { code: string }) {
   const { prix, flashes } = useEtat();
-  return <FlashValue direction={flashes[code]}>{fmtNumber(prix[code] ?? null)}</FlashValue>;
+  return <FlashFort direction={flashes[code]}>{fmtNumber(prix[code] ?? null)}</FlashFort>;
 }
 
 export function DateCoursPosition({ code, dateServeur }: { code: string; dateServeur: string | null }) {
@@ -85,7 +94,7 @@ export function KpiValorisation({ positions, liquidites }: { positions: Position
   return (
     <MetricCard
       label="Valorisation totale"
-      value={fmtFcfa(v.totalValue)}
+      value={<ChiffreRoulant valeur={v.totalValue} format={fmtFcfa} />}
       unit="FCFA"
       delta={liquidites != null ? `dont ${fmtFcfa(liquidites)} cash` : 'actions uniquement'}
       deltaDir="flat"
@@ -101,7 +110,7 @@ export function KpiPnl({ positions }: { positions: PositionValorisable[] }) {
   return (
     <MetricCard
       label="P&L latent"
-      value={`${v.totalPnl >= 0 ? '+' : ''}${fmtFcfa(v.totalPnl)}`}
+      value={<ChiffreRoulant valeur={v.totalPnl} format={(x) => `${x >= 0 ? '+' : ''}${fmtFcfa(x)}`} />}
       unit="FCFA"
       delta={v.totalPnlPct != null ? `${v.totalPnlPct >= 0 ? '+' : ''}${(v.totalPnlPct * 100).toFixed(1)}% / coût` : undefined}
       deltaDir={dir}

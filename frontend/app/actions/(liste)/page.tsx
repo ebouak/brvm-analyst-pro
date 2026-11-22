@@ -3,6 +3,8 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
+import { RejeuProvider } from '@/components/rejeu/RejeuProvider';
+import { LecteurSeance } from '@/components/rejeu/LecteurSeance';
 import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { EmptyStatePremium, PremiumPanel, PremiumCTA } from '@/components/ui/premium';
@@ -173,16 +175,20 @@ export default async function ActionsPage(props: { searchParams?: Promise<{ sect
         premier
       />
       <div className="mt-6">
-        <PremiumPanel>
-          <ActionsTable
-            actions={actions}
-            signals={signals}
-            sparklines={sparklines}
-            initialSecteur={initialSecteur}
-            showMetrics={gate.allowed}
-            dateMarche={lastDate}
-          />
-        </PremiumPanel>
+        {/* Rejeu de la séance : la cote rejoue les vrais relevés de la journée. */}
+        <RejeuProvider dateMarche={lastDate}>
+          <LecteurSeance className="mb-3" />
+          <PremiumPanel>
+            <ActionsTable
+              actions={actions}
+              signals={signals}
+              sparklines={sparklines}
+              initialSecteur={initialSecteur}
+              showMetrics={gate.allowed}
+              dateMarche={lastDate}
+            />
+          </PremiumPanel>
+        </RejeuProvider>
         {/* Pied de cote : d'où viennent les chiffres et ce qu'ils mesurent.
             Pas « cours de clôture » : en séance, la ligne du jour est mise à
             jour par la collecte intraday et n'est pas encore une clôture. */}

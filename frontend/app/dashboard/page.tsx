@@ -25,6 +25,11 @@ import { GrilleInterne, Cellule, Bloc, TeteBloc } from '@/components/dashboard/s
 import Trajectoire from '@/components/dashboard/surface/Trajectoire';
 import LargeurMoteur from '@/components/dashboard/surface/LargeurMoteur';
 import MouvementsSeance from '@/components/dashboard/surface/MouvementsSeance';
+import BandeauOuverture from '@/components/dashboard/surface/BandeauOuverture';
+import { RejeuProvider } from '@/components/rejeu/RejeuProvider';
+import { LecteurSeance } from '@/components/rejeu/LecteurSeance';
+import { pointsDuJour } from '@/lib/realtime/courbe';
+import { veilleDepuisVariation } from '@/lib/realtime/rejeu';
 import Secteurs from '@/components/dashboard/surface/Secteurs';
 import SignauxRecents from '@/components/dashboard/surface/SignauxRecents';
 import type { NoteSeance } from '@/lib/dashboard/signauxProches';
@@ -405,6 +410,37 @@ export default async function Dashboard() {
   const varCap = summary?.capitalisation_actions != null && summaryPrev?.capitalisation_actions ? (summary.capitalisation_actions / summaryPrev.capitalisation_actions - 1) * 100 : null;
   const varValeur = summary?.valeur_transactions != null && summaryPrev?.valeur_transactions ? (summary.valeur_transactions / summaryPrev.valeur_transactions - 1) * 100 : null;
   const titresEchanges = actions.reduce((t, a) => t + (a.volume ?? 0), 0);
+
+  // Courbes du jour des trois indices : relevés réels de la séance (0256).
+  // Absentes tant qu'il n'y a pas deux relevés (avant la première séance
+  // collectée) : rien n'est reconstitué.
+  const CODES_INDICES = ['BRVMC', 'BRVM30', 'BRVMPRES'] as const;
+  const { data: relevesIndices } = await createPublicClient()
+    .from('brvm_indices_snapshots')
+    .select('code, captured_at, valeur')
+    .eq('date_marche', lastDate)
+    .in('code', [...CODES_INDICES])
+    .order('captured_at', { ascending: true });
+  const lignesIdx = (relevesIndices ?? []) as { code: string; captured_at: string; valeur: number | null }[];
+  const courbesIndices = Object.fromEntries(
+    CODES_INDICES.map((c) => [c, pointsDuJour(lignesIdx.filter((r) => r.code === c))]),
+  );
+  const veilleIndice = (i: IndiceDaily | undefined) =>
+    i ? (i.valeur_precedente ?? veilleDepuisVariation(i.valeur, i.variation_pct)) : null;
+  const veillesIndices = { BRVMC: veilleIndice(brvmcJour), BRVM30: veilleIndice(b30), BRVMPRES: veilleIndice(prestige) };
+
+  // Bilan animé, une fois la séance terminée (indication d'horaire).
+  const variationsSeance = actions.filter((a) => a.date_marche === lastDate).map((a) => a.variation_pct).filter((v): v is number => v != null && Number.isFinite(v));
+  const bilan = seanceClose
+    ? {
+        composite: metriques.composite,
+        hausses: metriques.hausses,
+        baisses: metriques.baisses,
+        inchangees: variationsSeance.length > 0 ? variationsSeance.filter((v) => v === 0).length : null,
+        valeurEchangee: summary?.valeur_transactions ?? null,
+      }
+    : null;
+
   const chiffres: Chiffre[] = [
     { libelle: 'BRVM Composite', valeur: fmtIndice(brvmcJour?.valeur ?? null), variation: brvmcJour?.variation_pct ?? null, indice: 'BRVMC' },
     { libelle: 'BRVM 30', valeur: fmtIndice(b30?.valeur ?? null), variation: b30?.variation_pct ?? null, indice: 'BRVM30' },
@@ -441,6 +477,9 @@ export default async function Dashboard() {
         indices={[brvmcJour, b30, prestige]
           .filter((i): i is IndiceDaily => i != null)
           .map((i) => ({ code: i.code, valeur: i.valeur, variation_pct: i.variation_pct }))}
+        courbes={courbesIndices}
+        veilles={veillesIndices}
+        bilan={bilan}
       />
     ),
     seance: (
@@ -454,7 +493,7 @@ export default async function Dashboard() {
     indices: (
       <GrilleInterne>
         <MouvementsSeance
-          actions={actions.map((a) => ({ code: a.code, designation: a.designation, cours_jour: a.cours_jour, variation_pct: a.variation_pct }))}
+          actions={actions.map((a) => ({ code: a.code, designation: a.designation, cours_jour: a.cours_jour, variation_pct: a.variation_pct, cours_precedent: a.cours_precedent }))}
           sparklines={sparklines}
           dateMarche={lastDate}
         />
@@ -575,7 +614,15 @@ export default async function Dashboard() {
           </Link>
         )}
 
+        {/* « La séance est ouverte » : une fois par jour, en séance seulement. */}
+        <BandeauOuverture />
+
         <MacroBanner />
+
+        {/* Rejeu de la séance : tout widget qui lit les cours en direct
+            (mouvements, cote) rejoue les vrais relevés de la journée. */}
+        <RejeuProvider dateMarche={lastDate}>
+        <LecteurSeance />
 
         {/* ── Widgets configurables, par rangées (spec §4.0) ──
             « Le marché aujourd'hui » n'est pas un widget du layout : il est posé
@@ -613,6 +660,7 @@ export default async function Dashboard() {
             ));
           })()}
         </div>
+        </RejeuProvider>
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-6">
