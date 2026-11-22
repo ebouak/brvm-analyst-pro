@@ -10,7 +10,10 @@ import type { FragmentPdf } from '../carnet/parse.js';
 export async function fragmentsDesPages(pdf: Uint8Array): Promise<FragmentPdf[][]> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   // pdfjs détache le tampon qu'on lui passe : on lui en donne une copie.
-  const doc = await pdfjs.getDocument({ data: pdf.slice(), useSystemFonts: true }).promise;
+  // On garde la tâche de chargement : c'est elle qu'on libère (pdfjs 6 a retiré
+  // `destroy` du document ; la tâche l'a dans toutes les versions).
+  const tache = pdfjs.getDocument({ data: pdf.slice(), useSystemFonts: true });
+  const doc = await tache.promise;
   const pages: FragmentPdf[][] = [];
   for (let n = 1; n <= doc.numPages; n++) {
     const contenu = await (await doc.getPage(n)).getTextContent();
@@ -27,6 +30,6 @@ export async function fragmentsDesPages(pdf: Uint8Array): Promise<FragmentPdf[][
         })),
     );
   }
-  await doc.destroy();
+  await tache.destroy();
   return pages;
 }
