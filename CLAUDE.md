@@ -1686,6 +1686,14 @@ pas touchée** : ni `components/landing`, ni `components/vitrine`, ni
   (valorisation, plus-value, variation du portefeuille) : en faire un
   spectacle pousse à réagir (revue Fable du 2026-11-22). Le roulement est
   réservé aux données de MARCHÉ (cours, indices, bilan de séance).
+- **Brief du soir v2** (`video/brief.mjs`, `video/briefDonnees.mjs` pur et
+  testé) : bandeau sans anneaux vides + barre de largeur du marché ; « Votre
+  séance » (Premium + `recap_soir` + positions : même périmètre que la pièce
+  jointe, calculé à l'envoi, jamais stocké) ; courbe du jour du Composite
+  (dès 3 relevés de 0256) ; agenda 7 jours (dividendes fiables : montant > 0
+  ET exercice connu, montant NET ; AG listées par le dernier bulletin) ;
+  résumés de mur payant écartés (`nettoyerResume`). Tout est figé dans
+  `seance.json` par `genere.mjs` : le brief et l'envoi ne relisent pas la base.
 
 
 ## 9. Bugs connus / limites
