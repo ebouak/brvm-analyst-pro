@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic, parseBrvmResumeIndices } from './brvmPublic.js';
-import { ensureIndexInstruments, ensureActionInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots } from '../persistence/repository.js';
+import { ensureIndexInstruments, ensureActionInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots, insertIndexSnapshots } from '../persistence/repository.js';
 import { getSupabase } from '../persistence/supabase.js';
 import { memeSeanceQuePrecedente, type LigneComparable } from './preuveDeSeance.js';
 import type { IndiceRow } from '../types.js';
@@ -127,7 +127,17 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
     } catch (err) {
       logger.warn({ err: (err as Error).message }, 'intraday : historisation snapshots échouée');
     }
-    if (snapshot.indices.length > 0) await upsertIndices(snapshot);
+    if (snapshot.indices.length > 0) {
+      await upsertIndices(snapshot);
+      // Relevé des indices pour leur courbe du jour (0256). Non bloquant, comme
+      // les relevés d'actions : un échec ne doit pas casser la collecte.
+      try {
+        const nbIdx = await insertIndexSnapshots(snapshot);
+        logger.info({ nbIdx }, 'intraday : relevés d’indices historisés');
+      } catch (err) {
+        logger.warn({ err: (err as Error).message }, 'intraday : historisation des indices échouée');
+      }
+    }
     nbSummary = await upsertMarketSummary(snapshot);
   }
   logger.info(

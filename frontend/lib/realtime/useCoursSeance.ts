@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { estEnSeance } from '@/lib/freshness';
 import { useRealtimeActions } from './useRealtimeActions';
 import { recomposer } from './recomposer';
+import { lignesAuMoment, veillesDe } from './rejeu';
+import { useRejeu } from '@/components/rejeu/RejeuProvider';
 import type { FlashDirection, RealtimeActionRow } from './mergeActions';
 
 /**
@@ -14,19 +16,24 @@ import type { FlashDirection, RealtimeActionRow } from './mergeActions';
  * - Ne touche jamais aux champs serveur des lignes (voir `recomposer`).
  * - Sans `dateMarche`, ou en cas d'échec d'abonnement, les lignes de départ
  *   restent affichées telles quelles.
+ * - Dans un RejeuProvider en cours de lecture, les lignes sont celles du
+ *   relevé rejoué (`lignesAuMoment`) : la page rejoue sans rien savoir du
+ *   rejeu. `enRejeu` le signale ; `enDirect` est alors faux.
  *
  * `base` doit être une référence stable (useMemo côté appelant), sinon
  * `useRealtimeActions` se resynchronise à chaque rendu.
  */
-export function useCoursSeance<T extends RealtimeActionRow>(
+export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?: number | null }>(
   base: T[],
   dateMarche: string | null,
 ): {
   rows: T[];
   flashes: Record<string, FlashDirection>;
-  /** Vrai pendant la séance, quand l'abonnement est ouvert. */
+  /** Vrai pendant la séance, quand l'abonnement est ouvert (et hors rejeu). */
   enDirect: boolean;
-  /** Instant de la dernière mise à jour reçue ; null tant que rien n'est arrivé. */
+  /** Vrai pendant un rejeu de séance. */
+  enRejeu: boolean;
+  /** Instant de la dernière mise à jour reçue (ou du relevé rejoué). */
   derniereMaj: Date | null;
 } {
   // Faux au premier rendu (serveur compris) : pas d'écart d'hydratation.
@@ -50,5 +57,14 @@ export function useCoursSeance<T extends RealtimeActionRow>(
     if (recus !== base) setDerniereMaj(new Date());
   }, [recus, base]);
 
-  return { rows, flashes, enDirect, derniereMaj };
+  // Rejeu de séance : l'image courante remplace les cours, rien d'autre.
+  const rejeu = useRejeu();
+  const veilles = useMemo(() => veillesDe(base), [base]);
+  const image = rejeu?.actif ? rejeu.image : null;
+  const rowsRejeu = useMemo(() => (image ? lignesAuMoment(base, image, veilles) : null), [image, base, veilles]);
+
+  if (rowsRejeu && image && rejeu) {
+    return { rows: rowsRejeu, flashes: rejeu.directions, enDirect: false, enRejeu: true, derniereMaj: new Date(image.t) };
+  }
+  return { rows, flashes, enDirect, enRejeu: false, derniereMaj };
 }

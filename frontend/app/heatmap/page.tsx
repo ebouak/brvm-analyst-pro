@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import HeatmapViews, { SecteurSelect } from '@/components/HeatmapViews';
+import { RejeuProvider } from '@/components/rejeu/RejeuProvider';
+import { LecteurSeance } from '@/components/rejeu/LecteurSeance';
 import brvmLogos from '@/lib/brvmLogos.json';
 import { loadHeatmap } from '@/lib/heatmapData';
 import { VAR_PLEINE } from '@/lib/heatmap';
@@ -208,15 +210,21 @@ export default async function HeatmapPage(props: PageProps) {
                     action={{ href: '/heatmap', label: 'Voir tous les secteurs' }}
                   />
                 ) : (
-                  <PremiumPanel>
-                    <div className="p-3 sm:p-4 min-h-[420px]">
-                      <HeatmapViews
-                        rows={rows}
-                        logos={brvmLogos as Record<string, string>}
-                        legende={<LegendeVariation />}
-                      />
-                    </div>
-                  </PremiumPanel>
+                  // Rejeu de la séance : les tuiles changent de teinte au fil des
+                  // vrais relevés de la journée ; en séance, elles suivent le direct.
+                  <RejeuProvider dateMarche={lastDate}>
+                    <LecteurSeance className="mb-3" />
+                    <PremiumPanel>
+                      <div className="p-3 sm:p-4 min-h-[420px]">
+                        <HeatmapViews
+                          rows={rows}
+                          logos={brvmLogos as Record<string, string>}
+                          legende={<LegendeVariation />}
+                          dateMarche={lastDate}
+                        />
+                      </div>
+                    </PremiumPanel>
+                  </RejeuProvider>
                 )}
               </div>
 

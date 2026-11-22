@@ -10,6 +10,8 @@ export interface CoursMouvement {
   designation: string | null;
   cours_jour: number | null;
   variation_pct: number | null;
+  /** Clôture de la veille : sert au rejeu de la séance. */
+  cours_precedent?: number | null;
 }
 
 /**

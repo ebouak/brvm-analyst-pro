@@ -7,6 +7,7 @@ import HeatmapTreemap from '@/components/HeatmapTreemap';
 import type { ColorFilter } from '@/components/HeatmapTreemap';
 import HeatmapGrid from '@/components/HeatmapGrid';
 import type { HeatmapNode } from '@/lib/heatmap';
+import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
 
 type View = 'treemap' | 'grid';
 
@@ -18,6 +19,12 @@ interface Props {
    * Sans elle, une phrase sous la cartographie explique taille et couleur.
    */
   legende?: ReactNode;
+  /**
+   * Séance affichée. Fournie, la carte suit les cours en direct pendant la
+   * séance et rejoue les relevés dans un RejeuProvider. Absente (page
+   * publique /apercu), la carte reste telle que le serveur l'a rendue.
+   */
+  dateMarche?: string | null;
 }
 
 /** Point de rupture `md` de Tailwind (768 px). */
@@ -82,7 +89,10 @@ const GROUPE = 'inline-flex gap-0.5 rounded-lg border border-border bg-sunken p-
  * qu'on ne demande pas la cartographie). Les deux conteneurs gardent leur place
  * dans l'arbre : la vue visible n'est jamais remontée.
  */
-export default function HeatmapViews({ rows, logos = {}, legende }: Props) {
+export default function HeatmapViews({ rows: rowsServeur, logos = {}, legende, dateMarche = null }: Props) {
+  // Direct pendant la séance, rejeu dans un RejeuProvider ; sinon les lignes
+  // du serveur, inchangées.
+  const { rows } = useCoursSeance(rowsServeur, dateMarche);
   const isMd = useIsMd();
   const [choix, setChoix] = useState<View | null>(null);
   const [colorFilter, setColorFilter] = useState<ColorFilter>('all');

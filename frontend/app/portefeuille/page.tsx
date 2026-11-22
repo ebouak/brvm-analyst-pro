@@ -16,6 +16,8 @@ import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
 import PositionRowActions from '@/components/PositionRowActions';
 import RecapBouton from '@/components/portfolio/RecapBouton';
 import { valoriser } from '@/lib/portfolio/valoriserDirect';
+import { fetchAllRows } from '@/lib/supabase/paginate';
+import PortefeuilleDuJour from '@/components/portfolio/PortefeuilleDuJour';
 import {
   CoursDirectProvider, CoursPosition, DateCoursPosition, ValeurPosition, PnlPosition,
   KpiValorisation, KpiPnl, EnDirectPortefeuille, TotalValeur, TotalPnl,
@@ -102,16 +104,20 @@ async function getData(activeWlId?: string) {
   const codes = [...new Set([...pos.map((p) => p.code), ...items.map((i) => i.code)])];
   const lastPrice: Record<string, number | null> = {};
   const lastPriceDate: Record<string, string | null> = {};
+  // Clôture de la veille de la dernière ligne : référence de « votre
+  // portefeuille aujourd'hui ».
+  const lastPrecedent: Record<string, number | null> = {};
   if (codes.length > 0) {
     const { data: quotes } = await supabase
       .from('brvm_actions_daily')
-      .select('code, cours_jour, date_marche')
+      .select('code, cours_jour, cours_precedent, date_marche')
       .in('code', codes)
       .order('date_marche', { ascending: false });
-    for (const q of (quotes ?? []) as { code: string; cours_jour: number | null; date_marche: string }[]) {
+    for (const q of (quotes ?? []) as { code: string; cours_jour: number | null; cours_precedent: number | null; date_marche: string }[]) {
       if (!(q.code in lastPrice)) {
         lastPrice[q.code] = q.cours_jour;
         lastPriceDate[q.code] = q.date_marche;
+        lastPrecedent[q.code] = q.cours_precedent;
       }
     }
   }
@@ -146,7 +152,23 @@ async function getData(activeWlId?: string) {
     if (pts.length >= 2) sparklines[code] = pts;
   }
 
-  return { email: user.email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList };
+  // Relevés de la dernière séance pour les valeurs détenues : courbe
+  // « votre portefeuille aujourd'hui » (lecture publique, ≤ 30 par valeur).
+  const equityCodes = [...new Set(pos.filter((p) => p.code !== 'LIQUIDITES').map((p) => p.code))];
+  const derniereSeance = Object.values(lastPriceDate).filter((d): d is string => !!d).sort().at(-1) ?? null;
+  const relevesJour = derniereSeance && equityCodes.length > 0
+    ? await fetchAllRows<{ code: string; captured_at: string; close: number | null; volume: number | null }>((from, to) =>
+        supabase
+          .from('brvm_intraday_snapshots')
+          .select('code, captured_at, close, volume')
+          .eq('date_marche', derniereSeance)
+          .in('code', equityCodes)
+          .order('captured_at', { ascending: true })
+          .range(from, to),
+      )
+    : [];
+
+  return { email: user.email, pos, items, lastPrice, lastPriceDate, lastPrecedent, relevesJour, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList };
 }
 
 export default async function PortefeuillePage(
@@ -155,7 +177,7 @@ export default async function PortefeuillePage(
   }
 ) {
   const searchParams = await props.searchParams;
-  const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList } = await getData(searchParams?.wl);
+  const { email, pos, items, lastPrice, lastPriceDate, lastPrecedent, relevesJour, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList } = await getData(searchParams?.wl);
 
   // Liquidités stockées comme position spéciale ; séparées des actions.
   const liqPos = pos.find((p) => p.code === 'LIQUIDITES') ?? null;
@@ -176,8 +198,17 @@ export default async function PortefeuillePage(
 
   // Cours en direct : seule la séance la plus récente des positions est écoutée.
   const positionsDirect = equityPos.map((p) => ({ code: p.code, quantite: p.quantite, prix_entree: p.prix_entree }));
-  const coursDepart = equityPos.map((p) => ({ code: p.code, cours_jour: lastPrice[p.code] ?? null, variation_pct: null }));
+  const coursDepart = equityPos.map((p) => ({ code: p.code, cours_jour: lastPrice[p.code] ?? null, variation_pct: null, cours_precedent: lastPrecedent[p.code] ?? null }));
   const dateMarcheDirect = Object.values(lastPriceDate).filter((d): d is string => !!d).sort().at(-1) ?? null;
+  // Clôture de la veille par valeur : celle de la ligne de la séance ; une
+  // valeur dont le dernier cours est plus ancien n'a pas bougé aujourd'hui.
+  const veillesJour: Record<string, number | null> = Object.fromEntries(
+    equityPos.map((p) => [
+      p.code,
+      lastPriceDate[p.code] === dateMarcheDirect ? (lastPrecedent[p.code] ?? null) : (lastPrice[p.code] ?? null),
+    ]),
+  );
+  const positionsJour = equityPos.map((p) => ({ code: p.code, quantite: p.quantite }));
 
   // Répartition sectorielle
   const sectorRows = sectorBreakdown([
@@ -286,6 +317,11 @@ export default async function PortefeuillePage(
               />
             )}
           </div>
+
+          {/* ── Votre portefeuille aujourd'hui : variation du jour + courbe ── */}
+          {positionsJour.length > 0 && (
+            <PortefeuilleDuJour positions={positionsJour} releves={relevesJour} veilles={veillesJour} />
+          )}
 
           {/* ── KPI d'analyse (si positions) ─────────────────────────────── */}
           {nbLignes > 0 && (

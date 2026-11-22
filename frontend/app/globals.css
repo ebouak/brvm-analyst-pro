@@ -766,3 +766,84 @@ body::after {
   :root:has(#barre-de-cote[data-compacte]) { --barre-h: 2.75rem; }
 }
 @media print { :root { --barre-h: 0px !important; } }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DIRECT DE SÉANCE — pages de l'application (hors landing).
+   Classes NOUVELLES uniquement : `.flash-value` (FlashValue) reste celui de la
+   landing, inchangé. Tout est coupé sous prefers-reduced-motion (bloc final).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Flash fort d'une valeur : fond, couleur et léger agrandissement, 650 ms. */
+.flash-fort { display: inline-block; border-radius: 4px; padding: 0 3px; margin: 0 -3px; }
+.flash-fort.f-up { animation: flash-fort-up 650ms cubic-bezier(0.2, 0, 0, 1); }
+.flash-fort.f-down { animation: flash-fort-down 650ms cubic-bezier(0.2, 0, 0, 1); }
+@keyframes flash-fort-up {
+  0% { background-color: rgb(var(--color-up) / 0.4); color: rgb(var(--color-up)); transform: scale(1.08); }
+  100% { background-color: transparent; transform: none; }
+}
+@keyframes flash-fort-down {
+  0% { background-color: rgb(var(--color-down) / 0.4); color: rgb(var(--color-down)); transform: scale(1.08); }
+  100% { background-color: transparent; transform: none; }
+}
+/* Mêmes images sous un autre nom : changer de nom relance l'animation sans
+   recréer le nœud (FlashFort alterne `alt` à chaque flash). */
+.flash-fort.f-up.alt { animation-name: flash-fort-up-b; }
+.flash-fort.f-down.alt { animation-name: flash-fort-down-b; }
+@keyframes flash-fort-up-b {
+  0% { background-color: rgb(var(--color-up) / 0.4); color: rgb(var(--color-up)); transform: scale(1.08); }
+  100% { background-color: transparent; transform: none; }
+}
+@keyframes flash-fort-down-b {
+  0% { background-color: rgb(var(--color-down) / 0.4); color: rgb(var(--color-down)); transform: scale(1.08); }
+  100% { background-color: transparent; transform: none; }
+}
+
+/* Ligne entière balayée par la couleur du mouvement, de gauche à droite. */
+.ligne-flash-up, .ligne-flash-down { background-size: 220% 100%; background-repeat: no-repeat; animation: ligne-balayage 600ms cubic-bezier(0.2, 0, 0, 1); }
+.ligne-flash-up { background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-up) / 0.16) 45%, transparent 90%); }
+.ligne-flash-down { background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-down) / 0.16) 45%, transparent 90%); }
+@keyframes ligne-balayage { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
+/* Point « En direct » : une impulsion à chaque cours reçu, jamais en continu. */
+.direct-impulsion { animation: direct-impulsion 900ms ease-out; }
+@keyframes direct-impulsion {
+  0% { box-shadow: 0 0 0 0 rgb(var(--color-up) / 0.7); }
+  100% { box-shadow: 0 0 0 9px rgb(var(--color-up) / 0); }
+}
+
+/* Chiffres qui roulent (ChiffreRoulant) : une bande 0-9 par chiffre.
+   Hauteur = hauteur de ligne réelle (`1lh`, repli 1.15em) : la ligne ne
+   bouge pas pendant le roulement, même en `leading-none`. Le décalage se fait
+   en % de la bande (10 % par chiffre), juste quelle que soit l'unité. */
+.roulant-cols { display: inline-block; white-space: nowrap; height: 1.15em; height: 1lh; overflow: hidden; vertical-align: top; }
+.roulant-col { display: inline-block; height: 1.15em; height: 1lh; overflow: hidden; vertical-align: top; }
+.roulant-car { display: inline-block; height: 1.15em; height: 1lh; vertical-align: top; white-space: pre; }
+.roulant-bande { display: block; transition: transform 720ms cubic-bezier(0.2, 0, 0, 1); }
+.roulant-bande > span { display: block; height: 1.15em; height: 1lh; }
+.roulant-up { color: rgb(var(--color-up)); transition: color 900ms ease-out; }
+.roulant-down { color: rgb(var(--color-down)); transition: color 900ms ease-out; }
+
+/* Courbe du jour : elle se dessine à l'arrivée ; le dernier point s'éclaire
+   à chaque relevé. */
+.courbe-trace { stroke-dasharray: 1; stroke-dashoffset: 0; animation: courbe-trace 1300ms cubic-bezier(0.2, 0, 0, 1); }
+@keyframes courbe-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.courbe-point { transform-box: fill-box; transform-origin: center; animation: courbe-point 900ms ease-out; }
+@keyframes courbe-point { 0% { transform: scale(2.6); opacity: 0.4; } 100% { transform: scale(1); opacity: 1; } }
+
+/* Bandeau d'ouverture : il descend, puis un trait accent le traverse. */
+.bandeau-ouverture { animation: bandeau-entree 520ms cubic-bezier(0.2, 0, 0, 1); }
+@keyframes bandeau-entree { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+.bandeau-trait { transform-origin: left; animation: bandeau-trait 1100ms 200ms cubic-bezier(0.2, 0, 0, 1) both; }
+@keyframes bandeau-trait { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Bilan de séance : la barre de largeur du marché se déploie. */
+.bilan-barre > span { transform-origin: left; animation: bilan-barre 1100ms cubic-bezier(0.2, 0, 0, 1) both; }
+@keyframes bilan-barre { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-fort.f-up, .flash-fort.f-down,
+  .ligne-flash-up, .ligne-flash-down,
+  .direct-impulsion, .courbe-trace, .courbe-point,
+  .bandeau-ouverture, .bandeau-trait, .bilan-barre > span { animation: none; }
+  .roulant-bande, .roulant-up, .roulant-down { transition: none; }
+}

@@ -47,7 +47,9 @@ function Tile({ node, logoUrl, teintes }: LogoTileProps) {
       href={`/actions/${node.code}`}
       className={[
         'relative flex min-w-0 aspect-square flex-col items-center justify-center overflow-hidden rounded-lg p-1.5 sm:p-2',
-        'transition-transform duration-150 hover:z-10 hover:scale-[1.04] active:scale-[0.98]',
+        // La teinte glisse vers la nouvelle variation (direct, rejeu) ; le
+        // survol garde sa réponse rapide.
+        '[transition:transform_150ms_ease,background-color_700ms_ease,color_700ms_ease] hover:z-10 hover:scale-[1.04] active:scale-[0.98]',
         'motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100',
         'focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         bg ? '' : 'bg-elevated text-ivory',

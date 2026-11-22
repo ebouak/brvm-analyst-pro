@@ -1646,6 +1646,39 @@ Migration `0252_dispatch_cloture.sql` **à appliquer**.
   les runs de 22:00-23:36 lisaient la veille). Ces jours-là, plus de vidéo
   automatique : la veille le signale, la décision reste humaine.
 
+### Ajouts (passage 2026-11-22) — Direct de séance, rejeu, alertes en page
+
+PR #358 puis PR « spectacle ». Migration `0256_brvm_indices_snapshots.sql`
+**appliquée** (lecture anon 200, écriture anon 401 `42501`). **La landing n'est
+pas touchée** : ni `components/landing`, ni `components/vitrine`, ni
+`app/page.tsx`, ni `lib/realtime/useRealtimeActions.ts` / `FlashValue`.
+
+- **Direct** : `useCoursSeance` (abonnement Realtime **seulement pendant la
+  séance**) alimente `/actions`, `/dashboard`, `/portefeuille`, les fiches et
+  la carte de chaleur. `recomposer` n'écrase que les colonnes de marché : les
+  champs serveur ne disparaissent jamais. ⚠️ Un seul abonnement par sujet de
+  canal et par page (deux `cours-live-<date>` peuvent se fermer l'un l'autre).
+- **Portefeuille** : serveur et direct partagent `valoriser` (pur, testé).
+- **Rejeu** (`components/rejeu/`) : relevés RÉELS de `brvm_intraday_snapshots`
+  (lecture publique, ~1 440 lignes → `fetchAllRows`, sinon troncature
+  silencieuse), toujours étiqueté « relevés réels, pas le direct ». Tout
+  composant qui lit `useCoursSeance` sous un `RejeuProvider` rejoue sans le
+  savoir. Valeur échangée et transactions = `null` pendant le rejeu (inconnues
+  à 10 h) ; les indices ne sont pas encore rejoués.
+- **Relevés d'indices** (0256) : écrits par `runIntraday` (non bloquant), lus
+  pour les mini-courbes du dashboard. Courbes absentes avant deux relevés :
+  rien n'est reconstitué.
+- **Alertes en page** (`components/alertes/AlertesEnDirect.tsx`, monté dans
+  `ConditionalShell` pour un compte connecté) : seulement les 3 alertes de
+  PRIX, seulement un FRANCHISSEMENT vu pendant la visite. ⚠️ Règles dupliquées
+  de `scraper/src/alerts/evaluate.ts` dans `lib/alertes/franchissement.ts` :
+  corriger des deux côtés. Ne remplace pas l'e-mail ni Telegram.
+- **Intensité** : `FlashFort` (+ balayage de ligne), `ChiffreRoulant`
+  (texte ordinaire au repos), `CourbeDuJour`, bandeau d'ouverture, bilan de
+  séance. ⚠️ Ne pas relancer une animation en recréant le nœud (`key`) autour
+  d'un `ChiffreRoulant` : il perdrait son roulement. Tout est coupé sous
+  `prefers-reduced-motion`. Rien n'est animé sur les signaux.
+
 
 ## 9. Bugs connus / limites
 

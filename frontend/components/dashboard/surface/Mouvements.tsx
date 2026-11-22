@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { fmtNumber, fmtPctSigne } from '@/lib/format';
 import type { FlashDirection } from '@/lib/realtime/mergeActions';
-import { FlashValue } from '@/components/ui/FlashValue';
+import { FlashFort } from '@/components/ui/FlashFort';
 import { cheminSparkline } from '@/lib/dashboard/graphe';
 import { TeteBloc } from './Grille';
 
@@ -49,14 +49,14 @@ export default function Mouvements({ id, titre, lignes, flashes = {} }: {
                   key={l.code}
                   layout={calme ? false : 'position'}
                   transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-                  className="border-t border-border"
+                  className={`border-t border-border ${flashes[l.code] ? `ligne-flash-${flashes[l.code]}` : ''}`}
                 >
                   <th scope="row" className="px-1 py-1.5 text-left font-normal">
                     <Link href={`/actions/${l.code}`} className="tabular block text-[13px] text-ivory hover:text-accent-ink">{l.code}</Link>
                     <span className="block max-w-[16ch] truncate text-[11.5px] text-faint" title={l.nom}>{l.nom}</span>
                   </th>
                   <td className="tabular whitespace-nowrap px-1 py-1.5 text-right text-ivory">
-                    <FlashValue direction={flashes[l.code]}>{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</FlashValue>
+                    <FlashFort direction={flashes[l.code]}>{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</FlashFort>
                   </td>
                   <td className={`tabular whitespace-nowrap px-1 py-1.5 text-right ${l.variation == null ? 'text-faint' : l.variation > 0 ? 'text-up' : l.variation < 0 ? 'text-down' : 'text-muted'}`}>{l.variation != null ? fmtPctSigne(l.variation) : '—'}</td>
                   <td className="px-1 py-1.5 text-right"><Sparkline serie={l.serie} /></td>
