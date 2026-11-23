@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct, VOCABULAIRE } from './periode';
+import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct, VOCABULAIRE, aAvecArticle } from './periode';
 import { dernierEvenementResultats, phraseMiseAJour } from './miseAJour';
 import { lectureIntermediaire } from '@/lib/financials/interim';
+
+describe('aAvecArticle', () => {
+  it('contracte « à le » et « à les », garde « à l’ »', () => {
+    expect(aAvecArticle('1er semestre 2025')).toBe('au 1er semestre 2025');
+    expect(aAvecArticle('9 premiers mois 2025')).toBe('aux 9 premiers mois 2025');
+    expect(aAvecArticle('exercice 2025')).toBe('à l’exercice 2025');
+  });
+});
 
 const sp = (s: string | null) => s?.replace(/[  ]/g, ' ') ?? null;
 

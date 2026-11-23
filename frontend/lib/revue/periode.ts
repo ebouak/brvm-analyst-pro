@@ -64,6 +64,15 @@ export function avecArticle(libelle: string): string {
 }
 
 /**
+ * « à » suivi de l'article, contracté comme il se doit : « au 1er semestre »,
+ * « aux 9 premiers mois », « à l’exercice ». Sans elle, la revue écrivait
+ * « par rapport à le 1er semestre 2025 » (constaté sur CIEC le 2026-11-23).
+ */
+export function aAvecArticle(libelle: string): string {
+  return `à ${avecArticle(libelle)}`.replace(/^à le /, 'au ').replace(/^à les /, 'aux ');
+}
+
+/**
  * La période à présenter en premier. `annuels` : exercices annuels, le plus
  * récent d'abord (ordre de `getRevue`). `inter` : lecture intermédiaire déjà
  * filtrée par la règle de remplacement, ou null.
@@ -155,7 +164,7 @@ const signe = (v: number) => (v > 0 ? '+' : v < 0 ? '−' : '');
  * montant du résultat net. Une donnée absente donne `valeur: null`.
  */
 export function chiffreGeantPeriode(p: PeriodePrincipale, voc: Vocabulaire = VOCABULAIRE.general): ChiffreGeantPeriode {
-  const comp = p.libellePrecedent ? `par rapport à ${avecArticle(p.libellePrecedent)}` : '';
+  const comp = p.libellePrecedent ? `par rapport ${aAvecArticle(p.libellePrecedent)}` : '';
   const vRn = p.comparable ? variationPct(p.resultatNet, p.resultatNetPrecedent) : null;
   if (vRn != null) {
     return {
