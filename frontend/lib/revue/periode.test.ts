@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct, VOCABULAIRE, aAvecArticle } from './periode';
+import { periodePrincipale, chiffreGeantPeriode, constatPeriode, lignesComparaison, variationPct, VOCABULAIRE, aAvecArticle, deAvecArticle } from './periode';
 import { dernierEvenementResultats, phraseMiseAJour } from './miseAJour';
 import { lectureIntermediaire } from '@/lib/financials/interim';
 
@@ -8,6 +8,14 @@ describe('aAvecArticle', () => {
     expect(aAvecArticle('1er semestre 2025')).toBe('au 1er semestre 2025');
     expect(aAvecArticle('9 premiers mois 2025')).toBe('aux 9 premiers mois 2025');
     expect(aAvecArticle('exercice 2025')).toBe('à l’exercice 2025');
+  });
+});
+
+describe('deAvecArticle', () => {
+  it('contracte « de le » et « de les », garde « de l’ »', () => {
+    expect(deAvecArticle('1er semestre 2026')).toBe('du 1er semestre 2026');
+    expect(deAvecArticle('9 premiers mois de 2026')).toBe('des 9 premiers mois de 2026');
+    expect(deAvecArticle('exercice 2025')).toBe('de l’exercice 2025');
   });
 });
 

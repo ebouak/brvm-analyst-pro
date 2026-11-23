@@ -12,7 +12,8 @@ import { phraseDetachement } from '@/lib/reports/detachementRevue';
 import { constatSerie } from '@/lib/document/constats';
 import { photoActivite } from '@/lib/document/activite';
 import { planActivite, LIGNES_FACULTATIVES } from '@/lib/revue/gabarit';
-import { periodePrincipale, constatPeriode, chiffreGeantPeriode, lignesComparaison, variationPct, VOCABULAIRE } from '@/lib/revue/periode';
+import { periodePrincipale, constatPeriode, chiffreGeantPeriode, lignesComparaison, variationPct, VOCABULAIRE, avecArticle, deAvecArticle } from '@/lib/revue/periode';
+import { periodeDuRapport, rapportAnterieur } from '@/lib/revue/rapportActivite';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { chargerPeriodesBancaires } from '@/lib/bank/chargerLecture';
 import { lireBanque, lirePeriode } from '@/lib/bank/lecture';
@@ -132,15 +133,22 @@ export default async function RevuePage(props: Props) {
 
   // Rapport d'activité antérieur aux comptes : il passe en fin de document.
   const hl = d.highlights && (d.highlights.synthese || d.highlights.items.length > 0) ? d.highlights : null;
-  const hlAncien = !!(hl?.exercice && latest && hl.exercice < Number(latest.periode));
+  // Période du rapport lue dans son libellé source (« 1er semestre 2025 »,
+  // « Exercice 2024 »), comparée à la période que la Revue présente EN PREMIER.
+  // Avant : seul « exercice AAAA » était lu, comparé au seul annuel — un rapport
+  // du 1er semestre 2025 passait pour actuel dans une revue du 1er semestre 2026.
+  const periodeHl = hl ? periodeDuRapport(hl.source_libelle) : null;
+  const periodeRevue = principale?.periode ?? latest?.periode ?? null;
+  const libelleRevue = principale?.libelle ?? (latest ? `exercice ${latest.periode}` : null);
+  const hlAncien = rapportAnterieur(periodeHl, periodeRevue);
   const plan = hl ? planActivite(hl.synthese, hl.items) : null;
   const activite = hl && plan && (
     <div className="rv-activite">
       <h3 style={{ margin: '8mm 0 0', fontSize: '11pt' }}>
-        {hlAncien ? `Activité : dernier rapport disponible (exercice ${hl.exercice})` : 'Activité : ce qui se passe dans l’entreprise'}
+        {hlAncien && periodeHl ? `Activité : dernier rapport disponible (${periodeHl.libelle})` : 'Activité : ce qui se passe dans l’entreprise'}
       </h3>
-      {hlAncien && latest && (
-        <p className="doc-note">Ce rapport porte sur l’exercice {hl.exercice}, antérieur aux comptes {latest.periode} présentés dans cette revue : aucun rapport d’activité plus récent n’est disponible.</p>
+      {hlAncien && periodeHl && libelleRevue && (
+        <p className="doc-note">Ce rapport porte sur {avecArticle(periodeHl.libelle)}, antérieur aux comptes {deAvecArticle(libelleRevue)} présentés dans cette revue : aucun rapport d’activité plus récent n’est disponible.</p>
       )}
       {plan.synthese && <p>{plan.synthese}</p>}
       <ul>
