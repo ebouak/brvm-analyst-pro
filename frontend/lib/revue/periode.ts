@@ -72,6 +72,11 @@ export function aAvecArticle(libelle: string): string {
   return `à ${avecArticle(libelle)}`.replace(/^à le /, 'au ').replace(/^à les /, 'aux ');
 }
 
+/** « de » suivi de l'article, contracté : « du 1er semestre », « des 9 premiers mois », « de l’exercice ». */
+export function deAvecArticle(libelle: string): string {
+  return `de ${avecArticle(libelle)}`.replace(/^de le /, 'du ').replace(/^de les /, 'des ');
+}
+
 /**
  * La période à présenter en premier. `annuels` : exercices annuels, le plus
  * récent d'abord (ordre de `getRevue`). `inter` : lecture intermédiaire déjà
