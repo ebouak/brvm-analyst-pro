@@ -2,7 +2,6 @@
 import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
 import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
 import { FlashFort } from '@/components/ui/FlashFort';
 import { EnDirect } from '@/components/ui/EnDirect';
@@ -169,11 +168,10 @@ export default function ActionsTable({
   const dernier = useDernierReleve(enDirect);
   const heureDernier = dernier ? heureMaj(new Date(dernier.instant)) : null;
   const bouges = useMemo(() => new Set(dernier?.mouvements.map((m) => m.code) ?? []), [dernier]);
-  // Glissement des lignes quand l'ordre change (tri, filtre, nouveau cours).
-  // Coupé si l'utilisateur demande moins d'animations.
-  const calme = useReducedMotion();
-  const glisse = calme ? false : ('position' as const);
-  const transitionLigne = { duration: 0.25, ease: [0.2, 0, 0, 1] as const };
+  // Plus de glissement animé des lignes quand l'ordre change (retiré le
+  // 2026-11-23, avis Fable repris par l'exploitant) : des lignes qui bougent
+  // sous le curseur font « effet casino ». Le mouvement se dit par les éclairs
+  // étalés, l'encart « Dernier relevé » et le point sur les lignes.
 
   const paysOptions = useMemo(
     () => [...new Set(actions.map((a) => a.pays).filter(Boolean))].sort() as string[],
@@ -387,10 +385,8 @@ export default function ActionsTable({
         {rows.map((a) => {
           const sig = showMetrics ? signals[a.code] : undefined;
           return (
-            <motion.li
+            <li
               key={a.code}
-              layout={glisse}
-              transition={transitionLigne}
               className={eclairs[a.code] ? `ligne-flash-${eclairs[a.code]}` : undefined}
             >
               <Link
@@ -420,7 +416,7 @@ export default function ActionsTable({
                   </div>
                 </div>
               </Link>
-            </motion.li>
+            </li>
           );
         })}
       </ul>
@@ -470,10 +466,8 @@ export default function ActionsTable({
               const serie = sparklines[a.code];
               const serieMonte = serie && serie.length >= 2 ? serie[serie.length - 1]! >= serie[0]! : true;
               return (
-                <motion.tr
+                <tr
                   key={a.code}
-                  layout={glisse}
-                  transition={transitionLigne}
                   // Ligne balayée par la couleur du mouvement (direct ou rejeu).
                   className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group ${eclairs[a.code] ? `ligne-flash-${eclairs[a.code]}` : ''}`}
                 >
@@ -560,7 +554,7 @@ export default function ActionsTable({
                       </td>
                     </>
                   )}
-                </motion.tr>
+                </tr>
               );
             })}
           </tbody>

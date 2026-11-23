@@ -33,9 +33,20 @@ function ageTexte(f: Fraicheur): string {
   return `Dernière séance : ${f.derniereSeance ?? '—'}`;
 }
 
-export default function FreshnessBadge({ fraicheur }: { fraicheur: Fraicheur }) {
+export default function FreshnessBadge({ fraicheur, masquerEnSeance = false, enSeanceAuRendu = false }: {
+  fraicheur: Fraicheur;
+  /**
+   * Tableau de bord : pendant la séance, le bandeau « pouls de séance » dit
+   * déjà le relevé ; la pastille de l'en-tête le répétait (choix de
+   * l'exploitant du 2026-11-23). Elle revient hors séance.
+   */
+  masquerEnSeance?: boolean;
+  /** Calculé par le serveur au rendu : même affichage au premier rendu client. */
+  enSeanceAuRendu?: boolean;
+}) {
   const { releve, echanges } = useReleve();
   const maintenant = useMaintenant();
+  if (masquerEnSeance && (maintenant ? estEnSeance(maintenant) : enSeanceAuRendu)) return null;
 
   let f = fraicheur;
   let texte = ageTexte(fraicheur);
