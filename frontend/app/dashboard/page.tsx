@@ -6,7 +6,8 @@ import { utilisateurCourant } from '@/lib/supabase/session';
 import { createPublicClient } from '@/lib/supabase/public';
 import { unstable_cache } from 'next/cache';
 import FreshnessBadge from '@/components/FreshnessBadge';
-import { computeFreshness } from '@/lib/freshness';
+import { computeFreshness, estEnSeance } from '@/lib/freshness';
+import PoulsSeance from '@/components/dashboard/surface/PoulsSeance';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import { chargerProfil } from '@/lib/dashboard/profil';
@@ -586,6 +587,17 @@ export default async function Dashboard() {
             )}
           </nav>
         </header>
+
+        {/* Pouls de séance : le marché au premier écran, pendant la séance
+            seulement. Données de marché uniquement, aucun abonnement de plus. */}
+        <PoulsSeance
+          enSeanceAuRendu={estEnSeance(new Date())}
+          composite={metriques.composite ? { valeur: metriques.composite.valeur, variation_pct: metriques.composite.variationPct } : null}
+          largeur={metriques.hausses != null && metriques.baisses != null && metriques.stables != null
+            ? { hausses: metriques.hausses, baisses: metriques.baisses, stables: metriques.stables }
+            : null}
+          derniereCollecte={fIn.derniereCollecte}
+        />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
         {triggeredAlerts > 0 && (

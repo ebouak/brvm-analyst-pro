@@ -6,6 +6,7 @@ import { estEnSeance } from '@/lib/freshness';
 import { majIndice, type IndiceDirect } from './indices';
 import { estEnDirect } from './recomposer';
 import type { FlashDirection } from './mergeActions';
+import { publierComposite } from './useReleve';
 
 /**
  * Indices en direct (brvm_indices_daily, publiée dans `supabase_realtime`,
@@ -78,6 +79,14 @@ export function useIndicesSeance<T extends IndiceDirect>(
       Object.values(minuteurs).forEach(clearTimeout);
     };
   }, [ecoute]);
+
+  // Composite partagé avec le bandeau « pouls de séance » (useReleve), qui
+  // n'ouvre pas d'abonnement à lui : seulement un indice réellement reçu.
+  useEffect(() => {
+    if (!ecoute || !derniereMaj) return;
+    const c = indices.find((i) => i.code === 'BRVMC');
+    if (c && c.valeur != null) publierComposite({ valeur: c.valeur, variation_pct: c.variation_pct });
+  }, [indices, ecoute, derniereMaj]);
 
   return { indices, flashes, enDirect, derniereMaj };
 }
