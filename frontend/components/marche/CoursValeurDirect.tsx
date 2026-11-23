@@ -63,7 +63,8 @@ export function PrixFicheAction({ code, dateMarche, cours, variation, coursPrece
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {apres}
-        <EnDirect enDirect={v.enDirect} derniereMaj={v.derniereMaj} />
+        {/* La pastille de fraîcheur (`apres`) dit déjà l'heure du relevé sur cette ligne. */}
+        <EnDirect enDirect={v.enDirect} derniereMaj={v.derniereMaj} heure={false} />
       </div>
       <CourbeDuJour
         points={courbe}

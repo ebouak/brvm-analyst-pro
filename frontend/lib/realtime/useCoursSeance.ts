@@ -5,6 +5,8 @@ import { estEnSeance } from '@/lib/freshness';
 import { useRealtimeActions } from './useRealtimeActions';
 import { recomposer, estEnDirect, valeursChangees } from './recomposer';
 import { lignesAuMoment, veillesDe } from './rejeu';
+import { dernierReleveDe, echangesDuMarche } from './releve';
+import { publierReleve } from './useReleve';
 import { useRejeu } from '@/components/rejeu/RejeuProvider';
 import type { FlashDirection, RealtimeActionRow } from './mergeActions';
 
@@ -71,6 +73,23 @@ export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?:
 
   // Rejeu de séance : l'image courante remplace les cours, rien d'autre.
   const rejeu = useRejeu();
+
+  // Heure du dernier RELEVÉ et état des échanges du marché, partagés avec la
+  // pastille de fraîcheur et « En direct » (useReleve). Un relevé sans
+  // changement de cours reste un relevé : on lit `updated_at`, posé à chaque
+  // collecte. Jamais pendant un rejeu, jamais hors séance.
+  const releveIso = useMemo(
+    () => dernierReleveDe(recus as unknown as { updated_at?: string | null }[])?.toISOString() ?? null,
+    [recus],
+  );
+  const echanges = useMemo(() => echangesDuMarche(rows), [rows]);
+  const rejeuActif = !!rejeu?.actif;
+  useEffect(() => {
+    if (rejeuActif || !enSeance || jour == null) return;
+    // Un relevé d'un autre jour (lignes de la veille avant le premier relevé) ne dit rien d'aujourd'hui.
+    const r = releveIso && releveIso.slice(0, 10) === jour ? new Date(releveIso) : null;
+    publierReleve(r, r ? echanges : null);
+  }, [releveIso, echanges, rejeuActif, enSeance, jour]);
   const veilles = useMemo(() => veillesDe(base), [base]);
   const image = rejeu?.actif ? rejeu.image : null;
   const rowsRejeu = useMemo(() => (image ? lignesAuMoment(base, image, veilles) : null), [image, base, veilles]);
