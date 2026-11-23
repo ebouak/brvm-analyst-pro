@@ -1695,6 +1695,46 @@ pas touchée** : ni `components/landing`, ni `components/vitrine`, ni
   résumés de mur payant écartés (`nettoyerResume`). Tout est figé dans
   `seance.json` par `genere.mjs` : le brief et l'envoi ne relisent pas la base.
 
+### Ajouts (passage 2026-11-23) — Rendre le direct visible : persistance, pas intensité
+
+PR #368, #369, #370. Relecture avec le compte test Premium puis consultation Fable.
+
+- **Le constat mesuré** : le direct marchait, il était invisible. Un relevé
+  toutes les 15 min (intraday.yml) ; à 12:15:59, 114 animations en une seconde
+  sur `/actions`, puis rien pendant 15 min. Aucun cours ne bouge avant le relevé
+  de 10:15 (volumes nuls jusqu'à 10:01). Verdict Fable : **ce qu'apporte un
+  relevé doit RESTER à l'écran jusqu'au suivant** ; ne pas animer plus fort.
+- **Une seule heure de relevé** (`lib/realtime/releve.ts` pur, `useReleve.ts`
+  magasin) : `brvm_actions_daily.updated_at` (déclencheur `trg_actions_updated`,
+  posé à CHAQUE collecte) publié par `useCoursSeance`, lu par `FreshnessBadge`
+  (devenu client, il suivait l'heure du rendu et restait sur « il y a 13 min »)
+  et `EnDirect`. « prochain vers 12:30 », jamais de compte à rebours (le cron
+  varie) ; « relevé en retard » au-delà de 25 min ; « Aucun échange relevé
+  depuis l'ouverture » tiré des VOLUMES, pas de l'horloge.
+- **Bandeau « pouls de séance »** (`PoulsSeance`, sous l'en-tête du tableau de
+  bord, en séance seulement) : Composite, barre hausses/baisses, relevé, ligne
+  « dernier relevé ». La page n'est pas réordonnée.
+- **« Dernier relevé »** (`dernierReleve.ts` pur, `useDernierReleve`) : écart
+  entre les DEUX derniers relevés de `brvm_intraday_snapshots`, relu en base à
+  chaque relevé (jamais déduit de l'onglet), relevés identiques non fusionnés.
+  Encart sur `/actions` (6 mouvements, titres échangés, note neutre), point par
+  ligne jusqu'au relevé suivant. Éclairs de ligne étalés < 2 s (`useFlashesEtales`).
+- ⚠️ **Aucun abonnement Realtime de plus** : le bandeau LIT `useReleve`, que
+  remplissent les hooks déjà présents (`useCoursSeance` pour la largeur quand il
+  voit ≥ 20 valeurs, `useIndicesSeance` pour le Composite). Deux abonnements au
+  même sujet peuvent se fermer l'un l'autre.
+- ⚠️ **Le rendu serveur du tableau de bord peut être périmé** (`unstable_cache`
+  60 s, servi tel quel à la première visite après une pause) : vérifié en
+  production, le bandeau a montré le Composite du relevé de 13:30 à côté de
+  « Relevé de 13:45 ». En séance, `useCoursSeance` et `useIndicesSeance`
+  relisent donc UNE fois au montage les cours et indices du jour (48 lignes,
+  3 indices), sans éclair ni `derniereMaj` : un rattrapage n'est pas un mouvement.
+- **Écartés (Fable)** : rejeu automatique au chargement (brouille rejeu et
+  direct), relevé toutes les 5 min (1 s de mouvement par relevé quand même, 3×
+  la charge sur brvm.org). Le glissement animé des lignes du tableau
+  (`layout` framer-motion, antérieur) reste en place ; Fable le juge « effet
+  casino » : à rouvrir si l'exploitant le ressent.
+
 
 ## 9. Bugs connus / limites
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { estEnSeance } from '@/lib/freshness';
+import { createClient } from '@/lib/supabase/client';
 import { useRealtimeActions } from './useRealtimeActions';
 import { recomposer, estEnDirect, valeursChangees } from './recomposer';
 import { lignesAuMoment, veillesDe } from './rejeu';
@@ -57,17 +58,48 @@ export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?:
   }, []);
 
   const ecoute = enSeance && dateMarche != null ? jour : null;
-  const { rows: recus, flashes } = useRealtimeActions(base, ecoute);
-  const rows = useMemo(() => recomposer(base, recus), [base, recus]);
+
+  // Cours FRAIS au montage, pendant la séance : le rendu serveur peut venir
+  // d'un cache (tableau de bord : unstable_cache 60 s, servi périmé à la
+  // première visite). Sans cette relecture, le bandeau a affiché le Composite
+  // et la largeur du relevé de 13:30 à côté de « Relevé de 13:45 » (constaté
+  // le 2026-11-23). Pas d'éclair : un rattrapage n'est pas un mouvement.
+  const [frais, setFrais] = useState<(RealtimeActionRow & { updated_at?: string | null })[] | null>(null);
+  const nbBase = base.length;
+  const codesBase = useRef(base.map((b) => b.code));
+  useEffect(() => { codesBase.current = base.map((b) => b.code); }, [base]);
+  useEffect(() => {
+    if (!ecoute) return;
+    let annule = false;
+    void (async () => {
+      let q = createClient()
+        .from('brvm_actions_daily')
+        .select('code, cours_jour, variation_pct, volume, valeur_echangee, nb_transactions, updated_at')
+        .eq('date_marche', ecoute);
+      // Une fiche ou un portefeuille : leurs seuls codes ; la cote : tout le jour.
+      if (nbBase > 0 && nbBase < 20) q = q.in('code', codesBase.current);
+      const { data } = await q;
+      if (!annule && data && data.length > 0) setFrais(data as (RealtimeActionRow & { updated_at?: string | null })[]);
+    })();
+    return () => { annule = true; };
+  }, [ecoute, nbBase]);
+  const baseEffective = useMemo(() => (frais ? recomposer(base, frais) : base), [base, frais]);
+
+  const { rows: recus, flashes } = useRealtimeActions(baseEffective, ecoute);
+  const rows = useMemo(() => recomposer(baseEffective, recus), [baseEffective, recus]);
 
   // Seul un VRAI changement de valeur compte comme mise à jour : une relecture
-  // identique (retour d'onglet) ou vide (avant le premier relevé) ne date rien.
+  // identique (retour d'onglet) ou vide (avant le premier relevé) ne date rien,
+  // pas plus que le rattrapage des cours frais au montage.
   const [derniereMaj, setDerniereMaj] = useState<Date | null>(null);
   const affichees = useRef(rows);
+  const baseVue = useRef(baseEffective);
   useEffect(() => {
-    if (valeursChangees(affichees.current, rows)) setDerniereMaj(new Date());
+    const rattrapage = baseVue.current !== baseEffective;
+    baseVue.current = baseEffective;
+    if (!rattrapage && valeursChangees(affichees.current, rows)) setDerniereMaj(new Date());
     affichees.current = rows;
-  }, [rows]);
+  }, [rows, baseEffective]);
 
   const enDirect = estEnDirect({ enSeance, dateMarche, jour, majRecue: derniereMaj != null });
 
@@ -79,8 +111,11 @@ export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?:
   // changement de cours reste un relevé : on lit `updated_at`, posé à chaque
   // collecte. Jamais pendant un rejeu, jamais hors séance.
   const releveIso = useMemo(
-    () => dernierReleveDe(recus as unknown as { updated_at?: string | null }[])?.toISOString() ?? null,
-    [recus],
+    () => dernierReleveDe([
+      ...(recus as unknown as { updated_at?: string | null }[]),
+      ...(frais ?? []),
+    ])?.toISOString() ?? null,
+    [recus, frais],
   );
   const echanges = useMemo(() => echangesDuMarche(rows), [rows]);
   const largeur = useMemo(() => largeurDuMarche(rows), [rows]);
