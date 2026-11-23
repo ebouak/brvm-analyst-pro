@@ -5,14 +5,14 @@ import {
 
 // --- buildChartRows : cas réel CIEC (valeurs vérifiées Madis/Sika/Zone Bourse) ---
 const income = [
-  { periode: '2024', revenu_total: 263_294_000_000, resultat_exploitation: 16_591_000_000, resultat_net: 10_101_000_000, benefice_par_action: 180.38, dividende_par_action: 158.4 },
-  { periode: '2023', revenu_total: 257_218_000_000, resultat_exploitation: 16_460_000_000, resultat_net: 10_633_000_000, benefice_par_action: 189.88, dividende_par_action: 171 },
+  { periode: '2024', revenu_total: 263_294_000_000, resultat_exploitation: 16_591_000_000, resultat_avant_impots: 14_312_000_000, impots: 3_764_000_000, resultat_net: 10_101_000_000, benefice_par_action: 180.38, dividende_par_action: 158.4, lignes_specifiques: { cout_du_risque: -1_000_000_000 } },
+  { periode: '2023', revenu_total: 257_218_000_000, resultat_exploitation: 16_460_000_000, resultat_avant_impots: 14_053_000_000, impots: 2_742_000_000, resultat_net: 10_633_000_000, benefice_par_action: 189.88, dividende_par_action: 171 },
 ];
 const balance = [
-  { periode: '2024', total_actifs: 2_019_136_000_000, total_capitaux_propres: 150_000_000_000, dette_court_terme: 10_000_000_000, dette_long_terme: 49_052_000_000 },
+  { periode: '2024', total_actifs: 2_019_136_000_000, tresorerie_equivalents: 20_000_000_000, total_capitaux_propres: 150_000_000_000, dette_court_terme: 10_000_000_000, dette_long_terme: 49_052_000_000 },
 ];
 const cashflow = [
-  { periode: '2024', flux_exploitation: 30_000_000_000, flux_investissement: -12_000_000_000, flux_financement: -8_000_000_000 },
+  { periode: '2024', flux_exploitation: 30_000_000_000, depenses_capital: -8_000_000_000, flux_tresorerie_disponible: null, flux_investissement: -12_000_000_000, flux_financement: -8_000_000_000 },
 ];
 
 const rows = buildChartRows(income, balance, cashflow);
@@ -24,9 +24,17 @@ assert.equal(r24.revenu, 263_294_000_000);
 assert.ok(Math.abs(r24.margeNette - 3.836) < 0.01, `marge nette 2024 ≈ 3,84 %, eu ${r24.margeNette}`);
 assert.ok(Math.abs(r24.margeRex - 6.302) < 0.01, `marge d'exploitation ≈ 6,30 %, eu ${r24.margeRex}`);
 assert.ok(Math.abs(r24.roe - 6.734) < 0.01, `ROE = RN/CP ≈ 6,73 %, eu ${r24.roe}`);
+assert.ok(Math.abs(r24.roa - 0.50026) < 0.01, `ROA = RN/Actif ≈ 0,50 %, eu ${r24.roa}`);
+assert.equal(r24.tresorerie, 20_000_000_000);
+assert.equal(r24.detteNette, 39_052_000_000, 'dette nette = 59.052 Md - 20 Md');
+assert.equal(r24.capex, 8_000_000_000);
+assert.equal(r24.fcf, 22_000_000_000, 'FCF = 30 Md - 8 Md');
+assert.ok(Math.abs(r24.levierDetteCp - 39.368) < 0.01, `Dette/CP ≈ 39,37 %`);
+assert.ok(Math.abs(r24.tauxImposition - 26.299) < 0.05, `Taux impôt ≈ 26,30 %`);
 // Croissance CA 2024 vs 2023 : (263 294 − 257 218) / 257 218 = +2,36 % — le taux
 // même que publie la fiche Madis, preuve que la dérivation est la bonne.
 assert.ok(Math.abs(r24.croissanceCa - 2.3622) < 0.01, `croissance CA ≈ +2,36 %, eu ${r24.croissanceCa}`);
+assert.ok(Math.abs(r24.croissanceRn - (-5.003)) < 0.01, `croissance RN ≈ -5,00 %, eu ${r24.croissanceRn}`);
 assert.equal(r24.dettesFin, 59_052_000_000, 'dettes = CT + LT');
 assert.equal(r24.fluxInvestissement, -12_000_000_000);
 

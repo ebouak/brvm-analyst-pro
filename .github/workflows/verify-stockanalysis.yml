@@ -1,0 +1,57 @@
+name: Vérification & enrichissement StockAnalysis
+
+on:
+  schedule:
+    # Chaque dimanche à 04:00 UTC (hors séance)
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+    inputs:
+      ecrire:
+        description: 'Écrire les champs manquants (null) en base'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+      banques:
+        description: 'Limiter aux valeurs bancaires'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scraper/package-lock.json
+      - run: npm ci
+      - name: Vérification et enrichissement StockAnalysis
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          ARGS="--trigger=cron"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ARGS="--trigger=manual"
+            [ "${{ inputs.ecrire }}" = "true" ] && ARGS="$ARGS --ecrire"
+            [ "${{ inputs.banques }}" = "true" ] && ARGS="$ARGS --banques"
+          else
+            ARGS="$ARGS --ecrire"
+          fi
+          npm run verify:stockanalysis -- $ARGS
+      - name: Publier le rapport de vérification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stockanalysis-verification-report
+          path: scraper/output/stockanalysis/
+          retention-days: 14

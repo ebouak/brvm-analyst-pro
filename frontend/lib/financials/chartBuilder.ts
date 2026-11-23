@@ -23,21 +23,38 @@ export type UnitClass = 'fcfa' | 'fcfa_action' | 'pct';
 // on liste donc explicitement les clés numériques du catalogue.
 export interface ChartRow {
   periode: string;
+  // Compte de résultat
   revenu: number | null;
   rex: number | null;
+  rai: number | null;
   rn: number | null;
+  coutDuRisque: number | null;
+  // Bilan
   totalActif: number | null;
   capitauxPropres: number | null;
+  tresorerie: number | null;
   dettesFin: number | null;
+  detteNette: number | null;
+  // Flux de trésorerie
   fluxExploitation: number | null;
+  capex: number | null;
+  fcf: number | null;
   fluxInvestissement: number | null;
   fluxFinancement: number | null;
+  // Par action
   bpa: number | null;
   dividende: number | null;
+  // Ratios (%)
   margeNette: number | null;
   margeRex: number | null;
   roe: number | null;
+  roa: number | null;
+  levierDetteCp: number | null;
+  margeFcf: number | null;
   croissanceCa: number | null;
+  croissanceRn: number | null;
+  tauxImposition: number | null;
+  coutRisquePct: number | null;
 }
 
 /** Clé de série valide du catalogue (tout sauf `periode`). */
@@ -53,24 +70,42 @@ export interface SerieDef {
   groupe: 'Compte de résultat' | 'Bilan' | 'Flux de trésorerie' | 'Par action' | 'Ratios';
   /** Les montants se rendent en barres, les ratios et par-action en lignes. */
   render: 'bar' | 'line';
+  /** Restreindre l'affichage aux banques uniquement si vrai. */
+  banqueUniquement?: boolean;
 }
 
 export const SERIES_CATALOG: SerieDef[] = [
-  { id: 'revenu',        label: 'Chiffre d’affaires',     unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
-  { id: 'rex',           label: 'Résultat d’exploitation', unit: 'fcfa',       groupe: 'Compte de résultat', render: 'bar' },
-  { id: 'rn',            label: 'Résultat net',           unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
-  { id: 'totalActif',    label: 'Total actif',            unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
-  { id: 'capitauxPropres', label: 'Capitaux propres',     unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
-  { id: 'dettesFin',     label: 'Dettes financières',     unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
-  { id: 'fluxExploitation', label: 'Flux d’exploitation', unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
-  { id: 'fluxInvestissement', label: 'Flux d’investissement', unit: 'fcfa',    groupe: 'Flux de trésorerie', render: 'bar' },
-  { id: 'fluxFinancement', label: 'Flux de financement',  unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
-  { id: 'bpa',           label: 'BPA',                    unit: 'fcfa_action', groupe: 'Par action',         render: 'line' },
-  { id: 'dividende',     label: 'Dividende / action',     unit: 'fcfa_action', groupe: 'Par action',         render: 'line' },
-  { id: 'margeNette',    label: 'Marge nette %',          unit: 'pct',         groupe: 'Ratios',             render: 'line' },
-  { id: 'margeRex',      label: 'Marge d’exploitation %', unit: 'pct',         groupe: 'Ratios',             render: 'line' },
-  { id: 'roe',           label: 'ROE %',                  unit: 'pct',         groupe: 'Ratios',             render: 'line' },
-  { id: 'croissanceCa',  label: 'Croissance CA %',        unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'revenu',        label: 'Chiffre d’affaires',          unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
+  { id: 'rex',           label: 'Résultat d’exploitation',     unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
+  { id: 'rai',           label: 'Résultat avant impôts',       unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
+  { id: 'rn',            label: 'Résultat net',                unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar' },
+  { id: 'coutDuRisque',  label: 'Coût du risque',              unit: 'fcfa',        groupe: 'Compte de résultat', render: 'bar', banqueUniquement: true },
+
+  { id: 'totalActif',      label: 'Total actif',               unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
+  { id: 'capitauxPropres', label: 'Capitaux propres',          unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
+  { id: 'tresorerie',      label: 'Trésorerie & équiv.',       unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
+  { id: 'dettesFin',       label: 'Dettes financières',        unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
+  { id: 'detteNette',      label: 'Dette nette',               unit: 'fcfa',        groupe: 'Bilan',              render: 'bar' },
+
+  { id: 'fluxExploitation',   label: 'Flux d’exploitation',    unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
+  { id: 'capex',              label: 'Investissements (Capex)',unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
+  { id: 'fcf',                label: 'Free Cash Flow (FCF)',   unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
+  { id: 'fluxInvestissement', label: 'Flux d’investissement',  unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
+  { id: 'fluxFinancement',    label: 'Flux de financement',    unit: 'fcfa',        groupe: 'Flux de trésorerie', render: 'bar' },
+
+  { id: 'bpa',           label: 'BPA',                         unit: 'fcfa_action', groupe: 'Par action',         render: 'line' },
+  { id: 'dividende',     label: 'Dividende / action',          unit: 'fcfa_action', groupe: 'Par action',         render: 'line' },
+
+  { id: 'margeNette',     label: 'Marge nette %',              unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'margeRex',       label: 'Marge d’exploitation %',     unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'roe',            label: 'ROE %',                      unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'roa',            label: 'ROA %',                      unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'levierDetteCp',  label: 'Dette / Cap. propres %',     unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'margeFcf',       label: 'Marge FCF %',                unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'croissanceCa',   label: 'Croissance CA %',            unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'croissanceRn',   label: 'Croissance RN %',            unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'tauxImposition', label: 'Taux d’impôt eff. %',        unit: 'pct',         groupe: 'Ratios',             render: 'line' },
+  { id: 'coutRisquePct',  label: 'Coût du risque / PNB %',     unit: 'pct',         groupe: 'Ratios',             render: 'line', banqueUniquement: true },
 ];
 
 /** Sélection par défaut — le trio le plus lu (même esprit que Zone Bourse). */
@@ -80,15 +115,45 @@ export const DEFAULT_SELECTION = ['revenu', 'rn', 'margeNette'];
 const ratio = (num: number | null | undefined, den: number | null | undefined): number | null =>
   num != null && den != null && den !== 0 ? (num / den) * 100 : null;
 
+const growth = (curr: number | null | undefined, prev: number | null | undefined): number | null =>
+  curr != null && prev != null && prev !== 0 ? ((curr - prev) / Math.abs(prev)) * 100 : null;
+
 /**
  * Croise les trois états par période et calcule les ratios dérivés.
  * Sortie triée par période croissante. Un terme manquant donne null — le
  * graphique montre un trou, jamais une invention.
  */
 export function buildChartRows(
-  income: Pick<IncomeStatement, 'periode' | 'revenu_total' | 'resultat_exploitation' | 'resultat_net' | 'benefice_par_action' | 'dividende_par_action'>[],
-  balance: Pick<BalanceSheet, 'periode' | 'total_actifs' | 'total_capitaux_propres' | 'dette_court_terme' | 'dette_long_terme'>[],
-  cashflow: Pick<CashFlowStatement, 'periode' | 'flux_exploitation' | 'flux_investissement' | 'flux_financement'>[],
+  income: Pick<
+    IncomeStatement,
+    | 'periode'
+    | 'revenu_total'
+    | 'resultat_exploitation'
+    | 'resultat_net'
+    | 'benefice_par_action'
+    | 'dividende_par_action'
+    | 'resultat_avant_impots'
+    | 'impots'
+    | 'lignes_specifiques'
+  >[],
+  balance: Pick<
+    BalanceSheet,
+    | 'periode'
+    | 'total_actifs'
+    | 'total_capitaux_propres'
+    | 'dette_court_terme'
+    | 'dette_long_terme'
+    | 'tresorerie_equivalents'
+  >[],
+  cashflow: Pick<
+    CashFlowStatement,
+    | 'periode'
+    | 'flux_exploitation'
+    | 'flux_investissement'
+    | 'flux_financement'
+    | 'depenses_capital'
+    | 'flux_tresorerie_disponible'
+  >[],
 ): ChartRow[] {
   const balByPeriode = new Map(balance.map((b) => [b.periode, b]));
   const cfByPeriode = new Map(cashflow.map((c) => [c.periode, c]));
@@ -102,16 +167,37 @@ export function buildChartRows(
       bal?.dette_court_terme != null || bal?.dette_long_terme != null
         ? (bal?.dette_court_terme ?? 0) + (bal?.dette_long_terme ?? 0)
         : null;
+    const treso = bal?.tresorerie_equivalents ?? null;
+    const detteNette = dettes != null && treso != null ? dettes - treso : null;
+
+    const capexRaw = cf?.depenses_capital ?? null;
+    const capex = capexRaw != null ? Math.abs(capexRaw) : null;
+    const fcf =
+      cf?.flux_tresorerie_disponible ??
+      (cf?.flux_exploitation != null && capex != null ? cf.flux_exploitation - capex : null);
+
+    const spec = s.lignes_specifiques as Record<string, number | null> | null | undefined;
+    const coutDuRisqueRaw = typeof spec?.cout_du_risque === 'number' ? spec.cout_du_risque : null;
+    const coutDuRisque = coutDuRisqueRaw != null ? Math.abs(coutDuRisqueRaw) : null;
+
+    const impotsAbs = s.impots != null ? Math.abs(s.impots) : null;
+    const rai = s.resultat_avant_impots ?? null;
 
     return {
       periode: s.periode,
       revenu: s.revenu_total ?? null,
       rex: s.resultat_exploitation ?? null,
+      rai,
       rn: s.resultat_net ?? null,
+      coutDuRisque,
       totalActif: bal?.total_actifs ?? null,
       capitauxPropres: bal?.total_capitaux_propres ?? null,
+      tresorerie: treso,
       dettesFin: dettes,
+      detteNette,
       fluxExploitation: cf?.flux_exploitation ?? null,
+      capex,
+      fcf,
       fluxInvestissement: cf?.flux_investissement ?? null,
       fluxFinancement: cf?.flux_financement ?? null,
       bpa: s.benefice_par_action != null ? Number(s.benefice_par_action) : null,
@@ -119,10 +205,13 @@ export function buildChartRows(
       margeNette: ratio(s.resultat_net, s.revenu_total),
       margeRex: ratio(s.resultat_exploitation, s.revenu_total),
       roe: ratio(s.resultat_net, bal?.total_capitaux_propres),
-      croissanceCa:
-        prev?.revenu_total != null && prev.revenu_total !== 0 && s.revenu_total != null
-          ? ((s.revenu_total - prev.revenu_total) / Math.abs(prev.revenu_total)) * 100
-          : null,
+      roa: ratio(s.resultat_net, bal?.total_actifs),
+      levierDetteCp: ratio(dettes, bal?.total_capitaux_propres),
+      margeFcf: ratio(fcf, s.revenu_total),
+      croissanceCa: growth(s.revenu_total, prev?.revenu_total),
+      croissanceRn: growth(s.resultat_net, prev?.resultat_net),
+      tauxImposition: rai != null && rai > 0 && impotsAbs != null ? (impotsAbs / rai) * 100 : null,
+      coutRisquePct: ratio(coutDuRisque, s.revenu_total),
     };
   });
 }
