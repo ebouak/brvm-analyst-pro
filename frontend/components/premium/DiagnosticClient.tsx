@@ -177,6 +177,13 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
 
       {loading && !markdown && (
         <div className="space-y-3 p-6">
+          {/* Le premier mot peut tarder plusieurs minutes (cascade de fournisseurs,
+              modèle qui réfléchit avant d'écrire) : sans cette ligne, le bouton
+              « Génération… » seul passait pour un écran bloqué. Fermer la page
+              coupe le flux, et un rapport partiel n'est pas conservé. */}
+          <p role="status" className="text-sm text-muted">
+            Rédaction en cours. Elle prend souvent plusieurs minutes : gardez cette page ouverte, le texte s&apos;affichera au fur et à mesure.
+          </p>
           {[80, 60, 90, 70, 50].map((w, i) => (
             <div key={i} className="animate-pulse h-3 bg-border rounded" style={{ width: `${w}%` }} />
           ))}

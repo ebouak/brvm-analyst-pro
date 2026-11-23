@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous, raisonAffichable, penaliteRetiree, noteEcartArrondi, libelleClasse } from './quantTextes';
+import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous, raisonAffichable, penaliteRetiree, noteEcartArrondi, libelleClasse, libelleConfiance } from './quantTextes';
 
 describe('resumeGardeFous', () => {
   it('STAC : seule la pénalité de risque est retirée du score', () => {
@@ -109,5 +109,17 @@ describe('libelleClasse', () => {
   });
   it('classe inconnue : rendue telle quelle', () => {
     expect(libelleClasse('Autre')).toBe('Autre');
+  });
+});
+
+describe('libelleConfiance', () => {
+  it('traduit les niveaux du modèle, quelle que soit la casse', () => {
+    expect(libelleConfiance('high')).toBe('élevée');
+    expect(libelleConfiance('MEDIUM')).toBe('moyenne');
+    expect(libelleConfiance('low')).toBe('faible');
+    expect(libelleConfiance('insufficient')).toBe('insuffisante');
+  });
+  it('niveau inconnu : rendu tel quel', () => {
+    expect(libelleConfiance('autre')).toBe('autre');
   });
 });

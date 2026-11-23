@@ -121,5 +121,17 @@ export function libelleClasse(c: string): string {
   return CLASSES_QUANT[c] ?? c;
 }
 
+/** Niveau de confiance du modèle (`high`…) en français. Un niveau inconnu reste tel quel. */
+const CONFIANCES_QUANT: Record<string, string> = {
+  high: 'élevée',
+  medium: 'moyenne',
+  low: 'faible',
+  insufficient: 'insuffisante',
+};
+
+export function libelleConfiance(c: string): string {
+  return CONFIANCES_QUANT[c.toLowerCase()] ?? c;
+}
+
 /** Phrase des seuils du score Combined, à l'identique partout. */
 export const SEUILS_CLASSES = '≥ 65 : profil favorable, 50 à 64 : neutre, sous 50 : défavorable';

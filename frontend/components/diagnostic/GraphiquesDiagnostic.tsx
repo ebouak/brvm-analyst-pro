@@ -10,6 +10,8 @@ import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { valoriser } from '@/lib/diagnostic/valorisation';
 import { seriesAnnuelles, assez, type PointAnnuel } from '@/lib/diagnostic/series';
 import { libelleAbsence, serieRetenue, type ObsIndicateur } from '@/lib/bank/prudentiel';
+import { libelleClasse, libelleConfiance } from '@/lib/fiche/quantTextes';
+import { fmtDateCourte } from '@/lib/format';
 import {
   Figure, Barres, Courbes, BarresH, Pairs, Fourchette, Jauge, CourbeCours,
   type Serie, type LignePair, type Ton,
@@ -75,8 +77,8 @@ export async function graphiquesParSection(code: string): Promise<Record<string,
     ] as const).map(([libelle, valeur]) => ({ libelle, valeur, ton: ton(valeur), note: '/100' }));
     ajouter('1', (
       <Figure key="piliers" titre="Notes du modèle multifacteurs WESTBOURSE"
-        lecture={`Classification « ${pil.classification} », confiance ${pil.confiance}.`}
-        source={`modèle quant WESTBOURSE, calcul du ${pil.dateCalcul}`}>
+        lecture={`Classification « ${libelleClasse(pil.classification)} », confiance ${libelleConfiance(pil.confiance)}.`}
+        source={`modèle quant WESTBOURSE, calcul du ${fmtDateCourte(pil.dateCalcul)}`}>
         <BarresH lignes={lignes} max={100} format="note" resume="Notes des piliers sur 100" />
       </Figure>
     ));

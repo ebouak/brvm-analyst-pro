@@ -4,6 +4,7 @@ import { getLastMarketDate } from '@/lib/marketDate';
 import { resumerHistorique, type ResumeHistorique } from '@/lib/analyseIA/historique';
 import { lireTechnique, type LectureTechniqueIA } from '@/lib/analyseIA/technique';
 import { plusRecente } from '@/lib/analyseIA/sources';
+import { libelleClasse, libelleConfiance } from '@/lib/fiche/quantTextes';
 import type {
   Actualite,
   CarnetSeance,
@@ -366,8 +367,10 @@ export async function lireCombinedAlpha(db: SupabaseClient, code: string) {
             dynamique_du_cours: data.price_momentum_score,
             liquidite: data.liquidity_score,
           },
-          classification: data.classification,
-          confiance: data.confidence_level,
+          // En français : la classe brute (« Buy Quant ») est un terme d'achat
+          // que le modèle de langue recopiait tel quel.
+          classification: data.classification ? libelleClasse(data.classification as string) : null,
+          confiance: data.confidence_level ? libelleConfiance(data.confidence_level as string) : null,
           rang_global: data.rank_global,
           rang_secteur: data.rank_sector,
           eligibilite: data.eligibility_status,

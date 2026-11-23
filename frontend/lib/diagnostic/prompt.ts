@@ -8,6 +8,7 @@ import type { ContexteQuant } from './contexteQuant';
 import type { LigneComparaison } from './medianes';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import { valoriser, blocValorisation } from './valorisation';
+import { libelleClasse, libelleConfiance } from '@/lib/fiche/quantTextes';
 
 function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
@@ -88,7 +89,10 @@ function blocPiliers(q: ContexteQuant | null | undefined): string {
   if (!p) return 'Aucune note de modèle publiée pour cette valeur.';
   const n = (v: number | null) => (v == null ? 'N/D' : `${v}/100`);
   return [
-    `Calcul du ${p.dateCalcul} — classification « ${p.classification} », confiance ${p.confiance}${p.rangSecteur ? `, rang ${p.rangSecteur} dans son secteur` : ''}.`,
+    // Classe et confiance en français : la classe brute (« Buy Quant ») a été
+    // recopiée telle quelle dans des rapports, un terme d'achat dans un
+    // diagnostic sans recommandation (NSBC, 18/11/2026).
+    `Calcul du ${p.dateCalcul} — classification « ${libelleClasse(p.classification)} », confiance ${libelleConfiance(p.confiance)}${p.rangSecteur ? `, rang ${p.rangSecteur} dans son secteur` : ''}.`,
     `Note combinée ${n(p.combine)} | Valorisation ${n(p.valorisation)} | Qualité des résultats ${n(p.qualiteResultats)} | Solidité financière ${n(p.solidite)} | Dividende ${n(p.dividende)} | Momentum de cours ${n(p.momentum)} | Liquidité ${n(p.liquidite)}`,
   ].join('\n');
 }
