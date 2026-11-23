@@ -1,0 +1,1492 @@
+{
+ "lessons": {
+  "0": {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "fundamental",
+   "charts": [],
+   "duree_min": 12,
+   "liens": [
+    {
+     "href": "/fondamentaux",
+     "label": "Les fondamentaux de toutes les sociétés"
+    },
+    {
+     "href": "/rapports/dossiers",
+     "label": "Les dossiers valeur"
+    },
+    {
+     "href": "/societes",
+     "label": "Les sociétés cotées"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 1,
+    "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire.",
+    "options": [
+     "Le compte de résultat",
+     "Le rapport des commissaires aux comptes",
+     "Le rapport d’activité trimestriel",
+     "L’avis de convocation à l’assemblée générale"
+    ],
+    "question": "Quel document indique si les comptes sont certifiés ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "Les commissaires aux comptes certifient les comptes, avec ou sans réserve. C’est la première chose à lire.",
+     "options": [
+      "Le compte de résultat",
+      "Le rapport des commissaires aux comptes",
+      "Le rapport d’activité trimestriel",
+      "L’avis de convocation à l’assemblée générale"
+     ],
+     "question": "Quel document indique si les comptes sont certifiés ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un bénéfice qui ne devient pas trésorerie vient souvent de créances ou de stocks qui augmentent. Ce n’est pas forcément grave, mais il faut comprendre pourquoi.",
+     "options": [
+      "Rien, le résultat suffit",
+      "L’évolution des créances clients et des stocks",
+      "Le nombre d’administrateurs",
+      "Le cours de l’action"
+     ],
+     "question": "Une société affiche un résultat net en forte hausse, mais son flux de trésorerie opérationnel est négatif. Que vérifier en priorité ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Le bilan est une photographie à la date de clôture : actif d’un côté, fonds propres et dettes de l’autre.",
+     "options": [
+      "Les ventes et les charges de toute l’année",
+      "Le patrimoine et son financement, à une date",
+      "L’argent entré et sorti de la société dans l’année",
+      "Le cours moyen de l’action sur l’exercice"
+     ],
+     "question": "Que montre le bilan ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Le résultat d’exploitation reflète l’activité courante. Une cession exceptionnelle peut gonfler le résultat net d’une seule année.",
+     "options": [
+      "Il est toujours plus élevé que le résultat net",
+      "Il montre l’activité courante",
+      "Il inclut le dividende versé aux actionnaires",
+      "Il est le seul chiffre certifié des comptes"
+     ],
+     "question": "Pourquoi regarder le résultat d’exploitation, pas seulement le résultat net ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Des comptes provisoires peuvent évoluer jusqu’à l’assemblée générale. Ils sont utiles, à condition de le savoir.",
+     "options": [
+      "Ne peuvent plus changer une fois publiés",
+      "Peuvent encore être modifiés",
+      "Sont faux tant qu’ils ne sont pas approuvés",
+      "Ne sont communiqués qu’aux administrateurs"
+     ],
+     "question": "Des états financiers publiés « provisoires, non approuvés par l’assemblée générale » :"
+    }
+   ],
+   "resume": "Une société cotée publie chaque année ses états financiers : bilan, compte de résultat, tableau des flux de trésorerie et notes. Cette leçon montre où les trouver, ce que dit chaque tableau, dans quel ordre les lire et quels signaux doivent vous faire ralentir.",
+   "sections": [
+    {
+     "contenu": "Les sociétés cotées à la BRVM tiennent leurs comptes selon le SYSCOHADA révisé et, quand elles publient des comptes consolidés, établissent ceux du groupe selon les normes IFRS. Les banques suivent le plan comptable bancaire de l’UMOA, les assureurs le plan comptable du code CIMA. Le vocabulaire diffère un peu, la logique est la même : chaque document répond à une question précise.\nLe bilan dit ce que la société possède et ce qu’elle doit, à une date donnée. Le compte de résultat dit ce qu’elle a gagné ou perdu pendant l’année. Le tableau des flux dit si ce gain s’est transformé en argent disponible. Les notes et le rapport des commissaires aux comptes disent comment lire les trois premiers, et s’ils sont fiables.\nLire une seule pièce conduit souvent à une erreur. Un bénéfice élevé peut cacher une trésorerie qui fond. Des fonds propres solides peuvent cacher une activité qui recule. C’est en croisant les quatre que l’on se fait une idée juste de la société.",
+     "illustration": {
+      "actif": [
+       {
+        "label": "Immobilisations",
+        "valeur": 30
+       },
+       {
+        "label": "Stocks et créances",
+        "valeur": 15
+       },
+       {
+        "label": "Trésorerie",
+        "valeur": 5
+       }
+      ],
+      "gabarit": "bilan",
+      "note": "Les deux colonnes ont toujours le même total : tout ce que la société possède a été financé par quelqu’un. Ici, 50 Md FCFA d’actifs sont financés à 40 % par les actionnaires (fonds propres) et à 60 % par des dettes.",
+      "passif": [
+       {
+        "label": "Fonds propres",
+        "nature": "fonds_propres",
+        "valeur": 20
+       },
+       {
+        "label": "Dettes financières",
+        "nature": "dettes",
+        "valeur": 18
+       },
+       {
+        "label": "Fournisseurs et autres",
+        "nature": "dettes",
+        "valeur": 12
+       }
+      ],
+      "titre": "Un bilan en deux colonnes : ce que la société possède, et qui l’a financé (exemple fictif)",
+      "unite": "Md FCFA"
+     },
+     "points": [
+      {
+       "detail": "Une photographie à la date de clôture : ce que la société possède (actif) et comment c’est financé (passif : fonds propres et dettes).",
+       "titre": "Le bilan",
+       "verifier": "Le total des capitaux propres, et sa variation d’une année sur l’autre."
+      },
+      {
+       "detail": "Le film de l’année : chiffre d’affaires, charges, résultat d’exploitation, résultat net.",
+       "titre": "Le compte de résultat",
+       "verifier": "Le résultat d’exploitation, avant les éléments hors activités ordinaires."
+      },
+      {
+       "detail": "L’argent réellement entré et sorti : activité, investissements, financement (dont les dividendes versés).",
+       "titre": "Le tableau des flux de trésorerie",
+       "verifier": "Le flux des activités opérationnelles : positif, et proche du résultat ?"
+      },
+      {
+       "detail": "Les notes détaillent les postes ; le rapport des commissaires aux comptes dit si les comptes sont certifiés, avec ou sans réserve.",
+       "titre": "Les notes et le rapport des commissaires",
+       "verifier": "Le mot « réserve » ou « observation » dans le rapport des commissaires."
+      }
+     ],
+     "titre": "Les quatre pièces d’un rapport annuel",
+     "type": "definition"
+    },
+    {
+     "contenu": "Le compte de résultat part des ventes de l’année. On en retire les achats, les salaires et les amortissements, puis les intérêts de la dette et l’impôt. Ce qui reste est le résultat net : il appartient aux actionnaires.\nCe résultat n’est pas versé automatiquement. L’assemblée générale des actionnaires, réunie après la clôture de l’exercice, vote son affectation : une partie est distribuée sous forme de dividende, le reste est mis en réserve. Les réserves s’ajoutent aux fonds propres et financent les investissements futurs.\nPour l’épargnant, la conséquence est pratique : le dividende versé une année dépend du résultat de l’exercice précédent et de la décision de l’assemblée. Une société peut faire un bon bénéfice et choisir de le garder, pour investir ou pour rembourser une dette. Le rapport annuel explique en général ce choix dans la proposition d’affectation du résultat.",
+     "flux": [
+      {
+       "detail": "Chiffre d’affaires de l’année",
+       "icone": "entreprise",
+       "titre": "Ventes"
+      },
+      {
+       "detail": "Après charges, intérêts et impôt",
+       "icone": "benefices",
+       "titre": "Résultat net"
+      },
+      {
+       "detail": "Vote l’affectation du résultat",
+       "icone": "decision",
+       "titre": "Assemblée générale"
+      },
+      {
+       "detail": "Versé aux actionnaires",
+       "icone": "paiement",
+       "titre": "Dividende"
+      },
+      {
+       "detail": "Le reste renforce les fonds propres",
+       "icone": "actionnaires",
+       "titre": "Réserves"
+      }
+     ],
+     "illustration": {
+      "arrivee": "Résultat net",
+      "depart": {
+       "label": "Chiffre d’affaires",
+       "valeur": 20
+      },
+      "etapes": [
+       {
+        "label": "Achats et charges externes",
+        "valeur": -11
+       },
+       {
+        "label": "Salaires",
+        "valeur": -4
+       },
+       {
+        "label": "Amortissements",
+        "valeur": -1.5
+       },
+       {
+        "label": "Intérêts de la dette",
+        "valeur": -0.5
+       },
+       {
+        "label": "Impôt sur le résultat",
+        "valeur": -1
+       }
+      ],
+      "gabarit": "cascade",
+      "note": "Sur 20 Md FCFA de ventes, il reste 2 Md FCFA de résultat net, soit 10 FCFA pour 100 FCFA vendus. C’est ce résultat, le même que dans le simulateur ci-dessous, que l’assemblée générale répartit entre dividende et réserves.",
+      "titre": "Du chiffre d’affaires au résultat net (exemple fictif)",
+      "unite": "Md FCFA"
+     },
+     "simulation": {
+      "actions": 10000000,
+      "consigne": "Déplacez le curseur comme le ferait l’assemblée : la part distribuée va aux actionnaires, le reste renforce les fonds propres.",
+      "resultat_net": 2000000000,
+      "taux_distribution_pct": 50,
+      "type": "distribution"
+     },
+     "titre": "Le mécanisme : du chiffre d’affaires au dividende",
+     "type": "importance"
+    },
+    {
+     "contenu": "Un rapport annuel compte souvent des dizaines de pages. Les lire de la première à la dernière fait perdre l’essentiel dans les commentaires de la direction. L’ordre ci-dessous va du plus important au détail : en cinq étapes, vous savez si la société mérite une lecture plus poussée.\nCommencez par le rapport des commissaires aux comptes, même s’il est placé à la fin. S’il contient une réserve, tous les chiffres qui suivent se lisent avec cette réserve en tête. Passez ensuite au compte de résultat, en mettant au moins deux exercices côte à côte : une seule année ne montre pas de tendance.\nExemple fictif : une société affiche un résultat net en hausse de 40 %. Son résultat d’exploitation, lui, est stable : la hausse vient d’une plus-value sur la vente d’un immeuble. Le tableau des flux confirme une rentrée d’argent exceptionnelle, qui ne se reproduira pas. Lire dans l’ordre évite de prendre cette année pour une nouvelle tendance.",
+     "etapes": [
+      {
+       "cle": true,
+       "detail": "Des comptes certifiés sans réserve sont le point de départ. Une réserve se lit avant tout le reste.",
+       "titre": "Le rapport des commissaires aux comptes"
+      },
+      {
+       "detail": "Le chiffre d’affaires progresse-t-il ? Le résultat suit-il, ou dépend-il d’un élément exceptionnel ?",
+       "titre": "Le compte de résultat sur deux exercices"
+      },
+      {
+       "detail": "Un bénéfice qui ne devient jamais trésorerie est un signal : créances qui gonflent, stocks qui s’accumulent.",
+       "titre": "Le tableau des flux"
+      },
+      {
+       "detail": "Les fonds propres augmentent-ils ? La dette financière est-elle supportable face au résultat ?",
+       "titre": "Le bilan"
+      },
+      {
+       "detail": "Quelle part du bénéfice est distribuée, et quelle part est gardée pour investir.",
+       "titre": "L’affectation du résultat"
+      }
+     ],
+     "titre": "Un ordre de lecture en cinq étapes",
+     "type": "cas"
+    },
+    {
+     "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité en cours d’année. Les documents officiels sont diffusés par la BRVM ; beaucoup de sociétés les mettent aussi sur leur propre site.\nLe calendrier compte. Les comptes annuels arrivent plusieurs mois après la clôture de l’exercice : ils décrivent une situation déjà passée au moment où vous les lisez. Les rapports trimestriels et semestriels sont plus récents, mais moins détaillés, et ils ne font pas toujours l’objet d’une certification complète.\nUne bonne habitude consiste à garder les rapports de chaque année pour une même société. Comparer cinq exercices successifs montre bien mieux sa régularité que n’importe quel ratio calculé sur une seule année.",
+     "tableau": {
+      "colonnes": [
+       "Document",
+       "Fréquence",
+       "Ce qu’on y trouve"
+      ],
+      "lignes": [
+       [
+        "États financiers annuels",
+        "Une fois par an",
+        "Bilan, compte de résultat, flux, affectation du résultat"
+       ],
+       [
+        "Rapport des commissaires aux comptes",
+        "Une fois par an",
+        "Certification des comptes, réserves éventuelles"
+       ],
+       [
+        "Rapport d’activité",
+        "Trimestre, semestre",
+        "Chiffre d’affaires, résultat, commentaires de la direction"
+       ],
+       [
+        "Avis et communiqués",
+        "Selon les événements",
+        "Dividende, assemblée générale, opération sur le capital"
+       ]
+      ],
+      "note": "Sur WestBourse, chaque fiche société regroupe ses comptes, ses publications et ses dividendes."
+     },
+     "titre": "Où trouver les comptes",
+     "type": "importance"
+    },
+    {
+     "contenu": "Un rapport annuel est rédigé par la société sur elle-même. Les chiffres sont contrôlés par les commissaires aux comptes ; les commentaires de la direction restent de la communication. Ils mettent en avant les réussites et passent plus vite sur les difficultés.\nLe piège le plus fréquent tient aux unités et aux périmètres. Un tableau en millions de FCFA lu comme s’il était en milliers donne un résultat mille fois trop petit. Des comptes sociaux comparés à des comptes consolidés mélangent la société seule et le groupe avec ses filiales : les deux chiffres sont exacts, mais ils ne décrivent pas la même chose.\nAvant de comparer deux chiffres, vérifiez donc trois mentions : l’unité sous le titre du tableau, le périmètre (social ou consolidé) et le statut du document (provisoire, ou approuvé par l’assemblée générale).",
+     "points": [
+      {
+       "detail": "Certains états sont publiés « provisoires, non approuvés par l’assemblée générale ». Ils peuvent encore changer.",
+       "titre": "Confondre provisoire et définitif",
+       "verifier": "La mention en tête du document."
+      },
+      {
+       "detail": "Une cession d’actif gonfle le résultat d’une seule année. Le résultat d’exploitation la neutralise.",
+       "titre": "Prendre un résultat exceptionnel pour une tendance",
+       "verifier": "La ligne « résultat hors activités ordinaires »."
+      },
+      {
+       "detail": "Comptes sociaux (la société seule) et comptes consolidés (avec ses filiales) ne se comparent pas.",
+       "titre": "Comparer des périmètres différents",
+       "verifier": "Le titre exact du document."
+      },
+      {
+       "detail": "Certains tableaux sont en millions, d’autres en FCFA, plus rarement en devise étrangère.",
+       "titre": "Oublier l’unité",
+       "verifier": "L’unité indiquée sous le titre du tableau."
+      }
+     ],
+     "titre": "Les pièges de lecture",
+     "type": "piege"
+    },
+    {
+     "contenu": "Lire un rapport annuel, c’est répondre à quatre questions, dans l’ordre. Si la réponse à la première est négative, la suite se lit avec prudence.\nCes questions ne disent pas si l’action est chère ou bon marché : c’est le rôle des ratios des leçons suivantes, qui partent tous de ces chiffres. Un ratio calculé sur des comptes mal lus est faux, même avec une formule exacte.",
+     "points": [
+      {
+       "titre": "Les comptes sont-ils certifiés sans réserve ?"
+      },
+      {
+       "titre": "Le résultat vient-il de l’activité courante ?"
+      },
+      {
+       "titre": "Ce résultat devient-il de la trésorerie ?"
+      },
+      {
+       "titre": "Les fonds propres et la dette évoluent-ils dans le bon sens ?"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Trois tableaux, un rapport des commissaires aux comptes, et un ordre de lecture qui évite de se perdre.",
+   "titre": "Leçon 1 — Lire un rapport annuel"
+  },
+  "1": {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "evaluation",
+   "charts": [
+    {
+     "labels": [
+      "BPA de 200 FCFA",
+      "BPA de 300 FCFA",
+      "BPA de 400 FCFA"
+     ],
+     "note": "Valeurs d’exemple, reprises du simulateur de la leçon : au même cours, un bénéfice qui double divise le PER par deux. Payer un PER de 20 suppose donc que cette hausse du bénéfice ait de bonnes raisons de se produire.",
+     "reel": false,
+     "titre": "PER payé au cours de 4 000 FCFA, selon le bénéfice par action (exemple)",
+     "type": "bar",
+     "unite": "fois",
+     "valeurs": [
+      20,
+      13.3,
+      10
+     ]
+    }
+   ],
+   "duree_min": 11,
+   "liens": [
+    {
+     "href": "/premium/valorisation",
+     "label": "La valorisation de toutes les valeurs"
+    },
+    {
+     "href": "/actions/compare",
+     "label": "Comparer des actions"
+    },
+    {
+     "href": "/fondamentaux",
+     "label": "Les fondamentaux"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 1,
+    "explication": "4 500 ÷ 300 = 15.",
+    "options": [
+     "10",
+     "15",
+     "20",
+     "1 350"
+    ],
+    "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "4 500 ÷ 300 = 15.",
+     "options": [
+      "10",
+      "15",
+      "20",
+      "1 350"
+     ],
+     "question": "Une action cote 4 500 FCFA ; son bénéfice par action est de 300 FCFA. Quel est son PER ?"
+    },
+    {
+     "correct": 1,
+     "explication": "5 000 000 000 ÷ 20 000 000 = 250 FCFA par action.",
+     "options": [
+      "25 FCFA",
+      "250 FCFA",
+      "2 500 FCFA",
+      "4 FCFA"
+     ],
+     "question": "Une société a gagné 5 milliards et compte 20 millions d’actions. Quel est son BPA ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un PER très bas peut être une opportunité, ou le signe d’un problème. Il faut l’expliquer avant de conclure.",
+     "options": [
+      "Acheter immédiatement, avant la hausse",
+      "Chercher d’abord pourquoi",
+      "Vendre immédiatement si vous en détenez",
+      "Ignorer le PER, qui n’a aucun sens"
+     ],
+     "question": "Une société a un PER de 4, nettement sous ses concurrents. Quelle est la bonne réaction ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Les PER « normaux » varient d’un secteur à l’autre. La comparaison utile se fait dans le même secteur.",
+     "options": [
+      "Une banque",
+      "Un autre opérateur télécom",
+      "Une société agricole",
+      "L’indice BRVM Composite seul"
+     ],
+     "question": "Avec quelle société comparer le PER d’un opérateur télécom ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Avec un bénéfice négatif, le PER n’a pas de signification économique.",
+     "options": [
+      "Il est très attractif",
+      "Il n’a pas de sens",
+      "Il vaut zéro",
+      "Il vaut 100"
+     ],
+     "question": "Une société affiche une perte. Que vaut son PER ?"
+    }
+   ],
+   "resume": "Le PER rapporte le cours d’une action à son bénéfice par action. Il dit combien le marché paie pour un franc de bénéfice. Cette leçon montre comment le calculer, comment le lire sur de vraies valeurs de la BRVM, et ses limites.",
+   "sections": [
+    {
+     "contenu": "Le PER (price earnings ratio, ou rapport cours sur bénéfice) se calcule en deux temps. On ramène d’abord le bénéfice de la société à une seule action : c’est le bénéfice par action, le BPA. On compare ensuite ce BPA au cours de bourse.\nLe BPA se lit dans les comptes : résultat net de l’exercice divisé par le nombre d’actions qui composent le capital. Le cours, lui, change à chaque séance. Le PER bouge donc tous les jours, alors que le bénéfice ne change qu’à la publication de nouveaux comptes.\nL’inverse du PER, le rendement bénéficiaire, est souvent plus parlant. Un PER de 15 correspond à un rendement bénéficiaire d’environ 6,7 % : pour 100 FCFA payés, la société gagne environ 6,7 FCFA par an. Ce chiffre se compare facilement au taux d’une obligation. Les exemples ci-dessous sont fictifs.",
+     "formules": [
+      {
+       "exemple": "2 000 000 000 ÷ 10 000 000 = 200 FCFA",
+       "expression": "Résultat net ÷ Nombre d’actions",
+       "nom": "Bénéfice par action (BPA)"
+      },
+      {
+       "exemple": "3 000 ÷ 200 = 15 (on dit « 15 fois les bénéfices »)",
+       "expression": "Cours de l’action ÷ BPA",
+       "nom": "PER"
+      },
+      {
+       "exemple": "1 ÷ 15 ≈ 6,7 % : le bénéfice rapporté au prix payé",
+       "expression": "1 ÷ PER",
+       "nom": "Rendement bénéficiaire"
+      }
+     ],
+     "illustration": {
+      "facteurs": [
+       {
+        "label": "Cours de l’action",
+        "unite": "FCFA",
+        "valeur": 3000
+       },
+       {
+        "label": "Bénéfice par action (BPA)",
+        "unite": "FCFA",
+        "valeur": 200
+       }
+      ],
+      "gabarit": "decomposition",
+      "note": "À 3 000 FCFA l’action, l’acheteur paie 15 fois le bénéfice annuel par action. Le rendement bénéficiaire en est l’inverse : 1 ÷ 15, environ 6,7 %.",
+      "operation": "quotient",
+      "resultat": {
+       "label": "PER",
+       "valeur": 15
+      },
+      "titre": "Le PER, cours divisé par bénéfice par action (exemple fictif)"
+     },
+     "titre": "Trois formules",
+     "type": "definition"
+    },
+    {
+     "contenu": "Un PER de 15 signifie qu’au bénéfice actuel, il faudrait 15 années de bénéfices pour « rembourser » le prix de l’action. Plus le PER est élevé, plus le marché paie cher chaque franc de bénéfice.\nPourquoi accepter de payer cher ? Parce que l’on attend une hausse du bénéfice. Si le bénéfice double en quelques années, un PER de 20 payé aujourd’hui redevient un PER de 10 sur ce bénéfice futur. À l’inverse, un PER faible peut refléter une société mature qui grandit peu, un secteur délaissé, ou un risque que le marché perçoit et que vous ne voyez pas encore.\nLes fourchettes ci-dessous sont des repères pédagogiques, pas des normes. Elles servent à poser la bonne question : pourquoi ce PER est-il à ce niveau ?",
+     "simulation": {
+      "annees": 3,
+      "bpa": 200,
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "ONTBF"
+      ],
+      "consigne": "Fixez une progression du bénéfice : un PER de 20 payé aujourd’hui redevient un PER de 10 si le bénéfice double. Essayez aussi une valeur cotée.",
+      "cours": 4000,
+      "croissance_pct": 0,
+      "type": "per"
+     },
+     "stats": [
+      {
+       "detail": "Décote, ou méfiance du marché : à expliquer",
+       "label": "PER faible",
+       "valeur": "Moins de 8"
+      },
+      {
+       "detail": "Zone fréquente pour une société mature",
+       "label": "PER intermédiaire",
+       "valeur": "8 à 20"
+      },
+      {
+       "detail": "Croissance attendue, ou bénéfice temporairement bas",
+       "label": "PER élevé",
+       "valeur": "Plus de 20"
+      }
+     ],
+     "titre": "Ce que le PER raconte",
+     "type": "importance"
+    },
+    {
+     "contenu": "Comparer des sociétés du même secteur est la seule comparaison qui ait vraiment un sens. Trois opérateurs de télécommunications ont des métiers proches : leurs PER peuvent être mis côte à côte.\nLes ratios ci-dessous sont recalculés à l’ouverture de la leçon, à partir du dernier cours et des derniers comptes publiés. Ils changent donc avec le marché. Demandez-vous si l’écart entre deux sociétés s’explique par la croissance de leurs bénéfices, par leurs pays d’activité ou par leur politique de dividende. Un écart n’est pas une erreur du marché tant que vous ne l’avez pas expliqué.\nSi une valeur manque, c’est que la donnée nécessaire n’est pas disponible en base : elle est signalée comme manquante plutôt que devinée.",
+     "donnees_reelles": {
+      "codes": [
+       "SNTS",
+       "ORAC",
+       "ONTBF"
+      ],
+      "vue": "ratios"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : trois opérateurs télécoms",
+     "type": "cas"
+    },
+    {
+     "contenu": "Le même mot recouvre plusieurs calculs. Avant de comparer deux PER, demandez toujours sur quel bénéfice ils reposent.\nLe PER historique utilise le dernier exercice publié et certifié. C’est le plus fiable, mais aussi le plus ancien : en milieu d’année, il repose sur des comptes clos depuis plusieurs mois. Le PER glissant utilise les quatre derniers trimestres publiés ; il est plus récent, mais les comptes intermédiaires sont moins détaillés. Le PER prévisionnel repose sur un bénéfice estimé, et aucune estimation n’est certifiée.\nUne autre question compte pour un groupe : le résultat consolidé, ou la part qui revient aux actionnaires de la société mère ? Quand des actionnaires minoritaires détiennent une partie des filiales, la part du groupe est plus petite que le résultat consolidé, et le PER calculé sur elle est plus élevé.",
+     "tableau": {
+      "colonnes": [
+       "PER",
+       "Bénéfice utilisé",
+       "Usage"
+      ],
+      "lignes": [
+       [
+        "Historique",
+        "Dernier exercice publié",
+        "Le plus fiable : chiffres certifiés"
+       ],
+       [
+        "Glissant (12 mois)",
+        "Quatre derniers trimestres publiés",
+        "Plus récent, quand la société publie des comptes intermédiaires"
+       ],
+       [
+        "Prévisionnel",
+        "Bénéfice estimé de l’année en cours",
+        "Rare à la BRVM : aucune estimation n’est certifiée"
+       ]
+      ],
+      "note": "WestBourse utilise le PER historique, sur le résultat consolidé quand la société publie des comptes consolidés. Pour un groupe dont des actionnaires minoritaires détiennent une part des filiales (Sonatel, par exemple), le PER affiché paraît donc plus bas que celui calculé sur la part du groupe."
+     },
+     "titre": "Les trois PER qu’on rencontre",
+     "type": "importance"
+    },
+    {
+     "contenu": "Le PER est simple à calculer, et c’est justement pour cela qu’on le lit mal. Les cinq pièges ci-dessous reviennent le plus souvent.\nExemple fictif : une société gagne habituellement 2 milliards de FCFA. Une année, elle vend un terrain et encaisse 3 milliards de plus-value. Son résultat net passe à 5 milliards, et son PER est divisé par 2,5 du jour au lendemain. Rien n’a changé dans son activité : l’année suivante, sans cession, le PER retrouvera son niveau habituel. D’où la règle : vérifier que le résultat d’exploitation a suivi le résultat net.\nLe fractionnement est un piège plus mécanique. Quand une société divise la valeur de ses actions, le nombre de titres augmente et le BPA diminue dans la même proportion. Comparer un BPA ancien à un cours récent, sans corriger, donne un PER absurde.",
+     "illustration": {
+      "colonnes": [
+       {
+        "label": "Année habituelle",
+        "segments": [
+         {
+          "label": "Activité courante",
+          "valeur": 2
+         }
+        ]
+       },
+       {
+        "label": "Année de la cession",
+        "segments": [
+         {
+          "label": "Activité courante",
+          "valeur": 2
+         },
+         {
+          "label": "Plus-value du terrain",
+          "valeur": 3
+         }
+        ]
+       }
+      ],
+      "gabarit": "avant_apres",
+      "note": "Le résultat net passe de 2 à 5 Md FCFA et le PER est divisé par 2,5, alors que l’activité n’a pas changé. La plus-value ne se répétera pas l’année suivante : le PER retrouvera son niveau habituel.",
+      "titre": "Une plus-value exceptionnelle gonfle le résultat (exemple fictif)",
+      "unite": "Md FCFA"
+     },
+     "points": [
+      {
+       "detail": "Une plus-value de cession gonfle le bénéfice d’une année : le PER paraît bas, à tort.",
+       "titre": "Le bénéfice exceptionnel",
+       "verifier": "Le résultat d’exploitation a-t-il suivi ?"
+      },
+      {
+       "detail": "Avec un résultat négatif, le PER n’a pas de sens : il ne faut pas le lire comme « très bas ».",
+       "titre": "La perte",
+       "verifier": "Le signe du résultat net."
+      },
+      {
+       "detail": "Un PER bas sur une société dont les bénéfices baissent d’année en année n’est pas une affaire.",
+       "titre": "Le piège de la valeur",
+       "verifier": "La tendance du bénéfice sur 3 à 5 ans."
+      },
+      {
+       "detail": "Une banque et une société de distribution n’ont pas les mêmes PER « normaux ».",
+       "titre": "Comparer deux secteurs",
+       "verifier": "La médiane du secteur."
+      },
+      {
+       "detail": "Après un fractionnement, le BPA se divise : il faut le comparer avec le bon nombre de titres.",
+       "titre": "Le nombre d’actions qui change",
+       "verifier": "Les opérations sur titres de la société."
+      }
+     ],
+     "titre": "Quand le PER trompe",
+     "type": "piege"
+    },
+    {
+     "contenu": "Le PER est un point de départ, pas un verdict. Il pose une question, celle du prix payé pour un franc de bénéfice, et oblige à chercher la réponse dans les comptes.\nRetenez le bon ordre : vérifier d’abord que le bénéfice est récurrent, comparer ensuite le PER au secteur et à l’histoire de la société, et seulement alors en tirer une opinion. Le PER ne dit rien de la solidité du bilan : la leçon suivante complète la lecture avec les fonds propres.",
+     "points": [
+      {
+       "titre": "PER = cours ÷ bénéfice par action"
+      },
+      {
+       "titre": "Il se compare dans un même secteur, et dans le temps pour une même société"
+      },
+      {
+       "titre": "Il n’a pas de sens en cas de perte"
+      },
+      {
+       "titre": "Un PER bas demande une explication avant d’être une opportunité"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Combien d’années de bénéfices vous payez en achetant une action, et pourquoi ce chiffre ne se lit jamais seul.",
+   "titre": "Leçon 2 — Le PER : évaluer la cherté d’une action"
+  },
+  "2": {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "evaluation",
+   "charts": [],
+   "duree_min": 11,
+   "liens": [
+    {
+     "href": "/premium/valorisation",
+     "label": "La valorisation de toutes les valeurs"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Les dividendes"
+    },
+    {
+     "href": "/fondamentaux",
+     "label": "Les fondamentaux"
+    }
+   ],
+   "module": "Module 1 — Lire et analyser une entreprise",
+   "qcm": {
+    "correct": 1,
+    "explication": "10 ÷ 50 = 20 %.",
+    "options": [
+     "5 %",
+     "20 %",
+     "50 %",
+     "500 %"
+    ],
+    "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "10 ÷ 50 = 20 %.",
+     "options": [
+      "5 %",
+      "20 %",
+      "50 %",
+      "500 %"
+     ],
+     "question": "Une société a 50 milliards de fonds propres et a gagné 10 milliards. Quel est son ROE ?"
+    },
+    {
+     "correct": 1,
+     "explication": "P/B = PER × ROE = 8 × 0,25 = 2.",
+     "options": [
+      "0,32",
+      "2",
+      "3,1",
+      "33"
+     ],
+     "question": "Une société a un PER de 8 et un ROE de 25 %. Quel est son P/B ?"
+    },
+    {
+     "correct": 1,
+     "explication": "140 ÷ 2 000 = 7 %.",
+     "options": [
+      "1,4 %",
+      "7 %",
+      "14 %",
+      "70 %"
+     ],
+     "question": "Une action cote 2 000 FCFA et verse 140 FCFA de dividende. Quel est son rendement ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un ROE élevé avec peu de fonds propres peut cacher un endettement important. Il faut regarder la structure du bilan.",
+     "options": [
+      "Il signifie que la société est surévaluée",
+      "Il peut venir de fonds propres trop faibles",
+      "Il réduit forcément le dividende versé",
+      "Il n’est pas publié par les sociétés de la BRVM"
+     ],
+     "question": "Pourquoi un ROE très élevé n’est-il pas toujours une bonne nouvelle ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Une décote peut être une opportunité ou refléter une rentabilité faible. Le ROE aide à trancher.",
+     "options": [
+      "C’est forcément une bonne affaire à saisir",
+      "Il faut chercher pourquoi",
+      "La société va bientôt faire faillite",
+      "Le ratio est faux, la valeur comptable aussi"
+     ],
+     "question": "Une action cote sous sa valeur comptable (P/B inférieur à 1). Que faut-il en conclure ?"
+    }
+   ],
+   "resume": "Le PER ne regarde que le bénéfice. Le P/B compare le cours aux fonds propres, le ROE mesure la rentabilité de ces fonds propres, et le rendement du dividende dit ce que vous touchez. Lus ensemble, ces ratios disent si un prix élevé est justifié.",
+   "sections": [
+    {
+     "contenu": "Le PER ne regarde que le bénéfice d’une année. Trois autres ratios complètent la lecture, chacun avec sa question.\nLe P/B (price to book, ou cours sur valeur comptable) compare la valeur que la bourse donne à la société, sa capitalisation, à la valeur de ses fonds propres inscrite au bilan. Un P/B de 1 signifie que le marché valorise la société exactement à sa valeur comptable. Le même ratio se calcule par action : cours divisé par fonds propres par action.\nLe ROE (return on equity, ou rentabilité des fonds propres) mesure ce que la société gagne avec l’argent de ses actionnaires. Le rendement du dividende, enfin, dit ce que l’actionnaire reçoit chaque année en espèces, rapporté au prix payé. Les exemples chiffrés sont fictifs.",
+     "formules": [
+      {
+       "exemple": "60 Md ÷ 40 Md = 1,5 : le marché paie 1,5 fois la valeur comptable",
+       "expression": "Capitalisation ÷ Fonds propres",
+       "nom": "Price to book (P/B)"
+      },
+      {
+       "exemple": "8 Md ÷ 40 Md = 20 %",
+       "expression": "Résultat net ÷ Fonds propres",
+       "nom": "Rentabilité des fonds propres (ROE)"
+      },
+      {
+       "exemple": "180 ÷ 3 000 = 6 %",
+       "expression": "Dividende par action ÷ Cours",
+       "nom": "Rendement du dividende"
+      }
+     ],
+     "titre": "Trois ratios, trois questions",
+     "type": "definition"
+    },
+    {
+     "contenu": "Ces ratios ne sont pas indépendants : le P/B est égal au PER multiplié par le ROE. La formule se vérifie en écrivant chaque ratio par action : le BPA apparaît une fois au numérateur et une fois au dénominateur, et s’annule.\nCette relation explique beaucoup de choses. Une société qui gagne 25 % par an sur ses fonds propres peut valoir 2,5 fois sa valeur comptable avec un PER de seulement 10. Une société qui ne gagne que 5 %, avec le même PER, ne vaut que la moitié de sa valeur comptable. Le P/B élevé de la première n’est pas un excès : il reflète sa rentabilité.\nLa vraie question n’est donc pas « ce P/B est-il élevé ? », mais « ce P/B est-il cohérent avec le ROE ? ». Un P/B élevé avec un ROE faible demande une explication : soit le marché attend une forte amélioration, soit il paie trop cher.\nLe taux de distribution complète le tableau : c’est la part du bénéfice versée en dividende. Une société qui distribue presque tout garde peu pour investir, et sa croissance future en dépend.",
+     "formules": [
+      {
+       "exemple": "PER 10 × ROE 25 % = P/B de 2,5",
+       "expression": "(Cours ÷ BPA) × (BPA ÷ Fonds propres par action)",
+       "nom": "P/B = PER × ROE"
+      }
+     ],
+     "illustration": {
+      "facteurs": [
+       {
+        "label": "PER",
+        "valeur": 10
+       },
+       {
+        "label": "ROE",
+        "pourcentage": true,
+        "valeur": 25
+       }
+      ],
+      "gabarit": "decomposition",
+      "note": "À PER égal, c’est la rentabilité des fonds propres qui fixe le P/B. Avec un ROE de 5 %, le même PER de 10 donnerait un P/B de 0,5 : la moitié de la valeur comptable.",
+      "operation": "produit",
+      "resultat": {
+       "label": "P/B (cours ÷ valeur comptable)",
+       "valeur": 2.5
+      },
+      "titre": "Le P/B se décompose en PER et ROE (exemple de la leçon)"
+     },
+     "stats": [
+      {
+       "detail": "Décote : actifs mal valorisés, ou rentabilité jugée faible",
+       "label": "P/B inférieur à 1",
+       "valeur": "Sous la valeur comptable"
+      },
+      {
+       "detail": "À comparer au secteur et au coût de la dette",
+       "label": "ROE de 15 à 25 %",
+       "valeur": "Rentabilité solide"
+      },
+      {
+       "detail": "Proche de 100 % : peu de bénéfice gardé pour investir",
+       "label": "Taux de distribution",
+       "valeur": "Dividende ÷ Bénéfice"
+      }
+     ],
+     "titre": "Le lien qui explique tout",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les quatre sociétés ci-dessous ont des profils très différents, et c’est l’intérêt de les comparer.\nUne société peut afficher un P/B très élevé parce qu’elle distribue presque tout son bénéfice depuis des années : ses fonds propres restent petits, son ROE devient très élevé, et le P/B suit. Une autre peut coter sous sa valeur comptable, par exemple parce que sa rentabilité est jugée faible ou trop irrégulière. Les deux situations demandent une lecture, pas un réflexe.\nLes ratios sont recalculés à l’ouverture de la leçon avec le dernier cours et les derniers comptes publiés. Pour chaque valeur, vérifiez la cohérence entre P/B et ROE avec la relation vue plus haut, puis lisez la fiche de la société pour comprendre l’écart.",
+     "donnees_reelles": {
+      "codes": [
+       "NTLC",
+       "PALC",
+       "SNTS",
+       "SGBC"
+      ],
+      "vue": "ratios"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : des profils très différents",
+     "type": "cas"
+    },
+    {
+     "contenu": "Exemple fictif : deux sociétés affichent le même PER de 12. Un lecteur pressé les jugerait aussi chères l’une que l’autre.\nLe ROE change tout. La société A gagne 25 % sur ses fonds propres : son P/B de 3 traduit une entreprise qui crée beaucoup de valeur avec peu de capital. La société B ne gagne que 6 % : son P/B de 0,7 n’est pas une aubaine, c’est la conséquence d’une rentabilité faible. Si rien ne change dans sa gestion, la décote a de bonnes raisons de durer.\nLa décote de B ne devient intéressante que si vous avez une raison précise de penser que sa rentabilité va remonter : nouvelle direction, fin d’une charge exceptionnelle, cession d’une activité déficitaire. Sans cette raison, un P/B bas est seulement le prix d’une rentabilité basse.",
+     "simulation": {
+      "codes": [
+       "NTLC",
+       "PALC",
+       "SNTS",
+       "SGBC"
+      ],
+      "consigne": "Modifiez le ROE de chaque société à PER égal, puis vérifiez le lien sur une valeur cotée.",
+      "societes": [
+       {
+        "nom": "Société A",
+        "per": 12,
+        "roe_pct": 25
+       },
+       {
+        "nom": "Société B",
+        "per": 12,
+        "roe_pct": 6
+       }
+      ],
+      "type": "pb_roe"
+     },
+     "tableau": {
+      "colonnes": [
+       "Ratio",
+       "Société A",
+       "Société B"
+      ],
+      "lignes": [
+       [
+        "PER",
+        "12",
+        "12"
+       ],
+       [
+        "ROE",
+        "25 %",
+        "6 %"
+       ],
+       [
+        "P/B (= PER × ROE)",
+        "3,0",
+        "0,7"
+       ],
+       [
+        "Lecture",
+        "Rentable : le P/B élevé se justifie",
+        "Peu rentable : la décote s’explique"
+       ]
+      ],
+      "note": "Le même PER cache deux réalités : c’est le ROE qui fait la différence."
+     },
+     "titre": "Une lecture croisée",
+     "type": "cas"
+    },
+    {
+     "contenu": "Chaque ratio a son angle mort, et les quatre pièges ci-dessous en découlent.\nLe plus trompeur est le ROE gonflé par la dette. Exemple fictif : deux sociétés gagnent chacune 4 milliards de FCFA. La première est financée par 40 milliards de fonds propres ; la seconde par 10 milliards de fonds propres et 30 milliards de dettes. La première affiche un ROE de 10 %, la seconde de 40 %. La seconde n’est pas quatre fois mieux gérée : elle est surtout plus endettée, donc plus fragile si ses ventes baissent.\nLe rendement du dividende a un piège symétrique : il monte mécaniquement quand le cours baisse. Un rendement inhabituellement élevé peut donc signaler un marché qui doute du prochain dividende. Vérifiez le taux de distribution : un dividende supérieur au bénéfice est payé en puisant dans les réserves, ce qui ne peut pas durer.",
+     "illustration": {
+      "colonnes": [
+       {
+        "label": "Première société",
+        "segments": [
+         {
+          "label": "Fonds propres",
+          "valeur": 40
+         }
+        ]
+       },
+       {
+        "label": "Seconde société",
+        "segments": [
+         {
+          "label": "Fonds propres",
+          "valeur": 10
+         },
+         {
+          "label": "Dettes",
+          "valeur": 30
+         }
+        ]
+       }
+      ],
+      "gabarit": "avant_apres",
+      "note": "Les deux sociétés gagnent 4 Md FCFA. Rapporté à 40 Md FCFA de fonds propres, cela fait un ROE de 10 % ; rapporté à 10 Md FCFA, 40 %. L’écart vient de la dette, pas d’une meilleure gestion : la seconde est plus fragile si ses ventes baissent.",
+      "part_du_premier": true,
+      "titre": "Même bénéfice de 4 Md FCFA, deux façons de se financer (exemple fictif)",
+      "unite": "Md FCFA"
+     },
+     "points": [
+      {
+       "detail": "Une société très endettée a peu de fonds propres : son ROE paraît excellent, son risque est élevé aussi.",
+       "titre": "Un ROE gonflé par la dette",
+       "verifier": "Le rapport dette financière ÷ fonds propres."
+      },
+      {
+       "detail": "Le rendement monte quand le cours baisse. Un rendement de 12 % peut annoncer un dividende qui sera réduit.",
+       "titre": "Un rendement élevé par chute du cours",
+       "verifier": "Le taux de distribution et la tendance du bénéfice."
+      },
+      {
+       "detail": "Une entreprise qui a peu d’actifs physiques a naturellement un P/B élevé.",
+       "titre": "Un P/B lu pour une société de services",
+       "verifier": "La nature des actifs du bilan."
+      },
+      {
+       "detail": "Après des pertes accumulées, P/B et ROE n’ont plus de sens.",
+       "titre": "Des fonds propres négatifs",
+       "verifier": "Le signe des capitaux propres."
+      }
+     ],
+     "titre": "Les erreurs fréquentes",
+     "type": "piege"
+    },
+    {
+     "contenu": "Un ratio seul ne dit rien ; deux ratios ensemble commencent à raconter une histoire. Le couple P/B et ROE est le plus utile : il relie le prix payé à la rentabilité obtenue.\nEn pratique, lisez dans cet ordre : le ROE et sa régularité sur plusieurs années, la structure du bilan (dette et fonds propres), puis le P/B. Le rendement du dividende vient en dernier, une fois vérifié que le bénéfice couvre bien la distribution.",
+     "points": [
+      {
+       "titre": "P/B = capitalisation ÷ fonds propres"
+      },
+      {
+       "titre": "ROE = résultat ÷ fonds propres"
+      },
+      {
+       "titre": "P/B = PER × ROE : un P/B élevé se justifie par un ROE élevé"
+      },
+      {
+       "titre": "Un rendement très élevé se vérifie avant de se célébrer"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Ce que vaut l’entreprise dans ses livres, ce qu’elle rapporte sur ses fonds propres, et le lien entre les deux.",
+   "titre": "Leçon 3 — P/B, ROE et rendement : les ratios complémentaires"
+  },
+  "4": {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "general",
+   "charts": [
+    {
+     "labels": [
+      "1",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10",
+      "15",
+      "20"
+     ],
+     "note": "Valeurs d’exemple, pas des données de marché : risque du portefeuille, base 100 pour une seule action. La baisse est rapide pour les premières lignes, puis la courbe s’aplatit. Au-delà d’une quinzaine de lignes, il reste surtout le risque de marché, que la diversification ne supprime pas.",
+     "reel": false,
+     "titre": "Risque d’un portefeuille selon le nombre de lignes (exemple)",
+     "type": "line",
+     "unite": "base 100",
+     "valeurs": [
+      100,
+      74,
+      58,
+      52,
+      48,
+      46,
+      43,
+      42
+     ]
+    }
+   ],
+   "duree_min": 11,
+   "liens": [
+    {
+     "href": "/portefeuille",
+     "label": "Mon portefeuille"
+    },
+    {
+     "href": "/liquidite",
+     "label": "La liquidité de chaque valeur"
+    },
+    {
+     "href": "/secteurs",
+     "label": "Les secteurs"
+    }
+   ],
+   "module": "Module 2 — Construire son portefeuille",
+   "qcm": {
+    "correct": 1,
+    "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché.",
+    "options": [
+     "Le risque propre à une société",
+     "Le risque de marché",
+     "Le risque d’un mauvais résultat",
+     "Le risque d’un litige"
+    ],
+    "question": "Quel risque la diversification ne peut-elle pas supprimer ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "Une crise générale touche toutes les actions : multiplier les lignes ne protège pas contre le risque de marché.",
+     "options": [
+      "Le risque propre à une société",
+      "Le risque de marché",
+      "Le risque d’un mauvais résultat",
+      "Le risque d’un litige"
+     ],
+     "question": "Quel risque la diversification ne peut-elle pas supprimer ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Dix banques réagissent souvent ensemble aux mêmes nouvelles. La répartition par secteur compte autant que le nombre de lignes.",
+     "options": [
+      "Oui, dix lignes suffisent",
+      "Non, il reste exposé à un seul secteur",
+      "Oui, à condition que ce soit dix pays différents",
+      "La question n’a pas de sens"
+     ],
+     "question": "Un portefeuille compte dix lignes, toutes des banques. Est-il bien diversifié ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Les frais de courtage comportent souvent un minimum : sur un petit ordre, ils représentent un pourcentage élevé.",
+     "options": [
+      "Elles sont interdites par le règlement de la BRVM",
+      "Les frais minimum pèsent lourd",
+      "Elles ne versent pas de dividende",
+      "Elles augmentent le risque de marché"
+     ],
+     "question": "Pourquoi des lignes trop petites posent-elles problème ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Rééquilibrer ramène le portefeuille vers sa répartition cible et limite la dépendance à une seule société.",
+     "options": [
+      "Ne rien faire",
+      "Envisager de rééquilibrer pour réduire sa part",
+      "Acheter encore la même valeur",
+      "Vendre toutes les autres lignes"
+     ],
+     "question": "Une ligne a beaucoup monté et pèse désormais 40 % du portefeuille. Que suggère le principe de diversification ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un indice pondéré par la capitalisation peut être dominé par quelques grandes sociétés.",
+     "options": [
+      "Il ne contient qu’une seule société cotée",
+      "Il est pondéré par la capitalisation",
+      "Il ne contient que des obligations d’État",
+      "Il n’est plus publié par la BRVM"
+     ],
+     "question": "Pourquoi suivre l’indice BRVM Composite n’équivaut-il pas forcément à être diversifié ?"
+    }
+   ],
+   "resume": "Diversifier, c’est répartir son argent pour qu’une mauvaise nouvelle sur une société ne ruine pas tout le portefeuille. À la BRVM, la diversification a des limites particulières : peu de sociétés, des secteurs concentrés, une liquidité inégale. Cette leçon donne des règles simples et vérifiables.",
+   "sections": [
+    {
+     "contenu": "Le risque d’un portefeuille a deux sources. Il faut les distinguer avant de parler de diversification, car celle-ci ne supprime que la première.\nLa première est propre à chaque société : un mauvais résultat, un litige, un contrat perdu, un dirigeant qui part. Ce risque varie d’une société à l’autre. Si vous détenez dix sociétés à parts égales, une mauvaise nouvelle sur l’une ne touche qu’un dixième de votre portefeuille.\nLa seconde touche toutes les actions à la fois : une crise régionale, une hausse générale des taux, une baisse des prix des matières premières qui pèse sur plusieurs économies. Multiplier les lignes ne protège pas contre ce risque-là. D’autres placements, comme les obligations ou une épargne disponible, en amortissent l’effet.\nSupprimer la première source, c’est déjà beaucoup : c’est elle qui peut faire perdre une grande partie d’un portefeuille concentré sur une seule valeur.",
+     "points": [
+      {
+       "detail": "Un mauvais résultat, un litige, un dirigeant qui part. Il se réduit en multipliant les lignes.",
+       "titre": "Le risque propre à une société"
+      },
+      {
+       "detail": "Une crise régionale, une hausse des taux, un recul général. Il touche toutes les actions à la fois : la diversification ne l’efface pas.",
+       "titre": "Le risque de marché"
+      }
+     ],
+     "titre": "Deux risques différents",
+     "type": "definition"
+    },
+    {
+     "contenu": "Selon les études, souvent anciennes, menées sur les grands marchés, une grande partie du risque propre disparaît avec une à quelques dizaines de lignes, selon la méthode retenue. Au-delà, chaque ligne supplémentaire réduit très peu le risque et complique le suivi. Le graphique de la leçon illustre cette courbe avec des valeurs d’exemple.\nÀ la BRVM, avec une cinquantaine de sociétés et des secteurs concentrés, viser 8 à 15 lignes réparties sur plusieurs secteurs est un repère raisonnable.\nCe repère dépend aussi de la somme investie. Avec un petit capital, multiplier les lignes oblige à passer de petits ordres, sur lesquels les frais minimum de courtage pèsent lourd. Mieux vaut alors construire le portefeuille progressivement, ligne après ligne, que d’acheter quinze valeurs d’un coup avec de très petits montants.",
+     "titre": "Combien de lignes ?",
+     "type": "importance"
+    },
+    {
+     "contenu": "Une bonne répartition se vérifie sur quatre axes. Le nombre de lignes n’en est qu’un, et ce n’est pas le plus important.\nLe poids de la première ligne compte davantage : un portefeuille de quinze valeurs dont une pèse la moitié est en réalité concentré. Le secteur vient ensuite. À la BRVM, il est facile d’accumuler des banques sans s’en rendre compte, car elles sont nombreuses à la cote.\nLe pays est un axe propre à l’UEMOA. Toutes les sociétés sont cotées sur le même marché, mais leur activité dépend de l’économie d’un pays, ou de plusieurs : c’est le pays de l’activité qui compte. Enfin, la part d’obligations dépend de votre horizon et de la baisse que vous pouvez supporter : plus l’échéance de votre projet est proche, plus elle mérite d’être importante.\nExemple fictif : un portefeuille de 3 000 000 FCFA réparti en dix lignes égales de 300 000 FCFA ne dépasse jamais 10 % par ligne. S’il contient six banques, il dépasse pourtant de loin 35 % sur un seul secteur.",
+     "simulation": {
+      "capital": 3000000,
+      "secteurs": [
+       {
+        "nom": "Banques",
+        "pct": 60
+       },
+       {
+        "nom": "Télécoms",
+        "pct": 10
+       },
+       {
+        "nom": "Distribution",
+        "pct": 10
+       },
+       {
+        "nom": "Agro-industrie",
+        "pct": 10
+       },
+       {
+        "nom": "Services publics",
+        "pct": 10
+       }
+      ],
+      "seuil_secteur_pct": 33,
+      "type": "allocation"
+     },
+     "tableau": {
+      "colonnes": [
+       "Dimension",
+       "Question",
+       "Repère"
+      ],
+      "lignes": [
+       [
+        "Société",
+        "Quel poids pèse ma première ligne ?",
+        "Pas plus de 20 % du portefeuille"
+       ],
+       [
+        "Secteur",
+        "Suis-je trop exposé aux banques ?",
+        "Pas plus de 35 % sur un seul secteur"
+       ],
+       [
+        "Pays",
+        "Mes sociétés dépendent-elles d’une seule économie ?",
+        "Répartir entre plusieurs pays de l’UEMOA"
+       ],
+       [
+        "Classe d’actifs",
+        "Ai-je des obligations pour amortir les chocs ?",
+        "Selon l’horizon et la tolérance au risque"
+       ]
+      ],
+      "note": "Ces repères sont des ordres de grandeur pédagogiques, pas des règles réglementaires."
+     },
+     "titre": "Les quatre dimensions de la répartition",
+     "type": "importance"
+    },
+    {
+     "contenu": "L’indice BRVM Composite regroupe toutes les sociétés cotées, pondérées par leur capitalisation boursière. Une société deux fois plus grande pèse deux fois plus dans l’indice : quelques grandes valeurs y occupent une place importante.\nC’est utile à savoir : suivre l’indice n’est pas la même chose qu’être diversifié. Si les deux ou trois premières capitalisations baissent, l’indice baisse, même si la majorité des autres sociétés monte.\nLe BRVM 30 retient les trente valeurs les plus échangées. Un indice ne dit pas, à lui seul, si le mouvement du marché est porté par quelques grandes valeurs ou partagé par l’ensemble : pour le savoir, comptez plutôt les valeurs en hausse et en baisse de la séance. Les valeurs ci-dessous sont lues en base à l’ouverture de la leçon.",
+     "donnees_reelles": {
+      "codes": [
+       "BRVMC",
+       "BRVM30"
+      ],
+      "vue": "indices"
+     },
+     "reel": true,
+     "titre": "Sur la BRVM : deux indices",
+     "type": "cas"
+    },
+    {
+     "contenu": "Avoir beaucoup de lignes ne suffit pas. Les quatre erreurs ci-dessous donnent l’apparence d’un portefeuille réparti, sans en avoir la protection.\nLa plus fréquente consiste à accumuler des valeurs qui réagissent ensemble. Dix banques subissent la même décision sur les taux, la même hausse des créances douteuses dans un pays, la même nouvelle réglementation : elles montent et baissent souvent ensemble.\nLa liquidité est un piège moins visible. Une ligne peu échangée paraît stable sur un graphique, parce que son cours bouge rarement. Le jour où vous voulez la vendre, il peut ne pas y avoir d’acheteur au prix affiché. Diversifier, c’est aussi garder une part du portefeuille dans des valeurs que l’on peut revendre facilement.\nLe rééquilibrage, enfin, se fait au moins une fois par an. Une ligne qui a fortement monté finit par dominer le portefeuille : votre risque se concentre sans que vous l’ayez décidé.",
+     "points": [
+      {
+       "detail": "Dix lignes dans le même secteur réagissent ensemble à la même nouvelle.",
+       "titre": "Dix banques, un seul risque",
+       "verifier": "La répartition par secteur de votre portefeuille."
+      },
+      {
+       "detail": "Avec de petits montants, les frais minimum de courtage pèsent lourd sur chaque achat.",
+       "titre": "Des lignes trop petites",
+       "verifier": "Le coût total d’un ordre chez votre SGI."
+      },
+      {
+       "detail": "Certaines valeurs s’échangent peu : en cas de besoin, on peut ne pas réussir à vendre au prix affiché.",
+       "titre": "Oublier la liquidité",
+       "verifier": "La classe de liquidité de chaque valeur."
+      },
+      {
+       "detail": "Une ligne qui a beaucoup monté finit par peser trop lourd.",
+       "titre": "Ne jamais rééquilibrer",
+       "verifier": "Le poids de chaque ligne, une fois par an."
+      }
+     ],
+     "titre": "Les fausses diversifications",
+     "type": "piege"
+    },
+    {
+     "contenu": "Diversifier, c’est accepter de moins gagner sur sa meilleure idée pour ne pas tout perdre sur la pire. Personne ne sait à l’avance laquelle de ses idées sera la meilleure, ni laquelle sera la pire.\nUne règle simple résume la leçon : notez une fois par an le poids de chaque ligne, de chaque secteur et de chaque pays dans votre portefeuille. Si un chiffre vous surprend, c’est là qu’il faut agir. Le portefeuille virtuel de WestBourse permet de s’exercer à cette discipline sans engager d’argent.",
+     "points": [
+      {
+       "titre": "La diversification réduit le risque propre, pas le risque de marché"
+      },
+      {
+       "titre": "Plusieurs secteurs et plusieurs pays valent mieux que beaucoup de lignes"
+      },
+      {
+       "titre": "Une ligne ne devrait pas dominer le portefeuille"
+      },
+      {
+       "titre": "Vérifier et rééquilibrer au moins une fois par an"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Ne pas tout perdre à cause d’une seule société : combien de lignes, quels secteurs, quels pays.",
+   "titre": "Leçon 5 — Diversification et allocation d’actifs"
+  },
+  "6": {
+   "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
+   "categorie": "income",
+   "charts": [
+    {
+     "labels": [
+      "Prudent",
+      "Équilibré",
+      "Dynamique"
+     ],
+     "note": "Répartitions d’exemple, fictives, du tableau de la leçon : la part d’obligations baisse à mesure que le profil accepte plus de variations. Un profil se choisit d’après l’horizon et la baisse supportable, pas d’après le rendement espéré.",
+     "reel": false,
+     "titre": "Part des obligations dans les trois portefeuilles d’exemple",
+     "type": "bar",
+     "unite": "%",
+     "valeurs": [
+      50,
+      25,
+      0
+     ]
+    }
+   ],
+   "duree_min": 12,
+   "liens": [
+    {
+     "href": "/premium/paper-trading",
+     "label": "Le portefeuille virtuel"
+    },
+    {
+     "href": "/simulateur",
+     "label": "Le simulateur"
+    },
+    {
+     "href": "/dividendes",
+     "label": "Les dividendes"
+    }
+   ],
+   "module": "Module 2 — Construire son portefeuille",
+   "qcm": {
+    "correct": 1,
+    "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA.",
+    "options": [
+     "3 200 000 FCFA",
+     "5 000 000 FCFA",
+     "8 000 000 FCFA",
+     "32 000 000 FCFA"
+    ],
+    "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?"
+   },
+   "quiz": [
+    {
+     "correct": 1,
+     "explication": "400 000 ÷ 0,08 = 5 000 000 FCFA.",
+     "options": [
+      "3 200 000 FCFA",
+      "5 000 000 FCFA",
+      "8 000 000 FCFA",
+      "32 000 000 FCFA"
+     ],
+     "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?"
+    },
+    {
+     "correct": 1,
+     "explication": "100 × 600 = 60 000 FCFA, soit 6 actions à 10 000 FCFA.",
+     "options": [
+      "3",
+      "6",
+      "10",
+      "60"
+     ],
+     "question": "Vous détenez 100 actions à 10 000 FCFA ; le dividende est de 600 FCFA, entièrement réinvesti au même cours. Combien d’actions achetez-vous ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Une simulation applique des hypothèses ; elle ne garantit rien.",
+     "options": [
+      "Comparer deux scénarios",
+      "Garantir le résultat futur",
+      "Montrer l’effet du réinvestissement",
+      "Donner un ordre de grandeur"
+     ],
+     "question": "Qu’est-ce qu’une simulation ne peut pas faire ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Un rendement élevé peut annoncer un dividende réduit. Il faut vérifier sa régularité.",
+     "options": [
+      "Ce n’est pas le cas sur un horizon long",
+      "Il va souvent avec un dividende fragile",
+      "Les frais de courtage sont alors plus élevés",
+      "L’impôt sur les dividendes est plus élevé"
+     ],
+     "question": "Pourquoi viser un rendement très élevé augmente-t-il le risque ?"
+    },
+    {
+     "correct": 1,
+     "explication": "Il reproduit les achats et ventes aux cours réels, sans argent engagé.",
+     "options": [
+      "À investir de l’argent réel, sans payer de frais",
+      "À tester une stratégie sans argent réel",
+      "À obtenir des dividendes gratuits",
+      "À réduire l’impôt sur ses dividendes"
+     ],
+     "question": "À quoi sert le portefeuille virtuel ?"
+    }
+   ],
+   "resume": "Une simulation ne prédit rien : elle montre l’effet de vos hypothèses. Cette leçon calcule le réinvestissement des dividendes sur trois ans, l’argent nécessaire pour viser un revenu, et propose de tester une stratégie sans risque avec le portefeuille virtuel.",
+   "sections": [
+    {
+     "contenu": "Une simulation applique des hypothèses : un dividende, une croissance de ce dividende, un cours. Elle en déduit un résultat. Si une hypothèse change, le résultat change, parfois beaucoup.\nElle est utile pour deux raisons. Elle rend visible un mécanisme qu’on sous-estime à l’œil nu, comme l’effet du réinvestissement des dividendes. Et elle oblige à écrire ses hypothèses : on découvre souvent qu’on attendait sans le dire un rendement très élevé, ou un cours qui ne baisse jamais.\nElle ne garantit aucun résultat. Ses chiffres sont toujours plus réguliers que la réalité, qui ajoute des frais, des impôts, des baisses de cours et des dividendes réduits que des hypothèses simples ignorent.",
+     "points": [
+      {
+       "detail": "Mesurer l’effet du réinvestissement, comparer des rendements, fixer un ordre de grandeur.",
+       "titre": "Elle aide à"
+      },
+      {
+       "detail": "Ce que fera le cours, si le dividende sera maintenu, ni ce que coûteront les frais et l’impôt dans votre situation.",
+       "titre": "Elle ne dit pas"
+      }
+     ],
+     "titre": "Ce qu’une simulation est, et n’est pas",
+     "type": "definition"
+    },
+    {
+     "contenu": "Hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à acheter de nouvelles actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.\nLe mécanisme est celui des intérêts composés. La première année, les dividendes rachètent quelques actions. L’année suivante, ces actions nouvelles versent à leur tour un dividende, qui s’ajoute à celui des actions d’origine. Le nombre d’actions croît donc un peu plus vite chaque année.\nSur trois ans, l’effet reste modeste. Il devient important sur dix ou vingt ans : le réinvestissement est surtout un outil d’épargne longue. Notez les limites de l’exemple : un cours constant est une hypothèse commode, presque jamais vérifiée, et dans la réalité chaque rachat supporte des frais de courtage.",
+     "simulation": {
+      "actions": 200,
+      "annees": 3,
+      "cours": 15000,
+      "croissance_pct": 3,
+      "dpa": 900,
+      "type": "reinvestissement"
+     },
+     "titre": "Réinvestir ses dividendes pendant 3 ans",
+     "type": "cas"
+    },
+    {
+     "contenu": "Hypothèse fictive : vous visez 600 000 FCFA de dividendes nets par an. La somme à investir s’obtient en divisant le revenu visé par le rendement retenu.\nLe résultat montre un arbitrage. Plus le rendement retenu est élevé, plus la somme nécessaire est faible. Mais un rendement élevé est souvent associé à des sociétés dont le cours a baissé ou dont le dividende est fragile. Viser 9 % plutôt que 5 % réduit le capital nécessaire, et augmente le risque de voir le revenu réel baisser l’année où un dividende est réduit.\nUn calcul prudent retient un rendement modéré et prévoit une marge. Il vérifie aussi que le revenu visé est bien net d’impôt, puisque la retenue à la source réduit le dividende avant qu’il n’arrive sur votre compte.",
+     "simulation": {
+      "rendements_pct": [
+       5,
+       7,
+       9
+      ],
+      "revenu_cible": 600000,
+      "type": "objectif"
+     },
+     "titre": "Combien investir pour viser un revenu ?",
+     "type": "cas"
+    },
+    {
+     "contenu": "Trois répartitions fictives de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.\nLe profil prudent cherche des revenus stables et accepte une croissance plus lente : la moitié en obligations amortit les baisses du marché des actions. Le profil équilibré accepte des baisses temporaires en échange de revenus et de croissance. Le profil dynamique, entièrement en actions, vise la croissance du capital et doit supporter de fortes variations sans vendre au pire moment.\nUn profil ne se choisit pas sur le rendement espéré, mais sur deux questions : quand aurez-vous besoin de cet argent, et quelle baisse pourriez-vous supporter sans vendre ? Un épargnant qui vend tout à la première forte baisse n’a pas un profil dynamique, quelle que soit son ambition.",
+     "tableau": {
+      "colonnes": [
+       "Profil",
+       "Répartition",
+       "Ce qu’il cherche",
+       "Ce qu’il accepte"
+      ],
+      "lignes": [
+       [
+        "Prudent",
+        "Moitié obligations, moitié actions à dividende régulier",
+        "Des revenus stables",
+        "Une croissance plus lente"
+       ],
+       [
+        "Équilibré",
+        "Un quart d’obligations, trois quarts d’actions de 4 secteurs",
+        "Revenus et croissance",
+        "Des baisses temporaires"
+       ],
+       [
+        "Dynamique",
+        "Actions seulement, 8 à 12 lignes",
+        "La croissance du capital",
+        "De fortes variations"
+       ]
+      ],
+      "note": "Exemples pédagogiques. La bonne répartition dépend de votre horizon, de vos besoins et de votre tolérance aux pertes."
+     },
+     "titre": "Trois portefeuilles d’exemple",
+     "type": "importance"
+    },
+    {
+     "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le moyen le plus simple de vérifier qu’une stratégie tient sur la durée.\nIl apprend aussi ce qu’aucune simulation ne montre : vos propres réactions. Voir une ligne perdre 15 % en quelques semaines, même avec de l’argent fictif, dit beaucoup de ce que vous ferez avec de l’argent réel. Notez ces réactions au fil des semaines.\nLes quatre étapes ci-dessous donnent un cadre. Trois mois sont un minimum pour traverser au moins une période de baisse. Gardez en tête que, sur une valeur peu échangée, le vrai marché ne permet pas toujours d’acheter ou de vendre au cours affiché.",
+     "etapes": [
+      {
+       "detail": "Par exemple 3 000 000 FCFA, profil équilibré.",
+       "titre": "Définir le profil et la somme"
+      },
+      {
+       "detail": "En respectant les repères de diversification de la leçon 5.",
+       "titre": "Composer le portefeuille virtuel"
+      },
+      {
+       "cle": true,
+       "detail": "Noter ses réactions aux baisses, et l’arrivée des dividendes.",
+       "titre": "Le suivre trois mois"
+      },
+      {
+       "detail": "Le portefeuille fait-il mieux, ou moins bien, que le marché ?",
+       "titre": "Comparer à l’indice"
+      }
+     ],
+     "titre": "Tester sans risque",
+     "type": "importance"
+    },
+    {
+     "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité. Trois écarts reviennent presque toujours.\nLes frais et l’impôt d’abord. Chaque achat et chaque vente supporte des frais de courtage, et les dividendes subissent une retenue à la source. Une simulation qui les ignore surestime le résultat, d’autant plus que les ordres sont petits et nombreux.\nLe cours constant ensuite. Si le cours baisse, les dividendes réinvestis achètent plus d’actions, ce qui est favorable à long terme, mais la valeur affichée du portefeuille diminue. Testez toujours un scénario défavorable à côté du scénario central.\nL’extrapolation enfin. Une croissance du dividende observée sur cinq ans ne se prolonge pas d’elle-même. Pour une hypothèse raisonnable, regardez la régularité passée du dividende, et retenez une croissance plus faible que celle observée.",
+     "points": [
+      {
+       "detail": "Les frais de courtage et la retenue sur les dividendes réduisent le résultat réel.",
+       "titre": "Oublier les frais et l’impôt",
+       "verifier": "Si le dividende simulé est brut ou net."
+      },
+      {
+       "detail": "Le cours peut baisser ; réinvestir à un cours plus bas achète alors plus d’actions, mais le capital affiché diminue.",
+       "titre": "Supposer un cours constant",
+       "verifier": "Le résultat dans un scénario défavorable."
+      },
+      {
+       "detail": "Une croissance de dividende passée n’est pas une promesse.",
+       "titre": "Extrapoler le passé",
+       "verifier": "La régularité du dividende sur cinq ans."
+      }
+     ],
+     "titre": "Les illusions des simulations",
+     "type": "piege"
+    },
+    {
+     "contenu": "Simuler, c’est rendre ses hypothèses visibles. Une simulation honnête les affiche à côté de son résultat, et teste au moins un scénario défavorable.\nAvant d’engager de l’argent, posez la question inverse : si le dividende baissait d’un tiers et le cours de 20 %, que deviendrait votre plan ? Si la réponse vous inquiète, réduisez le montant ou allongez l’horizon.",
+     "points": [
+      {
+       "titre": "Une simulation compare des scénarios, elle ne prédit pas"
+      },
+      {
+       "titre": "Le réinvestissement des dividendes accélère la croissance du nombre d’actions"
+      },
+      {
+       "titre": "Un rendement visé plus élevé demande moins de capital, et plus de risque"
+      },
+      {
+       "titre": "Le portefeuille virtuel teste une stratégie sans engager d’argent"
+      }
+     ],
+     "titre": "L’essentiel",
+     "type": "retenir"
+    }
+   ],
+   "sous_titre": "Faire tourner des hypothèses avant d’engager son argent : dividendes réinvestis, objectif de revenu, et ce que les chiffres ne disent pas.",
+   "titre": "Leçon 7 — Simulation de portefeuille sur 3 ans"
+  }
+ },
+ "sauvegarde_le": "2026-11-23 21:47:24.328207+00",
+ "slug": "academy-niveau-2-fondamental"
+}

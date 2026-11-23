@@ -2,9 +2,9 @@
  "titre": "Leçon 1 — Lire un rapport annuel",
  "module": "Module 1 — Lire et analyser une entreprise",
  "categorie": "fundamental",
- "duree_min": 12,
- "sous_titre": "Trois tableaux, un rapport des commissaires aux comptes, et un ordre de lecture qui évite de se perdre.",
- "resume": "Une société cotée publie chaque année ses états financiers : bilan, compte de résultat, tableau des flux de trésorerie et notes. Cette leçon montre où les trouver, ce que dit chaque tableau, dans quel ordre les lire et quels signaux doivent vous faire ralentir.",
+ "duree_min": 22,
+ "sous_titre": "Trois tableaux, un rapport des commissaires aux comptes, un ordre de lecture, puis les vrais comptes 2025 de Sonatel.",
+ "resume": "Une société cotée publie chaque année ses états financiers : bilan, compte de résultat, tableau des flux de trésorerie et notes. Cette leçon montre où les trouver, ce que dit chaque tableau, dans quel ordre les lire et quels signaux doivent vous faire ralentir. Elle applique ensuite la méthode, chiffres à l’appui, aux comptes 2025 du groupe Sonatel.",
  "sections": [
   {
    "type": "definition",
@@ -171,6 +171,410 @@
    ]
   },
   {
+   "type": "cas",
+   "titre": "Cas réel : le compte de résultat de Sonatel en 2025",
+   "reel": true,
+   "contenu": "Appliquons l’ordre de lecture à un vrai document : le communiqué des résultats 2025 du groupe Sonatel, publié le 16 février 2026, avec des comptes consolidés aux normes IFRS. Les chiffres du tableau sont ceux de l’exercice 2025, tels que publiés, en milliards de FCFA (Md) arrondis à une décimale. Le bloc placé sous la section donne les valeurs actuelles lues en base : les cours et les ratios changent chaque jour, les comptes 2025 ne changent plus.\nLisons ligne à ligne. Le chiffre d’affaires passe de 1 776,4 à 1 923,1 Md : 1 923,1 ÷ 1 776,4 − 1 = +8,3 %. Les achats externes (634,1 Md) forment la charge la plus lourde, devant les dotations aux amortissements (251,5 Md). Les impôts et taxes d’exploitation, qui ne sont pas l’impôt sur les sociétés, progressent de 22,5 % pour atteindre 182,5 Md, bien plus vite que les ventes. Le document les isole : on peut donc les suivre.\nLe résultat d’exploitation atteint 669,8 Md. Marge d’exploitation : 669,8 ÷ 1 923,1 = 34,8 %, contre 34,9 % en 2024 (619,5 ÷ 1 776,4). L’activité a grandi sans que la marge bouge. Le résultat financier est une charge nette de 20,8 Md : le résultat avant impôt vaut 669,8 − 20,8 = 649,0 Md. L’impôt sur les sociétés est de 235,4 Md : 235,4 ÷ 649,0 = 36,3 %, contre 34,0 % en 2024. C’est un taux apparent, calculé sur des comptes qui mélangent plusieurs pays : ce n’est le taux légal d’aucun d’entre eux.\nLe résultat net consolidé est de 413,6 Md (649,0 − 235,4). Il n’appartient pourtant pas tout entier aux actionnaires de Sonatel. Sonatel détient 69,40 % d’Orange Mali, 88,92 % d’Orange Guinée, 89,85 % d’Orange Bissau et 50 % d’Orange Sierra Leone. Pour les filiales qu’elle contrôle, les comptes entrent en entier dans ceux du groupe ; la fraction qui revient aux autres actionnaires (30,60 % d’Orange Mali, par exemple) est isolée sur la ligne des minoritaires.\nSur les 413,6 Md, 71,6 Md reviennent aux minoritaires, soit 71,6 ÷ 413,6 = 17,3 %. Les 342,0 Md restants forment le résultat net part du groupe, celui des actionnaires de la maison mère : 413,6 − 71,6 = 342,0. C’est lui qui sert à calculer le bénéfice par action : 342,0 Md ÷ 100 millions d’actions = 3 420 FCFA par action ancienne, chiffre publié avant le fractionnement.",
+   "tableau": {
+    "colonnes": [
+     "Poste (Md FCFA)",
+     "2025",
+     "2024",
+     "Variation"
+    ],
+    "lignes": [
+     [
+      "Chiffre d’affaires",
+      "1 923,1",
+      "1 776,4",
+      "+8,3 %"
+     ],
+     [
+      "Achats externes",
+      "−634,1",
+      "−615,0",
+      "+3,1 %"
+     ],
+     [
+      "Charges de personnel",
+      "−150,1",
+      "−143,7",
+      "+4,5 %"
+     ],
+     [
+      "Impôts et taxes d’exploitation",
+      "−182,5",
+      "−148,9",
+      "+22,5 %"
+     ],
+     [
+      "Dotations aux amortissements",
+      "−251,5",
+      "−231,7",
+      "+8,5 %"
+     ],
+     [
+      "Résultat d’exploitation",
+      "669,8",
+      "619,5",
+      "+8,1 %"
+     ],
+     [
+      "Résultat financier",
+      "−20,8",
+      "−23,3",
+      "−10,6 %"
+     ],
+     [
+      "Impôt sur les sociétés",
+      "−235,4",
+      "−202,6",
+      "+16,2 %"
+     ],
+     [
+      "Résultat net consolidé",
+      "413,6",
+      "393,7",
+      "+5,1 %"
+     ],
+     [
+      "dont part du groupe",
+      "342,0",
+      "328,8",
+      "+4,0 %"
+     ],
+     [
+      "dont minoritaires",
+      "71,6",
+      "64,9",
+      "+10,3 %"
+     ],
+     [
+      "Résultat net par action, part du groupe (FCFA, avant fractionnement)",
+      "3 420",
+      "3 288",
+      "+4,0 %"
+     ]
+    ],
+    "note": "Variation de la valeur du poste ; pour une charge, un signe + veut dire une charge plus lourde. Les autres produits et charges (net −35,1 Md en 2025) ne sont pas listés, mais figurent dans la cascade ci-dessous."
+   },
+   "illustration": {
+    "gabarit": "cascade",
+    "titre": "Sonatel, exercice 2025 : du chiffre d’affaires au résultat net consolidé",
+    "unite": "Md FCFA",
+    "reel": true,
+    "source": "Groupe Sonatel, résultats financiers 2025 (états consolidés IFRS, 16 février 2026)",
+    "depart": {
+     "label": "Chiffre d’affaires",
+     "valeur": 1923.1
+    },
+    "etapes": [
+     {
+      "label": "Achats externes",
+      "valeur": -634.1
+     },
+     {
+      "label": "Charges de personnel",
+      "valeur": -150.1
+     },
+     {
+      "label": "Impôts et taxes d’exploitation",
+      "valeur": -182.5
+     },
+     {
+      "label": "Amortissements",
+      "valeur": -251.5
+     },
+     {
+      "label": "Autres produits et charges",
+      "valeur": -35.1
+     },
+     {
+      "label": "Résultat financier",
+      "valeur": -20.8
+     },
+     {
+      "label": "Impôt sur les sociétés",
+      "valeur": -235.4
+     }
+    ],
+    "arrivee": "Résultat net consolidé",
+    "note": "« Autres produits et charges » additionne les autres produits et charges opérationnels, les cessions, restructurations, pertes de valeur et le résultat des entités mises en équivalence. Le total calculé retombe sur le résultat net publié : 413,6 Md."
+   },
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : le bilan de Sonatel au 31 décembre 2025",
+   "reel": true,
+   "contenu": "Passons au bilan, en milliards de FCFA. Les chiffres du tableau sont ceux du 31 décembre 2025 et du 31 décembre 2024 ; le bloc en dessous donne les valeurs actuelles lues en base. Le total du bilan est de 3 270,2 Md : 1 626,0 Md d’actif non courant, dont 1 143,5 Md d’immobilisations corporelles, et 1 644,2 Md d’actif courant, dont 536,1 Md de disponibilités.\nCôté financement, le total des capitaux propres est de 1 399,3 Md : 1 399,3 ÷ 3 270,2 = 42,8 % du total du bilan, contre 41,0 % un an plus tôt (1 274,6 ÷ 3 105,3). Un peu plus de 42 FCFA d’actifs sur 100 sont donc financés par les actionnaires et les minoritaires ; le reste l’est par des dettes de toute nature : fournisseurs, impôts, dettes financières, autres passifs.\nLes dettes financières, c’est-à-dire les passifs financiers non courants (232,7 Md) et courants (170,0 Md), totalisent 402,7 Md. Face à elles, 536,1 Md de disponibilités : 536,1 − 402,7 = 133,4 Md. Le groupe détient plus de trésorerie que de dettes financières. Fin 2024, les deux étaient presque égales (460,4 Md et 460,5 Md). Ce calcul laisse de côté les dettes locatives et les autres passifs : il ne résume pas à lui seul la solidité du bilan.\nLes capitaux propres se divisent en deux : 1 160,7 Md pour la part du groupe et 238,5 Md pour les minoritaires. La part du groupe pèse 1 160,7 ÷ 1 399,3 = 83,0 % du total. C’est cette ligne que les deux leçons suivantes utilisent pour le P/B et le ROE, comme le résultat part du groupe sert au PER.\nUne ligne demande de l’attention : les écarts de conversion, à −112,0 Md contre −60,9 Md fin 2024, soit 51,1 Md de moins dans les capitaux propres. Ils viennent de la conversion en FCFA des comptes de filiales hors zone franc, c’est-à-dire celles de Guinée et de Sierra Leone. Cet effet ne passe pas par le résultat : il agit directement sur les capitaux propres. Le communiqué ne dit pas quelle monnaie pèse combien.",
+   "tableau": {
+    "colonnes": [
+     "Poste (Md FCFA)",
+     "31/12/2025",
+     "31/12/2024"
+    ],
+    "lignes": [
+     [
+      "Immobilisations corporelles",
+      "1 143,5",
+      "1 120,7"
+     ],
+     [
+      "Total de l’actif non courant",
+      "1 626,0",
+      "1 634,6"
+     ],
+     [
+      "Disponibilités et quasi-disponibilités",
+      "536,1",
+      "460,4"
+     ],
+     [
+      "Total de l’actif courant",
+      "1 644,2",
+      "1 470,7"
+     ],
+     [
+      "Total de l’actif",
+      "3 270,2",
+      "3 105,3"
+     ],
+     [
+      "Capitaux propres part du groupe",
+      "1 160,7",
+      "1 050,3"
+     ],
+     [
+      "Capitaux propres des minoritaires",
+      "238,5",
+      "224,3"
+     ],
+     [
+      "Total des capitaux propres",
+      "1 399,3",
+      "1 274,6"
+     ],
+     [
+      "Dettes financières (passifs financiers courants et non courants)",
+      "402,7",
+      "460,5"
+     ],
+     [
+      "Écarts de conversion (inclus dans les capitaux propres)",
+      "−112,0",
+      "−60,9"
+     ],
+     [
+      "Total des passifs courants",
+      "1 567,7",
+      "1 504,2"
+     ]
+    ],
+    "note": "Les dettes financières additionnent les passifs financiers non courants et courants. Le total du passif et des capitaux propres égale le total de l’actif : 3 270,2 Md au 31/12/2025."
+   },
+   "illustration": {
+    "gabarit": "bilan",
+    "titre": "Sonatel au 31 décembre 2025 : ce que le groupe possède, et qui l’a financé",
+    "unite": "Md FCFA",
+    "reel": true,
+    "source": "Groupe Sonatel, résultats financiers 2025 (états consolidés IFRS, 16 février 2026)",
+    "actif": [
+     {
+      "label": "Immobilisations corporelles",
+      "valeur": 1143.5
+     },
+     {
+      "label": "Autres actifs non courants",
+      "valeur": 482.5
+     },
+     {
+      "label": "Créances et autres actifs courants",
+      "valeur": 1108.1
+     },
+     {
+      "label": "Trésorerie",
+      "valeur": 536.1
+     }
+    ],
+    "passif": [
+     {
+      "label": "Capitaux propres",
+      "valeur": 1399.3,
+      "nature": "fonds_propres"
+     },
+     {
+      "label": "Dettes financières",
+      "valeur": 402.7,
+      "nature": "dettes"
+     },
+     {
+      "label": "Fournisseurs",
+      "valeur": 480.7,
+      "nature": "dettes"
+     },
+     {
+      "label": "Autres dettes",
+      "valeur": 987.5,
+      "nature": "dettes"
+     }
+    ],
+    "note": "« Fournisseurs » additionne fournisseurs d’immobilisations et fournisseurs de biens et services. « Autres dettes » est calculé par différence : tout le reste du passif (autres passifs, impôts et taxes, dettes locatives, avantages du personnel…). Total : 3 270,2 Md de chaque côté."
+   },
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : du bénéfice à la trésorerie, puis au dividende",
+   "reel": true,
+   "contenu": "Le résultat net est un chiffre comptable ; le tableau des flux montre l’argent réellement entré et sorti. Les montants du tableau sont ceux de l’exercice 2025, en Md FCFA. Le bloc sous la section donne les dividendes passés lus en base, à comparer à celui de l’exercice 2025.\nL’activité a généré 681,6 Md de trésorerie, contre 413,6 Md de résultat net consolidé : l’écart est de 268,0 Md. Les dotations aux amortissements (251,5 Md) sont une charge sans sortie d’argent et sont du même ordre que cet écart. Le reste dépend de postes que le communiqué ne détaille pas.\nSoustrayons les acquisitions d’immobilisations pour voir ce qui reste après l’investissement : 681,6 − 289,2 = 392,4 Md en 2025 (660,0 − 300,9 = 359,1 Md en 2024). C’est notre calcul, simple. La société publie, elle, un « free cash flow » de 422,5 Md, avec sa propre définition. Les deux chiffres ne se comparent pas directement : le communiqué ne détaille pas le calcul de son indicateur, et l’écart de 30,1 Md ne permet pas, à lui seul, de dire d’où il vient.\nDans le financement, 230,5 Md de dividendes ont été versés en 2025, maison mère et minoritaires des filiales. Le tableau des variations de capitaux propres détaille 187,6 Md versés par la maison mère et 43,4 Md aux minoritaires, soit 231,0 Md, à 0,5 Md près. Ce ne sont pas les dividendes décrits plus bas, qui concernent le résultat 2025 et sont payés en 2026. Au total, 681,6 − 273,5 − 298,0 − 34,4 = 75,7 Md : les disponibilités passent de 460,4 à 536,1 Md.\nReste l’affectation du résultat 2025 : un dividende de 1 933 FCFA brut par action ancienne. La retenue de 10 % (IRVM, l’impôt sur les revenus de valeurs mobilières) laisse 1 740 FCFA net (1 933 × 0,90 = 1 739,7, arrondi). Avec 100 millions d’actions avant fractionnement, le total distribué est 1 933 × 100 000 000 = 193,3 Md. Rapporté au résultat part du groupe : 193,3 ÷ 342,0 = 56,5 %. C’est le taux de distribution. Selon le calendrier BRVM, le détachement a eu lieu le 22 mai 2026 et le paiement le 26 mai 2026.\nUn dividende se vote sur le résultat de la société mère, Sonatel SA, dans ses comptes sociaux, pas sur le résultat consolidé. Le rapport 193,3 ÷ 342,0 est donc un repère de lecture, pas la règle de l’assemblée. Après distribution, 53,3 Md (53 318 839 013 FCFA) sont reportés en réserves libres.\nLe titre a été fractionné le 26 octobre 2026 : une action ancienne contre dix nouvelles, soit 1 milliard d’actions. Le même dividende s’écrit 193,3 FCFA brut et 174 FCFA net par action nouvelle ; le résultat part du groupe par action devient 342,0 FCFA. Le total distribué ne change pas : 193,3 × 1 000 000 000 = 193,3 Md.",
+   "stats": [
+    {
+     "label": "Dividende brut",
+     "valeur": "1 933 FCFA",
+     "detail": "Par action ancienne, exercice 2025 (193,3 FCFA après fractionnement)"
+    },
+    {
+     "label": "Dividende net",
+     "valeur": "1 740 FCFA",
+     "detail": "Après retenue de 10 % (174 FCFA après fractionnement)"
+    },
+    {
+     "label": "Total distribué",
+     "valeur": "193,3 Md FCFA",
+     "detail": "1 933 × 100 millions d’actions"
+    },
+    {
+     "label": "Taux de distribution",
+     "valeur": "56,5 %",
+     "detail": "193,3 ÷ 342,0, résultat part du groupe"
+    },
+    {
+     "label": "Reliquat en réserves",
+     "valeur": "53,3 Md FCFA",
+     "detail": "Réserves libres, comptes de la société mère"
+    }
+   ],
+   "tableau": {
+    "colonnes": [
+     "Poste (Md FCFA)",
+     "2025",
+     "2024"
+    ],
+    "lignes": [
+     [
+      "Flux des activités d’exploitation",
+      "681,6",
+      "660,0"
+     ],
+     [
+      "Acquisitions d’immobilisations",
+      "−289,2",
+      "−300,9"
+     ],
+     [
+      "Exploitation moins acquisitions (notre calcul)",
+      "392,4",
+      "359,1"
+     ],
+     [
+      "Flux des activités d’investissement",
+      "−273,5",
+      "−414,5"
+     ],
+     [
+      "Flux des activités de financement",
+      "−298,0",
+      "−196,9"
+     ],
+     [
+      "dont dividendes versés",
+      "−230,5",
+      "−244,0"
+     ],
+     [
+      "Incidence des taux de change",
+      "−34,4",
+      "+11,8"
+     ],
+     [
+      "Variation nette de trésorerie",
+      "75,7",
+      "60,3"
+     ],
+     [
+      "Disponibilités à l’ouverture",
+      "460,4",
+      "400,0"
+     ],
+     [
+      "Disponibilités à la clôture",
+      "536,1",
+      "460,4"
+     ]
+    ],
+    "note": "La ligne « exploitation moins acquisitions » est un calcul de la leçon, pas un chiffre publié. Le flux d’investissement inclut d’autres mouvements que les seules acquisitions, non détaillés ici."
+   },
+   "donnees_reelles": {
+    "vue": "historique",
+    "codes": [
+     "SNTS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : ce que dit l’attestation des commissaires",
+   "reel": true,
+   "contenu": "Revenons à la première étape de l’ordre de lecture : les commissaires aux comptes. Le communiqué indique que les états financiers consolidés ont été arrêtés par le conseil d’administration le 16 février 2026. Il y joint une attestation des commissaires aux comptes (Deloitte Sénégal et Garecgo), datée du même jour, sur la sincérité des informations financières consolidées. Elle ne relève aucune anomalie significative.\nIl faut lire ce texte exactement. Une attestation de sincérité sur des tableaux n’est pas le rapport de certification complet, qui accompagne le rapport annuel et s’appuie sur les notes annexes. Les tableaux publiés ici ne comprennent pas ces notes. Les chiffres de cette leçon sont ceux de l’exercice 2025, tels que le communiqué les donne, sans le détail qui les explique. Le bloc en dessous donne la valeur actuelle de l’action.\nQue conclure ? Que les commissaires ont relu ces chiffres sans relever d’anomalie significative, et rien de plus. Une absence de réserve ne veut pas dire que tout est expliqué. Deux lignes du bilan le montrent : les autres actifs courants (657,0 Md, contre 512,8 Md un an plus tôt) et les autres passifs courants (643,9 Md, contre 510,8 Md). Seules les notes disent ce qu’elles contiennent.\nLa conduite à tenir est simple : utiliser ces chiffres comme des ordres de grandeur fiables, puis attendre le rapport annuel complet, avec le rapport de certification et les notes, avant de conclure sur les postes qui demandent un détail.",
+   "tableau": {
+    "colonnes": [
+     "Élément",
+     "Dans le communiqué ?",
+     "Ce que cela change pour le lecteur"
+    ],
+    "lignes": [
+     [
+      "Tableaux consolidés IFRS (résultat, bilan, flux)",
+      "Oui",
+      "Les chiffres de cette leçon"
+     ],
+     [
+      "Attestation de sincérité des commissaires, 16 février 2026",
+      "Oui",
+      "Aucune anomalie significative relevée"
+     ],
+     [
+      "Notes annexes",
+      "Non",
+      "Le détail des grands postes reste inconnu"
+     ],
+     [
+      "Rapport de certification complet",
+      "Non",
+      "À attendre avec le rapport annuel"
+     ]
+    ],
+    "note": "Source : communiqué des résultats 2025 du groupe Sonatel, 16 février 2026."
+   },
+   "donnees_reelles": {
+    "vue": "cours",
+    "codes": [
+     "SNTS"
+    ]
+   }
+  },
+  {
    "type": "importance",
    "titre": "Où trouver les comptes",
    "contenu": "Les sociétés cotées publient leurs états financiers annuels, puis des rapports d’activité en cours d’année. Les documents officiels sont diffusés par la BRVM ; beaucoup de sociétés les mettent aussi sur leur propre site.\nLe calendrier compte. Les comptes annuels arrivent plusieurs mois après la clôture de l’exercice : ils décrivent une situation déjà passée au moment où vous les lisez. Les rapports trimestriels et semestriels sont plus récents, mais moins détaillés, et ils ne font pas toujours l’objet d’une certification complète.\nUne bonne habitude consiste à garder les rapports de chaque année pour une même société. Comparer cinq exercices successifs montre bien mieux sa régularité que n’importe quel ratio calculé sur une seule année.",
@@ -276,37 +680,37 @@
    "explication": "Un bénéfice qui ne devient pas trésorerie vient souvent de créances ou de stocks qui augmentent. Ce n’est pas forcément grave, mais il faut comprendre pourquoi."
   },
   {
-   "question": "Que montre le bilan ?",
+   "question": "Sonatel publie un résultat net consolidé de 413,6 Md FCFA et un résultat net part du groupe de 342,0 Md. Que représentent les 71,6 Md d’écart ?",
    "options": [
-    "Les ventes et les charges de toute l’année",
-    "Le patrimoine et son financement, à une date",
-    "L’argent entré et sorti de la société dans l’année",
-    "Le cours moyen de l’action sur l’exercice"
+    "La part du résultat qui revient aux minoritaires des filiales",
+    "Les dividendes versés aux actionnaires de Sonatel en 2025",
+    "L’impôt sur les sociétés payé par les seules filiales",
+    "Les amortissements des immobilisations du groupe"
    ],
-   "correct": 1,
-   "explication": "Le bilan est une photographie à la date de clôture : actif d’un côté, fonds propres et dettes de l’autre."
+   "correct": 0,
+   "explication": "413,6 − 342,0 = 71,6 Md. Les comptes des filiales entrent en entier dans le consolidé ; la fraction détenue par d’autres actionnaires (par exemple 30,60 % d’Orange Mali) est isolée sur la ligne des minoritaires."
   },
   {
-   "question": "Pourquoi regarder le résultat d’exploitation, pas seulement le résultat net ?",
+   "question": "Sonatel annonce un dividende brut de 1 933 FCFA par action ancienne, pour 100 millions d’actions. Quel est le total distribué ?",
    "options": [
-    "Il est toujours plus élevé que le résultat net",
-    "Il montre l’activité courante",
-    "Il inclut le dividende versé aux actionnaires",
-    "Il est le seul chiffre certifié des comptes"
+    "193,3 Md FCFA",
+    "19,3 Md FCFA",
+    "1 933 Md FCFA",
+    "187,6 Md FCFA"
    ],
-   "correct": 1,
-   "explication": "Le résultat d’exploitation reflète l’activité courante. Une cession exceptionnelle peut gonfler le résultat net d’une seule année."
+   "correct": 0,
+   "explication": "1 933 × 100 000 000 = 193 300 000 000 FCFA, soit 193,3 Md. Les 187,6 Md sont les dividendes versés en 2025 par la maison mère, un autre chiffre."
   },
   {
-   "question": "Des états financiers publiés « provisoires, non approuvés par l’assemblée générale » :",
+   "question": "Le communiqué de Sonatel contient une attestation des commissaires sur la sincérité des comptes, mais pas les notes annexes. Que faire ?",
    "options": [
-    "Ne peuvent plus changer une fois publiés",
-    "Peuvent encore être modifiés",
-    "Sont faux tant qu’ils ne sont pas approuvés",
-    "Ne sont communiqués qu’aux administrateurs"
+    "Utiliser les chiffres, en notant que les notes manquent, et attendre le rapport annuel complet",
+    "Considérer les comptes comme certifiés sans réserve et ne plus rien lire d’autre",
+    "Écarter les chiffres, qui sont faux tant que les notes ne sont pas publiées",
+    "Remplacer les notes manquantes par ses propres estimations des postes"
    ],
-   "correct": 1,
-   "explication": "Des comptes provisoires peuvent évoluer jusqu’à l’assemblée générale. Ils sont utiles, à condition de le savoir."
+   "correct": 0,
+   "explication": "Une attestation de sincérité n’est pas le rapport de certification complet. Les chiffres restent exploitables comme ordres de grandeur ; le détail des postes attend les notes du rapport annuel."
   }
  ],
  "liens": [

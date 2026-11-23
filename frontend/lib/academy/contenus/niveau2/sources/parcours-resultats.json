@@ -1,0 +1,319 @@
+{
+ "unique": {
+  "verse": 1000000,
+  "frais": 9800,
+  "lignes": [
+   {
+    "code": "SNTS",
+    "titres": 140,
+    "cout": 196193,
+    "cours_fin": 4040,
+    "valeur": 565600,
+    "dividendes": 110320
+   },
+   {
+    "code": "SGBC",
+    "titres": 18,
+    "cout": 198162,
+    "cours_fin": 38795,
+    "valeur": 698310,
+    "dividendes": 136642
+   },
+   {
+    "code": "CIEC",
+    "titres": 107,
+    "cout": 198849,
+    "cours_fin": 4400,
+    "valeur": 470800,
+    "dividendes": 90530
+   },
+   {
+    "code": "SOGC",
+    "titres": 39,
+    "cout": 196950,
+    "cours_fin": 7600,
+    "valeur": 296400,
+    "dividendes": 91611
+   },
+   {
+    "code": "TTLS",
+    "titres": 104,
+    "cout": 199576,
+    "cours_fin": 3580,
+    "valeur": 372320,
+    "dividendes": 106907
+   }
+  ],
+  "valeur_titres": 2403430,
+  "liquidites": 546280,
+  "dividendes": 536010,
+  "valeur_finale": 2949710,
+  "gain": 1949710,
+  "gain_pct": 195,
+  "taux_annuel_pct": 24.2,
+  "points": [
+   {
+    "ancre": "2022-11-20",
+    "verse": 1000000,
+    "valeur": 1211138
+   },
+   {
+    "ancre": "2023-11-20",
+    "verse": 1000000,
+    "valeur": 1319667
+   },
+   {
+    "ancre": "2024-11-20",
+    "verse": 1000000,
+    "valeur": 1643855
+   },
+   {
+    "ancre": "2025-11-20",
+    "verse": 1000000,
+    "valeur": 2109138
+   },
+   {
+    "ancre": "2026-11-20",
+    "verse": 1000000,
+    "valeur": 2949710
+   }
+  ],
+  "nb_achats": 5
+ },
+ "mensuel": {
+  "verse": 3000000,
+  "frais": 37139,
+  "lignes": [
+   {
+    "code": "SNTS",
+    "titres": 260,
+    "cout": 481746,
+    "cours_fin": 4040,
+    "valeur": 1050400,
+    "dividendes": 133820
+   },
+   {
+    "code": "SGBC",
+    "titres": 44,
+    "cout": 819433,
+    "cours_fin": 38795,
+    "valeur": 1706980,
+    "dividendes": 198528
+   },
+   {
+    "code": "CIEC",
+    "titres": 341,
+    "cout": 817074,
+    "cours_fin": 4400,
+    "valeur": 1500400,
+    "dividendes": 157738
+   },
+   {
+    "code": "SOGC",
+    "titres": 155,
+    "cout": 892360,
+    "cours_fin": 7600,
+    "valeur": 1178000,
+    "dividendes": 128784
+   },
+   {
+    "code": "TTLS",
+    "titres": 289,
+    "cout": 740396,
+    "cours_fin": 3580,
+    "valeur": 1034620,
+    "dividendes": 132518
+   }
+  ],
+  "valeur_titres": 6470400,
+  "liquidites": 379,
+  "dividendes": 751388,
+  "valeur_finale": 6470779,
+  "gain": 3470779,
+  "gain_pct": 115.7,
+  "taux_annuel_pct": 31.7,
+  "points": [
+   {
+    "ancre": "2022-11-20",
+    "verse": 600000,
+    "valeur": 584889
+   },
+   {
+    "ancre": "2023-11-20",
+    "verse": 1200000,
+    "valeur": 1234080
+   },
+   {
+    "ancre": "2024-11-20",
+    "verse": 1800000,
+    "valeur": 2318809
+   },
+   {
+    "ancre": "2025-11-20",
+    "verse": 2400000,
+    "valeur": 3879663
+   },
+   {
+    "ancre": "2026-11-20",
+    "verse": 3000000,
+    "valeur": 6470779
+   }
+  ],
+  "nb_achats": 60
+ },
+ "annuel": {
+  "verse": 3000000,
+  "frais": 41448,
+  "lignes": [
+   {
+    "code": "SNTS",
+    "titres": 430,
+    "cout": 777650,
+    "cours_fin": 4040,
+    "valeur": 1737200,
+    "dividendes": 258540
+   },
+   {
+    "code": "SGBC",
+    "titres": 64,
+    "cout": 821286,
+    "cours_fin": 38795,
+    "valeur": 2482880,
+    "dividendes": 413566
+   },
+   {
+    "code": "CIEC",
+    "titres": 434,
+    "cout": 861715,
+    "cours_fin": 4400,
+    "valeur": 1909600,
+    "dividendes": 279608
+   },
+   {
+    "code": "SOGC",
+    "titres": 244,
+    "cout": 859415,
+    "cours_fin": 7600,
+    "valeur": 1854400,
+    "dividendes": 444974
+   },
+   {
+    "code": "TTLS",
+    "titres": 437,
+    "cout": 866196,
+    "cours_fin": 3580,
+    "valeur": 1564460,
+    "dividendes": 339073
+   }
+  ],
+  "valeur_titres": 9548540,
+  "liquidites": 549499,
+  "dividendes": 1735761,
+  "valeur_finale": 10098039,
+  "gain": 7098039,
+  "gain_pct": 236.6,
+  "taux_annuel_pct": 21.3,
+  "points": [
+   {
+    "ancre": "2017-11-20",
+    "verse": 600000,
+    "valeur": 582184
+   },
+   {
+    "ancre": "2018-11-20",
+    "verse": 900000,
+    "valeur": 717735
+   },
+   {
+    "ancre": "2019-11-20",
+    "verse": 1200000,
+    "valeur": 925407
+   },
+   {
+    "ancre": "2020-11-20",
+    "verse": 1500000,
+    "valeur": 1248203
+   },
+   {
+    "ancre": "2021-11-20",
+    "verse": 1800000,
+    "valeur": 2224693
+   },
+   {
+    "ancre": "2022-11-20",
+    "verse": 2100000,
+    "valeur": 3029292
+   },
+   {
+    "ancre": "2023-11-20",
+    "verse": 2400000,
+    "valeur": 3438762
+   },
+   {
+    "ancre": "2024-11-20",
+    "verse": 2700000,
+    "valeur": 4810444
+   },
+   {
+    "ancre": "2025-11-20",
+    "verse": 3000000,
+    "valeur": 7021616
+   },
+   {
+    "ancre": "2026-11-20",
+    "verse": 3000000,
+    "valeur": 10098039
+   }
+  ],
+  "nb_achats": 50
+ },
+ "concentre": {
+  "verse": 1000000,
+  "frais": 9867,
+  "lignes": [
+   {
+    "code": "ONTBF",
+    "titres": 253,
+    "cout": 996567,
+    "cours_fin": 2805,
+    "valeur": 709665,
+    "dividendes": 331658
+   }
+  ],
+  "valeur_titres": 709665,
+  "liquidites": 335091,
+  "dividendes": 331658,
+  "valeur_finale": 1044756,
+  "gain": 44756,
+  "gain_pct": 4.5,
+  "taux_annuel_pct": 0.9,
+  "points": [
+   {
+    "ancre": "2022-11-20",
+    "verse": 1000000,
+    "valeur": 969028
+   },
+   {
+    "ancre": "2023-11-20",
+    "verse": 1000000,
+    "valeur": 725642
+   },
+   {
+    "ancre": "2024-11-20",
+    "verse": 1000000,
+    "valeur": 841010
+   },
+   {
+    "ancre": "2025-11-20",
+    "verse": 1000000,
+    "valeur": 928295
+   },
+   {
+    "ancre": "2026-11-20",
+    "verse": 1000000,
+    "valeur": 1044756
+   }
+  ],
+  "nb_achats": 1
+ }
+}

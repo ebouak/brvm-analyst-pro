@@ -41,8 +41,9 @@ describe.each(LECONS)('%s — règles éditoriales', (_f, l, brut) => {
   it('un cas « réel » lit ses chiffres en base ; un graphique écrit à la main est un exemple', () => {
     for (const s of l.sections) if (s.reel) expect(s.donnees_reelles, s.titre).toBeTruthy();
     for (const c of l.charts) {
-      expect(c.reel).toBe(false);
-      expect(c.note.toLowerCase()).toMatch(/exemple/);
+      // Chiffres publiés ou calculés sur des cours réels : source ET année dans la note.
+      if (c.reel) expect(c.note, c.titre).toMatch(/Sources? : .*(19|20)[0-9]{2}/);
+      else expect(c.note.toLowerCase()).toMatch(/exemple/);
     }
   });
 

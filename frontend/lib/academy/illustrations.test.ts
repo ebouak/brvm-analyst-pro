@@ -207,12 +207,16 @@ describe('chaque visuel de chaque leçon', () => {
     expect(texte).not.toMatch(/achetez|vendez|conseil|recommand|garanti|à coup sûr|opportunit/i);
     expect(texte).not.toMatch(/\btu\b|\bton\b|\bta\b|\btes\b/);
   });
-  it('les graphiques de leçon restent des exemples (aucune donnée de marché figée)', () => {
+  it('un graphique de leçon est un exemple, ou une série HISTORIQUE datée et sourcée', () => {
+    // Aucune donnée de marché « du jour » figée dans un graphique : elle serait périmée
+    // à la séance suivante. Une série passée (comptes publiés, parcours 2016-2026)
+    // ne se périme pas, à condition de dire sa source et son année.
     for (const { fichier, lecon } of lecons) {
       if (fichier.startsWith('autres/')) continue;
-      for (const c of lecon.charts) expect(c.reel, fichier).toBe(false);
+      for (const c of lecon.charts) if (c.reel) expect(c.note, fichier).toMatch(/Sources? : .*(19|20)[0-9]{2}/);
     }
   });
+
 });
 
 describe('les visuels concordent avec les simulateurs et le texte de leur leçon', () => {

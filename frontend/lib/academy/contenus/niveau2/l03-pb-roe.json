@@ -2,9 +2,9 @@
  "titre": "Leçon 3 — P/B, ROE et rendement : les ratios complémentaires",
  "module": "Module 1 — Lire et analyser une entreprise",
  "categorie": "evaluation",
- "duree_min": 11,
+ "duree_min": 18,
  "sous_titre": "Ce que vaut l’entreprise dans ses livres, ce qu’elle rapporte sur ses fonds propres, et le lien entre les deux.",
- "resume": "Le PER ne regarde que le bénéfice. Le P/B compare le cours aux fonds propres, le ROE mesure la rentabilité de ces fonds propres, et le rendement du dividende dit ce que vous touchez. Lus ensemble, ces ratios disent si un prix élevé est justifié.",
+ "resume": "Le PER ne regarde que le bénéfice. Le P/B compare le cours aux fonds propres, le ROE mesure la rentabilité de ces fonds propres, et le rendement du dividende dit ce que vous touchez. Lus ensemble, ces ratios disent si un prix élevé est justifié. La leçon les calcule sur les comptes 2025 de Sonatel.",
  "sections": [
   {
    "type": "definition",
@@ -90,6 +90,158 @@
      "PALC",
      "SNTS",
      "SGBC"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : P/B, ROE et rendement de Sonatel",
+   "reel": true,
+   "contenu": "Appliquons les trois ratios à Sonatel, avec les comptes 2025 (communiqué du 16 février 2026) et le cours de clôture du 20 novembre 2026 : 4 040 FCFA. Les chiffres du tableau sont ceux de cet exercice et de cette séance ; le bloc sous la section donne les valeurs actuelles lues en base.\nP/B. La capitalisation est de 4 040 Md (4 040 FCFA × 1 milliard d’actions). Les capitaux propres part du groupe, ceux des actionnaires de Sonatel, sont de 1 160,7 Md au 31 décembre 2025. P/B = 4 040 ÷ 1 160,7 = 3,48. La bourse valorise le groupe environ 3,5 fois sa valeur comptable.\nROE. Résultat net part du groupe ÷ capitaux propres part du groupe = 342,0 ÷ 1 160,7 = 29,5 %. Pour 100 FCFA de fonds propres, 29,5 FCFA de bénéfice en 2025. On prend la part du groupe des deux côtés, pour comparer ce qui revient aux mêmes personnes. Les fonds propres sont ceux de fin d’exercice, pas une moyenne de l’année.\nVérifions l’identité P/B = PER × ROE avec ces vrais chiffres. Le PER vaut 11,8 (leçon 2) et le ROE 29,5 % : 11,8 × 0,295 = 3,48. On retombe sur le P/B, aux arrondis près, parce que le bénéfice s’annule dans le calcul. Par action, c’est la même chose : 4 040 FCFA de cours pour 1 160,7 FCFA de fonds propres par action.\nLe rendement. Le dividende brut est de 193,3 FCFA par action nouvelle (1 933 FCFA par action ancienne) : 193,3 ÷ 4 040 = 4,8 % brut. Après la retenue de 10 %, le net est de 174 FCFA : 174 ÷ 4 040 = 4,3 %. Le taux de distribution est de 193,3 Md ÷ 342,0 Md = 56,5 %. Le dividende se vote sur les comptes de la société mère : ce taux est un repère de lecture.\nCes ratios valent pour une date et un exercice. Ils décrivent ; ils ne disent pas si le prix est justifié. Un P/B de 3,5 se lit avec le ROE de 29,5 %, et ce ROE avec la structure du bilan : c’est l’objet de la section suivante.",
+   "tableau": {
+    "colonnes": [
+     "Ratio",
+     "Calcul",
+     "Résultat"
+    ],
+    "lignes": [
+     [
+      "Capitalisation",
+      "4 040 FCFA × 1 milliard d’actions",
+      "4 040 Md FCFA"
+     ],
+     [
+      "Capitaux propres part du groupe",
+      "Bilan au 31/12/2025",
+      "1 160,7 Md FCFA"
+     ],
+     [
+      "P/B",
+      "4 040 ÷ 1 160,7",
+      "3,48"
+     ],
+     [
+      "Résultat net part du groupe",
+      "Compte de résultat 2025",
+      "342,0 Md FCFA"
+     ],
+     [
+      "ROE",
+      "342,0 ÷ 1 160,7",
+      "29,5 %"
+     ],
+     [
+      "PER",
+      "4 040 ÷ 342,0",
+      "11,8"
+     ],
+     [
+      "Vérification : PER × ROE",
+      "11,8 × 29,5 %",
+      "3,48"
+     ],
+     [
+      "Rendement brut du dividende",
+      "193,3 ÷ 4 040",
+      "4,8 %"
+     ],
+     [
+      "Rendement net de la retenue de 10 %",
+      "174 ÷ 4 040",
+      "4,3 %"
+     ],
+     [
+      "Taux de distribution",
+      "193,3 Md ÷ 342,0 Md",
+      "56,5 %"
+     ]
+    ],
+    "note": "Dividende de l’exercice 2025, par action nouvelle (après le fractionnement du 26 octobre 2026). Source : communiqué Sonatel du 16 février 2026 ; cours de clôture BRVM du 20 novembre 2026."
+   },
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : d’où vient le ROE de Sonatel",
+   "reel": true,
+   "contenu": "Le ROE se décompose en trois facteurs (décomposition de DuPont) : ROE = marge nette × rotation de l’actif × levier. La marge nette est le résultat rapporté au chiffre d’affaires. La rotation de l’actif est le chiffre d’affaires rapporté au total du bilan. Le levier est le total du bilan rapporté aux capitaux propres. Les termes s’annulent deux à deux : on retombe sur résultat ÷ capitaux propres. Les chiffres du tableau sont ceux de l’exercice 2025 ; le bloc en dessous donne les valeurs actuelles.\nPour que la chaîne soit cohérente, on prend ici le résultat net consolidé (413,6 Md) et le total des capitaux propres (1 399,3 Md), minoritaires compris. Le ROE obtenu, 29,6 %, diffère donc un peu des 29,5 % calculés sur la part du groupe. Marge nette : 413,6 ÷ 1 923,1 = 21,5 %. Rotation : 1 923,1 ÷ 3 270,2 = 0,588. Levier : 3 270,2 ÷ 1 399,3 = 2,337. Le produit des trois facteurs arrondis donne 0,2955 ; calculé directement, 413,6 ÷ 1 399,3 = 0,2956, soit 29,6 %.\nQue lire ? La marge nette est élevée : 21,5 FCFA de résultat net pour 100 FCFA de chiffre d’affaires. La rotation de 0,588 est modeste : 1 FCFA d’actif produit 0,59 FCFA de ventes. Un levier de 2,337 ne veut pas dire que la société est très endettée : le total du bilan contient aussi des dettes d’exploitation (fournisseurs, impôts, autres passifs), pas seulement des dettes financières.\nCe qui compte pour le risque financier, ce sont les dettes financières : 402,7 Md, soit 402,7 ÷ 1 399,3 = 28,8 % des capitaux propres, et moins que la trésorerie de 536,1 Md (133,4 Md d’écart). Contrairement à l’exemple du piège plus bas, le ROE de Sonatel n’est donc pas gonflé par une dette financière : il tient d’abord à la marge. Cette lecture porte sur un seul exercice ; pour juger de sa stabilité, il faudrait refaire ces calculs sur plusieurs années.",
+   "tableau": {
+    "colonnes": [
+     "Facteur",
+     "Calcul",
+     "Valeur"
+    ],
+    "lignes": [
+     [
+      "Marge nette",
+      "413,6 ÷ 1 923,1",
+      "21,5 %"
+     ],
+     [
+      "Rotation de l’actif",
+      "1 923,1 ÷ 3 270,2",
+      "0,588"
+     ],
+     [
+      "Levier (total du bilan ÷ capitaux propres)",
+      "3 270,2 ÷ 1 399,3",
+      "2,337"
+     ],
+     [
+      "ROE sur le résultat consolidé",
+      "413,6 ÷ 1 399,3",
+      "29,6 %"
+     ],
+     [
+      "Dettes financières ÷ capitaux propres",
+      "402,7 ÷ 1 399,3",
+      "28,8 %"
+     ],
+     [
+      "Trésorerie moins dettes financières",
+      "536,1 − 402,7",
+      "133,4 Md FCFA"
+     ]
+    ],
+    "note": "Montants en Md FCFA, exercice 2025. Résultat consolidé et total des capitaux propres (minoritaires inclus) pour tous les calculs de ce tableau."
+   },
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "Le ROE de Sonatel en 2025 : marge nette × rotation de l’actif × levier",
+    "reel": true,
+    "source": "Groupe Sonatel, résultats financiers 2025 (états consolidés IFRS, 16 février 2026)",
+    "operation": "produit",
+    "resultat": {
+     "label": "ROE (résultat consolidé)",
+     "valeur": 29.6,
+     "pourcentage": true
+    },
+    "facteurs": [
+     {
+      "label": "Marge nette",
+      "valeur": 21.5,
+      "pourcentage": true
+     },
+     {
+      "label": "Rotation de l’actif",
+      "valeur": 0.588
+     },
+     {
+      "label": "Levier (actif ÷ fonds propres)",
+      "valeur": 2.337
+     }
+    ],
+    "note": "Le ROE de 29,6 % est le produit d’une marge nette de 21,5 %, d’une rotation de 0,588 et d’un levier de 2,337 ; le schéma arrondit à deux décimales (0,59 et 2,34). Le levier compte toutes les dettes, pas seulement les dettes financières."
+   },
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS"
     ]
    }
   },
