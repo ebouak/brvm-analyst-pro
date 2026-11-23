@@ -1732,8 +1732,9 @@ PR #368, #369, #370. Relecture avec le compte test Premium puis consultation Fab
 - **Écartés (Fable)** : rejeu automatique au chargement (brouille rejeu et
   direct), relevé toutes les 5 min (1 s de mouvement par relevé quand même, 3×
   la charge sur brvm.org). Le glissement animé des lignes du tableau
-  (`layout` framer-motion, antérieur) reste en place ; Fable le juge « effet
-  casino » : à rouvrir si l'exploitant le ressent.
+  (`layout` framer-motion, antérieur) a été RETIRÉ (« effet casino », avis
+  Fable repris par l'exploitant) ; la pastille de fraîcheur de l'en-tête du
+  tableau de bord s'efface en séance, le bandeau disant déjà le relevé.
 
 
 ## 9. Bugs connus / limites

@@ -577,7 +577,8 @@ export default async function Dashboard() {
           </div>
           <nav className="flex flex-wrap items-center gap-2" aria-label="Navigation rapide">
             <PastilleSeance />
-            <FreshnessBadge fraicheur={fraicheurCours} />
+            {/* En séance, le bandeau « pouls de séance » dit déjà le relevé. */}
+            <FreshnessBadge fraicheur={fraicheurCours} masquerEnSeance enSeanceAuRendu={estEnSeance(new Date())} />
             <BadgeNervosite badge={badgeNervosite} />
             <BoutonsWhatsapp src="dashboard" connecte={Boolean(user)} sousTitre={false} className="w-full sm:w-auto" />
             {user && (
