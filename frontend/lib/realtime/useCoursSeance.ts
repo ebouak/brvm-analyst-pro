@@ -5,7 +5,7 @@ import { estEnSeance } from '@/lib/freshness';
 import { useRealtimeActions } from './useRealtimeActions';
 import { recomposer, estEnDirect, valeursChangees } from './recomposer';
 import { lignesAuMoment, veillesDe } from './rejeu';
-import { dernierReleveDe, echangesDuMarche } from './releve';
+import { dernierReleveDe, echangesDuMarche, largeurDuMarche } from './releve';
 import { publierReleve } from './useReleve';
 import { useRejeu } from '@/components/rejeu/RejeuProvider';
 import type { FlashDirection, RealtimeActionRow } from './mergeActions';
@@ -83,13 +83,14 @@ export function useCoursSeance<T extends RealtimeActionRow & { cours_precedent?:
     [recus],
   );
   const echanges = useMemo(() => echangesDuMarche(rows), [rows]);
+  const largeur = useMemo(() => largeurDuMarche(rows), [rows]);
   const rejeuActif = !!rejeu?.actif;
   useEffect(() => {
     if (rejeuActif || !enSeance || jour == null) return;
     // Un relevé d'un autre jour (lignes de la veille avant le premier relevé) ne dit rien d'aujourd'hui.
     const r = releveIso && releveIso.slice(0, 10) === jour ? new Date(releveIso) : null;
-    publierReleve(r, r ? echanges : null);
-  }, [releveIso, echanges, rejeuActif, enSeance, jour]);
+    publierReleve(r, r ? echanges : null, r ? largeur : null);
+  }, [releveIso, echanges, largeur, rejeuActif, enSeance, jour]);
   const veilles = useMemo(() => veillesDe(base), [base]);
   const image = rejeu?.actif ? rejeu.image : null;
   const rowsRejeu = useMemo(() => (image ? lignesAuMoment(base, image, veilles) : null), [image, base, veilles]);

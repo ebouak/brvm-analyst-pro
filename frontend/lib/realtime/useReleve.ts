@@ -1,36 +1,59 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import type { Largeur } from './releve';
 
 /**
- * Heure du dernier relevé, partagée par la page — source UNIQUE de la pastille
- * de fraîcheur et du point « En direct » (avant le 2026-11-23, chacun avait la
- * sienne et ils se contredisaient sur la fiche action).
+ * État du direct partagé par la page — source UNIQUE de la pastille de
+ * fraîcheur, du point « En direct » et du bandeau « pouls de séance » (avant le
+ * 2026-11-23, chacun avait sa propre heure et ils se contredisaient).
  *
- * Alimenté par `useCoursSeance` (qui seul reçoit les cours), lu par
- * `FreshnessBadge` et `EnDirect`. Aucun abonnement Realtime de plus.
+ * Alimenté par les hooks qui reçoivent déjà les cours (`useCoursSeance`,
+ * `useIndicesSeance`) : AUCUN abonnement Realtime de plus. Deux abonnements au
+ * même sujet peuvent se fermer l'un l'autre (voir MouvementsSeance).
  */
-export interface InfoReleve {
+export interface InfoSeance {
   /** Heure du dernier relevé (ms), d'après `updated_at` des lignes reçues. */
   releve: number | null;
   /** Le marché a-t-il échangé aujourd'hui ? null : inconnu. */
   echanges: boolean | null;
+  /** Hausses / baisses / stables du marché, publiées par un hook qui voit toute la cote. */
+  largeur: Largeur | null;
+  /** BRVM Composite reçu en direct. */
+  composite: { valeur: number; variation_pct: number | null } | null;
 }
 
-const VIDE: InfoReleve = { releve: null, echanges: null };
-let etat: InfoReleve = VIDE;
+const VIDE: InfoSeance = { releve: null, echanges: null, largeur: null, composite: null };
+let etat: InfoSeance = VIDE;
 const abonnes = new Set<() => void>();
 
-/** Un relevé plus ancien que celui connu est ignoré ; un `echanges` inconnu ne remplace pas un connu. */
-export function publierReleve(releve: Date | null, echanges: boolean | null): void {
-  const r = releve?.getTime() ?? null;
-  const suivant: InfoReleve = {
-    releve: r != null && (etat.releve == null || r > etat.releve) ? r : etat.releve,
-    echanges: echanges ?? etat.echanges,
-  };
-  if (suivant.releve === etat.releve && suivant.echanges === etat.echanges) return;
+function remplacer(suivant: InfoSeance) {
+  if (
+    suivant.releve === etat.releve && suivant.echanges === etat.echanges
+    && memeLargeur(suivant.largeur, etat.largeur)
+    && suivant.composite?.valeur === etat.composite?.valeur && suivant.composite?.variation_pct === etat.composite?.variation_pct
+  ) return;
   etat = suivant;
   abonnes.forEach((f) => f());
+}
+
+const memeLargeur = (a: Largeur | null, b: Largeur | null) =>
+  a === b || (a != null && b != null && a.hausses === b.hausses && a.baisses === b.baisses && a.stables === b.stables);
+
+/** Un relevé plus ancien que celui connu est ignoré ; une valeur inconnue (null) ne remplace pas une connue. */
+export function publierReleve(releve: Date | null, echanges: boolean | null, largeur: Largeur | null = null): void {
+  const r = releve?.getTime() ?? null;
+  remplacer({
+    ...etat,
+    releve: r != null && (etat.releve == null || r > etat.releve) ? r : etat.releve,
+    echanges: echanges ?? etat.echanges,
+    largeur: largeur ?? etat.largeur,
+  });
+}
+
+export function publierComposite(composite: { valeur: number; variation_pct: number | null } | null): void {
+  if (!composite) return;
+  remplacer({ ...etat, composite });
 }
 
 const abonner = (f: () => void) => {
@@ -38,7 +61,7 @@ const abonner = (f: () => void) => {
   return () => { abonnes.delete(f); };
 };
 
-export function useReleve(): InfoReleve {
+export function useReleve(): InfoSeance {
   return useSyncExternalStore(abonner, () => etat, () => VIDE);
 }
 

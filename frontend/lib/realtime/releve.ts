@@ -82,3 +82,16 @@ export function echangesDuMarche(lignes: readonly { volume?: number | null }[], 
   if (connus.length < minimum) return null;
   return connus.some((l) => (l.volume ?? 0) > 0);
 }
+
+export interface Largeur { hausses: number; baisses: number; stables: number }
+
+/**
+ * Hausses, baisses et stables du MARCHÉ, même règle que le serveur
+ * (`metriquesDepuisSeance`) : variation finie, > 0, < 0 ou nulle. Sur un
+ * ensemble trop étroit pour parler du marché : null.
+ */
+export function largeurDuMarche(lignes: readonly { variation_pct: number | null }[], minimum = 20): Largeur | null {
+  const v = lignes.map((l) => l.variation_pct).filter((x): x is number => typeof x === 'number' && Number.isFinite(x));
+  if (v.length < minimum) return null;
+  return { hausses: v.filter((x) => x > 0).length, baisses: v.filter((x) => x < 0).length, stables: v.filter((x) => x === 0).length };
+}

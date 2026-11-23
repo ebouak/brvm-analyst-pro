@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { etatReleve, phraseReleve, phraseReleveCourte, dernierReleveDe, echangesDuMarche } from './releve';
+import { etatReleve, phraseReleve, phraseReleveCourte, dernierReleveDe, echangesDuMarche, largeurDuMarche } from './releve';
+
+describe('largeurDuMarche', () => {
+  it('même règle que le serveur : > 0, < 0, nulle ; inconnues écartées', () => {
+    const lignes = [
+      ...Array.from({ length: 4 }, () => ({ variation_pct: 1.2 })),
+      ...Array.from({ length: 40 }, () => ({ variation_pct: -0.8 })),
+      ...Array.from({ length: 4 }, () => ({ variation_pct: 0 })),
+      { variation_pct: null },
+    ];
+    expect(largeurDuMarche(lignes)).toEqual({ hausses: 4, baisses: 40, stables: 4 });
+  });
+  it('trop peu de valeurs pour parler du marché : null', () => {
+    expect(largeurDuMarche([{ variation_pct: 1 }, { variation_pct: -1 }])).toBeNull();
+  });
+});
 
 const d = (iso: string) => new Date(iso);
 
