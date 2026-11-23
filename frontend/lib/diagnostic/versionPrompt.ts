@@ -12,7 +12,13 @@
  * Aucune migration : `metrics_snapshot` est un jsonb déjà écrit à chaque
  * génération. Changer la valeur ci-dessous invalide tous les rapports.
  */
-export const VERSION_PROMPT_DIAGNOSTIC = '2026-11-11-sans-recommandation';
+export const VERSION_PROMPT_DIAGNOSTIC = '2026-11-23-classes-en-francais';
+// Historique :
+// - 2026-11-11-sans-recommandation : retrait du verdict, de l'objectif et du stop.
+// - 2026-11-23-classes-en-francais : la classe du modèle quant était transmise
+//   en anglais, et trois rapports l'ont recopiée (« Buy Quant », « Watchlist /
+//   Neutral », « confiance high ») : un terme d'achat dans un diagnostic sans
+//   recommandation (NSBC, 18/11/2026). Ces rapports doivent être régénérés.
 
 /** Chemin PostgREST du marqueur, pour `.eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC)`. */
 export const CHEMIN_VERSION_PROMPT = 'metrics_snapshot->>prompt_version';

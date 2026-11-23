@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { getLatestPatternScore } from '@/lib/patterns/queries';
 import type { PatternScore } from '@/lib/patterns/database';
-import { fmtDateCourte } from '@/lib/format';
+import { fmtDateCourte, fmtNumber } from '@/lib/format';
+
+/** « 0,42 » signé (« +0,42 », « −0,42 ») ; null → tiret. */
+const signe = (v: number | null | undefined, d: number) =>
+  v == null ? '—' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${fmtNumber(Math.abs(v), d)}`;
 
 interface PatternDiagnosticProps {
   code: string;
@@ -67,7 +71,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-white">Analyse Techniques Intraday</h3>
+      <h3 className="text-lg font-semibold text-white">Analyse technique intraday</h3>
 
       {/* ATR Section */}
       {pattern.atr_score !== null && (
@@ -84,7 +88,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             <p className="text-sm text-muted mb-2">{pattern.atr_explanation_fr}</p>
           )}
           <div className="mt-2 text-xs text-muted">
-            Score: <span className="font-mono font-bold text-white">{pattern.atr_score.toFixed(1)}</span>
+            Score : <span className="font-mono font-bold text-white">{fmtNumber(pattern.atr_score, 1)}</span>
           </div>
         </div>
       )}
@@ -104,7 +108,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             <p className="text-sm text-muted mb-2">{pattern.consolidation_explanation_fr}</p>
           )}
           <div className="mt-2 text-xs text-muted">
-            Score: <span className="font-mono font-bold text-white">{pattern.consolidation_score.toFixed(1)}</span>
+            Score : <span className="font-mono font-bold text-white">{fmtNumber(pattern.consolidation_score, 1)}</span>
           </div>
         </div>
       )}
@@ -127,7 +131,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
           <div>
             <span className="text-muted">Score combiné</span>
             <div className="font-semibold text-info mt-1">
-              {pattern.combined_pattern_score?.toFixed(1) ?? '—'}
+              {fmtNumber(pattern.combined_pattern_score, 1)}
             </div>
           </div>
           <div>
@@ -141,16 +145,16 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             </div>
           )}
           <div>
-            <span className="text-muted">Δ Conseiller</span>
+            <span className="text-muted">Effet sur la note du conseiller</span>
             <div className={`font-semibold mt-1 ${pattern.advisor_sub_score_delta && pattern.advisor_sub_score_delta > 0 ? 'text-up' : 'text-down'}`}>
-              {pattern.advisor_sub_score_delta ? (pattern.advisor_sub_score_delta > 0 ? '+' : '') + pattern.advisor_sub_score_delta.toFixed(2) : '—'}
+              {signe(pattern.advisor_sub_score_delta, 2)}
             </div>
           </div>
           {pattern.advisor_impact_estimate !== null && (
             <div>
               <span className="text-muted">Impact sur score</span>
               <div className="font-semibold text-info mt-1">
-                {(pattern.advisor_impact_estimate * 100).toFixed(0)}%
+                {fmtNumber(pattern.advisor_impact_estimate * 100, 0)} %
               </div>
             </div>
           )}
@@ -161,7 +165,8 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
       <div className="text-xs text-faint px-4 py-2">
         <span>Analyse du {fmtDateCourte(pattern.date_marche)}</span>
         <span className="mx-2" aria-hidden="true">·</span>
-        <span>Engine v{pattern.engine_version}</span>
+        {/* engine_version porte déjà son « v » (« v1.0.0 ») : l'affichage disait « vv1.0.0 ». */}
+        <span>Moteur v{String(pattern.engine_version).replace(/^v/i, '')}</span>
       </div>
     </div>
   );
