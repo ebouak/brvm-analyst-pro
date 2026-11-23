@@ -1723,6 +1723,12 @@ PR #368, #369, #370. Relecture avec le compte test Premium puis consultation Fab
   remplissent les hooks déjà présents (`useCoursSeance` pour la largeur quand il
   voit ≥ 20 valeurs, `useIndicesSeance` pour le Composite). Deux abonnements au
   même sujet peuvent se fermer l'un l'autre.
+- ⚠️ **Le rendu serveur du tableau de bord peut être périmé** (`unstable_cache`
+  60 s, servi tel quel à la première visite après une pause) : vérifié en
+  production, le bandeau a montré le Composite du relevé de 13:30 à côté de
+  « Relevé de 13:45 ». En séance, `useCoursSeance` et `useIndicesSeance`
+  relisent donc UNE fois au montage les cours et indices du jour (48 lignes,
+  3 indices), sans éclair ni `derniereMaj` : un rattrapage n'est pas un mouvement.
 - **Écartés (Fable)** : rejeu automatique au chargement (brouille rejeu et
   direct), relevé toutes les 5 min (1 s de mouvement par relevé quand même, 3×
   la charge sur brvm.org). Le glissement animé des lignes du tableau

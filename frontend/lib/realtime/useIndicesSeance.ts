@@ -80,6 +80,31 @@ export function useIndicesSeance<T extends IndiceDirect>(
     };
   }, [ecoute]);
 
+  // Indices FRAIS au montage, pendant la séance : le rendu serveur peut venir
+  // d'un cache périmé (même raison que useCoursSeance). Sans éclair ni
+  // `derniereMaj` : un rattrapage n'est pas un mouvement.
+  useEffect(() => {
+    if (!ecoute) return;
+    let annule = false;
+    void (async () => {
+      const codes = courant.current.map((i) => i.code);
+      if (codes.length === 0) return;
+      const { data } = await createClient()
+        .from('brvm_indices_daily')
+        .select('code, valeur, variation_pct')
+        .eq('date_marche', ecoute)
+        .in('code', codes);
+      if (annule || !data || data.length === 0) return;
+      let etat = courant.current;
+      for (const recu of data as IndiceDirect[]) etat = majIndice(etat, recu).indices;
+      courant.current = etat;
+      setIndices(etat);
+      const c = etat.find((i) => i.code === 'BRVMC');
+      if (c && c.valeur != null) publierComposite({ valeur: c.valeur, variation_pct: c.variation_pct });
+    })();
+    return () => { annule = true; };
+  }, [ecoute]);
+
   // Composite partagé avec le bandeau « pouls de séance » (useReleve), qui
   // n'ouvre pas d'abonnement à lui : seulement un indice réellement reçu.
   useEffect(() => {
