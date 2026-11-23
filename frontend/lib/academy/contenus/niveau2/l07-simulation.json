@@ -1,30 +1,591 @@
 {
- "titre": "Leçon 7 — Simulation de portefeuille sur 3 ans",
+ "titre": "Leçon 7 — Quatre parcours d’épargnants, reconstitués sur 5 et 10 ans",
  "module": "Module 2 — Construire son portefeuille",
  "categorie": "income",
- "duree_min": 12,
- "sous_titre": "Faire tourner des hypothèses avant d’engager son argent : dividendes réinvestis, objectif de revenu, et ce que les chiffres ne disent pas.",
- "resume": "Une simulation ne prédit rien : elle montre l’effet de vos hypothèses. Cette leçon calcule le réinvestissement des dividendes sur trois ans, l’argent nécessaire pour viser un revenu, et propose de tester une stratégie sans risque avec le portefeuille virtuel.",
+ "duree_min": 24,
+ "sous_titre": "Un versement unique, une épargne mensuelle, une prime annuelle, une seule valeur : quatre façons d’alimenter un portefeuille, rejouées sur des cours réels.",
+ "resume": "Quatre profils-types, dont les cours, les dividendes et les dates sont réels, sont rejoués sur cinq ou dix ans : 1 000 000 FCFA investis d’un coup, 50 000 FCFA par mois, une prime annuelle de 300 000 FCFA, et un contre-exemple concentré sur une seule valeur. Vous lisez les règles du calcul, les résultats, ce qu’ils montrent, ce qu’ils ne disent pas, puis vous testez vos propres hypothèses.",
  "sections": [
   {
    "type": "definition",
-   "titre": "Ce qu’une simulation est, et n’est pas",
-   "contenu": "Une simulation applique des hypothèses : un dividende, une croissance de ce dividende, un cours. Elle en déduit un résultat. Si une hypothèse change, le résultat change, parfois beaucoup.\nElle est utile pour deux raisons. Elle rend visible un mécanisme qu’on sous-estime à l’œil nu, comme l’effet du réinvestissement des dividendes. Et elle oblige à écrire ses hypothèses : on découvre souvent qu’on attendait sans le dire un rendement très élevé, ou un cours qui ne baisse jamais.\nElle ne garantit aucun résultat. Ses chiffres sont toujours plus réguliers que la réalité, qui ajoute des frais, des impôts, des baisses de cours et des dividendes réduits que des hypothèses simples ignorent.",
+   "titre": "Une reconstitution : ce que c’est, et ses limites",
+   "contenu": "Les quatre parcours de cette leçon sont des reconstitutions. Chacun décrit un épargnant type qui aurait acheté des actions de la BRVM il y a cinq ou dix ans. Ces personnes n’existent pas : ce sont des profils-types, sans nom. En revanche, les cours de clôture, les dividendes nets et les dates sont ceux du marché, tirés de la base WestBourse.\nUne reconstitution a un avantage : on connaît la fin de l’histoire, donc chaque chiffre se vérifie. Elle a une limite majeure : l’épargnant de 2021 ne la connaissait pas. Il ignorait quel cours, quel dividende, quelle année difficile l’attendait. Lisez ces résultats comme des ordres de grandeur du passé, jamais comme une promesse.\nLes cinq valeurs des parcours A, B et C servent d’exemple de répartition entre cinq secteurs et deux pays. Ce n’est pas une sélection recommandée. Sous chaque cas, un bloc de données réelles affiche les valeurs du jour à côté des chiffres figés au 20 novembre 2026.",
    "points": [
     {
-     "titre": "Elle aide à",
-     "detail": "Mesurer l’effet du réinvestissement, comparer des rendements, fixer un ordre de grandeur."
+     "titre": "Ce qui est réel",
+     "detail": "Les cours de clôture, les dividendes nets publiés et les dates des séances."
     },
     {
-     "titre": "Elle ne dit pas",
-     "detail": "Ce que fera le cours, si le dividende sera maintenu, ni ce que coûteront les frais et l’impôt dans votre situation."
+     "titre": "Ce qui est posé",
+     "detail": "Le profil de l’épargnant, ses montants, ses dates et les règles de calcul de la section suivante."
+    },
+    {
+     "titre": "Ce qui est inconnu",
+     "detail": "L’avenir : un parcours passé ne dit rien de ce que feront les cours demain."
     }
    ]
   },
   {
+   "type": "importance",
+   "titre": "Les règles du calcul",
+   "contenu": "Tous les parcours suivent les mêmes règles, posées avant de regarder les résultats pour ne pas les ajuster après coup. Deux d’entre elles pèsent lourd : les frais de 1 % sont une hypothèse, vos frais réels dépendent de votre SGI, et les dividendes d’avant 2021 manquent dans notre base, ce qui sous-estime les parcours longs.",
+   "tableau": {
+    "colonnes": [
+     "Règle",
+     "Choix retenu"
+    ],
+    "lignes": [
+     [
+      "Achat",
+      "Au cours de clôture de la première séance à partir de la date indiquée."
+     ],
+     [
+      "Quantités",
+      "Actions entières seulement ; ce qui ne suffit pas à acheter un titre reste en liquidités."
+     ],
+     [
+      "Frais",
+      "1 % du montant de chaque achat. C’est une hypothèse pédagogique."
+     ],
+     [
+      "Dividendes",
+      "Dividende net de l’exercice N crédité le 30 avril N+1, sur les titres détenus à cette date."
+     ],
+     [
+      "Avant 2021",
+      "Les dividendes des exercices antérieurs à 2021 sont absents de notre base : ils ne sont pas comptés."
+     ],
+     [
+      "Cours",
+      "Ajustés des opérations sur titres, dont le fractionnement de Sonatel du 26 octobre 2026 (un ancien titre devient dix)."
+     ],
+     [
+      "Valeur finale",
+      "Clôture du 20 novembre 2026, sans frais de vente ni impôt sur la plus-value."
+     ],
+     [
+      "Dividendes reçus",
+      "Parcours A et D : encaissés, non réinvestis. Parcours B et C : réinvestis à l’achat suivant."
+     ]
+    ],
+    "note": "Hypothèses pédagogiques : elles simplifient la réalité (dates de paiement, ordres, fiscalité). Les nombres de titres de Sonatel sont exprimés après le fractionnement."
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Mobiliser ses ressources : quatre façons d’alimenter un portefeuille",
+   "contenu": "Avant de choisir des valeurs, on choisit comment l’argent arrivera. Les quatre parcours en illustrent quatre. Aucune n’est meilleure en soi : chacune correspond à une situation de revenus, et chacune modifie le prix d’achat moyen.\nUne épargne de précaution passe avant tout achat : plusieurs mois de dépenses, disponibles sans vendre d’actions. Sans elle, un imprévu oblige à vendre au moment où le cours est peut-être bas.",
+   "tableau": {
+    "colonnes": [
+     "Mode",
+     "D’où vient l’argent",
+     "Ce qu’il exige",
+     "Effet sur le prix d’achat moyen"
+    ],
+    "lignes": [
+     [
+      "Versement unique (parcours A, D)",
+      "Produit d’une tontine, épargne accumulée",
+      "Une somme libre pour des années ; un seul jour d’achat",
+      "Tout est acheté au même cours : le résultat dépend de ce jour"
+     ],
+     [
+      "Prélèvement mensuel (parcours B)",
+      "50 000 FCFA sur un salaire",
+      "De la régularité ; des petits ordres, donc des frais qui pèsent",
+      "Achats étalés sur 60 mois : le prix moyen lisse les hauts et les bas"
+     ],
+     [
+      "Revenu annuel (parcours C)",
+      "Prime de fin d’année, revenu de récolte",
+      "Une discipline annuelle, y compris les années difficiles",
+      "Un achat par an : un étalement plus lent, sur dix ans"
+     ],
+     [
+      "Transfert de la diaspora",
+      "Envoi régulier d’un proche à l’étranger",
+      "Compter le change euro / franc CFA et les frais de transfert",
+      "Selon le rythme des envois : mensuel comme B, annuel comme C"
+     ]
+    ],
+    "note": "Les montants des parcours sont des exemples. Ce qui compte : une somme que vous pouvez laisser investie sans en avoir besoin à court terme."
+   }
+  },
+  {
    "type": "cas",
-   "titre": "Réinvestir ses dividendes pendant 3 ans",
-   "contenu": "Hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA. Les dividendes servent à acheter de nouvelles actions. Le calcul est fait à l’affichage, à partir de ces seules hypothèses.\nLe mécanisme est celui des intérêts composés. La première année, les dividendes rachètent quelques actions. L’année suivante, ces actions nouvelles versent à leur tour un dividende, qui s’ajoute à celui des actions d’origine. Le nombre d’actions croît donc un peu plus vite chaque année.\nSur trois ans, l’effet reste modeste. Il devient important sur dix ou vingt ans : le réinvestissement est surtout un outil d’épargne longue. Notez les limites de l’exemple : un cours constant est une hypothèse commode, presque jamais vérifiée, et dans la réalité chaque rachat supporte des frais de courtage.",
+   "reel": true,
+   "titre": "Parcours A : un versement unique de 1 000 000 FCFA (novembre 2021)",
+   "contenu": "Profil-type : un épargnant place 1 000 000 FCFA, par exemple le produit d’une tontine, le 22 novembre 2021, première séance après le 20. Il répartit à parts égales entre cinq valeurs de cinq secteurs, soit environ 200 000 FCFA par ligne, et encaisse les dividendes sans les réinvestir. Le passé ne préjuge pas de l’avenir.\nSur un gain de 1 949 710 FCFA, 1 413 700 viennent de la hausse des cours (2 403 430 de titres, pour 989 730 payés) et 536 010 des dividendes : 72,5 % et 27,5 %. Les dividendes, non réinvestis, restent en liquidités : 546 280 FCFA à l’arrivée, avec les 10 270 FCFA non investis au départ.\nLes lignes ont suivi des chemins très différents. La mise sur Société Générale Côte d’Ivoire a été multipliée par 3,5 (698 310 pour 198 162 payés), celle sur SOGB par 1,5 seulement (296 400 pour 196 950). Le portefeuille n’a pas eu besoin que chaque ligne réussisse.\nAu 20 novembre 2026, sur la valeur des titres, SGBC pèse 29,1 %, Sonatel 23,5 %, CIE 19,6 %, TotalEnergies Sénégal 15,5 % et SOGB 12,3 %. Deux lignes dépassent les 20 % de départ : c’est la dérive que la leçon 5 appelle à surveiller. Le bloc ci-dessous affiche les cours du jour, à côté de ces chiffres figés.",
+   "tableau": {
+    "colonnes": [
+     "Valeur",
+     "Titres achetés",
+     "Cours d’achat (22/11/2021)",
+     "Coût, frais compris",
+     "Valeur au 20/11/2026",
+     "Dividendes nets reçus"
+    ],
+    "lignes": [
+     [
+      "Sonatel (SNTS)",
+      "140",
+      "1 387,5",
+      "196 193",
+      "565 600 (cours 4 040)",
+      "110 320"
+     ],
+     [
+      "SGBC (SGBC)",
+      "18",
+      "10 900",
+      "198 162",
+      "698 310 (cours 38 795)",
+      "136 642"
+     ],
+     [
+      "CIE (CIEC)",
+      "107",
+      "1 840",
+      "198 849",
+      "470 800 (cours 4 400)",
+      "90 530"
+     ],
+     [
+      "SOGB (SOGC)",
+      "39",
+      "5 000",
+      "196 950",
+      "296 400 (cours 7 600)",
+      "91 611"
+     ],
+     [
+      "TotalEnergies Sénégal (TTLS)",
+      "104",
+      "1 900",
+      "199 576",
+      "372 320 (cours 3 580)",
+      "106 907"
+     ],
+     [
+      "Total",
+      "",
+      "",
+      "989 730",
+      "2 403 430",
+      "536 010"
+     ]
+    ],
+    "note": "Montants en FCFA. Sonatel : cours et titres ajustés du fractionnement (140 titres ajustés = 14 titres d’alors). 10 270 FCFA n’ont pas servi : on n’achète que des actions entières."
+   },
+   "stats": [
+    {
+     "label": "Somme versée",
+     "valeur": "1 000 000 FCFA",
+     "detail": "Une seule fois, le 22 novembre 2021"
+    },
+    {
+     "label": "Valeur au 20 nov. 2026",
+     "valeur": "2 949 710 FCFA",
+     "detail": "Titres 2 403 430 + liquidités 546 280"
+    },
+    {
+     "label": "Dividendes encaissés",
+     "valeur": "536 010 FCFA",
+     "detail": "Nets, exercices 2021 à 2025"
+    },
+    {
+     "label": "Gain",
+     "valeur": "1 949 710 FCFA",
+     "detail": "+195 % de la somme versée"
+    },
+    {
+     "label": "Taux annuel équivalent",
+     "valeur": "24,2 %",
+     "detail": "Taux de rendement interne, avant impôt"
+    },
+    {
+     "label": "Frais supposés",
+     "valeur": "9 800 FCFA",
+     "detail": "1 % de chaque achat (hypothèse)"
+    }
+   ],
+   "donnees_reelles": {
+    "vue": "cours",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "CIEC",
+     "SOGC",
+     "TTLS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "reel": true,
+   "titre": "Parcours B : 50 000 FCFA par mois pendant cinq ans (décembre 2021 à novembre 2026)",
+   "contenu": "Profil-type : un salarié prélève 50 000 FCFA le 1er de chaque mois pendant 60 mois, soit 3 000 000 FCFA versés. Chaque mois, il achète une seule valeur, à tour de rôle parmi les cinq. Les dividendes reçus sont réinvestis dans l’achat suivant. Cela fait 60 ordres et 37 139 FCFA de frais à 1 %.\nAcheter régulièrement, c’est acheter plus de titres quand le cours est bas et moins quand il est haut. L’effet se lit dans le prix moyen payé : 1 835 FCFA par titre Sonatel, contre 2 040 pour la moyenne simple de ses douze cours d’achat ; 18 439 contre 20 528 pour SGBC. Il n’est pas systématique : pour SOGB, les deux chiffres sont presque égaux (5 700 et 5 710), et il ne protège pas d’une baisse prolongée.\nLes petits ordres ont un coût. Un titre SGBC valait de 11 045 à 37 995 FCFA selon le mois d’achat : avec 50 000 FCFA, on n’en achète que quelques-uns, et le reste attend le mois suivant. Les ordres ne sont donc pas tous égaux, les dividendes et les restes s’y ajoutant : le plus petit coûte 25 200 FCFA, le plus gros 356 328 FCFA. Chez une SGI qui applique un minimum de courtage, les frais pèseraient plus lourd que 1 %.\nLe taux annuel équivalent (31,7 %) ne se compare pas au gain total (+115,7 %). Le gain total rapporte le résultat à toutes les sommes versées, quelle que soit leur date. Le taux tient compte de la durée : les 50 000 FCFA du dernier mois ont travaillé quelques jours, ceux du premier presque cinq ans, et un franc versé a travaillé en moyenne environ deux ans et demi.",
+   "tableau": {
+    "colonnes": [
+     "Valeur",
+     "Titres détenus",
+     "Coût, frais compris",
+     "Valeur au 20/11/2026",
+     "Dividendes nets reçus"
+    ],
+    "lignes": [
+     [
+      "Sonatel (SNTS)",
+      "260",
+      "481 746",
+      "1 050 400 (cours 4 040)",
+      "133 820"
+     ],
+     [
+      "SGBC (SGBC)",
+      "44",
+      "819 433",
+      "1 706 980 (cours 38 795)",
+      "198 528"
+     ],
+     [
+      "CIE (CIEC)",
+      "341",
+      "817 074",
+      "1 500 400 (cours 4 400)",
+      "157 738"
+     ],
+     [
+      "SOGB (SOGC)",
+      "155",
+      "892 360",
+      "1 178 000 (cours 7 600)",
+      "128 784"
+     ],
+     [
+      "TotalEnergies Sénégal (TTLS)",
+      "289",
+      "740 396",
+      "1 034 620 (cours 3 580)",
+      "132 518"
+     ],
+     [
+      "Total",
+      "",
+      "3 751 009",
+      "6 470 400",
+      "751 388"
+     ]
+    ],
+    "note": "Montants en FCFA. Le coût dépasse les 3 000 000 FCFA versés parce qu’il inclut les dividendes réinvestis (751 388 FCFA). Sonatel : titres ajustés du fractionnement."
+   },
+   "stats": [
+    {
+     "label": "Somme versée",
+     "valeur": "3 000 000 FCFA",
+     "detail": "60 prélèvements de 50 000 FCFA"
+    },
+    {
+     "label": "Valeur au 20 nov. 2026",
+     "valeur": "6 470 779 FCFA",
+     "detail": "Titres 6 470 400 + liquidités 379"
+    },
+    {
+     "label": "Dividendes réinvestis",
+     "valeur": "751 388 FCFA",
+     "detail": "21,6 % du gain"
+    },
+    {
+     "label": "Gain",
+     "valeur": "3 470 779 FCFA",
+     "detail": "+115,7 % de la somme versée"
+    },
+    {
+     "label": "Taux annuel équivalent",
+     "valeur": "31,7 %",
+     "detail": "Tient compte de la date de chaque versement"
+    },
+    {
+     "label": "Frais supposés",
+     "valeur": "37 139 FCFA",
+     "detail": "1 % de chacun des 60 achats (hypothèse)"
+    }
+   ],
+   "donnees_reelles": {
+    "vue": "historique",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "CIEC",
+     "SOGC",
+     "TTLS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "reel": true,
+   "titre": "Parcours C : une prime annuelle de 300 000 FCFA sur dix ans (2016 à 2025)",
+   "contenu": "Profil-type : chaque 20 novembre, de 2016 à 2025, un épargnant verse 300 000 FCFA, prime de fin d’année, revenu de récolte ou envoi d’un proche de la diaspora. Il répartit à parts égales entre les cinq valeurs et réinvestit les dividendes. Total : 3 000 000 FCFA en dix ans, 50 ordres, 41 448 FCFA de frais à 1 %.\nUne limite avant les chiffres : les dividendes des exercices antérieurs à 2021 ne figurent pas dans notre base et ne sont pas comptés. Le résultat est donc sous-estimé, d’autant plus que 2016 à 2020 sont les années où le portefeuille était le plus petit. Le parcours ne dit pas ce qu’aurait reçu un vrai épargnant : il en donne une version incomplète.\nLe passage le plus instructif va de 2017 à 2020. Pendant quatre ans, le portefeuille a valu moins que les sommes versées : 582 184 FCFA pour 600 000 en 2017, puis jusqu’à 274 593 FCFA de moins en novembre 2019 (925 407 pour 1 200 000, soit −22,9 %). Entre novembre 2016 et novembre 2020, les cinq cours ont reculé, de 19 % pour SOGB à 59 % pour CIE. Qui aurait vendu en 2019 aurait encaissé moins que ce qu’il avait versé, avant frais de vente.\nLe redressement vient ensuite : en novembre 2021, la valeur dépasse les versements (2 224 693 contre 1 800 000), après un bond de 1 248 203 à 2 224 693 FCFA en un an, pour 300 000 FCFA versés. Les versements de 2018 à 2020 avaient acheté Sonatel entre 1 145 et 1 850 FCFA le titre ajusté, contre 4 040 FCFA au 20 novembre 2026. Mais rien ne garantit qu’une baisse longue finisse en reprise : celle de 2016 à 2020 aurait pu se prolonger.",
+   "tableau": {
+    "colonnes": [
+     "Date",
+     "Cumul versé (FCFA)",
+     "Valeur du portefeuille (FCFA)",
+     "Écart (FCFA)"
+    ],
+    "lignes": [
+     [
+      "20 nov. 2017",
+      "600 000",
+      "582 184",
+      "−17 816"
+     ],
+     [
+      "20 nov. 2018",
+      "900 000",
+      "717 735",
+      "−182 265"
+     ],
+     [
+      "20 nov. 2019",
+      "1 200 000",
+      "925 407",
+      "−274 593"
+     ],
+     [
+      "20 nov. 2020",
+      "1 500 000",
+      "1 248 203",
+      "−251 797"
+     ],
+     [
+      "20 nov. 2021",
+      "1 800 000",
+      "2 224 693",
+      "+424 693"
+     ],
+     [
+      "20 nov. 2022",
+      "2 100 000",
+      "3 029 292",
+      "+929 292"
+     ],
+     [
+      "20 nov. 2023",
+      "2 400 000",
+      "3 438 762",
+      "+1 038 762"
+     ],
+     [
+      "20 nov. 2024",
+      "2 700 000",
+      "4 810 444",
+      "+2 110 444"
+     ],
+     [
+      "20 nov. 2025",
+      "3 000 000",
+      "7 021 616",
+      "+4 021 616"
+     ],
+     [
+      "20 nov. 2026",
+      "3 000 000",
+      "10 098 039",
+      "+7 098 039"
+     ]
+    ],
+    "note": "Valeur = titres au cours de clôture + liquidités (dividendes pas encore réinvestis). Écart = valeur moins cumul versé. Dividendes d’avant 2021 non comptés."
+   },
+   "stats": [
+    {
+     "label": "Somme versée",
+     "valeur": "3 000 000 FCFA",
+     "detail": "10 versements de 300 000 FCFA"
+    },
+    {
+     "label": "Valeur au 20 nov. 2026",
+     "valeur": "10 098 039 FCFA",
+     "detail": "Titres 9 548 540 + liquidités 549 499"
+    },
+    {
+     "label": "Dividendes 2021 à 2025",
+     "valeur": "1 735 761 FCFA",
+     "detail": "Ceux de 2016 à 2020 ne sont pas comptés"
+    },
+    {
+     "label": "Gain",
+     "valeur": "7 098 039 FCFA",
+     "detail": "+236,6 % de la somme versée"
+    },
+    {
+     "label": "Taux annuel équivalent",
+     "valeur": "21,3 %",
+     "detail": "Sur dix ans, sous-estimé (voir ci-dessus)"
+    },
+    {
+     "label": "Point bas",
+     "valeur": "−274 593 FCFA",
+     "detail": "Au 20 nov. 2019, soit −22,9 %"
+    }
+   ],
+   "donnees_reelles": {
+    "vue": "rendement",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "CIEC",
+     "SOGC",
+     "TTLS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "reel": true,
+   "titre": "Parcours D : tout sur une seule valeur, Onatel Burkina Faso (novembre 2021)",
+   "contenu": "Contre-exemple : un épargnant place les mêmes 1 000 000 FCFA, le même 22 novembre 2021, sur une seule valeur, Onatel Burkina Faso (ONTBF) : 253 titres à 3 900 FCFA. Les dividendes sont encaissés, non réinvestis. La leçon ne juge pas la société : elle décrit des cours et des dividendes publiés. Le passé ne préjuge pas de l’avenir.\nLe cours a perdu 28,1 % (de 3 900 à 2 805 FCFA), et la valeur du parcours est passée à 725 642 FCFA en novembre 2023, soit 274 358 FCFA de moins que le versement. Les dividendes ont baissé d’année en année : de 416,58 FCFA par action pour l’exercice 2021 à 145,32 FCFA pour 2025, soit −65,1 %. Sur la mise de départ, le cours a fait perdre 286 902 FCFA, les dividendes ont rapporté 331 658 FCFA, d’où le gain final de 44 756 FCFA.\nComparons au parcours A, parti le même jour avec la même somme. Cinq valeurs de cinq secteurs ont rapporté 1 949 710 FCFA, une seule en a rapporté 44 756 : la valeur finale du parcours A (2 949 710) est 2,8 fois celle du parcours D (1 044 756). Ce n’est pas une règle : une valeur seule aurait pu être la meilleure. Mais on ne sait pas à l’avance laquelle, et c’est pour cela qu’on répartit.",
+   "tableau": {
+    "colonnes": [
+     "Date",
+     "Cours d’ONTBF (FCFA)",
+     "Valeur du parcours D (FCFA)",
+     "Dividende net par action reçu dans l’année (FCFA)"
+    ],
+    "lignes": [
+     [
+      "22 nov. 2021",
+      "3 900",
+      "1 000 000 (versement)",
+      "aucun"
+     ],
+     [
+      "20 nov. 2022",
+      "3 400",
+      "969 028",
+      "416,58 (exercice 2021)"
+     ],
+     [
+      "20 nov. 2023",
+      "2 150",
+      "725 642",
+      "288 (exercice 2022)"
+     ],
+     [
+      "20 nov. 2024",
+      "2 340",
+      "841 010",
+      "266 (exercice 2023)"
+     ],
+     [
+      "20 nov. 2025",
+      "2 490",
+      "928 295",
+      "195 (exercice 2024)"
+     ],
+     [
+      "20 nov. 2026",
+      "2 805",
+      "1 044 756",
+      "145,32 (exercice 2025)"
+     ]
+    ],
+    "note": "Valeur = titres au cours de clôture + dividendes encaissés. Le dividende de l’exercice N est compté au 30 avril N+1. Dividendes arrondis au centime."
+   },
+   "stats": [
+    {
+     "label": "Somme versée",
+     "valeur": "1 000 000 FCFA",
+     "detail": "253 titres Onatel Burkina Faso"
+    },
+    {
+     "label": "Valeur au 20 nov. 2026",
+     "valeur": "1 044 756 FCFA",
+     "detail": "Titres 709 665 + liquidités 335 091"
+    },
+    {
+     "label": "Dividendes encaissés",
+     "valeur": "331 658 FCFA",
+     "detail": "Plus que le gain final"
+    },
+    {
+     "label": "Gain",
+     "valeur": "44 756 FCFA",
+     "detail": "+4,5 % de la somme versée"
+    },
+    {
+     "label": "Taux annuel équivalent",
+     "valeur": "0,9 %",
+     "detail": "Contre 24,2 % pour le parcours A"
+    },
+    {
+     "label": "Cours de l’action",
+     "valeur": "−28,1 %",
+     "detail": "De 3 900 à 2 805 FCFA en cinq ans"
+    }
+   ],
+   "donnees_reelles": {
+    "vue": "rendement",
+    "codes": [
+     "ONTBF"
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Ce que les quatre parcours montrent ensemble",
+   "contenu": "Le gain total et le taux annuel ne classent pas les parcours dans le même ordre : C a le plus gros gain (+236,6 %), B le taux le plus haut (31,7 %). Le premier mesure ce qu’on a gagné sur les sommes versées, le second la vitesse à laquelle l’argent a travaillé : il ne faut pas les confondre.\nLes dividendes pèsent de 21,6 % à 27,5 % du gain des trois parcours diversifiés (A 27,5 %, B 21,6 %, C 24,5 %) ; le reste vient de la hausse des cours. Dans le parcours D, ils font plus que le gain entier : la perte sur le cours (286 902 FCFA) a été couverte par 331 658 FCFA de dividendes.\nLes trois parcours diversifiés ont fini au-dessus des sommes versées, le parcours concentré a stagné. C’est l’effet de la répartition, mais aussi celui de la période, comme le rappelle la section suivante. Le passé ne préjuge pas de l’avenir.",
+   "tableau": {
+    "colonnes": [
+     "Parcours",
+     "Versé (FCFA)",
+     "Valeur finale (FCFA)",
+     "Dividendes (FCFA)",
+     "Gain (FCFA)",
+     "Taux annuel"
+    ],
+    "lignes": [
+     [
+      "A : versement unique",
+      "1 000 000",
+      "2 949 710",
+      "536 010",
+      "+1 949 710 (+195,0 %)",
+      "24,2 %"
+     ],
+     [
+      "B : 50 000 FCFA par mois",
+      "3 000 000",
+      "6 470 779",
+      "751 388",
+      "+3 470 779 (+115,7 %)",
+      "31,7 %"
+     ],
+     [
+      "C : 300 000 FCFA par an, 10 ans",
+      "3 000 000",
+      "10 098 039",
+      "1 735 761",
+      "+7 098 039 (+236,6 %)",
+      "21,3 %"
+     ],
+     [
+      "D : une seule valeur",
+      "1 000 000",
+      "1 044 756",
+      "331 658",
+      "+44 756 (+4,5 %)",
+      "0,9 %"
+     ]
+    ],
+    "note": "A, B, C : mêmes cinq valeurs ; D : une seule. A et D ne réinvestissent pas leurs dividendes, B et C si. C : dividendes d’avant 2021 non comptés. Valeurs au 20 novembre 2026, avant frais de vente et impôt."
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "À votre tour : tester ses propres hypothèses",
+   "contenu": "Les parcours rejouent le passé ; un simulateur teste des hypothèses sur l’avenir, sans le prédire. Premier simulateur, hypothèses fictives : 200 actions, un dividende net de 900 FCFA par action qui progresse de 3 % par an, un cours constant de 15 000 FCFA, dividendes réinvestis. Second simulateur : un revenu visé de 600 000 FCFA divisé par un rendement. Plus le rendement retenu est élevé, moins il faut de capital, mais un rendement élevé s’accompagne souvent d’un dividende plus fragile.\nLes chiffres d’une simulation sont plus réguliers que la réalité, qui ajoute frais, impôts, baisses de cours et dividendes réduits. Testez un scénario défavorable à côté du central : si le dividende baissait d’un tiers et le cours de 20 %, que deviendrait votre plan ?\nLe portefeuille virtuel de WestBourse achète et vend aux cours réels, sans argent engagé. Il montre aussi vos réactions face à une ligne qui perd 15 %. Trois mois sont un minimum pour traverser une baisse.",
    "simulation": {
     "type": "reinvestissement",
     "actions": 200,
@@ -32,64 +593,22 @@
     "cours": 15000,
     "croissance_pct": 3,
     "annees": 3
-   }
-  },
-  {
-   "type": "cas",
-   "titre": "Combien investir pour viser un revenu ?",
-   "contenu": "Hypothèse fictive : vous visez 600 000 FCFA de dividendes nets par an. La somme à investir s’obtient en divisant le revenu visé par le rendement retenu.\nLe résultat montre un arbitrage. Plus le rendement retenu est élevé, plus la somme nécessaire est faible. Mais un rendement élevé est souvent associé à des sociétés dont le cours a baissé ou dont le dividende est fragile. Viser 9 % plutôt que 5 % réduit le capital nécessaire, et augmente le risque de voir le revenu réel baisser l’année où un dividende est réduit.\nUn calcul prudent retient un rendement modéré et prévoit une marge. Il vérifie aussi que le revenu visé est bien net d’impôt, puisque la retenue à la source réduit le dividende avant qu’il n’arrive sur votre compte.",
-   "simulation": {
-    "type": "objectif",
-    "revenu_cible": 600000,
-    "rendements_pct": [
-     5,
-     7,
-     9
-    ]
-   }
-  },
-  {
-   "type": "importance",
-   "titre": "Trois portefeuilles d’exemple",
-   "contenu": "Trois répartitions fictives de 3 000 000 FCFA, sans aucune valeur citée : elles illustrent des profils, pas des recommandations.\nLe profil prudent cherche des revenus stables et accepte une croissance plus lente : la moitié en obligations amortit les baisses du marché des actions. Le profil équilibré accepte des baisses temporaires en échange de revenus et de croissance. Le profil dynamique, entièrement en actions, vise la croissance du capital et doit supporter de fortes variations sans vendre au pire moment.\nUn profil ne se choisit pas sur le rendement espéré, mais sur deux questions : quand aurez-vous besoin de cet argent, et quelle baisse pourriez-vous supporter sans vendre ? Un épargnant qui vend tout à la première forte baisse n’a pas un profil dynamique, quelle que soit son ambition.",
-   "tableau": {
-    "colonnes": [
-     "Profil",
-     "Répartition",
-     "Ce qu’il cherche",
-     "Ce qu’il accepte"
-    ],
-    "lignes": [
-     [
-      "Prudent",
-      "Moitié obligations, moitié actions à dividende régulier",
-      "Des revenus stables",
-      "Une croissance plus lente"
-     ],
-     [
-      "Équilibré",
-      "Un quart d’obligations, trois quarts d’actions de 4 secteurs",
-      "Revenus et croissance",
-      "Des baisses temporaires"
-     ],
-     [
-      "Dynamique",
-      "Actions seulement, 8 à 12 lignes",
-      "La croissance du capital",
-      "De fortes variations"
+   },
+   "simulations": [
+    {
+     "type": "objectif",
+     "revenu_cible": 600000,
+     "rendements_pct": [
+      5,
+      7,
+      9
      ]
-    ],
-    "note": "Exemples pédagogiques. La bonne répartition dépend de votre horizon, de vos besoins et de votre tolérance aux pertes."
-   }
-  },
-  {
-   "type": "importance",
-   "titre": "Tester sans risque",
-   "contenu": "Le portefeuille virtuel de WestBourse permet d’acheter et de vendre aux cours réels, sans engager d’argent. C’est le moyen le plus simple de vérifier qu’une stratégie tient sur la durée.\nIl apprend aussi ce qu’aucune simulation ne montre : vos propres réactions. Voir une ligne perdre 15 % en quelques semaines, même avec de l’argent fictif, dit beaucoup de ce que vous ferez avec de l’argent réel. Notez ces réactions au fil des semaines.\nLes quatre étapes ci-dessous donnent un cadre. Trois mois sont un minimum pour traverser au moins une période de baisse. Gardez en tête que, sur une valeur peu échangée, le vrai marché ne permet pas toujours d’acheter ou de vendre au cours affiché.",
+    }
+   ],
    "etapes": [
     {
      "titre": "Définir le profil et la somme",
-     "detail": "Par exemple 3 000 000 FCFA, profil équilibré."
+     "detail": "Par exemple 3 000 000 FCFA : les quatre façons de les mobiliser sont décrites plus haut."
     },
     {
      "titre": "Composer le portefeuille virtuel",
@@ -108,44 +627,169 @@
   },
   {
    "type": "piege",
-   "titre": "Les illusions des simulations",
-   "contenu": "Les chiffres d’une simulation sont toujours plus propres que la réalité. Trois écarts reviennent presque toujours.\nLes frais et l’impôt d’abord. Chaque achat et chaque vente supporte des frais de courtage, et les dividendes subissent une retenue à la source. Une simulation qui les ignore surestime le résultat, d’autant plus que les ordres sont petits et nombreux.\nLe cours constant ensuite. Si le cours baisse, les dividendes réinvestis achètent plus d’actions, ce qui est favorable à long terme, mais la valeur affichée du portefeuille diminue. Testez toujours un scénario défavorable à côté du scénario central.\nL’extrapolation enfin. Une croissance du dividende observée sur cinq ans ne se prolonge pas d’elle-même. Pour une hypothèse raisonnable, regardez la régularité passée du dividende, et retenez une croissance plus faible que celle observée.",
+   "titre": "Ce que ces chiffres ne disent pas",
+   "contenu": "Ces parcours sont instructifs, pas démonstratifs. Avant d’en tirer une règle, gardez en tête les limites ci-dessous : la plupart jouent dans le même sens, celui d’un résultat plus beau que ce que vivrait un épargnant réel.",
    "points": [
     {
-     "titre": "Oublier les frais et l’impôt",
-     "detail": "Les frais de courtage et la retenue sur les dividendes réduisent le résultat réel.",
-     "verifier": "Si le dividende simulé est brut ou net."
+     "titre": "Une période très favorable",
+     "detail": "De novembre 2021 à novembre 2026, les cinq cours ont progressé, de 1,5 fois (SOGB) à 3,6 fois (SGBC). Le parcours C a passé quatre ans sous les sommes versées.",
+     "verifier": "La date de départ de toute période qu’on vous présente."
     },
     {
-     "titre": "Supposer un cours constant",
-     "detail": "Le cours peut baisser ; réinvestir à un cours plus bas achète alors plus d’actions, mais le capital affiché diminue.",
-     "verifier": "Le résultat dans un scénario défavorable."
+     "titre": "Des valeurs choisies en connaissant la suite",
+     "detail": "Aucune des cinq valeurs n’a quitté la cote, aucune n’a supprimé son dividende de 2021 à 2025. En 2021, rien ne le garantissait : on ne le sait qu’après coup.",
+     "verifier": "Si les exemples ont été choisis après le résultat."
     },
     {
-     "titre": "Extrapoler le passé",
-     "detail": "Une croissance de dividende passée n’est pas une promesse.",
+     "titre": "Aucune garantie que cela se répète",
+     "detail": "Un parcours passé n’annonce ni les cours ni les dividendes à venir. Le parcours D le rappelle : un dividende peut baisser d’année en année.",
      "verifier": "La régularité du dividende sur cinq ans."
+    },
+    {
+     "titre": "Des frais réels différents",
+     "detail": "Le calcul retient 1 % par achat. Votre SGI peut appliquer un autre taux, un minimum par ordre, d’autres frais : les petits ordres du parcours B seraient les plus touchés.",
+     "verifier": "Le barème de frais de votre SGI."
+    },
+    {
+     "titre": "Pas d’impôt sur la plus-value",
+     "detail": "Les valeurs finales sont avant frais de vente et avant tout impôt éventuel sur la plus-value. Les dividendes, eux, sont comptés nets.",
+     "verifier": "Le régime fiscal de votre pays de résidence."
+    },
+    {
+     "titre": "Un ordre réel ne passe pas toujours au cours de clôture",
+     "detail": "Sur une valeur peu échangée, un achat ou une vente peut déplacer le prix ou attendre une contrepartie.",
+     "verifier": "La classe de liquidité de la valeur."
+    },
+    {
+     "titre": "Une seule valeur peut stagner cinq ans",
+     "detail": "Le parcours D a gagné 4,5 % en cinq ans, soit 0,9 % par an : la concentration ne laisse aucun filet.",
+     "verifier": "Le poids de votre première ligne."
     }
    ]
   },
   {
    "type": "retenir",
    "titre": "L’essentiel",
-   "contenu": "Simuler, c’est rendre ses hypothèses visibles. Une simulation honnête les affiche à côté de son résultat, et teste au moins un scénario défavorable.\nAvant d’engager de l’argent, posez la question inverse : si le dividende baissait d’un tiers et le cours de 20 %, que deviendrait votre plan ? Si la réponse vous inquiète, réduisez le montant ou allongez l’horizon.",
+   "contenu": "Quatre profils-types, quatre façons d’alimenter un portefeuille, un même enseignement : la méthode compte autant que la valeur choisie. Répartir, étaler ses achats, garder une réserve et accepter qu’un portefeuille puisse valoir moins que les sommes versées pendant des années sont des choix de comportement.\nTestez ces choix d’abord avec le portefeuille virtuel, avec vos propres montants.",
    "points": [
     {
-     "titre": "Une simulation compare des scénarios, elle ne prédit pas"
+     "titre": "Une reconstitution décrit le passé avec des chiffres réels, elle ne prédit rien"
     },
     {
-     "titre": "Le réinvestissement des dividendes accélère la croissance du nombre d’actions"
+     "titre": "Répartis sur cinq secteurs, A, B et C ont mieux fini que la valeur seule"
     },
     {
-     "titre": "Un rendement visé plus élevé demande moins de capital, et plus de risque"
+     "titre": "Un portefeuille peut valoir moins que les sommes versées pendant des années"
     },
     {
-     "titre": "Le portefeuille virtuel teste une stratégie sans engager d’argent"
+     "titre": "Gain total et taux annuel mesurent deux choses différentes"
+    },
+    {
+     "titre": "Épargne de précaution d’abord ; frais, impôt et liquidité réduisent le résultat"
     }
    ]
+  }
+ ],
+ "charts": [
+  {
+   "type": "line",
+   "titre": "Parcours C : valeur du portefeuille chaque 20 novembre, de 2017 à 2026",
+   "labels": [
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "2026"
+   ],
+   "valeurs": [
+    0.58,
+    0.72,
+    0.93,
+    1.25,
+    2.22,
+    3.03,
+    3.44,
+    4.81,
+    7.02,
+    10.1
+   ],
+   "unite": "M FCFA",
+   "note": "Source : clôtures BRVM et dividendes nets publiés, base WestBourse, 2016-2026 ; calcul WestBourse sur ces données. Valeur du portefeuille en millions de FCFA : 0,58 en 2017, 0,93 en 2019, 2,22 en 2021, 10,10 en 2026. Comparez au graphique suivant : tant que cette courbe reste sous celle des sommes versées, le portefeuille vaut moins que ce qu’on y a mis.",
+   "reel": true
+  },
+  {
+   "type": "line",
+   "titre": "Parcours C : cumul des sommes versées chaque 20 novembre, de 2017 à 2026",
+   "labels": [
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "2026"
+   ],
+   "valeurs": [
+    0.6,
+    0.9,
+    1.2,
+    1.5,
+    1.8,
+    2.1,
+    2.4,
+    2.7,
+    3,
+    3
+   ],
+   "unite": "M FCFA",
+   "note": "Source : clôtures BRVM et dividendes nets publiés, base WestBourse, 2016-2026 ; calcul WestBourse sur ces données. Le cumul versé monte de 0,3 M FCFA par an, puis s’arrête à 3,0 M FCFA après le dernier versement de 2025. De 2017 à 2020, la valeur du graphique précédent reste en dessous de ces montants (0,58 contre 0,6 ; 0,72 contre 0,9 ; 0,93 contre 1,2 ; 1,25 contre 1,5).",
+   "reel": true
+  },
+  {
+   "type": "bar",
+   "titre": "Valeur finale au 20 novembre 2026, selon le parcours",
+   "labels": [
+    "A : versement unique",
+    "B : mensuel",
+    "C : annuel, 10 ans",
+    "D : une seule valeur"
+   ],
+   "valeurs": [
+    2.95,
+    6.47,
+    10.1,
+    1.04
+   ],
+   "unite": "M FCFA",
+   "note": "Source : clôtures BRVM et dividendes nets publiés, base WestBourse, 2016-2026 ; calcul WestBourse sur ces données. Les sommes versées diffèrent : 1,0 M FCFA pour A et D, 3,0 M FCFA pour B et C. Comparez donc plutôt A à D (même somme, même jour), puis B à C.",
+   "reel": true
+  },
+  {
+   "type": "bar",
+   "titre": "Gain en pourcentage de la somme versée, selon le parcours",
+   "labels": [
+    "A : versement unique",
+    "B : mensuel",
+    "C : annuel, 10 ans",
+    "D : une seule valeur"
+   ],
+   "valeurs": [
+    195,
+    115.7,
+    236.6,
+    4.5
+   ],
+   "unite": "%",
+   "note": "Source : clôtures BRVM et dividendes nets publiés, base WestBourse, 2016-2026 ; calcul WestBourse sur ces données. Le gain rapporté aux sommes versées, avant frais de vente et impôt. Le parcours D, concentré sur une valeur, est loin derrière les trois parcours répartis sur cinq secteurs. Le passé ne préjuge pas de l’avenir.",
+   "reel": true
   }
  ],
  "quiz": [
@@ -172,37 +816,37 @@
    "explication": "100 × 600 = 60 000 FCFA, soit 6 actions à 10 000 FCFA."
   },
   {
-   "question": "Qu’est-ce qu’une simulation ne peut pas faire ?",
+   "question": "Dans le parcours C (300 000 FCFA chaque novembre), à quelle date le portefeuille valait-il le moins par rapport aux sommes versées ?",
    "options": [
-    "Comparer deux scénarios",
-    "Garantir le résultat futur",
-    "Montrer l’effet du réinvestissement",
-    "Donner un ordre de grandeur"
+    "20 novembre 2017",
+    "20 novembre 2018",
+    "20 novembre 2019",
+    "20 novembre 2020"
    ],
-   "correct": 1,
-   "explication": "Une simulation applique des hypothèses ; elle ne garantit rien."
+   "correct": 2,
+   "explication": "Au 20 novembre 2019, il valait 925 407 FCFA pour 1 200 000 versés, soit 274 593 FCFA de moins (−22,9 %). En 2017 l’écart n’était que de 17 816 FCFA, en 2020 de 251 797 FCFA."
   },
   {
-   "question": "Pourquoi viser un rendement très élevé augmente-t-il le risque ?",
+   "question": "Le parcours B affiche un gain total de 115,7 % et un taux annuel équivalent de 31,7 %. Pourquoi ces deux chiffres ne se comparent-ils pas ?",
    "options": [
-    "Ce n’est pas le cas sur un horizon long",
-    "Il va souvent avec un dividende fragile",
-    "Les frais de courtage sont alors plus élevés",
-    "L’impôt sur les dividendes est plus élevé"
+    "Le gain total ignore les dividendes, que le taux compte",
+    "Le taux tient compte de la date de chaque versement, le gain total non",
+    "Le taux est calculé avant les frais, le gain total après",
+    "Le gain total porte sur dix ans, le taux sur cinq ans"
    ],
    "correct": 1,
-   "explication": "Un rendement élevé peut annoncer un dividende réduit. Il faut vérifier sa régularité."
+   "explication": "Le gain total rapporte le résultat à toutes les sommes versées, quelle que soit leur date. Le taux tient compte de la durée : un franc versé a travaillé en moyenne environ deux ans et demi, le dernier prélèvement quelques jours."
   },
   {
-   "question": "À quoi sert le portefeuille virtuel ?",
+   "question": "Les parcours A et D partent de 1 000 000 FCFA le même jour : 2 949 710 FCFA à l’arrivée pour A, 1 044 756 FCFA pour D. Que montre cet écart ?",
    "options": [
-    "À investir de l’argent réel, sans payer de frais",
-    "À tester une stratégie sans argent réel",
-    "À obtenir des dividendes gratuits",
-    "À réduire l’impôt sur ses dividendes"
+    "Qu’un portefeuille réparti fait toujours mieux qu’une seule valeur",
+    "Que la société du parcours D est mal gérée",
+    "Que les dividendes n’ont pas compté dans le résultat de D",
+    "Qu’une seule valeur peut stagner cinq ans pendant que d’autres montent"
    ],
-   "correct": 1,
-   "explication": "Il reproduit les achats et ventes aux cours réels, sans argent engagé."
+   "correct": 3,
+   "explication": "Le cours de la valeur unique a reculé de 28,1 % et ses dividendes ont baissé, d’où +4,5 % en cinq ans. Une répartition n’a rien de garanti, mais elle limite l’effet d’une seule ligne. La qualité de la société n’est pas ce que mesure ce calcul."
   }
  ],
  "liens": [
@@ -217,28 +861,13 @@
   {
    "label": "Les dividendes",
    "href": "/dividendes"
+  },
+  {
+   "label": "Mon portefeuille",
+   "href": "/portefeuille"
   }
  ],
  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.",
- "charts": [
-  {
-   "type": "bar",
-   "titre": "Part des obligations dans les trois portefeuilles d’exemple",
-   "labels": [
-    "Prudent",
-    "Équilibré",
-    "Dynamique"
-   ],
-   "valeurs": [
-    50,
-    25,
-    0
-   ],
-   "unite": "%",
-   "reel": false,
-   "note": "Répartitions d’exemple, fictives, du tableau de la leçon : la part d’obligations baisse à mesure que le profil accepte plus de variations. Un profil se choisit d’après l’horizon et la baisse supportable, pas d’après le rendement espéré."
-  }
- ],
  "qcm": {
   "question": "Pour viser 400 000 FCFA de dividendes par an avec un rendement de 8 %, quelle somme faut-il investir ?",
   "options": [

@@ -2,9 +2,9 @@
  "titre": "Leçon 2 — Le PER : évaluer la cherté d’une action",
  "module": "Module 1 — Lire et analyser une entreprise",
  "categorie": "evaluation",
- "duree_min": 11,
+ "duree_min": 17,
  "sous_titre": "Combien d’années de bénéfices vous payez en achetant une action, et pourquoi ce chiffre ne se lit jamais seul.",
- "resume": "Le PER rapporte le cours d’une action à son bénéfice par action. Il dit combien le marché paie pour un franc de bénéfice. Cette leçon montre comment le calculer, comment le lire sur de vraies valeurs de la BRVM, et ses limites.",
+ "resume": "Le PER rapporte le cours d’une action à son bénéfice par action. Il dit combien le marché paie pour un franc de bénéfice. Cette leçon montre comment le calculer, comment le lire sur de vraies valeurs de la BRVM, et ses limites. Elle le calcule aussi pas à pas sur les comptes 2025 de Sonatel.",
  "sections": [
   {
    "type": "definition",
@@ -96,6 +96,102 @@
      "SNTS",
      "ORAC",
      "ONTBF"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Cas réel : le PER de Sonatel, calculé pas à pas",
+   "reel": true,
+   "contenu": "Calculons le PER d’une vraie société avec les comptes 2025 du groupe Sonatel (communiqué du 16 février 2026) et le cours de clôture du 20 novembre 2026 : 4 040 FCFA. Les chiffres du tableau sont ceux de cet exercice et de cette séance. Le bloc sous la section donne les valeurs actuelles lues en base, qui ont pu changer depuis.\nÉtape 1, la capitalisation. Depuis le fractionnement du 26 octobre 2026 (une action ancienne contre dix nouvelles), Sonatel compte 1 milliard d’actions : 4 040 FCFA × 1 000 000 000 = 4 040 Md FCFA. Étape 2, le bénéfice par action. Deux bénéfices sont publiés. Le résultat net part du groupe est de 342,0 Md : 342,0 Md ÷ 1 milliard d’actions = 342,0 FCFA par action. Le résultat net consolidé est de 413,6 Md : 413,6 Md ÷ 1 milliard = 413,6 FCFA par action.\nÉtape 3, les deux PER : 4 040 ÷ 342,0 = 11,8 sur la part du groupe, et 4 040 ÷ 413,6 = 9,8 sur le résultat consolidé. Le premier est le bon pour un actionnaire de Sonatel. Sur les 413,6 Md du consolidé, 71,6 Md reviennent aux minoritaires des filiales : l’acheteur d’une action Sonatel n’y a aucun droit. Les compter dans le bénéfice fait paraître le PER plus bas qu’il n’est pour lui.\nLe rendement bénéficiaire est l’inverse du PER : 1 ÷ 11,8 = 8,5 %. Pour 100 FCFA de capitalisation, la part du groupe a gagné 8,5 FCFA sur l’exercice 2025. Ce n’est pas ce que l’actionnaire touche : c’est ce que la société a gagné, dont le dividende n’est qu’une partie.\nL’effet du fractionnement : avant le 26 octobre 2026, à valeur égale, une action ancienne valait dix fois plus (4 040 × 10 = 40 400 FCFA) et le bénéfice par action était de 3 420 FCFA : 40 400 ÷ 3 420 = 11,8. Après : 4 040 ÷ 342,0 = 11,8. Le cours et le bénéfice par action sont divisés par dix, le PER ne change pas : la société vaut la même chose, seules les unités changent.\nUne mise en garde. Ce PER vaut pour le cours du 20 novembre 2026 et pour l’exercice 2025. Avec un autre cours, ou avec les comptes 2026, il sera différent. Il ne dit pas si l’action est chère ou non : il dit combien d’années du bénéfice 2025, part du groupe, la capitalisation représente. Pour aller plus loin, comparez-le dans le temps et à d’autres sociétés du secteur.",
+   "tableau": {
+    "colonnes": [
+     "Donnée",
+     "Valeur",
+     "D’où elle vient"
+    ],
+    "lignes": [
+     [
+      "Cours de clôture du 20 novembre 2026",
+      "4 040 FCFA",
+      "Clôture BRVM, base WestBourse"
+     ],
+     [
+      "Nombre d’actions après fractionnement",
+      "1 000 000 000",
+      "100 millions × 10 (fractionnement du 26 octobre 2026)"
+     ],
+     [
+      "Capitalisation",
+      "4 040 Md FCFA",
+      "4 040 × 1 milliard"
+     ],
+     [
+      "Résultat net part du groupe 2025",
+      "342,0 Md FCFA",
+      "Communiqué Sonatel, 16 février 2026"
+     ],
+     [
+      "Résultat net consolidé 2025",
+      "413,6 Md FCFA",
+      "Communiqué Sonatel, 16 février 2026"
+     ],
+     [
+      "Bénéfice par action, part du groupe",
+      "342,0 FCFA",
+      "342,0 Md ÷ 1 milliard"
+     ],
+     [
+      "Bénéfice par action, résultat consolidé",
+      "413,6 FCFA",
+      "413,6 Md ÷ 1 milliard"
+     ],
+     [
+      "PER sur la part du groupe",
+      "11,8",
+      "4 040 ÷ 342,0"
+     ],
+     [
+      "PER sur le résultat consolidé",
+      "9,8",
+      "4 040 ÷ 413,6"
+     ],
+     [
+      "Rendement bénéficiaire (part du groupe)",
+      "8,5 %",
+      "1 ÷ 11,8"
+     ]
+    ],
+    "note": "Les calculs sont refaits à partir des lignes publiées. Le bloc ci-dessous applique la méthode de WestBourse (résultat consolidé quand il existe) : son PER peut différer de 11,8."
+   },
+   "illustration": {
+    "gabarit": "decomposition",
+    "titre": "PER de Sonatel : cours du 20 novembre 2026 divisé par le bénéfice par action 2025",
+    "reel": true,
+    "source": "Groupe Sonatel, résultats financiers 2025 (états consolidés IFRS, 16 février 2026) ; clôture BRVM du 20 novembre 2026",
+    "operation": "quotient",
+    "resultat": {
+     "label": "PER (part du groupe)",
+     "valeur": 11.8
+    },
+    "facteurs": [
+     {
+      "label": "Cours de l’action",
+      "valeur": 4040,
+      "unite": "FCFA"
+     },
+     {
+      "label": "BPA part du groupe",
+      "valeur": 342,
+      "unite": "FCFA"
+     }
+    ],
+    "note": "À 4 040 FCFA l’action, l’acheteur paie 11,8 fois le bénéfice 2025 par action revenant au groupe. Sur le résultat consolidé (413,6 FCFA par action), le PER serait de 9,8 : ce bénéfice-là compte 71,6 Md qui reviennent aux minoritaires."
+   },
+   "donnees_reelles": {
+    "vue": "ratios",
+    "codes": [
+     "SNTS"
     ]
    }
   },

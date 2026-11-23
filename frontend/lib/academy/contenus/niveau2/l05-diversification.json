@@ -2,9 +2,9 @@
  "titre": "Leçon 5 — Diversification et allocation d’actifs",
  "module": "Module 2 — Construire son portefeuille",
  "categorie": "general",
- "duree_min": 11,
+ "duree_min": 17,
  "sous_titre": "Ne pas tout perdre à cause d’une seule société : combien de lignes, quels secteurs, quels pays.",
- "resume": "Diversifier, c’est répartir son argent pour qu’une mauvaise nouvelle sur une société ne ruine pas tout le portefeuille. À la BRVM, la diversification a des limites particulières : peu de sociétés, des secteurs concentrés, une liquidité inégale. Cette leçon donne des règles simples et vérifiables.",
+ "resume": "Diversifier, c’est répartir son argent pour qu’une mauvaise nouvelle sur une société ne ruine pas tout le portefeuille. À la BRVM, la diversification a des limites particulières : peu de sociétés, des secteurs concentrés, une liquidité inégale. Cette leçon donne des règles simples et vérifiables. Deux cas réels reconstitués sur cinq ans montrent la répartition d’un portefeuille équilibré, puis sa dérive.",
  "sections": [
   {
    "type": "definition",
@@ -86,6 +86,169 @@
      }
     ],
     "seuil_secteur_pct": 33
+   }
+  },
+  {
+   "type": "cas",
+   "reel": true,
+   "titre": "Cas réel : constituer un portefeuille équilibré avec 1 000 000 FCFA",
+   "contenu": "Reprenons le parcours A de la leçon 7. Le 22 novembre 2021, un épargnant type dispose de 1 000 000 FCFA, par exemple le produit d’une tontine. Il vise cinq lignes d’environ 200 000 FCFA, une par secteur, en actions entières, à la clôture du jour, avec 1 % de frais retenu dans le calcul. Ce profil est un exemple, pas une personne ; les cours sont réels. Les cinq valeurs illustrent une répartition, elles ne forment pas une sélection recommandée.\nVérifions les repères du tableau précédent, sur les 1 000 000 FCFA du départ. Société : la plus grosse ligne pèse 20,0 %, le repère de 20 % est donc tenu. Secteur : chacun pèse environ 20 %, loin des 35 %. Pays : Côte d’Ivoire 59,4 % (trois lignes), Sénégal 39,6 % (deux lignes). Classe d’actifs : 100 % actions, ce qui est une limite. Un portefeuille équilibré au sens large comporterait aussi des obligations : voir les leçons 9 et 10.\nLimites, honnêtement. Cinq lignes, c’est en dessous du repère de 8 à 15 : une mauvaise nouvelle sur une société touche encore un cinquième du portefeuille. Deux pays seulement sur les huit de l’UEMOA. Et les actions entières imposent d’arrondir : un titre SGBC à 10 900 FCFA conduit à 18 titres, 196 200 FCFA hors frais. Cette répartition est un point de départ à titre d’exemple. Le bloc ci-dessous affiche les cours du jour des cinq valeurs.",
+   "tableau": {
+    "colonnes": [
+     "Valeur",
+     "Secteur",
+     "Pays",
+     "Cours (22/11/2021)",
+     "Titres",
+     "Montant, frais compris (poids)"
+    ],
+    "lignes": [
+     [
+      "Sonatel (SNTS)",
+      "Télécoms",
+      "Sénégal",
+      "1 387,5",
+      "140",
+      "196 193 (19,6 %)"
+     ],
+     [
+      "Société Générale Côte d’Ivoire (SGBC)",
+      "Banque",
+      "Côte d’Ivoire",
+      "10 900",
+      "18",
+      "198 162 (19,8 %)"
+     ],
+     [
+      "CIE (CIEC)",
+      "Services publics",
+      "Côte d’Ivoire",
+      "1 840",
+      "107",
+      "198 849 (19,9 %)"
+     ],
+     [
+      "SOGB (SOGC)",
+      "Agro-industrie",
+      "Côte d’Ivoire",
+      "5 000",
+      "39",
+      "196 950 (19,7 %)"
+     ],
+     [
+      "TotalEnergies Marketing Sénégal (TTLS)",
+      "Distribution",
+      "Sénégal",
+      "1 900",
+      "104",
+      "199 576 (20,0 %)"
+     ],
+     [
+      "Total investi",
+      "",
+      "",
+      "",
+      "",
+      "989 730 (99,0 %)"
+     ]
+    ],
+    "note": "Cours en FCFA. Sonatel : cours et titres ajustés du fractionnement du 26 octobre 2026. Poids calculés sur 1 000 000 FCFA ; 10 270 FCFA (1,0 %) restent en liquidités, faute de pouvoir acheter un titre de plus."
+   },
+   "donnees_reelles": {
+    "vue": "cours",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "CIEC",
+     "SOGC",
+     "TTLS"
+    ]
+   }
+  },
+  {
+   "type": "cas",
+   "reel": true,
+   "titre": "Cas réel : cinq ans plus tard, équilibré contre concentré",
+   "contenu": "Au 20 novembre 2026, comparons le parcours A (cinq valeurs) au parcours D, qui a placé la même somme, le même jour, sur une seule valeur, Onatel Burkina Faso. Dans les deux cas, les dividendes sont encaissés, non réinvestis. Valeur finale : 2 949 710 FCFA pour A, 1 044 756 FCFA pour D. Le cours d’Onatel a perdu 28,1 et son dividende par action est passé de 416,58 à 145,32 FCFA. Le passé ne préjuge pas de l’avenir : cinq ans sont une période courte.\nUne répartition de départ ne dure pas. Chaque ligne a suivi son rythme et leur poids a glissé : SGBC pèse 29,1 % de la valeur des titres, Sonatel 23,5 %, tandis que SOGB tombe à 12,3 %. Deux lignes dépassent le repère de 20 %. Aucun secteur n’atteint les 35 % (SGBC est la seule banque), mais c’est le signal que la leçon décrit : noter chaque année le poids de chaque ligne.\nRééquilibrer, c’est vendre une partie de ce qui a beaucoup monté pour racheter ce qui a moins progressé. Cela coûte des frais et peut déclencher un impôt sur la plus-value selon votre pays ; le parcours A ne l’a pas fait. Laisser dériver est aussi un choix : accepter que SGBC pèse près de 30 % des titres. La leçon ne tranche pas à votre place.",
+   "tableau": {
+    "colonnes": [
+     "Valeur",
+     "Valeur de la ligne au 20/11/2026",
+     "Poids sur les titres",
+     "Écart avec les 20 % de départ"
+    ],
+    "lignes": [
+     [
+      "Sonatel (SNTS)",
+      "565 600",
+      "23,5 %",
+      "+3,5 points"
+     ],
+     [
+      "SGBC (SGBC)",
+      "698 310",
+      "29,1 %",
+      "+9,1 points"
+     ],
+     [
+      "CIE (CIEC)",
+      "470 800",
+      "19,6 %",
+      "−0,4 point"
+     ],
+     [
+      "SOGB (SOGC)",
+      "296 400",
+      "12,3 %",
+      "−7,7 points"
+     ],
+     [
+      "TotalEnergies Sénégal (TTLS)",
+      "372 320",
+      "15,5 %",
+      "−4,5 points"
+     ],
+     [
+      "Total des titres",
+      "2 403 430",
+      "100 %",
+      ""
+     ]
+    ],
+    "note": "Poids calculés sur la valeur des titres (2 403 430 FCFA), hors liquidités (546 280 FCFA). Chaque ligne pesait environ 20 % au départ."
+   },
+   "stats": [
+    {
+     "label": "Parcours A, valeur finale",
+     "valeur": "2 949 710 FCFA",
+     "detail": "Gain +195 %, taux annuel 24,2 %"
+    },
+    {
+     "label": "Parcours D, valeur finale",
+     "valeur": "1 044 756 FCFA",
+     "detail": "Gain +4,5 %, taux annuel 0,9 %"
+    },
+    {
+     "label": "Ligne la plus lourde de A",
+     "valeur": "SGBC, 29,1 %",
+     "detail": "20 % au départ"
+    },
+    {
+     "label": "Ligne la plus légère de A",
+     "valeur": "SOGB, 12,3 %",
+     "detail": "20 % au départ"
+    }
+   ],
+   "donnees_reelles": {
+    "vue": "historique",
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "CIEC",
+     "SOGC",
+     "TTLS",
+     "ONTBF"
+    ]
    }
   },
   {
@@ -175,6 +338,27 @@
    "unite": "base 100",
    "note": "Valeurs d’exemple, pas des données de marché : risque du portefeuille, base 100 pour une seule action. La baisse est rapide pour les premières lignes, puis la courbe s’aplatit. Au-delà d’une quinzaine de lignes, il reste surtout le risque de marché, que la diversification ne supprime pas.",
    "reel": false
+  },
+  {
+   "type": "bar",
+   "titre": "Parcours A : poids de chaque ligne au 20 novembre 2026",
+   "labels": [
+    "Sonatel",
+    "SGBC",
+    "CIE",
+    "SOGB",
+    "TotalEnergies Sénégal"
+   ],
+   "valeurs": [
+    23.5,
+    29.1,
+    19.6,
+    12.3,
+    15.5
+   ],
+   "unite": "%",
+   "note": "Source : clôtures BRVM au 20 novembre 2026 et ordres du parcours A du 22 novembre 2021, base WestBourse, 2021-2026. Poids sur la valeur des titres : chaque ligne pesait environ 20 % au départ, l’écart mesure la dérive en cinq ans. Le passé ne préjuge pas de l’avenir.",
+   "reel": true
   }
  ],
  "quiz": [
@@ -201,37 +385,37 @@
    "explication": "Dix banques réagissent souvent ensemble aux mêmes nouvelles. La répartition par secteur compte autant que le nombre de lignes."
   },
   {
-   "question": "Pourquoi des lignes trop petites posent-elles problème ?",
+   "question": "Dans le parcours A, la ligne la plus lourde pèse 29,1 % des titres, cinq ans après un départ à 20 % par ligne. Que suggère la leçon ?",
    "options": [
-    "Elles sont interdites par le règlement de la BRVM",
-    "Les frais minimum pèsent lourd",
-    "Elles ne versent pas de dividende",
-    "Elles augmentent le risque de marché"
+    "Ne rien examiner : le repère de 20 % ne vaut que le jour de l’achat",
+    "Se demander s’il faut rééquilibrer, en pesant frais et impôt éventuel",
+    "Vendre aussitôt toutes les autres lignes pour retrouver 20 %",
+    "Racheter la ligne qui a le plus monté, pour la renforcer encore"
    ],
    "correct": 1,
-   "explication": "Les frais de courtage comportent souvent un minimum : sur un petit ordre, ils représentent un pourcentage élevé."
+   "explication": "Un poids qui a glissé de 20 % à 29,1 % est le signal qu’il faut regarder la répartition. Rééquilibrer a un coût (frais, impôt éventuel) : la leçon invite à se poser la question, sans imposer la réponse."
   },
   {
-   "question": "Une ligne a beaucoup monté et pèse désormais 40 % du portefeuille. Que suggère le principe de diversification ?",
+   "question": "Pourquoi 10 270 FCFA restent-ils non investis dans le parcours A, sur 1 000 000 FCFA ?",
    "options": [
-    "Ne rien faire",
-    "Envisager de rééquilibrer pour réduire sa part",
-    "Acheter encore la même valeur",
-    "Vendre toutes les autres lignes"
+    "La BRVM impose un minimum non investi par portefeuille",
+    "On n’achète que des actions entières, et le reste ne suffit pas",
+    "Les frais de 1 % ont absorbé cette somme sur chaque ligne",
+    "La cinquième ligne a été achetée avec un jour de retard"
    ],
    "correct": 1,
-   "explication": "Rééquilibrer ramène le portefeuille vers sa répartition cible et limite la dépendance à une seule société."
+   "explication": "Avec un cours de 10 900 FCFA, SGBC s’achète par titres entiers (18 titres, 196 200 FCFA) : le reliquat de chaque ligne reste en liquidités. Ici 1 000 000 − 989 730 = 10 270 FCFA."
   },
   {
-   "question": "Pourquoi suivre l’indice BRVM Composite n’équivaut-il pas forcément à être diversifié ?",
+   "question": "Les parcours A et D partent de 1 000 000 FCFA le même jour : 2 949 710 FCFA pour A, 1 044 756 FCFA pour D. Qu’illustre l’écart ?",
    "options": [
-    "Il ne contient qu’une seule société cotée",
-    "Il est pondéré par la capitalisation",
-    "Il ne contient que des obligations d’État",
-    "Il n’est plus publié par la BRVM"
+    "Un portefeuille réparti gagne toujours plus qu’une seule valeur",
+    "Les dividendes n’ont eu aucun effet sur le résultat de D",
+    "Une seule société peut stagner cinq ans alors que d’autres progressent",
+    "La société de D est mal gérée, ce que le calcul démontre"
    ],
-   "correct": 1,
-   "explication": "Un indice pondéré par la capitalisation peut être dominé par quelques grandes sociétés."
+   "correct": 2,
+   "explication": "Une ligne unique porte seule le risque propre à la société : ici +4,5 % en cinq ans, contre +195 % pour A. La répartition ne garantit rien, mais elle limite l’effet d’une seule ligne ; le calcul ne juge pas la société."
   }
  ],
  "liens": [
