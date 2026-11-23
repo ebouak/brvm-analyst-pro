@@ -5,6 +5,8 @@ import { fmtNumber, fmtPctSigne } from '@/lib/format';
 import { phraseReleve, type Largeur } from '@/lib/realtime/releve';
 import { useMaintenant, useReleve } from '@/lib/realtime/useReleve';
 import { ChiffreRoulant } from '@/components/ui/ChiffreRoulant';
+import { useDernierReleve } from '@/lib/realtime/useDernierReleve';
+import { LigneDernierReleve } from '@/components/marche/DernierReleve';
 
 /**
  * Bandeau « pouls de séance » : le marché au PREMIER ÉCRAN du tableau de bord,
@@ -29,6 +31,8 @@ export default function PoulsSeance({ enSeanceAuRendu, composite, largeur, derni
   const info = useReleve();
   const maintenant = useMaintenant();
   const visible = maintenant ? estEnSeance(maintenant) : enSeanceAuRendu;
+  // Ce qu'a apporté le dernier relevé, en une ligne (le détail est sur /actions).
+  const dernier = useDernierReleve(visible && maintenant != null);
   if (!visible) return null;
 
   const c = info.composite ?? composite;
@@ -82,6 +86,12 @@ export default function PoulsSeance({ enSeanceAuRendu, composite, largeur, derni
       )}
 
       {phrase && <p className="text-xs text-muted sm:ml-auto">{phrase}</p>}
+
+      {dernier && (
+        <div className="basis-full border-t border-border/60 pt-2">
+          <LigneDernierReleve donnees={dernier} />
+        </div>
+      )}
     </section>
   );
 }

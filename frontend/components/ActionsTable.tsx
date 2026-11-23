@@ -6,6 +6,10 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useCoursSeance } from '@/lib/realtime/useCoursSeance';
 import { FlashFort } from '@/components/ui/FlashFort';
 import { EnDirect } from '@/components/ui/EnDirect';
+import { useDernierReleve } from '@/lib/realtime/useDernierReleve';
+import { useFlashesEtales } from '@/lib/realtime/useFlashesEtales';
+import { heureMaj } from '@/lib/realtime/recomposer';
+import { DernierRelevePanneau, MarqueReleve } from '@/components/marche/DernierReleve';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import SignalBadge from './SignalBadge';
@@ -160,6 +164,11 @@ export default function ActionsTable({
   // Cours en direct pendant la séance ; les champs serveur (désignation,
   // secteur, pays) sont conservés par `recomposer`.
   const { rows: cours, flashes, enDirect, derniereMaj } = useCoursSeance(actions, dateMarche);
+  // Ce qu'a apporté le dernier relevé : reste affiché jusqu'au suivant (encart
+  // + point sur chaque ligne qui a bougé). Relu en base, jamais déduit de l'onglet.
+  const dernier = useDernierReleve(enDirect);
+  const heureDernier = dernier ? heureMaj(new Date(dernier.instant)) : null;
+  const bouges = useMemo(() => new Set(dernier?.mouvements.map((m) => m.code) ?? []), [dernier]);
   // Glissement des lignes quand l'ordre change (tri, filtre, nouveau cours).
   // Coupé si l'utilisateur demande moins d'animations.
   const calme = useReducedMotion();
@@ -200,6 +209,13 @@ export default function ActionsTable({
     });
     return r;
   }, [cours, q, pays, secteur, minVol, perf, sortKey, asc]);
+
+  // En direct, les éclairs parcourent la cote de haut en bas en moins de 2 s
+  // au lieu de partir tous ensemble ; en rejeu, ils restent immédiats (les
+  // images se succèdent plus vite que la vague).
+  const ordre = useMemo(() => rows.map((r) => r.code), [rows]);
+  const eclairsEtales = useFlashesEtales(flashes, ordre);
+  const eclairs = enDirect ? eclairsEtales : flashes;
 
   /*
    * Colonne Signal : le moteur s'abstient le plus souvent (CLAUDE.md §9). Une
@@ -357,6 +373,7 @@ export default function ActionsTable({
           <EnDirect enDirect={enDirect} derniereMaj={derniereMaj} />
         </div>
       )}
+      {enDirect && dernier && <DernierRelevePanneau donnees={dernier} />}
 
       {noSignalNote}
 
@@ -374,7 +391,7 @@ export default function ActionsTable({
               key={a.code}
               layout={glisse}
               transition={transitionLigne}
-              className={flashes[a.code] ? `ligne-flash-${flashes[a.code]}` : undefined}
+              className={eclairs[a.code] ? `ligne-flash-${eclairs[a.code]}` : undefined}
             >
               <Link
                 href={`/actions/${a.code}`}
@@ -383,7 +400,7 @@ export default function ActionsTable({
                 <Logo code={a.code} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-medium text-ivory">{a.code}</span>
+                    <span className="font-mono font-medium text-ivory">{a.code}{heureDernier && bouges.has(a.code) && <MarqueReleve heure={heureDernier} />}</span>
                     {sig?.signal && <RatingBadge scoreTotal={sig.score_total} confiance={sig.confiance} neutre />}
                   </div>
                   <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
@@ -394,7 +411,7 @@ export default function ActionsTable({
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="tabular text-ivory font-medium"><FlashFort direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort> <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
+                  <div className="tabular text-ivory font-medium"><FlashFort direction={eclairs[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort> <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
                   <div className={`tabular text-sm font-medium ${tonVariation(a.variation_pct)}`}>
                     <Variation v={a.variation_pct} />
                   </div>
@@ -458,7 +475,7 @@ export default function ActionsTable({
                   layout={glisse}
                   transition={transitionLigne}
                   // Ligne balayée par la couleur du mouvement (direct ou rejeu).
-                  className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group ${flashes[a.code] ? `ligne-flash-${flashes[a.code]}` : ''}`}
+                  className={`border-b border-border/40 hover:bg-white/[0.02] ${EASE} group ${eclairs[a.code] ? `ligne-flash-${eclairs[a.code]}` : ''}`}
                 >
                   {/* ── Code + Désignation ─────────────────────────────── */}
                   <td className="px-4 py-3">
@@ -469,6 +486,7 @@ export default function ActionsTable({
                       <Logo code={a.code} size="sm" />
                       <div>
                         <span className={`font-mono font-medium text-ivory group-hover:text-accent-ink ${EASE}`}>{a.code}</span>
+                        {heureDernier && bouges.has(a.code) && <MarqueReleve heure={heureDernier} />}
                         <div className="text-[11px] text-faint truncate max-w-[160px] leading-tight">
                           {a.designation}
                         </div>
@@ -489,7 +507,7 @@ export default function ActionsTable({
 
                   {/* ── Cours ─────────────────────────────────────────── */}
                   <td className="px-4 py-3 text-right tabular text-ivory font-medium">
-                    <FlashFort direction={flashes[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort>
+                    <FlashFort direction={eclairs[a.code]}>{fmtNumber(a.cours_jour)}</FlashFort>
                   </td>
 
                   {/* ── Variation % ───────────────────────────────────── */}
