@@ -1767,6 +1767,39 @@ production (compte test Premium, bureau et mobile). 615 tests Academy verts.
   remplacement gardée par titre (modèle `0259`). Insérer des leçons en tête décale
   `academy_progress`/`academy_notes` (modèle `0258`, décalage par +1000).
 
+### Ajouts (passage 2026-11-24) — Academy niveau 3 : les bougies, sur des séances réelles
+
+PR #380, #381, #382. Migrations `0261` et `0262` **appliquées** après déploiement,
+vérifiées en base et en production (compte test Premium).
+
+- **Leçon 1 enrichie** (`niveau3/l01-lire-graphique.json`, 0261) : anatomie d’une bougie,
+  six figures, cinq ateliers de chandeliers, pièges propres à la BRVM, 12 questions.
+  Convention rappelée : **vert = hausse** à la BRVM (le document fourni disait l’inverse).
+- **Leçon 2 recentrée** (`niveau3/l02-chandeliers.json`, 0262, générée par
+  `scripts/academy-lecon2-bougies.mjs`) : les quatre figures à trois bougies (étoiles du
+  matin et du soir, trois soldats, trois corbeaux), chacune avec son atelier ; les règles
+  de repérage écrites ; les vraies bougies de six valeurs ; puis ce que montrent
+  4 923 bougies réelles (2021-2026).
+- **Moteur pur** `lib/academy/figuresBougies.ts` (sans import, testé par
+  `figuresBougies.test.ts`) : seuils dans `SEUILS_BOUGIES`, une séance sans échange ou
+  sans OHLC complet n’est **jamais** lue comme une figure, pas de chevauchement d’une
+  même figure. **Aucun écart d’ouverture exigé** : l’ouverture égale la clôture de la
+  veille dans 40,9 % des séances, l’exiger rendrait les étoiles introuvables.
+- **Simulateurs** `bougies` (séances réelles, 1 à 6 codes, 10 à 60 séances) et
+  `figure_bougies` (atelier de 2 à 5 bougies modifiables, cohérence OHLC vérifiée par le
+  schéma), rendus par `components/academy/lecon/SimulateurBougies.tsx` (SVG). `/api/academy/serie`
+  renvoie désormais `ouverture`/`haut`/`bas`/`volume` : `null` si absent ou ≤ 0, **jamais
+  remplacés par la clôture** (ce qui dessinerait une bougie plate inventée).
+- **La mesure** (`scripts/academy-lecon2-stats.mjs` → `niveau3/sources/bougies-brvm-2026-11-24.json`) :
+  sur les 10 valeurs les plus échangées, 38,6 % des séances seulement sont lisibles en
+  bougie ; mouvement à 5 séances comparé au taux de base **dans le sens de la figure**,
+  intervalle de Wilson à 95 %, 30 cas minimum. **Aucune figure ne fait nettement mieux
+  qu’une séance quelconque** ; l’avalement baissier fait même moins bien (33,6 % de
+  baisses contre 42,0 %). La leçon le dit, et ses tests vérifient que chaque verdict suit
+  le calcul. ⚠️ Ne pas réécrire une figure comme « signal » sans une nouvelle mesure.
+- ⚠️ Un curseur `.lp-curseur` (grille à trois colonnes) ne tient pas dans une cellule
+  `.lp-champs` : il s’y réduit à un point. Le placer dans un bloc `.lp-curseurs` (#382).
+
 
 ## 9. Bugs connus / limites
 
