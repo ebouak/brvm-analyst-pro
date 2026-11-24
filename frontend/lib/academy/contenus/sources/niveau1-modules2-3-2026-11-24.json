@@ -1,0 +1,86 @@
+{
+  "genere_le": "2026-11-24",
+  "seance_actions": "2026-11-24",
+  "seance_reference": "2026-11-23",
+  "dividendes_2025_brvm_calendrier": {
+    "nb_valeurs_datees": 34,
+    "top_rendements_nets": [
+      { "code": "STBC", "cours": 20395, "div_brut": 1940, "div_net": 1707.2, "rdt_net_pct": 8.37, "ex_date": "2026-08-12", "payment_date": "2026-08-13" },
+      { "code": "NEIC", "cours": 1800, "div_brut": 159.54, "div_net": 140.4, "rdt_net_pct": 7.80, "ex_date": "2026-09-09", "payment_date": "2026-09-10" },
+      { "code": "ABJC", "cours": 2590, "div_brut": 229, "div_net": 201.52, "rdt_net_pct": 7.78, "ex_date": "2026-09-29", "payment_date": "2026-09-30" },
+      { "code": "BOAB", "cours": 8200, "div_brut": null, "div_net": 585, "rdt_net_pct": 7.13, "ex_date": "2026-05-22", "payment_date": "2026-05-26" },
+      { "code": "SGBC", "cours": 37550, "div_brut": 2606, "div_net": 2293.28, "rdt_net_pct": 6.11, "ex_date": "2026-08-21", "payment_date": "2026-08-24" },
+      { "code": "PALC", "cours": 7300, "div_brut": 501.6, "div_net": 441.4, "rdt_net_pct": 6.05, "ex_date": "2026-06-26", "payment_date": "2026-06-29" },
+      { "code": "SPHC", "cours": 7450, "div_brut": 489, "div_net": 430.32, "rdt_net_pct": 5.78, "ex_date": "2026-08-27", "payment_date": "2026-08-28" }
+    ],
+    "historique_5_ans_fcfa_net": {
+      "SNTS": [
+        { "exercice": 2021, "net": 140 },
+        { "exercice": 2022, "net": 150 },
+        { "exercice": 2023, "net": 158 },
+        { "exercice": 2024, "net": 166 },
+        { "exercice": 2025, "net": 174 }
+      ],
+      "SGBC": [
+        { "exercice": 2021, "net": 1004.93 },
+        { "exercice": 2022, "net": 1107 },
+        { "exercice": 2023, "net": 1547 },
+        { "exercice": 2024, "net": 1639 },
+        { "exercice": 2025, "net": 2293.28 }
+      ],
+      "ORAC": [
+        { "exercice": 2021, "net": 717 },
+        { "exercice": 2022, "net": 753 },
+        { "exercice": 2023, "net": 780 },
+        { "exercice": 2024, "net": 660 },
+        { "exercice": 2025, "net": 704 }
+      ],
+      "SPHC": [
+        { "exercice": 2021, "net": 365.4 },
+        { "exercice": 2022, "net": 294 },
+        { "exercice": 2023, "net": 65 },
+        { "exercice": 2024, "net": 324 },
+        { "exercice": 2025, "net": 430.32 }
+      ]
+    }
+  },
+  "sgi": {
+    "nb_sgi_annuaire": 40,
+    "nb_grilles_frais": 37,
+    "repartition_pays": { "CI": 20, "SN": 6, "BJ": 5, "BF": 4, "ML": 3, "NE": 1, "TG": 1 }
+  },
+  "liquidite_2026_11_23": {
+    "classes": { "A": 4, "B": 20, "C": 18, "D": 6 },
+    "top": [
+      { "code": "SNTS", "score": 92, "classe": "A", "presence_pct": 100, "spread_pct": 0.75 },
+      { "code": "SGBC", "score": 80, "classe": "A", "presence_pct": 100, "spread_pct": 2.06 },
+      { "code": "BBGC", "score": 79, "classe": "A", "presence_pct": 100, "spread_pct": 0.06 },
+      { "code": "BOAC", "score": 75, "classe": "A", "presence_pct": 100, "spread_pct": 0.36 }
+    ],
+    "exemples_etraits": [
+      { "code": "PRSC", "score": 17, "classe": "D", "spread_pct": 8.99 },
+      { "code": "UNLC", "score": 11, "classe": "D", "spread_pct": 2.42 }
+    ]
+  },
+  "baisses_52s_2026_11_23": [
+    { "code": "SCRC", "cours": 1230, "haut_52s": 3920, "recul_pct": -68.6 },
+    { "code": "SAFC", "cours": 2890, "haut_52s": 6200, "recul_pct": -53.4 },
+    { "code": "UNLC", "cours": 42000, "haut_52s": 85500, "recul_pct": -50.9 },
+    { "code": "SIVC", "cours": 1600, "haut_52s": 3215, "recul_pct": -50.2 }
+  ],
+  "carnet_2026_11_23": [
+    { "code": "ORAC", "qte_achat": 51, "cours_achat": 19000, "qte_vente": 64, "cours_vente": 19005 },
+    { "code": "NSBC", "qte_achat": 50, "cours_achat": 14950, "qte_vente": 344, "cours_vente": 15000 },
+    { "code": "SNTS", "qte_achat": 27691, "cours_achat": 3900, "qte_vente": 20, "cours_vente": 3990 }
+  ],
+  "obligations_2026_11_24": [
+    { "code": "EOS.O10", "designation": "ETAT DU SENEGAL 6,15% 2023-2030", "taux_pct": 6.15, "cours": 10000 },
+    { "code": "EOM.O9", "designation": "ETAT DU MALI 6,30% 2022-2032", "taux_pct": 6.30, "cours": 9695 },
+    { "code": "BABS.O1", "designation": "GSS BAOBAB 6,80% 2024-2029", "taux_pct": 6.80, "cours": 9700 }
+  ],
+  "macro": {
+    "parite_eur_xof": 655.957,
+    "bceao_taux_directeur_pct": 3.0,
+    "bceao_guichet_marginal_pct": 5.0
+  }
+}

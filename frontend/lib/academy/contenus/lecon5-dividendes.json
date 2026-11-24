@@ -6,20 +6,30 @@
     "credit": "Photo : Leeloo The First / Pexels"
   },
   "categorie": "income",
-  "duree_min": 9,
+  "duree_min": 12,
   "sous_titre": "Comprendre le mécanisme, calculer son rendement et mesurer l’effet du réinvestissement.",
   "resume": "Un dividende est la part du bénéfice qu’une société cotée verse à ses actionnaires.\nBien compris, il peut devenir une source de revenus régulière, à condition de savoir le calculer, le lire et en mesurer les limites.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis. Investir en actions comporte un risque de perte en capital.",
   "quiz": [
     {
       "question": "Vous détenez 200 actions et la société verse 1 500 FCFA par action. Quel est votre revenu brut ?",
-      "options": ["30 000 FCFA", "150 000 FCFA", "300 000 FCFA", "3 000 000 FCFA"],
+      "options": [
+        "30 000 FCFA",
+        "150 000 FCFA",
+        "300 000 FCFA",
+        "3 000 000 FCFA"
+      ],
       "correct": 2,
       "explication": "Revenu brut = nombre d’actions × dividende par action : 200 × 1 500 = 300 000 FCFA."
     },
     {
       "question": "Une action cote 20 000 FCFA et verse un dividende annuel de 1 200 FCFA. Quel est son rendement ?",
-      "options": ["1,2 %", "6 %", "12 %", "16,7 %"],
+      "options": [
+        "1,2 %",
+        "6 %",
+        "12 %",
+        "16,7 %"
+      ],
       "correct": 1,
       "explication": "Rendement = dividende ÷ cours × 100 : 1 200 ÷ 20 000 × 100 = 6 %."
     },
@@ -58,21 +68,86 @@
     },
     {
       "question": "Quel capital faut-il pour viser 600 000 FCFA de dividendes bruts par an, à 8 % de rendement hypothétique ?",
-      "options": ["48 000 FCFA", "4 800 000 FCFA", "7 500 000 FCFA", "10 000 000 FCFA"],
+      "options": [
+        "48 000 FCFA",
+        "4 800 000 FCFA",
+        "7 500 000 FCFA",
+        "10 000 000 FCFA"
+      ],
       "correct": 2,
       "explication": "Capital = revenu visé ÷ rendement : 600 000 ÷ 8 % = 7 500 000 FCFA. À 6 %, il en faudrait 10 000 000."
+    },
+    {
+      "question": "En Côte d’Ivoire depuis 2025, quel est le taux d’IRVM retenu sur les dividendes d’actions cotées pour un particulier ?",
+      "options": [
+        "5 %",
+        "10 %",
+        "12 %",
+        "25 %"
+      ],
+      "correct": 2,
+      "explication": "Depuis la loi de finances 2025, l’IRVM en Côte d’Ivoire est de 12 % pour les personnes physiques (10 % pour les personnes morales)."
+    },
+    {
+      "question": "Un dividende brut de 1 940 FCFA soumis à 12 % d’IRVM donne quel montant net perçu par action ?",
+      "options": [
+        "1 707,20 FCFA",
+        "1 746,00 FCFA",
+        "1 820,00 FCFA",
+        "1 928,00 FCFA"
+      ],
+      "correct": 0,
+      "explication": "1 940 × (1 − 0,12) = 1 707,20 FCFA nets (cas réel STBC sur l’exercice 2025)."
+    },
+    {
+      "question": "Que montre la comparaison entre SNTS (140 → 174 FCFA) et SPHC (365 → 65 → 430 FCFA) sur 5 ans ?",
+      "options": [
+        "Tous les dividendes progressent chaque année",
+        "Un dividende cyclique peut baisser fortement si l’activité recule",
+        "Les actions agricoles versent des dividendes fixes",
+        "Le dividende ne dépend pas du bénéfice"
+      ],
+      "correct": 1,
+      "explication": "Le dividende suit la capacité bénéficiaire : il est stable ou croissant sur les valeurs défensives, et volatil sur les valeurs cycliques."
+    },
+    {
+      "question": "Que se passe-t-il techniquement sur le cours le matin du détachement d’un dividende ?",
+      "options": [
+        "Le cours double automatiquement",
+        "Le cours est ajusté à la baisse du montant du dividende",
+        "La cotation est suspendue pendant un mois",
+        "Le dividende est annulé pour les anciens actionnaires"
+      ],
+      "correct": 1,
+      "explication": "Le jour du détachement, le cours de référence est ajusté du dividende détaché : toucher le dividende la veille n’est donc pas un gain gratuit."
     }
   ],
   "sections": [
     {
       "type": "definition",
       "titre": "Comprendre le dividende",
-      "contenu": "Quand une société réalise un bénéfice, son assemblée générale décide d’en verser une partie aux actionnaires : c’est le dividende.\nLe reste est conservé pour financer l’activité. Une société bénéficiaire peut aussi choisir de ne rien distribuer.",
+      "contenu": "Quand une société réalise un bénéfice, son assemblée générale décide d’en verser une partie aux actionnaires : c’est le dividende.\nLe reste est conservé en réserves pour financer l’activité ou rembourser la dette. Une société bénéficiaire peut aussi choisir de ne rien distribuer.\nÀ la BRVM, la quasi-totalité des sociétés versent un dividende annuel unique, voté entre avril et juillet après la clôture des comptes.\nEn 2026, le calendrier officiel de la BRVM recense 34 valeurs ayant daté et payé un dividende au titre de l’exercice 2025.",
       "flux": [
-        { "titre": "Entreprise", "detail": "Réalise un bénéfice sur l’exercice.", "icone": "entreprise" },
-        { "titre": "Bénéfice distribuable", "detail": "La part qui peut être versée.", "icone": "benefices" },
-        { "titre": "Décision de distribution", "detail": "Votée en assemblée générale.", "icone": "decision" },
-        { "titre": "Actionnaires", "detail": "Reçoivent le dividende, par action détenue.", "icone": "actionnaires" }
+        {
+          "titre": "Entreprise",
+          "detail": "Réalise un bénéfice sur l’exercice.",
+          "icone": "entreprise"
+        },
+        {
+          "titre": "Bénéfice distribuable",
+          "detail": "La part qui peut être versée.",
+          "icone": "benefices"
+        },
+        {
+          "titre": "Décision de distribution",
+          "detail": "Votée en assemblée générale.",
+          "icone": "decision"
+        },
+        {
+          "titre": "Actionnaires",
+          "detail": "Reçoivent le dividende, par action détenue.",
+          "icone": "actionnaires"
+        }
       ],
       "formules": [
         {
@@ -90,26 +165,89 @@
     {
       "type": "cas",
       "titre": "Un exemple chiffré",
-      "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques : ils ne décrivent aucune société cotée.\nLe tableau qui suit applique le même calcul à quatre valeurs de la BRVM : dernier dividende enregistré, cours de la dernière séance, rendement, et revenu pour 300 actions.\nAttention : le tableau donne des montants nets d’impôt, tels que versés ; l’exemple ci-dessus est brut.",
-      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "SDCC"], "actions": 300 },
+      "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement brut de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques.\nSur le marché réel au 24 novembre 2026, les meilleurs rendements nets datés atteignent 8,37 % sur STBC (1707,20 FCFA nets pour 20 395 FCFA) et 7,78 % sur ABJC (201,52 FCFA nets pour 2 590 FCFA).\nLe tableau ci-dessous applique le calcul réel à quatre valeurs liquides pour 300 actions, en montants nets d’impôt tels que versés.",
+      "donnees_reelles": {
+        "vue": "rendement",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "SDCC"
+        ],
+        "actions": 300
+      },
       "stats": [
-        { "label": "Actions détenues", "valeur": "300" },
-        { "label": "Dividende par action", "valeur": "1 000 FCFA" },
-        { "label": "Revenu brut annuel", "valeur": "300 000 FCFA" },
-        { "label": "Rendement brut", "valeur": "10 %", "detail": "au cours de 10 000 FCFA" }
+        {
+          "label": "Actions détenues",
+          "valeur": "300"
+        },
+        {
+          "label": "Dividende par action",
+          "valeur": "1 000 FCFA"
+        },
+        {
+          "label": "Revenu brut annuel",
+          "valeur": "300 000 FCFA"
+        },
+        {
+          "label": "Rendement brut",
+          "valeur": "10 %",
+          "detail": "au cours de 10 000 FCFA"
+        }
+      ],
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Meilleurs rendements nets de dividende à la BRVM (ex. 2025, en %)",
+          "reel": true,
+          "note": "Sources : Calendrier officiel des dividendes BRVM (ex. 2025) et clôtures du 24/11/2026. Montants nets d’IRVM.",
+          "labels": [
+            "STBC",
+            "NEIC",
+            "ABJC",
+            "BOAB",
+            "SGBC",
+            "PALC",
+            "SPHC"
+          ],
+          "valeurs": [
+            8.37,
+            7.8,
+            7.78,
+            7.13,
+            6.11,
+            6.05,
+            5.78
+          ]
+        }
       ]
     },
     {
       "type": "cas",
       "titre": "Réinvestir ses dividendes",
       "contenu": "Plutôt que de dépenser le dividende, on peut s’en servir pour acheter de nouvelles actions. L’année suivante, ces actions rapportent à leur tour un dividende.\nAnnée 1 : 300 actions × 1 000 FCFA = 300 000 FCFA, réinvestis à 10 000 FCFA l’action, soit 30 actions de plus. Année 2 : 330 actions × 1 050 FCFA = 346 500 FCFA.\nLe graphique compare ce choix avec des dividendes conservés en espèces, sous les hypothèses écrites dessous.",
-      "simulation": { "type": "reinvestissement", "actions": 300, "dpa": 1000, "cours": 10000, "croissance_pct": 5, "annees": 6 }
+      "simulation": {
+        "type": "reinvestissement",
+        "actions": 300,
+        "dpa": 1000,
+        "cours": 10000,
+        "croissance_pct": 5,
+        "annees": 6
+      }
     },
     {
       "type": "importance",
       "titre": "Analyser une action à dividendes",
-      "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger.\nCommencez par la régularité : le tableau montre les dividendes de quatre valeurs de la BRVM sur cinq exercices. Repérez celles qui progressent et celles qui ont connu une baisse.",
-      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "ORAC", "SGBC", "SPHC"] },
+      "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger avant d’acheter.\nRegardez d’abord la trajectoire sur cinq ans : SGBC a porté son dividende net de 1 005 FCFA (2021) à 2 293,28 FCFA (2025) et SNTS de 140 à 174 FCFA.\nÀ l’inverse, SPHC est passée de 365,40 FCFA (2021) à 65 FCFA (2023) avant de remonter à 430,32 FCFA (2025) : un dividende cyclique suit la matière première.\nLe tableau ci-dessous confronte quatre historiques réels sur cinq exercices pour distinguer régularité et cyclicité.",
+      "donnees_reelles": {
+        "vue": "historique",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "SPHC"
+        ]
+      },
       "points": [
         {
           "titre": "Régularité des distributions",
@@ -136,51 +274,161 @@
           "detail": "Un rendement très élevé peut traduire une action dont le cours a chuté, parce que le marché doute de la suite.",
           "verifier": "le PER, l’endettement et l’actualité de la société."
         }
+      ],
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Dividende net versé sur 5 ans : régularité (SNTS) vs cyclicité (SPHC)",
+          "reel": true,
+          "note": "Sources : BRVM (calendrier officiel 2025) et historiques 2021–2024 (SNTS ajusté du fractionnement par 10).",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "valeurs": [],
+          "series": [
+            {
+              "nom": "SNTS (FCFA net)",
+              "valeurs": [
+                140,
+                150,
+                158,
+                166,
+                174
+              ],
+              "type": "line",
+              "axe": "gauche"
+            },
+            {
+              "nom": "SPHC (FCFA net)",
+              "valeurs": [
+                365.4,
+                294,
+                65,
+                324,
+                430.32
+              ],
+              "type": "line",
+              "axe": "gauche"
+            }
+          ]
+        }
       ]
     },
     {
       "type": "importance",
       "titre": "Les dates qui comptent",
-      "contenu": "Trois dates encadrent chaque dividende. Pour l’investisseur, la plus importante est la date de détachement.\nIl faut détenir l’action la veille du détachement pour percevoir le dividende. Acheter le jour du détachement ou après ne donne pas droit au dividende en cours : il revient au vendeur.",
+      "contenu": "Trois dates encadrent chaque dividende. Pour l’investisseur, la plus décisive est la date de détachement (ex-date).\nIl faut détenir l’action la veille du détachement pour percevoir le dividende. Acheter le jour même ou après ne donne aucun droit au coupon en cours.\nEn pratique, le paiement intervient 1 à 3 jours ouvrés après : STBC a détaché le 2026-08-12 et payé le 2026-08-13 ; ABJC a détaché le 2026-09-29 et payé le 2026-09-30.",
       "etapes_style": "frise",
       "etapes": [
-        { "titre": "Décision de distribution", "detail": "L’assemblée générale approuve le montant du dividende." },
-        { "titre": "Date de détachement", "detail": "Seuls les détenteurs de la veille y ont droit ; le cours est ajusté du dividende.", "cle": true },
-        { "titre": "Date de paiement", "detail": "Le dividende est versé sur le compte espèces associé à votre compte-titres, par votre SGI." }
+        {
+          "titre": "Décision de distribution",
+          "detail": "L’assemblée générale approuve le montant du dividende."
+        },
+        {
+          "titre": "Date de détachement",
+          "detail": "Seuls les détenteurs de la veille y ont droit ; le cours est ajusté du dividende.",
+          "cle": true
+        },
+        {
+          "titre": "Date de paiement",
+          "detail": "Le dividende est versé sur le compte espèces associé à votre compte-titres, par votre SGI."
+        }
       ]
     },
     {
       "type": "piege",
       "titre": "Les erreurs à éviter",
-      "contenu": "Cinq erreurs reviennent souvent chez les investisseurs qui découvrent les dividendes.",
+      "contenu": "Cinq erreurs reviennent souvent chez les investisseurs qui découvrent les dividendes, notamment oublier l’impôt retenu à la source (IRVM).\nEn Côte d’Ivoire, l’IRVM sur dividendes cotés est de 12 % pour les personnes physiques depuis 2025 (10 % pour les personnes morales).\nExemple réel : sur STBC, le dividende brut voté est de 1 940 FCFA, mais l’actionnaire particulier perçoit 1707,20 FCFA nets après 12 % d’IRVM.",
       "points": [
-        { "titre": "Choisir sur le seul rendement", "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou du cours." },
-        { "titre": "Acheter juste avant le détachement pour « toucher » le dividende", "detail": "Au détachement, le cours est ajusté du dividende : le gain n’est pas gratuit." },
-        { "titre": "Oublier les impôts et les frais", "detail": "Le dividende est versé après retenue à la source, et chaque ordre coûte des frais de courtage." },
-        { "titre": "Supposer que le dividende se répétera", "detail": "Il est voté chaque année : il peut baisser, ou disparaître." },
-        { "titre": "Tout miser sur une seule valeur", "detail": "Une société, un secteur ou un pays peut traverser une mauvaise année. Répartir réduit ce risque." }
+        {
+          "titre": "Choisir sur le seul rendement",
+          "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou du cours."
+        },
+        {
+          "titre": "Acheter juste avant le détachement pour « toucher » le dividende",
+          "detail": "Au détachement, le cours est ajusté du dividende : le gain n’est pas gratuit."
+        },
+        {
+          "titre": "Oublier les impôts et les frais",
+          "detail": "Le dividende est versé après retenue à la source, et chaque ordre coûte des frais de courtage."
+        },
+        {
+          "titre": "Supposer que le dividende se répétera",
+          "detail": "Il est voté chaque année : il peut baisser, ou disparaître."
+        },
+        {
+          "titre": "Tout miser sur une seule valeur",
+          "detail": "Une société, un secteur ou un pays peut traverser une mauvaise année. Répartir réduit ce risque."
+        }
       ]
     },
     {
       "type": "cas",
       "titre": "Calculer un objectif de revenus",
-      "contenu": "Pour viser un revenu annuel, on divise ce revenu par le rendement espéré : on obtient le capital à investir.\nPour 600 000 FCFA de dividendes bruts par an, il faut 10 000 000 FCFA à 6 % de rendement, et 7 500 000 FCFA à 8 %. Ces rendements sont des hypothèses, pas des promesses.",
+      "contenu": "Voici les ordres de grandeur pour viser un revenu annuel de dividendes, selon trois taux de rendement hypothétiques.\nCes chiffres reposent sur des hypothèses constantes (aucune baisse du dividende ni frais de courtage inclus) : ils donnent un cap, pas une promesse.\nPour réduire l’effort d’épargne, le réinvestissement automatique des premiers coupons permet de bâtir progressivement le nombre d’actions génératrices de revenus.",
       "formules": [
-        { "nom": "Capital nécessaire", "expression": "Revenu annuel visé ÷ Rendement", "exemple": "600 000 ÷ 6 % = 10 000 000 FCFA" }
+        {
+          "nom": "Capital nécessaire",
+          "expression": "Revenu annuel visé ÷ Rendement",
+          "exemple": "600 000 ÷ 6 % = 10 000 000 FCFA"
+        }
       ],
-      "simulation": { "type": "objectif", "revenu_cible": 600000, "rendements_pct": [6, 8] }
+      "simulation": {
+        "type": "objectif",
+        "revenu_cible": 600000,
+        "rendements_pct": [
+          6,
+          8
+        ]
+      }
     },
     {
       "type": "retenir",
       "titre": "L’essentiel",
-      "contenu": "Cinq idées à garder en tête.",
+      "contenu": "Le dividende rémunère la patience, à condition de ne jamais sacrifier la qualité de l’entreprise pour un taux facial élevé.\nVérifiez toujours : la base nette d’impôt, la régularité sur 5 ans, le taux de distribution du bénéfice et la liquidité du titre avant d’entrer.",
       "points": [
-        { "titre": "Le dividende est une part du bénéfice", "detail": "Voté chaque année, il n’est jamais garanti." },
-        { "titre": "Revenu = actions × dividende par action", "detail": "300 actions × 1 000 FCFA = 300 000 FCFA bruts." },
-        { "titre": "Rendement = dividende ÷ cours × 100", "detail": "Il dépend du prix payé pour l’action." },
-        { "titre": "Réinvestir accroît les revenus futurs", "detail": "Les actions achetées produisent à leur tour un dividende." },
-        { "titre": "Le détachement décide du droit au dividende", "detail": "Il faut détenir l’action la veille de la date de détachement." }
+        {
+          "titre": "Le dividende est une part du bénéfice",
+          "detail": "Voté chaque année, il n’est jamais garanti."
+        },
+        {
+          "titre": "Revenu = actions × dividende par action",
+          "detail": "300 actions × 1 000 FCFA = 300 000 FCFA bruts."
+        },
+        {
+          "titre": "Rendement = dividende ÷ cours × 100",
+          "detail": "Il dépend du prix payé pour l’action."
+        },
+        {
+          "titre": "Réinvestir accroît les revenus futurs",
+          "detail": "Les actions achetées produisent à leur tour un dividende."
+        },
+        {
+          "titre": "Le détachement décide du droit au dividende",
+          "detail": "Il faut détenir l’action la veille de la date de détachement."
+        }
       ]
     }
-  ]
+  ],
+  "module": "Module 2 — Dividendes et investissement pratique",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "charts": [],
+  "qcm": {
+    "question": "Vous détenez 200 actions et la société verse 1 500 FCFA par action. Quel est votre revenu brut ?",
+    "options": [
+      "30 000 FCFA",
+      "150 000 FCFA",
+      "300 000 FCFA",
+      "3 000 000 FCFA"
+    ],
+    "correct": 2,
+    "explication": "Revenu brut = nombre d’actions × dividende par action : 200 × 1 500 = 300 000 FCFA."
+  }
 }

@@ -6,7 +6,7 @@
     "credit": "Photo : Ron Lach / Pexels"
   },
   "categorie": "general",
-  "duree_min": 7,
+  "duree_min": 10,
   "sous_titre": "Quatre étapes, les bons documents, et le type d’ordre qui protège votre prix.",
   "resume": "Pour acheter des actions à la BRVM, il faut passer par une Société de Gestion et d’Intermédiation (SGI) agréée.\nCette leçon détaille l’ouverture du compte, le dépôt et le premier ordre, avec les réflexes qui évitent les mauvaises surprises.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
@@ -14,18 +14,60 @@
     {
       "type": "definition",
       "titre": "Le parcours en quatre étapes",
-      "contenu": "Un particulier n’achète pas directement en bourse : il passe par une SGI, qui transmet ses ordres au marché et conserve ses titres.\nDe nombreuses SGI permettent aujourd’hui d’ouvrir un compte en ligne.",
+      "contenu": "Un particulier ne peut pas acheter d’actions directement sur la BRVM : il doit ouvrir un compte-titres auprès d’une SGI (Société de Gestion et d’Intermédiation) agréée par l’AMF-UMOA (ex-CREPMF).\nFin 2026, l’annuaire officiel recense 40 SGI réparties dans 7 pays de l’UEMOA : 20 en Côte d’Ivoire, 6 au Sénégal, 5 au Bénin, 4 au Burkina Faso, 3 au Mali, 1 au Niger et 1 au Togo.\nChaque compte-titres est adossé à un compte espèces dédié qui reçoit vos dépôts, règle vos achats et encaisse automatiquement vos dividendes nets.",
       "flux": [
-        { "titre": "Choisir une SGI", "detail": "Agréée par l’autorité de régulation, l’AMF-UMOA.", "icone": "entreprise" },
-        { "titre": "Constituer le dossier", "detail": "Pièce d’identité, justificatif de domicile, formulaire.", "icone": "decision" },
-        { "titre": "Déposer des fonds", "detail": "Virement ou dépôt sur le compte espèces.", "icone": "paiement" },
-        { "titre": "Passer un ordre", "detail": "Choisir la valeur, la quantité et le prix.", "icone": "graphique" }
+        {
+          "titre": "Choisir une SGI",
+          "detail": "Agréée par l’autorité de régulation, l’AMF-UMOA.",
+          "icone": "entreprise"
+        },
+        {
+          "titre": "Constituer le dossier",
+          "detail": "Pièce d’identité, justificatif de domicile, formulaire.",
+          "icone": "decision"
+        },
+        {
+          "titre": "Déposer des fonds",
+          "detail": "Virement ou dépôt sur le compte espèces.",
+          "icone": "paiement"
+        },
+        {
+          "titre": "Passer un ordre",
+          "detail": "Choisir la valeur, la quantité et le prix.",
+          "icone": "graphique"
+        }
+      ],
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Répartition des 40 SGI agréées par pays de l’UEMOA",
+          "reel": true,
+          "note": "Sources : Annuaire officiel des SGI BRVM / AMF-UMOA (2026).",
+          "labels": [
+            "Côte d’Ivoire",
+            "Sénégal",
+            "Bénin",
+            "Burkina Faso",
+            "Mali",
+            "Niger",
+            "Togo"
+          ],
+          "valeurs": [
+            20,
+            6,
+            5,
+            4,
+            3,
+            1,
+            1
+          ]
+        }
       ]
     },
     {
       "type": "importance",
       "titre": "Choisir sa SGI",
-      "contenu": "Les SGI se distinguent par leurs frais, leur plateforme et leur service. Leur liste complète et à jour figure dans l’annuaire des SGI agréées, publié par la BRVM et par l’AMF-UMOA : vérifiez-y le nom exact de celle que vous choisissez.",
+      "contenu": "Les documents demandés sont standards : pièce d’identité en cours de validité, justificatif de domicile, photo, RIB ou numéro Mobile Money et fiche de connaissance client (KYC).\nSur 37 grilles tarifaires publiées, le dépôt minimum varie fortement d’une SGI à l’autre : de 0 FCFA ou 50 000 FCFA jusqu’à 2 000 000 FCFA selon le positionnement.\nL’ouverture prend généralement quelques jours ouvrés, parfois entièrement en ligne selon la SGI choisie.",
       "points": [
         {
           "titre": "L’agrément",
@@ -52,7 +94,7 @@
     {
       "type": "definition",
       "titre": "Deux types d’ordres",
-      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.\nLe règlement de la BRVM parle d’ordre « à cours limité » et d’ordre « au mieux ». La leçon 7 y ajoute la durée de validité et le « tout ou rien », puis met ces règles en pratique sur un carnet d’ordres.",
+      "contenu": "Avant de choisir une SGI, comparez quatre postes de frais : la commission de courtage par ordre, les droits de garde annuels, la tenue de compte et les frais de retrait ou de virement.\nSur les grilles homologuées en base, le courtage se situe typiquement entre 0,65 % et 1 % par transaction (parfois avec un minimum de perception de 1 000 FCFA).\nLes droits de garde annuels vont souvent de 0,25 % à 0,50 % du portefeuille, et la tenue de compte est nulle chez de nombreuses SGI (ou jusqu’à 12 500 FCFA/an ailleurs).",
       "points": [
         {
           "titre": "L’ordre à cours limité",
@@ -69,11 +111,22 @@
     {
       "type": "cas",
       "titre": "Le coût réel d’un premier achat",
-      "contenu": "Le coût d’un ordre ne se limite pas au cours de l’action : il faut y ajouter les frais.\nExemple pédagogique avec 1 % de frais : 20 actions à 10 000 FCFA coûtent 202 000 FCFA. Sur un très petit ordre, des frais minimums peuvent peser bien plus.",
+      "contenu": "Passer un ordre revient à donner trois instructions précises : le sens (achat ou vente), la quantité de titres et le type de prix.\nAvec un ordre à cours limité, vous fixez le prix maximum d’achat (ou minimum de vente). Avec un ordre au mieux, vous acceptez le prix disponible dans le carnet.\nLa leçon 7 y ajoute la durée de validité (ordre « jour » ou « à révocation ») et les conditions d’exécution face au carnet d’ordres.",
       "formules": [
-        { "nom": "Coût total d’un achat", "expression": "Quantité × Cours + Frais", "exemple": "20 × 10 000 + 1 % = 202 000 FCFA" }
+        {
+          "nom": "Coût total d’un achat",
+          "expression": "Quantité × Cours + Frais",
+          "exemple": "20 × 10 000 + 1 % = 202 000 FCFA"
+        }
       ],
-      "simulation": { "type": "frais_ordre", "consigne": "Reprenez l’exemple, puis réduisez la quantité : avec un minimum de frais, le coût d’un très petit ordre grimpe vite.", "cours": 10000, "quantite": 20, "taux_frais_pct": 1, "minimum_fcfa": 0 },
+      "simulation": {
+        "type": "frais_ordre",
+        "consigne": "Reprenez l’exemple, puis réduisez la quantité : avec un minimum de frais, le coût d’un très petit ordre grimpe vite.",
+        "cours": 10000,
+        "quantite": 20,
+        "taux_frais_pct": 1,
+        "minimum_fcfa": 0
+      },
       "illustration": {
         "gabarit": "decomposition",
         "titre": "Le coût d’un achat : les titres, plus les frais (exemple pédagogique)",
@@ -100,18 +153,39 @@
       "type": "cas",
       "reel": true,
       "titre": "Sur la BRVM : le prix de 20 actions",
-      "contenu": "Le tableau donne le cours de la dernière séance de quatre valeurs. Pour estimer un premier achat, multipliez ce cours par la quantité visée, puis ajoutez les frais de votre SGI.",
-      "donnees_reelles": { "vue": "cours", "codes": ["SNTS", "ORAC", "SIBC", "BOAB"], "actions": 20 }
+      "contenu": "Sur le Bulletin Officiel de la Cote du 23 novembre 2026, le carnet d’ORAC affichait 51 titres à l’achat à 19 000 FCFA face à 64 titres à la vente à 19 005 FCFA : un écart très serré de 5 FCFA.\nSur NSBC le même jour, 50 titres étaient demandés à 14 950 FCFA face à 344 titres offerts à 15 000 FCFA.\nSur SNTS, 27 691 titres attendaient à l’achat à 3 900 FCFA contre 20 titres offerts à 3 990 FCFA : un ordre au mieux trop gros aurait payé plus cher.",
+      "donnees_reelles": {
+        "vue": "cours",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SIBC",
+          "BOAB"
+        ],
+        "actions": 20
+      }
     },
     {
       "type": "piege",
       "titre": "Les erreurs à éviter",
-      "contenu": "Quelques réflexes évitent l’essentiel des mauvaises surprises.",
+      "contenu": "Deux réflexes protègent vos premiers ordres : vérifiez toujours le montant total frais inclus, et privilégiez l’ordre à cours limité sur les titres peu liquides.\nCommencez par un petit ordre sur une valeur liquide pour tester le parcours complet de votre SGI (dépôt, exécution, avis d’opéré).",
       "points": [
-        { "titre": "Passer un ordre au mieux sur une valeur peu échangée", "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché." },
-        { "titre": "Confier ses fonds à un intermédiaire non agréé", "detail": "Plateformes et « courtiers » non agréés sont une source fréquente d’arnaques." },
-        { "titre": "Oublier les frais sur les petits ordres", "detail": "Mieux vaut regrouper ses achats que multiplier les très petits ordres." },
-        { "titre": "Signer sans lire les conditions", "detail": "Frais, délais et modalités de retrait figurent dans la convention de compte." }
+        {
+          "titre": "Passer un ordre au mieux sur une valeur peu échangée",
+          "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché."
+        },
+        {
+          "titre": "Confier ses fonds à un intermédiaire non agréé",
+          "detail": "Plateformes et « courtiers » non agréés sont une source fréquente d’arnaques."
+        },
+        {
+          "titre": "Oublier les frais sur les petits ordres",
+          "detail": "Mieux vaut regrouper ses achats que multiplier les très petits ordres."
+        },
+        {
+          "titre": "Signer sans lire les conditions",
+          "detail": "Frais, délais et modalités de retrait figurent dans la convention de compte."
+        }
       ]
     },
     {
@@ -119,11 +193,26 @@
       "titre": "L’essentiel",
       "contenu": "Cinq idées à garder en tête.",
       "points": [
-        { "titre": "On investit à la BRVM par une SGI agréée", "detail": "L’agrément se vérifie auprès de l’AMF-UMOA." },
-        { "titre": "Quatre étapes", "detail": "Choisir la SGI, constituer le dossier, déposer, passer l’ordre." },
-        { "titre": "L’ordre à cours limité protège votre prix", "detail": "C’est le réflexe recommandé pour débuter." },
-        { "titre": "Coût total = quantité × cours + frais", "detail": "Les frais comptent, surtout sur les petits montants." },
-        { "titre": "Méfiance envers les plateformes non agréées", "detail": "Aucun agrément, aucun dépôt." }
+        {
+          "titre": "On investit à la BRVM par une SGI agréée",
+          "detail": "L’agrément se vérifie auprès de l’AMF-UMOA."
+        },
+        {
+          "titre": "Quatre étapes",
+          "detail": "Choisir la SGI, constituer le dossier, déposer, passer l’ordre."
+        },
+        {
+          "titre": "L’ordre à cours limité protège votre prix",
+          "detail": "C’est le réflexe recommandé pour débuter."
+        },
+        {
+          "titre": "Coût total = quantité × cours + frais",
+          "detail": "Les frais comptent, surtout sur les petits montants."
+        },
+        {
+          "titre": "Méfiance envers les plateformes non agréées",
+          "detail": "Aucun agrément, aucun dépôt."
+        }
       ]
     }
   ],
@@ -141,19 +230,34 @@
     },
     {
       "question": "Par qui faut-il passer pour acheter des actions à la BRVM ?",
-      "options": ["Sa banque, directement au guichet", "Une SGI agréée", "N’importe quelle plateforme en ligne", "La BCEAO"],
+      "options": [
+        "Sa banque, directement au guichet",
+        "Une SGI agréée",
+        "N’importe quelle plateforme en ligne",
+        "La BCEAO"
+      ],
       "correct": 1,
       "explication": "Seules les Sociétés de Gestion et d’Intermédiation agréées peuvent transmettre des ordres au marché de la BRVM."
     },
     {
       "question": "Quelle autorité agrée les SGI de l’UMOA ?",
-      "options": ["La BCEAO", "L’AMF-UMOA (ex-CREPMF)", "La BRVM elle-même", "Le ministère des Finances de chaque pays"],
+      "options": [
+        "La BCEAO",
+        "L’AMF-UMOA (ex-CREPMF)",
+        "La BRVM elle-même",
+        "Le ministère des Finances de chaque pays"
+      ],
       "correct": 1,
       "explication": "L’Autorité des Marchés Financiers de l’UMOA, qui a succédé au CREPMF, agrée et contrôle les SGI."
     },
     {
       "question": "Vous achetez 20 actions à 10 000 FCFA avec 1 % de frais. Quel est le coût total ?",
-      "options": ["200 000 FCFA", "202 000 FCFA", "220 000 FCFA", "200 100 FCFA"],
+      "options": [
+        "200 000 FCFA",
+        "202 000 FCFA",
+        "220 000 FCFA",
+        "200 100 FCFA"
+      ],
       "correct": 1,
       "explication": "20 × 10 000 = 200 000 FCFA, plus 1 % de frais (2 000 FCFA) : 202 000 FCFA."
     },
@@ -167,6 +271,50 @@
       ],
       "correct": 0,
       "explication": "Pour un achat, la limite est un prix maximum : l’ordre s’exécute à 10 000 FCFA ou en dessous ; sinon il reste en attente pendant sa durée de validité."
+    },
+    {
+      "question": "Dans les grilles tarifaires des SGI de la BRVM, dans quelle fourchette se situe généralement la commission de courtage ?",
+      "options": [
+        "0,01 % à 0,05 %",
+        "0,65 % à 1 % par ordre",
+        "5 % à 10 % par ordre",
+        "Toujours gratuite"
+      ],
+      "correct": 1,
+      "explication": "Sur les grilles SGI homologuées, le courtage se situe typiquement entre 0,65 % et 1 % par transaction (avec parfois un minimum de perception)."
+    },
+    {
+      "question": "Que sont les « droits de garde » prélevés par une SGI ?",
+      "options": [
+        "Une amende en cas de perte",
+        "Des frais annuels pour la conservation de vos titres en portefeuille",
+        "La taxe sur les dividendes",
+        "Le prix d’un ordre annulé"
+      ],
+      "correct": 1,
+      "explication": "Les droits de garde rémunèrent la conservation et le suivi administratif de vos titres (souvent 0,25 % à 0,50 % par an)."
+    },
+    {
+      "question": "Pourquoi l’ordre « à cours limité » est-il recommandé face à un carnet peu profond ?",
+      "options": [
+        "Il garantit une hausse du titre",
+        "Il supprime les frais de courtage",
+        "Il vous protège contre une exécution à un prix nettement plus élevé que prévu",
+        "Il évite de payer l’IRVM"
+      ],
+      "correct": 2,
+      "explication": "L’ordre à cours limité fixe un plafond de prix : vous ne payez jamais plus cher que votre limite, même si les vendeurs sont rares."
+    },
+    {
+      "question": "À quoi sert le compte espèces associé à votre compte-titres chez la SGI ?",
+      "options": [
+        "À détenir uniquement des devises étrangères",
+        "À déposer vos fonds, régler vos ordres et encaisser vos dividendes",
+        "À emprunter automatiquement à la BCEAO",
+        "À bloquer vos actions pendant 10 ans"
+      ],
+      "correct": 1,
+      "explication": "Toute opération de trésorerie (dépôt, achat, vente, coupon, dividende) transite par votre compte espèces SGI."
     }
   ],
   "qcm": {
@@ -181,7 +329,19 @@
     "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides."
   },
   "liens": [
-    { "label": "Comparateur de SGI", "href": "/comparateur-sgi" },
-    { "label": "Classement de liquidité", "href": "/liquidite" }
-  ]
+    {
+      "label": "Comparateur de SGI",
+      "href": "/comparateur-sgi"
+    },
+    {
+      "label": "Classement de liquidité",
+      "href": "/liquidite"
+    }
+  ],
+  "module": "Module 3 — Stratégies et compte",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "charts": []
 }
