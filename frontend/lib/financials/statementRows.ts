@@ -93,15 +93,18 @@ export const INCOME_ROWS: Record<Famille, StatementRow[]> = {
     ...PAR_ACTION,
   ],
 
-  // Cascade bancaire : produits d'intérêts → marge d'intérêts → PNB (ligne
-  // maîtresse) → charges → résultat. Ni coût des ventes ni marge brute.
+  // Cascade bancaire : produits d'intérêts → charges d'intérêts → marge d'intérêts → commissions → PNB → charges → RBE → coût du risque → résultat.
   banque: [
     { key: 'produit_interets', label: "Produits d'intérêts", specific: true },
+    { key: 'charges_interets', label: "Charges d'intérêts", specific: true },
     { key: 'marge_interets', label: "Marge d'intérêts", specific: true, bold: true },
+    { key: 'commissions_nettes', label: 'Commissions nettes', specific: true },
     { key: 'revenu_total', label: 'Total des produits bancaires' },
     { key: 'pnb', label: 'Produit Net Bancaire (PNB)', specific: true, bold: true },
     { key: 'frais_generaux_admin', label: "Frais généraux d'exploitation" },
     { key: 'depenses_exploitation', label: "Charges d'exploitation" },
+    { key: 'resultat_brut_exploitation', label: "Résultat brut d'exploitation (RBE)", specific: true, bold: true },
+    { key: 'cout_du_risque', label: 'Coût du risque', specific: true },
     { key: 'autres_depenses', label: 'Autres charges' },
     ...RESULTAT_COMMUN,
     ...PAR_ACTION,
@@ -175,6 +178,7 @@ export const BALANCE_ROWS: Record<Famille, StatementRow[]> = {
     { key: 'investissements_court_terme', label: 'Placements court terme', indent: true },
     { key: 'investissements_long_terme', label: 'Portefeuille de titres', indent: true },
     { key: 'immobilisations_nettes', label: 'Immobilisations nettes', indent: true },
+    { key: 'actifs_incorporels', label: 'Actifs incorporels', indent: true },
     { key: 'goodwill', label: 'Goodwill', indent: true },
     { key: 'autres_actifs_financiers', label: 'Autres actifs financiers', indent: true },
 

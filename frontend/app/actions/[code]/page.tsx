@@ -14,6 +14,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 import { SectionLock } from '@/components/premium/SectionLock';
 import ChartBuilder from '@/components/financials/ChartBuilderLazy';
 import { buildChartRows } from '@/lib/financials/chartBuilder';
+import { avecBpaCalcule } from '@/lib/fiche/financialsAffichage';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import brvmLogos from '@/lib/brvmLogos.json';
 
@@ -371,7 +372,11 @@ async function FicheAction(props: PropsFiche) {
   const [gateIndicateurs, gateSignaux, gateFonda, gateValo, gateLectureSeance] = await pGates;
   const financials = await pFinancials;
   const chartRows = financials
-    ? buildChartRows(financials.incomeStatements, financials.balanceSheets, financials.cashFlowStatements)
+    ? buildChartRows(
+        avecBpaCalcule(financials.incomeStatements, financials.instrument.shares),
+        financials.balanceSheets,
+        financials.cashFlowStatements,
+      )
     : [];
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await pData;
   // Bouton « Corriger » réservé aux admins (la route /api/fundamentals revérifie).
@@ -1481,7 +1486,7 @@ async function FicheAction(props: PropsFiche) {
                 <details className="mt-4 rounded-card border border-border bg-surface p-4">
                   <summary className="cursor-pointer text-sm text-ivory">Personnaliser ce graphique</summary>
                   <div className="mt-4">
-                    <ChartBuilder rows={chartRows} />
+                    <ChartBuilder rows={chartRows} banque={financials?.instrument.famille_comptable === 'banque'} />
                   </div>
                 </details>
               )}

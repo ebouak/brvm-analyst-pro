@@ -1,24 +1,21 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import {
-  ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
+import { RotateCcw } from 'lucide-react';
 import {
   SERIES_CATALOG, DEFAULT_SELECTION, planAxes, peutAjouter, normalizeRows,
   type ChartRow, type UnitClass,
 } from '@/lib/financials/chartBuilder';
+import { chartTheme } from '@/lib/chartTheme';
 
 /**
- * Constructeur de graphique : l'utilisateur coche les séries, les axes se
- * placent seuls (montants / % / par-action — 2 classes d'unité max, cf.
- * lib/financials/chartBuilder.ts). Composant de rendu pur : toutes les valeurs
- * viennent de buildChartRows, rien n'est calculé ici.
+ * Constructeur de graphique fondamental : l'utilisateur coche les séries,
+ * les axes se placent seuls (montants / % / par-action — 2 classes d'unité max).
+ * Style aligné sur la landing page (jetons CSS clair/sombre via chartTheme()).
  */
-
-const PALETTE = ['#56D7FD', '#3fe18b', '#e8b54d', '#7e57c2', '#ff6b6b', '#e6e9f0', '#26a69a', '#f06292'];
-const AXIS = '#7a9ea8';
-const GRID = '#1a2a30';
 
 const nf = new Intl.NumberFormat('fr-FR');
 const fmtAxe = (unit: UnitClass | null) => (v: number) => {
@@ -34,86 +31,235 @@ const fmtVal = (unit: UnitClass) => (v: number) => {
 
 const GROUPES = ['Compte de résultat', 'Bilan', 'Flux de trésorerie', 'Par action', 'Ratios'] as const;
 
-export default function ChartBuilder({ rows, banque = false }: { rows: ChartRow[]; /** Banque : le revenu est un produit net bancaire, pas un chiffre d'affaires. */ banque?: boolean }) {
-  // Même catalogue, seul le libellé du revenu change pour une banque.
+interface Preset {
+  id: string;
+  label: string;
+  series: string[];
+}
+
+const PRESETS: Preset[] = [
+  { id: 'perf', label: 'Performance', series: ['revenu', 'rn', 'margeNette'] },
+  { id: 'rentabilite', label: 'Rentabilité (ROE / ROA)', series: ['capitauxPropres', 'rn', 'roe', 'roa'] },
+  { id: 'bilan', label: 'Bilan & Trésorerie', series: ['totalActif', 'tresorerie', 'dettesFin', 'levierDetteCp'] },
+  { id: 'cash', label: 'Cash-Flow & FCF', series: ['fluxExploitation', 'capex', 'fcf', 'margeFcf'] },
+  { id: 'action', label: 'Par action', series: ['bpa', 'dividende'] },
+];
+
+interface TooltipItem {
+  name?: string;
+  value?: number;
+  color?: string;
+}
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  indice,
+  catalogue,
+}: {
+  active?: boolean;
+  payload?: TooltipItem[];
+  label?: string;
+  indice: boolean;
+  catalogue: typeof SERIES_CATALOG;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-border-strong bg-surface/95 px-3.5 py-2.5 shadow-card backdrop-blur-sm">
+      <p className="mb-1.5 border-b border-border/70 pb-1 font-mono text-[11px] font-medium text-ivory">
+        Exercice {label}
+      </p>
+      <ul className="space-y-1">
+        {payload.map((entry) => {
+          const name = entry.name ?? '';
+          const val = typeof entry.value === 'number' ? entry.value : null;
+          const def = catalogue.find((s) => s.label === name);
+          const formatted =
+            val == null
+              ? '—'
+              : indice
+                ? `${nf.format(Math.round(val * 10) / 10)} (base 100)`
+                : def
+                  ? fmtVal(def.unit)(val)
+                  : nf.format(val);
+          return (
+            <li key={name} className="flex items-center justify-between gap-4 text-xs">
+              <span className="flex items-center gap-1.5 text-muted">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: entry.color }} />
+                {name}
+              </span>
+              <span className="tabular font-medium text-ivory">{formatted}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+export default function ChartBuilder({
+  rows,
+  banque = false,
+}: {
+  rows: ChartRow[];
+  /** Banque : le revenu est un produit net bancaire, pas un chiffre d'affaires. */
+  banque?: boolean;
+}) {
+  const uid = useId().replace(/:/g, '');
+  const [theme, setTheme] = useState(() => chartTheme());
+
+  useEffect(() => {
+    const refresh = () => setTheme(chartTheme());
+    refresh();
+    const obs = new MutationObserver(refresh);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    return () => obs.disconnect();
+  }, []);
+
+  const palette = useMemo(
+    () => [theme.accent, theme.up, theme.warn, '#8b6fc2', theme.down, theme.ivory, '#26a69a', '#d97706'],
+    [theme],
+  );
+
+  // Même catalogue, adapté au vocabulaire bancaire si nécessaire.
   const catalogue = useMemo(
-    () => (banque ? SERIES_CATALOG.map((s) => (s.id === 'revenu' ? { ...s, label: 'Produit net bancaire' } : s)) : SERIES_CATALOG),
+    () =>
+      SERIES_CATALOG
+        .filter((s) => banque || !s.banqueUniquement)
+        .map((s) => {
+          if (!banque) return s;
+          if (s.id === 'revenu') return { ...s, label: 'Produit net bancaire' };
+          if (s.id === 'croissanceCa') return { ...s, label: 'Croissance PNB %' };
+          return s;
+        }),
     [banque],
   );
+
   const [selection, setSelection] = useState<string[]>(DEFAULT_SELECTION);
-  // Mode « base 100 » : toutes les séries partagent un seul axe (indice), ce qui
-  // lève la limite des deux familles d'unités — on peut alors tout superposer.
   const [indice, setIndice] = useState(false);
 
   const plan = useMemo(() => planAxes(selection), [selection]);
   const defs = useMemo(() => new Map<string, (typeof SERIES_CATALOG)[number]>(catalogue.map((s) => [s.id, s])), [catalogue]);
 
-  // Ne proposer que les séries ayant au moins un point non nul : cocher une
-  // série vide produirait un graphique muet sans explication.
   const disponibles = useMemo(
     () => new Set<string>(catalogue.filter((s) => rows.some((r) => r[s.id] != null)).map((s) => s.id)),
     [rows, catalogue],
   );
 
   const basculer = (id: string) => {
-    // En mode indice, aucune contrainte d'axe : toute série se coche librement.
     setSelection((sel) =>
       sel.includes(id) ? sel.filter((x) => x !== id) : (indice || peutAjouter(sel, id)) ? [...sel, id] : sel,
     );
   };
 
   const actives = selection.filter((id) => disponibles.has(id));
-  // Données réellement tracées : rebasées en base 100 si le mode indice est actif.
   const data = useMemo(() => (indice ? normalizeRows(rows, actives) : rows), [indice, rows, actives]);
-  if (rows.length < 2) return null; // une seule année : rien à tracer
+  const estDefaut =
+    !indice &&
+    selection.length === DEFAULT_SELECTION.length &&
+    DEFAULT_SELECTION.every((id) => selection.includes(id));
+
+  if (rows.length < 2) return null;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs text-muted">Construire un graphique</p>
-          <p className="text-[11px] text-faint">
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-card space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-0.5">
+          <h3 className="font-display text-base font-semibold tracking-tight text-ivory">
+            Construire un graphique
+          </h3>
+          <p className="text-xs text-muted">
             {indice
-              ? 'Mode indice : toutes les séries ramenées à 100 la première année. Comparez n’importe quelles trajectoires.'
-              : 'Cochez jusqu’à deux familles d’unités (montants, %, FCFA/action), les axes se placent seuls. Pour tout combiner, activez « base 100 ».'}
+              ? 'Mode base 100 : toutes les séries sont ramenées à 100 la première année.'
+              : 'Sélectionnez jusqu’à deux familles d’unités (montants, %, FCFA/action) ou activez « Base 100 ».'}
           </p>
         </div>
-        <button
-          type="button" onClick={() => setIndice((v) => !v)} aria-pressed={indice}
-          className={`shrink-0 px-2.5 py-1 rounded border text-[11px] transition ${
-            indice ? 'border-accent/60 bg-accent/10 text-accent' : 'border-border text-muted hover:text-white'
-          }`}
-          title="Ramène chaque série à 100 la première année pour comparer les évolutions, quelles que soient les unités."
-        >
-          Base 100
-        </button>
+        <div className="flex items-center gap-2">
+          {!estDefaut && (
+            <button
+              type="button"
+              onClick={() => { setSelection(DEFAULT_SELECTION); setIndice(false); }}
+              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted transition hover:border-border-strong hover:text-ivory"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Réinitialiser
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIndice((v) => !v)}
+            aria-pressed={indice}
+            className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-medium transition ${
+              indice
+                ? 'border-accent bg-accent/15 text-accent-ink'
+                : 'border-border bg-sunken/50 text-muted hover:border-border-strong hover:text-ivory'
+            }`}
+            title="Ramène chaque série à 100 la première année pour comparer les évolutions, quelles que soient les unités."
+          >
+            Base 100
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
+      {/* Préréglages rapides */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-border/70 pb-3">
+        <span className="mr-1 text-[11px] font-medium text-faint">Vues rapides :</span>
+        {PRESETS.map((p) => {
+          const applicable = p.series.filter((id) => disponibles.has(id));
+          if (applicable.length === 0) return null;
+          const actif =
+            applicable.length === actives.length && applicable.every((id) => actives.includes(id));
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => { setIndice(false); setSelection(applicable); }}
+              className={`rounded-full px-2.5 py-0.5 text-[11px] transition ${
+                actif
+                  ? 'bg-ivory text-bg font-medium'
+                  : 'bg-sunken text-muted hover:bg-border/60 hover:text-ivory'
+              }`}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Sélecteur par famille */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {GROUPES.map((g) => {
           const series = catalogue.filter((s) => s.groupe === g && disponibles.has(s.id));
           if (series.length === 0) return null;
           return (
-            <fieldset key={g} className="min-w-[10rem]">
-              <legend className="text-xs text-faint mb-1">{g}</legend>
+            <fieldset key={g} className="space-y-1.5">
+              <legend className="text-[11px] font-medium text-faint">{g}</legend>
               <div className="flex flex-wrap gap-1.5">
                 {series.map((s) => {
-                  const coche = selection.includes(s.id);
-                  // En mode indice, plus aucune case n'est bloquée.
+                  const idx = actives.indexOf(s.id);
+                  const coche = idx !== -1;
                   const bloque = !coche && !indice && !peutAjouter(selection, s.id);
+                  const couleur = coche ? palette[idx % palette.length] : undefined;
                   return (
                     <button
-                      key={s.id} type="button" onClick={() => basculer(s.id)} disabled={bloque}
+                      key={s.id}
+                      type="button"
+                      onClick={() => basculer(s.id)}
+                      disabled={bloque}
                       aria-pressed={coche}
                       title={bloque ? 'Ajouterait une 3e famille d’unités : décochez d’abord une série.' : undefined}
-                      className={`px-2 py-1 rounded border text-[11px] transition ${
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] transition ${
                         coche
-                          ? 'border-accent/60 bg-accent/10 text-accent'
+                          ? 'border-accent/50 bg-accent/10 font-medium text-ivory'
                           : bloque
-                            ? 'border-border text-faint cursor-not-allowed opacity-50'
-                            : 'border-border text-muted hover:border-accent/40 hover:text-white'
+                            ? 'cursor-not-allowed border-border/50 text-faint opacity-45'
+                            : 'border-border bg-sunken/30 text-muted hover:border-border-strong hover:text-ivory'
                       }`}
                     >
+                      {coche && (
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: couleur }} />
+                      )}
                       {s.label}
                     </button>
                   );
@@ -125,40 +271,81 @@ export default function ChartBuilder({ rows, banque = false }: { rows: ChartRow[
       </div>
 
       {actives.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted">Sélectionnez au moins une série.</p>
+        <p className="py-12 text-center text-sm text-muted">Sélectionnez au moins une série à tracer.</p>
       ) : (
-        <div style={{ height: 300 }}>
+        <div className="rounded-xl border border-border/70 bg-sunken/25 px-2 pt-3 pb-1" style={{ height: 320 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
-              <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: GRID }} tickLine={false} />
-              <YAxis yAxisId="g" tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: GRID }} tickLine={false}
-                tickFormatter={indice ? (v: number) => nf.format(Math.round(v)) : fmtAxe(plan.gauche)} width={indice ? 42 : 58} />
+            <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 2, left: 6 }}>
+              <defs>
+                {actives.map((id, i) => {
+                  const c = palette[i % palette.length];
+                  return (
+                    <linearGradient key={id} id={`cb-${uid}-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={c} stopOpacity={0.92} />
+                      <stop offset="100%" stopColor={c} stopOpacity={0.68} />
+                    </linearGradient>
+                  );
+                })}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.border} opacity={0.75} />
+              <XAxis
+                dataKey="periode"
+                tick={{ fill: theme.muted, fontSize: 11, fontFamily: 'var(--font-mono)' }}
+                axisLine={{ stroke: theme.border }}
+                tickLine={false}
+              />
+              <YAxis
+                yAxisId="g"
+                tick={{ fill: theme.muted, fontSize: 11, fontFamily: 'var(--font-mono)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={indice ? (v: number) => nf.format(Math.round(v)) : fmtAxe(plan.gauche)}
+                width={indice ? 44 : 58}
+              />
               {!indice && plan.droite && (
-                <YAxis yAxisId="d" orientation="right" tick={{ fill: AXIS, fontSize: 11 }}
-                  axisLine={{ stroke: GRID }} tickLine={false} tickFormatter={fmtAxe(plan.droite)} width={52} />
+                <YAxis
+                  yAxisId="d"
+                  orientation="right"
+                  tick={{ fill: theme.muted, fontSize: 11, fontFamily: 'var(--font-mono)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={fmtAxe(plan.droite)}
+                  width={52}
+                />
               )}
               <Tooltip
-                contentStyle={{ background: '#0a1417', border: `1px solid ${GRID}`, borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: '#e5e7eb' }}
-                formatter={(v: number, name: string) => {
-                  if (indice) return [`${nf.format(Math.round(v * 10) / 10)} (base 100)`, name];
-                  const def = catalogue.find((s) => s.label === name);
-                  return [def ? fmtVal(def.unit)(v) : nf.format(v), name];
-                }}
+                cursor={{ fill: theme.border, opacity: 0.2 }}
+                content={<CustomTooltip indice={indice} catalogue={catalogue} />}
               />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              {/* En mode indice, tout est tracé en ligne sur l'axe unique 'g'. */}
+              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} iconType="circle" iconSize={8} />
               {actives.map((id, i) => {
                 const def = defs.get(id);
                 if (!def) return null;
                 const axe = indice || def.unit === plan.gauche ? 'g' : 'd';
-                const couleur = PALETTE[i % PALETTE.length];
+                const couleur = palette[i % palette.length];
                 return !indice && def.render === 'bar' ? (
-                  <Bar key={id} yAxisId={axe} dataKey={id} name={def.label} fill={couleur}
-                    radius={[3, 3, 0, 0]} maxBarSize={26} />
+                  <Bar
+                    key={id}
+                    yAxisId={axe}
+                    dataKey={id}
+                    name={def.label}
+                    fill={`url(#cb-${uid}-${i})`}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
+                  />
                 ) : (
-                  <Line key={id} yAxisId={axe} dataKey={id} name={def.label} stroke={couleur}
-                    strokeWidth={2} dot={{ r: 3 }} connectNulls={false} />
+                  <Line
+                    key={id}
+                    type="monotone"
+                    yAxisId={axe}
+                    dataKey={id}
+                    name={def.label}
+                    stroke={couleur}
+                    strokeWidth={2.25}
+                    dot={{ r: 3.5, fill: theme.surface, stroke: couleur, strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: couleur, stroke: theme.surface, strokeWidth: 2 }}
+                    connectNulls={false}
+                  />
                 );
               })}
             </ComposedChart>
@@ -166,9 +353,9 @@ export default function ChartBuilder({ rows, banque = false }: { rows: ChartRow[
         </div>
       )}
 
-      <p className="text-[11px] text-faint">
+      <p className="text-[11px] leading-relaxed text-faint">
         Séries dérivées des états financiers publiés (une valeur manquante laisse un trou, rien n’est estimé).
-        Marges = résultat / {banque ? 'PNB' : 'CA'} ; ROE = résultat net / capitaux propres.
+        Marges = résultat / {banque ? 'PNB' : 'CA'} · ROE = RN / capitaux propres · ROA = RN / total actif · FCF = flux d’exploitation − |Capex|.
       </p>
     </div>
   );

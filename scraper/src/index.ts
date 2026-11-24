@@ -556,6 +556,37 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'verify:stockanalysis': {
+      const { runStockAnalysis } = await import('./stockanalysis/runStockAnalysis.js');
+      const ecrire = rest.includes('--ecrire');
+      const banques = rest.includes('--banques');
+      const codes = positional.map((c) => c.toUpperCase());
+      const res = await monitored(
+        { code: 'verify-stockanalysis', label: 'Vérification & enrichissement StockAnalysis' },
+        async () => {
+          const r = await runStockAnalysis({ mock, ecrire, banques, codes });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.totalStocks,
+              rows_upserted: ecrire ? r.totalFieldsFilled : 0,
+              metadata: {
+                ecrire,
+                banques,
+                enrichedStocks: r.enrichedStocks,
+                totalFieldsFilled: r.totalFieldsFilled,
+                totalDiscrepancies: r.totalDiscrepancies,
+                echecs: r.echecs,
+                reportPath: r.reportPath,
+              },
+            },
+          };
+        },
+      );
+      console.log(JSON.stringify(res, null, 2));
+      return res.echecs > 0 ? 1 : 0;
+    }
     case 'communaute': {
       // Relevé automatique des membres du canal Telegram (communaute_releves, 0218).
       const { runCommunaute } = await import('./communaute/runCommunaute.js');

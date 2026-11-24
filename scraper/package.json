@@ -104,7 +104,8 @@
     "social:articles": "tsx src/index.ts social:articles",
     "contact:rappel": "tsx src/index.ts contact:rappel",
     "whatsapp:sante": "tsx src/index.ts whatsapp:sante",
-    "ops:workflows": "tsx src/index.ts ops:workflows"
+    "ops:workflows": "tsx src/index.ts ops:workflows",
+    "verify:stockanalysis": "tsx --env-file-if-exists=.env.local src/index.ts verify:stockanalysis"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
