@@ -163,7 +163,9 @@ export default async function FormationsPage() {
             <h2 id="h-cours" className="font-display text-lg text-ivory">
               Cours de l’Academy
             </h2>
-            <span className="text-sm text-muted">{pluriel(courses.length, 'cours', 'cours')}</span>
+            <Link href="/formations/academy" className="text-sm font-medium text-accent-ink hover:underline">
+              Explorer tout le catalogue ({courses.length}) →
+            </Link>
           </div>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[...courses]
