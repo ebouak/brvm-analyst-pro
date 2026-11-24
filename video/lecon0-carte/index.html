@@ -297,7 +297,7 @@ const tagObl1 = item(L.items, 3170, 1140, cue('emet', 'obligataire'), { pitch: 1
 pill(tagObl1.g, 'OBLIGATIONS', 3170, 1140, C.cyan);
 const entr = item(L.items, 3260, 1620, cue('emet', 'entreprises'), { rot: -1.5 });
 card(entr.g, 3050, 1510, 420, 220, C.white);
-text(entr.g, 'ENTREPRISES', 3080, 1660, 62, { ls: -1 });
+text(entr.g, 'ENTREPRISES', 3082, 1658, Math.min(60, (60 * 350) / measure('ENTREPRISES', 60, 900, -1)), { ls: -1 });
 const tagAct = item(L.items, 3138, 1510, cue('emet', 'actions'), { pitch: 1.3 });
 pill(tagAct.g, 'ACTIONS', 3138, 1510, C.pink);
 const tagObl2 = item(L.items, 3318, 1510, cue('emet', 'obligations'), { pitch: 1.4 });
