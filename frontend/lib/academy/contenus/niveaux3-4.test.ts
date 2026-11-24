@@ -59,8 +59,9 @@ describe('niveau 3, leçon 0 — chiffres recalculés depuis les sources', () =>
 });
 
 describe.each([L0, ...N3, ...N4])('%s — règles éditoriales', (_f, l, brut) => {
-  it('cinq questions valides ; la question unique reprend la première', () => {
-    expect(l.quiz).toHaveLength(5);
+  it('au moins cinq questions valides (douze pour la leçon 1 enrichie, 2026-11-24) ; la question unique reprend la première', () => {
+    expect(l.quiz!.length).toBeGreaterThanOrEqual(5);
+    expect(l.quiz!.length).toBeLessThanOrEqual(20);
     for (const q of l.quiz!) expect(q.correct).toBeLessThan(q.options.length);
     expect(l.qcm).toEqual(l.quiz![0]);
   });
