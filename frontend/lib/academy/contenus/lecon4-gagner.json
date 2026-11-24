@@ -1,31 +1,90 @@
 {
   "titre": "Leçon 4 — Dividende et plus-value : les deux sources de gain",
+  "module": "Module 1 : Comprendre la Bourse BRVM",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
   "categorie": "income",
-  "duree_min": 9,
-  "sous_titre": "Le dividende et la plus-value : deux sources de gain, deux logiques. Et un droit à protéger lors d’une augmentation de capital.",
-  "resume": "Une action peut rapporter de deux façons : par le dividende versé chaque année, et par la plus-value à la revente. Lors d’une augmentation de capital, les droits que vous recevez ne sont pas un gain : ils compensent la dilution de vos titres.\nCette leçon apprend à calculer ces gains, à les additionner, et à reconnaître ce qui n’est pas la norme.",
+  "duree_min": 18,
+  "sous_titre": "Comment se combinent dividende et plus-value, ce qui se passe vraiment au détachement, l’impôt UEMOA, et comment protéger vos DPS.",
+  "resume": "Une action peut rapporter de deux façons : par le dividende voté chaque année, et par la plus-value à la revente. Lors d’une augmentation de capital, les droits préférentiels de souscription (DPS) ne créent pas de gain : ils compensent la dilution de vos titres.\nCette leçon décompose le rendement total sur cinq années réelles à la BRVM, démontre le mécanisme du détachement sur l’épisode réel Filtisac CI (2025), détaille la fiscalité IRVM par pays UEMOA et propose trois simulateurs interactifs.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis et les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
   "sections": [
     {
       "type": "definition",
       "titre": "Deux sources de gain, un droit à protéger",
-      "contenu": "Un actionnaire gagne de l’argent de deux manières, qui peuvent s’additionner. Un troisième élément, le droit de souscription, ne crée pas de gain : il protège ce que vous avez déjà.",
+      "contenu": "Un actionnaire gagne de l’argent de deux manières distinctes, qui peuvent s’additionner — ou se compenser partiellement. Un troisième élément souvent mal compris, le droit préférentiel de souscription (DPS), ne crée pas de richesse supplémentaire : il protège la valeur de ce que vous possédez déjà lors d’une augmentation de capital.",
       "points": [
-        { "titre": "Le dividende", "detail": "La part du bénéfice que l’assemblée générale décide de verser chaque année. Un revenu, sans vendre vos titres, mais jamais garanti." },
-        { "titre": "La plus-value", "detail": "La différence entre le prix de revente et le prix d’achat. Elle peut aussi être négative : c’est alors une moins-value." },
-        { "titre": "Les droits préférentiels de souscription (DPS)", "detail": "Lors d’une augmentation de capital, vous recevez des droits qui compensent la dilution de vos titres. Ils ne créent pas de gain : bien utilisés, ils évitent une perte." }
-      ]
+        {
+          "titre": "Le dividende",
+          "detail": "La part du bénéfice annuel que l’assemblée générale décide de distribuer en espèces aux actionnaires. Il procure un revenu sans vendre vos titres, mais n’est jamais garanti."
+        },
+        {
+          "titre": "La plus-value",
+          "detail": "L’écart positif entre le prix de revente et le prix d’achat. Si le cours baisse sous votre prix d’entrée, l’écart est négatif : c’est une moins-value."
+        },
+        {
+          "titre": "Les droits préférentiels de souscription (DPS)",
+          "detail": "Lors d’une augmentation de capital en numéraire, vous recevez des droits qui compensent la dilution de vos titres. Ils ne créent pas de gain : exercés ou cédés, ils évitent une perte."
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Élément",
+          "Origine",
+          "Quand est-il encaissé ?",
+          "Nature du risque"
+        ],
+        "lignes": [
+          [
+            "Dividende",
+            "Part du bénéfice net votée en assemblée",
+            "À la date de paiement, sur le compte espèces",
+            "Peut baisser ou disparaître si les bénéfices chutent"
+          ],
+          [
+            "Plus-value",
+            "Hausse du cours entre l’achat et la vente",
+            "Uniquement au moment de la revente (avant, elle reste latente)",
+            "Peut se transformer en moins-value si le marché se retourne"
+          ],
+          [
+            "DPS",
+            "Augmentation de capital avec maintien du droit",
+            "Pendant la période de souscription (exercice ou vente du droit)",
+            "Perte sèche uniquement si vous laissez expirer vos droits"
+          ]
+        ],
+        "note": "Ne confondez jamais un revenu encaissé (dividende), un gain potentiel sur papier (plus-value latente) et un mécanisme de protection contre la dilution (DPS)."
+      }
     },
     {
       "type": "importance",
-      "titre": "Les calculer",
-      "contenu": "Trois formules suffisent. Les exemples sont pédagogiques : ils ne décrivent aucune société cotée.",
+      "titre": "Additionner les deux moteurs : le rendement total",
+      "contenu": "Observer une action uniquement par son cours — ou uniquement par son dividende — donne une image tronquée. Une société au cours stable qui verse 8 % de dividende net par an rapporte davantage qu’une action qui monte de 5 % sans rien distribuer. À l’inverse, un dividende de 8 % ne compense pas une chute durable de 30 % du cours.\nLe seul juge complet est le rendement total : la somme des dividendes réellement perçus et de la variation du cours, rapportée au capital engagé au départ. Les exemples ci-dessous sont pédagogiques.",
       "formules": [
-        { "nom": "Revenu du dividende", "expression": "Nombre d’actions × Dividende par action", "exemple": "300 × 1 000 = 300 000 FCFA" },
-        { "nom": "Plus-value", "expression": "(Prix de revente − Prix d’achat) × Nombre d’actions", "exemple": "(5 600 − 5 000) × 200 = 120 000 FCFA" },
-        { "nom": "Rendement total", "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie", "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %" }
+        {
+          "nom": "Revenu du dividende",
+          "expression": "Nombre d’actions × Dividende par action",
+          "exemple": "300 × 1 000 = 300 000 FCFA"
+        },
+        {
+          "nom": "Plus-value (hors frais)",
+          "expression": "(Prix de revente − Prix d’achat) × Nombre d’actions",
+          "exemple": "(5 600 − 5 000) × 200 = 120 000 FCFA"
+        },
+        {
+          "nom": "Rendement total",
+          "expression": "(Dividendes reçus + Plus-value) ÷ Somme investie",
+          "exemple": "(80 000 + 120 000) ÷ 1 000 000 = 20 %"
+        },
+        {
+          "nom": "Rendement du dividende",
+          "expression": "Dividende annuel ÷ Cours retenu",
+          "exemple": "400 ÷ 5 000 = 8 % sur prix d’achat"
+        }
       ],
-      "simulation": { "type": "rendement_total", "consigne": "Les trois formules réunies : changez le prix de revente ou le dividende, et regardez la part de chacun dans le résultat.", "prix_achat": 5000, "prix_vente": 5600, "actions": 200, "dividendes_par_action": 400, "annees": 1 },
       "illustration": {
         "gabarit": "decomposition",
         "titre": "Le rendement total additionne dividende et plus-value (exemple pédagogique)",
@@ -47,52 +106,407 @@
             "pourcentage": true
           }
         ],
-        "note": "Sur 1 000 000 FCFA investis, les deux sources de gain s’additionnent. La plus-value n’est acquise qu’à la revente ; le dividende, lui, est encaissé au paiement."
+        "note": "Sur 1 000 000 FCFA investis, les deux sources de gain s’additionnent. La plus-value n’est acquise qu’à la revente ; le dividende, lui, est encaissé sur le compte espèces au paiement."
+      },
+      "simulation": {
+        "type": "rendement_total",
+        "consigne": "Modifiez le prix de revente, le dividende ou la durée de détention : voyez comment la part de chaque moteur évolue (y compris en cas de baisse du cours).",
+        "prix_achat": 5000,
+        "prix_vente": 5600,
+        "actions": 200,
+        "dividendes_par_action": 400,
+        "annees": 1
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Ce que montrent cinq années réelles à la BRVM (2021–2026)",
+      "contenu": "À la BRVM, les dividendes jouent un rôle bien plus important que sur de nombreuses bourses occidentales. Entre janvier 2021 et le 24 novembre 2026, sur des sociétés distributrices régulières comme TotalEnergies CI (TTLC), Sonatel (SNTS) ou Palm CI (PALC), les dividendes cumulés des exercices 2021 à 2025 représentent entre 56 % et 177 % du prix d’achat initial (séries ajustées des divisions de titres).\nMais rien n’est automatique : sur Uniwax CI (UNXC), le dividende est tombé à 0 FCFA pendant quatre exercices consécutifs (2022 à 2025). Les deux moteurs varient fortement selon la santé et le cycle de chaque entreprise.",
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Décomposition réelle 2021–2026 : variation du cours contre dividendes cumulés (% du cours de janv. 2021)",
+          "labels": [
+            "SNTS",
+            "CIEC",
+            "TTLC",
+            "PALC",
+            "SGBC",
+            "UNXC"
+          ],
+          "series": [
+            {
+              "nom": "Variation du cours (janv. 2021 → 24 nov. 2026)",
+              "valeurs": [
+                199.2,
+                193.1,
+                92.6,
+                231.8,
+                400.7,
+                66.7
+              ]
+            },
+            {
+              "nom": "Dividendes cumulés (exercices 2021–2025)",
+              "valeurs": [
+                60.6,
+                58.4,
+                56.2,
+                177.5,
+                101.2,
+                5.8
+              ]
+            }
+          ],
+          "unite": " %",
+          "note": "Source : base WESTBOURSE (brvm_actions_daily & dividends, janv. 2021 au 24/11/2026, séries ajustées des divisions de titres, hors réinvestissement et hors frais). Période historiquement très haussière sur la BRVM : ce constat passé ne présage en rien de l’avenir.",
+          "reel": true
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Valeur",
+          "Cours janv. 2021",
+          "Cours 24/11/2026",
+          "Dividendes cumulés (ex. 21–25)",
+          "Part cours",
+          "Part dividendes"
+        ],
+        "lignes": [
+          [
+            "SNTS — SONATEL",
+            "1 300 FCFA",
+            "3 890 FCFA",
+            "788 FCFA",
+            "+199,2 %",
+            "+60,6 %"
+          ],
+          [
+            "CIEC — CIE CI",
+            "1 450 FCFA",
+            "4 250 FCFA",
+            "846 FCFA",
+            "+193,1 %",
+            "+58,4 %"
+          ],
+          [
+            "TTLC — TOTAL CI",
+            "1 550 FCFA",
+            "2 985 FCFA",
+            "871 FCFA",
+            "+92,6 %",
+            "+56,2 %"
+          ],
+          [
+            "PALC — PALMCI",
+            "2 200 FCFA",
+            "7 300 FCFA",
+            "3 906 FCFA",
+            "+231,8 %",
+            "+177,5 %"
+          ],
+          [
+            "SGBC — SGBCI",
+            "7 500 FCFA",
+            "37 550 FCFA",
+            "7 591 FCFA",
+            "+400,7 %",
+            "+101,2 %"
+          ],
+          [
+            "UNXC — UNIWAX CI",
+            "1 050 FCFA",
+            "1 750 FCFA",
+            "61 FCFA",
+            "+66,7 %",
+            "+5,8 %"
+          ]
+        ],
+        "note": "Source : base WESTBOURSE (janv. 2021 – 24/11/2026). Sur UNXC, aucun dividende n’a été versé au titre des exercices 2022 à 2025 ; sur SGBC, le dividende a plus que doublé entre 2021 et 2025."
+      },
+      "encadres": [
+        {
+          "ton": "attention",
+          "titre": "Les années 2021–2026 ne sont pas une promesse",
+          "texte": "La BRVM a connu entre 2021 et 2026 un cycle de rattrapage particulièrement favorable, après une longue phase de baisse entre 2016 et 2020. Extrapoler ces pourcentages sur les cinq prochaines années serait une erreur grave."
+        }
+      ]
+    },
+    {
+      "type": "definition",
+      "titre": "Chronologie d’un dividende : de l’assemblée générale au compte espèces",
+      "contenu": "Pour toucher le dividende d’une année, il n’est pas nécessaire d’avoir détenu l’action pendant douze mois : tout se joue autour d’une date précise, la date de détachement (ou date ex-dividende).\nVous devez être propriétaire de l’action à la clôture de la séance qui précède le détachement. Si vous achetez le matin du détachement ou après, le dividende de l’exercice revient au vendeur, même si le paiement effectif n’intervient que plusieurs jours plus tard.",
+      "etapes": [
+        {
+          "titre": "Clôture et publication des comptes",
+          "detail": "L’entreprise publie son bénéfice annuel et le conseil d’administration propose un dividende par action."
+        },
+        {
+          "titre": "Vote en assemblée générale (AGO)",
+          "detail": "Les actionnaires approuvent (ou modifient) le montant du dividende ; la société communique le calendrier officiel à la BRVM."
+        },
+        {
+          "titre": "Date de détachement (ex-dividende)",
+          "detail": "L’action cote désormais sans le droit au dividende de l’exercice : son cours de référence est mécaniquement ajusté à la baisse du montant du dividende.",
+          "cle": true
+        },
+        {
+          "titre": "Date de paiement (compte espèces)",
+          "detail": "La société transfère les fonds via le DC/BR ; votre SGI crédite votre compte espèces du montant net, après retenue à la source."
+        }
+      ],
+      "etapes_style": "frise"
+    },
+    {
+      "type": "cas",
+      "titre": "Le mythe du « dividende gratuit » : l’épisode réel Filtisac CI (2025)",
+      "contenu": "Une illusion tenace consiste à acheter une action la veille du détachement pour « prendre le dividende » et revendre aussitôt. En réalité, l’argent distribué sort de la trésorerie de l’entreprise : la société vaut immédiatement d’autant moins, et le marché ajuste le cours en conséquence.\nL’épisode réel de Filtisac Côte d’Ivoire (FTSC) en septembre 2025 l’illustre avec une clarté spectaculaire. Pour l’exercice 2024, la société distribue un dividende exceptionnel net de 1 726,56 FCFA. Le 25 septembre 2025 (veille du détachement), FTSC clôture à 3 760 FCFA. Le 26 septembre 2025 (jour du détachement), le cours ouvre et clôture à 2 185 FCFA, soit une baisse immédiate de 1 575 FCFA (−41,9 %) en une seule séance.",
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Cours réel de Filtisac CI (FTSC) autour du détachement du 26 septembre 2025",
+          "labels": [
+            "22/09",
+            "23/09",
+            "24/09",
+            "25/09",
+            "26/09",
+            "29/09",
+            "30/09",
+            "01/10",
+            "02/10",
+            "03/10"
+          ],
+          "valeurs": [
+            4605,
+            4385,
+            4060,
+            3760,
+            2185,
+            2345,
+            2520,
+            2705,
+            2905,
+            3120
+          ],
+          "unite": " FCFA",
+          "note": "Source : base WESTBOURSE (brvm_actions_daily, FTSC du 22/09/2025 au 03/10/2025). Entre le 25/09 (3 760 FCFA) et le 26/09 (2 185 FCFA), le cours recule de 1 575 FCFA le jour du détachement du dividende net de 1 726,56 FCFA.",
+          "reel": true
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Séance",
+          "Cours de clôture FTSC",
+          "Variation",
+          "Ce qui se passe"
+        ],
+        "lignes": [
+          [
+            "24/09/2025",
+            "4 060 FCFA",
+            "−7,4 %",
+            "Avant-veille du détachement"
+          ],
+          [
+            "25/09/2025",
+            "3 760 FCFA",
+            "−7,4 %",
+            "Dernier jour pour acheter avec droit au dividende"
+          ],
+          [
+            "26/09/2025",
+            "2 185 FCFA",
+            "−41,9 %",
+            "Jour du détachement (dividende net 1 726,56 FCFA) : ajustement technique hors plafond ±7,5 %"
+          ],
+          [
+            "29/09/2025",
+            "2 345 FCFA",
+            "+7,3 %",
+            "Reprise des cotations normales dans la limite de ±7,5 %"
+          ]
+        ],
+        "note": "Source : base WESTBOURSE (2025). Acheter la veille du détachement ne crée aucun gain gratuit : l’ajustement du cours compense le dividende et les frais de courtage restent à votre charge."
       }
     },
     {
       "type": "cas",
       "reel": true,
-      "titre": "Sur la BRVM : la régularité des dividendes",
-      "contenu": "Le dividende d’une société varie d’un exercice à l’autre. Le tableau donne le dividende par action de quatre valeurs sur cinq exercices, tel qu’enregistré dans notre base.\nRepérez les distributions régulières, celles qui progressent, et les baisses.",
-      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "ORAC", "SGBC", "CIEC"] }
+      "titre": "Sur la BRVM : observer la régularité sur cinq exercices",
+      "contenu": "Au-delà d’un seul versement, ce qui compte pour un investisseur de long terme est la constance de l’entreprise. Le tableau en direct ci-dessous lit dans la base les dividendes des cinq derniers exercices de quatre grandes valeurs cotées.\nComparez les trajectoires : certaines sociétés augmentent régulièrement leur distribution année après année, d’autres l’ajustent selon leurs investissements ou leur conjoncture.",
+      "donnees_reelles": {
+        "vue": "historique",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "CIEC"
+        ]
+      }
     },
     {
       "type": "cas",
       "reel": true,
-      "titre": "Sur la BRVM : ce que rapportent 100 actions",
-      "contenu": "Le même calcul, appliqué au dernier dividende enregistré et au cours de la dernière séance. Le rendement change chaque jour avec le cours.",
-      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "CIEC"], "actions": 100 }
+      "titre": "Sur la BRVM : ce que rapportent 100 actions au cours du jour",
+      "contenu": "Le rendement du dividende n’est pas un taux fixe gravé dans le marbre : il évolue chaque jour avec le cours de l’action. Si une société maintient son dividende à 500 FCFA mais que son cours double de 5 000 à 10 000 FCFA, le rendement pour un nouvel acheteur passe de 10 % à 5 % — tandis que l’actionnaire entré à 5 000 FCFA conserve 10 % sur son prix d’achat initial.",
+      "donnees_reelles": {
+        "vue": "rendement",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "CIEC"
+        ],
+        "actions": 100
+      }
     },
     {
       "type": "importance",
-      "titre": "Une augmentation de capital : trois choix",
-      "contenu": "Lors d’une augmentation de capital en numéraire, les actionnaires reçoivent en principe des DPS, en proportion des titres qu’ils détiennent, sauf si l’assemblée générale les a supprimés : la note d’information le précise.\nLe prix de souscription est fixé dans cette note. Au détachement des droits, le cours baisse d’environ leur valeur : c’est la dilution que les droits compensent.",
+      "titre": "Impôt sur les dividendes (IRVM) et inflation : du brut au réel",
+      "contenu": "Les dividendes versés par les sociétés cotées à la BRVM subissent une retenue à la source appelée IRVM (Impôt sur le Revenu des Valeurs Mobilières). Point crucial : c’est le pays où siège la société émettrice qui fixe le taux, pas votre pays de résidence ! Votre SGI crédite directement le montant net.\nDeux autres réalités séparent le gain affiché du gain réel : d’abord, une plus-value reste « latente » (virtuelle) tant que vous n’avez pas vendu ; ensuite, si votre portefeuille rapporte 6 % dans une année où les prix à la consommation montent de 4 %, votre pouvoir d’achat réel n’a progressé que d’environ 2 %.",
+      "tableau": {
+        "colonnes": [
+          "Pays de l’émetteur",
+          "Taux IRVM dividendes cotés (personne physique)",
+          "Précision vérifiée"
+        ],
+        "lignes": [
+          [
+            "Togo",
+            "3 %",
+            "Personnes morales : 7 %"
+          ],
+          [
+            "Bénin",
+            "5 %",
+            "Taux réduit pour les sociétés cotées"
+          ],
+          [
+            "Mali",
+            "7 %",
+            "Retenu automatiquement à la source"
+          ],
+          [
+            "Sénégal",
+            "10 %",
+            "Applicable notamment à Sonatel (SNTS)"
+          ],
+          [
+            "Côte d’Ivoire",
+            "12 %",
+            "Depuis la loi de finances 2025 (10 % pour les personnes morales ; 10 % pour tous avant 2025)"
+          ],
+          [
+            "Burkina Faso",
+            "12,5 %",
+            "Retenu automatiquement à la source"
+          ]
+        ],
+        "note": "Source : barème fiscal UEMOA vérifié dans WESTBOURSE (Annexe fiscale 2025 Côte d’Ivoire, calendrier BRVM 2026). Vérifiez toujours si un dividende annoncé dans la presse est brut ou net d’IRVM ; certains émetteurs bénéficient de régimes consolidés particuliers."
+      },
+      "simulation": {
+        "type": "rendement_net",
+        "consigne": "Saisissez un dividende brut, un cours et changez le pays de l’émetteur (Togo, Bénin, Sénégal, Côte d’Ivoire, Burkina Faso) pour mesurer l’impact exact de l’IRVM.",
+        "dividende_brut": 800,
+        "cours": 15000,
+        "pays": "CI"
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Augmentation de capital et DPS : calculer la dilution et choisir",
+      "contenu": "Lorsqu’une société cotée lève des fonds frais en émettant de nouvelles actions à un prix inférieur au cours du marché (augmentation de capital en numéraire), chaque action existante représente soudain une part plus petite de l’entreprise : c’est la dilution.\nPour ne pas léser les actionnaires actuels, l’entreprise leur attribue (sauf suppression votée en assemblée) un Droit Préférentiel de Souscription (DPS) par action détenue. Au détachement du DPS, le cours baisse d’environ la valeur de ce droit : vous avez alors trois options — dont une seule fait perdre de l’argent à coup sûr.",
+      "formules": [
+        {
+          "nom": "Valeur théorique d’un DPS",
+          "expression": "(Cours avant détachement − Prix d’émission) ÷ (Parité + 1)",
+          "exemple": "Parité 4 anciennes pour 1 nouvelle, cours 10 000, émission 7 000 → (10 000 − 7 000) ÷ 5 = 600 FCFA"
+        },
+        {
+          "nom": "Cours théorique ex-droit",
+          "expression": "Cours avant détachement − Valeur théorique du DPS",
+          "exemple": "10 000 − 600 = 9 400 FCFA (les 600 FCFA de baisse sont compensés par le DPS)"
+        }
+      ],
       "points": [
-        { "titre": "Exercer ses droits", "detail": "Vous souscrivez aux nouvelles actions et gardez votre part du capital.", "verifier": "le prix de souscription et la période de l’opération." },
-        { "titre": "Céder ses droits", "detail": "Les DPS se négocient pendant la période de souscription : vendre vos droits compense la baisse du cours au détachement, sans rien débourser." },
-        { "titre": "Ne rien faire", "detail": "À la fin de la période, les droits non utilisés perdent leur valeur : vous subissez la dilution sans compensation. C’est le seul mauvais choix." }
-      ]
+        {
+          "titre": "Exercer ses droits",
+          "detail": "Vous apportez les espèces nécessaires pour acheter les nouvelles actions au prix réduit et maintenez intacte votre part du capital.",
+          "verifier": "le prix de souscription, la parité et la date limite dans la note d’information."
+        },
+        {
+          "titre": "Céder ses droits sur le marché",
+          "detail": "Les DPS sont cotés à la BRVM pendant la période de souscription : les vendre compense la baisse technique du cours au détachement, sans rien débourser."
+        },
+        {
+          "titre": "Ne rien faire (le seul mauvais choix)",
+          "detail": "À la clôture de la période, les droits non utilisés tombent à 0 FCFA : vous subissez toute la dilution sans aucune compensation."
+        }
+      ],
+      "simulation": {
+        "type": "dps",
+        "consigne": "Simulez une augmentation de capital : voyez la valeur théorique de vos DPS, le cours ex-droit et la perte sèche si vous laissez expirer vos droits.",
+        "cours": 10000,
+        "prix_emission": 7000,
+        "parite": 4,
+        "actions": 100
+      }
     },
     {
       "type": "piege",
-      "titre": "Les erreurs à éviter",
-      "contenu": "Trois confusions coûtent cher aux débutants.",
+      "titre": "Cinq confusions qui coûtent cher sur les gains boursiers",
+      "contenu": "Ces cinq erreurs reviennent chaque année au printemps, en pleine saison des dividendes à la BRVM.",
       "points": [
-        { "titre": "Prendre une envolée passée pour la norme", "detail": "Une action qui a triplé en quelques années est l’exception. Un rendement passé, même réel, ne se répète pas sur commande." },
-        { "titre": "Acheter juste avant le détachement pour « toucher » le dividende", "detail": "Au détachement, le cours baisse d’environ le montant du dividende : le gain n’est pas gratuit." },
-        { "titre": "Oublier l’impôt", "detail": "Le dividende est versé après une retenue à la source, dont le taux dépend du pays de la société.", "verifier": "si le montant affiché est brut ou net." }
+        {
+          "titre": "Prendre une envolée passée pour la norme",
+          "detail": "Une action qui a triplé en quatre ans est une exception, pas un rythme de croisière garanti pour les quatre années suivantes."
+        },
+        {
+          "titre": "Chasser le dividende la veille du détachement",
+          "detail": "Comme le prouve l’épisode réel de Filtisac CI (26/09/2025), le cours s’ajuste à la baisse dès le détachement et vos frais d’aller-retour restent perdus."
+        },
+        {
+          "titre": "Confondre dividende brut et dividende net",
+          "detail": "Selon le pays de l’émetteur (3 % à 12,5 % d’IRVM), le montant crédité sur votre compte espèces diffère du montant brut voté en assemblée.",
+          "verifier": "la mention « brut » ou « net » sur l’avis de paiement de la BRVM."
+        },
+        {
+          "titre": "Confondre plus-value latente et argent en poche",
+          "detail": "Tant que vos actions ne sont pas vendues, une hausse de +30 % peut fondre en quelques semaines lors d’une correction de marché."
+        },
+        {
+          "titre": "Oublier ses DPS lors d’une augmentation de capital",
+          "detail": "Ne pas surveiller les avis de sa SGI pendant deux semaines peut faire expirer des droits qui valaient plusieurs pourcents de votre position.",
+          "verifier": "régulièrement les avis d’opérations sur titres envoyés par votre SGI."
+        }
       ]
     },
     {
       "type": "retenir",
-      "titre": "L’essentiel",
-      "contenu": "Quatre idées à garder en tête.",
+      "titre": "L’essentiel à retenir",
+      "contenu": "Cinq repères clés pour mesurer honnêtement ce que rapporte une action.",
       "points": [
-        { "titre": "Deux sources de gain, un droit à protéger", "detail": "Dividende et plus-value ; les droits de souscription compensent la dilution, ils ne s’ajoutent pas au gain." },
-        { "titre": "Le dividende est voté, pas promis", "detail": "Il peut baisser ou disparaître d’un exercice à l’autre." },
-        { "titre": "Le rendement total additionne tout", "detail": "Dividendes reçus et plus-value, rapportés à la somme investie." },
-        { "titre": "Ne jamais laisser expirer ses DPS", "detail": "Les exercer ou les céder, mais ne pas les ignorer." }
+        {
+          "titre": "Deux sources de gain, un droit à protéger",
+          "detail": "Dividende et plus-value créent le rendement total ; les DPS compensent la dilution lors d’une augmentation de capital."
+        },
+        {
+          "titre": "Le rendement total combine les deux moteurs",
+          "detail": "À la BRVM, les dividendes cumulés pèsent lourd sur plusieurs années, mais ne sont jamais promis."
+        },
+        {
+          "titre": "Le dividende n’est jamais gratuit",
+          "detail": "Le jour du détachement, le cours s’ajuste à la baisse du montant distribué ; seul l’investissement de durée crée de la valeur."
+        },
+        {
+          "titre": "Raisonnez toujours en net d’IRVM et après inflation",
+          "detail": "La retenue à la source dépend du pays de la société émettrice (3 % à 12,5 % selon les pays UEMOA)."
+        },
+        {
+          "titre": "Ne laissez jamais expirer vos DPS",
+          "detail": "Exercez-les ou cédez-les pendant la période de cotation, mais ne restez jamais passif."
+        }
       ]
     }
   ],
@@ -101,44 +515,138 @@
   "quiz": [
     {
       "question": "Vous achetez 200 actions à 5 000 FCFA et les revendez à 5 600 FCFA. Quelle est votre plus-value, hors frais ?",
-      "options": ["600 FCFA", "12 000 FCFA", "120 000 FCFA", "1 120 000 FCFA"],
+      "options": [
+        "600 FCFA",
+        "12 000 FCFA",
+        "120 000 FCFA",
+        "1 120 000 FCFA"
+      ],
       "correct": 2,
       "explication": "(5 600 − 5 000) × 200 = 600 × 200 = 120 000 FCFA."
     },
     {
       "question": "Vous avez investi 1 000 000 FCFA, reçu 80 000 FCFA de dividendes et réalisé 120 000 FCFA de plus-value. Quel est votre rendement total ?",
-      "options": ["8 %", "12 %", "20 %", "200 %"],
+      "options": [
+        "8 %",
+        "12 %",
+        "20 %",
+        "200 %"
+      ],
       "correct": 2,
       "explication": "(80 000 + 120 000) ÷ 1 000 000 = 200 000 ÷ 1 000 000 = 20 %."
     },
     {
-      "question": "Une société lance une augmentation de capital. Quel choix fait perdre de l’argent à coup sûr ?",
-      "options": ["Exercer tous ses DPS", "Céder ses DPS sur le marché", "Les laisser expirer", "Céder une partie et exercer l’autre"],
+      "question": "Une société lance une augmentation de capital avec DPS. Quel choix fait perdre de l’argent à coup sûr ?",
+      "options": [
+        "Exercer tous ses DPS",
+        "Céder ses DPS sur le marché",
+        "Les laisser expirer sans agir",
+        "Vendre une part et exercer l’autre"
+      ],
       "correct": 2,
-      "explication": "Les droits non utilisés perdent leur valeur à la fin de la période de souscription. Les exercer ou les céder préserve leur valeur."
+      "explication": "À la fin de la période de souscription, les droits non utilisés tombent à zéro : vous subissez la dilution du cours sans aucune compensation."
     },
     {
-      "question": "Vous achetez une action la veille du détachement, juste pour toucher le dividende. Que se passe-t-il ?",
-      "options": ["Vous gagnez le dividende sans aucune contrepartie", "Le cours baisse d’environ le dividende", "Le dividende vous est refusé par la société", "La société vous rembourse les frais d’achat"],
+      "question": "Vous achetez une action la veille du détachement, uniquement pour toucher le dividende. Que se passe-t-il le lendemain ?",
+      "options": [
+        "Vous gagnez le dividende sans contrepartie",
+        "Le cours s’ajuste à la baisse du dividende",
+        "Votre SGI annule automatiquement l’ordre",
+        "La société rembourse vos frais d’achat"
+      ],
       "correct": 1,
-      "explication": "Au détachement, le cours est ajusté du dividende. Le gain apparent est compensé, et les frais d’achat restent à votre charge."
+      "explication": "Au détachement (comme sur FTSC le 26/09/2025), le cours baisse d’environ le montant du dividende. Le gain apparent est compensé et les frais restent à votre charge."
     },
     {
       "question": "Une société a versé un dividende chaque année depuis dix ans. Que pouvez-vous en déduire ?",
-      "options": ["Le dividende est garanti pour l’an prochain", "Il peut baisser ou disparaître", "Il augmentera forcément l’an prochain", "La société ne peut plus le supprimer"],
+      "options": [
+        "Le dividende est garanti à vie",
+        "Il peut baisser ou disparaître",
+        "Il augmentera forcément l’an prochain",
+        "L’AMF-UMOA interdit de le réduire"
+      ],
       "correct": 1,
-      "explication": "La régularité passée est un bon signe, pas une garantie : l’assemblée générale décide chaque année."
+      "explication": "La régularité passée est un indice de discipline, jamais une garantie : chaque année, l’assemblée générale vote en fonction des résultats réels."
+    },
+    {
+      "question": "Quel pays détermine le taux d’impôt retenu à la source (IRVM) sur un dividende BRVM ?",
+      "options": [
+        "Le pays où siège la société cotée",
+        "Le pays où réside l’actionnaire",
+        "Toujours la Côte d’Ivoire (siège BRVM)",
+        "Le pays où est située votre SGI"
+      ],
+      "correct": 0,
+      "explication": "L’IRVM est prélevé à la source selon la fiscalité du pays de l’émetteur (par exemple 10 % au Sénégal, 12 % en Côte d’Ivoire pour les particuliers depuis 2025, 3 % au Togo)."
+    },
+    {
+      "question": "Quelle date devez-vous surveiller pour savoir si votre achat vous donne droit au dividende de l’exercice ?",
+      "options": [
+        "La date de détachement (ex-dividende)",
+        "La date de paiement sur votre compte",
+        "Le 31 décembre de l’année suivante",
+        "La date de publication du rapport annuel"
+      ],
+      "correct": 0,
+      "explication": "Il faut détenir le titre avant la date de détachement. Un achat effectué le jour du détachement ou après ne donne plus droit au dividende de l’exercice."
+    },
+    {
+      "question": "Sur quel compte votre SGI verse-t-elle un dividende en espèces ?",
+      "options": [
+        "Sur le compte espèces associé",
+        "Sur le compte-titres en actions",
+        "Sur un compte bloqué au DC/BR",
+        "Directement chez la BRVM"
+      ],
+      "correct": 0,
+      "explication": "Les dividendes en numéraire sont toujours crédités en francs CFA sur le compte espèces lié à votre compte-titres."
+    },
+    {
+      "question": "Pourquoi les DPS reçus lors d’une augmentation de capital ne constituent-ils pas une « troisième source de gain » ?",
+      "options": [
+        "Ils sont interdits aux particuliers",
+        "Ils compensent seulement la dilution",
+        "Ils ne peuvent jamais être vendus",
+        "Ils sont taxés à 100 % à la source"
+      ],
+      "correct": 1,
+      "explication": "La valeur des DPS correspond à la baisse technique du cours au détachement : les vendre ou les exercer préserve votre patrimoine mais ne crée pas de gain nouveau."
+    },
+    {
+      "question": "Une action achetée 10 000 FCFA vaut aujourd’hui 13 000 FCFA, mais vous ne l’avez pas vendue. De quoi s’agit-il ?",
+      "options": [
+        "D’un dividende exceptionnel acquis",
+        "D’une plus-value latente (non réalisée)",
+        "D’un gain définitivement garanti",
+        "D’un droit préférentiel de souscription"
+      ],
+      "correct": 1,
+      "explication": "Tant que la vente n’est pas exécutée, le gain reste latent : une baisse ultérieure du cours peut le réduire ou l’effacer."
+    }
+  ],
+  "liens": [
+    {
+      "label": "Les dividendes de toutes les valeurs",
+      "href": "/dividendes"
+    },
+    {
+      "label": "Le calendrier des dividendes",
+      "href": "/dividendes/calendrier"
+    },
+    {
+      "label": "Le rendement réel, après inflation",
+      "href": "/rendement-vrai"
     }
   ],
   "qcm": {
     "question": "Vous achetez 200 actions à 5 000 FCFA et les revendez à 5 600 FCFA. Quelle est votre plus-value, hors frais ?",
-    "options": ["600 FCFA", "12 000 FCFA", "120 000 FCFA", "1 120 000 FCFA"],
+    "options": [
+      "600 FCFA",
+      "12 000 FCFA",
+      "120 000 FCFA",
+      "1 120 000 FCFA"
+    ],
     "correct": 2,
     "explication": "(5 600 − 5 000) × 200 = 600 × 200 = 120 000 FCFA."
-  },
-  "liens": [
-    { "label": "Les dividendes de toutes les valeurs", "href": "/dividendes" },
-    { "label": "Le calendrier des dividendes", "href": "/dividendes/calendrier" },
-    { "label": "Le rendement réel, après inflation", "href": "/rendement-vrai" }
-  ]
+  }
 }

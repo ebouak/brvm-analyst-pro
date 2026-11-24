@@ -1,83 +1,487 @@
 {
   "titre": "Leçon 1 — Qu’est-ce que la BRVM et comment ça marche ?",
+  "module": "Module 1 : Comprendre la Bourse BRVM",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
   "image": {
     "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/BRVM.jpg/960px-BRVM.jpg",
     "alt": "Bâtiment de la Bourse Régionale des Valeurs Mobilières (BRVM) à Abidjan",
     "credit": "Photo : Wikimedia Commons (BRVM, Abidjan)"
   },
   "categorie": "general",
-  "duree_min": 9,
-  "sous_titre": "Une bourse commune à huit pays, des sociétés que vous connaissez, et un prix qui se forme chaque jour.",
-  "resume": "La BRVM est la bourse commune aux huit pays de l’UEMOA.\nCette leçon explique ce qu’on y achète, comment le prix d’une action se forme, ce que mesurent les indices et les réflexes à prendre avant d’y placer le moindre franc.",
+  "duree_min": 16,
+  "sous_titre": "Une bourse unique pour huit pays, quarante-huit sociétés cotées, un carnet d’ordres quotidien et des règles qu’il faut connaître avant d’acheter.",
+  "resume": "La BRVM est la bourse commune aux huit pays de l’UEMOA, opérationnelle depuis septembre 1998.\nCette leçon détaille son poids réel, la façon dont les prix se forment séance après séance, la concentration particulière de sa liquidité, le rôle exact des indices et la différence entre cours unitaire et capitalisation.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
   "sections": [
     {
       "type": "definition",
-      "titre": "Une bourse commune à huit pays",
-      "contenu": "La Bourse Régionale des Valeurs Mobilières (BRVM), installée à Abidjan, fonctionne depuis 1998. C’est un marché unique pour les huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo.\nOn y échange des actions et des obligations, en francs CFA. Le marché est supervisé par l’Autorité des Marchés Financiers de l’UMOA (AMF-UMOA).",
+      "titre": "Une bourse commune à huit pays d’Afrique de l’Ouest",
+      "contenu": "La Bourse Régionale des Valeurs Mobilières (BRVM), dont le siège est à Abidjan, a démarré ses activités en septembre 1998. Elle remplace les bourses nationales par un marché unique partagé entre les huit États membres de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo. Chaque pays dispose d’une Antenne Nationale de Bourse qui assure la liaison locale.\nUne même monnaie (le franc CFA), un même système de cotation électronique, un seul régulateur — l’Autorité des Marchés Financiers de l’UMOA (AMF-UMOA, qui a succédé au CREPMF) — et un dépositaire central commun (DC/BR) permettent à un résident de Dakar, Cotonou, Ouagadougou ou de la diaspora d’acheter indifféremment une banque ivoirienne ou un opérateur sénégalais.",
+      "stats": [
+        {
+          "label": "Pays membres",
+          "valeur": "8 États",
+          "detail": "Zone UEMOA, monnaie unique FCFA"
+        },
+        {
+          "label": "Actions cotées",
+          "valeur": "48 sociétés",
+          "detail": "Relevé au 24 novembre 2026"
+        },
+        {
+          "label": "Capitalisation actions",
+          "valeur": "18 511 Md FCFA",
+          "detail": "Base WESTBOURSE au 24/11/2026"
+        },
+        {
+          "label": "Rythme annuel",
+          "valeur": "247 à 259 séances",
+          "detail": "Mesuré de 2021 à 2025 (~21 / mois)"
+        }
+      ],
       "flux": [
-        { "titre": "Une entreprise", "detail": "Elle ouvre son capital pour se financer.", "icone": "entreprise" },
-        { "titre": "Des actions", "detail": "Son capital est découpé en parts cotées à la BRVM.", "icone": "piece" },
-        { "titre": "Des investisseurs", "detail": "Ils achètent ces parts et deviennent actionnaires.", "icone": "actionnaires" }
+        {
+          "titre": "Une entreprise",
+          "detail": "Elle ouvre son capital ou émet un emprunt pour financer sa croissance.",
+          "icone": "entreprise"
+        },
+        {
+          "titre": "La cote BRVM",
+          "detail": "Son capital est découpé en actions négociées en séance publique.",
+          "icone": "piece"
+        },
+        {
+          "titre": "Des investisseurs",
+          "detail": "Particuliers et institutions achètent ces parts via une SGI agréée.",
+          "icone": "actionnaires"
+        }
       ]
     },
     {
       "type": "importance",
-      "titre": "Acheter une action, c’est devenir copropriétaire",
-      "contenu": "Une action est une fraction du capital d’une entreprise réelle. En la détenant, vous acquérez des droits, mais aucune garantie.",
-      "points": [
-        { "titre": "Une part des bénéfices, si l’assemblée la distribue", "detail": "Le dividende est voté chaque année par l’assemblée générale. Il peut monter, baisser ou disparaître.", "verifier": "l’historique des dividendes de la société sur plusieurs exercices." },
-        { "titre": "Une voix en assemblée générale", "detail": "Les actionnaires votent sur les comptes, la distribution du bénéfice et la nomination des administrateurs." },
-        { "titre": "La possibilité de revendre", "detail": "Vous pouvez revendre vos titres par votre SGI. Le prix n’est pas garanti, et sur une valeur peu échangée, trouver un acheteur peut prendre du temps.", "verifier": "les volumes échangés de la valeur avant d’acheter." }
+      "titre": "Ce que représente vraiment la cote : secteurs et géants",
+      "contenu": "La BRVM n’est pas un miroir proportionnel de l’économie réelle ouest-africaine : certains secteurs y pèsent très lourd, d’autres en sont absents. Au 24 novembre 2026, les 48 actions cotées se répartissent en sept grands secteurs, dominés en nombre par les services financiers (17 sociétés, surtout des banques commerciales) et la consommation (16 sociétés au total).\nEn valeur boursière, la concentration est encore plus marquée : deux opérateurs télécoms, Sonatel (3 890 Md FCFA, soit 21,0 % de la cote) et Orange Côte d’Ivoire (2817,3 Md FCFA), représentent à eux seuls 36,2 % de la capitalisation totale des actions. Comprendre cette structure évite de croire que le marché entier bouge uniformément.",
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Répartition des 48 actions cotées par secteur (24 novembre 2026)",
+          "labels": [
+            "Services financiers",
+            "Consommation discrétionnaire",
+            "Consommation de base",
+            "Industriels",
+            "Énergie",
+            "Télécommunications",
+            "Services publics"
+          ],
+          "valeurs": [
+            17,
+            8,
+            8,
+            7,
+            3,
+            3,
+            2
+          ],
+          "unite": " titres",
+          "note": "Source : base WESTBOURSE (référentiel BRVM, 24 novembre 2026). Les services financiers (17 valeurs) représentent plus d’un tiers des sociétés cotées, devant la consommation discrétionnaire et de base (8 chacune).",
+          "reel": true
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "info",
+          "titre": "Marché actions et marché obligataire cohabitent à la BRVM",
+          "texte": "La BRVM cote à la fois des actions d’entreprises et des obligations (emprunts d’États UEMOA, institutions régionales comme la BOAD ou la BIDC, et sociétés privées). Ce module 1 porte sur les actions ; les obligations sont traitées dans le niveau 2."
+        }
       ]
     },
     {
       "type": "definition",
-      "titre": "Comment se forme le prix d’une action",
-      "contenu": "Le prix naît de la rencontre des ordres d’achat et de vente transmis par les SGI. Quand les acheteurs sont plus pressés que les vendeurs, le cours monte ; dans le cas inverse, il baisse.\nLa variation d’un titre sur une séance est encadrée par les règles du marché. Le cours de clôture de chaque valeur est publié chaque jour dans le Bulletin officiel de la cote.",
-      "etapes": [
-        { "titre": "Les ordres arrivent", "detail": "Votre SGI transmet votre ordre au système de cotation de la BRVM." },
-        { "titre": "Ils se rencontrent", "detail": "Un ordre d’achat s’exécute face à un ordre de vente compatible en prix.", "cle": true },
-        { "titre": "Le cours est publié", "detail": "Dernier prix échangé, volumes et variations, dans le Bulletin officiel de la cote." },
-        { "titre": "Les titres sont livrés", "detail": "Le Dépositaire central (DC/BR) dénoue l’échange entre intermédiaires ; votre SGI inscrit ensuite les titres sur votre compte-titres." }
+      "titre": "Acheter une action : droits réels et absence de garantie",
+      "contenu": "Une action est un titre de propriété : elle représente une fraction du capital d’une entreprise réelle, pas un billet de loterie ni un dépôt rémunéré à taux fixe. En tant que copropriétaire, vous partagez à la fois les réussites de la société (bénéfices distribués, croissance de la valeur) et ses difficultés (baisse du cours, suppression du dividende, voire perte totale en cas de faillite).\nLa différence avec un compte d’épargne bancaire ou une obligation est fondamentale : un prêteur reçoit un intérêt prévu par contrat ; un actionnaire est rémunéré après tous les créanciers, sur ce qui reste du bénéfice.",
+      "points": [
+        {
+          "titre": "Une part du bénéfice votée en assemblée",
+          "detail": "Chaque année, l’assemblée générale décide s’il y a un dividende et fixe son montant. Il peut croître, stagner ou tomber à zéro.",
+          "verifier": "l’historique des dividendes sur cinq exercices et le taux de distribution."
+        },
+        {
+          "titre": "Un droit de vote et d’information",
+          "detail": "Vous pouvez participer aux assemblées générales et consulter les rapports annuels, comptes semestriels et communiqués d’activité publiés au Bulletin officiel."
+        },
+        {
+          "titre": "La faculté de revendre sur le marché secondaire",
+          "detail": "Vous n’êtes pas bloqué jusqu’à la dissolution de l’entreprise : vous pouvez céder vos actions à un autre investisseur via votre SGI, au prix que le marché accepte ce jour-là.",
+          "verifier": "le volume quotidien moyen de la valeur avant de vous engager."
+        },
+        {
+          "titre": "Aucune garantie sur le capital",
+          "detail": "Ni la société, ni votre SGI, ni la BRVM ne garantissent que vous retrouverez votre mise de départ à la date de votre choix."
+        }
       ],
-      "etapes_style": "frise"
+      "tableau": {
+        "colonnes": [
+          "Critère",
+          "Livret / dépôt bancaire",
+          "Obligation cotée",
+          "Action BRVM"
+        ],
+        "lignes": [
+          [
+            "Statut juridique",
+            "Déposant",
+            "Créancier (prêteur)",
+            "Copropriétaire (actionnaire)"
+          ],
+          [
+            "Revenu attendu",
+            "Intérêt fixé d’avance",
+            "Coupon défini dans le contrat",
+            "Dividende voté chaque année (variable)"
+          ],
+          [
+            "Capital à l’échéance",
+            "Garanti dans le cadre bancaire",
+            "Remboursé sauf défaut de l’émetteur",
+            "Aucune échéance, prix variable en séance"
+          ],
+          [
+            "Risque principal",
+            "Érosion par l’inflation",
+            "Défaut de l’émetteur ou hausse des taux",
+            "Baisse durable des résultats et du cours"
+          ]
+        ],
+        "note": "Comparer ces trois placements par leur nature juridique évite d’attendre d’une action la stabilité d’un livret."
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Anatomie d’une séance BRVM : du carnet au règlement J+3",
+      "contenu": "La BRVM fonctionne du lundi au vendredi (hors jours fériés communs ou ivoiriens), en cotation en continu. Les investisseurs ne négocient jamais en face à face : tous les ordres d’achat et de vente passent par les SGI agréées et s’empilent dans un carnet d’ordres électronique centralisé.\nLe prix d’une action change uniquement lorsqu’un ordre d’achat et un ordre de vente se rencontrent sur un prix compatible. Pour éviter les mouvements désordonnés sur un marché encore étroit, la BRVM encadre la variation quotidienne d’un titre à ±7,5 % autour de son cours de référence (sauf ajustement technique, par exemple le jour d’un détachement de dividende ou d’une division d’actions).",
+      "etapes": [
+        {
+          "titre": "Pré-ouverture (accumulation des ordres)",
+          "detail": "Les SGI saisissent les ordres dans le carnet avant l’ouverture ; aucun échange n’a encore lieu, un prix d’équilibre théorique se forme."
+        },
+        {
+          "titre": "Ouverture et cotation en continu",
+          "detail": "Dès que le prix d’un acheteur croise celui d’un vendeur, la transaction s’exécute instantanément dans la limite des ±7,5 % par séance.",
+          "cle": true
+        },
+        {
+          "titre": "Clôture et cours de référence",
+          "detail": "En fin de séance, le dernier cours négocié devient le cours de clôture officiel de la journée."
+        },
+        {
+          "titre": "Publication du BOC",
+          "detail": "La BRVM diffuse chaque soir le Bulletin Officiel de la Cote : cours, variations, volumes, capitaux échangés et avis aux investisseurs."
+        },
+        {
+          "titre": "Règlement-livraison (J+3)",
+          "detail": "Dans les trois jours ouvrés, le DC/BR échange les titres contre les espèces entre SGI ; votre compte-titres est définitivement mis à jour."
+        }
+      ],
+      "etapes_style": "frise",
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Pourquoi certaines actions n’affichent 0 % de variation pendant plusieurs jours",
+          "texte": "À la BRVM, une variation de 0 % ne signifie pas toujours que tout le monde est d’accord sur le prix : cela signifie souvent qu’aucune transaction n’a eu lieu durant la séance, faute d’accord entre acheteurs et vendeurs."
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "La liquidité : le trait distinctif de la BRVM",
+      "contenu": "La liquidité mesure la facilité d’acheter ou de revendre une action rapidement sans faire décaler son prix. Sur les 65 séances comprises entre le 24 août et le 23 novembre 2026, 184,4 milliards de FCFA ont été échangés sur les 48 actions de la cote.\nMais ces échanges sont fortement concentrés : Sonatel (SNTS) capte à elle seule 40,9 % des capitaux échangés, les cinq valeurs les plus actives en concentrent 58,3 %, et les dix premières 71,9 %. Les 38 autres sociétés se partagent les 28,1 % restants — certaines restent plusieurs séances sans un seul titre échangé.",
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Concentration des capitaux échangés sur 65 séances (24 août – 23 novembre 2026)",
+          "labels": [
+            "Sonatel (n°1)",
+            "Rangs 2 à 5",
+            "Rangs 6 à 10",
+            "Les 38 autres actions"
+          ],
+          "valeurs": [
+            40.9,
+            17.4,
+            13.6,
+            28.1
+          ],
+          "unite": " %",
+          "note": "Source : base WESTBOURSE (brvm_actions_daily, 65 séances du 24/08/2026 au 23/11/2026, total 184,4 Md FCFA sur 48 valeurs). Plus de 71 % des volumes passent par dix sociétés seulement.",
+          "reel": true
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Rang",
+          "Valeur",
+          "Capitaux échangés (65 séances)",
+          "Part du marché"
+        ],
+        "lignes": [
+          [
+            "#1",
+            "SNTS — SONATEL SENEGAL",
+            "75,41 Md FCFA",
+            "40,9 %"
+          ],
+          [
+            "#2",
+            "SGBC — SOCIETE GENERALE COTE D'IVOIRE",
+            "12,41 Md FCFA",
+            "6,7 %"
+          ],
+          [
+            "#3",
+            "BBGC — BRIDGE BANK GROUP COTE D'IVOIRE",
+            "6,71 Md FCFA",
+            "3,6 %"
+          ],
+          [
+            "#4",
+            "SIBC — SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE",
+            "6,57 Md FCFA",
+            "3,6 %"
+          ],
+          [
+            "#5",
+            "BOAC — BANK OF AFRICA COTE D'IVOIRE",
+            "6,40 Md FCFA",
+            "3,5 %"
+          ]
+        ],
+        "note": "Source : base WESTBOURSE, 24 août au 23 novembre 2026. Une forte liquidité facilite l’exécution des ordres sans écart de prix excessif."
+      }
     },
     {
       "type": "cas",
       "reel": true,
-      "titre": "Les indices, thermomètre du marché",
-      "contenu": "Un indice résume en un chiffre l’évolution d’un ensemble d’actions. Le BRVM Composite suit toutes les actions cotées ; le BRVM 30 suit trente des valeurs les plus échangées.\nLe BRVM Composite et le BRVM 30 sont calculés sur les seuls cours : les dividendes n’y entrent pas. Une année où l’indice stagne peut donc avoir rapporté de l’argent aux actionnaires qui ont touché leurs dividendes.",
-      "donnees_reelles": { "vue": "indices", "codes": ["BRVMC", "BRVM30"] }
+      "titre": "Les indices, thermomètre du marché — et leur angle mort",
+      "contenu": "Un indice résume en un seul chiffre l’évolution d’un panier d’actions. Le BRVM Composite regroupe l’ensemble des actions cotées, pondérées par leur capitalisation boursière ; le BRVM 30 suit trente valeurs parmi les plus échangées du marché ; le BRVM Prestige réunit des sociétés répondant à des critères stricts de taille et de gouvernance.\nPoint essentiel : le BRVM Composite et le BRVM 30 sont des indices « nus », calculés uniquement sur les cours, sans intégrer les dividendes versés. Comme beaucoup d’entreprises de la BRVM distribuent des dividendes significatifs, l’indice sous-estime structurellement le rendement total obtenu par un actionnaire qui conserve ses titres.",
+      "donnees_reelles": {
+        "vue": "indices",
+        "codes": [
+          "BRVMC",
+          "BRVM30"
+        ]
+      },
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Évolution mensuelle du BRVM Composite et du BRVM 30 (mai – novembre 2026)",
+          "labels": [
+            "Mai 26",
+            "Juin 26",
+            "Juil. 26",
+            "Août 26",
+            "Sept. 26",
+            "Oct. 26",
+            "24 nov. 26"
+          ],
+          "series": [
+            {
+              "nom": "BRVM Composite (axe gauche)",
+              "valeurs": [
+                425.54,
+                453.21,
+                482.65,
+                530.92,
+                548.38,
+                534.71,
+                472.04
+              ],
+              "axe": "gauche"
+            },
+            {
+              "nom": "BRVM 30 (axe droite)",
+              "valeurs": [
+                199.55,
+                212.45,
+                230.08,
+                255.88,
+                266.08,
+                259.18,
+                228.62
+              ],
+              "axe": "droite"
+            }
+          ],
+          "unite": " pts",
+          "unite_droite": " pts",
+          "note": "Source : base WESTBOURSE (brvm_indices_daily, clôtures de fin de mois de mai à octobre 2026 et séance du 24/11/2026). Après un sommet à 548,38 points fin septembre, le BRVM Composite a corrigé à 472,04 points : la bourse alterne hausses et replis.",
+          "reel": true
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "attention",
+          "titre": "Un indice ne monte jamais en ligne droite",
+          "texte": "Entre le 30 septembre 2026 (548,38 pts) et le 24 novembre 2026 (472,04 pts), le BRVM Composite a reculé de 13,9 % en moins de deux mois. Ces respirations font partie de la vie normale d’un marché actions."
+        }
+      ]
     },
     {
       "type": "cas",
       "reel": true,
-      "titre": "Des sociétés que vous connaissez",
-      "contenu": "On trouve à la BRVM des banques, des opérateurs de télécommunications, des distributeurs d’énergie, des industriels et des groupes agricoles, souvent présents dans votre quotidien.\nLe tableau donne le dernier cours de six d’entre elles. Le prix d’une action ne dit rien de sa qualité : il dépend surtout du nombre de titres en circulation.",
-      "donnees_reelles": { "vue": "cours", "codes": ["SNTS", "ORAC", "SGBC", "CIEC", "TTLC", "SPHC"] }
+      "titre": "Cours unitaire contre capitalisation : ce que le prix ne dit pas",
+      "contenu": "Une confusion très répandue chez les débutants consiste à croire qu’une action à 52 FCFA est « moins chère » ou « plus petite » qu’une action à 42 000 FCFA. En réalité, le prix d’une action isolée ne dit rien sans le nombre total d’actions qui composent le capital de la société.\nAu 24 novembre 2026, ETI Togo (ETIT) cote 52 FCFA par titre mais compte plus de 18 milliards d’actions : sa capitalisation atteint 940,4 Md FCFA, la 4e plus grande de la BRVM. À l’inverse, Unilever CI (UNLC) cote 42 000 FCFA — plus de 800 fois plus cher au titre — pour une capitalisation de 385,7 Md FCFA, soit 2,4 fois moins qu’ETIT.",
+      "donnees_reelles": {
+        "vue": "cours",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "CIEC",
+          "TTLC",
+          "ETIT"
+        ]
+      },
+      "formules": [
+        {
+          "nom": "Capitalisation boursière",
+          "expression": "Cours de l’action × Nombre total d’actions émises",
+          "exemple": "ETIT (24/11/2026) : 52 FCFA × 18,08 Md d’actions ≈ 940,4 Md FCFA"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Code",
+          "Société",
+          "Cours (24/11/2026)",
+          "Capitalisation",
+          "Ce qu’on observe"
+        ],
+        "lignes": [
+          [
+            "ETIT",
+            "ETI Togo (Ecobank)",
+            "52 FCFA",
+            "940,4 Md FCFA",
+            "Prix le plus bas, mais 4e poids du marché"
+          ],
+          [
+            "SNTS",
+            "Sonatel Sénégal",
+            "3 890 FCFA",
+            "3 890 Md FCFA",
+            "Prix intermédiaire, n°1 de la BRVM"
+          ],
+          [
+            "CIEC",
+            "CIE Côte d’Ivoire",
+            "4 250 FCFA",
+            "238,0 Md FCFA",
+            "Cours proche de SNTS, capitalisation 16× moindre"
+          ],
+          [
+            "ORAC",
+            "Orange Côte d’Ivoire",
+            "18 700 FCFA",
+            "2817,3 Md FCFA",
+            "N°2 de la cote par la capitalisation"
+          ],
+          [
+            "SGBC",
+            "Société Générale CI",
+            "37 550 FCFA",
+            "1168,2 Md FCFA",
+            "1re banque cotée en capitalisation"
+          ],
+          [
+            "UNLC",
+            "Unilever Côte d’Ivoire",
+            "42 000 FCFA",
+            "385,7 Md FCFA",
+            "Prix unitaire le plus élevé, taille bien inférieure à ETIT"
+          ]
+        ],
+        "note": "Source : base WESTBOURSE au 24 novembre 2026. Comparer des actions par leur cours unitaire n’a aucun sens économique."
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Observer un cours réel sur plusieurs horizons",
+      "contenu": "Regarder la variation d’une action sur une seule journée donne souvent une impression trompeuse : un titre peut baisser sur une semaine tout en progressant nettement sur un an, ou inversement.\nUtilisez le simulateur ci-dessous pour comparer l’évolution réelle de cinq valeurs majeures de la BRVM sur plusieurs fenêtres de séances. Une série passée décrit ce qui s’est produit ; elle ne prédit jamais la suite.",
+      "simulation": {
+        "type": "technique",
+        "consigne": "Sélectionnez une valeur réelle de la BRVM et observez comment son comportement change selon le nombre de séances affichées.",
+        "indicateur": "variation",
+        "codes": [
+          "SNTS",
+          "SGBC",
+          "ORAC",
+          "CIEC",
+          "ETIT"
+        ]
+      }
     },
     {
       "type": "piege",
-      "titre": "Quatre erreurs de débutant",
-      "contenu": "Ces erreurs coûtent plus cher que n’importe quel mauvais choix de valeur.",
+      "titre": "Cinq erreurs classiques de débutant à la BRVM",
+      "contenu": "La plupart des déceptions des premiers mois ne viennent pas d’un manque de mathématiques financières, mais de cinq réflexes évitables.",
       "points": [
-        { "titre": "Chercher un gain rapide", "detail": "La bourse récompense surtout la patience. Un horizon de plusieurs années laisse le temps aux dividendes et à la croissance des sociétés de travailler." },
-        { "titre": "Placer de l’argent dont on aura besoin", "detail": "Loyer, scolarité, urgence médicale : cet argent ne va pas en actions. Constituez d’abord une épargne de précaution." },
-        { "titre": "Vendre sans regarder le calendrier", "detail": "Vendre avant la date de détachement fait perdre le dividende de l’année.", "verifier": "le calendrier des dividendes de vos valeurs." },
-        { "titre": "Passer par un intermédiaire non agréé", "detail": "Seules les SGI agréées peuvent acheter des actions pour vous à la BRVM.", "verifier": "la liste des SGI agréées publiée par l’AMF-UMOA." }
+        {
+          "titre": "Chercher un gain rapide sur quelques semaines",
+          "detail": "Entre les frais d’aller-retour et les variations quotidiennes imprévisibles, le court terme joue contre le particulier. Les actions se conçoivent sur plusieurs années."
+        },
+        {
+          "titre": "Placer de l’argent nécessaire à court terme",
+          "detail": "Loyer, frais de scolarité, fonds d’urgence : cet argent n’a pas sa place en bourse. Devoir vendre pendant un repli de 15 % transforme une baisse passagère en perte définitive."
+        },
+        {
+          "titre": "Ignorer la liquidité d’une petite valeur",
+          "detail": "Sur un titre qui s’échange quelques dizaines de fois par mois, un ordre urgent peut rester bloqué plusieurs jours ou s’exécuter loin du dernier cours publié.",
+          "verifier": "les capitaux échangés et le nombre de séances sans échange sur les derniers mois."
+        },
+        {
+          "titre": "Confondre cours bas et action bon marché",
+          "detail": "Une action à 1 500 FCFA peut être très chère par rapport à ses bénéfices, alors qu’une action à 35 000 FCFA peut être raisonnablement valorisée."
+        },
+        {
+          "titre": "Passer par un intermédiaire non agréé",
+          "detail": "Seules les SGI agréées par l’AMF-UMOA ont accès au système de cotation de la BRVM. Tout autre intermédiaire qui collecte vos fonds agit hors la loi.",
+          "verifier": "la présence de la société sur la liste officielle publiée par l’AMF-UMOA."
+        }
       ]
     },
     {
       "type": "retenir",
-      "titre": "L’essentiel",
-      "contenu": "Cinq idées à garder en tête.",
+      "titre": "L’essentiel à retenir",
+      "contenu": "Six repères fondamentaux avant de passer à l’étude des acteurs du marché.",
       "points": [
-        { "titre": "Un marché unique pour huit pays", "detail": "La BRVM sert toute l’UEMOA, sous la supervision de l’AMF-UMOA." },
-        { "titre": "Une action est une part d’entreprise", "detail": "Elle donne droit au dividende voté, au vote en assemblée et à la revente." },
-        { "titre": "Le prix vient de l’offre et de la demande", "detail": "Il change à chaque séance, dans des limites fixées par le marché." },
-        { "titre": "Les indices mesurent les cours, pas les dividendes", "detail": "Le BRVM Composite suit toutes les actions, le BRVM 30 trente des plus échangées." },
-        { "titre": "Tout passe par une SGI agréée", "detail": "C’est votre intermédiaire obligatoire et votre premier interlocuteur." }
+        {
+          "titre": "Un marché unique pour 8 pays",
+          "detail": "La BRVM réunit toute l’UEMOA depuis 1998, en FCFA, sous la supervision de l’AMF-UMOA."
+        },
+        {
+          "titre": "48 actions, une cote concentrée",
+          "detail": "Banques, consommation et télécoms dominent ; Sonatel concentre plus de 40 % des échanges sur 65 séances fin 2026."
+        },
+        {
+          "titre": "Une action = copropriété sans garantie",
+          "detail": "Droits au dividende voté, au vote en AG et à la revente, mais risque de perte en capital."
+        },
+        {
+          "titre": "Un prix formé par l’offre et la demande",
+          "detail": "Cotation en continu, variation plafonnée à ±7,5 % par séance hors ajustement technique, livraison en J+3."
+        },
+        {
+          "titre": "Indices nus hors dividendes",
+          "detail": "BRVM Composite et BRVM 30 mesurent les cours seuls : ils ne comptabilisent pas les dividendes distribués."
+        },
+        {
+          "titre": "Ne jamais juger une société à son seul cours",
+          "detail": "C’est la capitalisation (cours × nombre de titres) qui mesure la taille boursière d’une entreprise."
+        }
       ]
     }
   ],
@@ -86,44 +490,138 @@
   "quiz": [
     {
       "question": "Combien de pays partagent la BRVM ?",
-      "options": ["Trois", "Cinq", "Huit", "Quinze"],
+      "options": [
+        "Trois pays",
+        "Cinq pays",
+        "Huit pays",
+        "Quinze pays"
+      ],
       "correct": 2,
       "explication": "La BRVM est commune aux huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo."
     },
     {
-      "question": "Qui supervise le marché financier régional ?",
-      "options": ["La BRVM elle-même", "L’AMF-UMOA", "Chaque SGI pour ses clients", "Le ministère des Finances de chaque pays"],
+      "question": "Qui supervise le marché financier régional et agrée les intermédiaires ?",
+      "options": [
+        "La BRVM elle-même",
+        "L’AMF-UMOA",
+        "Chaque SGI en autonomie",
+        "Les banques centrales nationales"
+      ],
       "correct": 1,
-      "explication": "L’Autorité des Marchés Financiers de l’UMOA agrée les intermédiaires, contrôle le marché et protège les investisseurs. La BRVM, elle, organise les séances."
+      "explication": "L’Autorité des Marchés Financiers de l’UMOA (qui a succédé au CREPMF) agrée les intermédiaires, contrôle le marché et protège les investisseurs."
     },
     {
-      "question": "Pour acheter une action cotée à la BRVM, par qui faut-il passer ?",
-      "options": ["Directement par la BRVM", "Par une SGI agréée", "Par n’importe quelle banque", "Par la société émettrice"],
+      "question": "Pour acheter une action cotée à la BRVM, par qui un particulier doit-il obligatoirement passer ?",
+      "options": [
+        "Directement par le site de la BRVM",
+        "Par une SGI agréée",
+        "Par le siège de la société cotée",
+        "Par un groupe de conseil sur messagerie"
+      ],
       "correct": 1,
-      "explication": "Un particulier ne peut pas passer d’ordre directement : il passe par une Société de Gestion et d’Intermédiation agréée, qui transmet l’ordre et conserve les titres."
+      "explication": "Seules les Sociétés de Gestion et d’Intermédiation agréées ont accès au système de cotation de la BRVM pour transmettre vos ordres."
     },
     {
-      "question": "Le BRVM Composite progresse de 0 % sur une année. Les actionnaires ont-ils forcément gagné 0 % ?",
-      "options": ["Oui, l’indice mesure tout le gain", "Non : il ignore les dividendes", "Non : l’indice ne compte que les banques", "Oui, sauf pour les détenteurs d’obligations"],
+      "question": "Le BRVM Composite termine une année exactement à 0 %. Les actionnaires ont-ils forcément gagné 0 % ?",
+      "options": [
+        "Oui, l’indice inclut tous les gains",
+        "Non : il ignore les dividendes",
+        "Non : il exclut les valeurs ivoiriennes",
+        "Oui, sauf en cas de hausse des taux"
+      ],
       "correct": 1,
-      "explication": "L’indice est calculé sur les seuls cours. Un actionnaire qui a touché ses dividendes a pu gagner de l’argent même si l’indice n’a pas bougé."
+      "explication": "Le BRVM Composite et le BRVM 30 sont des indices de prix nus : les dividendes versés par les entreprises n’y entrent pas."
     },
     {
       "question": "Lequel de ces droits une action ne donne-t-elle PAS ?",
-      "options": ["Voter en assemblée générale", "Percevoir le dividende voté", "Revendre ses titres", "Un revenu garanti chaque année"],
+      "options": [
+        "Voter en assemblée générale",
+        "Percevoir le dividende voté",
+        "Revendre ses titres en séance",
+        "Un revenu garanti chaque année"
+      ],
       "correct": 3,
-      "explication": "Le dividende est voté chaque année : il n’est jamais garanti. Une action comporte un risque de perte en capital."
+      "explication": "Le dividende dépend des bénéfices et du vote annuel de l’assemblée générale : il n’est jamais garanti."
+    },
+    {
+      "question": "Quelle est la limite habituelle de variation du cours d’une action au cours d’une même séance BRVM (hors ajustement technique) ?",
+      "options": [
+        "±7,5 %",
+        "±2,0 %",
+        "±25,0 %",
+        "Aucune limite"
+      ],
+      "correct": 0,
+      "explication": "La BRVM encadre la variation quotidienne à ±7,5 % autour du cours de référence pour amortir les chocs sur un marché étroit."
+    },
+    {
+      "question": "Une action A cote 52 FCFA et une action B cote 42 000 FCFA. Que peut-on en déduire sur la taille des deux entreprises ?",
+      "options": [
+        "L’entreprise B est forcément plus grande",
+        "L’entreprise A est en difficulté financière",
+        "Rien sans connaître leur nombre d’actions",
+        "L’action A est huit cents fois moins chère à l’achat"
+      ],
+      "correct": 2,
+      "explication": "La taille boursière est la capitalisation (cours × nombre d’actions). Au 24/11/2026, ETIT à 52 FCFA vaut 940,4 Md FCFA contre 385,7 Md FCFA pour UNLC à 42 000 FCFA."
+    },
+    {
+      "question": "Dans quel délai habituel s’effectue le règlement-livraison (échange titres contre espèces) après une exécution à la BRVM ?",
+      "options": [
+        "Instantanément dans la minute",
+        "En trois jours ouvrés (J+3)",
+        "À la fin de chaque mois civil",
+        "Après la prochaine assemblée générale"
+      ],
+      "correct": 1,
+      "explication": "Le dénouement titres contre espèces par le Dépositaire Central (DC/BR) intervient en J+3 ouvrés après la séance d’exécution."
+    },
+    {
+      "question": "Que révèle la mesure réelle de la liquidité à la BRVM sur fin 2026 ?",
+      "options": [
+        "Les 48 titres s’échangent à parts égales",
+        "Les dix titres les plus actifs concentrent plus de 70 % des échanges",
+        "Seules les obligations sont réellement échangées",
+        "Aucune action ne dépasse 5 % des volumes"
+      ],
+      "correct": 1,
+      "explication": "Sur 65 séances (24/08 au 23/11/2026), les 10 valeurs les plus échangées représentent 71,9 % des capitaux échangés (dont 40,9 % pour Sonatel seule)."
+    },
+    {
+      "question": "Une action affiche 0 % de variation pendant trois séances d’affilée à la BRVM. Quelle est l’explication la plus fréquente ?",
+      "options": [
+        "Son cours est figé par le régulateur",
+        "Aucun échange n’a eu lieu sur ces séances",
+        "La société prépare une fusion imminente",
+        "Les dividendes sont en cours de calcul"
+      ],
+      "correct": 1,
+      "explication": "Sur les valeurs peu liquides, il arrive fréquemment qu’aucun ordre d’achat ne croise un ordre de vente durant une ou plusieurs séances : le cours reste alors inchangé."
+    }
+  ],
+  "liens": [
+    {
+      "label": "Les indices et la séance du jour",
+      "href": "/dashboard"
+    },
+    {
+      "label": "Les cours de toutes les actions",
+      "href": "/actions"
+    },
+    {
+      "label": "Comparer les SGI agréées",
+      "href": "/comparateur-sgi"
     }
   ],
   "qcm": {
     "question": "Combien de pays partagent la BRVM ?",
-    "options": ["Trois", "Cinq", "Huit", "Quinze"],
+    "options": [
+      "Trois pays",
+      "Cinq pays",
+      "Huit pays",
+      "Quinze pays"
+    ],
     "correct": 2,
     "explication": "La BRVM est commune aux huit pays de l’UEMOA : Bénin, Burkina Faso, Côte d’Ivoire, Guinée-Bissau, Mali, Niger, Sénégal et Togo."
-  },
-  "liens": [
-    { "label": "Les indices et la séance du jour", "href": "/dashboard" },
-    { "label": "Les cours de toutes les actions", "href": "/actions" },
-    { "label": "Comparer les SGI agréées", "href": "/comparateur-sgi" }
-  ]
+  }
 }

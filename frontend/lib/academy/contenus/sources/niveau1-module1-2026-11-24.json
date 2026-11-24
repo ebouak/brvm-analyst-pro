@@ -1,0 +1,856 @@
+{
+  "_lisez_moi": "Instantané réel de la BRVM au 2026-11-24 extrait de la base WESTBOURSE (brvm_actions_daily, brvm_instruments, brvm_indices_daily, dividends, sgi_frais) et recoupé avec les sources figées du niveau 3. Sert aux leçons 1 à 4 du niveau 1 (Module 1).",
+  "date_reference": "2026-11-24",
+  "marche": {
+    "nb_actions_cotees": 48,
+    "nb_avec_capitalisation": 48,
+    "capitalisation_totale_md": 18511,
+    "cours_median_fcfa": 4530,
+    "cours_min": {
+      "code": "ETIT",
+      "nom": "ETI TG",
+      "cours": 52,
+      "cap_md": 940.4,
+      "pays": "TG"
+    },
+    "cours_max": {
+      "code": "UNLC",
+      "nom": "UNILEVER CI",
+      "cours": 42000,
+      "cap_md": 385.7,
+      "pays": "CI"
+    },
+    "par_pays": [
+      {
+        "code": "CI",
+        "nom": "Côte d’Ivoire",
+        "nb": 32
+      },
+      {
+        "code": "NC",
+        "nom": "NC",
+        "nb": 4
+      },
+      {
+        "code": "BF",
+        "nom": "Burkina Faso",
+        "nb": 3
+      },
+      {
+        "code": "SN",
+        "nom": "Sénégal",
+        "nb": 3
+      },
+      {
+        "code": "TG",
+        "nom": "Togo",
+        "nb": 2
+      },
+      {
+        "code": "BJ",
+        "nom": "Bénin",
+        "nb": 2
+      },
+      {
+        "code": "NE",
+        "nom": "Niger",
+        "nb": 1
+      },
+      {
+        "code": "ML",
+        "nom": "Mali",
+        "nb": 1
+      }
+    ],
+    "par_secteur": [
+      {
+        "secteur": "Services financiers",
+        "nb": 17
+      },
+      {
+        "secteur": "Consommation discrétionnaire",
+        "nb": 8
+      },
+      {
+        "secteur": "Consommation de base",
+        "nb": 8
+      },
+      {
+        "secteur": "Industriels",
+        "nb": 7
+      },
+      {
+        "secteur": "Énergie",
+        "nb": 3
+      },
+      {
+        "secteur": "Télécommunications",
+        "nb": 3
+      },
+      {
+        "secteur": "Services publics",
+        "nb": 2
+      }
+    ],
+    "tranches_cours": [
+      {
+        "label": "Moins de 2 000 FCFA",
+        "nb": 10
+      },
+      {
+        "label": "2 000 à 4 999 FCFA",
+        "nb": 15
+      },
+      {
+        "label": "5 000 à 14 999 FCFA",
+        "nb": 14
+      },
+      {
+        "label": "15 000 FCFA et plus",
+        "nb": 9
+      }
+    ],
+    "top_capitalisations": [
+      {
+        "code": "SNTS",
+        "nom": "SONATEL",
+        "pays": "SN",
+        "secteur": "Télécommunications",
+        "cours": 3890,
+        "shares": 1000000000,
+        "cap_md": 3890
+      },
+      {
+        "code": "ORAC",
+        "nom": "ORANGE COTE D'IVOIRE",
+        "pays": null,
+        "secteur": "Télécommunications",
+        "cours": 18700,
+        "shares": 150655350,
+        "cap_md": 2817.3
+      },
+      {
+        "code": "SGBC",
+        "nom": "SGBCI",
+        "pays": "CI",
+        "secteur": "Services financiers",
+        "cours": 37550,
+        "shares": 31111110,
+        "cap_md": 1168.2
+      },
+      {
+        "code": "ETIT",
+        "nom": "ETI TG",
+        "pays": "TG",
+        "secteur": "Services financiers",
+        "cours": 52,
+        "shares": 18084106722,
+        "cap_md": 940.4
+      },
+      {
+        "code": "SIBC",
+        "nom": "SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE",
+        "pays": null,
+        "secteur": "Services financiers",
+        "cours": 7990,
+        "shares": 100000000,
+        "cap_md": 799
+      },
+      {
+        "code": "ECOC",
+        "nom": "ECOBANK COTE D'IVOIRE",
+        "pays": "CI",
+        "secteur": "Services financiers",
+        "cours": 14500,
+        "shares": 55050600,
+        "cap_md": 798.2
+      },
+      {
+        "code": "CBIBF",
+        "nom": "CORIS BANK INTERNATIONAL BURKINA FASO",
+        "pays": "BF",
+        "secteur": "Services financiers",
+        "cours": 24900,
+        "shares": 32000000,
+        "cap_md": 796.8
+      },
+      {
+        "code": "SLBC",
+        "nom": "SOLIBRA CI",
+        "pays": "CI",
+        "secteur": "Consommation de base",
+        "cours": 36500,
+        "shares": 16460840,
+        "cap_md": 600.8
+      }
+    ],
+    "exemples_cours_vs_cap": [
+      {
+        "code": "ETIT",
+        "nom": "ETI TG",
+        "pays": "TG",
+        "secteur": "Services financiers",
+        "cours": 52,
+        "shares": 18084106722,
+        "cap_md": 940.4
+      },
+      {
+        "code": "SNTS",
+        "nom": "SONATEL",
+        "pays": "SN",
+        "secteur": "Télécommunications",
+        "cours": 3890,
+        "shares": 1000000000,
+        "cap_md": 3890
+      },
+      {
+        "code": "ORAC",
+        "nom": "ORANGE COTE D'IVOIRE",
+        "pays": null,
+        "secteur": "Télécommunications",
+        "cours": 18700,
+        "shares": 150655350,
+        "cap_md": 2817.3
+      },
+      {
+        "code": "SGBC",
+        "nom": "SGBCI",
+        "pays": "CI",
+        "secteur": "Services financiers",
+        "cours": 37550,
+        "shares": 31111110,
+        "cap_md": 1168.2
+      },
+      {
+        "code": "UNLC",
+        "nom": "UNILEVER CI",
+        "pays": "CI",
+        "secteur": "Consommation de base",
+        "cours": 42000,
+        "shares": 9183400,
+        "cap_md": 385.7
+      },
+      {
+        "code": "CIEC",
+        "nom": "CIE CI",
+        "pays": "CI",
+        "secteur": "Services publics",
+        "cours": 4250,
+        "shares": 56000000,
+        "cap_md": 238
+      }
+    ],
+    "seances_par_an": {
+      "2021": 259,
+      "2022": 259,
+      "2023": 247,
+      "2024": 249,
+      "2025": 249,
+      "2026": 224
+    }
+  },
+  "liquidite_65_seances": {
+    "periode": {
+      "debut": "2026-08-24",
+      "fin": "2026-11-23",
+      "seances": 65
+    },
+    "capitaux_totaux_md": 184.4,
+    "part_snts_pct": 40.9,
+    "part_top5_pct": 58.3,
+    "part_top10_pct": 71.9,
+    "top5": [
+      {
+        "code": "SNTS",
+        "nom": "SONATEL SENEGAL",
+        "capitaux_md": 75.41,
+        "seances_cotees": 65,
+        "seances_sans_echange": 0
+      },
+      {
+        "code": "SGBC",
+        "nom": "SOCIETE GENERALE COTE D'IVOIRE",
+        "capitaux_md": 12.41,
+        "seances_cotees": 65,
+        "seances_sans_echange": 0
+      },
+      {
+        "code": "BBGC",
+        "nom": "BRIDGE BANK GROUP COTE D'IVOIRE",
+        "capitaux_md": 6.71,
+        "seances_cotees": 43,
+        "seances_sans_echange": 0
+      },
+      {
+        "code": "SIBC",
+        "nom": "SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE",
+        "capitaux_md": 6.57,
+        "seances_cotees": 65,
+        "seances_sans_echange": 0
+      },
+      {
+        "code": "BOAC",
+        "nom": "BANK OF AFRICA COTE D'IVOIRE",
+        "capitaux_md": 6.4,
+        "seances_cotees": 65,
+        "seances_sans_echange": 0
+      }
+    ],
+    "sans_echange_au_moins_10_seances": 2
+  },
+  "indices_2026": {
+    "BRVMC": {
+      "2026-05": {
+        "date": "2026-05-29",
+        "valeur": 425.54
+      },
+      "2026-06": {
+        "date": "2026-06-30",
+        "valeur": 453.21
+      },
+      "2026-07": {
+        "date": "2026-07-31",
+        "valeur": 482.65
+      },
+      "2026-08": {
+        "date": "2026-08-31",
+        "valeur": 530.92
+      },
+      "2026-09": {
+        "date": "2026-09-30",
+        "valeur": 548.38
+      },
+      "2026-10": {
+        "date": "2026-10-30",
+        "valeur": 534.71
+      },
+      "2026-11": {
+        "date": "2026-11-24",
+        "valeur": 472.04
+      }
+    },
+    "BRVM30": {
+      "2026-05": {
+        "date": "2026-05-29",
+        "valeur": 199.55
+      },
+      "2026-06": {
+        "date": "2026-06-30",
+        "valeur": 212.45
+      },
+      "2026-07": {
+        "date": "2026-07-31",
+        "valeur": 230.08
+      },
+      "2026-08": {
+        "date": "2026-08-31",
+        "valeur": 255.88
+      },
+      "2026-09": {
+        "date": "2026-09-30",
+        "valeur": 266.08
+      },
+      "2026-10": {
+        "date": "2026-10-30",
+        "valeur": 259.18
+      },
+      "2026-11": {
+        "date": "2026-11-24",
+        "valeur": 228.62
+      }
+    }
+  },
+  "sgi": {
+    "nb_sgi_frais_base": 37,
+    "nb_homologuees_base": 34,
+    "nb_sgi_annuaire": 34,
+    "annuaire_par_pays": {
+      "CI": 17,
+      "SN": 6,
+      "BF": 3,
+      "ML": 3,
+      "BJ": 3,
+      "TG": 1,
+      "NE": 1
+    },
+    "courtage_min_pct": 0.1,
+    "courtage_max_pct": 1,
+    "depot_zero_nb": 8,
+    "depot_renseigne_nb": 22,
+    "depot_max_fcfa": 2000000,
+    "droits_garde_annuels_max_pct": 0.5,
+    "tenue_compte_zero_nb": 14
+  },
+  "ftsc_detachement_2025": {
+    "dividende_net_2024": 1726.56,
+    "seances": [
+      {
+        "date": "2025-09-22",
+        "cours": 4605,
+        "variation_pct": 0.1,
+        "volume": 24606
+      },
+      {
+        "date": "2025-09-23",
+        "cours": 4385,
+        "variation_pct": -4.8,
+        "volume": 30878
+      },
+      {
+        "date": "2025-09-24",
+        "cours": 4060,
+        "variation_pct": -7.4,
+        "volume": 17681
+      },
+      {
+        "date": "2025-09-25",
+        "cours": 3760,
+        "variation_pct": -7.4,
+        "volume": 28165
+      },
+      {
+        "date": "2025-09-26",
+        "cours": 2185,
+        "variation_pct": -41.9,
+        "volume": 31731
+      },
+      {
+        "date": "2025-09-29",
+        "cours": 2345,
+        "variation_pct": 7.3,
+        "volume": 25841
+      },
+      {
+        "date": "2025-09-30",
+        "cours": 2520,
+        "variation_pct": 7.5,
+        "volume": 20862
+      },
+      {
+        "date": "2025-10-01",
+        "cours": 2705,
+        "variation_pct": 7.3,
+        "volume": 26223
+      },
+      {
+        "date": "2025-10-02",
+        "cours": 2905,
+        "variation_pct": 7.4,
+        "volume": 11254
+      },
+      {
+        "date": "2025-10-03",
+        "cours": 3120,
+        "variation_pct": 7.4,
+        "volume": 9038
+      }
+    ]
+  },
+  "performance_5_ans_2021_2026": [
+    {
+      "code": "SNTS",
+      "nom": "SONATEL",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1300,
+      "cours_fin_2025": 2612,
+      "cours_fin": 3890,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 140,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 150,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 158,
+          "base": "net",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 166,
+          "base": "net",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 174,
+          "base": "net",
+          "ex_date": "2026-05-22"
+        }
+      ],
+      "somme_dividendes": 788,
+      "plus_value_fcfa": 2590,
+      "part_plus_value_pct": 199.2,
+      "part_dividendes_pct": 60.6,
+      "rendement_total_pct": 259.8
+    },
+    {
+      "code": "SGBC",
+      "nom": "SGBCI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 7500,
+      "cours_fin_2025": 29895,
+      "cours_fin": 37550,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 1004.93,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 1107,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 1547,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 1639,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 2293.28,
+          "base": "net",
+          "ex_date": "2026-08-21"
+        }
+      ],
+      "somme_dividendes": 7591.21,
+      "plus_value_fcfa": 30050,
+      "part_plus_value_pct": 400.7,
+      "part_dividendes_pct": 101.2,
+      "rendement_total_pct": 501.9
+    },
+    {
+      "code": "SIBC",
+      "nom": "SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1277.5,
+      "cours_fin_2025": 5750,
+      "cours_fin": 7990,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 202.5,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 248,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 248,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 330,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 374,
+          "base": "net",
+          "ex_date": "2026-07-30"
+        }
+      ],
+      "somme_dividendes": 1402.5,
+      "plus_value_fcfa": 6712.5,
+      "part_plus_value_pct": 525.4,
+      "part_dividendes_pct": 109.8,
+      "rendement_total_pct": 635.2
+    },
+    {
+      "code": "BOAC",
+      "nom": "BANK OF AFRICA CI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1700,
+      "cours_fin_2025": 7180,
+      "cours_fin": 10590,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 187,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 270,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 342,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 459,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 594.528,
+          "base": "net",
+          "ex_date": "2026-05-05"
+        }
+      ],
+      "somme_dividendes": 1852.53,
+      "plus_value_fcfa": 8890,
+      "part_plus_value_pct": 522.9,
+      "part_dividendes_pct": 109,
+      "rendement_total_pct": 631.9
+    },
+    {
+      "code": "CIEC",
+      "nom": "CIE CI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1450,
+      "cours_fin_2025": 2360,
+      "cours_fin": 4250,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 153.16,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 158,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 171,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 158,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 205.92,
+          "base": "net",
+          "ex_date": "2026-07-27"
+        }
+      ],
+      "somme_dividendes": 846.08,
+      "plus_value_fcfa": 2800,
+      "part_plus_value_pct": 193.1,
+      "part_dividendes_pct": 58.4,
+      "rendement_total_pct": 251.5
+    },
+    {
+      "code": "TTLC",
+      "nom": "TOTAL CI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1550,
+      "cours_fin_2025": 2335,
+      "cours_fin": 2985,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 159.29,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 176,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 200,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 196,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 139.7678,
+          "base": "net",
+          "ex_date": "2026-08-28"
+        }
+      ],
+      "somme_dividendes": 871.06,
+      "plus_value_fcfa": 1435,
+      "part_plus_value_pct": 92.6,
+      "part_dividendes_pct": 56.2,
+      "rendement_total_pct": 148.8
+    },
+    {
+      "code": "PALC",
+      "nom": "PALMCI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 2200,
+      "cours_fin_2025": 8100,
+      "cours_fin": 7300,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 1236.34,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 1214,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 563,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 451,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 441.4045,
+          "base": "net",
+          "ex_date": "2026-06-26"
+        }
+      ],
+      "somme_dividendes": 3905.74,
+      "plus_value_fcfa": 5100,
+      "part_plus_value_pct": 231.8,
+      "part_dividendes_pct": 177.5,
+      "rendement_total_pct": 409.3
+    },
+    {
+      "code": "ETIT",
+      "nom": "ETI TG",
+      "date_debut": "2021-01-04",
+      "cours_debut": 13,
+      "cours_fin_2025": 23,
+      "cours_fin": 52,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 0.9,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 1,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 0.9184,
+          "base": "net",
+          "ex_date": "2026-06-29"
+        }
+      ],
+      "somme_dividendes": 2.82,
+      "plus_value_fcfa": 39,
+      "part_plus_value_pct": 300,
+      "part_dividendes_pct": 21.7,
+      "rendement_total_pct": 321.7
+    },
+    {
+      "code": "UNXC",
+      "nom": "UNIWAX CI",
+      "date_debut": "2021-01-04",
+      "cours_debut": 1050,
+      "cours_fin_2025": 1400,
+      "cours_fin": 1750,
+      "dividendes_2021_2025": [
+        {
+          "exercice": 2021,
+          "montant": 60.75,
+          "base": "net",
+          "ex_date": null
+        },
+        {
+          "exercice": 2022,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2023,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2024,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        },
+        {
+          "exercice": 2025,
+          "montant": 0,
+          "base": "inconnu",
+          "ex_date": null
+        }
+      ],
+      "somme_dividendes": 60.75,
+      "plus_value_fcfa": 700,
+      "part_plus_value_pct": 66.7,
+      "part_dividendes_pct": 5.8,
+      "rendement_total_pct": 72.5
+    }
+  ]
+}

@@ -1,62 +1,310 @@
 {
   "titre": "Leçon 3 — Combien faut-il pour investir à la BRVM ?",
+  "module": "Module 1 : Comprendre la Bourse BRVM",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
   "image": {
     "url": "https://images.pexels.com/photos/7491011/pexels-photo-7491011.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
     "alt": "Mains posées sur une calculatrice, à côté d’un carnet de notes",
     "credit": "Photo : RDNE Stock project / Pexels"
   },
   "categorie": "evaluation",
-  "duree_min": 9,
-  "sous_titre": "Le vrai ticket d’entrée : le cours d’une action, les frais, et ce qu’il faut pour répartir son risque.",
-  "resume": "Aucun montant minimum n’est fixé par la loi pour acheter une action : on achète des titres entiers, au cours du jour.\nCette leçon montre ce que coûte réellement un premier achat, pourquoi les frais pèsent lourd sur les petits ordres, et comment répartir un premier budget.",
+  "duree_min": 17,
+  "sous_titre": "Prix réel des 48 actions, anatomie complète des frais de bourse, seuil de rentabilité et budgets concrets pour bien démarrer.",
+  "resume": "La loi ne fixe aucun capital minimum pour acheter une action à la BRVM : on achète des titres entiers, au cours de la séance.\nCette leçon montre combien coûtent réellement les 48 actions de la cote, démontre comment le minimum de frais pénalise les trop petits ordres, compare trois budgets de départ (50 000, 250 000 et 1 000 000 FCFA) et propose trois simulateurs pour calibrer votre plan.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
   "sections": [
     {
       "type": "definition",
-      "titre": "Le prix d’une action n’est pas un droit d’entrée",
-      "contenu": "À la BRVM, on achète des actions entières, au cours de la séance. Le coût d’un achat est donc le cours multiplié par la quantité, auquel s’ajoutent les frais.\nCertaines SGI demandent un dépôt minimum à l’ouverture du compte : il varie d’une SGI à l’autre, et se compare avant de s’engager.",
+      "titre": "Aucun minimum légal : distinguer trois montants différents",
+      "contenu": "À la BRVM, on achète des actions entières — il n’existe pas de fractions d’action. Techniquement, une seule action suffit pour devenir actionnaire. Mais en pratique, trois montants bien distincts déterminent votre vrai ticket d’entrée : le cours unitaire de l’action choisie, le dépôt minimum éventuellement exigé par la SGI à l’ouverture, et le montant d’ordre nécessaire pour que les frais restent raisonnables.\nDans la base WESTBOURSE, sur les 22 SGI dont le dépôt minimum est renseigné, 8 n’en imposent aucun (0 FCFA), tandis que d’autres demandent de 50 000 FCFA jusqu’à 2 000 000 FCFA. Ce critère se compare avant toute signature.",
+      "stats": [
+        {
+          "label": "Minimum légal BRVM",
+          "valeur": "1 action",
+          "detail": "Aucun plancher fixé par la bourse"
+        },
+        {
+          "label": "Cours médian (48 titres)",
+          "valeur": "4 530 FCFA",
+          "detail": "Relevé au 24 novembre 2026"
+        },
+        {
+          "label": "Titres sous 5 000 FCFA",
+          "valeur": "25 / 48",
+          "detail": "Plus de la moitié de la cote"
+        },
+        {
+          "label": "SGI sans dépôt minimum",
+          "valeur": "8 / 22",
+          "detail": "Parmi les SGI à dépôt renseigné"
+        }
+      ],
       "formules": [
-        { "nom": "Coût d’un achat", "expression": "Quantité × Cours + Frais", "exemple": "10 × 2 500 + 1 % de frais = 25 250 FCFA" }
+        {
+          "nom": "Coût total d’un achat",
+          "expression": "Quantité × Cours exécuté + Frais d’achat",
+          "exemple": "10 × 2 500 + 1 % de frais = 25 250 FCFA"
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Combien coûte une action à la BRVM ? La réalité des 48 titres",
+      "contenu": "L’idée que « la bourse est réservée aux millionnaires » ne résiste pas aux chiffres. Au 24 novembre 2026, 25 actions sur 48 — soit plus de la moitié de la cote — s’échangent à moins de 5 000 FCFA l’unité, et 10 titres coûtent moins de 2 000 FCFA. Le cours médian s’établit à 4 530 FCFA.\nSeules 9 sociétés dépassent 15 000 FCFA par titre (jusqu’à 42 000 FCFA pour UNLC). Le prix d’une action n’est donc pas un obstacle d’accès ; le vrai sujet est l’équilibre entre taille d’ordre, frais et diversification.",
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Répartition des 48 actions BRVM par tranche de cours (24 novembre 2026)",
+          "labels": [
+            "Moins de 2 000 FCFA",
+            "2 000 à 4 999 FCFA",
+            "5 000 à 14 999 FCFA",
+            "15 000 FCFA et plus"
+          ],
+          "valeurs": [
+            10,
+            15,
+            14,
+            9
+          ],
+          "unite": " titres",
+          "note": "Source : base WESTBOURSE (brvm_actions_daily, clôture du 24/11/2026, 48 actions). Cours le plus bas : ETIT (52 FCFA) ; cours médian : 4 530 FCFA ; cours le plus haut : UNLC (42 000 FCFA).",
+          "reel": true
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "attention",
+          "titre": "Attention au piège du « petit prix = bonne affaire »",
+          "texte": "Acheter 100 actions à 500 FCFA plutôt que 2 actions à 25 000 FCFA engage exactement la même somme (50 000 FCFA) et n’offre aucun avantage mathématique. Si les deux titres gagnent 10 %, votre gain est de 5 000 FCFA dans les deux cas."
+        }
       ]
     },
     {
       "type": "cas",
       "reel": true,
-      "titre": "Sur la BRVM : le prix de 10 actions",
-      "contenu": "Le tableau donne le dernier cours de six valeurs, et ce que coûtent 10 actions de chacune, hors frais.\nL’écart entre elles vient surtout du nombre de titres de chaque société, pas de leur qualité : une action à petit prix n’est pas une bonne affaire pour autant.",
-      "donnees_reelles": { "vue": "cours", "codes": ["UNXC", "TTLC", "CIEC", "SPHC", "SGBC", "SNTS"], "actions": 10 }
+      "titre": "Sur la BRVM : ce que coûtent 10 actions aujourd’hui",
+      "contenu": "Le tableau ci-dessous lit les derniers cours en base pour six sociétés de profils variés et calcule le coût de 10 actions de chacune, hors frais de transaction.\nRegardez l’écart entre le coût de 10 actions d’une valeur autour de quelques milliers de francs et celui d’une grande banque comme SGBC : votre budget par ligne détermine le nombre de titres, jamais la qualité de l’entreprise.",
+      "donnees_reelles": {
+        "vue": "cours",
+        "codes": [
+          "UNXC",
+          "TTLC",
+          "CIEC",
+          "SPHC",
+          "SGBC",
+          "SNTS"
+        ],
+        "actions": 10
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Anatomie complète des frais de bourse en zone UEMOA",
+      "contenu": "Chaque transaction supporte plusieurs couches de frais qu’il faut connaître avant de passer son premier ordre. Une partie revient à votre SGI (négociable ou variable selon sa grille homologuée par l’AMF-UMOA), une autre aux infrastructures de marché (BRVM et DC/BR), et la fiscalité locale (TVA ou TAF) s’applique sur les commissions.\nAu-delà des frais de transaction, vérifiez deux coûts récurrents souvent oubliés par les débutants : les droits de garde (facturés annuellement ou trimestriellement en pourcentage du portefeuille) et les frais fixes de tenue de compte (0 FCFA dans 14 des 37 grilles suivies, mais parfois facturés au trimestre dans d’autres).",
+      "tableau": {
+        "colonnes": [
+          "Poste de frais",
+          "Qui prélève ?",
+          "Ordres de grandeur observés",
+          "Ce qu’il faut vérifier"
+        ],
+        "lignes": [
+          [
+            "Courtage SGI",
+            "Votre SGI",
+            "0,1 % à 1,0 % HT (grilles suivies), parfois avec minimum",
+            "Le taux appliqué aux particuliers ET le minimum en FCFA par ordre"
+          ],
+          [
+            "Commissions de marché",
+            "BRVM + DC/BR",
+            "Environ 0,3 % HT au total sur actions (barème réglementé)",
+            "Communes à toutes les SGI ; apparaissent sur l’avis d’opéré"
+          ],
+          [
+            "Taxe sur commissions (TVA / TAF)",
+            "Administration fiscale",
+            "Selon le pays de la SGI (souvent 10 % à 18 % des commissions)",
+            "S’applique sur les frais de courtage, pas sur le montant des actions"
+          ],
+          [
+            "Droits de garde (conservation)",
+            "SGI / conservateur",
+            "Jusqu’à 0,5 % / an (ou facturation trimestrielle avec plancher)",
+            "S’il existe un plancher en FCFA par trimestre qui pèse sur un petit compte"
+          ],
+          [
+            "Tenue de compte & virements",
+            "Votre SGI",
+            "0 FCFA (14 grilles) à quelques milliers de FCFA / trimestre",
+            "Frais de retrait d’espèces et frais de transfert de titres vers une autre SGI"
+          ]
+        ],
+        "note": "Source : synthèse des 37 grilles SGI suivies dans la base WESTBOURSE (dont 34 homologuées AMF-UMOA, novembre 2026). Demandez toujours la grille complète avant d’ouvrir votre compte."
+      }
     },
     {
       "type": "importance",
-      "titre": "Les frais, l’ennemi des petits ordres",
-      "contenu": "Chaque ordre supporte des frais : le courtage de la SGI, des commissions du marché et du dépositaire, et la TVA sur ces commissions. Beaucoup de SGI appliquent aussi un montant minimum par ordre.\nCes frais se paient à l’achat puis à la revente. L’action doit donc monter d’au moins le total des deux pour que l’opération soit gagnante.",
+      "titre": "L’effet ciseau du minimum de frais sur les petits ordres",
+      "contenu": "Les frais de transaction se paient deux fois : à l’achat, puis à la revente. Avec 1,5 % de frais tout compris par sens, l’action doit déjà monter d’environ 3 % pour que l’aller-retour revienne à zéro.\nMais le vrai danger pour un petit budget est le minimum de perception par ordre. Si votre SGI prélève un minimum de 2 500 FCFA par ordre (exemple pédagogique fréquent), un achat de 10 000 FCFA subit 25 % de frais dès l’entrée — soit 50 % aller-retour ! Dès 170 000 FCFA par ordre, ce plancher s’efface et vous payez le taux normal.",
       "formules": [
-        { "nom": "Seuil de rentabilité d’un aller-retour", "expression": "Frais à l’achat + Frais à la revente", "exemple": "1,5 % + 1,5 % : l’action doit monter d’environ 3 %" }
+        {
+          "nom": "Seuil de rentabilité d’un aller-retour",
+          "expression": "Frais à l’achat + Frais à la revente (en % du montant investi)",
+          "exemple": "1,5 % + 1,5 % ≈ 3 % sans minimum ; 25 % + 25 % = 50 % sur 10 000 FCFA avec 2 500 FCFA de minimum"
+        }
       ],
-      "points": [
-        { "titre": "Le courtage", "detail": "La rémunération de la SGI, en pourcentage de l’ordre, souvent avec un minimum.", "verifier": "la grille tarifaire de votre SGI." },
-        { "titre": "Les commissions de marché", "detail": "Celles de la bourse et du dépositaire central, communes à toutes les SGI." },
-        { "titre": "La tenue de compte", "detail": "Certaines SGI facturent des frais annuels de tenue de compte ou de conservation." }
+      "tableau": {
+        "colonnes": [
+          "Montant de l’ordre",
+          "Frais d’achat (1,5 %, min 2 500)",
+          "Coût aller-retour",
+          "Hausse nécessaire pour équilibrer"
+        ],
+        "lignes": [
+          [
+            "10 000 FCFA",
+            "2 500 FCFA",
+            "5 000 FCFA",
+            "50,0 %"
+          ],
+          [
+            "25 000 FCFA",
+            "2 500 FCFA",
+            "5 000 FCFA",
+            "20,0 %"
+          ],
+          [
+            "50 000 FCFA",
+            "2 500 FCFA",
+            "5 000 FCFA",
+            "10,0 %"
+          ],
+          [
+            "100 000 FCFA",
+            "2 500 FCFA",
+            "5 000 FCFA",
+            "5,0 %"
+          ],
+          [
+            "200 000 FCFA",
+            "3 000 FCFA",
+            "6 000 FCFA",
+            "3,0 %"
+          ],
+          [
+            "500 000 FCFA",
+            "7 500 FCFA",
+            "15 000 FCFA",
+            "3,0 %"
+          ]
+        ],
+        "note": "Calcul pédagogique (taux 1,5 % TTC, minimum de 2 500 FCFA par ordre). Si votre SGI n’applique aucun minimum ou un minimum de 1 000 FCFA, le seuil baisse d’autant : testez vos propres chiffres dans le simulateur ci-dessous."
+      },
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Coût réel aller-retour en % selon la taille de l’ordre (exemple : 1,5 %, min 2 500 FCFA)",
+          "labels": [
+            "10 000",
+            "25 000",
+            "50 000",
+            "100 000",
+            "200 000",
+            "500 000"
+          ],
+          "valeurs": [
+            50,
+            20,
+            10,
+            5,
+            3,
+            3
+          ],
+          "unite": " %",
+          "note": "Exemple pédagogique calculé pour un taux de 1,5 % et un minimum de perception de 2 500 FCFA par ordre. En dessous de 100 000 FCFA par ordre, un minimum forfaitaire pèse très lourd ; regrouper son épargne avant d’acheter règle le problème.",
+          "reel": false
+        }
       ],
-      "simulation": { "type": "frais_ordre", "consigne": "Modifiez la quantité et ajoutez un minimum de frais : sur un petit ordre, le minimum pèse bien plus que le taux affiché.", "cours": 2500, "quantite": 10, "taux_frais_pct": 1.5, "minimum_fcfa": 0 }
+      "simulation": {
+        "type": "frais_ordre",
+        "consigne": "Faites varier la quantité et saisissez le minimum de frais de votre SGI (0, 1 000 ou 2 500 FCFA) pour observer l’impact exact sur votre seuil de rentabilité.",
+        "cours": 2500,
+        "quantite": 10,
+        "taux_frais_pct": 1.5,
+        "minimum_fcfa": 1000
+      }
     },
     {
       "type": "cas",
-      "titre": "Répartir un premier budget de 50 000 FCFA",
-      "contenu": "Exemple pédagogique : avec 50 000 FCFA, on peut viser trois valeurs de trois secteurs différents, soit un peu plus de 16 000 FCFA par ligne, frais compris.\nLe nombre d’actions de chaque ligne dépend de son cours : quelques titres d’une valeur chère, davantage d’une valeur moins chère. L’important est la répartition, pas le nombre de titres.",
+      "titre": "Trois budgets de départ concrets : 50 000, 250 000 et 1 000 000 FCFA",
+      "contenu": "Il n’existe pas de somme « idéale » universelle : l’important est d’adapter votre méthode à votre budget pour éviter que les frais ou le manque de diversification ne vous pénalisent.\nExemple pédagogique : avec 50 000 FCFA, vous pouvez commencer sur trois valeurs de secteurs différents (environ 16 667 FCFA par ligne) uniquement chez une SGI sans minimum de perception élevé ni frais fixes trimestriels lourds — sinon, mieux vaut cumuler son épargne deux ou trois mois avant de passer chaque ordre.",
       "formules": [
-        { "nom": "Budget par ligne", "expression": "Budget total ÷ Nombre de valeurs", "exemple": "50 000 ÷ 3 ≈ 16 667 FCFA par valeur" }
+        {
+          "nom": "Budget indicatif par ligne",
+          "expression": "Budget total ÷ Nombre de valeurs visées",
+          "exemple": "50 000 ÷ 3 ≈ 16 667 FCFA par valeur ; 250 000 ÷ 5 = 50 000 FCFA par valeur"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Budget de départ",
+          "Nombre de lignes conseillé",
+          "Taille moyenne par ordre",
+          "Priorité pratique"
+        ],
+        "lignes": [
+          [
+            "50 000 FCFA",
+            "2 à 3 valeurs (secteurs distincts)",
+            "16 000 à 25 000 FCFA",
+            "Choisir impérativement une SGI sans dépôt minimum et sans frais fixes élevés (ou un OPCVM)"
+          ],
+          [
+            "250 000 FCFA",
+            "4 à 5 valeurs (3 à 4 secteurs)",
+            "50 000 à 60 000 FCFA",
+            "Première vraie diversification sectorielle ; frais maîtrisés dès 50 000 FCFA par ordre"
+          ],
+          [
+            "1 000 000 FCFA",
+            "5 à 8 valeurs (4+ secteurs)",
+            "125 000 à 200 000 FCFA",
+            "Respecter facilement les plafonds de 20 % par société et 35 % par secteur"
+          ]
+        ],
+        "note": "Exemples pédagogiques d’organisation de budget. Ne placez en actions que l’argent dont vous n’aurez pas besoin avant plusieurs années."
+      },
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "La règle d’or avant le premier franc en bourse",
+          "texte": "Constituez d’abord une épargne de précaution disponible (l’équivalent de 3 à 6 mois de dépenses courantes) sur un support liquide sans risque de perte en capital. La bourse vient ensuite."
+        }
       ]
     },
     {
-      "type": "piege",
+      "type": "importance",
+      "titre": "Construire son capital mois après mois : la force de la régularité",
+      "contenu": "La plupart des investisseurs particuliers ne démarrent pas avec un gros capital : ils alimentent leur compte espèces chaque mois (par exemple 25 000 ou 50 000 FCFA à la réception du salaire) et passent un ordre dès que le solde atteint un montant suffisant pour diluer les frais.\nCette discipline régulière présente deux avantages majeurs : elle évite de tout investir au plus haut d’un cycle et laisse le temps au réinvestissement des dividendes de composer le capital année après année.",
+      "simulation": {
+        "type": "valeur_future",
+        "consigne": "Testez l’effet d’un versement mensuel régulier sur 5, 10 ou 15 ans. Le taux annuel est une hypothèse de calcul, jamais une promesse.",
+        "capital_initial": 50000,
+        "versement_mensuel": 25000,
+        "taux_pct": 8,
+        "annees": 10,
+        "objectif": 5000000
+      }
+    },
+    {
+      "type": "cas",
       "titre": "Ne pas mettre tous ses œufs dans le même panier",
-      "contenu": "Exemple pédagogique : 50 000 FCFA sur une seule action qui baisse de 20 %, c’est 10 000 FCFA de perte. Répartis sur cinq valeurs à parts égales, la même baisse sur une seule d’entre elles coûte 2 000 FCFA, soit 4 % du portefeuille.",
-      "points": [
-        { "titre": "Tout miser sur une valeur", "detail": "Une mauvaise nouvelle sur une société, et c’est tout le capital qui recule." },
-        { "titre": "Multiplier les très petits ordres", "detail": "Avec un minimum de frais par ordre, dix petits achats coûtent bien plus qu’un seul." },
-        { "titre": "Investir son épargne de précaution", "detail": "L’argent des imprévus doit rester disponible : une action peut être en baisse le jour où vous en avez besoin." }
-      ],
+      "contenu": "Exemple pédagogique : 50 000 FCFA placés sur une seule action qui recule de 20 %, c’est 10 000 FCFA de perte (20 % de votre capital). Répartis à parts égales sur cinq valeurs de secteurs différents, la même chute de 20 % sur l’une d’elles coûte 2 000 FCFA, soit seulement 4 % du portefeuille.\nPour garder ce filet de sécurité à mesure que votre portefeuille grandit, deux repères simples sont utilisés tout au long de l’Académie : ne jamais dépasser 20 % sur une seule société, ni plus de 35 % sur un seul secteur d’activité.",
       "illustration": {
         "gabarit": "avant_apres",
         "titre": "50 000 FCFA et une valeur qui baisse de 20 % (exemple pédagogique)",
@@ -89,18 +337,86 @@
             ]
           }
         ],
-        "note": "La même baisse coûte 10 000 FCFA quand tout est placé sur une valeur, et 2 000 FCFA, soit 4 % du portefeuille, quand le budget est réparti en cinq parts égales et qu’une seule des cinq baisse."
+        "note": "La même baisse coûte 10 000 FCFA quand tout est concentré sur un titre, contre 2 000 FCFA (4 % du portefeuille) quand le budget est réparti en cinq parts égales et qu’une seule baisse."
+      },
+      "simulation": {
+        "type": "allocation",
+        "capital": 250000,
+        "secteurs": [
+          {
+            "nom": "Services financiers",
+            "pct": 30
+          },
+          {
+            "nom": "Télécommunications",
+            "pct": 25
+          },
+          {
+            "nom": "Services publics & Énergie",
+            "pct": 25
+          },
+          {
+            "nom": "Consommation & Industrie",
+            "pct": 20
+          }
+        ],
+        "seuil_secteur_pct": 35
       }
     },
     {
-      "type": "retenir",
-      "titre": "L’essentiel",
-      "contenu": "Quatre idées à garder en tête.",
+      "type": "piege",
+      "titre": "Cinq erreurs de budget qui rognent le capital dès le départ",
+      "contenu": "Éviter ces cinq erreurs protège souvent plusieurs points de rendement dès la première année.",
       "points": [
-        { "titre": "Coût = quantité × cours + frais", "detail": "Aucun minimum légal ; le dépôt minimum dépend de la SGI." },
-        { "titre": "Les frais se paient deux fois", "detail": "À l’achat et à la revente : ils fixent le seuil de rentabilité." },
-        { "titre": "Un cours bas n’est pas une affaire", "detail": "Il dépend du nombre de titres de la société." },
-        { "titre": "Répartir dès le premier budget", "detail": "Au moins trois valeurs, dans des secteurs différents." }
+        {
+          "titre": "Tout miser sur une seule valeur « coup de cœur »",
+          "detail": "Même une grande entreprise peut traverser une crise sectorielle, une baisse de marge ou une suppression de dividende."
+        },
+        {
+          "titre": "Multiplier les micro-ordres mangés par le minimum de frais",
+          "detail": "Dix ordres de 10 000 FCFA avec un minimum de 2 500 FCFA coûtent 25 000 FCFA de frais, contre 1 500 à 2 500 FCFA pour un seul ordre regroupé de 100 000 FCFA.",
+          "verifier": "le minimum de perception de votre SGI avant d’envoyer un ordre."
+        },
+        {
+          "titre": "Oublier les frais fixes annuels sur un petit compte",
+          "detail": "Des frais de tenue de compte de 10 000 FCFA par an représentent 20 % d’un portefeuille de 50 000 FCFA — ils effaceraient à eux seuls les dividendes.",
+          "verifier": "les frais de tenue de compte et le plancher des droits de garde."
+        },
+        {
+          "titre": "Investir son fonds d’urgence ou de l’argent emprunté",
+          "detail": "En cas d’imprévu ou d’échéance de crédit, vous seriez contraint de vendre au pire moment, potentiellement à perte."
+        },
+        {
+          "titre": "Choisir ses actions parce que leur cours unitaire est petit",
+          "detail": "Un cours bas n’indique ni une sous-évaluation ni un risque moindre : regardez toujours la santé financière de la société et sa valorisation."
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel à retenir",
+      "contenu": "Cinq principes pratiques pour calibrer votre premier budget en bourse.",
+      "points": [
+        {
+          "titre": "Coût = quantité × cours + frais",
+          "detail": "Aucun minimum légal ; plus de la moitié des 48 actions BRVM cotent sous 5 000 FCFA (médiane 4 530 FCFA)."
+        },
+        {
+          "titre": "Comparez la grille complète de votre SGI",
+          "detail": "Dépôt minimum, courtage, minimum par ordre, droits de garde et tenue de compte."
+        },
+        {
+          "titre": "Les frais se paient à l’aller comme au retour",
+          "detail": "Regroupez votre épargne pour passer des ordres qui ne sont pas écrasés par le minimum de perception."
+        },
+        {
+          "titre": "Épargne de précaution d’abord, régularité ensuite",
+          "detail": "Investissez uniquement de l’argent disponible sur plusieurs années, idéalement par versements réguliers."
+        },
+        {
+          "titre": "Diversifiez dès le départ",
+          "detail": "Plusieurs secteurs distincts, avec pour repère maximal 20 % par société et 35 % par secteur."
+        }
       ]
     }
   ],
@@ -108,45 +424,139 @@
   "charts": [],
   "quiz": [
     {
-      "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais. Combien payez-vous ?",
-      "options": ["2 525 FCFA", "25 000 FCFA", "25 250 FCFA", "27 500 FCFA"],
+      "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais (sans minimum). Combien payez-vous ?",
+      "options": [
+        "2 525 FCFA",
+        "25 000 FCFA",
+        "25 250 FCFA",
+        "27 500 FCFA"
+      ],
       "correct": 2,
       "explication": "10 × 2 500 = 25 000 FCFA, plus 1 % de frais, soit 250 FCFA : 25 250 FCFA au total."
     },
     {
       "question": "Vos frais sont de 1,5 % à l’achat et 1,5 % à la revente. De combien l’action doit-elle monter, environ, pour que l’opération ne perde rien ?",
-      "options": ["0,75 %", "1,5 %", "3 %", "15 %"],
+      "options": [
+        "0,75 %",
+        "1,5 %",
+        "3 %",
+        "15 %"
+      ],
       "correct": 2,
-      "explication": "Les frais se paient deux fois : 1,5 % + 1,5 % = environ 3 %. En dessous, l’aller-retour est perdant."
+      "explication": "Les frais se paient deux fois : 1,5 % à l’achat + 1,5 % à la revente = environ 3 %. En dessous, l’aller-retour est perdant."
     },
     {
       "question": "Une action cote 1 800 FCFA, une autre 30 000 FCFA. Que peut-on en conclure ?",
-      "options": ["La première est forcément la meilleure affaire", "La seconde est de meilleure qualité", "Rien : le cours dépend surtout du nombre de titres", "La première verse forcément un plus petit dividende"],
+      "options": [
+        "La première est la meilleure affaire",
+        "La seconde est de meilleure qualité",
+        "Rien sans analyser leurs fondamentaux",
+        "La première verse un plus petit dividende"
+      ],
       "correct": 2,
-      "explication": "Le cours d’une action ne dit rien de sa qualité ni de sa cherté. Pour juger, il faut rapporter le prix aux bénéfices ou aux dividendes."
+      "explication": "Le cours d’une action dépend du nombre de titres en circulation, pas de sa cherté ni de sa qualité. Il faut rapporter le prix aux bénéfices ou aux dividendes."
     },
     {
       "question": "50 000 FCFA répartis à parts égales sur cinq valeurs. L’une d’elles baisse de 20 %. Combien perd le portefeuille ?",
-      "options": ["10 000 FCFA", "2 000 FCFA", "4 000 FCFA", "20 000 FCFA"],
+      "options": [
+        "10 000 FCFA",
+        "2 000 FCFA",
+        "4 000 FCFA",
+        "20 000 FCFA"
+      ],
       "correct": 1,
       "explication": "Chaque ligne vaut 10 000 FCFA ; 20 % de 10 000 = 2 000 FCFA, soit 4 % du portefeuille. Sur une seule valeur, la perte aurait été de 10 000 FCFA."
     },
     {
-      "question": "Pourquoi éviter de multiplier les très petits ordres ?",
-      "options": ["La BRVM refuse les ordres de moins de dix titres", "Le minimum de frais par ordre pèse lourd", "Ils ne donnent pas droit au dividende", "Ils sont toujours exécutés en dernier"],
+      "question": "Pourquoi éviter de multiplier les très petits ordres quand votre SGI applique un minimum de perception ?",
+      "options": [
+        "La BRVM refuse les ordres sous dix titres",
+        "Le minimum de frais pèse très lourd en %",
+        "Ils ne donnent pas droit au dividende",
+        "Ils sont exécutés seulement le vendredi"
+      ],
       "correct": 1,
-      "explication": "Beaucoup de SGI appliquent un montant minimum de frais par ordre : sur un petit achat, ce minimum pèse lourd en pourcentage."
+      "explication": "Un minimum de 2 500 FCFA sur un ordre de 10 000 FCFA représente 25 % de frais dès l’achat (50 % aller-retour). Mieux vaut regrouper son épargne."
+    },
+    {
+      "question": "Votre SGI facture 10 000 FCFA de frais fixes de tenue de compte par an. Combien cela représente-t-il sur un portefeuille de 50 000 FCFA ?",
+      "options": [
+        "20 % par an",
+        "2 % par an",
+        "5 % par an",
+        "0,5 % par an"
+      ],
+      "correct": 0,
+      "explication": "10 000 ÷ 50 000 = 20 % par an : ces frais fixes absorberaient plus que les dividendes habituels. Sur un petit budget, il faut cibler une SGI sans frais fixes lourds."
+    },
+    {
+      "question": "À la BRVM, quel est le montant minimum fixé par la loi pour acheter des actions ?",
+      "options": [
+        "Aucun : le prix d’une seule action entière",
+        "100 000 FCFA obligatoires",
+        "500 000 FCFA fixés par la BRVM",
+        "1 000 000 FCFA fixés par l’AMF-UMOA"
+      ],
+      "correct": 0,
+      "explication": "La BRVM ne fixe aucun plancher en FCFA : on achète au minimum une action entière. Le dépôt minimum éventuel dépend uniquement de la politique commerciale de chaque SGI."
+    },
+    {
+      "question": "Quel repère de diversification est retenu dans l’Académie pour limiter le risque de concentration ?",
+      "options": [
+        "Max 50 % par titre et 80 % par secteur",
+        "Max 20 % par société et 35 % par secteur",
+        "Exactement 100 % sur le secteur bancaire",
+        "Uniquement des titres sous 2 000 FCFA"
+      ],
+      "correct": 1,
+      "explication": "Limiter chaque société à 20 % et chaque secteur à 35 % évite qu’un choc isolé ou sectoriel ne mette en danger tout votre capital."
+    },
+    {
+      "question": "Que faut-il constituer AVANT d’investir son premier franc en actions ?",
+      "options": [
+        "Un crédit bancaire à taux variable",
+        "Une épargne de précaution disponible",
+        "Un compte dans trois SGI différentes",
+        "Un portefeuille d’au moins vingt titres"
+      ],
+      "correct": 1,
+      "explication": "Disposer de 3 à 6 mois de dépenses courantes sur un support liquide évite d’être forcé de vendre vos actions en pleine baisse lors d’un imprévu."
+    },
+    {
+      "question": "Vous épargnez 20 000 FCFA par mois chez une SGI qui applique un minimum de 2 000 FCFA par ordre. Quelle pratique réduit vos frais ?",
+      "options": [
+        "Passer quatre ordres de 5 000 FCFA",
+        "Cumuler 4 à 6 mois avant d’acheter",
+        "Vendre et racheter chaque semaine",
+        "Emprunter pour acheter plus vite"
+      ],
+      "correct": 1,
+      "explication": "En cumulant 100 000 à 120 000 FCFA sur votre compte espèces avant de passer l’ordre, le minimum de 2 000 FCFA retombe sous 2 % au lieu de 10 % sur 20 000 FCFA."
+    }
+  ],
+  "liens": [
+    {
+      "label": "Simuler un budget d’épargne",
+      "href": "/simulateur-budget"
+    },
+    {
+      "label": "Comparer les frais des SGI",
+      "href": "/comparateur-sgi"
+    },
+    {
+      "label": "Les cours de toutes les actions",
+      "href": "/actions"
     }
   ],
   "qcm": {
-    "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais. Combien payez-vous ?",
-    "options": ["2 525 FCFA", "25 000 FCFA", "25 250 FCFA", "27 500 FCFA"],
+    "question": "Une action cote 2 500 FCFA. Vous en achetez 10, avec 1 % de frais (sans minimum). Combien payez-vous ?",
+    "options": [
+      "2 525 FCFA",
+      "25 000 FCFA",
+      "25 250 FCFA",
+      "27 500 FCFA"
+    ],
     "correct": 2,
     "explication": "10 × 2 500 = 25 000 FCFA, plus 1 % de frais, soit 250 FCFA : 25 250 FCFA au total."
-  },
-  "liens": [
-    { "label": "Simuler un budget d’épargne", "href": "/simulateur-budget" },
-    { "label": "Comparer les frais des SGI", "href": "/comparateur-sgi" },
-    { "label": "Les cours de toutes les actions", "href": "/actions" }
-  ]
+  }
 }
