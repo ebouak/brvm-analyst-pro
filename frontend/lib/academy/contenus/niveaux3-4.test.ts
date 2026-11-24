@@ -3,7 +3,7 @@ import { pageExiste } from '@/lib/routes/pageExiste';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { lessonSchema, type Lesson } from '../types';
-import { rsiSeries } from '@/lib/indicators';
+import { macdSeries, rsiSeries } from '@/lib/indicators';
 
 /**
  * Niveaux 3 (analyse technique, 7 leçons) et 4 (expert : régulation et marché
@@ -292,5 +292,67 @@ describe('niveau 3, leçon 4 — le RSI, mesuré sur la BRVM (2026-11-24)', () =
   it('aucune promesse ni aucun conseil sur une valeur', () => {
     expect(brut).toMatch(/il n’en a pas annoncé la fin/);
     expect(brut).not.toMatch(/candidat|signal d’achat|à surveiller pour|probabilité de succès|garantit (une|la) (hausse|baisse)/i);
+  });
+});
+
+describe('niveau 3, leçon 5 — MACD mesuré sur la BRVM (2026-11-24)', () => {
+  type Eval = { cas: number; part_pct: number; part_base_pct: number; assez_de_cas: boolean; ecart_etabli: boolean; ecart_sens: 'plus' | 'moins' | null };
+  const src = JSON.parse(readFileSync(fileURLToPath(new URL('./niveau3/sources/macd-brvm-2026-11-24.json', import.meta.url)), 'utf-8')) as {
+    croisement_signal: {
+      croisements: number;
+      allers_retours: Record<'5' | '10' | '20', { part_pct: number }>;
+      apres_20: { haussier: Eval; baissier: Eval };
+    };
+    croisement_zero: { croisements: number; apres_20: { haussier: Eval; baissier: Eval } };
+    ralentissement_hist: { cas: number; part_dementi_pct: number; avance_mediane_seances: number };
+    exemples: { orac: { seances: { date: string; cloture: number; macd: number; hist: number }[]; clotures_verif: { date: string; cloture: number }[] } };
+  };
+  const [, l5, brut] = N3[4]!;
+  const fr = (n: number) => n.toFixed(1).replace('.', ',');
+  const ent = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+  it('les chiffres de la leçon sont ceux de la source recalculée', () => {
+    expect(l5.nouveaute).toEqual({ type: 'mis_a_jour', depuis: '2026-11-24' });
+    expect(brut).toContain(`${ent(src.croisement_signal.croisements)} croisements MACD/Signal`);
+    expect(brut).toContain(`${fr(src.croisement_signal.allers_retours['10'].part_pct)} % en 10 séances`);
+    expect(brut).toContain(`démenti avant zéro dans ${fr(src.ralentissement_hist.part_dementi_pct)} % des cas`);
+  });
+
+  it('le tableau des croisements reprend les quatre évaluations et le verdict suit Wilson', () => {
+    const t = l5.sections.find((s) => s.titre.startsWith('Ce que valent les croisements du MACD'))!.tableau!;
+    const evals: [string, Eval][] = [
+      ['MACD / Signal — Haussier', src.croisement_signal.apres_20.haussier],
+      ['MACD / Signal — Baissier', src.croisement_signal.apres_20.baissier],
+      ['Passage ligne zéro — Haussier', src.croisement_zero.apres_20.haussier],
+      ['Passage ligne zéro — Baissier', src.croisement_zero.apres_20.baissier],
+    ];
+    expect(t.lignes).toHaveLength(evals.length);
+    for (const [lib, ev] of evals) {
+      const ligne = t.lignes.find((r) => r[0] === lib)!;
+      expect(ligne).toBeTruthy();
+      expect(ligne[6]).toMatch(!ev.assez_de_cas ? /Trop peu de cas/ : ev.ecart_etabli ? /souvent/ : /non établi/);
+    }
+  });
+
+  it('l’atelier MACD et les simulateurs en direct sont présents', () => {
+    const sims = l5.sections.flatMap((s) => [...(s.simulation ? [s.simulation] : []), ...s.simulations]);
+    expect(sims.some((s) => s.type === 'atelier_macd')).toBe(true);
+    expect(sims.filter((s) => s.type === 'technique' && s.indicateur === 'macd')).toHaveLength(2);
+  });
+
+  it('les signes clés du cas réel ORAC concordent avec macdSeries', () => {
+    const cl = src.exemples.orac.clotures_verif;
+    const m = macdSeries(cl.map((x) => x.cloture), 12, 26, 9);
+    const parDate = (d: string) => m[cl.findIndex((x) => x.date === d)]!;
+    expect(parDate('2026-10-29').hist!).toBeGreaterThan(0);
+    expect(parDate('2026-11-10').hist!).toBeLessThan(0);
+    expect(parDate('2026-11-10').macd!).toBeLessThan(0);
+    expect(parDate('2026-11-23').hist!).toBeGreaterThan(parDate('2026-11-18').hist!);
+  });
+
+  it('aucune promesse, aucun site tiers', () => {
+    expect(brut).toMatch(/ne prédit pas/);
+    expect(brut).not.toMatch(/probabilité de succès|signal fiable|garantit (une|la) (hausse|baisse)/);
+    expect(brut).not.toMatch(/sika|rich ?bourse|stockanalysis/i);
   });
 });

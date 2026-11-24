@@ -9,6 +9,7 @@ import SimulateurTechnique from './SimulateurTechnique';
 import SimulateurBougies from './SimulateurBougies';
 import AtelierMoyenne from './AtelierMoyenne';
 import AtelierRsi from './AtelierRsi';
+import AtelierMacd from './AtelierMacd';
 
 /**
  * Simulations pédagogiques d'une leçon : calculées au rendu à partir des
@@ -162,5 +163,6 @@ export default function SimulationLecon({ sim }: { sim: Simulation }) {
   if (sim.type === 'bougies' || sim.type === 'figure_bougies') return <SimulateurBougies sim={sim} />;
   if (sim.type === 'moyenne_glissante') return <AtelierMoyenne sim={sim} />;
   if (sim.type === 'rsi_pas_a_pas') return <AtelierRsi sim={sim} />;
+  if (sim.type === 'atelier_macd') return <AtelierMacd sim={sim} />;
   return <SimulateurLecon sim={sim} />;
 }

@@ -321,6 +321,10 @@ export const simulationSchema = z.discriminatedUnion('type', [
     seuil_bas: z.number().min(5).max(50).optional().default(30),
     /** Moyennes : simple (défaut) ou exponentielle — l'apprenant peut basculer (2026-11-24). */
     methode: z.enum(['simple', 'exponentielle']).optional().default('simple'),
+    /** MACD : moyennes rapide, lente et signal (12, 26, 9 par défaut ; modifiables en direct, 2026-11-24). */
+    rapide: z.number().int().min(2).max(50).optional().default(12),
+    lente: z.number().int().min(3).max(100).optional().default(26),
+    signal: z.number().int().min(2).max(50).optional().default(9),
   }),
   /**
    * Atelier (2026-11-24) : la moyenne qui glisse, séance par séance, sur des
@@ -341,6 +345,18 @@ export const simulationSchema = z.discriminatedUnion('type', [
     consigne: consigneSchema,
     clotures: z.array(z.number().positive().max(10_000_000)).min(5).max(25),
     periode: z.number().int().min(2).max(14).optional().default(14),
+  }),
+  /**
+   * Atelier (2026-11-24) : le MACD calculé séance par séance sur des clôtures
+   * FICTIVES modifiables, avec scénario « cours figé (sans échange) ».
+   */
+  z.object({
+    type: z.literal('atelier_macd'),
+    consigne: consigneSchema,
+    clotures: z.array(z.number().positive().max(10_000_000)).min(8).max(24),
+    rapide: z.number().int().min(2).max(12).optional().default(3),
+    lente: z.number().int().min(3).max(26).optional().default(6),
+    signal: z.number().int().min(2).max(9).optional().default(3),
   }),
   /** Chandelier japonais construit à partir de quatre prix saisis. */
   z.object({
@@ -383,11 +399,20 @@ export const simulationSchema = z.discriminatedUnion('type', [
   if (s.type === 'technique' && !(s.longue > s.courte)) {
     ctx.addIssue({ code: 'custom', message: 'la moyenne longue doit compter plus de séances que la courte' });
   }
+  if (s.type === 'technique' && s.indicateur === 'macd' && !(s.lente > s.rapide)) {
+    ctx.addIssue({ code: 'custom', message: 'la moyenne lente doit compter plus de séances que la rapide' });
+  }
   if (s.type === 'moyenne_glissante' && !(s.periode < s.clotures.length)) {
     ctx.addIssue({ code: 'custom', message: 'la période doit compter moins de séances que les clôtures saisies' });
   }
   if (s.type === 'rsi_pas_a_pas' && !(s.periode < s.clotures.length)) {
     ctx.addIssue({ code: 'custom', message: 'un RSI sur N séances demande au moins N + 1 clôtures' });
+  }
+  if (s.type === 'atelier_macd' && !(s.lente > s.rapide)) {
+    ctx.addIssue({ code: 'custom', message: 'la moyenne lente doit compter plus de séances que la rapide' });
+  }
+  if (s.type === 'atelier_macd' && s.clotures.length < s.lente + s.signal) {
+    ctx.addIssue({ code: 'custom', message: 'il faut assez de clôtures pour calculer au moins deux barres d’histogramme' });
   }
   if (s.type === 'scenario_baisse' || s.type === 'allocation') {
     const total = s.secteurs.reduce((t, x) => t + x.pct, 0);

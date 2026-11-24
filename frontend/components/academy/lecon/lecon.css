@@ -433,3 +433,4 @@
 /* Atelier « la moyenne qui glisse » : colonne des clôtures retenues lisible sans casser chaque nombre. */
 .lp-saisie-cours td { white-space: nowrap; }
 .lp-graphe--court { height: 200px; }
+.lp-actions { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; }

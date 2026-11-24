@@ -30,7 +30,7 @@ import {
   calculerSouscription,
   calculerValeurFuture,
 } from './simulateurs';
-import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, rsiPasAPas, type PointSerie } from './simTechnique';
+import { atelierMacd, lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, rsiPasAPas, type PointSerie } from './simTechnique';
 import { lireFigureFictive, lireSeances } from './figuresBougies';
 
 export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): { lecture: string; alertes: string[] } {
@@ -95,6 +95,8 @@ export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): {
       return moyenneGlissante(sim.clotures, sim.periode);
     case 'rsi_pas_a_pas':
       return rsiPasAPas(sim.clotures, sim.periode);
+    case 'atelier_macd':
+      return atelierMacd(sim.clotures, sim.rapide, sim.lente, sim.signal);
     case 'croissance':
       return calculerCroissance(sim);
     case 'endettement':
@@ -105,6 +107,6 @@ export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): {
       if (sim.indicateur === 'variation') return lectureVariation(serie);
       if (sim.indicateur === 'moyennes') return lectureMoyennes(serie, sim.courte, sim.longue, sim.methode);
       if (sim.indicateur === 'rsi') return lectureRsi(serie, sim.periode, sim.seuil_haut, sim.seuil_bas);
-      return lectureMacd(serie);
+      return lectureMacd(serie, sim.rapide, sim.lente, sim.signal);
   }
 }

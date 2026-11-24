@@ -39,7 +39,7 @@ import { dateSeanceLongue } from '@/components/CarnetOrdres';
 
 export type SimulationSimple = Exclude<
   Simulation,
-  { type: 'reinvestissement' | 'objectif' | 'carnet' | 'allocation' | 'scenario_baisse' | 'technique' | 'bougies' | 'figure_bougies' | 'moyenne_glissante' | 'rsi_pas_a_pas' }
+  { type: 'reinvestissement' | 'objectif' | 'carnet' | 'allocation' | 'scenario_baisse' | 'technique' | 'bougies' | 'figure_bougies' | 'moyenne_glissante' | 'rsi_pas_a_pas' | 'atelier_macd' }
 >;
 
 const nombre = (n: number, dec = 0) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: dec }).format(n);
