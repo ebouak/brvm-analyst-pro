@@ -128,7 +128,7 @@
   "devDependencies": {
     "@types/node": "^22.7.4",
     "@types/pdfkit": "^0.12.11",
-    "@types/puppeteer": "^5.4.7",
+    "@types/puppeteer": "^7.0.4",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.70.1",
