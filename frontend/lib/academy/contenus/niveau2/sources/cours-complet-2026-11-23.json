@@ -1,5 +1,5 @@
 {
-  "_lisez_moi": "Données du module zéro du niveau 2 (cours complet d’analyse fondamentale). Bloc « base » : lu dans la base WESTBOURSE le 2026-11-24 (états financiers publiés, dividendes, clôtures BRVM). Bloc « tiers » : chiffres de sources externes, cités avec leur source et leur date, jamais recalculés. Montants en milliards de FCFA sauf mention. Les ratios affichés dans les leçons sont recalculés par scripts/academy-module-zero.mjs et contrôlés par niveau2.test.ts.",
+  "_lisez_moi": "Données du module zéro du niveau 2 (cours complet d’analyse fondamentale). Tout vient de la base WESTBOURSE (comptes publiés par les sociétés, Bulletin officiel de la cote, calendrier officiel des dividendes, clôtures de la BRVM), lue le 2026-11-24, et de deux sources officielles : les comptes 2025 publiés par Sonatel (sonatel-2025.json, relus sur le PDF) et les rapports annuels de la BCEAO. Aucun site d’information tiers n’est cité (choix éditorial du 2026-11-24). Montants en milliards de FCFA sauf mention. Les ratios affichés dans les leçons sont recalculés par scripts/academy-module-zero.mjs et contrôlés par niveau2.test.ts.",
   "date_reference": "2026-11-23",
   "lu_le": "2026-11-24",
   "societes": {
@@ -8,19 +8,23 @@
       "secteur": "Banque",
       "famille": "banque",
       "titres": 55050600,
+      "premiere_seance_en_base": "2017-12-12",
       "cours": { "2026-11-23": 14455, "2026-11-20": 14795, "2025-11-24": 15300, "2023-11-23": 6975 },
       "volume_2026_11_23": null,
       "annuel": {
-        "2021": { "revenu": 90.5, "rn": 34.3, "bpa": 623.14, "dpa_comptes": 420.30, "cp": 144.8, "actif": 1677.7, "cloture": 4785 },
-        "2022": { "revenu": 99.2, "rn": 44.6, "bpa": 810.13, "dpa_comptes": 549.00, "cp": 163.7, "actif": 1901.2, "cloture": 4945 },
-        "2023": { "revenu": 110.2, "rn": 48.1, "bpa": 873.00, "dpa_comptes": 594.00, "cp": 178.2, "actif": 1953.3, "cloture": 6800 },
-        "2024": { "revenu": 122.3, "rn": 57.5, "bpa": 1044.00, "dpa_comptes": 708.00, "cp": 199.4, "actif": 2050.7, "cloture": 8795, "depots": 1412.5, "credits": 972.6 },
-        "2025": { "revenu": 132.7, "rn": 63.5, "bpa": 1153.16, "dpa_comptes": 888.00, "cp": 218.6, "actif": 2054.5, "cloture": 16000, "depots": 1626.2, "credits": 1050.8 }
+        "2021": { "revenu": 90.5, "rn": 34.3, "bpa": 623.14, "dpa_comptes": 420.30, "cp": 144.8, "actif": 1677.7, "cloture": 4785, "rbe": 47.899, "cout_du_risque": 11.974 },
+        "2022": { "revenu": 99.2, "rn": 44.6, "bpa": 810.13, "dpa_comptes": 549.00, "cp": 163.7, "actif": 1901.2, "cloture": 4945, "rbe": 54.150, "cout_du_risque": 5.782 },
+        "2023": { "revenu": 110.2, "rn": 48.1, "bpa": 873.00, "dpa_comptes": 594.00, "cp": 178.2, "actif": 1953.3, "cloture": 6800, "rbe": 60.314, "cout_du_risque": 5.933 },
+        "2024": { "revenu": 122.3, "rn": 57.5, "bpa": 1044.00, "dpa_comptes": 708.00, "cp": 199.4, "actif": 2050.7, "cloture": 8795, "depots": 1412.5, "credits": 972.6, "rbe": 67.339, "cout_du_risque": 2.935, "coefficient_exploitation_pct": 44.9 },
+        "2025": { "revenu": 132.7, "rn": 63.5, "bpa": 1153.16, "dpa_comptes": 888.00, "cp": 218.6, "actif": 2054.5, "cloture": 16000, "depots": 1626.2, "credits": 1050.8, "rbe": 75.794, "cout_du_risque": 1.799, "coefficient_exploitation_pct": 42.9 }
       },
       "dividende_2025": { "brut": 888, "net": 781.44, "source": "calendrier de paiement des dividendes de la BRVM" },
       "interim": {
-        "2025-T1": { "revenu": 29.7, "rn": 13.3 }, "2025-S1": { "revenu": 62.8, "rn": 28.9 }, "2025-T3": { "revenu": 96.4, "rn": 44.4 },
-        "2026-T1": { "revenu": 30.8, "rn": 13.0 }, "2026-S1": { "revenu": 64.1, "rn": 26.4 }
+        "2025-T1": { "revenu": 29.7, "rn": 13.3 },
+        "2025-S1": { "revenu": 62.8, "rn": 28.9, "cout_du_risque": 0.700, "creances_souffrance_brutes": 37.292, "total_bilan": 1901.180 },
+        "2025-T3": { "revenu": 96.4, "rn": 44.4, "taux_creances_souffrance_pct": 3.8, "couverture_pct": 97.8 },
+        "2026-T1": { "revenu": 30.8, "rn": 13.0 },
+        "2026-S1": { "revenu": 64.1, "rn": 26.4, "cout_du_risque": 5.197, "creances_souffrance_brutes": 45.300, "couverture_pct": 90, "total_bilan": 2077.936, "cp": 196.096 }
       }
     },
     "SGBC": {
@@ -30,16 +34,19 @@
       "titres": 31111110,
       "cours": { "2026-11-23": 37610, "2026-11-20": 38795, "2025-11-24": 27650, "2023-11-23": 16685 },
       "annuel": {
-        "2021": { "revenu": 189.1, "rn": 67.4, "bpa": 2167.65, "dpa_comptes": 1004.93, "cp": 305.0, "actif": 3021.5, "cloture": 10595 },
-        "2022": { "revenu": 215.1, "rn": 74.6, "bpa": 2398.23, "dpa_comptes": 1107.00, "cp": 345.0, "actif": 3345.3, "cloture": 11605 },
-        "2023": { "revenu": 253.3, "rn": 97.2, "bpa": 3125.00, "dpa_comptes": 1547.00, "cp": 404.0, "actif": 3437.7, "cloture": 16050 },
-        "2024": { "revenu": 263.2, "rn": 101.2, "bpa": 3254.00, "dpa_comptes": 1639.00, "cp": 451.7, "actif": 3614.2, "cloture": 21000, "depots": 2747.5, "credits": 2474.6 },
-        "2025": { "revenu": 276.0, "rn": 101.4, "bpa": 3257.73, "dpa_comptes": 2606.00, "cp": 495.1, "actif": 3769.2, "cloture": 29895, "depots": 2907.7, "credits": 2546.3 }
+        "2021": { "revenu": 189.1, "rn": 67.4, "bpa": 2167.65, "dpa_comptes": 1004.93, "cp": 305.0, "actif": 3021.5, "cloture": 10595, "rbe": 98.446, "cout_du_risque": 17.942 },
+        "2022": { "revenu": 215.1, "rn": 74.6, "bpa": 2398.23, "dpa_comptes": 1107.00, "cp": 345.0, "actif": 3345.3, "cloture": 11605, "rbe": 118.708, "cout_du_risque": 28.816 },
+        "2023": { "revenu": 253.3, "rn": 97.2, "bpa": 3125.00, "dpa_comptes": 1547.00, "cp": 404.0, "actif": 3437.7, "cloture": 16050, "rbe": 147.701, "cout_du_risque": 27.654 },
+        "2024": { "revenu": 263.2, "rn": 101.2, "bpa": 3254.00, "dpa_comptes": 1639.00, "cp": 451.7, "actif": 3614.2, "cloture": 21000, "depots": 2747.5, "credits": 2474.6, "rbe": 163.484, "cout_du_risque": 36.235, "taux_creances_souffrance_pct": 7.5, "couverture_pct": 84 },
+        "2025": { "revenu": 276.0, "rn": 101.4, "bpa": 3257.73, "dpa_comptes": 2606.00, "cp": 495.1, "actif": 3769.2, "cloture": 29895, "depots": 2907.7, "credits": 2546.3, "rbe": 169.074, "cout_du_risque": 46.829, "coefficient_exploitation_pct": 38.8, "taux_creances_souffrance_pct": 8, "couverture_pct": 82 }
       },
       "dividende_2025": { "brut": 2606, "net": 2293.28, "source": "calendrier de paiement des dividendes de la BRVM" },
       "interim": {
-        "2025-T1": { "revenu": 66.3, "rn": 27.1 }, "2025-S1": { "revenu": 132.0, "rn": 53.1 }, "2025-T3": { "revenu": 201.0, "rn": 83.3 },
-        "2026-T1": { "revenu": 65.6, "rn": 24.0 }, "2026-S1": { "revenu": 134.1, "rn": 53.4 }
+        "2025-T1": { "revenu": 66.3, "rn": 27.1 },
+        "2025-S1": { "revenu": 132.0, "rn": 53.1, "cout_du_risque": 18.359, "solvabilite_pct": 17.7, "cp": 446.837, "total_bilan": 3724.358 },
+        "2025-T3": { "revenu": 201.0, "rn": 83.3 },
+        "2026-T1": { "revenu": 65.6, "rn": 24.0 },
+        "2026-S1": { "revenu": 134.1, "rn": 53.4, "cout_du_risque": 20.030, "solvabilite_pct": 17.6, "cp": 548.463, "total_bilan": 4054.459 }
       }
     },
     "SNTS": {
@@ -51,12 +58,13 @@
       "volume_2026_11_23": 88961,
       "fractionnement": "1 action ancienne pour 10 nouvelles le 26/10/2026 ; cours et BPA historiques ajustés en base",
       "annuel": {
-        "2021": { "revenu": 1334.9, "rn": 252.5, "bpa": 252.46, "dpa_comptes": 140.0, "cp": 821.3, "actif": 2063.8, "cloture": 1397.5 },
-        "2022": { "revenu": 1455.0, "rn": 278.9, "bpa": 278.90, "dpa_comptes": 150.0, "cp": 898.5, "actif": 2252.2, "cloture": 1520 },
-        "2023": { "revenu": 1620.7, "rn": 331.7, "bpa": 331.70, "dpa_comptes": 157.5, "cp": 1065.7, "actif": 2573.9, "cloture": 1798 },
-        "2024": { "revenu": 1776.4, "rn": 393.7, "bpa": 393.70, "dpa_comptes": 165.5, "cp": 1274.6, "actif": 3105.3, "cloture": 2400 },
-        "2025": { "revenu": 1923.1, "rn": 413.6, "bpa": 413.60, "dpa_comptes": 174.0, "cp": 1399.3, "actif": 3270.2, "cloture": 2612 }
+        "2021": { "revenu": 1334.9, "rn": 252.5, "bpa": 252.46, "dpa_comptes": 140.0, "cp": 821.3, "actif": 2063.8, "cloture": 1397.5, "rex": 399.655, "flux_exploitation": 463.254, "investissements": 221.399, "disponibilites": 244.206, "dettes_fin_courantes": 213.881, "dettes_fin_non_courantes": 202.538 },
+        "2022": { "revenu": 1455.0, "rn": 278.9, "bpa": 278.90, "dpa_comptes": 150.0, "cp": 898.5, "actif": 2252.2, "cloture": 1520, "rex": 437.059, "flux_exploitation": 464.136, "investissements": 262.989, "disponibilites": 276.791, "dettes_fin_courantes": 200.577, "dettes_fin_non_courantes": 199.560 },
+        "2023": { "revenu": 1620.7, "rn": 331.7, "bpa": 331.70, "dpa_comptes": 157.5, "cp": 1065.7, "actif": 2573.9, "cloture": 1798, "rex": 515.709, "flux_exploitation": 643.077, "investissements": 288.126, "disponibilites": 400.024, "dettes_fin_courantes": 214.819, "dettes_fin_non_courantes": 167.129 },
+        "2024": { "revenu": 1776.4, "rn": 393.7, "bpa": 393.70, "dpa_comptes": 165.5, "cp": 1274.6, "actif": 3105.3, "cloture": 2400, "rex": 619.524, "flux_exploitation": 659.991, "investissements": 300.900, "disponibilites": 460.360, "dettes_fin_courantes": 219.081, "dettes_fin_non_courantes": 241.468, "rn_part_du_groupe": 328.750 },
+        "2025": { "revenu": 1923.1, "rn": 413.6, "bpa": 413.60, "dpa_comptes": 174.0, "cp": 1399.3, "actif": 3270.2, "cloture": 2612, "rex": 669.792, "flux_exploitation": 681.606, "investissements": 289.218, "disponibilites": 536.105, "dettes_fin_courantes": 170.026, "dettes_fin_non_courantes": 232.660, "rn_part_du_groupe": 341.963, "cp_part_du_groupe": 1160.715, "charges_endettement": 24.403 }
       },
+      "_officiel": "Lignes 2024-2025 de rex, flux, investissements, disponibilités, dettes financières, part du groupe et coût de l’endettement : comptes 2025 publiés par Sonatel le 16/02/2026 (sonatel-2025.json, relus sur le PDF). Années antérieures : base WESTBOURSE. Le champ flux_tresorerie_disponible de la base vaut 363,956 en 2025, incohérent avec flux − investissements (392,388) : il n’est pas utilisé ; le free cash flow est recalculé.",
       "dividende_2025": { "brut": null, "net": 174, "source": "calendrier de paiement des dividendes de la BRVM" },
       "interim": {
         "2025-T1": { "revenu": 471.6, "rn": 108.4 }, "2025-S1": { "revenu": 960.2, "rn": 208.1 }, "2025-T3": { "revenu": 1432.5, "rn": 311.0 },
@@ -68,14 +76,15 @@
       "secteur": "Télécommunications",
       "famille": "general",
       "titres": 150655350,
+      "premiere_seance_en_base": "2022-12-30",
       "cours": { "2026-11-23": 19005, "2026-11-20": 19250, "2025-11-24": 14550, "2023-11-23": 10550 },
       "volume_2026_11_23": 2509,
       "annuel": {
-        "2021": { "revenu": 965.0, "rn": 155.8, "bpa": 1034.38, "dpa_comptes": 717.0, "cp": 727.1, "actif": 1755.0, "cloture": null },
-        "2022": { "revenu": 965.0, "rn": 153.5, "bpa": 1018.78, "dpa_comptes": 752.76, "cp": 725.5, "actif": 2017.8, "cloture": 10210 },
-        "2023": { "revenu": 1016.5, "rn": 154.9, "bpa": 1028.00, "dpa_comptes": 780.0, "cp": 724.0, "actif": 2074.7, "cloture": 10900 },
-        "2024": { "revenu": 1084.1, "rn": 158.2, "bpa": 1050.00, "dpa_comptes": 660.0, "cp": 713.8, "actif": 2309.1, "cloture": 17500 },
-        "2025": { "revenu": 1197.1, "rn": 167.8, "bpa": 1114.00, "dpa_comptes": 800.0, "cp": 707.8, "actif": 2554.1, "cloture": 14250 }
+        "2021": { "revenu": 965.0, "rn": 155.8, "bpa": 1034.38, "dpa_comptes": 717.0, "cp": 727.1, "actif": 1755.0, "cloture": null, "rex": 256.760, "flux_exploitation": 308.135, "investissements": 159.308, "disponibilites": 177.819, "dettes_fin_courantes": null, "dettes_fin_non_courantes": 131.553 },
+        "2022": { "revenu": 965.0, "rn": 153.5, "bpa": 1018.78, "dpa_comptes": 752.76, "cp": 725.5, "actif": 2017.8, "cloture": 10210, "rex": 255.455, "flux_exploitation": 296.849, "investissements": 171.761, "disponibilites": 283.535, "dettes_fin_courantes": null, "dettes_fin_non_courantes": 108.409 },
+        "2023": { "revenu": 1016.5, "rn": 154.9, "bpa": 1028.00, "dpa_comptes": 780.0, "cp": 724.0, "actif": 2074.7, "cloture": 10900, "rex": 251.293, "flux_exploitation": 281.520, "investissements": 193.512, "disponibilites": 237.840, "dettes_fin_courantes": null, "dettes_fin_non_courantes": 103.982 },
+        "2024": { "revenu": 1084.1, "rn": 158.2, "bpa": 1050.00, "dpa_comptes": 660.0, "cp": 713.8, "actif": 2309.1, "cloture": 17500, "rex": 263.200, "flux_exploitation": 256.300, "investissements": 159.500, "disponibilites": 287.000, "dettes_fin_courantes": 176.000, "dettes_fin_non_courantes": 159.800 },
+        "2025": { "revenu": 1197.1, "rn": 167.8, "bpa": 1114.00, "dpa_comptes": 800.0, "cp": 707.8, "actif": 2554.1, "cloture": 14250, "rex": 287.200, "flux_exploitation": 335.500, "investissements": 184.200, "disponibilites": 225.800, "dettes_fin_courantes": 111.900, "dettes_fin_non_courantes": 224.000 }
       },
       "dividende_2025": { "brut": 800, "net": 704, "source": "calendrier de paiement des dividendes de la BRVM" },
       "interim": {
@@ -84,41 +93,9 @@
       }
     }
   },
-  "tiers": {
-    "stockanalysis_sp": {
-      "source": "StockAnalysis / S&P Global Market Intelligence, consulté le 23/11/2026",
-      "per_ttm": { "ECOC": 14.04, "SGBC": 12.26, "SNTS": 11.25, "ORAC": 20.27 },
-      "beta_1an": { "ECOC": 0.64, "SGBC": 0.68, "SNTS": 1.37, "ORAC": 1.35 },
-      "rn_part_du_groupe": { "SNTS": [211.1, 236.0, 279.4, 328.8, 342.0], "ORAC": [125.4, 118.3, 110.5, 112.8, 129.1] },
-      "per_part_du_groupe": { "SNTS": [6.62, 6.44, 6.43, 7.30, 7.64], "ORAC": [null, null, 14.87, 23.37, 16.63] },
-      "revenus_standardises": { "ECOC": [null, 94.5, 104.2, 119.4, 132.7], "SGBC": [233.2, 265.8, 304.2, 321.5, 333.5] },
-      "ebitda": { "SNTS": [400, 435, 520, 618, 681], "ORAC_ebitdaal": [256, 255, 251, 266, 288] },
-      "marge_brute_pct": { "SNTS": [57.0, 56.1, 58.0, 58.9, 60.7], "ORAC": [57.5, 55.5, 61.7, 54.1, 53.3] },
-      "marge_operationnelle_pct": { "SNTS": [30.0, 30.0, 32.1, 34.8, 35.4], "ORAC": [26.6, 26.5, 24.7, 24.6, 24.0] },
-      "fcf": { "SNTS": [242, 201, 355, 359, 364], "ORAC": [149, 125, 88, 97, 151] },
-      "dette_nette": { "SNTS": [-199, -146, 14, -3, 133], "ORAC": [null, 46, 175, 134, 149] },
-      "capex": { "SNTS": [221, 263, 288, 301, 318], "ORAC": [159, 172, 194, 160, 184] }
-    },
-    "sika_finance": {
-      "source": "Sika Finance, articles et fiches consultés le 23/11/2026",
-      "rendement_affiche": { "SNTS": 6.66, "ORAC": 4.02 },
-      "ECOC": {
-        "cout_du_risque_2025_pct": 0.2, "couverture_s1_2026_pct": 90, "cout_du_risque_s1_2026": 5.2, "cout_du_risque_s1_2025": 0.7,
-        "pnb_9m_2026": 98.2, "rn_9m_2026": 39.5, "variation_rn_9m_2026_pct": -12.3, "bilan_s1_2026": 2078,
-        "articles": "30/04/2026, 10/09/2026 et 28/10/2026"
-      },
-      "SGBC": {
-        "pnb_9m_2026": 197.6, "rn_9m_2026": 80.4, "coefficient_exploitation_9m_2026_pct": 36.8, "bilan_s1_2026": 4054.5,
-        "cp_s1_2026": 548.5, "variation_cp_pct": 22.7, "solvabilite_pct": 17.6, "hausse_cout_risque_s1_pct": 9.1,
-        "npl_2025_pct": 8, "couverture_2025_pct": 82, "part_marche_credits_pct": 18,
-        "articles": "07/05/2026, 01/09/2026 et 02/11/2026 ; parts de marché : APBEF-CI, avril 2026"
-      },
-      "ORAC": { "lignes_9m_2026_millions": 40.35, "variation_ebitdaal_9m_2026_pct": 18, "variation_ecapex_9m_2026_pct": 20, "articles": "09/10/2026 et 29/10/2026" }
-    },
-    "bceao": {
-      "source": "rapports annuels 2022 et 2023 de la BCEAO",
-      "solvabilite_minimum_pct": 11.5,
-      "note": "Ratio de solvabilité total minimum de 11,5 % depuis la fin de la période transitoire, en 2023 (11,25 % à fin 2022). Le cours fourni citait 12,5 % pour les banques d’importance systémique (EBIS) : ce seuil n’apparaît pas dans les rapports consultés."
-    }
+  "bceao": {
+    "source": "rapports annuels 2022 et 2023 de la BCEAO",
+    "solvabilite_minimum_pct": 11.5,
+    "note": "Ratio de solvabilité total minimum de 11,5 % depuis la fin de la période transitoire, en 2023 (11,25 % à fin 2022). Le cours fourni citait 12,5 % pour les banques d’importance systémique (EBIS) : ce seuil n’apparaît pas dans les rapports consultés."
   }
 }

@@ -99,17 +99,17 @@
           [
             "Liquidité parfois limitée",
             "Certaines actions s’échangent peu. Le dernier cours affiché peut ne pas représenter un prix auquel on peut acheter ou vendre une quantité importante.",
-            "Vérifier les volumes quotidiens et l’écart achat-vente (bid-ask spread)."
+            "Vérifier les volumes quotidiens et l’écart achat-vente (bid-ask spread) : la page Liquidité de WESTBOURSE les réunit."
           ],
           [
             "Flottant variable",
             "Une grande partie du capital est souvent détenue par des actionnaires de référence, ce qui réduit les titres réellement disponibles.",
-            "Consulter le nombre d’actions en circulation et le pourcentage de flottant."
+            "Consulter le nombre d’actions en circulation et le pourcentage de flottant, sur la fiche de la société."
           ],
           [
             "Écarts achat-vente importants",
             "Le prix demandé par les vendeurs peut être très éloigné du prix offert par les acheteurs.",
-            "Ne pas se fier au seul cours de clôture. Examiner le carnet d’ordres."
+            "Ne pas se fier au seul cours de clôture. Examiner le carnet d’ordres, affiché sur chaque fiche société."
           ],
           [
             "Données à dates variables",
@@ -127,7 +127,7 @@
             "Vérifier si des comptes consolidés en normes IFRS sont aussi publiés."
           ]
         ],
-        "note": "Le carnet d’ordres de chaque valeur figure sur sa fiche société : la BRVM publie chaque séance la meilleure limite de chaque côté dans son Bulletin officiel de la cote."
+        "note": "Le carnet d’ordres affiché sur WESTBOURSE vient du Bulletin officiel de la cote : la BRVM y publie chaque séance la meilleure limite de chaque côté."
       },
       "donnees_reelles": {
         "vue": "cours",
@@ -143,11 +143,11 @@
     {
       "type": "definition",
       "titre": "Les sources à privilégier, dans l’ordre",
-      "contenu": "Une analyse ne vaut que par ses données. Les sources n’ont pas toutes le même statut : les documents publiés par la société et par la bourse font foi ; les sites d’information et les bases de données retraitent ces documents, parfois avec des définitions différentes.\nCe cours le montre sur des cas réels. Pour une même banque, deux séries de produit net bancaire circulent selon qu’on lit les comptes publiés ou une base standardisée ; pour un même opérateur, trois PER coexistent selon le bénéfice retenu. Aucune n’est fausse : elles ne mesurent pas la même chose.",
+      "contenu": "Une analyse ne vaut que par ses données. Les documents publiés par la société et par la bourse font foi : ce sont eux qu’il faut lire en premier. WESTBOURSE les rassemble ensuite sur plusieurs exercices et recalcule chaque ratio avec la même méthode d’une société à l’autre, en indiquant pour chaque chiffre sa date et sa source.\nCe cours n’utilise que ces sources. Les bases de données et sites d’information retraitent souvent les mêmes documents avec leurs propres définitions : un chiffre différent n’est pas forcément faux, mais il ne se compare qu’à définition égale. Le module le montre sur un cas réel : pour un même opérateur, quatre PER coexistent selon le cours et le bénéfice retenus.",
       "etapes": [
         {
           "titre": "BRVM (brvm.org)",
-          "detail": "Rapports d’activité, états financiers, avis et communiqués, cours quotidiens et Bulletin officiel de la cote. Source primaire pour les données officielles.",
+          "detail": "Rapports d’activité, états financiers, avis et communiqués, cours quotidiens, Bulletin officiel de la cote et calendrier de paiement des dividendes. Source primaire pour les données officielles.",
           "cle": true
         },
         {
@@ -155,27 +155,20 @@
           "detail": "Rapport annuel complet, présentation aux investisseurs, communiqués de presse, documents d’assemblée générale."
         },
         {
-          "titre": "Sika Finance (sikafinance.com)",
-          "detail": "Cotations en différé, historiques, fiches sociétés, dividendes, actualités et analyses."
+          "titre": "WESTBOURSE",
+          "detail": "Les comptes publiés de chaque société rassemblés sur plusieurs exercices ; les ratios recalculés à méthode constante (BPA, PER, P/B, ROE, rendement) ; le carnet d’ordres du Bulletin officiel ; le calendrier officiel des dividendes ; la note de liquidité ; le comparateur et le screener. Chaque chiffre porte sa date et sa source.",
+          "cle": true
         },
         {
-          "titre": "Richbourse (richbourse.com)",
-          "detail": "Outils de suivi, historiques, fiches de sociétés et informations de marché BRVM."
-        },
-        {
-          "titre": "StockAnalysis / S&P Global Market Intelligence",
-          "detail": "États financiers standardisés sur cinq ans et plus, ratios calculés : utile pour comparer plusieurs années, à condition de connaître ses définitions."
-        },
-        {
-          "titre": "FGI Bourse, CGF Bourse, allAfrica, Daba Finance",
-          "detail": "Analyses sectorielles, commentaires de résultats trimestriels, contexte macroéconomique régional."
+          "titre": "Les autorités : BCEAO et AMF-UMOA",
+          "detail": "Rapports annuels de la BCEAO et règles prudentielles des banques ; avis et décisions de l’AMF-UMOA, régulateur du marché financier régional."
         }
       ],
       "encadres": [
         {
           "ton": "info",
           "titre": "Règle éditoriale",
-          "texte": "Distinguez toujours les données publiées par la société (rapports, communiqués), les cours de marché (BRVM, Sika Finance) et vos propres calculs. Indiquez la période comptable, la date du cours retenu, la devise, les unités et la définition du ratio utilisé."
+          "texte": "Distinguez toujours les données publiées par la société (rapports, communiqués), les cours de marché (BRVM, Bulletin officiel de la cote) et vos propres calculs. Indiquez la période comptable, la date du cours retenu, la devise, les unités et la définition du ratio utilisé."
         }
       ]
     },
@@ -194,7 +187,7 @@
         },
         {
           "titre": "Une source datée pour chaque chiffre",
-          "detail": "Les comptes et la cote font foi ; les bases de données les retraitent."
+          "detail": "Les comptes publiés et la cote font foi ; WESTBOURSE les rassemble et recalcule les ratios."
         }
       ]
     }
@@ -237,12 +230,12 @@
       "question": "Quelle source fait foi pour les états financiers d’une société cotée à la BRVM ?",
       "options": [
         "Un forum de discussion entre investisseurs de la région",
-        "Une base de données standardisée",
+        "Un chiffre repris sans sa date ni sa définition",
         "Les documents publiés par la société et par la BRVM",
         "Le dernier article de presse publié sur la société"
       ],
       "correct": 2,
-      "explication": "Les rapports et états financiers publiés par la société et diffusés par la BRVM sont la source primaire ; les bases de données les retraitent."
+      "explication": "Les rapports et états financiers publiés par la société et diffusés par la BRVM sont la source primaire ; WESTBOURSE les rassemble et recalcule les ratios."
     },
     {
       "question": "Selon quel référentiel les sociétés cotées à la BRVM préparent-elles leurs comptes ?",
