@@ -141,13 +141,15 @@ function SeancesReelles({ sim }: { sim: SimReel }) {
         <span className="lp-badge lp-badge--reel">Données réelles</span>
       </div>
       {sim.consigne && <p className="lp-note lp-note--haut">{sim.consigne}</p>}
-      <div className="lp-champs lp-bloc-court">
-        <div className="lp-champ">
-          <label htmlFor={`${id}-code`}>Valeur</label>
-          <select id={`${id}-code`} value={code} onChange={(e) => setCode(e.target.value)}>
-            {sim.codes.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+      <div className="lp-champ">
+        <label htmlFor={`${id}-code`}>Valeur</label>
+        <select id={`${id}-code`} value={code} onChange={(e) => setCode(e.target.value)}>
+          {sim.codes.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      {/* Même disposition que SimulateurTechnique : le curseur a sa propre
+          ligne (ses trois colonnes ne tiennent pas dans une cellule de .lp-champs). */}
+      <div className="lp-curseurs lp-bloc-court">
         <div className="lp-curseur">
           <label htmlFor={`${id}-n`}>Séances affichées</label>
           <input id={`${id}-n`} type="range" min={10} max={60} step={5} value={nbSeances} aria-valuetext={`${nbSeances} séances`} onChange={(e) => setNbSeances(Number(e.target.value))} />
