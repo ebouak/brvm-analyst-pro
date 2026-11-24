@@ -18,7 +18,7 @@
     {
       "type": "importance",
       "titre": "Les sept indicateurs d’une banque",
-      "contenu": "Le tableau réunit les indicateurs à suivre, ce qu’ils mesurent et la lecture qui en découle. La plupart sont publiés par les banques elles-mêmes dans leur rapport d’activité ; le ratio de solvabilité est un ratio réglementaire, contrôlé par la Commission bancaire de l’UMOA.\nAppliqués aux deux banques étudiées ensuite, ces indicateurs donnent déjà des repères. En 2025, Société Générale Côte d’Ivoire prête 87,6 % de ses dépôts à sa clientèle, Ecobank Côte d’Ivoire 64,6 %. Un rapport élevé n’est pas un défaut en soi : la banque transforme une plus grande part de ses ressources en crédits, ce qui lui rapporte davantage d’intérêts et l’expose davantage au risque de crédit.\nCôté efficacité, Sika Finance donne pour Société Générale Côte d’Ivoire un coefficient d’exploitation de 36,8 % sur les neuf premiers mois de 2026 : sur 100 francs de PNB, environ 37 paient les frais généraux. Côté solvabilité, la même banque affiche 17,6 % au premier semestre 2026, pour un minimum réglementaire de 11,5 %.",
+      "contenu": "Le tableau réunit les indicateurs à suivre, ce qu’ils mesurent et la lecture qui en découle. La plupart sont publiés par les banques elles-mêmes dans leur rapport d’activité ; le ratio de solvabilité est un ratio réglementaire, contrôlé par la Commission bancaire de l’UMOA.\nAppliqués aux deux banques étudiées ensuite, ces indicateurs donnent déjà des repères. En 2025, Société Générale Côte d’Ivoire prête 87,6 % de ses dépôts à sa clientèle, Ecobank Côte d’Ivoire 64,6 %. Un rapport élevé n’est pas un défaut en soi : la banque transforme une plus grande part de ses ressources en crédits, ce qui lui rapporte davantage d’intérêts et l’expose davantage au risque de crédit.\nCôté efficacité, les comptes 2025 donnent un coefficient d’exploitation de 38,8 % pour Société Générale Côte d’Ivoire et de 42,9 % pour Ecobank Côte d’Ivoire : sur 100 francs de PNB, environ 39 et 43 paient les frais généraux. Côté solvabilité, Société Générale Côte d’Ivoire publie 17,6 % au premier semestre 2026, pour un minimum réglementaire de 11,5 %.",
       "tableau": {
         "colonnes": [
           "Indicateur bancaire",
@@ -48,7 +48,7 @@
           ],
           [
             "Coefficient d’exploitation",
-            "Frais généraux ÷ PNB : l’efficacité opérationnelle.",
+            "Frais généraux ÷ PNB, ou 1 − résultat brut d’exploitation ÷ PNB : l’efficacité opérationnelle.",
             "Plus il est bas, plus la banque est efficace ; sous 50 %, il est généralement jugé très bon."
           ],
           [
@@ -126,7 +126,7 @@
       "type": "cas",
       "titre": "Les banques de la BRVM, en direct",
       "reel": true,
-      "contenu": "Les ratios ci-dessous sont recalculés au chargement de la leçon, sur le dernier exercice publié et le dernier cours connu en base. Ils ne sont donc pas figés à la date de rédaction : comparez-les à ceux du 23 novembre 2026 cités dans les leçons 0.4 à 0.6.",
+      "contenu": "Les ratios ci-dessous sont recalculés par WESTBOURSE au chargement de la leçon, sur le dernier exercice publié et le dernier cours connu en base. Ils ne sont donc pas figés à la date de rédaction : comparez-les à ceux du 23 novembre 2026 cités dans les leçons 0.4 à 0.6.",
       "donnees_reelles": {
         "vue": "ratios",
         "codes": [

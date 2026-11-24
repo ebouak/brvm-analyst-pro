@@ -17,7 +17,7 @@
       "etapes": [
         {
           "titre": "Rassembler les données",
-          "detail": "Les états financiers sur au moins trois exercices ; la date et la source de chaque donnée."
+          "detail": "Les états financiers sur au moins trois exercices ; la date et la source de chaque donnée. Les fiches sociétés de WESTBOURSE les réunissent."
         },
         {
           "titre": "Vérifier la qualité",
@@ -54,7 +54,7 @@
     {
       "type": "piege",
       "titre": "Risques et signaux d’alerte",
-      "contenu": "Huit situations doivent faire ralentir l’analyse. Aucune n’est une condamnation ; chacune appelle une vérification dans les comptes.\nAppliqués aux sociétés de ce module, ces signaux orientent les vérifications sans rien trancher. Le dividende publié pour 2025 par Société Générale Côte d’Ivoire représente 80 % de son BPA : un taux élevé, qui reste sous le bénéfice mais appelle un regard sur les flux de trésorerie. Orange Côte d’Ivoire distribue 63 % de son BPA en dividende net, Sonatel 42 %.\nLa dette nette de Sonatel, selon S&P Global, passe de −3 milliards en 2024 à 133 milliards en 2025 ; elle reste modeste au regard de son free cash flow (364 milliards en 2025). Chez Ecobank Côte d’Ivoire, c’est le coût du risque qui se tend en 2026, après une année 2025 très favorable : le signal à suivre est la qualité des crédits, pas l’endettement.",
+      "contenu": "Huit situations doivent faire ralentir l’analyse. Aucune n’est une condamnation ; chacune appelle une vérification dans les comptes.\nAppliqués aux sociétés de ce module, ces signaux orientent les vérifications sans rien trancher. Le dividende publié pour 2025 par Société Générale Côte d’Ivoire représente 80 % de son BPA : un taux élevé, qui reste sous le bénéfice mais appelle un regard sur les flux de trésorerie. Orange Côte d’Ivoire distribue 63 % de son BPA en dividende net, Sonatel 42 %.\nChez Ecobank Côte d’Ivoire, les créances en souffrance brutes passent de 37,3 à 45,3 milliards d’un premier semestre à l’autre : le signal à suivre est la qualité des crédits. Chez Orange Côte d’Ivoire, la dette financière nette passe de 48,8 à 110,1 milliards en 2025, quand le résultat progresse de 6,1 % : la dette avance plus vite que les résultats, à suivre sur les prochains exercices.",
       "points": [
         {
           "titre": "Bénéfices en hausse, trésorerie en baisse",
@@ -111,7 +111,15 @@
             "122,3",
             "132,7",
             "En hausse",
-            "Comptes publiés, BRVM"
+            "Comptes publiés, base WESTBOURSE"
+          ],
+          [
+            "Coût du risque (Md FCFA)",
+            "5,9",
+            "2,9",
+            "1,8",
+            "En baisse",
+            "Comptes publiés, base WESTBOURSE"
           ],
           [
             "Résultat net (Md FCFA)",
@@ -119,7 +127,7 @@
             "57,5",
             "63,5",
             "En hausse",
-            "Comptes publiés, BRVM"
+            "Comptes publiés, base WESTBOURSE"
           ],
           [
             "ROE (capitaux de clôture)",
@@ -135,7 +143,7 @@
             "2 050,7",
             "2 054,5",
             "En hausse",
-            "Comptes publiés, BRVM"
+            "Comptes publiés, base WESTBOURSE"
           ],
           [
             "Capitaux propres (Md FCFA)",
@@ -143,7 +151,7 @@
             "199,4",
             "218,6",
             "En hausse",
-            "Comptes publiés, BRVM"
+            "Comptes publiés, base WESTBOURSE"
           ],
           [
             "Dividende par action publié (FCFA)",
@@ -178,7 +186,7 @@
             "Clôtures de la BRVM"
           ]
         ],
-        "note": "Une tendance « en hausse » du PER ou « en baisse » du rendement n’est ni bonne ni mauvaise en soi : elle dit que le cours a monté plus vite que le bénéfice ou le dividende."
+        "note": "Une tendance « en hausse » du PER ou « en baisse » du rendement n’est ni bonne ni mauvaise en soi : elle dit que le cours a monté plus vite que le bénéfice ou le dividende. Une tendance « en baisse » du coût du risque, elle, ajoute au résultat."
       },
       "donnees_reelles": {
         "vue": "ratios",
@@ -190,7 +198,7 @@
     {
       "type": "piege",
       "titre": "Erreurs courantes à éviter",
-      "contenu": "Neuf erreurs reviennent sans cesse, chez les débutants comme chez les lecteurs pressés. Chacune a sa correction.\nCe module en a croisé plusieurs sur des cas réels. Trois PER différents pour Sonatel au même moment (9,43, 9,77 et 11,25) illustrent l’erreur des périodes et des définitions mélangées. Deux séries de PNB pour Ecobank Côte d’Ivoire illustrent celle des données retraitées. Le rendement de 6,66 % affiché pour Sonatel, qui se retrouve exactement sur la clôture 2025 et non sur le cours du jour, illustre celle de la date du cours.",
+      "contenu": "Neuf erreurs reviennent sans cesse, chez les débutants comme chez les lecteurs pressés. Chacune a sa correction.\nCe module en a croisé plusieurs sur des cas réels. Quatre PER différents pour Sonatel au même moment (8,54, 9,43, 9,77 et 11,40) illustrent l’erreur des périodes et des définitions mélangées. Le rendement de Sonatel, 4,46 % sur le cours du jour et 6,66 % sur la clôture 2025, illustre celle de la date du cours. La dette nette, qui change de signe selon qu’on compte ou non certains postes, illustre celle des définitions non écrites.",
       "tableau": {
         "colonnes": [
           "Erreur",
@@ -244,12 +252,12 @@
         {
           "ton": "cle",
           "titre": "Banques : ECOC face à SGBC (exercice 2025, cours au 23/11/2026)",
-          "texte": "SGBC est plus grande en PNB, en bilan et en capitaux propres ; elle présente un PER plus bas (11,54 contre 12,54) et un rendement du dividende plus élevé, et son cours a progressé en 2026 (+25,8 %).\nECOC affiche un ROE plus élevé (29,0 % contre 20,5 %) et une meilleure marge nette ; son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (−9,7 %).\nPour conclure davantage, il faudrait aligner normes comptables, définition du résultat, ROE sur capitaux moyens, indicateur de qualité des crédits, coût du risque, dividende, BPA, date du cours et liquidité."
+          "texte": "SGBC est plus grande en PNB, en bilan et en capitaux propres, et plus efficace dans ses frais ; elle présente un PER plus bas (11,54 contre 12,54) et un rendement du dividende plus élevé, et son cours a progressé en 2026 (+25,8 %).\nECOC affiche un ROE plus élevé (29,0 % contre 20,5 %), une meilleure marge nette et un coût du risque bien plus faible jusqu’en 2025 ; son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (−9,7 %).\nPour conclure davantage, il faudrait aligner normes comptables, définition du résultat, ROE sur capitaux moyens, indicateur de qualité des crédits et sa date, coût du risque, dividende, BPA, date du cours et liquidité."
         },
         {
           "ton": "cle",
           "titre": "Télécoms : Sonatel face à Orange CI (exercice 2025, cours au 23/11/2026)",
-          "texte": "Sonatel est plus grande (1 923,1 milliards de chiffre d’affaires contre 1 197,1), plus rentable (marge nette consolidée 21,5 % contre 14,0 %), moins chère (PER 9,43 contre 17,06) et bien plus liquide.\nOrange CI croît plus vite (+18,7 % de résultat sur neuf mois 2026) et le marché lui accorde un PER plus élevé. Les deux opérateurs investissent environ 16 % de leur chiffre d’affaires dans leurs réseaux."
+          "texte": "Sonatel est plus grande (1 923,1 milliards de chiffre d’affaires contre 1 197,1), plus rentable (marge d’exploitation 34,8 % contre 24,0 %), moins chère (PER 9,43 contre 17,06), en trésorerie nette et bien plus liquide.\nOrange CI croît plus vite (+18,7 % de résultat sur neuf mois 2026) et le marché lui accorde un PER plus élevé. Les deux opérateurs investissent environ 15 % de leur chiffre d’affaires dans leurs réseaux."
         },
         {
           "ton": "alerte",
@@ -266,65 +274,40 @@
         {
           "ton": "info",
           "titre": "Modèle à compléter",
-          "texte": "« Sur la base des informations disponibles pour l’exercice [année] et des cours de référence du [date], [Société A] et [Société B] présentent des profils différents. [A] affiche [atout principal : taille, rentabilité, rendement], tandis que [B] se distingue par [atout principal]. Les PER ne constituent qu’un élément de comparaison. L’analyse doit être complétée par des données homogènes sur [indicateurs sectoriels pertinents], les fonds propres, le dividende, la liquidité boursière et les perspectives. Les données proviennent de la BRVM et des comptes publiés par les sociétés, recalculées par WESTBOURSE, et de [autres sources], chacune avec sa date. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente. »"
+          "texte": "« Sur la base des informations disponibles pour l’exercice [année] et des cours de référence du [date], [Société A] et [Société B] présentent des profils différents. [A] affiche [atout principal : taille, rentabilité, rendement], tandis que [B] se distingue par [atout principal]. Les PER ne constituent qu’un élément de comparaison. L’analyse doit être complétée par des données homogènes sur [indicateurs sectoriels pertinents], les fonds propres, le dividende, la liquidité boursière et les perspectives. Les données proviennent des comptes publiés par les sociétés et de la BRVM, rassemblés et recalculés par WESTBOURSE, chacune avec sa date. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente. »"
         }
       ]
     },
     {
       "type": "lexique",
-      "titre": "Sources consultées",
-      "contenu": "Chaque chiffre de ce module renvoie à l’une de ces sources. Les données de la BRVM et des sociétés font foi ; les autres sont citées avec leur date de consultation.",
+      "titre": "Sources de ce module",
+      "contenu": "Chaque chiffre de ce module renvoie à l’une de ces sources : les documents officiels font foi, WESTBOURSE les rassemble et recalcule les ratios.",
       "tableau": {
         "colonnes": [
           "Source",
           "Type de données",
-          "Date d’accès"
+          "Date"
         ],
         "lignes": [
           [
             "BRVM (brvm.org)",
-            "Rapports d’activité et états financiers d’ECOC, SGBC, SNTS et ORAC, avis, cours officiels, Bulletin officiel de la cote, calendrier de paiement des dividendes",
-            "23/11/2026"
+            "Cours officiels, Bulletin officiel de la cote, calendrier de paiement des dividendes, avis et communiqués",
+            "Séances du 23/11/2023 au 23/11/2026"
+          ],
+          [
+            "Les sociétés étudiées",
+            "Rapports d’activité et états financiers annuels et intermédiaires d’Ecobank CI, Société Générale CI, Sonatel et Orange CI ; comptes 2025 de Sonatel publiés le 16/02/2026",
+            "Exercices 2021 à 2025, comptes 2026 jusqu’à fin septembre"
           ],
           [
             "WESTBOURSE (westbourse.com)",
-            "Comptes publiés en base, ratios recalculés (BPA, PER, ROE, marge nette, rendement), clôtures, carnet d’ordres et notes de liquidité",
+            "Comptes publiés rassemblés en base, ratios recalculés (BPA, PER, PER glissant, ROE, marges, coût du risque, free cash flow, dette nette, rendement), clôtures, volumes, carnet d’ordres et notes de liquidité",
             "Lus le 24/11/2026"
-          ],
-          [
-            "Sika Finance (sikafinance.com)",
-            "Comptes intermédiaires de 2026 non encore en base, coût du risque, solvabilité, rendements affichés, actualités",
-            "23/11/2026"
-          ],
-          [
-            "StockAnalysis / S&P Global Market Intelligence",
-            "États financiers standardisés, PER sur douze mois glissants, résultat part du groupe, EBITDA, free cash flow, dette nette, capex, bêta",
-            "23/11/2026"
-          ],
-          [
-            "Sonatel (sonatel.sn)",
-            "Présentation du groupe, présence dans cinq pays",
-            "23/11/2026"
           ],
           [
             "BCEAO (bceao.int)",
             "Rapports annuels 2022 et 2023 : ratio de solvabilité minimum de l’UMOA",
-            "24/11/2026"
-          ],
-          [
-            "allAfrica, Daba Finance",
-            "Résultats trimestriels d’ECOC, contexte sectoriel",
-            "23/11/2026"
-          ],
-          [
-            "FGI Bourse (fgi-bourse.com)",
-            "Analyse des états financiers d’ECOC 2025",
-            "23/11/2026"
-          ],
-          [
-            "APBEF-CI",
-            "Parts de marché bancaires en Côte d’Ivoire (avril 2026)",
-            "Via Sika Finance"
+            "Lus le 24/11/2026"
           ]
         ]
       },

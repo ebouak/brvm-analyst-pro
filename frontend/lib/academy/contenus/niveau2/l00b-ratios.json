@@ -75,12 +75,17 @@
         {
           "nom": "BPA",
           "expression": "BPA = résultat net attribuable aux actionnaires ÷ nombre moyen pondéré d’actions",
-          "exemple": "413,6 milliards ÷ 1 milliard d’actions = 413,60 FCFA (Sonatel 2025, après fractionnement)"
+          "exemple": "413,6 milliards ÷ 1 milliard d’actions = 413,60 FCFA (Sonatel 2025, résultat consolidé, après fractionnement)"
         },
         {
           "nom": "PER",
           "expression": "PER = cours ÷ BPA, ou capitalisation ÷ résultat net",
           "exemple": "29 895 ÷ 3 257,73 = 9,18 (SGBC, clôture 2025)"
+        },
+        {
+          "nom": "PER sur 12 mois glissants",
+          "expression": "Bénéfice glissant = résultat de l’exercice − période de l’an dernier + même période de cette année",
+          "exemple": "Sonatel : 413,6 − 311,0 + 354,0 = 456,6 milliards ; 3 900 ÷ 456,60 = 8,54"
         },
         {
           "nom": "P/B (price to book)",
@@ -133,29 +138,32 @@
     {
       "type": "definition",
       "titre": "Endettement et solvabilité des entreprises non financières",
-      "contenu": "La dette financière nette retranche la trésorerie des emprunts. Le gearing la rapporte aux capitaux propres ; la couverture des intérêts dit combien de fois le résultat opérationnel paie les charges financières.\nUne dette nette négative signifie que l’entreprise détient plus de trésorerie qu’elle ne doit d’emprunts. Selon S&P Global, Sonatel est ainsi passée d’une trésorerie nette (une dette nette de −199 milliards en 2021) à une dette nette de 133 milliards en 2025, pendant que ses investissements annuels passaient de 221 à 318 milliards.",
+      "contenu": "La dette financière nette retranche la trésorerie des emprunts. Le gearing la rapporte aux capitaux propres ; la couverture des intérêts dit combien de fois le résultat opérationnel paie les charges financières.\nUne dette nette négative signifie que l’entreprise détient plus de trésorerie qu’elle ne doit d’emprunts. Selon ses comptes 2025 publiés, Sonatel doit 402,7 milliards de passifs financiers (courants et non courants) et détient 536,1 milliards de disponibilités : sa dette financière nette est de −133,4 milliards, c’est-à-dire une trésorerie nette. Un an plus tôt, les deux montants s’équilibraient (460,5 contre 460,4 milliards).\nLa définition doit toujours être écrite : certains ajoutent les dettes locatives aux dettes financières, d’autres non. Le résultat change de signe pour peu qu’un seul poste soit compté différemment.",
       "formules": [
         {
           "nom": "Dette financière nette",
-          "expression": "Dette nette = emprunts et dettes financières − trésorerie"
+          "expression": "Dette nette = emprunts et dettes financières − trésorerie",
+          "exemple": "Sonatel 2025 : 402,7 − 536,1 = −133,4 milliards (trésorerie nette)"
         },
         {
           "nom": "Gearing",
-          "expression": "Gearing = (dette nette ÷ capitaux propres) × 100"
+          "expression": "Gearing = (dette nette ÷ capitaux propres) × 100",
+          "exemple": "−133,4 ÷ 1 399,3 = −9,5 %"
         },
         {
           "nom": "Couverture des intérêts",
-          "expression": "Couverture = résultat opérationnel ÷ charges d’intérêts"
+          "expression": "Couverture = résultat opérationnel ÷ charges d’intérêts",
+          "exemple": "669,8 ÷ 24,4 = 27,4 fois (coût de l’endettement financier brut)"
         }
       ],
       "simulation": {
         "type": "endettement",
-        "consigne": "Exemple fictif d’entreprise industrielle : modifiez la trésorerie ou les charges d’intérêts et observez le gearing et la couverture.",
-        "dettes_financieres": 300,
-        "tresorerie": 100,
-        "capitaux_propres": 400,
-        "resultat_operationnel": 120,
-        "charges_interets": 20,
+        "consigne": "Les valeurs proposées sont celles des comptes 2025 publiés par Sonatel. Remplacez-les par celles d’une entreprise endettée : le gearing et la couverture changent de lecture.",
+        "dettes_financieres": 402.68600000000004,
+        "tresorerie": 536.105,
+        "capitaux_propres": 1399.3,
+        "resultat_operationnel": 669.792,
+        "charges_interets": 24.403,
         "unite": "Md FCFA"
       },
       "encadres": [
@@ -169,7 +177,7 @@
     {
       "type": "retenir",
       "titre": "L’essentiel",
-      "contenu": "Chaque ratio répond à une question précise, et chacun a ses pièges de calcul : le nombre d’années du TCAM, les capitaux propres moyens du ROE, la même période pour le cours et le bénéfice du PER, le périmètre consolidé ou part du groupe du BPA.",
+      "contenu": "Chaque ratio répond à une question précise, et chacun a ses pièges de calcul : le nombre d’années du TCAM, les capitaux propres moyens du ROE, la même période pour le cours et le bénéfice du PER, le périmètre consolidé ou part du groupe du BPA, la définition de la dette nette.",
       "points": [
         {
           "titre": "Croissance",
@@ -181,11 +189,11 @@
         },
         {
           "titre": "Valorisation",
-          "detail": "PER, P/B et rendement, toujours datés et sourcés."
+          "detail": "PER, P/B et rendement, toujours datés : exercice clos ou 12 mois glissants."
         },
         {
           "titre": "Endettement",
-          "detail": "Dette nette, gearing et couverture, jamais pour une banque."
+          "detail": "Dette nette, gearing et couverture, définition écrite, jamais pour une banque."
         }
       ]
     }

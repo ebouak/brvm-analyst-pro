@@ -3,8 +3,8 @@
   "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
   "categorie": "fundamental",
   "duree_min": 18,
-  "sous_titre": "La plus grande banque du cas : croissance qui ralentit, capitaux propres renforcés, solvabilité confortable et un dividende 2025 en forte hausse.",
-  "resume": "Filiale du groupe Société Générale, présent en Côte d’Ivoire depuis 1941 selon la banque, Société Générale Côte d’Ivoire est la plus grande des deux banques étudiées : 276,0 milliards de PNB et 3 769,2 milliards de bilan en 2025. Cette leçon reprend ses comptes 2021-2025, recalcule les ratios, explique pourquoi une autre série de PNB, plus élevée, circule, puis lit les comptes de 2026.",
+  "sous_titre": "La plus grande banque du cas : croissance qui ralentit, coût du risque en hausse, capitaux propres renforcés et un dividende 2025 en forte hausse.",
+  "resume": "Filiale du groupe Société Générale, présent en Côte d’Ivoire depuis 1941 selon la banque, Société Générale Côte d’Ivoire est la plus grande des deux banques étudiées : 276,0 milliards de PNB et 3 769,2 milliards de bilan en 2025. Cette leçon reprend ses comptes 2021-2025, recalcule les ratios, montre ce que le coût du risque retire au résultat, puis lit les comptes de 2026.",
   "nouveaute": {
     "type": "nouveau",
     "depuis": "2026-11-24"
@@ -14,7 +14,7 @@
       "type": "cas",
       "titre": "La fiche au 23 novembre 2026",
       "reel": true,
-      "contenu": "Au 23 novembre 2026, l’action Société Générale Côte d’Ivoire cotait 37 610 FCFA, en recul de 3,05 % sur la séance. Avec 31,11 millions d’actions, la capitalisation atteint 1 170,1 milliards de FCFA.\nSur le BPA 2025 (3 257,73 FCFA), le PER ressort à 11,54 ; StockAnalysis affiche 12,26 sur douze mois glissants. Le dividende brut 2025, 2 606 FCFA, représente 6,93 % du cours, 6,10 % net.\nLe titre gagne 25,81 % depuis le 1er janvier 2026 et 36,0 % sur un an (depuis le 24/11/2025) : le marché l’a nettement réévalué.",
+      "contenu": "Au 23 novembre 2026, l’action Société Générale Côte d’Ivoire cotait 37 610 FCFA, en recul de 3,05 % sur la séance. Avec 31,11 millions d’actions, la capitalisation atteint 1 170,1 milliards de FCFA.\nSur le BPA 2025 (3 257,73 FCFA), le PER ressort à 11,54 ; sur douze mois glissants, de juillet 2025 à juin 2026, le bénéfice atteint 101,7 milliards et le PER 11,51. Le dividende brut 2025, 2 606 FCFA, représente 6,93 % du cours, 6,10 % net.\nLe titre gagne 25,81 % depuis le 1er janvier 2026 et 36,0 % sur un an (depuis le 24/11/2025) : le marché l’a nettement réévalué.",
       "stats": [
         {
           "label": "Cours au 23/11/2026",
@@ -29,7 +29,7 @@
         {
           "label": "PER sur le BPA 2025",
           "valeur": "11,54",
-          "detail": "12,26 sur 12 mois glissants (StockAnalysis)"
+          "detail": "11,51 sur 12 mois glissants (calcul WESTBOURSE)"
         },
         {
           "label": "Rendement du dividende 2025",
@@ -42,9 +42,9 @@
           "detail": "sur un an : +36,0 %"
         },
         {
-          "label": "Bêta sur un an",
-          "valeur": "0,68",
-          "detail": "StockAnalysis / S&P Global"
+          "label": "Coefficient d’exploitation 2025",
+          "valeur": "38,8 %",
+          "detail": "37,9 % en 2024"
         }
       ],
       "donnees_reelles": {
@@ -58,7 +58,7 @@
       "type": "cas",
       "titre": "Les comptes 2021-2025, recalculés",
       "reel": true,
-      "contenu": "Le PNB publié passe de 189,1 à 276,0 milliards de FCFA, soit 9,9 % par an ; le résultat net, de 67,4 à 101,4 milliards, soit 10,8 % par an. Mais la croissance ralentit nettement : +0,2 % seulement pour le résultat 2025.\nUne série plus élevée circule, de 233,2 à 333,5 milliards : c’est la série standardisée de S&P Global / StockAnalysis, qui ne retient pas le même périmètre. Les comptes intermédiaires tranchent : 201,0 milliards de PNB sur neuf mois 2025, soit un rythme annuel proche des 276,0 milliards publiés, pas des 333,5.\nLes capitaux propres augmentent fortement, de 451,7 à 495,1 milliards en 2025 : le ROE de clôture baisse à 20,5 %, alors que le résultat est stable. C’est l’effet mécanique d’un dénominateur qui grossit.",
+      "contenu": "Le PNB publié passe de 189,1 à 276,0 milliards de FCFA, soit 9,9 % par an ; le résultat net, de 67,4 à 101,4 milliards, soit 10,8 % par an. Mais la croissance ralentit nettement : +0,2 % seulement pour le résultat 2025.\nLe premier graphique montre pourquoi. En 2025, le résultat brut d’exploitation progresse encore de 3,4 %, mais le coût du risque augmente de 29,2 %, de 36,2 à 46,8 milliards, soit 1,84 % des crédits. Sur quatre ans, il a été multiplié par 2,6 : c’est l’inverse d’Ecobank Côte d’Ivoire.\nLes capitaux propres augmentent fortement, de 451,7 à 495,1 milliards en 2025 : le ROE de clôture baisse à 20,5 %, alors que le résultat est stable. C’est l’effet mécanique d’un dénominateur qui grossit.",
       "tableau": {
         "colonnes": [
           "Indicateur",
@@ -70,7 +70,7 @@
         ],
         "lignes": [
           [
-            "Produit net bancaire, comptes publiés (Md FCFA)",
+            "Produit net bancaire (Md FCFA)",
             "189,1",
             "215,1",
             "253,3",
@@ -86,12 +86,28 @@
             "+4,9 %"
           ],
           [
-            "PNB, série standardisée S&P / StockAnalysis (Md FCFA)",
-            "233,2",
-            "265,8",
-            "304,2",
-            "321,5",
-            "333,5"
+            "Résultat brut d’exploitation (Md FCFA)",
+            "98,4",
+            "118,7",
+            "147,7",
+            "163,5",
+            "169,1"
+          ],
+          [
+            "Coefficient d’exploitation (publié, sinon 1 − RBE ÷ PNB)",
+            "47,9 %",
+            "44,8 %",
+            "41,7 %",
+            "37,9 %",
+            "38,8 %"
+          ],
+          [
+            "Coût du risque (Md FCFA)",
+            "17,9",
+            "28,8",
+            "27,7",
+            "36,2",
+            "46,8"
           ],
           [
             "Résultat net (Md FCFA)",
@@ -148,6 +164,14 @@
             "—",
             "90,1 %",
             "87,6 %"
+          ],
+          [
+            "Coût du risque ÷ crédits",
+            "—",
+            "—",
+            "—",
+            "1,46 %",
+            "1,84 %"
           ],
           [
             "ROE sur capitaux propres de clôture",
@@ -214,12 +238,12 @@
             "8,7 %"
           ]
         ],
-        "note": "Dividende : montant publié par exercice ; la base fiscale (brut ou net d’impôt) n’est connue avec certitude que pour 2025, d’après le calendrier de paiement des dividendes de la BRVM. Rendement à la clôture = dividende publié de l’exercice ÷ dernier cours de l’année. « — » : donnée absente de la source."
+        "note": "Comptes publiés par la banque, en base WESTBOURSE ; ratios calculés par WESTBOURSE. Dividende : montant publié par exercice ; la base fiscale (brut ou net d’impôt) n’est connue avec certitude que pour 2025, d’après le calendrier de paiement des dividendes de la BRVM. Rendement à la clôture = dividende publié de l’exercice ÷ dernier cours de l’année. « — » : donnée absente des comptes en base."
       },
       "graphiques": [
         {
           "type": "bar",
-          "titre": "Société Générale CI : PNB et résultat net (2021-2025, Md FCFA)",
+          "titre": "Société Générale CI : du PNB au résultat net (2021-2025, Md FCFA)",
           "labels": [
             "2021",
             "2022",
@@ -228,7 +252,7 @@
             "2025"
           ],
           "unite": "Md FCFA",
-          "note": "Le résultat net progresse de 50,4 % en quatre ans, le PNB de 46,0 %. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Le résultat net progresse de 50,4 % en quatre ans, le résultat brut d’exploitation de 71,7 % ; le coût du risque passe de 17,9 à 46,8 milliards. Cliquez sur la légende pour isoler une série. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -239,6 +263,26 @@
                 253.3,
                 263.2,
                 276
+              ]
+            },
+            {
+              "nom": "Résultat brut d’exploitation",
+              "valeurs": [
+                98.45,
+                118.71,
+                147.7,
+                163.48,
+                169.07
+              ]
+            },
+            {
+              "nom": "Coût du risque",
+              "valeurs": [
+                17.94,
+                28.82,
+                27.65,
+                36.23,
+                46.83
               ]
             },
             {
@@ -264,7 +308,7 @@
             "2025"
           ],
           "unite": "FCFA",
-          "note": "Le PER passe de 4,89 à 9,18 : le cours a monté plus vite que le bénéfice. Cliquez sur la légende pour masquer une série. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Le PER passe de 4,89 à 9,18 : le cours a monté plus vite que le bénéfice. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -303,7 +347,7 @@
             "2025"
           ],
           "unite": "FCFA",
-          "note": "Dividende de l’exercice tel que publié ; 2025 : 2 606 FCFA brut, 2 293,28 FCFA net. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Dividende de l’exercice tel que publié ; 2025 : 2 606 FCFA brut, 2 293,28 FCFA net. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "valeurs": [
             1004.93,
@@ -325,44 +369,70 @@
       "type": "cas",
       "titre": "2026 : les comptes intermédiaires",
       "reel": true,
-      "contenu": "Le premier semestre 2026 est stable : PNB +1,6 %, résultat net +0,6 %. Sur neuf mois, selon Sika Finance, le PNB recule à 197,6 milliards (−1,7 % par rapport aux neuf mois 2025 en base) et le résultat net à 80,4 milliards (−3,5 %).\nLe bilan franchit 4 000 milliards au premier semestre (4 054,5 milliards), les capitaux propres atteignent 548,5 milliards (+22,7 % sur un an) et le ratio de solvabilité 17,6 %, bien au-dessus du minimum de 11,5 %. Le coefficient d’exploitation reste bas, 36,8 % sur neuf mois ; la hausse du coût du risque (+9,1 % au premier semestre) pèse sur la rentabilité.",
-      "tableau": {
-        "colonnes": [
-          "Période 2026",
-          "PNB (Md FCFA)",
-          "Variation",
-          "Résultat net (Md FCFA)",
-          "Variation",
-          "Source"
-        ],
-        "lignes": [
-          [
-            "1er trimestre (31 mars)",
-            "65,6",
-            "−1,1 %",
-            "24,0",
-            "−11,4 %",
-            "Base WESTBOURSE"
+      "contenu": "Le premier semestre 2026 est stable : PNB +1,6 %, résultat net +0,6 %. Le coût du risque continue de monter (+9,1 %, à 20,0 milliards).\nLe bilan franchit 4 000 milliards (4 054,5 milliards), les capitaux propres atteignent 548,5 milliards (+22,7 % sur un an) et le ratio de solvabilité 17,6 %, bien au-dessus du minimum de 11,5 %.",
+      "tableaux": [
+        {
+          "colonnes": [
+            "Période 2026",
+            "PNB (Md FCFA)",
+            "Variation",
+            "Résultat net (Md FCFA)",
+            "Variation"
           ],
-          [
-            "1er semestre (30 juin)",
-            "134,1",
-            "+1,6 %",
-            "53,4",
-            "+0,6 %",
-            "Base WESTBOURSE ; bilan 4 054,5 Md (Sika Finance)"
+          "lignes": [
+            [
+              "1er trimestre (31 mars)",
+              "65,6",
+              "−1,1 %",
+              "24,0",
+              "−11,4 %"
+            ],
+            [
+              "1er semestre (30 juin)",
+              "134,1",
+              "+1,6 %",
+              "53,4",
+              "+0,6 %"
+            ]
           ],
-          [
-            "9 premiers mois (30 sept.)",
-            "197,6",
-            "−1,7 %",
-            "80,4",
-            "−3,5 %",
-            "Sika Finance, articles du 07/05/2026, 01/09/2026 et 02/11/2026 ; parts de marché : APBEF-CI, avril 2026"
-          ]
-        ],
-        "note": "Comptes non audités. Variations calculées par rapport à la même période de 2025, en base. Les comptes intermédiaires sont des cumuls depuis le 1er janvier."
-      },
+          "note": "Comptes publiés par la banque, non audités, en base WESTBOURSE. Variations calculées par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier."
+        },
+        {
+          "colonnes": [
+            "Indicateur",
+            "1er semestre 2025",
+            "1er semestre 2026",
+            "Variation"
+          ],
+          "lignes": [
+            [
+              "Coût du risque (Md FCFA)",
+              "18,4",
+              "20,0",
+              "+9,1 %"
+            ],
+            [
+              "Capitaux propres (Md FCFA)",
+              "446,8",
+              "548,5",
+              "+22,7 %"
+            ],
+            [
+              "Ratio de solvabilité",
+              "17,7 %",
+              "17,6 %",
+              "−0,1 pt"
+            ],
+            [
+              "Total du bilan (Md FCFA)",
+              "3 724,4",
+              "4 054,5",
+              "+8,9 %"
+            ]
+          ],
+          "note": "Comptes semestriels publiés par la banque, en base WESTBOURSE."
+        }
+      ],
       "donnees_reelles": {
         "vue": "cours",
         "codes": [
@@ -374,7 +444,7 @@
     {
       "type": "importance",
       "titre": "La lecture de Société Générale Côte d’Ivoire",
-      "contenu": "Taille : la banque détient environ 18 % des crédits en Côte d’Ivoire (APBEF-CI, avril 2026, via Sika Finance). Croissance : solide jusqu’en 2023, puis quasi nulle pour le résultat 2025.\nRentabilité : ROE de 20,5 % sur les capitaux de clôture 2025 et 21,4 % sur les capitaux moyens, en baisse parce que les fonds propres ont été renforcés. La marge nette reste élevée, 36,7 % du PNB publié.\nQualité des actifs (2025, Sika Finance) : créances en souffrance autour de 8 % des crédits, couverture d’environ 82 %. Valorisation : le PER de fin d’année passe de 4,89 en 2021 à 9,18 en 2025, puis à 11,54 au cours du 23/11/2026.\nDividende : le montant publié pour 2025 (2 606 FCFA brut) dépasse de 59 % celui publié pour 2024 (1 639 FCFA, base fiscale non précisée) et représente 80 % du BPA 2025. Sa soutenabilité se vérifie dans les flux de trésorerie, pas dans le seul résultat.",
+      "contenu": "Taille : 3 769,2 milliards de bilan fin 2025, 1,8 fois celui d’Ecobank Côte d’Ivoire. Croissance : solide jusqu’en 2023, puis quasi nulle pour le résultat 2025.\nRentabilité : ROE de 20,5 % sur les capitaux de clôture 2025 et 21,4 % sur les capitaux moyens, en baisse parce que les fonds propres ont été renforcés. La marge nette reste élevée, 36,7 % du PNB, et le coefficient d’exploitation bas, 38,8 %.\nQualité des actifs (comptes 2025) : créances en souffrance à 8 % des crédits, couvertes à 82 %. Valorisation : le PER de fin d’année passe de 4,89 en 2021 à 9,18 en 2025, puis à 11,54 au cours du 23/11/2026.\nDividende : le montant publié pour 2025 (2 606 FCFA brut) dépasse de 59 % celui publié pour 2024 (1 639 FCFA, base fiscale non précisée) et représente 80 % du BPA 2025. Sa soutenabilité se vérifie dans les flux de trésorerie, pas dans le seul résultat.",
       "simulation": {
         "type": "per",
         "consigne": "Le PER de SGBC au 23/11/2026, sur le BPA 2025. Passez aux données réelles pour le recalculer au dernier cours.",
@@ -390,11 +460,11 @@
     {
       "type": "retenir",
       "titre": "L’essentiel",
-      "contenu": "Société Générale Côte d’Ivoire est une grande banque solide dont la croissance ralentit. Son ROE baisse parce que ses capitaux propres augmentent ; sa valorisation monte parce que le marché l’a réévaluée en 2026.",
+      "contenu": "Société Générale Côte d’Ivoire est une grande banque solide dont la croissance ralentit. Son ROE baisse parce que ses capitaux propres augmentent ; son résultat plafonne parce que son coût du risque monte ; sa valorisation monte parce que le marché l’a réévaluée en 2026.",
       "points": [
         {
-          "titre": "Une série de PNB vérifiable",
-          "detail": "Les comptes intermédiaires départagent les séries annuelles."
+          "titre": "Le coût du risque absorbe la croissance",
+          "detail": "Le résultat brut d’exploitation monte, le coût du risque plus vite encore."
         },
         {
           "titre": "ROE en baisse, fonds propres en hausse",
@@ -431,18 +501,18 @@
       "explication": "Les capitaux propres passent de 451,7 à 495,1 milliards : à résultat égal, le ROE baisse mécaniquement."
     },
     {
-      "question": "Sur neuf mois 2025, le PNB de SGBC atteint 201,0 milliards. Quelle série annuelle 2025 cela rend-il plausible ?",
+      "question": "En 2025, le résultat brut d’exploitation de SGBC progresse de 3,4 % et son résultat net de 0,2 %. Qu’est-ce qui absorbe l’essentiel de l’écart ?",
       "options": [
-        "Environ 276,0 milliards",
-        "Environ 333,5 milliards",
-        "Environ 600 milliards",
-        "Aucune des deux"
+        "La hausse du coût du risque",
+        "Une baisse du nombre d’actions en circulation",
+        "Une chute du produit net bancaire de plus de moitié",
+        "La suppression du dividende versé aux actionnaires"
       ],
       "correct": 0,
-      "explication": "Trois trimestres à 201,0 milliards donnent un rythme annuel proche de 276,0 ; atteindre 333,5 supposerait un dernier trimestre exceptionnel."
+      "explication": "Le coût du risque passe de 36,2 à 46,8 milliards (+29,2 %) : les provisions absorbent la hausse de l’exploitation."
     },
     {
-      "question": "Le ratio de solvabilité de SGBC est de 17,6 %. Que signifie-t-il ?",
+      "question": "Le ratio de solvabilité de SGBC est de 17,6 % au premier semestre 2026. Que signifie-t-il ?",
       "options": [
         "Que la banque est insolvable",
         "Que ses fonds propres couvrent largement le minimum réglementaire",
