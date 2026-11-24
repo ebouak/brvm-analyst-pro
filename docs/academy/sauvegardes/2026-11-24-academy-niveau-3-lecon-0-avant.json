@@ -1,0 +1,1730 @@
+{
+ "_lisez_moi": "Contenu (academy_courses.content) du cours academy-niveau-3-technique AVANT la migration 0260 (leçon 0), lu le 2026-11-24. Aucune donnée personnelle. Pour revenir en arrière : réécrire ce contenu et retrancher 1 aux lesson_idx >= 1 de academy_progress et academy_notes pour ce cours (aucune ligne au 2026-11-24).",
+ "slug": "academy-niveau-3-technique",
+ "titre": "Niveau 3 — Analyse Technique",
+ "niveau": "avance",
+ "content": {
+  "glossaire": [
+   {
+    "definition": "Représentation graphique d'une période incluant Open, High, Low, Close.",
+    "terme": "Chandelier japonais"
+   },
+   {
+    "definition": "Partie rectangulaire du chandelier (écart ouverture/clôture).",
+    "terme": "Corps"
+   },
+   {
+    "definition": "Extensions au-dessus et en dessous du corps indiquant les extrêmes de la séance.",
+    "terme": "Mèche (ombre)"
+   },
+   {
+    "definition": "Niveau de prix où la demande est historiquement forte et le cours rebondit.",
+    "terme": "Support"
+   },
+   {
+    "definition": "Niveau de prix où l'offre est forte et le cours bute régulièrement.",
+    "terme": "Résistance"
+   },
+   {
+    "definition": "Moyenne calculée sur N périodes glissantes. Lisse les cours pour révéler la tendance.",
+    "terme": "Moyenne mobile (MM)"
+   },
+   {
+    "definition": "MM50 passe au-dessus de MM200. Signal haussier fort à long terme.",
+    "terme": "Golden Cross"
+   },
+   {
+    "definition": "MM50 passe sous MM200. Signal baissier fort à long terme.",
+    "terme": "Death Cross"
+   },
+   {
+    "definition": "Indicateur qui confirme une tendance déjà engagée plutôt que de la prédire.",
+    "terme": "Indicateur retardé"
+   },
+   {
+    "definition": "Relative Strength Index. Oscillateur mesurant la force relative des hausses vs baisses sur 14 périodes.",
+    "terme": "RSI"
+   },
+   {
+    "definition": "RSI > 70 : le marché a peut-être monté trop vite, correction possible.",
+    "terme": "Surachat"
+   },
+   {
+    "definition": "RSI < 30 : le marché a peut-être trop baissé, rebond possible.",
+    "terme": "Survente"
+   },
+   {
+    "definition": "Désaccord entre le cours (qui fait un nouveau extrême) et le RSI (qui ne le confirme pas).",
+    "terme": "Divergence"
+   },
+   {
+    "definition": "Figure de retournement baissier avec 3 sommets (épaule, tête, épaule).",
+    "terme": "Tête-Épaules"
+   },
+   {
+    "definition": "Ligne de support horizontale ou légèrement inclinée reliant les creux d'une Tête-Épaules.",
+    "terme": "Neckline (ligne de cou)"
+   },
+   {
+    "definition": "Figure de compression entre support et résistance convergents. La cassure donne la direction.",
+    "terme": "Triangle"
+   },
+   {
+    "definition": "Figure de continuation : pause (consolidation) après une forte impulsion directionnelle.",
+    "terme": "Drapeau"
+   },
+   {
+    "definition": "Prix cible calculé à partir de l'amplitude de la figure chartiste.",
+    "terme": "Objectif de cours"
+   },
+   {
+    "definition": "Ordre de vente automatique déclenché si le cours atteint un niveau prédéfini de perte maximale.",
+    "terme": "Stop-loss"
+   },
+   {
+    "definition": "Ordre de vente automatique déclenché si le cours atteint un niveau cible de gain.",
+    "terme": "Take-profit"
+   },
+   {
+    "definition": "Ne jamais risquer plus de 2% du capital total sur une seule position.",
+    "terme": "Règle des 2%"
+   },
+   {
+    "definition": "Ratio Risque/Rendement. Un ratio 1:2 signifie que le gain visé est le double du risque accepté.",
+    "terme": "Ratio R/R"
+   },
+   {
+    "definition": "Stop-loss qui se remonte automatiquement quand le cours monte, protégeant les gains latents.",
+    "terme": "Trailing stop"
+   },
+   {
+    "definition": "Bourse Régionale des Valeurs Mobilières — marché financier commun des 8 pays UEMOA, créé en 1998 à Abidjan.",
+    "terme": "BRVM"
+   },
+   {
+    "definition": "Union Économique et Monétaire Ouest Africaine — 8 pays : Bénin, Burkina Faso, Côte d'Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo.",
+    "terme": "UEMOA"
+   },
+   {
+    "definition": "Titre de propriété représentant une fraction du capital d'une entreprise. Donne droit aux dividendes, au vote en AG et à la plus-value.",
+    "terme": "Action"
+   },
+   {
+    "definition": "Price Earning Ratio = Cours / BPA. Mesure combien de fois le bénéfice annuel est intégré dans le prix de l'action.",
+    "terme": "PER"
+   }
+  ],
+  "intro": "Niveau 3 — Analyse technique. Sept leçons pour lire un graphique, comprendre les chandeliers, les moyennes mobiles, le RSI et le MACD, reconnaître les figures chartistes et gérer son risque. Les indicateurs des valeurs citées sont recalculés sur les clôtures réelles à l’ouverture de chaque leçon ; les graphiques d’illustration sont des exemples annoncés comme tels.",
+  "lessons": [
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [],
+    "duree_min": 10,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/methodologie",
+      "label": "Notre méthodologie des signaux"
+     }
+    ],
+    "module": "Module 1 — Graphiques et tendances",
+    "qcm": {
+     "correct": 1,
+     "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière.",
+     "options": [
+      "Baissière",
+      "Haussière",
+      "Sans tendance",
+      "Impossible à dire"
+     ],
+     "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière.",
+      "options": [
+       "Baissière",
+       "Haussière",
+       "Sans tendance",
+       "Impossible à dire"
+      ],
+      "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Un support est une zone de prix où des acheteurs sont apparus à plusieurs reprises.",
+      "options": [
+       "Le cours le plus haut de l’année écoulée",
+       "Un niveau où la baisse a cessé plusieurs fois",
+       "Le cours moyen pondéré des vingt dernières séances",
+       "Le volume moyen"
+      ],
+      "question": "Qu’est-ce qu’un support ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Sans volume, un mouvement peut venir de quelques ordres isolés.",
+      "options": [
+       "Comme très solide",
+       "Comme fragile : peu d’échanges l’ont produit",
+       "Comme une garantie de hausse",
+       "Comme une erreur"
+      ],
+      "question": "Un cours monte de 5 % avec un volume très faible. Comment lire ce mouvement ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle.",
+      "options": [
+       "Le prix exact du marché aujourd’hui",
+       "Le dernier prix échangé, sans plus",
+       "Zéro, faute d’échange",
+       "La moyenne des cours de son secteur"
+      ],
+      "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Sur 2008-2023, 276 cas indépendants ont fait en moyenne 8,4 % de mieux que le marché à 20 séances. Sur 2024-2026, l’effet n’est pas confirmé à 60 séances. C’est une moyenne passée, ni une règle ni une promesse.",
+      "options": [
+       "Ils ont continué à baisser en moyenne",
+       "Mieux que le marché, en moyenne",
+       "Ils ont tous été suspendus de cotation",
+       "Exactement comme le marché"
+      ],
+      "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés dans les 20 séances suivantes ?"
+     }
+    ],
+    "resume": "L’analyse technique étudie le cours et les volumes pour décrire le comportement du marché. Avant tout indicateur, il faut savoir lire un graphique : identifier une tendance, repérer les niveaux où le cours a déjà rebondi, et vérifier si les mouvements sont portés par des échanges réels. Cette leçon pose ces bases, et leurs limites à la BRVM.",
+    "sections": [
+     {
+      "contenu": "Un graphique de cours montre l’histoire des prix d’une action. Avant de calculer le moindre indicateur, il faut savoir le lire à l’œil, comme on lit une carte avant de mesurer une distance.\nL’analyse technique part d’une idée simple : le cours résume ce que les acheteurs et les vendeurs ont accepté de payer. En étudiant son évolution et les volumes échangés, on décrit le comportement du marché. On ne dit rien, en revanche, de la valeur de la société : c’est le rôle de l’analyse fondamentale du niveau 2.\nQuatre notions suffisent pour commencer. La tendance donne la direction. Le support et la résistance marquent les zones où le mouvement s’est déjà arrêté. Le volume dit si ces mouvements ont été portés par de vrais échanges. Les trois premières se lisent sur la courbe ; la quatrième, sur les barres placées sous la courbe.",
+      "points": [
+       {
+        "detail": "Haussière si les sommets et les creux sont de plus en plus hauts ; baissière dans le cas inverse ; sans tendance sinon.",
+        "titre": "La tendance",
+        "verifier": "Les trois derniers creux et sommets."
+       },
+       {
+        "detail": "Une zone de prix où le cours a cessé de baisser plusieurs fois : des acheteurs y sont apparus.",
+        "titre": "Le support"
+       },
+       {
+        "detail": "Une zone où le cours a cessé de monter plusieurs fois : des vendeurs y sont apparus.",
+        "titre": "La résistance"
+       },
+       {
+        "detail": "Le nombre de titres échangés. Un mouvement sans volume est fragile.",
+        "titre": "Le volume",
+        "verifier": "Le volume du jour comparé à sa moyenne."
+       }
+      ],
+      "titre": "Quatre notions de base",
+      "type": "definition"
+     },
+     {
+      "contenu": "Une même action peut monter sur un mois et baisser sur un an. Les deux descriptions sont exactes : elles ne portent pas sur le même horizon. Avant toute lecture, choisissez donc l’échelle de temps qui correspond à votre projet.\nUn épargnant qui achète pour plusieurs années regarde d’abord le graphique long : où se situe le cours dans son histoire ? Le graphique de quelques mois sert ensuite à vérifier que la tendance n’est pas en train de se retourner. Le court terme ne sert qu’à choisir un moment d’achat, et c’est l’horizon le plus trompeur.\nÀ la BRVM, le court terme est particulièrement bruité. Sur une valeur peu échangée, quelques ordres suffisent à déplacer le cours d’une séance à l’autre, sans que rien n’ait changé dans la société.",
+      "simulation": {
+       "codes": [
+        "SNTS",
+        "SGBC",
+        "ORAC",
+        "PALC"
+       ],
+       "consigne": "Choisissez une valeur : sa variation est mesurée sur quatre horizons, à partir de ses clôtures réelles.",
+       "indicateur": "variation",
+       "type": "technique"
+      },
+      "tableau": {
+       "colonnes": [
+        "Horizon",
+        "Graphique utile",
+        "Question"
+       ],
+       "lignes": [
+        [
+         "Court terme",
+         "Quelques semaines, cours quotidien",
+         "Le mouvement récent est-il confirmé par le volume ?"
+        ],
+        [
+         "Moyen terme",
+         "Quelques mois",
+         "La tendance est-elle intacte ?"
+        ],
+        [
+         "Long terme",
+         "Plusieurs années",
+         "Où se situe le cours dans son histoire ?"
+        ]
+       ],
+       "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+      },
+      "titre": "Les trois échelles de temps",
+      "type": "importance"
+     },
+     {
+      "contenu": "L’analyse technique a été développée sur des marchés très liquides, où des milliers d’ordres s’échangent chaque minute. La BRVM est un marché plus étroit, et plusieurs de ses particularités changent la lecture d’un graphique.\nUne valeur peut rester plusieurs séances sans échange : son cours reste figé au dernier prix traité. Sur le graphique, la courbe paraît calme ; en réalité, personne n’a acheté ni vendu, et ce calme ne contient aucune information.\nLa BRVM encadre aussi la variation d’un cours en une séance. Une nouvelle importante peut donc se traduire par plusieurs séances consécutives de hausse ou de baisse, au lieu d’un saut unique. Lire ces séances comme une tendance qui s’installe est une erreur : c’est le même événement, étalé par la règle.\nEnfin, une valeur suspendue garde son dernier cours affiché. Ce chiffre n’est pas un prix auquel on peut traiter tant que la cotation n’a pas repris.",
+      "points": [
+       {
+        "detail": "Une valeur peut rester plusieurs séances sans échange : son cours reste figé, sans information.",
+        "titre": "Des cours qui ne bougent pas",
+        "verifier": "Le volume des dernières séances."
+       },
+       {
+        "detail": "La BRVM limite la variation d’un cours en une séance : un mouvement fort peut s’étaler sur plusieurs jours.",
+        "titre": "Une variation encadrée",
+        "verifier": "Les règles de cotation publiées par la BRVM."
+       },
+       {
+        "detail": "Une valeur suspendue garde son dernier cours affiché : ce n’est pas un prix auquel on peut traiter.",
+        "titre": "Une suspension",
+        "verifier": "La mention « suspendue » sur la fiche."
+       }
+      ],
+      "titre": "Les limites propres à la BRVM",
+      "type": "piege"
+     },
+     {
+      "contenu": "Le cours de quatre valeurs très suivies, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.\nCes indicateurs sont expliqués dans les leçons suivantes. Pour l’instant, retenez la lecture la plus simple : un cours au-dessus de ses deux moyennes décrit une tendance récente haussière, un cours en dessous une tendance baissière. C’est ce qui s’est passé, pas ce qui va se passer.\nExercez-vous en ouvrant le graphique de l’une de ces valeurs sur sa fiche : repérez les trois derniers sommets et les trois derniers creux, puis vérifiez si votre lecture concorde avec la position du cours face à ses moyennes.",
+      "donnees_reelles": {
+       "codes": [
+        "SNTS",
+        "SGBC",
+        "ORAC",
+        "PALC"
+       ],
+       "vue": "technique"
+      },
+      "reel": true,
+      "titre": "Sur la BRVM : une lecture du jour",
+      "type": "cas"
+     },
+     {
+      "contenu": "WestBourse a rejoué son score technique sur 2008-2023, une période que la formule n’avait jamais vue : 109 634 notes, une par titre et par séance. Ces notes se chevauchent : pour juger un écart, seuls comptent les cas indépendants.\nLes titres les plus mal notés (score inférieur à −0,60 : 400 cas, dont 276 indépendants) ont fait en moyenne 8,4 % de mieux que le marché dans les 20 séances suivantes, avec un intervalle à 95 % de +5,5 % à +11,4 %. Les mieux notés n’ont pas fait mieux que le marché.\nSur 2024-2026, cet effet n’est pas confirmé à 60 séances. C’est une moyenne passée, sur un échantillon limité : certaines valeurs ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil, ni une prévision, et rien ne promet que cela se reproduise.",
+      "stats": [
+       {
+        "detail": "Une par titre et par séance, 2008-2023 : elles se chevauchent",
+        "label": "Notes rejouées",
+        "valeur": "109 634"
+       },
+       {
+        "detail": "À 20 séances, 276 cas indépendants, 2008-2023 ; non confirmé sur 2024-2026 à 60 séances",
+        "label": "Scores les plus bas, 20 séances après",
+        "valeur": "+8,4 % face au marché"
+       },
+       {
+        "detail": "À 20 séances, 305 cas indépendants, écart non établi",
+        "label": "Scores les plus hauts, 20 séances après",
+        "valeur": "−1,5 % face au marché"
+       }
+      ],
+      "titre": "Ce que nous avons mesuré sur la BRVM",
+      "type": "importance"
+     },
+     {
+      "contenu": "Lire avant de calculer. Un indicateur ne remplace pas l’œil : il précise ce que l’œil a déjà vu, ou il le contredit, et c’est alors qu’il devient utile.\nAvant de tirer la moindre conclusion d’un graphique de la BRVM, vérifiez deux choses : que la valeur s’échange réellement, et que l’horizon regardé correspond à votre projet.",
+      "points": [
+       {
+        "titre": "Une tendance se lit aux sommets et aux creux successifs"
+       },
+       {
+        "titre": "Supports et résistances sont des zones, pas des prix exacts"
+       },
+       {
+        "titre": "Un mouvement sans volume est fragile, surtout à la BRVM"
+       },
+       {
+        "titre": "Un cours figé ou suspendu ne dit rien du prix réel"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Tendance, supports, résistances et volume : les quatre choses à repérer avant tout indicateur.",
+    "titre": "Leçon 1 — Lire un graphique de cours"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [],
+    "duree_min": 9,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/liquidite",
+      "label": "La liquidité de chaque valeur"
+     }
+    ],
+    "module": "Module 1 — Graphiques et tendances",
+    "qcm": {
+     "correct": 1,
+     "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture.",
+     "options": [
+      "La clôture est sous l’ouverture",
+      "La clôture est au-dessus de l’ouverture",
+      "Il n’y a pas eu d’échange",
+      "Le cours a atteint un record"
+     ],
+     "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "Un corps clair (ou vert) indique une clôture supérieure à l’ouverture.",
+      "options": [
+       "La clôture est sous l’ouverture",
+       "La clôture est au-dessus de l’ouverture",
+       "Il n’y a pas eu d’échange",
+       "Le cours a atteint un record"
+      ],
+      "question": "Une bougie a un corps clair. Qu’est-ce que cela signifie ?"
+     },
+     {
+      "correct": 1,
+      "explication": "La mèche basse descend jusqu’au plus bas de la période.",
+      "options": [
+       "La clôture",
+       "Le plus bas atteint pendant la période",
+       "Le dividende",
+       "Le volume"
+      ],
+      "question": "Que représente la mèche basse ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Ouverture et clôture presque égales : aucun camp ne l’a emporté.",
+      "options": [
+       "Une forte hausse",
+       "Une hésitation entre acheteurs et vendeurs",
+       "Une suspension",
+       "Un dividende"
+      ],
+      "question": "Un doji traduit plutôt :"
+     },
+     {
+      "correct": 1,
+      "explication": "Sans transaction, les quatre prix sont identiques.",
+      "options": [
+       "À un marteau",
+       "À un trait plat, sans information",
+       "À un avalement",
+       "À une étoile filante"
+      ],
+      "question": "Une valeur n’a eu aucun échange dans la séance. À quoi ressemble sa bougie ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Une configuration isolée est un indice ; la suite des cours et le volume la confirment ou non.",
+      "options": [
+       "Par la couleur du logo",
+       "Par la séance suivante et par le volume",
+       "Par le PER",
+       "Elle n’a pas besoin de confirmation"
+      ],
+      "question": "Comment confirmer une configuration de chandeliers ?"
+     }
+    ],
+    "resume": "Un chandelier résume une séance en quatre prix. Sa couleur dit si le cours a fini plus haut ou plus bas qu’à l’ouverture ; ses mèches montrent les extrêmes atteints. Cette leçon apprend à lire une bougie et quelques configurations connues, avec une prudence particulière à la BRVM.",
+    "sections": [
+     {
+      "contenu": "Un chandelier, ou bougie, résume une période de cotation en quatre prix : l’ouverture, le plus haut, le plus bas et la clôture. Chaque bougie représente une période : une séance sur un graphique quotidien, une semaine sur un graphique hebdomadaire.\nLe corps est le rectangle entre l’ouverture et la clôture. Sa couleur indique le sens de la période : clair ou vert quand la clôture dépasse l’ouverture, sombre ou rouge dans le cas inverse. Les mèches sont les traits fins au-dessus et au-dessous du corps : elles montrent jusqu’où le cours est allé avant de revenir.\nExemple fictif : une action ouvre à 1 000 FCFA, monte jusqu’à 1 060, descend à 980 et clôture à 1 040. Sa bougie a un corps clair de 1 000 à 1 040, une mèche haute jusqu’à 1 060 et une mèche basse jusqu’à 980. On lit d’un coup d’œil une séance haussière, au cours de laquelle les vendeurs ont repris une partie de la hausse avant la clôture.",
+      "points": [
+       {
+        "detail": "L’écart entre l’ouverture et la clôture. Clair (ou vert) : clôture au-dessus de l’ouverture. Sombre (ou rouge) : en dessous.",
+        "titre": "Le corps"
+       },
+       {
+        "detail": "Le plus haut atteint pendant la période.",
+        "titre": "La mèche haute"
+       },
+       {
+        "detail": "Le plus bas atteint pendant la période.",
+        "titre": "La mèche basse"
+       },
+       {
+        "detail": "Un grand corps traduit un mouvement net ; un petit corps, de l’hésitation.",
+        "titre": "La taille"
+       }
+      ],
+      "simulation": {
+       "bas": 980,
+       "cloture": 1040,
+       "consigne": "Saisissez quatre prix : la bougie se dessine et sa forme est décrite. Essayez un doji, un marteau, une étoile filante.",
+       "haut": 1060,
+       "ouverture": 1000,
+       "type": "chandelier"
+      },
+      "titre": "L’anatomie d’une bougie",
+      "type": "definition"
+     },
+     {
+      "contenu": "Les chandeliers ont été popularisés par des négociants japonais, qui ont donné aux figures des noms imagés. Ces figures décrivent le comportement des acheteurs et des vendeurs sur une ou deux périodes ; aucune n’est un signal fiable à elle seule.\nLe doji, dont l’ouverture et la clôture sont presque égales, montre une séance où aucun camp ne l’a emporté. Le marteau et l’étoile filante se lisent par leur longue mèche : elle montre l’attaque d’un camp, le petit corps montre qu’elle a été repoussée. L’avalement concerne deux bougies : le corps de la seconde englobe entièrement celui de la première, en sens inverse, ce qui traduit un changement de rapport de force.\nLe contexte compte autant que la forme. Un marteau après une longue baisse dit quelque chose ; le même marteau au milieu d’une séquence sans direction ne dit presque rien. C’est pourquoi on attend la confirmation de la séance suivante, et qu’on regarde le volume.",
+      "tableau": {
+       "colonnes": [
+        "Configuration",
+        "À quoi elle ressemble",
+        "Ce qu’elle suggère"
+       ],
+       "lignes": [
+        [
+         "Doji",
+         "Ouverture et clôture presque égales",
+         "Hésitation entre acheteurs et vendeurs"
+        ],
+        [
+         "Marteau",
+         "Petit corps en haut, longue mèche basse",
+         "Les vendeurs ont poussé, les acheteurs ont repris le dessus"
+        ],
+        [
+         "Étoile filante",
+         "Petit corps en bas, longue mèche haute",
+         "Les acheteurs ont poussé, les vendeurs ont repris le dessus"
+        ],
+        [
+         "Avalement",
+         "Un corps qui englobe entièrement le précédent",
+         "Un changement de rapport de force"
+        ]
+       ],
+       "note": "Une configuration se confirme par la séance suivante et par le volume."
+      },
+      "titre": "Quatre configurations connues",
+      "type": "importance"
+     },
+     {
+      "contenu": "Une bougie suppose une séance active, avec de nombreux échanges répartis dans la journée. Sur un grand marché, les mèches reflètent des milliers d’ordres. À la BRVM, une séance peut ne compter que quelques transactions sur une valeur.\nConséquence directe : la forme d’une bougie peut venir d’un seul ordre. Une longue mèche basse, qui ressemblerait à un marteau sur un marché liquide, peut n’être qu’un vendeur pressé qui a accepté un prix bas pour quelques titres. La forme est là ; l’information derrière est très mince.\nLes données posent une autre difficulté. Les sources publiques ne fournissent pas toujours le plus haut et le plus bas de chaque séance. Plutôt que de dessiner des mèches inventées, WestBourse affiche alors des courbes de clôture, et le signale sous le graphique. Une bougie sans vraies données derrière elle n’apprend rien et peut tromper.",
+      "points": [
+       {
+        "detail": "Sans transaction, ouverture, plus haut, plus bas et clôture sont identiques : la bougie est plate et ne dit rien.",
+        "titre": "Une bougie sans échange",
+        "verifier": "Le volume de la séance."
+       },
+       {
+        "detail": "Avec quelques échanges, une longue mèche peut venir d’un seul ordre isolé.",
+        "titre": "Peu d’ordres, beaucoup de forme",
+        "verifier": "Le nombre de titres échangés."
+       },
+       {
+        "detail": "Les sources publiques ne fournissent pas toujours le plus haut et le plus bas de chaque séance. WestBourse affiche alors des courbes de clôture plutôt que des bougies inventées.",
+        "titre": "Des données incomplètes",
+        "verifier": "La mention de la source sous le graphique."
+       }
+      ],
+      "titre": "Les chandeliers à la BRVM",
+      "type": "piege"
+     },
+     {
+      "contenu": "Une bougie raconte une séance ; elle ne prédit pas la suivante. Elle permet de voir vite la bataille entre acheteurs et vendeurs, à condition qu’il y ait eu bataille.\nÀ la BRVM, prenez l’habitude de regarder le volume avant la forme. Une bougie construite sur quelques titres n’a pas la valeur d’une bougie portée par une séance active. Et une configuration, quelle qu’elle soit, ne devient intéressante qu’une fois confirmée par les séances suivantes.",
+      "points": [
+       {
+        "titre": "Le corps : ouverture et clôture ; les mèches : les extrêmes"
+       },
+       {
+        "titre": "Doji, marteau, étoile filante, avalement : des indices, pas des signaux"
+       },
+       {
+        "titre": "Toujours vérifier le volume"
+       },
+       {
+        "titre": "À la BRVM, une bougie sans échange ne dit rien"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Ouverture, plus haut, plus bas, clôture : ce qu’une bougie raconte d’une séance, et ce qu’elle ne raconte pas.",
+    "titre": "Leçon 2 — Les chandeliers japonais"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [
+     {
+      "labels": [
+       "S1",
+       "S2",
+       "S3",
+       "S4",
+       "S5",
+       "S6",
+       "S7",
+       "S8",
+       "S9",
+       "S10"
+      ],
+      "note": "Valeurs d’exemple. Moyenne sur 5 séances : 99,2 à la séance 5, 105,8 à la séance 9, 107,8 à la séance 10. Le cours passe au-dessus de sa moyenne à partir de la séance 5 et y reste : la moyenne confirme la hausse, avec retard.",
+      "reel": false,
+      "titre": "Un cours qui repasse au-dessus de sa moyenne (exemple)",
+      "type": "line",
+      "unite": "FCFA",
+      "valeurs": [
+       100,
+       98,
+       97,
+       99,
+       102,
+       105,
+       107,
+       106,
+       109,
+       112
+      ]
+     }
+    ],
+    "duree_min": 10,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/methodologie",
+      "label": "Notre méthodologie des signaux"
+     }
+    ],
+    "module": "Module 2 — Indicateurs",
+    "qcm": {
+     "correct": 1,
+     "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205.",
+     "options": [
+      "200",
+      "205",
+      "210",
+      "820"
+     ],
+     "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205.",
+      "options": [
+       "200",
+       "205",
+       "210",
+       "820"
+      ],
+      "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Un cours au-dessus de ses deux moyennes décrit une tendance haussière, sans rien garantir.",
+      "options": [
+       "Tendance baissière",
+       "Tendance haussière",
+       "Valeur suspendue",
+       "Achat garanti"
+      ],
+      "question": "Le cours est au-dessus de sa moyenne sur 20 séances et de sa moyenne sur 50 séances. Comment le décrire ?"
+     },
+     {
+      "correct": 0,
+      "explication": "Une moyenne se calcule sur des cours passés : elle réagit après le mouvement.",
+      "options": [
+       "Parce que les moyennes regardent les cours passés",
+       "Parce que la BRVM publie tard",
+       "Parce que le volume est faible",
+       "Il n’arrive jamais en retard"
+      ],
+      "question": "Pourquoi un croisement de moyennes arrive-t-il en retard ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Quand le cours oscille, les moyennes se croisent souvent sans tendance réelle.",
+      "options": [
+       "Sont très fiables",
+       "Se multiplient et donnent beaucoup de faux signaux",
+       "Disparaissent",
+       "Annoncent un dividende"
+      ],
+      "question": "Dans un marché sans tendance, les croisements de moyennes :"
+     },
+     {
+      "correct": 1,
+      "explication": "(110 − 100) ÷ 100 = +10 %.",
+      "options": [
+       "+1 %",
+       "+10 %",
+       "+110 %",
+       "−10 %"
+      ],
+      "question": "Un cours vaut 110 et sa moyenne 100. Quel est son écart à la moyenne ?"
+     }
+    ],
+    "resume": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, recalculée à chaque séance. Elle lisse les variations et révèle la tendance. Cette leçon explique le calcul, la lecture du cours face à ses moyennes, et pourquoi les croisements arrivent toujours en retard.",
+    "sections": [
+     {
+      "contenu": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, sur un nombre de séances fixé. À chaque nouvelle séance, la clôture la plus ancienne sort du calcul et la plus récente y entre : la moyenne « glisse » avec le temps, d’où son nom.\nSon intérêt est de lisser les variations d’une séance à l’autre. Une action qui monte, baisse un peu, puis remonte dessine une courbe en dents de scie ; sa moyenne mobile dessine une ligne plus régulière, qui fait apparaître la direction de fond.\nExemple fictif sur cinq séances : les clôtures 100, 102, 101, 105 et 107 donnent une moyenne de 103. Si l’action clôture à 108 à la séance suivante, la clôture 100 sort du calcul et la nouvelle moyenne vaut (102 + 101 + 105 + 107 + 108) ÷ 5, soit 104,6. L’écart du cours à sa moyenne mesure, en pourcentage, de combien il s’en éloigne.",
+      "formules": [
+       {
+        "exemple": "(100 + 102 + 101 + 105 + 107) ÷ 5 = 103",
+        "expression": "(Somme des N dernières clôtures) ÷ N",
+        "nom": "Moyenne mobile simple sur N séances"
+       },
+       {
+        "exemple": "(107 − 103) ÷ 103 ≈ +3,9 %",
+        "expression": "(Cours − Moyenne) ÷ Moyenne",
+        "nom": "Écart à la moyenne"
+       }
+      ],
+      "titre": "Le calcul",
+      "type": "definition"
+     },
+     {
+      "contenu": "Le nombre de séances change ce que la moyenne décrit. Une moyenne courte, sur 20 séances, soit environ un mois de cotation, suit le cours de près et réagit vite. Une moyenne longue, sur 50 séances ou plus, réagit lentement et décrit la tendance de fond.\nOn lit d’abord la position du cours face aux deux moyennes. Au-dessus des deux, le mouvement récent et la tendance de fond vont ensemble vers le haut. En dessous des deux, ils vont ensemble vers le bas. Entre les deux, court terme et fond divergent : c’est souvent une phase d’hésitation.\nOn lit ensuite la pente de la moyenne longue. Une moyenne longue qui monte régulièrement décrit une tendance installée ; une moyenne plate décrit un marché sans direction, où les croisements perdent leur sens. Le graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne et y reste.",
+      "simulation": {
+       "codes": [
+        "SNTS",
+        "ORAC",
+        "SGBC",
+        "ETIT",
+        "SIBC"
+       ],
+       "consigne": "Raccourcissez ou allongez les moyennes sur une série réelle : plus elles sont courtes, plus elles suivent le cours de près.",
+       "courte": 20,
+       "indicateur": "moyennes",
+       "longue": 50,
+       "type": "technique"
+      },
+      "stats": [
+       {
+        "detail": "Description de la situation, pas une prévision",
+        "label": "Cours au-dessus des deux moyennes",
+        "valeur": "Tendance haussière"
+       },
+       {
+        "detail": "Idem",
+        "label": "Cours sous les deux moyennes",
+        "valeur": "Tendance baissière"
+       },
+       {
+        "detail": "Tendances courte et longue divergentes",
+        "label": "Cours entre les deux",
+        "valeur": "Hésitation"
+       }
+      ],
+      "titre": "Moyenne courte et moyenne longue",
+      "type": "importance"
+     },
+     {
+      "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.\nPour chaque ligne, faites la lecture en deux temps vue plus haut : où se situe le cours face à ses deux moyennes, et quel écart les sépare ? Un cours très éloigné de sa moyenne courte décrit un mouvement récent rapide. Rien ne dit qu’il se prolongera, ni qu’il se corrigera.\nGardez en tête une particularité de la BRVM : si une valeur a connu plusieurs séances sans échange, sa moyenne a été calculée en partie sur des cours figés. Elle paraît plus stable qu’elle ne l’est. La fiche de chaque valeur indique ses volumes récents.",
+      "donnees_reelles": {
+       "codes": [
+        "SNTS",
+        "ORAC",
+        "SGBC",
+        "ETIT",
+        "SIBC"
+       ],
+       "vue": "technique"
+      },
+      "reel": true,
+      "titre": "Sur la BRVM : le cours face à ses moyennes",
+      "type": "cas"
+     },
+     {
+      "contenu": "Une moyenne mobile regarde en arrière par construction : elle est faite de cours passés. Elle confirme donc une tendance quand celle-ci est déjà installée, jamais avant.\nExemple fictif : une action passe de 1 000 à 1 300 FCFA en deux mois. La moyenne courte ne croise la moyenne longue à la hausse qu’après plusieurs semaines, quand le cours a déjà parcouru une bonne partie du chemin. Celui qui attend le croisement pour acheter paie plus cher que celui qui a acheté au début ; celui qui attend le croisement inverse pour vendre vend sous le sommet.\nCe retard est le prix de la régularité. Une moyenne plus courte le réduit, mais elle croise le cours plus souvent et multiplie les faux signaux, surtout quand le marché oscille sans direction. Aucun réglage ne supprime ce dilemme.",
+      "points": [
+       {
+        "detail": "Quand la moyenne courte croise la longue, une bonne partie du mouvement a souvent eu lieu.",
+        "titre": "Les croisements arrivent tard",
+        "verifier": "L’écart du cours à sa moyenne au moment du croisement."
+       },
+       {
+        "detail": "Quand le cours oscille, les moyennes se croisent sans cesse.",
+        "titre": "Les faux signaux en marché sans tendance",
+        "verifier": "La pente de la moyenne longue."
+       },
+       {
+        "detail": "Une moyenne calculée sur des cours figés paraît stable sans l’être.",
+        "titre": "Des séances sans échange",
+        "verifier": "Le nombre de séances réellement échangées."
+       }
+      ],
+      "titre": "Le retard, défaut inévitable",
+      "type": "piege"
+     },
+     {
+      "contenu": "Une moyenne mobile décrit, elle ne prévoit pas. C’est un outil de lecture, qui rend une tendance plus visible et évite de confondre une séance agitée avec un retournement.\nUtilisez-la comme un repère de contexte : savoir si le cours est au-dessus ou en dessous de sa moyenne longue, et si cette moyenne monte ou baisse, situe un achat. Cela ne dit rien du juste prix de la société, qui relève de ses comptes.",
+      "points": [
+       {
+        "titre": "Moyenne mobile = moyenne des N dernières clôtures"
+       },
+       {
+        "titre": "Courte pour le mouvement récent, longue pour la tendance de fond"
+       },
+       {
+        "titre": "Le cours face à ses deux moyennes décrit la tendance"
+       },
+       {
+        "titre": "Les croisements arrivent en retard et se trompent sans tendance"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Lisser le bruit des séances pour voir la tendance : moyenne courte, moyenne longue, et leurs croisements.",
+    "titre": "Leçon 3 — Les moyennes mobiles"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [
+     {
+      "labels": [
+       "S1",
+       "S2",
+       "S3",
+       "S4",
+       "S5",
+       "S6",
+       "S7",
+       "S8",
+       "S9",
+       "S10"
+      ],
+      "note": "Valeurs d’exemple. Le RSI passe en surachat (au-dessus de 70) aux séances 4 à 6, revient en zone neutre, puis touche la survente (sous 30) à la séance 9. Ces passages décrivent l’intensité du mouvement ; ils ne datent pas le retournement.",
+      "reel": false,
+      "titre": "Un RSI qui traverse ses zones (exemple)",
+      "type": "line",
+      "unite": "RSI",
+      "valeurs": [
+       48,
+       55,
+       63,
+       72,
+       76,
+       71,
+       60,
+       44,
+       29,
+       35
+      ]
+     }
+    ],
+    "duree_min": 10,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/methodologie",
+      "label": "Notre méthodologie des signaux"
+     }
+    ],
+    "module": "Module 2 — Indicateurs",
+    "qcm": {
+     "correct": 2,
+     "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75.",
+     "options": [
+      "25",
+      "50",
+      "75",
+      "300"
+     ],
+     "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?"
+    },
+    "quiz": [
+     {
+      "correct": 2,
+      "explication": "RS = 3 ; RSI = 100 − 100 ÷ (1 + 3) = 75.",
+      "options": [
+       "25",
+       "50",
+       "75",
+       "300"
+      ],
+      "question": "La hausse moyenne vaut 3 et la baisse moyenne 1. Quel est le RSI ?"
+     },
+     {
+      "correct": 2,
+      "explication": "Sous 30, on parle de survente.",
+      "options": [
+       "Surachat",
+       "Neutre",
+       "Survente",
+       "Hors échelle"
+      ],
+      "question": "Un RSI de 25 se situe dans quelle zone ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Une tendance forte peut maintenir le RSI en zone de surachat.",
+      "options": [
+       "Non, c’est impossible",
+       "Oui, dans une forte tendance haussière",
+       "Seulement pour les obligations",
+       "Seulement les jours fériés"
+      ],
+      "question": "Un RSI reste au-dessus de 70 pendant des semaines. Est-ce possible ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Avec peu d’échanges, quelques ordres font bouger le cours, et donc le RSI.",
+      "options": [
+       "Il ne se calcule pas sans volume quotidien",
+       "Quelques ordres suffisent à le pousser à l’extrême",
+       "Il n’est publié qu’une fois par mois pour ces valeurs",
+       "Il est interdit sur les petites valeurs"
+      ],
+      "question": "Pourquoi le RSI d’une valeur peu liquide est-il à lire avec prudence ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Le RSI est calculé sur les cours seulement.",
+      "options": [
+       "Tout",
+       "Rien : il ne mesure que les mouvements de cours",
+       "Son bénéfice",
+       "Son dividende"
+      ],
+      "question": "Que dit le RSI sur les comptes d’une société ?"
+     }
+    ],
+    "resume": "Le RSI (relative strength index) compare l’ampleur des hausses et des baisses sur les dernières séances, en général 14. Au-dessus de 70, on parle de surachat ; sous 30, de survente. Cette leçon explique son calcul, sa lecture et ce que les mesures faites sur la BRVM disent de ces excès.",
+    "sections": [
+     {
+      "contenu": "Le RSI (relative strength index, ou indice de force relative) compare l’ampleur des hausses et des baisses du cours sur les dernières séances, en général 14. Il a été présenté par J. Welles Wilder en 1978.\nLe calcul se fait en trois temps. On sépare les séances de hausse et de baisse, et on calcule la hausse moyenne et la baisse moyenne sur la période. On divise l’une par l’autre : c’est la force relative. On ramène enfin ce rapport sur une échelle de 0 à 100.\nExemple fictif : avec une hausse moyenne de 2 et une baisse moyenne de 1, la force relative vaut 2 et le RSI environ 66,7. Si les baisses disparaissent, le RSI tend vers 100 ; si les hausses disparaissent, il tend vers 0. Cette échelle fixe est son grand avantage : un RSI se compare d’une action à l’autre, contrairement au MACD de la leçon suivante.",
+      "formules": [
+       {
+        "exemple": "2 ÷ 1 = 2",
+        "expression": "Hausse moyenne ÷ Baisse moyenne, sur 14 séances",
+        "nom": "Force relative (RS)"
+       },
+       {
+        "exemple": "100 − 100 ÷ 3 ≈ 66,7",
+        "expression": "100 − 100 ÷ (1 + RS)",
+        "nom": "RSI"
+       }
+      ],
+      "titre": "Le calcul",
+      "type": "definition"
+     },
+     {
+      "contenu": "Les seuils de 70 et 30 sont des conventions, proposées par l’auteur de l’indicateur et reprises par l’usage. Ce ne sont pas des lois du marché.\nAu-dessus de 70, les hausses récentes ont nettement dominé les baisses : on parle de surachat. Sous 30, c’est l’inverse : on parle de survente. Ces mots trompent. « Surachat » ne signifie pas que l’action est trop chère, mais que son cours a monté vite récemment ; une action peut être en surachat et rester bon marché au regard de ses comptes.\nCertains utilisateurs resserrent les seuils à 80 et 20 pour ne retenir que les excès les plus marqués. Quel que soit le réglage, la zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.",
+      "simulation": {
+       "codes": [
+        "SNTS",
+        "BOAC",
+        "NTLC",
+        "SDCC",
+        "TTLC"
+       ],
+       "consigne": "Changez la période et les seuils : la zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.",
+       "indicateur": "rsi",
+       "periode": 14,
+       "seuil_bas": 30,
+       "seuil_haut": 70,
+       "type": "technique"
+      },
+      "stats": [
+       {
+        "detail": "Les hausses récentes dominent nettement",
+        "label": "RSI supérieur à 70",
+        "valeur": "Surachat"
+       },
+       {
+        "detail": "Pas d’excès marqué",
+        "label": "RSI entre 30 et 70",
+        "valeur": "Zone neutre"
+       },
+       {
+        "detail": "Les baisses récentes dominent nettement",
+        "label": "RSI inférieur à 30",
+        "valeur": "Survente"
+       }
+      ],
+      "titre": "Les trois zones",
+      "type": "importance"
+     },
+     {
+      "contenu": "Le RSI sur 14 séances de cinq valeurs, recalculé à l’ouverture de la leçon sur les clôtures réelles.\nPour chacune, situez d’abord le RSI dans l’une des trois zones, puis regardez le cours face à sa moyenne longue sur la même ligne. Un RSI élevé sur une valeur au-dessus de sa moyenne longue décrit une tendance forte ; le même RSI sur une valeur sous sa moyenne longue décrit plutôt un rebond récent dans une tendance restée baissière.\nUn RSI en zone extrême décrit un mouvement récent ; il ne dit pas quand il s’arrêtera. Avant de vous y intéresser, vérifiez sur la fiche de la valeur que ce mouvement a été porté par de vrais échanges.",
+      "donnees_reelles": {
+       "codes": [
+        "SNTS",
+        "BOAC",
+        "NTLC",
+        "SDCC",
+        "TTLC"
+       ],
+       "vue": "technique"
+      },
+      "reel": true,
+      "titre": "Sur la BRVM : le RSI du jour",
+      "type": "cas"
+     },
+     {
+      "contenu": "La leçon 1 présente le rejeu du score technique de WestBourse sur 2008-2023, avec son horizon, la taille de son échantillon et ses limites. Ce résultat porte sur un score qui combine plusieurs éléments, dont le RSI, et non sur le RSI seul.\nIl ne dit donc rien de ce que fait une valeur après un RSI bas. Un RSI décrit un excès récent : il ne dit pas si cet excès se corrigera, ni quand. Il ne transforme pas un RSI bas en raison d’acheter.",
+      "titre": "Le RSI et la mesure de la leçon 1",
+      "type": "importance"
+     },
+     {
+      "contenu": "Le RSI est l’un des indicateurs les plus populaires, et l’un des plus mal utilisés. Trois erreurs reviennent.\nLa première consiste à vendre dès que le RSI dépasse 70. Dans une tendance forte, il peut rester au-dessus de ce seuil pendant des semaines, et la hausse continuer. Le seuil décrit un excès ; il ne fixe pas la date d’un retournement.\nLa deuxième tient à la liquidité. Sur une valeur peu échangée, deux ou trois séances de hausse portées par quelques titres suffisent à pousser le RSI vers 80 ou 90. L’indicateur mesure alors moins un excès du marché que l’effet de quelques ordres isolés.\nLa troisième est d’oublier ce que le RSI ignore : les comptes de la société, son dividende, sa dette. Un RSI bas sur une société dont les résultats se dégradent ne signale pas une occasion ; il reflète une baisse qui a peut-être de bonnes raisons.",
+      "points": [
+       {
+        "detail": "Dans une forte tendance, le RSI peut rester au-dessus de 70 longtemps.",
+        "titre": "« Surachat » ne veut pas dire « vendre »",
+        "verifier": "La tendance de fond, sur la moyenne longue."
+       },
+       {
+        "detail": "Sur une valeur peu liquide, deux ou trois séances suffisent à pousser le RSI vers un extrême.",
+        "titre": "Peu d’échanges, RSI extrême",
+        "verifier": "Les volumes des séances qui ont fait bouger le RSI."
+       },
+       {
+        "detail": "Le RSI ne dit rien de la société : ni de ses comptes, ni de son dividende.",
+        "titre": "Un indicateur parmi d’autres",
+        "verifier": "Les fondamentaux, avant toute décision."
+       }
+      ],
+      "titre": "Les mauvaises lectures du RSI",
+      "type": "piege"
+     },
+     {
+      "contenu": "Le RSI mesure un excès récent, pas une valeur. Il répond à une seule question : le cours a-t-il bougé de façon inhabituellement rapide dans un sens ces dernières semaines ?\nC’est une information de contexte, à croiser avec la tendance de fond donnée par la moyenne longue, avec les volumes, et surtout avec les comptes de la société. La mesure faite par WestBourse sur la BRVM décrit une moyenne passée ; elle ne dit rien d’une valeur en particulier.",
+      "points": [
+       {
+        "titre": "RSI = 100 − 100 ÷ (1 + RS), en général sur 14 séances"
+       },
+       {
+        "titre": "Au-dessus de 70 : surachat ; sous 30 : survente"
+       },
+       {
+        "titre": "Une zone extrême peut durer dans une tendance forte"
+       },
+       {
+        "titre": "Le RSI décrit un excès récent ; il ne dit pas s’il se corrigera"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Un indicateur borné de 0 à 100 qui compare les hausses et les baisses récentes, et ce qu’il vaut sur un marché peu liquide.",
+    "titre": "Leçon 4 — Le RSI : mesurer les excès de marché"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [
+     {
+      "labels": [
+       "S1",
+       "S2",
+       "S3",
+       "S4",
+       "S5",
+       "S6",
+       "S7",
+       "S8"
+      ],
+      "note": "Valeurs d’exemple. Négatif et croissant (S1 à S3) : la baisse ralentit. Il devient positif à S4 (croisement), grandit jusqu’à S6 (la hausse accélère), puis diminue (la hausse ralentit). Aucune de ces phases ne dit combien de temps durera la suivante.",
+      "reel": false,
+      "titre": "Un histogramme de MACD (exemple)",
+      "type": "bar",
+      "unite": "",
+      "valeurs": [
+       -3,
+       -2,
+       -0.5,
+       1,
+       2.5,
+       3,
+       2,
+       0.5
+      ]
+     }
+    ],
+    "duree_min": 9,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/methodologie",
+      "label": "Notre méthodologie des signaux"
+     }
+    ],
+    "module": "Module 2 — Indicateurs",
+    "qcm": {
+     "correct": 1,
+     "explication": "250 − 240 = +10.",
+     "options": [
+      "−10",
+      "+10",
+      "490",
+      "250"
+     ],
+     "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "250 − 240 = +10.",
+      "options": [
+       "−10",
+       "+10",
+       "490",
+       "250"
+      ],
+      "question": "La moyenne exponentielle 12 vaut 250 et la 26 vaut 240. Que vaut la ligne MACD ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Positif et croissant : la tendance haussière s’accélère.",
+      "options": [
+       "Une baisse qui accélère",
+       "Une hausse qui accélère",
+       "Une suspension",
+       "Un dividende"
+      ],
+      "question": "L’histogramme est positif et croissant. Que décrit-il ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Le MACD s’exprime en points de cours : il dépend du prix de l’action.",
+      "options": [
+       "Il est confidentiel",
+       "Sa valeur dépend du niveau du cours",
+       "Il est toujours égal",
+       "Il est borné de 0 à 100"
+      ],
+      "question": "Pourquoi ne pas comparer le MACD de deux actions différentes ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Les séances récentes pèsent plus : la moyenne réagit plus vite.",
+      "options": [
+       "Elle ignore les séances récentes",
+       "Elle donne plus de poids aux séances récentes",
+       "Elle ne se calcule que sur les dividendes",
+       "Rien"
+      ],
+      "question": "Qu’est-ce qui distingue une moyenne exponentielle d’une moyenne simple ?"
+     },
+     {
+      "correct": 1,
+      "explication": "12 et 26 pour les moyennes, 9 pour la ligne de signal.",
+      "options": [
+       "5, 10, 15",
+       "12, 26, 9",
+       "14, 70, 30",
+       "20, 50, 200"
+      ],
+      "question": "Quels sont les paramètres usuels du MACD ?"
+     }
+    ],
+    "resume": "Le MACD mesure l’écart entre une moyenne exponentielle courte et une longue. Quand l’écart grandit, la tendance accélère ; quand il se resserre, elle ralentit. Cette leçon explique ses trois composantes et ce qu’on peut, ou non, en tirer.",
+    "sections": [
+     {
+      "contenu": "Le MACD (moving average convergence divergence, ou convergence et divergence de moyennes mobiles) a été présenté par Gerald Appel à la fin des années 1970. Il repose sur deux moyennes mobiles exponentielles du cours, une courte et une longue, et mesure l’écart entre elles.\nLes paramètres usuels sont 12, 26 et 9 séances. La ligne MACD est la différence entre la moyenne exponentielle sur 12 séances et celle sur 26. Positive, elle indique une tendance courte au-dessus de la tendance longue ; négative, l’inverse.\nLa ligne de signal est une moyenne exponentielle sur 9 séances de la ligne MACD elle-même : elle la lisse. L’histogramme représente l’écart entre les deux lignes, sous forme de barres ; il a été ajouté plus tard à l’indicateur d’Appel, par Thomas Aspray. C’est souvent la composante la plus lisible, parce qu’elle montre si l’écart grandit ou se resserre.",
+      "formules": [
+       {
+        "exemple": "105 − 102 = +3 : la tendance courte est au-dessus de la longue",
+        "expression": "Moyenne exponentielle 12 − Moyenne exponentielle 26",
+        "nom": "Ligne MACD"
+       },
+       {
+        "exemple": "Elle lisse la ligne MACD",
+        "expression": "Moyenne exponentielle sur 9 séances de la ligne MACD",
+        "nom": "Ligne de signal"
+       },
+       {
+        "exemple": "Positif et croissant : l’élan haussier se renforce",
+        "expression": "Ligne MACD − Ligne de signal",
+        "nom": "Histogramme"
+       }
+      ],
+      "titre": "Trois composantes",
+      "type": "definition"
+     },
+     {
+      "contenu": "Une moyenne simple donne le même poids à chaque séance : la clôture d’il y a vingt séances compte autant que celle d’hier. Une moyenne exponentielle donne plus de poids aux séances récentes, et ce poids décroît progressivement pour les plus anciennes. Elle réagit donc plus vite à un changement de direction, au prix de plus de bruit.\nLe MACD n’est pas borné comme le RSI : il s’exprime en points de cours, et sa valeur dépend du prix de l’action. Exemple fictif : un écart de 50 FCFA entre les deux moyennes représente un mouvement important pour une action à 1 000 FCFA, et presque rien pour une action à 30 000 FCFA. On compare donc le MACD d’une action à son propre passé, jamais à celui d’une autre.\nPour comparer deux valeurs, il faudrait rapporter l’écart au cours, en pourcentage. Certains outils le proposent sous un autre nom ; le MACD classique ne le fait pas.",
+      "titre": "Moyenne exponentielle : pourquoi ?",
+      "type": "importance"
+     },
+     {
+      "contenu": "L’histogramme décrit l’accélération ou le ralentissement de la tendance. Il se lit selon deux critères, son signe et son évolution, comme dans l’exemple fictif du tableau.\nPositif et croissant, il montre une moyenne courte qui s’éloigne de plus en plus de la longue, vers le haut : la hausse accélère. Positif et décroissant, il montre un écart qui se resserre : la hausse continue peut-être, mais elle ralentit. Les deux cas symétriques décrivent la baisse.\nLe passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal. Beaucoup y voient un signal ; il hérite pourtant du retard des moyennes, et arrive souvent après le début du mouvement. Le ralentissement de l’histogramme, qui précède le croisement, est une information plus précoce, mais aussi plus souvent démentie.",
+      "simulation": {
+       "codes": [
+        "SNTS",
+        "ORAC",
+        "SGBC",
+        "SIBC"
+       ],
+       "consigne": "Le MACD 12, 26, 9 calculé sur une valeur réelle : l’histogramme est lu selon son signe et son évolution, comme dans le tableau.",
+       "indicateur": "macd",
+       "type": "technique"
+      },
+      "tableau": {
+       "colonnes": [
+        "Histogramme",
+        "Lecture"
+       ],
+       "lignes": [
+        [
+         "Positif et croissant",
+         "La tendance haussière s’accélère"
+        ],
+        [
+         "Positif et décroissant",
+         "La hausse ralentit"
+        ],
+        [
+         "Négatif et décroissant",
+         "La tendance baissière s’accélère"
+        ],
+        [
+         "Négatif et croissant",
+         "La baisse ralentit"
+        ]
+       ],
+       "note": "Le passage de l’histogramme d’un signe à l’autre correspond au croisement des lignes MACD et signal."
+      },
+      "titre": "Lire l’histogramme",
+      "type": "cas"
+     },
+     {
+      "contenu": "Le MACD hérite des défauts des moyennes mobiles dont il est fait. Les moyennes exponentielles les atténuent un peu, sans les supprimer.\nIl est en retard : construit sur des moyennes, il confirme plus qu’il n’anticipe. Il trompe dans un marché qui oscille sans direction : les lignes se croisent alors sans cesse, et chaque croisement est un faux départ.\nÀ la BRVM s’ajoute la question des séances sans échange. Quand le cours d’une valeur reste figé plusieurs jours, ses moyennes se rapprochent mécaniquement et son MACD tend vers zéro. Ce resserrement ne décrit pas une tendance qui s’essouffle : il décrit un marché qui ne traite pas. Vérifiez les volumes avant de lire le MACD d’une valeur peu liquide.",
+      "points": [
+       {
+        "detail": "Construit sur des moyennes, il confirme plus qu’il n’anticipe.",
+        "titre": "Il est en retard",
+        "verifier": "Le moment du croisement par rapport au mouvement du cours."
+       },
+       {
+        "detail": "Un MACD de +50 sur une action à 30 000 FCFA n’a rien à voir avec +50 sur une action à 500 FCFA.",
+        "titre": "Il ne se compare pas entre actions",
+        "verifier": "L’écart rapporté au cours."
+       },
+       {
+        "detail": "Dans un marché qui oscille, les croisements se multiplient.",
+        "titre": "Il trompe sans tendance",
+        "verifier": "La pente des moyennes."
+       }
+      ],
+      "titre": "Ce que le MACD ne fait pas",
+      "type": "piege"
+     },
+     {
+      "contenu": "Le MACD mesure un élan, pas une destination. Il dit si une tendance accélère ou ralentit ; il ne dit pas jusqu’où elle ira, ni quand elle s’arrêtera.\nIl complète le RSI plus qu’il ne le remplace : le RSI mesure l’intensité d’un mouvement récent sur une échelle fixe, le MACD la dynamique de la tendance en points de cours. Lus avec les moyennes mobiles et le volume, ils décrivent l’état d’un graphique. Aucun des trois ne dit si la société mérite votre argent.",
+      "points": [
+       {
+        "titre": "MACD = moyenne exponentielle 12 − moyenne exponentielle 26"
+       },
+       {
+        "titre": "Signal = moyenne exponentielle 9 du MACD ; histogramme = leur écart"
+       },
+       {
+        "titre": "L’histogramme décrit l’accélération ou le ralentissement"
+       },
+       {
+        "titre": "Il ne se compare pas d’une action à l’autre"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Deux moyennes exponentielles, leur écart, et le signal qui en découle : un indicateur de dynamique.",
+    "titre": "Leçon 5 — Le MACD : l’élan d’une tendance"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [],
+    "duree_min": 10,
+    "liens": [
+     {
+      "href": "/actions",
+      "label": "Les fiches valeur et leurs graphiques"
+     },
+     {
+      "href": "/scanner",
+      "label": "Le scanner technique"
+     },
+     {
+      "href": "/liquidite",
+      "label": "La liquidité de chaque valeur"
+     }
+    ],
+    "module": "Module 3 — Figures et gestion du risque",
+    "qcm": {
+     "correct": 1,
+     "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier.",
+     "options": [
+      "Une continuation haussière",
+      "Un retournement baissier",
+      "Un dividende",
+      "Une suspension"
+     ],
+     "question": "Une tête-épaules suggère plutôt :"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "Trois sommets, celui du milieu le plus haut : figure de retournement baissier.",
+      "options": [
+       "Une continuation haussière",
+       "Un retournement baissier",
+       "Un dividende",
+       "Une suspension"
+      ],
+      "question": "Une tête-épaules suggère plutôt :"
+     },
+     {
+      "correct": 1,
+      "explication": "La cassure du niveau clé, en clôture et avec du volume, confirme la figure.",
+      "options": [
+       "Dès qu’on la voit",
+       "Quand le cours clôture au-delà du niveau clé, avec du volume",
+       "Quand le RSI vaut 50",
+       "Jamais"
+      ],
+      "question": "Quand une figure est-elle confirmée ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Le double creux est confirmé quand le cours dépasse le sommet entre les deux creux.",
+      "options": [
+       "La cassure du creux le plus bas",
+       "La cassure du sommet intermédiaire",
+       "Une baisse du volume",
+       "Un nouveau dividende"
+      ],
+      "question": "Un double creux se confirme par :"
+     },
+     {
+      "correct": 1,
+      "explication": "Avec peu d’échanges, un ordre isolé suffit à franchir un niveau.",
+      "options": [
+       "Elle est interdite",
+       "Elle peut venir d’un seul ordre isolé",
+       "Elle est toujours fiable",
+       "Elle n’existe pas"
+      ],
+      "question": "Pourquoi une cassure sur une valeur peu liquide est-elle suspecte ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Le triangle traduit le plus souvent une pause avant la reprise de la tendance.",
+      "options": [
+       "Retournement",
+       "Continuation",
+       "Liquidation",
+       "Dividende"
+      ],
+      "question": "Un triangle est le plus souvent une figure de :"
+     }
+    ],
+    "resume": "Les figures chartistes sont des formes récurrentes du cours, associées à une continuation ou à un retournement de tendance. Cette leçon présente les principales, la façon de les confirmer, et le risque de les voir là où il n’y a que du bruit.",
+    "sections": [
+     {
+      "contenu": "Les figures chartistes sont des formes que le cours dessine sur plusieurs semaines ou plusieurs mois, et que les analystes ont l’habitude de reconnaître. Elles se classent en deux familles : celles qui suggèrent un retournement de la tendance, et celles qui suggèrent sa continuation après une pause.\nLes figures de retournement se forment à la fin d’une tendance. Le double creux montre un cours qui baisse, rebondit, rebaisse jusqu’au même niveau, puis repart : les acheteurs ont défendu deux fois le même prix. La tête-épaules montre trois sommets, celui du milieu plus haut que les deux autres : la hausse s’essouffle, la dernière tentative échoue plus bas.\nLes figures de continuation marquent une pause. Dans un triangle, les oscillations se resserrent jusqu’à ce que le cours sorte d’un côté. Dans un canal, le cours évolue entre deux droites parallèles. Pour chaque figure, le tableau indique ce qui la confirme ; sans cette confirmation, ce n’est qu’une hypothèse.",
+      "tableau": {
+       "colonnes": [
+        "Figure",
+        "Famille",
+        "Description",
+        "Confirmation"
+       ],
+       "lignes": [
+        [
+         "Double creux",
+         "Retournement haussier",
+         "Deux creux au même niveau, séparés d’un sommet",
+         "Cassure du sommet intermédiaire"
+        ],
+        [
+         "Double sommet",
+         "Retournement baissier",
+         "Deux sommets au même niveau, séparés d’un creux",
+         "Cassure du creux intermédiaire"
+        ],
+        [
+         "Tête-épaules",
+         "Retournement baissier",
+         "Trois sommets, celui du milieu le plus haut",
+         "Cassure de la ligne de cou"
+        ],
+        [
+         "Triangle",
+         "Continuation, le plus souvent",
+         "Des oscillations qui se resserrent",
+         "Sortie du triangle avec du volume"
+        ],
+        [
+         "Canal",
+         "Continuation",
+         "Le cours évolue entre deux droites parallèles",
+         "Rebonds répétés sur les bornes"
+        ]
+       ],
+       "note": "Une figure n’existe vraiment qu’une fois confirmée ; avant, ce n’est qu’une hypothèse."
+      },
+      "titre": "Retournement ou continuation",
+      "type": "definition"
+     },
+     {
+      "contenu": "La règle commune à toutes les figures est de ne rien conclure avant la confirmation. Une figure en formation peut toujours échouer, et elle échoue souvent.\nLe niveau clé est le cœur de la méthode. Pour un double creux, c’est le sommet entre les deux creux ; pour une tête-épaules, la ligne de cou qui relie les creux de part et d’autre de la tête ; pour un triangle, sa borne. La figure n’est confirmée que lorsque le cours clôture au-delà de ce niveau. Une mèche qui le franchit pendant la séance, avant de revenir, ne suffit pas.\nExemple fictif : une action forme deux creux à 1 500 FCFA, séparés d’un sommet à 1 700. Tant que le cours n’a pas clôturé au-dessus de 1 700, il n’y a pas de double creux, seulement deux rebonds. Et si, après la cassure, le cours repasse sous 1 500, la figure est invalidée : c’est ce niveau qu’on fixe d’avance comme point d’erreur, comme le montre la leçon suivante.",
+      "etapes": [
+       {
+        "detail": "Sur un horizon suffisant : quelques semaines au moins.",
+        "titre": "Repérer la forme"
+       },
+       {
+        "detail": "Le sommet intermédiaire, la ligne de cou, la borne du triangle.",
+        "titre": "Identifier le niveau clé"
+       },
+       {
+        "cle": true,
+        "detail": "Une clôture au-delà du niveau clé, pas une simple mèche.",
+        "titre": "Attendre la cassure"
+       },
+       {
+        "detail": "Une cassure sans volume est suspecte, surtout à la BRVM.",
+        "titre": "Vérifier le volume"
+       },
+       {
+        "detail": "Le niveau qui invaliderait la figure : c’est la leçon suivante.",
+        "titre": "Fixer d’avance où l’on s’est trompé"
+       }
+      ],
+      "etapes_style": "frise",
+      "titre": "La méthode : attendre la cassure",
+      "type": "importance"
+     },
+     {
+      "contenu": "L’œil humain trouve des formes même dans le hasard. C’est le principal danger des figures chartistes : on finit par voir ce que l’on espère voir.\nPremier réflexe : vérifier sa lecture sur un autre horizon. Une tête-épaules visible sur trois semaines disparaît souvent sur six mois. Si une figure n’apparaît que sur l’échelle de temps qui arrange votre idée, elle est probablement fragile.\nDeuxième réflexe, propre à la BRVM. Une cassure suppose que de nombreux acheteurs ou vendeurs franchissent ensemble un niveau. Sur une valeur peu échangée, une « cassure » peut venir d’un seul ordre de quelques titres. Le volume du jour de cassure, comparé à celui des séances précédentes, dit si le mouvement est porté par le marché ou par un ordre isolé.\nEnfin, une figure ne dit rien de la société. Une cassure à la hausse sur une entreprise dont les résultats se dégradent reste un mouvement de cours, pas une amélioration de ses comptes.",
+      "points": [
+       {
+        "detail": "Une figure non confirmée échoue souvent.",
+        "titre": "Conclure avant la cassure",
+        "verifier": "La clôture au-delà du niveau clé."
+       },
+       {
+        "detail": "En changeant d’échelle, on trouve presque toujours une figure.",
+        "titre": "Choisir l’horizon qui arrange",
+        "verifier": "La même lecture sur un autre horizon."
+       },
+       {
+        "detail": "Sur une valeur peu échangée, une « cassure » peut venir d’un seul ordre.",
+        "titre": "Ignorer la liquidité",
+        "verifier": "Le volume du jour de cassure."
+       }
+      ],
+      "titre": "Voir des figures partout",
+      "type": "piege"
+     },
+     {
+      "contenu": "Une figure est une hypothèse jusqu’à sa confirmation. La discipline consiste à attendre une clôture au-delà du niveau clé, avec du volume, et à savoir d’avance ce qui invaliderait la figure.\nCette discipline compte plus que le nombre de figures connues. Celui qui en connaît dix mais conclut avant la cassure risque de se tromper plus souvent que celui qui n’en connaît que deux et attend la confirmation. Sur un marché étroit comme la BRVM, l’attente est encore plus justifiée.",
+      "points": [
+       {
+        "titre": "Double creux, double sommet, tête-épaules : des retournements"
+       },
+       {
+        "titre": "Triangles et canaux : plutôt des continuations"
+       },
+       {
+        "titre": "Attendre une clôture au-delà du niveau clé, avec du volume"
+       },
+       {
+        "titre": "Savoir d’avance ce qui invaliderait la figure"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Double creux, tête-épaules, triangles : des formes que le cours dessine, et la discipline qu’il faut pour ne pas en voir partout.",
+    "titre": "Leçon 6 — Les figures chartistes classiques"
+   },
+   {
+    "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+    "categorie": "technical",
+    "charts": [],
+    "duree_min": 11,
+    "liens": [
+     {
+      "href": "/premium/paper-trading",
+      "label": "Le portefeuille virtuel"
+     },
+     {
+      "href": "/comparateur-sgi",
+      "label": "Choisir sa SGI"
+     },
+     {
+      "href": "/liquidite",
+      "label": "La liquidité de chaque valeur"
+     }
+    ],
+    "module": "Module 3 — Figures et gestion du risque",
+    "qcm": {
+     "correct": 1,
+     "explication": "2 000 000 × 2 % = 40 000 FCFA.",
+     "options": [
+      "4 000 FCFA",
+      "40 000 FCFA",
+      "400 000 FCFA",
+      "20 000 FCFA"
+     ],
+     "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?"
+    },
+    "quiz": [
+     {
+      "correct": 1,
+      "explication": "2 000 000 × 2 % = 40 000 FCFA.",
+      "options": [
+       "4 000 FCFA",
+       "40 000 FCFA",
+       "400 000 FCFA",
+       "20 000 FCFA"
+      ],
+      "question": "Portefeuille de 2 000 000 FCFA, risque accepté de 2 % par position. Quel est le risque maximal ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Risque par action : 300 FCFA ; 30 000 ÷ 300 = 100 actions.",
+      "options": [
+       "10",
+       "100",
+       "300",
+       "1 000"
+      ],
+      "question": "Achat à 3 000 FCFA, stop à 2 700 FCFA, risque maximal de 30 000 FCFA. Combien d’actions acheter ?"
+     },
+     {
+      "correct": 2,
+      "explication": "Gain visé 300, risque 100 : rapport de 3.",
+      "options": [
+       "1",
+       "2",
+       "3",
+       "13"
+      ],
+      "question": "Stop à 900, achat à 1 000, objectif à 1 300. Quel est le rapport gain sur risque ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Sans contrepartie au niveau du stop, la vente se fait au prix suivant disponible.",
+      "options": [
+       "Il s’exécute au cours de clôture de la veille",
+       "Le cours peut sauter le niveau du stop",
+       "Les stops sont toujours exécutés au cours d’achat",
+       "La BRVM rembourse la différence au vendeur"
+      ],
+      "question": "Pourquoi un stop ne garantit-il pas le prix de vente à la BRVM ?"
+     },
+     {
+      "correct": 1,
+      "explication": "Reculer son stop transforme une perte contrôlée en perte non contrôlée.",
+      "options": [
+       "Le fixer avant d’acheter",
+       "Le reculer vers le bas quand le cours s’en approche",
+       "Calculer la taille de position",
+       "Noter son raisonnement"
+      ],
+      "question": "Quelle est l’erreur la plus coûteuse avec un stop ?"
+     }
+    ],
+    "resume": "La gestion du risque compte davantage que le choix du point d’entrée. Elle consiste à fixer à l’avance le niveau où l’on reconnaît s’être trompé, à en déduire la taille de la position, et à comparer le gain visé au risque pris. Cette leçon donne les calculs et leurs limites sur un marché peu liquide.",
+    "sections": [
+     {
+      "contenu": "La gestion du risque compte davantage que le choix du moment d’achat. Personne ne sait si un achat sera bon ; chacun peut décider à l’avance combien il accepte de perdre s’il est mauvais.\nTrois décisions s’écrivent avant de passer l’ordre. Le niveau d’invalidation, souvent appelé stop, est le prix auquel votre raisonnement est faux : il se place à un niveau qui a un sens sur le graphique, sous un support ou sous la ligne de cou, et non à un pourcentage choisi au hasard. L’objectif est un niveau plausible de sortie. La taille de la position découle des deux premiers.\nLes écrire avant l’achat protège d’un biais bien connu : une fois la position ouverte, on trouve facilement des raisons de la garder quand elle perd. Une règle écrite à froid est plus fiable qu’une décision prise sous le coup de l’émotion.",
+      "points": [
+       {
+        "detail": "Le prix auquel votre raisonnement est faux : sous un support, sous la ligne de cou.",
+        "titre": "Le niveau d’invalidation (stop)"
+       },
+       {
+        "detail": "Un niveau plausible de sortie : une résistance, un sommet précédent.",
+        "titre": "L’objectif"
+       },
+       {
+        "detail": "Calculée pour qu’une sortie au stop ne coûte qu’une petite part du portefeuille.",
+        "titre": "La taille de la position"
+       }
+      ],
+      "titre": "Trois décisions à prendre avant l’achat",
+      "type": "definition"
+     },
+     {
+      "contenu": "Exemple fictif : un portefeuille de 5 000 000 FCFA, et la règle de ne pas risquer plus de 1 % du portefeuille sur une position.\nLe raisonnement part du risque, pas de la somme à investir. On calcule d’abord la perte maximale acceptée : 1 % de 5 000 000, soit 50 000 FCFA. On mesure ensuite le risque par action, c’est-à-dire l’écart entre le prix d’achat et le stop : 200 FCFA. On en déduit le nombre d’actions : 250, soit 500 000 FCFA investis.\nLe résultat surprend souvent : on investit 10 % du portefeuille en ne risquant que 1 %. La perte possible n’est pas la somme investie, mais l’écart jusqu’au stop. Un stop éloigné impose une position plus petite ; un stop proche autorise une position plus grande, mais il sera touché plus souvent.\nLe taux de 1 % est un repère pédagogique, pas une règle réglementaire. Ce qui compte est de choisir un taux et de s’y tenir.",
+      "formules": [
+       {
+        "exemple": "5 000 000 × 1 % = 50 000 FCFA",
+        "expression": "Portefeuille × % de risque accepté",
+        "nom": "Risque maximal par position"
+       },
+       {
+        "exemple": "2 000 − 1 800 = 200 FCFA",
+        "expression": "Prix d’achat − Stop",
+        "nom": "Risque par action"
+       },
+       {
+        "exemple": "50 000 ÷ 200 = 250 actions, soit 500 000 FCFA investis",
+        "expression": "Risque maximal ÷ Risque par action",
+        "nom": "Nombre d’actions"
+       }
+      ],
+      "illustration": {
+       "facteurs": [
+        {
+         "label": "Perte maximale (1 % du portefeuille)",
+         "unite": "FCFA",
+         "valeur": 50000
+        },
+        {
+         "label": "Risque par action (prix − stop)",
+         "unite": "FCFA",
+         "valeur": 200
+        }
+       ],
+       "gabarit": "decomposition",
+       "note": "250 actions à 2 000 FCFA, soit 500 000 FCFA investis : 10 % du portefeuille pour 1 % de risque. La taille vient de l’écart jusqu’au stop, pas de la somme disponible.",
+       "operation": "quotient",
+       "resultat": {
+        "label": "Nombre d’actions",
+        "unite": "actions",
+        "valeur": 250
+       },
+       "titre": "La taille de la position découle du risque accepté (exemple fictif)"
+      },
+      "simulation": {
+       "consigne": "Déplacez le stop ou le risque accepté : la taille de la position en découle, et l’objectif donne le rapport gain sur risque.",
+       "objectif": 2500,
+       "portefeuille": 5000000,
+       "prix_achat": 2000,
+       "risque_pct": 1,
+       "stop": 1800,
+       "type": "position"
+      },
+      "titre": "Les calculs",
+      "type": "importance"
+     },
+     {
+      "contenu": "Exemple fictif : un achat à 2 000 FCFA, un stop à 1 800 et un objectif à 2 500. Le gain visé est de 500 FCFA par action pour un risque de 200 : le rapport gain sur risque vaut 2,5.\nCe rapport a une conséquence simple, souvent ignorée. Avec un rapport de 2,5, chaque opération gagnante rapporte deux fois et demie ce que coûte une opération perdante. Il suffit donc d’avoir raison un peu moins d’une fois sur trois pour ne pas perdre, hors frais. Avec un rapport de 1, il faut avoir raison plus d’une fois sur deux.\nL’objectif doit rester plausible. Le placer très haut pour obtenir un beau rapport sur le papier ne change rien : si le cours n’a aucune raison d’atteindre ce niveau, le rapport affiché est une illusion. Un objectif se justifie par un niveau visible sur le graphique, comme un ancien sommet.",
+      "tableau": {
+       "colonnes": [
+        "Élément",
+        "Calcul",
+        "Résultat"
+       ],
+       "lignes": [
+        [
+         "Risque par action",
+         "2 000 − 1 800",
+         "200 FCFA"
+        ],
+        [
+         "Gain visé par action",
+         "2 500 − 2 000",
+         "500 FCFA"
+        ],
+        [
+         "Rapport gain sur risque",
+         "500 ÷ 200",
+         "2,5"
+        ],
+        [
+         "Taux de réussite nécessaire pour ne pas perdre",
+         "1 ÷ (1 + 2,5)",
+         "Environ 29 %"
+        ]
+       ],
+       "note": "Avec un rapport de 2,5, il suffit d’avoir raison un peu moins d’une fois sur trois pour ne pas perdre, hors frais."
+      },
+      "titre": "Le rapport gain sur risque",
+      "type": "cas"
+     },
+     {
+      "contenu": "Un stop n’est pas une garantie de prix, et c’est particulièrement vrai à la BRVM.\nLe règlement général de la BRVM prévoit deux types d’ordres selon le prix : au mieux et à cours limité. L’ordre stop, qui se déclencherait automatiquement à un seuil, n’en fait pas partie. Certaines SGI proposent un service de surveillance, d’autres non : renseignez-vous. Le plus souvent, votre stop est une règle que vous vous imposez, en surveillant le cours et en passant vous-même l’ordre de vente.\nMême exécutée, la vente peut se faire plus bas que prévu. Sur une valeur peu échangée, il n’y a pas forcément d’acheteur à votre niveau : le cours peut passer d’un coup en dessous, et la vente se fait au prix suivant disponible. Les frais de courtage, à l’achat comme à la vente, s’ajoutent à la perte.\nL’erreur la plus coûteuse reste humaine : reculer son stop quand le cours s’en approche, pour « laisser une chance ». Une perte limitée à 1 % du portefeuille devient alors une perte que plus rien ne limite.",
+      "points": [
+       {
+        "detail": "Le règlement ne prévoit pas d’ordre stop ; certaines SGI proposent une surveillance, sinon il faut surveiller soi-même et passer l’ordre.",
+        "titre": "Le stop n’est pas un ordre de la BRVM",
+        "verifier": "Les types d’ordres proposés par votre SGI."
+       },
+       {
+        "detail": "Sur une valeur peu liquide, le cours peut passer d’un coup sous votre niveau : la vente se fait plus bas.",
+        "titre": "Le prix peut sauter le stop",
+        "verifier": "La liquidité de la valeur avant d’acheter."
+       },
+       {
+        "detail": "Courtage à l’achat et à la vente réduisent le gain et augmentent la perte.",
+        "titre": "Les frais",
+        "verifier": "Le barème de votre SGI."
+       },
+       {
+        "detail": "Le reculer pour « laisser une chance » transforme une petite perte en grande perte.",
+        "titre": "Déplacer son stop vers le bas",
+        "verifier": "Votre règle écrite avant l’achat."
+       }
+      ],
+      "titre": "Les limites à la BRVM",
+      "type": "piege"
+     },
+     {
+      "contenu": "On ne contrôle pas le marché ; on contrôle ce qu’on risque. La taille de la position, calculée à partir du stop, est la seule variable entièrement entre vos mains.\nAvant chaque achat, trois chiffres s’écrivent : le stop, l’objectif et la taille. Si vous ne savez pas où placer le stop, c’est que vous ne savez pas encore ce qui prouverait que vous avez tort : mieux vaut attendre. Sur une valeur peu liquide, prévoyez une marge, car le prix réel de sortie peut être moins bon que le niveau prévu.",
+      "points": [
+       {
+        "titre": "Fixer le stop et l’objectif avant l’achat"
+       },
+       {
+        "titre": "Taille de position = risque accepté ÷ risque par action"
+       },
+       {
+        "titre": "Viser un rapport gain sur risque d’au moins 2"
+       },
+       {
+        "titre": "À la BRVM, le stop est une intention : la liquidité décide du prix réel"
+       }
+      ],
+      "titre": "L’essentiel",
+      "type": "retenir"
+     }
+    ],
+    "sous_titre": "Décider avant d’acheter combien on accepte de perdre, et en déduire combien acheter.",
+    "titre": "Leçon 7 — Stop-loss, objectif et taille de position"
+   }
+  ],
+  "niveau": "avance",
+  "relatedLinks": [],
+  "titre": "Niveau 3 — Analyse Technique"
+ }
+}

@@ -1736,6 +1736,37 @@ PR #368, #369, #370. Relecture avec le compte test Premium puis consultation Fab
   Fable repris par l'exploitant) ; la pastille de fraîcheur de l'en-tête du
   tableau de bord s'efface en séance, le bandeau disant déjà le relevé.
 
+### Ajouts (passage 2026-11-24) — Academy : modules 0 (fondamental et technique)
+
+PR #376, #377, #378. Migrations `0258`, `0259`, `0260` **appliquées** et vérifiées en
+production (compte test Premium, bureau et mobile). 615 tests Academy verts.
+
+- **Niveau 2, module 0** (8 leçons « Leçon 0.1 » à « 0.8 », fichiers `niveau2/l00a…l00h`) :
+  cours complet d’analyse fondamentale sur ECOC, SGBC, SNTS, ORAC. Généré par
+  `frontend/scripts/academy-module-zero.mjs` depuis `niveau2/sources/cours-complet-2026-11-23.json` ;
+  `niveau2.test.ts` recalcule les chiffres clés **indépendamment** du générateur.
+- **Niveau 3, leçon 0** (`niveau3/l00-grille-decision.json`) : la grille de décision en six
+  familles, liquidité réelle (`niveau3/sources/liquidite-2026-11-23.json`), générée par
+  `scripts/academy-lecon0-technique.mjs`.
+- **Schéma relevé** (`lib/academy/types.ts`) : graphiques multi-séries (axe droit, `null` =
+  année vide, légende cliquable), `tableaux`, `encadres`, `graphiques` dans les sections,
+  simulateurs `croissance`, `endettement`, `roe_moyen`, badge `nouveaute` (s’éteint après
+  45 jours, `lib/academy/nouveaute.ts`).
+- ⚠️ **Ordre : code déployé AVANT la migration de contenu.** Une seule leçon refusée par
+  `courseContentSchema` fait répondre 404 au cours ENTIER (`learn.ts`).
+- ⚠️ **Choix éditorial (exploitant) : aucun site tiers cité** (Sika Finance, Richbourse,
+  StockAnalysis, etc.) ; WESTBOURSE est mis en avant comme source qui rassemble et
+  recalcule. Un chiffre venu d’un tiers est recalculé depuis la base ou les comptes
+  officiels, sinon retiré — jamais gardé sans source. Test dédié dans `niveau2.test.ts`.
+  Reste à traiter : 3 cours hors niveaux (Dangote) citent encore Sika et Daba Finance.
+- **Erreur évitée** : le cours fourni (repris de S&P) donnait à Sonatel 133 Md de dette
+  nette en 2025 ; ses comptes publiés donnent une **trésorerie nette** de 133,4 Md.
+  ⚠️ `cash_flow_statements.flux_tresorerie_disponible` de SNTS 2025 vaut 363,956 en base,
+  incohérent avec flux − investissements (392,388) : ne pas l’utiliser, recalculer.
+- **Modifier une leçon** : éditer le générateur, relancer, puis une migration de
+  remplacement gardée par titre (modèle `0259`). Insérer des leçons en tête décale
+  `academy_progress`/`academy_notes` (modèle `0258`, décalage par +1000).
+
 
 ## 9. Bugs connus / limites
 
