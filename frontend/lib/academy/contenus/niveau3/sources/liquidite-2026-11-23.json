@@ -1,0 +1,346 @@
+{
+ "_lisez_moi": "Capitaux échangés par action sur les séances de la BRVM du 2026-08-24 au 2026-11-23 (base WESTBOURSE, brvm_actions_daily.valeur_echangee), lus le 2026-11-24. Sert à la leçon 0 du niveau 3 (concentration de la liquidité). Montants en milliards de FCFA ; les parts sont recalculées par scripts/academy-lecon0-technique.mjs.",
+ "periode": {
+  "debut": "2026-08-24",
+  "fin": "2026-11-23",
+  "seances": 65
+ },
+ "valeurs": [
+  {
+   "code": "SNTS",
+   "nom": "SONATEL SENEGAL",
+   "capitaux_md": 75.41,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SGBC",
+   "nom": "SOCIETE GENERALE COTE D'IVOIRE",
+   "capitaux_md": 12.41,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BBGC",
+   "nom": "BRIDGE BANK GROUP COTE D'IVOIRE",
+   "capitaux_md": 6.71,
+   "seances_cotees": 43,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SIBC",
+   "nom": "SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE",
+   "capitaux_md": 6.57,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOAC",
+   "nom": "BANK OF AFRICA COTE D'IVOIRE",
+   "capitaux_md": 6.4,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ETIT",
+   "nom": "ETI TG",
+   "capitaux_md": 5.79,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "NSBC",
+   "nom": "NSIA BANQUE COTE D'IVOIRE",
+   "capitaux_md": 5.07,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ORAC",
+   "nom": "ORANGE COTE D'IVOIRE",
+   "capitaux_md": 5.02,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOAS",
+   "nom": "BANK OF AFRICA SENEGAL",
+   "capitaux_md": 4.87,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "STBC",
+   "nom": "SITAB COTE D'IVOIRE",
+   "capitaux_md": 4.3,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BICB",
+   "nom": "BANQUE INTERNATIONALE POUR L’INDUSTRIE ET LE COMMERCE DU BENIN",
+   "capitaux_md": 3.99,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOAB",
+   "nom": "BANK OF AFRICA BENIN",
+   "capitaux_md": 2.72,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ECOC",
+   "nom": "ECOBANK COTE D'IVOIRE",
+   "capitaux_md": 2.62,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SDSC",
+   "nom": "AFRICA GLOBAL LOGISTICS COTE D'IVOIRE",
+   "capitaux_md": 2.61,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "CIEC",
+   "nom": "CIE COTE D'IVOIRE",
+   "capitaux_md": 2.6,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOABF",
+   "nom": "BANK OF AFRICA BURKINA FASO",
+   "capitaux_md": 2.58,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "CBIBF",
+   "nom": "CORIS BANK INTERNATIONAL BURKINA FASO",
+   "capitaux_md": 2.53,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOAN",
+   "nom": "BANK OF AFRICA NIGER",
+   "capitaux_md": 2.23,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "PALC",
+   "nom": "PALMCI",
+   "capitaux_md": 2.18,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SPHC",
+   "nom": "SAPH COTE D'IVOIRE",
+   "capitaux_md": 2.15,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BOAM",
+   "nom": "BANK OF AFRICA MALI",
+   "capitaux_md": 2.14,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SAFC",
+   "nom": "SAFCA COTE D'IVOIRE",
+   "capitaux_md": 2.04,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SCRC",
+   "nom": "SUCRIVOIRE COTE D'IVOIRE",
+   "capitaux_md": 1.73,
+   "seances_cotees": 65,
+   "seances_sans_echange": 4
+  },
+  {
+   "code": "SMBC",
+   "nom": "SMB COTE D'IVOIRE",
+   "capitaux_md": 1.52,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SLBC",
+   "nom": "SOLIBRA COTE D'IVOIRE",
+   "capitaux_md": 1.5,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "UNXC",
+   "nom": "UNIWAX COTE D'IVOIRE",
+   "capitaux_md": 1.35,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SDCC",
+   "nom": "SODECI",
+   "capitaux_md": 1.32,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BICC",
+   "nom": "BICICI",
+   "capitaux_md": 1.3,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SOGC",
+   "nom": "SOGB COTE D'IVOIRE",
+   "capitaux_md": 1.28,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "NTLC",
+   "nom": "NESTLE COTE D'IVOIRE",
+   "capitaux_md": 1.24,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "LNBB",
+   "nom": "LOTERIE NATIONALE DU BENIN",
+   "capitaux_md": 1.21,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SEMC",
+   "nom": "EVIOSYS PACKAGING SIEM COTE D'IVOIRE",
+   "capitaux_md": 1.06,
+   "seances_cotees": 65,
+   "seances_sans_echange": 49
+  },
+  {
+   "code": "TTLC",
+   "nom": "TOTALENERGIES MARKETING COTE D'IVOIRE",
+   "capitaux_md": 1.04,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ONTBF",
+   "nom": "ONATEL BURKINA FASO",
+   "capitaux_md": 0.99,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "TTLS",
+   "nom": "TOTALENERGIES MARKETING SENEGAL",
+   "capitaux_md": 0.94,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SHEC",
+   "nom": "VIVO ENERGY COTE D'IVOIRE",
+   "capitaux_md": 0.7,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "STAC",
+   "nom": "SETAO COTE D'IVOIRE",
+   "capitaux_md": 0.65,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ABJC",
+   "nom": "SERVAIR ABIDJAN CI",
+   "capitaux_md": 0.61,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "ORGT",
+   "nom": "ORAGROUP TOGO",
+   "capitaux_md": 0.56,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "NEIC",
+   "nom": "NEI-CEDA COTE D'IVOIRE",
+   "capitaux_md": 0.44,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "SIVC",
+   "nom": "ERIUM COTE D’IVOIRE",
+   "capitaux_md": 0.44,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "FTSC",
+   "nom": "FILTISAC COTE D'IVOIRE",
+   "capitaux_md": 0.32,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "PRSC",
+   "nom": "TRACTAFRIC MOTORS COTE D'IVOIRE",
+   "capitaux_md": 0.31,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "BNBC",
+   "nom": "BERNABE COTE D'IVOIRE",
+   "capitaux_md": 0.31,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "CFAC",
+   "nom": "CFAO MOTORS COTE D'IVOIRE",
+   "capitaux_md": 0.27,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "CABC",
+   "nom": "SICABLE COTE D'IVOIRE",
+   "capitaux_md": 0.26,
+   "seances_cotees": 65,
+   "seances_sans_echange": 0
+  },
+  {
+   "code": "UNLC",
+   "nom": "UNILEVER COTE D'IVOIRE",
+   "capitaux_md": 0.05,
+   "seances_cotees": 65,
+   "seances_sans_echange": 1
+  },
+  {
+   "code": "SICC",
+   "nom": "SICOR COTE D'IVOIRE",
+   "capitaux_md": 0.05,
+   "seances_cotees": 65,
+   "seances_sans_echange": 49
+  }
+ ]
+}

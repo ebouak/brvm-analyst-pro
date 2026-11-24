@@ -33,10 +33,10 @@ const simulations = lecons.flatMap(({ f, l }) =>
 );
 
 describe('simulations de toutes les leçons', () => {
-  it('au moins un simulateur dans 32 leçons sur 41 (dont le module 0 du niveau 2, 2026-11-24)', () => {
+  it('au moins un simulateur dans 33 leçons sur 42 (dont les modules 0 des niveaux 2 et 3, 2026-11-24)', () => {
     const avec = lecons.filter(({ l }) => l.sections.some((s) => s.simulation || s.simulations.length > 0));
-    expect(lecons).toHaveLength(41);
-    expect(avec.length).toBeGreaterThanOrEqual(32);
+    expect(lecons).toHaveLength(42);
+    expect(avec.length).toBeGreaterThanOrEqual(33);
   });
 
   for (const { f, i, sim } of simulations) {
