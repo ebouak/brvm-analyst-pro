@@ -8,6 +8,12 @@
  * La vidéo est servie depuis notre stockage (bucket public academy-lecon0, distinct du bucket privé academy-videos des cours payants) :
  * aucun lecteur tiers, la promesse « aucun traceur » tient.
  *
+ * Vidéo 16:9 (2026-11-25) : habillage video/habillage/ (intro, outro) + carte
+ * animée video/lecon0-carte/, voix de l'auteur = les enregistrements de
+ * remotion/public/ecosysteme/ (texte de remotion/ecosysteme.json, donc de
+ * TRANSCRIPTION ci-dessous). Les anciens fichiers ecosysteme-umoa.* restent
+ * dans le bucket : l'email de bienvenue pointe encore sur ecosysteme-umoa.jpg.
+ *
  * COPIE de remotion/ecosysteme.json (textes et voix off) : deux paquets
  * distincts, pas de module partagé. Toute correction du contenu est à
  * reporter des deux côtés, puis la vidéo à re-rendre.
@@ -20,11 +26,11 @@ export const LECON0 = {
   chemin: '/formations/academy/lecon-0',
   titre: 'Qui fait quoi sur le marché financier de l’UMOA',
   resume:
-    'Le régulateur, la Bourse, le dépositaire, les intermédiaires, les émetteurs et les investisseurs : la carte des acteurs en moins de deux minutes.',
-  video: `${DOSSIER}/ecosysteme-umoa.mp4`,
-  affiche: `${DOSSIER}/ecosysteme-umoa-poster.jpg`,
-  vignette: `${DOSSIER}/ecosysteme-umoa.jpg`,
-  duree: '1 min 42',
+    'Le régulateur, la Bourse, le dépositaire, les intermédiaires, les émetteurs et les investisseurs : la carte des acteurs en deux minutes.',
+  video: `${DOSSIER}/lecon0-acteurs-umoa-16x9.mp4`,
+  affiche: `${DOSSIER}/lecon0-acteurs-umoa-16x9-poster.jpg`,
+  vignette: `${DOSSIER}/lecon0-acteurs-umoa-16x9.jpg`,
+  duree: '2 min 04',
 } as const;
 
 export interface Famille {

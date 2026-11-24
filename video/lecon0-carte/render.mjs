@@ -14,28 +14,31 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(ICI, '../out/lecon0-carte');
-const VOIX_DIR = path.join(OUT, 'voix');
+// Voix : « jye » = enregistrements de l'auteur (voix-jye.mjs), « denise » = synthèse (voix.py).
+const SOURCE_VOIX = process.env.VOIX || 'jye';
+const VOIX_DIR = path.join(OUT, SOURCE_VOIX === 'jye' ? 'voix-jye' : 'voix');
 const PAGE = pathToFileURL(path.join(ICI, 'index.html')).href;
 const FPS = 60, SUB = 3, WORKERS = 6;
 fs.mkdirSync(OUT, { recursive: true });
 
 // Minutage : chaque scène = respiration, voix, courte pause. Les instants des
 // mots deviennent absolus : l'animation se cale sur eux.
-const PRE = { hook: 0.6 }, PRE_DEF = 1.25, POST = 0.6, TENUE_FIN = 3.4;
+const PRE = { hook: 0.6, intro: 0.6 }, PRE_DEF = 1.25, POST = 0.6, TENUE_FIN = 3.4;
 function minutage() {
-  const conf = JSON.parse(fs.readFileSync(path.join(ICI, 'voix.json'), 'utf8'));
+  const fOrdre = path.join(VOIX_DIR, 'ordre.json');
+  const ordre = fs.existsSync(fOrdre) ? JSON.parse(fs.readFileSync(fOrdre, 'utf8')) : JSON.parse(fs.readFileSync(path.join(ICI, 'voix.json'), 'utf8')).segments.map((s) => s.id);
   const scenes = {};
   let t = 0;
-  for (const { id } of conf.segments) {
+  for (const id of ordre) {
     const f = path.join(VOIX_DIR, `${id}.json`);
-    if (!fs.existsSync(f)) throw new Error(`voix absente : ${f} — lancer d'abord « python voix.py »`);
+    if (!fs.existsSync(f)) throw new Error(`voix absente : ${f} — lancer d'abord « node voix-jye.mjs » (ou « python voix.py »)`);
     const mots = JSON.parse(fs.readFileSync(f, 'utf8'));
     const v = t + (PRE[id] ?? PRE_DEF);
     const fin = v + mots[mots.length - 1].b;
     scenes[id] = { s: +t.toFixed(3), v: +v.toFixed(3), e: +(fin + POST).toFixed(3), mots: mots.map((m) => ({ m: m.m, a: +(v + m.a).toFixed(3), b: +(v + m.b).toFixed(3) })) };
     t = fin + POST;
   }
-  return { scenes, duration: +(t + TENUE_FIN).toFixed(3), ordre: conf.segments.map((s) => s.id) };
+  return { scenes, duration: +(t + TENUE_FIN).toFixed(3), ordre };
 }
 const VX = minutage();
 

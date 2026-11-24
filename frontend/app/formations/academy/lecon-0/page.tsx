@@ -39,8 +39,8 @@ const videoLd = {
   description: LECON0.resume,
   thumbnailUrl: [LECON0.vignette],
   contentUrl: LECON0.video,
-  uploadDate: '2026-09-29',
-  duration: 'PT1M42S',
+  uploadDate: '2026-11-25',
+  duration: 'PT2M4S',
   inLanguage: 'fr',
   transcript: TRANSCRIPTION.join(' '),
   isAccessibleForFree: true,
@@ -58,19 +58,19 @@ export default function Lecon0Page() {
         subtitle={LECON0.resume}
       />
 
-      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
-        <video
-          controls
-          preload="metadata"
-          playsInline
-          poster={LECON0.affiche}
-          className="mx-auto w-full max-w-[340px] rounded-xl border border-border/60 bg-black"
-        >
-          <source src={LECON0.video} type="video/mp4" />
-          Votre navigateur ne lit pas la vidéo. <a href={LECON0.video}>Télécharger la leçon 0</a>.
-        </video>
+      {/* Vidéo 16:9 : pleine largeur, le texte passe dessous. */}
+      <video
+        controls
+        preload="metadata"
+        playsInline
+        poster={LECON0.affiche}
+        className="mt-6 aspect-video w-full rounded-xl border border-border/60 bg-black"
+      >
+        <source src={LECON0.video} type="video/mp4" />
+        Votre navigateur ne lit pas la vidéo. <a href={LECON0.video}>Télécharger la leçon 0</a>.
+      </video>
 
-        <div className="flex flex-col gap-5">
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border/60 bg-surface/60 p-5">
             <p className="text-sm text-muted">Vidéo · {LECON0.duree} · voix off</p>
             <p className="mt-2 leading-relaxed text-ivory">
@@ -106,7 +106,6 @@ export default function Lecon0Page() {
               ))}
             </ol>
           </section>
-        </div>
       </div>
 
       <section aria-labelledby="h-transcription" className="mt-8 rounded-xl border border-border/60 bg-surface/60 p-5">
