@@ -78,10 +78,10 @@ export default function TechnicalGauge({ result }: { result: TechnicalSummaryRes
         {/* Aiguille */}
         <polygon
           points={`${baseAX.toFixed(2)},${baseAY.toFixed(2)} ${tipX.toFixed(2)},${tipY.toFixed(2)} ${baseBX.toFixed(2)},${baseBY.toFixed(2)}`}
-          fill="#FCFCFC"
+          fill="rgb(var(--color-ivory))"
         />
-        <circle cx={CX} cy={CY} r={7} fill="#FCFCFC" />
-        <circle cx={CX} cy={CY} r={3} fill="#0a1417" />
+        <circle cx={CX} cy={CY} r={7} fill="rgb(var(--color-ivory))" />
+        <circle cx={CX} cy={CY} r={3} fill="rgb(var(--color-surface))" />
 
         {/* Verdict au centre */}
         <text x={CX} y={120} textAnchor="middle"

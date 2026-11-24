@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import type { PortfolioState } from '@/lib/portfolio/derive';
 import { fmtFcfa } from '@/lib/format';
 import { AnimatedValue } from '@/components/AnimatedValue';
+import { chartTheme } from '@/lib/chartTheme';
 import type { ReactNode } from 'react';
 
 function pct(v: number | null): string {
@@ -28,6 +29,17 @@ interface Props {
  * position partagent une seule et même source de vérité (derivePortfolio).
  */
 export default function PortfolioOverview({ state, isLoading = false }: Props) {
+  const uid = useId().replace(/:/g, '');
+  const [theme, setTheme] = useState(() => chartTheme());
+
+  useEffect(() => {
+    const refresh = () => setTheme(chartTheme());
+    refresh();
+    const obs = new MutationObserver(refresh);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    return () => obs.disconnect();
+  }, []);
+
   const curve = useMemo(() => {
     if (!state || state.equityCurve.length === 0) return [];
     const base = state.equityCurve[0]!.invested || state.equityCurve[0]!.value || 1;
@@ -67,11 +79,11 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
       </div>
 
       {/* Courbe d'équité (base 100) — auto-dérivée */}
-      <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
+      <div className="rounded-2xl border border-border bg-surface p-5 shadow-card space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">Évolution du portefeuille (base 100)</h3>
+          <h3 className="font-display text-base font-semibold tracking-tight text-ivory">Évolution du portefeuille (base 100)</h3>
           {state.annualizedReturn != null && (
-            <span className={`text-sm font-semibold ${pnlClass(state.annualizedReturn)}`}>{pct(state.annualizedReturn)}/an</span>
+            <span className={`tabular text-sm font-semibold ${pnlClass(state.annualizedReturn)}`}>{pct(state.annualizedReturn)}/an</span>
           )}
         </div>
         {curve.length < 2 ? (
@@ -79,32 +91,34 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
             Historique insuffisant pour tracer la courbe (positions trop récentes).
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={curve} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <defs>
-                <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00c853" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#00c853" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#232733" vertical={false} />
-              <XAxis dataKey="label" stroke="#8b93a7" style={{ fontSize: 11 }} minTickGap={28} />
-              <YAxis stroke="#8b93a7" style={{ fontSize: 11 }} domain={['dataMin - 5', 'dataMax + 5']} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#161922', border: '1px solid #232733', borderRadius: 6, color: '#e6e9f0' }}
-                formatter={(v: number) => [v.toFixed(2), 'Base 100']}
-              />
-              <ReferenceLine y={100} stroke="#8b93a7" strokeDasharray="5 5" />
-              <Area type="monotone" dataKey="indice" stroke="#00c853" strokeWidth={2} fill="url(#eqGrad)" isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="rounded-xl border border-border/70 bg-sunken/25 px-2 pt-3 pb-1" style={{ height: 268 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={curve} margin={{ top: 6, right: 20, left: 0, bottom: 4 }}>
+                <defs>
+                  <linearGradient id={`po-eq-${uid}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={theme.up} stopOpacity={0.22} />
+                    <stop offset="95%" stopColor={theme.up} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.border} opacity={0.75} vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: theme.muted, fontSize: 11, fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: theme.border }} tickLine={false} minTickGap={28} />
+                <YAxis tick={{ fill: theme.muted, fontSize: 11, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} domain={['dataMin - 5', 'dataMax + 5']} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, borderRadius: 12, color: theme.ivory, fontSize: 12 }}
+                  formatter={(v: number) => [v.toFixed(2), 'Base 100']}
+                />
+                <ReferenceLine y={100} stroke={theme.muted} strokeDasharray="5 5" />
+                <Area type="monotone" dataKey="indice" stroke={theme.up} strokeWidth={2.25} fill={`url(#po-eq-${uid})`} isAnimationActive={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
       {/* Répartition sectorielle + positions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold text-white mb-3">Répartition sectorielle</h3>
+        <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+          <h3 className="font-display text-base font-semibold tracking-tight text-ivory mb-3">Répartition sectorielle</h3>
           <ul className="space-y-2">
             {state.sectors.map((s) => (
               <li key={s.secteur} className="space-y-1">
