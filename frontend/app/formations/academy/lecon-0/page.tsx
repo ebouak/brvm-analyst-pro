@@ -40,7 +40,7 @@ const videoLd = {
   thumbnailUrl: [LECON0.vignette],
   contentUrl: LECON0.video,
   uploadDate: '2026-11-25',
-  duration: 'PT2M4S',
+  duration: 'PT2M5S',
   inLanguage: 'fr',
   transcript: TRANSCRIPTION.join(' '),
   isAccessibleForFree: true,
