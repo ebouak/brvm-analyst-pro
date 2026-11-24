@@ -12,6 +12,11 @@ import { SaisieInvalide, fmtPct, type Lecture } from './simulateurs';
 export interface PointSerie {
   date: string;
   cours: number;
+  /** Bougie de la séance, quand la base la publie (null sinon) ; lue par le simulateur `bougies`. */
+  ouverture?: number | null;
+  haut?: number | null;
+  bas?: number | null;
+  volume?: number | null;
 }
 
 const nb = (n: number, dec = 0) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: dec }).format(n);

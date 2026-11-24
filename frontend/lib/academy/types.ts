@@ -329,7 +329,29 @@ export const simulationSchema = z.discriminatedUnion('type', [
     bas: z.number().positive().max(10_000_000),
     cloture: z.number().positive().max(10_000_000),
   }),
+  // ── Bougies sur plusieurs séances (2026-11-24, lib/academy/figuresBougies.ts) ──
+  /** Les vraies bougies des dernières séances d’une valeur, figures repérées (/api/academy/serie). */
+  z.object({
+    type: z.literal('bougies'),
+    consigne: consigneSchema,
+    codes: z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).min(1).max(6),
+    seances: z.number().int().min(10).max(60).optional().default(30),
+  }),
+  /** Atelier : figure formée par deux à cinq bougies FICTIVES, modifiables. */
+  z.object({
+    type: z.literal('figure_bougies'),
+    consigne: consigneSchema,
+    bougies: z.array(z.object({
+      ouverture: z.number().positive().max(10_000_000),
+      haut: z.number().positive().max(10_000_000),
+      bas: z.number().positive().max(10_000_000),
+      cloture: z.number().positive().max(10_000_000),
+    })).min(2).max(5),
+  }),
 ]).superRefine((s, ctx) => {
+  if (s.type === 'figure_bougies' && s.bougies.some((x) => x.haut < Math.max(x.ouverture, x.cloture) || x.bas > Math.min(x.ouverture, x.cloture))) {
+    ctx.addIssue({ code: 'custom', message: 'bougie impossible : plus haut / plus bas incohérents' });
+  }
   if (s.type === 'position' && !(s.stop < s.prix_achat)) {
     ctx.addIssue({ code: 'custom', message: 'le stop doit être sous le prix d’achat' });
   }

@@ -111,3 +111,37 @@ describe('réponses de calcul', () => {
     expect(bonne(N4, 5, 3)).toBe(String(1000 / 2));
   });
 });
+
+describe('niveau 3, leçon 2 — figures à trois bougies et séances réelles (2026-11-24)', () => {
+  type Fig = { figure: string; libelle: string; mesurables: number; part_pct: number | null; part_base_pct: number; assez_de_cas: boolean; ecart_etabli: boolean };
+  const src = JSON.parse(readFileSync(fileURLToPath(new URL('./niveau3/sources/bougies-brvm-2026-11-24.json', import.meta.url)), 'utf-8')) as {
+    seances: number; seances_lisibles: number; base: { part_hausse_pct: number; part_baisse_pct: number }; figures: Fig[];
+    marche: { ouverture_egale_cloture_veille: number; seances_avec_ouverture_et_echange: number };
+  };
+  const [, l2, brut] = N3[1]!;
+  const fr = (n: number) => n.toFixed(1).replace('.', ',');
+  const ent = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  it('les chiffres de la leçon sont ceux de la mesure', () => {
+    expect(brut).toContain(`${ent(src.seances_lisibles)} seulement ont une bougie lisible`);
+    expect(brut).toContain(`plus haute cinq séances plus tard dans ${fr(src.base.part_hausse_pct)} %`);
+    const ouv = (src.marche.ouverture_egale_cloture_veille / src.marche.seances_avec_ouverture_et_echange) * 100;
+    expect(brut).toContain(`dans ${fr(ouv)} % des séances`);
+  });
+  it('le tableau donne une ligne par figure, et le verdict suit le calcul', () => {
+    const t = l2.sections.find((s) => s.titre.startsWith('Ce que les bougies'))!.tableau!;
+    expect(t.lignes).toHaveLength(src.figures.length);
+    for (const f of src.figures) {
+      const ligne = t.lignes.find((r) => r[0] === f.libelle)!;
+      expect(ligne[6]).toMatch(!f.assez_de_cas ? /Trop peu de cas/ : f.ecart_etabli ? /fréquent/ : /non établi/);
+    }
+  });
+  it('les quatre figures à trois bougies ont leur atelier, et la lecture réelle son simulateur', () => {
+    const sims = l2.sections.flatMap((s) => [...(s.simulation ? [s.simulation] : []), ...s.simulations]);
+    expect(sims.filter((s) => s.type === 'figure_bougies')).toHaveLength(4);
+    expect(sims.some((s) => s.type === 'bougies')).toBe(true);
+  });
+  it('aucune promesse : une figure décrit, elle ne prédit pas', () => {
+    expect(brut).toMatch(/ne prédit pas/);
+    expect(brut).not.toMatch(/probabilité de succès|signal fiable|garantit (une|la) (hausse|baisse)/);
+  });
+});

@@ -6,6 +6,7 @@ import { capitalPourObjectif, simulerReinvestissement } from '@/lib/academy/simu
 import SimulationInteractive from './SimulationsInteractives';
 import SimulateurLecon from './SimulateursLecon';
 import SimulateurTechnique from './SimulateurTechnique';
+import SimulateurBougies from './SimulateurBougies';
 
 /**
  * Simulations pédagogiques d'une leçon : calculées au rendu à partir des
@@ -156,5 +157,6 @@ export default function SimulationLecon({ sim }: { sim: Simulation }) {
   if (sim.type === 'objectif') return <Objectif sim={sim} />;
   if (sim.type === 'carnet' || sim.type === 'allocation' || sim.type === 'scenario_baisse') return <SimulationInteractive sim={sim} />;
   if (sim.type === 'technique') return <SimulateurTechnique sim={sim} />;
+  if (sim.type === 'bougies' || sim.type === 'figure_bougies') return <SimulateurBougies sim={sim} />;
   return <SimulateurLecon sim={sim} />;
 }

@@ -1,0 +1,305 @@
+{
+ "_lisez_moi": "Figures de chandeliers repérées par lib/academy/figuresBougies.ts sur les séances réelles (brvm_actions_daily, base WESTBOURSE, lue le 2026-11-24) des dix actions les plus échangées du 24/08 au 23/11/2026, de 2021 au 23/11/2026. « mesurables » : cas suivis d’au moins 5 séances. part_hausse_pct : part des cas où la clôture était plus haute 5 séances plus tard ; ic95_pct : intervalle de Wilson à 95 % ; ecart_etabli : l’intervalle exclut la part de toutes les séances lisibles (base). Pas un test de stratégie : ni frais, ni dédoublonnage des cas proches. Généré par scripts/academy-lecon2-stats.mjs.",
+ "periode": {
+  "debut": "2021-01-01",
+  "fin": "2026-11-23"
+ },
+ "horizon_seances": 5,
+ "min_cas": 30,
+ "comparaisons": 10,
+ "valeurs": [
+  {
+   "code": "BBGC",
+   "seances": 43,
+   "lisibles": 42,
+   "premiere": "2026-09-24"
+  },
+  {
+   "code": "BOAC",
+   "seances": 1483,
+   "lisibles": 632,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "BOAS",
+   "seances": 1484,
+   "lisibles": 397,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "ETIT",
+   "seances": 1478,
+   "lisibles": 626,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "NSBC",
+   "seances": 1476,
+   "lisibles": 629,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "ORAC",
+   "seances": 969,
+   "lisibles": 117,
+   "premiere": "2022-12-30"
+  },
+  {
+   "code": "SGBC",
+   "seances": 1483,
+   "lisibles": 631,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "SIBC",
+   "seances": 1486,
+   "lisibles": 634,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "SNTS",
+   "seances": 1486,
+   "lisibles": 633,
+   "premiere": "2021-01-04"
+  },
+  {
+   "code": "STBC",
+   "seances": 1370,
+   "lisibles": 582,
+   "premiere": "2021-01-05"
+  }
+ ],
+ "seances": 12758,
+ "seances_lisibles": 4923,
+ "marche": {
+  "periode": {
+   "debut": "2021-01-01",
+   "fin": "2026-11-23"
+  },
+  "valeurs": 48,
+  "seances": 63676,
+  "seances_sans_prix_complets": 38159,
+  "seances_avec_ouverture_et_echange": 25330,
+  "ouverture_egale_cloture_veille": 10357,
+  "source": "brvm_actions_daily, toutes actions cotées, lue le 2026-11-24"
+ },
+ "base": {
+  "mesurables": 4873,
+  "part_hausse_pct": 43.9154524933306,
+  "part_baisse_pct": 41.965934742458444,
+  "part_inchange_pct": 14.118612764210958,
+  "variation_moyenne_pct": 0.7248003846650717
+ },
+ "figures": [
+  {
+   "figure": "doji",
+   "libelle": "Doji",
+   "nb_bougies": 1,
+   "lecture_courante": "indecision",
+   "occurrences": 16,
+   "mesurables": 16,
+   "sens_compare": "hausse",
+   "part_pct": 12.5,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 12.5,
+   "part_baisse_pct": 75,
+   "ic95_pct": [
+    3.4976749337057136,
+    36.02333143674828
+   ],
+   "variation_moyenne_pct": -2.298994715528493,
+   "assez_de_cas": false,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "marteau",
+   "libelle": "Marteau",
+   "nb_bougies": 1,
+   "lecture_courante": "haussiere",
+   "occurrences": 2,
+   "mesurables": 2,
+   "sens_compare": "hausse",
+   "part_pct": 0,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 0,
+   "part_baisse_pct": 100,
+   "ic95_pct": [
+    0,
+    65.76280471103807
+   ],
+   "variation_moyenne_pct": -1.3294948648336746,
+   "assez_de_cas": false,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "etoile_filante",
+   "libelle": "Étoile filante",
+   "nb_bougies": 1,
+   "lecture_courante": "baissiere",
+   "occurrences": 3,
+   "mesurables": 3,
+   "sens_compare": "baisse",
+   "part_pct": 33.33333333333333,
+   "part_base_pct": 41.965934742458444,
+   "part_hausse_pct": 66.66666666666666,
+   "part_baisse_pct": 33.33333333333333,
+   "ic95_pct": [
+    6.14903152761605,
+    79.23450448735122
+   ],
+   "variation_moyenne_pct": 3.841160907121699,
+   "assez_de_cas": false,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "avalement_haussier",
+   "libelle": "Avalement haussier",
+   "nb_bougies": 2,
+   "lecture_courante": "haussiere",
+   "occurrences": 130,
+   "mesurables": 128,
+   "sens_compare": "hausse",
+   "part_pct": 39.0625,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 39.0625,
+   "part_baisse_pct": 53.90625,
+   "ic95_pct": [
+    31.046881571207507,
+    47.71551208906361
+   ],
+   "variation_moyenne_pct": -0.03439810583957302,
+   "assez_de_cas": true,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "avalement_baissier",
+   "libelle": "Avalement baissier",
+   "nb_bougies": 2,
+   "lecture_courante": "baissiere",
+   "occurrences": 128,
+   "mesurables": 125,
+   "sens_compare": "baisse",
+   "part_pct": 33.6,
+   "part_base_pct": 41.965934742458444,
+   "part_hausse_pct": 61.6,
+   "part_baisse_pct": 33.6,
+   "ic95_pct": [
+    25.91826049407464,
+    42.259719288852615
+   ],
+   "variation_moyenne_pct": 0.7054230198425616,
+   "assez_de_cas": true,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "harami",
+   "libelle": "Harami",
+   "nb_bougies": 2,
+   "lecture_courante": "ralentissement",
+   "occurrences": 613,
+   "mesurables": 608,
+   "sens_compare": "hausse",
+   "part_pct": 42.76315789473684,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 42.76315789473684,
+   "part_baisse_pct": 44.73684210526316,
+   "ic95_pct": [
+    38.88812329495362,
+    46.72906912870637
+   ],
+   "variation_moyenne_pct": 0.3934385201766642,
+   "assez_de_cas": true,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "etoile_du_matin",
+   "libelle": "Étoile du matin",
+   "nb_bougies": 3,
+   "lecture_courante": "haussiere",
+   "occurrences": 42,
+   "mesurables": 42,
+   "sens_compare": "hausse",
+   "part_pct": 38.095238095238095,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 38.095238095238095,
+   "part_baisse_pct": 45.23809523809524,
+   "ic95_pct": [
+    24.999520898785942,
+    53.18623178000364
+   ],
+   "variation_moyenne_pct": -0.13396173360335836,
+   "assez_de_cas": true,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "etoile_du_soir",
+   "libelle": "Étoile du soir",
+   "nb_bougies": 3,
+   "lecture_courante": "baissiere",
+   "occurrences": 55,
+   "mesurables": 53,
+   "sens_compare": "baisse",
+   "part_pct": 41.509433962264154,
+   "part_base_pct": 41.965934742458444,
+   "part_hausse_pct": 47.16981132075472,
+   "part_baisse_pct": 41.509433962264154,
+   "ic95_pct": [
+    29.260708309128653,
+    54.905817615546226
+   ],
+   "variation_moyenne_pct": 0.9880374350088601,
+   "assez_de_cas": true,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "trois_soldats",
+   "libelle": "Trois soldats blancs",
+   "nb_bougies": 3,
+   "lecture_courante": "haussiere",
+   "occurrences": 24,
+   "mesurables": 24,
+   "sens_compare": "hausse",
+   "part_pct": 50,
+   "part_base_pct": 43.9154524933306,
+   "part_hausse_pct": 50,
+   "part_baisse_pct": 45.83333333333333,
+   "ic95_pct": [
+    31.42713162776308,
+    68.57286837223691
+   ],
+   "variation_moyenne_pct": 2.8592478873387934,
+   "assez_de_cas": false,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  },
+  {
+   "figure": "trois_corbeaux",
+   "libelle": "Trois corbeaux noirs",
+   "nb_bougies": 3,
+   "lecture_courante": "baissiere",
+   "occurrences": 26,
+   "mesurables": 24,
+   "sens_compare": "baisse",
+   "part_pct": 41.66666666666667,
+   "part_base_pct": 41.965934742458444,
+   "part_hausse_pct": 54.166666666666664,
+   "part_baisse_pct": 41.66666666666667,
+   "ic95_pct": [
+    24.467347246538232,
+    61.16566235061137
+   ],
+   "variation_moyenne_pct": 1.518191294830507,
+   "assez_de_cas": false,
+   "ecart_etabli": false,
+   "ecart_sens": null
+  }
+ ]
+}
