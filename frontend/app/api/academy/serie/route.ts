@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   const [cours, ins] = await Promise.all([
     sb
       .from('brvm_actions_daily')
-      .select('date_marche, cours_jour')
+      .select('date_marche, cours_jour, ouverture, plus_haut, plus_bas, volume')
       .eq('code', code)
       .gte('date_marche', depuis)
       .order('date_marche', { ascending: true })
@@ -37,9 +37,20 @@ export async function GET(req: NextRequest) {
   // Une panne n'est jamais présentée comme « aucune donnée ».
   if (cours.error || ins.error) return NextResponse.json({ error: 'Lecture indisponible' }, { status: 502 });
 
-  const points = ((cours.data ?? []) as { date_marche: string; cours_jour: number | null }[])
+  // Bougie de la séance (2026-11-24, simulateur `bougies`) : un prix absent ou
+  // nul reste null — jamais remplacé par la clôture, qui fabriquerait une bougie.
+  const prix = (v: number | null) => (v != null && Number(v) > 0 ? Number(v) : null);
+  type Ligne = { date_marche: string; cours_jour: number | null; ouverture: number | null; plus_haut: number | null; plus_bas: number | null; volume: number | null };
+  const points = ((cours.data ?? []) as Ligne[])
     .filter((r) => r.cours_jour != null && Number(r.cours_jour) > 0)
-    .map((r) => ({ date: r.date_marche, cours: Number(r.cours_jour) }));
+    .map((r) => ({
+      date: r.date_marche,
+      cours: Number(r.cours_jour),
+      ouverture: prix(r.ouverture),
+      haut: prix(r.plus_haut),
+      bas: prix(r.plus_bas),
+      volume: r.volume == null ? null : Number(r.volume),
+    }));
   const nom = (ins.data as { designation: string | null } | null)?.designation ?? null;
   return NextResponse.json({ code, nom, points }, { headers: CACHE });
 }

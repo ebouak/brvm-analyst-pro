@@ -408,3 +408,21 @@
   color: var(--lp-hausse); background: color-mix(in srgb, var(--lp-hausse) 12%, transparent);
 }
 .lp-nouveaute--mis_a_jour { color: var(--lp-accent); background: var(--lp-accent-clair); }
+
+/* ── Bougies sur plusieurs séances (SimulateurBougies, 2026-11-24) ── */
+/* Le dessin garde sa largeur et défile horizontalement sur mobile : réduire
+   trente bougies à 340 px les rendrait illisibles. */
+.lp-chandeliers-cadre { overflow-x: auto; margin: 0.75rem 0 0.25rem; -webkit-overflow-scrolling: touch; }
+.lp-chandeliers { display: block; min-width: 520px; width: 100%; height: auto; }
+.lp-chandeliers-cadre--court .lp-chandeliers { min-width: 0; max-width: 420px; margin: 0 auto; }
+.lp-figures-reperees { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0.35rem; font-size: 0.92rem; color: var(--lp-texte); }
+.lp-figures-reperees li { display: flex; align-items: baseline; gap: 0.5rem; }
+.lp-figures-num {
+  flex: none; display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 700; color: var(--lp-accent); background: var(--lp-accent-clair);
+}
+.lp-saisie-bougies input {
+  width: 100%; min-width: 4.5rem; padding: 0.35rem 0.45rem; border: 1px solid var(--lp-trame); border-radius: 6px;
+  font: inherit; font-variant-numeric: tabular-nums; color: var(--lp-encre); background: #fff;
+}
+.lp-saisie-bougies input:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 1px; }

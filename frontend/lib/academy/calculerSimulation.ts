@@ -31,6 +31,7 @@ import {
   calculerValeurFuture,
 } from './simulateurs';
 import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, type PointSerie } from './simTechnique';
+import { lireFigureFictive, lireSeances } from './figuresBougies';
 
 export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): { lecture: string; alertes: string[] } {
   switch (sim.type) {
@@ -84,6 +85,12 @@ export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): {
       return calculerChange(sim);
     case 'chandelier':
       return lireBougie(sim);
+    case 'bougies':
+      return lireSeances(serie.slice(-sim.seances).map((p) => ({
+        date: p.date, ouverture: p.ouverture ?? null, haut: p.haut ?? null, bas: p.bas ?? null, cloture: p.cours, volume: p.volume ?? null,
+      })));
+    case 'figure_bougies':
+      return lireFigureFictive(sim.bougies);
     case 'croissance':
       return calculerCroissance(sim);
     case 'endettement':
