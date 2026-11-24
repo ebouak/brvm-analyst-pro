@@ -743,3 +743,102 @@ export function calculerChange(p: ParamsChange): ResultatChange {
   if (actions != null) lecture += ` À ${fmtFcfa(p.cours_action)} l’action, cela paie ${nb(actions)} titre(s), hors frais de courtage.`;
   return { fraisEur, fraisPct, netEur, fcfa, actions, lecture, alertes };
 }
+
+// ── Module zéro (2026-11-23) : croissance, endettement, ROE moyen ───────────
+
+export interface ParamsCroissance {
+  valeur_initiale: number;
+  valeur_finale: number;
+  /** Nombre d'années ENTRE les deux valeurs (2021 → 2025 : 4). */
+  annees: number;
+}
+
+export interface ResultatCroissance extends Lecture {
+  croissanceTotalePct: number;
+  /** Taux de croissance annuel moyen (TCAM). */
+  tcamPct: number;
+  /** Valeur de chaque année si la croissance avait été régulière, de l'initiale à la finale. */
+  trajectoire: number[];
+}
+
+export function calculerCroissance(p: ParamsCroissance): ResultatCroissance {
+  exiger(positif(p.valeur_initiale) && positif(p.valeur_finale), 'Les deux valeurs doivent être supérieures à zéro.');
+  exiger(Number.isInteger(p.annees) && p.annees >= 1, 'Le nombre d’années doit être un entier d’au moins 1.');
+  const facteur = p.valeur_finale / p.valeur_initiale;
+  const croissanceTotalePct = (facteur - 1) * 100;
+  const tcamPct = (Math.pow(facteur, 1 / p.annees) - 1) * 100;
+  const trajectoire = Array.from({ length: p.annees + 1 }, (_, k) => p.valeur_initiale * Math.pow(1 + tcamPct / 100, k));
+  const alertes: string[] = [];
+  if (p.annees === 1) alertes.push('Sur une seule année, le TCAM se confond avec la croissance annuelle.');
+  const lecture = `De ${nb(p.valeur_initiale, 1)} à ${nb(p.valeur_finale, 1)} en ${nb(p.annees)} an${p.annees > 1 ? 's' : ''} : ${fmtPct(croissanceTotalePct)} au total, soit un taux de croissance annuel moyen de ${fmtPct(tcamPct)}. Le TCAM lisse le parcours : une année forte et une année faible peuvent donner le même taux qu’une progression régulière.`;
+  return { croissanceTotalePct, tcamPct, trajectoire, lecture, alertes };
+}
+
+export interface ParamsEndettement {
+  dettes_financieres: number;
+  tresorerie: number;
+  capitaux_propres: number;
+  resultat_operationnel: number;
+  charges_interets: number;
+}
+
+export interface ResultatEndettement extends Lecture {
+  detteNette: number;
+  gearingPct: number;
+  /** Résultat opérationnel ÷ charges d'intérêts ; null sans charges d'intérêts. */
+  couverture: number | null;
+}
+
+export function calculerEndettement(p: ParamsEndettement): ResultatEndettement {
+  exiger(finiPositifOuNul(p.dettes_financieres) && finiPositifOuNul(p.tresorerie) && finiPositifOuNul(p.charges_interets), 'Dettes, trésorerie et charges d’intérêts ne peuvent pas être négatives.');
+  exiger(positif(p.capitaux_propres), 'Les capitaux propres doivent être supérieurs à zéro pour calculer le gearing.');
+  exiger(Number.isFinite(p.resultat_operationnel), 'Le résultat opérationnel doit être un nombre.');
+  const detteNette = p.dettes_financieres - p.tresorerie;
+  const gearingPct = (detteNette / p.capitaux_propres) * 100;
+  const couverture = p.charges_interets > 0 ? p.resultat_operationnel / p.charges_interets : null;
+  const alertes: string[] = [];
+  if (gearingPct > 100) alertes.push(`Un gearing de ${fmtPct(gearingPct)} : la dette nette dépasse les capitaux propres.`);
+  if (couverture != null && couverture < 3) alertes.push(`Le résultat opérationnel ne couvre les intérêts que ${fmtX(couverture)} fois : une baisse d’activité pèserait vite sur le résultat.`);
+  let lecture = detteNette < 0
+    ? `La trésorerie dépasse les dettes financières : l’entreprise est en trésorerie nette de ${nb(-detteNette, 1)}. Le gearing est négatif (${fmtPct(gearingPct)}).`
+    : `Dette nette de ${nb(detteNette, 1)}, soit un gearing de ${fmtPct(gearingPct)} des capitaux propres.`;
+  lecture += couverture == null
+    ? ' Sans charges d’intérêts, la couverture ne se calcule pas.'
+    : ` Le résultat opérationnel couvre ${fmtX(couverture)} fois les charges d’intérêts.`;
+  lecture += ' Ces ratios ne s’appliquent pas à une banque, dont la dette est la matière première.';
+  return { detteNette, gearingPct, couverture, lecture, alertes };
+}
+
+export interface ParamsRoeMoyen {
+  resultat_net: number;
+  capitaux_debut: number;
+  capitaux_fin: number;
+  actif_debut?: number;
+  actif_fin?: number;
+}
+
+export interface ResultatRoeMoyen extends Lecture {
+  roeClotPct: number;
+  roeMoyenPct: number;
+  /** ROA sur actif moyen ; null sans les deux totaux d'actif. */
+  roaMoyenPct: number | null;
+}
+
+export function calculerRoeMoyen(p: ParamsRoeMoyen): ResultatRoeMoyen {
+  exiger(Number.isFinite(p.resultat_net), 'Le résultat net doit être un nombre.');
+  exiger(positif(p.capitaux_debut) && positif(p.capitaux_fin), 'Les capitaux propres doivent être supérieurs à zéro.');
+  const roeClotPct = (p.resultat_net / p.capitaux_fin) * 100;
+  const moyens = (p.capitaux_debut + p.capitaux_fin) / 2;
+  const roeMoyenPct = (p.resultat_net / moyens) * 100;
+  const actifs = p.actif_debut != null && p.actif_fin != null && positif(p.actif_debut) && positif(p.actif_fin);
+  const roaMoyenPct = actifs ? (p.resultat_net / ((p.actif_debut! + p.actif_fin!) / 2)) * 100 : null;
+  const ecart = roeMoyenPct - roeClotPct;
+  const alertes: string[] = [];
+  if (Math.abs(ecart) >= 2) alertes.push(`Écart de ${fmtPct(Math.abs(ecart))} entre les deux méthodes : comparez deux sociétés avec la même.`);
+  let lecture = `ROE sur capitaux propres moyens : ${fmtPct(roeMoyenPct)} ; sur capitaux de clôture : ${fmtPct(roeClotPct)}.`;
+  lecture += p.capitaux_fin > p.capitaux_debut
+    ? ' Quand les capitaux propres augmentent dans l’année, le ROE de clôture sous-estime le rendement réellement obtenu.'
+    : ' Quand les capitaux propres baissent dans l’année, le ROE de clôture surestime le rendement réellement obtenu.';
+  if (roaMoyenPct != null) lecture += ` Rapporté à l’actif moyen, le résultat donne un ROA de ${fmtPct(roaMoyenPct, 2)}.`;
+  return { roeClotPct, roeMoyenPct, roaMoyenPct, lecture, alertes };
+}

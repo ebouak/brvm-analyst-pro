@@ -9,6 +9,8 @@ import { SectionHeader } from '@/components/ui/premium';
 import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { NIVEAUX, NIVEAU_LABEL, type CourseContent, type Niveau } from '@/lib/academy/types';
 import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academy/progressCalc';
+import { badgeEnsemble, type Badge } from '@/lib/academy/nouveaute';
+import BadgeNouveaute from '@/components/academy/BadgeNouveaute';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +27,8 @@ interface HubCourse {
   resume: string | null;
   lessonsCount: number;
   cover: string | null;
+  /** « Nouveau » / « Mis à jour » d'après les leçons ; s'éteint seul (lib/academy/nouveaute.ts). */
+  badge: Badge | null;
 }
 
 export default async function AcademyHubPage() {
@@ -65,6 +69,7 @@ export default async function AcademyHubPage() {
     id: r.id, slug: r.slug, titre: r.titre, niveau: r.niveau, resume: r.resume,
     lessonsCount: r.content?.lessons?.length ?? 0,
     cover: r.content?.lessons?.find((l) => l.image?.url)?.image?.url ?? null,
+    badge: badgeEnsemble(r.content?.lessons ?? [], new Date()),
   }));
 
   // Progression de l'utilisateur (RLS owner via session).
@@ -142,9 +147,12 @@ export default async function AcademyHubPage() {
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
                             <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${p.pct}%` }} />
                           </div>
-                          <p className="mt-1.5 text-[11px] text-faint">
-                            {c.lessonsCount} leçons ·{' '}
-                            {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
+                          <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-faint">
+                            <span>
+                              {c.lessonsCount} leçons ·{' '}
+                              {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
+                            </span>
+                            {c.badge && <BadgeNouveaute badge={c.badge} />}
                           </p>
                         </div>
                         </div>

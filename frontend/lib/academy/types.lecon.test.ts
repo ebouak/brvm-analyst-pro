@@ -86,11 +86,12 @@ describe('schéma de leçon — blocs éditoriaux optionnels', () => {
     expect(sectionSchema.safeParse({ ...base, donnees_reelles: { vue: 'prevision', codes: ['SNTS'] } }).success).toBe(false);
   });
 
-  it('quiz en série : de 1 à 10 questions, chacune avec une bonne réponse dans ses options', () => {
+  it('quiz en série : de 1 à 20 questions (plafond relevé le 2026-11-23), chacune avec une bonne réponse dans ses options', () => {
     const q = { question: 'Q ?', options: ['a', 'b'], correct: 1, explication: 'Parce que.' };
     expect(lessonSchema.safeParse({ ...ancienne, quiz: [q, q, q, q, q] }).success).toBe(true);
     expect(lessonSchema.safeParse({ ...ancienne, quiz: [{ ...q, correct: 2 }] }).success).toBe(false);
-    expect(lessonSchema.safeParse({ ...ancienne, quiz: Array(11).fill(q) }).success).toBe(false);
+    expect(lessonSchema.safeParse({ ...ancienne, quiz: Array(20).fill(q) }).success).toBe(true);
+    expect(lessonSchema.safeParse({ ...ancienne, quiz: Array(21).fill(q) }).success).toBe(false);
   });
 
   it('« Cas réel BRVM » seulement quand le cas est réel ; sinon « Exemple »', () => {

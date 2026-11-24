@@ -1,0 +1,423 @@
+{
+  "titre": "Leçon 0.8 — Méthode, signaux d’alerte et conclusion",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 16,
+  "sous_titre": "La méthode en huit étapes, les huit signaux d’alerte, un tableau de suivi rempli, les erreurs courantes et un modèle de conclusion.",
+  "resume": "Cette dernière leçon du module rassemble l’outillage : la méthode pratique en huit étapes, les signaux d’alerte à reconnaître, un modèle de tableau de suivi rempli avec les comptes d’Ecobank Côte d’Ivoire, les erreurs les plus courantes et leur correction, les conclusions des deux comparaisons, un modèle de conclusion pour une fiche et la liste des sources consultées.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "La méthode pratique en huit étapes",
+      "contenu": "Les huit étapes reprennent le parcours de la leçon 0.1 en le rendant opérationnel. Chacune produit quelque chose : un tableau, une note, une hypothèse écrite.\nL’ordre compte. Choisir les ratios avant d’avoir compris l’activité conduit à appliquer à une banque les indicateurs d’un industriel ; évaluer avant d’avoir vérifié la qualité des comptes revient à valoriser un bénéfice qui n’existe peut-être pas.",
+      "etapes": [
+        {
+          "titre": "Rassembler les données",
+          "detail": "Les états financiers sur au moins trois exercices ; la date et la source de chaque donnée."
+        },
+        {
+          "titre": "Vérifier la qualité",
+          "detail": "Le rapport d’audit, les annexes, les changements de méthode et les opérations exceptionnelles."
+        },
+        {
+          "titre": "Comprendre l’activité",
+          "detail": "Le modèle économique, les clients, les coûts, les concurrents et les risques principaux."
+        },
+        {
+          "titre": "Observer les tendances",
+          "detail": "PNB ou chiffre d’affaires, marges, résultat net, BPA, dette, flux de trésorerie et dividendes sur plusieurs années."
+        },
+        {
+          "titre": "Choisir les ratios adaptés",
+          "detail": "Ceux du secteur : pas les indicateurs d’une entreprise industrielle pour une banque.",
+          "cle": true
+        },
+        {
+          "titre": "Évaluer la valorisation",
+          "detail": "Plusieurs méthodes (multiples, DCF, dividende) et plusieurs scénarios, pas un seul chiffre."
+        },
+        {
+          "titre": "Tenir compte du marché",
+          "detail": "Liquidité, flottant, écart achat-vente et volumes : le prix affiché n’est pas forcément un prix d’exécution réaliste."
+        },
+        {
+          "titre": "Conclure avec équilibre",
+          "detail": "Forces, faiblesses, risques, hypothèses de valorisation et ce qui pourrait changer l’analyse.",
+          "cle": true
+        }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Risques et signaux d’alerte",
+      "contenu": "Huit situations doivent faire ralentir l’analyse. Aucune n’est une condamnation ; chacune appelle une vérification dans les comptes.\nAppliqués aux sociétés de ce module, ces signaux orientent les vérifications sans rien trancher. Le dividende publié pour 2025 par Société Générale Côte d’Ivoire représente 80 % de son BPA : un taux élevé, qui reste sous le bénéfice mais appelle un regard sur les flux de trésorerie. Orange Côte d’Ivoire distribue 63 % de son BPA en dividende net, Sonatel 42 %.\nLa dette nette de Sonatel, selon S&P Global, passe de −3 milliards en 2024 à 133 milliards en 2025 ; elle reste modeste au regard de son free cash flow (364 milliards en 2025). Chez Ecobank Côte d’Ivoire, c’est le coût du risque qui se tend en 2026, après une année 2025 très favorable : le signal à suivre est la qualité des crédits, pas l’endettement.",
+      "points": [
+        {
+          "titre": "Bénéfices en hausse, trésorerie en baisse",
+          "detail": "Si les bénéfices progressent mais que les flux de trésorerie opérationnels se dégradent durablement, il faut chercher une hausse des créances, des stocks ou d’autres éléments."
+        },
+        {
+          "titre": "Dette qui progresse plus vite que les résultats",
+          "detail": "Un endettement croissant sans croissance proportionnelle des résultats est un signal de risque."
+        },
+        {
+          "titre": "Réserves du commissaire aux comptes",
+          "detail": "Des réserves d’audit ou des retards importants de publication doivent alerter sur la qualité de l’information."
+        },
+        {
+          "titre": "Dividendes supérieurs aux bénéfices",
+          "detail": "Si les dividendes dépassent durablement les bénéfices et les flux de trésorerie, la distribution n’est pas soutenable."
+        },
+        {
+          "titre": "Dépendance excessive",
+          "detail": "Une forte dépendance à un produit, un client, un fournisseur ou une matière première augmente le risque."
+        },
+        {
+          "titre": "Résultat reposant sur l’exceptionnel",
+          "detail": "Un résultat gonflé par des éléments non récurrents (cession d’actifs, reprise de provisions) ne préjuge pas de la rentabilité future."
+        },
+        {
+          "titre": "Faible flottant ou échanges rares",
+          "detail": "Un titre peu liquide est difficile à acheter ou à vendre sans effet sur le cours : le prix affiché peut être trompeur."
+        },
+        {
+          "titre": "Dilution des actionnaires",
+          "detail": "Des augmentations de capital répétées diluent la part des actionnaires existants sans contrepartie claire."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Modèle de tableau de suivi, rempli avec Ecobank Côte d’Ivoire",
+      "reel": true,
+      "contenu": "Le modèle tient sur une page : trois exercices, une tendance, une source datée par ligne. Reproduisez-le pour chaque société suivie ; le bloc en direct, en dessous, recalcule les ratios au dernier cours.\nLa colonne « Tendance » compare 2025 à 2023 : « en hausse » au-delà de +2 %, « en baisse » en deçà de −2 %, « stable » entre les deux. Sur Ecobank Côte d’Ivoire, presque tout monte : PNB, résultat, fonds propres, dividende. Mais le PER passe aussi de 7,79 à 13,87, et le rendement à la clôture recule de 8,7 % à 5,5 %. Le tableau dit à la fois que l’entreprise a progressé et que son cours a progressé plus vite qu’elle.",
+      "tableau": {
+        "colonnes": [
+          "Indicateur",
+          "2023",
+          "2024",
+          "2025",
+          "Tendance",
+          "Source et date"
+        ],
+        "lignes": [
+          [
+            "PNB (Md FCFA)",
+            "110,2",
+            "122,3",
+            "132,7",
+            "En hausse",
+            "Comptes publiés, BRVM"
+          ],
+          [
+            "Résultat net (Md FCFA)",
+            "48,1",
+            "57,5",
+            "63,5",
+            "En hausse",
+            "Comptes publiés, BRVM"
+          ],
+          [
+            "ROE (capitaux de clôture)",
+            "27,0 %",
+            "28,8 %",
+            "29,0 %",
+            "En hausse",
+            "Calcul WESTBOURSE"
+          ],
+          [
+            "Total du bilan (Md FCFA)",
+            "1 953,3",
+            "2 050,7",
+            "2 054,5",
+            "En hausse",
+            "Comptes publiés, BRVM"
+          ],
+          [
+            "Capitaux propres (Md FCFA)",
+            "178,2",
+            "199,4",
+            "218,6",
+            "En hausse",
+            "Comptes publiés, BRVM"
+          ],
+          [
+            "Dividende par action publié (FCFA)",
+            "594,00",
+            "708,00",
+            "888 brut",
+            "En hausse",
+            "Calendrier des dividendes, BRVM"
+          ],
+          [
+            "PER à la clôture de l’année",
+            "7,79",
+            "8,42",
+            "13,87",
+            "En hausse",
+            "Calcul WESTBOURSE"
+          ],
+          [
+            "Rendement à la clôture de l’année",
+            "8,7 %",
+            "8,1 %",
+            "5,5 %",
+            "En baisse",
+            "Calcul WESTBOURSE"
+          ],
+          [
+            "Cours de clôture de l’année (FCFA)",
+            "6 800",
+            "8 795",
+            "16 000",
+            "En hausse",
+            "Clôtures de la BRVM"
+          ]
+        ],
+        "note": "Une tendance « en hausse » du PER ou « en baisse » du rendement n’est ni bonne ni mauvaise en soi : elle dit que le cours a monté plus vite que le bénéfice ou le dividende."
+      },
+      "donnees_reelles": {
+        "vue": "ratios",
+        "codes": [
+          "ECOC"
+        ]
+      }
+    },
+    {
+      "type": "piege",
+      "titre": "Erreurs courantes à éviter",
+      "contenu": "Neuf erreurs reviennent sans cesse, chez les débutants comme chez les lecteurs pressés. Chacune a sa correction.\nCe module en a croisé plusieurs sur des cas réels. Trois PER différents pour Sonatel au même moment (9,43, 9,77 et 11,25) illustrent l’erreur des périodes et des définitions mélangées. Deux séries de PNB pour Ecobank Côte d’Ivoire illustrent celle des données retraitées. Le rendement de 6,66 % affiché pour Sonatel, qui se retrouve exactement sur la clôture 2025 et non sur le cours du jour, illustre celle de la date du cours.",
+      "tableau": {
+        "colonnes": [
+          "Erreur",
+          "Correction"
+        ],
+        "lignes": [
+          [
+            "Conclure qu’une action est bon marché parce que son cours est bas.",
+            "Un cours bas peut refléter des problèmes fondamentaux. Comparez avec une valeur estimée, pas avec un cours passé."
+          ],
+          [
+            "Acheter sur la base d’un PER faible sans vérifier la qualité des bénéfices.",
+            "Vérifiez si le bénéfice est récurrent ou exceptionnel. Privilégiez un bénéfice normalisé."
+          ],
+          [
+            "Confondre bénéfice comptable et trésorerie disponible.",
+            "Examinez le tableau des flux de trésorerie : le bénéfice peut être positif alors que la trésorerie se dégrade."
+          ],
+          [
+            "Comparer directement des sociétés de secteurs différents.",
+            "Les ratios pertinents varient selon le secteur. Ne comparez pas une banque avec une entreprise industrielle."
+          ],
+          [
+            "Utiliser un dividende passé comme s’il était garanti.",
+            "Le dividende futur n’est jamais garanti. Examinez les bénéfices et les flux de trésorerie pour juger sa soutenabilité."
+          ],
+          [
+            "Calculer un ratio avec des données de périodes différentes.",
+            "Homogénéisez les périodes : le PER doit associer un cours et un bénéfice de la même période."
+          ],
+          [
+            "Ignorer la liquidité du titre.",
+            "Vérifiez les volumes et l’écart achat-vente : un cours affiché peut ne pas être exécutable."
+          ],
+          [
+            "Se fier à une seule année ou à un seul ratio.",
+            "Croisez plusieurs ratios sur plusieurs années et intégrez des éléments qualitatifs."
+          ],
+          [
+            "Présenter une estimation comme une certitude.",
+            "Formulez des hypothèses explicites et présentez des scénarios. Toute valorisation est une approximation."
+          ]
+        ]
+      }
+    },
+    {
+      "type": "retenir",
+      "titre": "Les deux conclusions du module",
+      "contenu": "Les deux comparaisons se concluent de la même façon : elles décrivent des profils, elles ne désignent pas de gagnant.",
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Banques : ECOC face à SGBC (exercice 2025, cours au 23/11/2026)",
+          "texte": "SGBC est plus grande en PNB, en bilan et en capitaux propres ; elle présente un PER plus bas (11,54 contre 12,54) et un rendement du dividende plus élevé, et son cours a progressé en 2026 (+25,8 %).\nECOC affiche un ROE plus élevé (29,0 % contre 20,5 %) et une meilleure marge nette ; son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (−9,7 %).\nPour conclure davantage, il faudrait aligner normes comptables, définition du résultat, ROE sur capitaux moyens, indicateur de qualité des crédits, coût du risque, dividende, BPA, date du cours et liquidité."
+        },
+        {
+          "ton": "cle",
+          "titre": "Télécoms : Sonatel face à Orange CI (exercice 2025, cours au 23/11/2026)",
+          "texte": "Sonatel est plus grande (1 923,1 milliards de chiffre d’affaires contre 1 197,1), plus rentable (marge nette consolidée 21,5 % contre 14,0 %), moins chère (PER 9,43 contre 17,06) et bien plus liquide.\nOrange CI croît plus vite (+18,7 % de résultat sur neuf mois 2026) et le marché lui accorde un PER plus élevé. Les deux opérateurs investissent environ 16 % de leur chiffre d’affaires dans leurs réseaux."
+        },
+        {
+          "ton": "alerte",
+          "titre": "À lire avec ces conclusions",
+          "texte": "Ces comparaisons sont informatives et ne constituent pas une recommandation d’achat ou de vente."
+        }
+      ]
+    },
+    {
+      "type": "definition",
+      "titre": "Modèle de conclusion pour une fiche",
+      "contenu": "Une conclusion honnête nomme les profils, dit ce que les ratios ne disent pas, cite ses sources et sa date. Le modèle ci-dessous se complète entre crochets.",
+      "encadres": [
+        {
+          "ton": "info",
+          "titre": "Modèle à compléter",
+          "texte": "« Sur la base des informations disponibles pour l’exercice [année] et des cours de référence du [date], [Société A] et [Société B] présentent des profils différents. [A] affiche [atout principal : taille, rentabilité, rendement], tandis que [B] se distingue par [atout principal]. Les PER ne constituent qu’un élément de comparaison. L’analyse doit être complétée par des données homogènes sur [indicateurs sectoriels pertinents], les fonds propres, le dividende, la liquidité boursière et les perspectives. Les données proviennent de la BRVM et des comptes publiés par les sociétés, recalculées par WESTBOURSE, et de [autres sources], chacune avec sa date. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente. »"
+        }
+      ]
+    },
+    {
+      "type": "lexique",
+      "titre": "Sources consultées",
+      "contenu": "Chaque chiffre de ce module renvoie à l’une de ces sources. Les données de la BRVM et des sociétés font foi ; les autres sont citées avec leur date de consultation.",
+      "tableau": {
+        "colonnes": [
+          "Source",
+          "Type de données",
+          "Date d’accès"
+        ],
+        "lignes": [
+          [
+            "BRVM (brvm.org)",
+            "Rapports d’activité et états financiers d’ECOC, SGBC, SNTS et ORAC, avis, cours officiels, Bulletin officiel de la cote, calendrier de paiement des dividendes",
+            "23/11/2026"
+          ],
+          [
+            "WESTBOURSE (westbourse.com)",
+            "Comptes publiés en base, ratios recalculés (BPA, PER, ROE, marge nette, rendement), clôtures, carnet d’ordres et notes de liquidité",
+            "Lus le 24/11/2026"
+          ],
+          [
+            "Sika Finance (sikafinance.com)",
+            "Comptes intermédiaires de 2026 non encore en base, coût du risque, solvabilité, rendements affichés, actualités",
+            "23/11/2026"
+          ],
+          [
+            "StockAnalysis / S&P Global Market Intelligence",
+            "États financiers standardisés, PER sur douze mois glissants, résultat part du groupe, EBITDA, free cash flow, dette nette, capex, bêta",
+            "23/11/2026"
+          ],
+          [
+            "Sonatel (sonatel.sn)",
+            "Présentation du groupe, présence dans cinq pays",
+            "23/11/2026"
+          ],
+          [
+            "BCEAO (bceao.int)",
+            "Rapports annuels 2022 et 2023 : ratio de solvabilité minimum de l’UMOA",
+            "24/11/2026"
+          ],
+          [
+            "allAfrica, Daba Finance",
+            "Résultats trimestriels d’ECOC, contexte sectoriel",
+            "23/11/2026"
+          ],
+          [
+            "FGI Bourse (fgi-bourse.com)",
+            "Analyse des états financiers d’ECOC 2025",
+            "23/11/2026"
+          ],
+          [
+            "APBEF-CI",
+            "Parts de marché bancaires en Côte d’Ivoire (avril 2026)",
+            "Via Sika Finance"
+          ]
+        ]
+      },
+      "encadres": [
+        {
+          "ton": "alerte",
+          "titre": "Avertissement",
+          "texte": "Ce module est un support pédagogique destiné aux investisseurs de la BRVM. Il ne constitue pas un conseil personnalisé d’achat ou de vente de titres. Les cours peuvent varier ; les ratios sont indicatifs et reposent sur les données disponibles à la date indiquée. Avant toute décision d’investissement, consultez un conseiller financier agréé et référez-vous aux documents officiels publiés par les sociétés et par la BRVM."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Les bénéfices d’une société progressent depuis trois ans, mais ses flux de trésorerie d’exploitation baissent. Que vérifier en premier ?",
+      "options": [
+        "Le nombre de ses salariés et de ses implantations",
+        "L’évolution de ses créances clients et de ses stocks",
+        "Le cours de bourse de ses principaux concurrents cotés",
+        "La date de sa prochaine assemblée générale"
+      ],
+      "correct": 1,
+      "explication": "Un bénéfice qui ne se transforme pas en trésorerie s’explique souvent par des créances ou des stocks qui gonflent."
+    },
+    {
+      "question": "Une société verse chaque année un dividende supérieur à son bénéfice. Que faut-il en conclure ?",
+      "options": [
+        "Que la distribution n’est pas soutenable durablement",
+        "Que son PER est forcément bas et son action sous-évaluée",
+        "Que l’action est garantie",
+        "Que son ROE est nul"
+      ],
+      "correct": 0,
+      "explication": "Distribuer plus que ce que l’on gagne puise dans les réserves ou la trésorerie : cela ne peut pas durer."
+    },
+    {
+      "question": "Pourquoi homogénéiser les périodes avant de calculer un PER ?",
+      "options": [
+        "Parce que le PER ne se calcule qu’en décembre",
+        "Pour associer un cours et un bénéfice de la même période",
+        "Pour éviter de payer des frais de courtage",
+        "Parce que la BRVM impose de publier tous les ratios à la même date chaque année"
+      ],
+      "correct": 1,
+      "explication": "Un cours d’aujourd’hui rapporté à un bénéfice d’il y a deux ans donne un PER qui ne mesure rien de précis."
+    },
+    {
+      "question": "Dans un tableau de suivi, que doit indiquer chaque ligne en plus des chiffres ?",
+      "options": [
+        "Une recommandation",
+        "Le nom de l’analyste",
+        "Sa source et sa date",
+        "Un objectif de cours"
+      ],
+      "correct": 2,
+      "explication": "Une source et une date par ligne permettent de vérifier et de mettre à jour le tableau."
+    },
+    {
+      "question": "Une conclusion d’analyse bien construite…",
+      "options": [
+        "désigne toujours la meilleure action",
+        "décrit des profils, écrit ses hypothèses et cite ses sources",
+        "ne mentionne jamais de chiffres",
+        "reprend la conclusion du dernier article publié sur la société par la presse"
+      ],
+      "correct": 1,
+      "explication": "Elle décrit, ne prescrit pas : forces, faiblesses, hypothèses et sources datées."
+    }
+  ],
+  "qcm": {
+    "question": "Les bénéfices d’une société progressent depuis trois ans, mais ses flux de trésorerie d’exploitation baissent. Que vérifier en premier ?",
+    "options": [
+      "Le nombre de ses salariés et de ses implantations",
+      "L’évolution de ses créances clients et de ses stocks",
+      "Le cours de bourse de ses principaux concurrents cotés",
+      "La date de sa prochaine assemblée générale"
+    ],
+    "correct": 1,
+    "explication": "Un bénéfice qui ne se transforme pas en trésorerie s’explique souvent par des créances ou des stocks qui gonflent."
+  },
+  "liens": [
+    {
+      "label": "Le screener",
+      "href": "/screener"
+    },
+    {
+      "label": "Comparer des actions",
+      "href": "/actions/compare"
+    },
+    {
+      "label": "Les fiches sociétés",
+      "href": "/societes"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}

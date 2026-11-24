@@ -1,0 +1,285 @@
+{
+  "titre": "Leçon 0.1 — Le principe, le marché BRVM et les sources",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 14,
+  "sous_titre": "Analyser l’entreprise avant son action : quatre questions, un parcours en six étapes, les particularités de la BRVM et les sources à privilégier.",
+  "resume": "L’analyse fondamentale estime la valeur économique d’une entreprise à partir de ses comptes, de son activité, de ses perspectives et des risques qu’elle encourt, puis compare cette valeur estimée au cours de bourse. Cette leçon ouvre le cours complet : les quatre questions à se poser, le parcours d’analyse en six étapes, ce qui distingue la BRVM d’une grande place financière, et les sources à consulter, dans l’ordre de fiabilité.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Le principe : analyser l’entreprise avant son action",
+      "contenu": "L’analyse fondamentale consiste à estimer la valeur économique d’une entreprise à partir de ses comptes, de son activité, de ses perspectives et des risques qu’elle encourt. L’objectif est de comparer cette valeur estimée avec le cours en bourse, puis de juger si l’écart justifie un investissement.\nElle s’oppose à une lecture qui ne regarde que le graphique du cours. Un cours monte ou baisse pour des raisons très diverses ; l’analyse fondamentale cherche ce que l’entreprise produit réellement, en bénéfices et en trésorerie, et ce que l’acheteur paie pour y avoir droit.\nQuatre questions structurent tout le travail. Chacune renvoie à des documents et à des ratios précis, que les leçons suivantes détaillent un par un, puis appliquent à quatre sociétés cotées : deux banques, Ecobank Côte d’Ivoire et Société Générale Côte d’Ivoire, et deux opérateurs de télécommunications, Sonatel et Orange Côte d’Ivoire.",
+      "points": [
+        {
+          "titre": "L’entreprise est-elle solide ?",
+          "detail": "Qualité des actifs, niveau d’endettement, liquidité, réserves, risques identifiés dans le rapport d’audit.",
+          "verifier": "Le rapport des commissaires aux comptes : opinion sans réserve ?"
+        },
+        {
+          "titre": "Est-elle rentable ?",
+          "detail": "Croissance du chiffre d’affaires ou du produit net bancaire (PNB), évolution des marges, rendement des capitaux propres (ROE), rendement des actifs (ROA).",
+          "verifier": "Les marges sur au moins trois exercices, pas sur un seul."
+        },
+        {
+          "titre": "Génère-t-elle de la trésorerie ?",
+          "detail": "Le bénéfice comptable n’est pas la trésorerie. Il faut examiner les flux de trésorerie opérationnels et disponibles (free cash flow).",
+          "verifier": "Le tableau des flux : les flux d’exploitation suivent-ils le résultat ?"
+        },
+        {
+          "titre": "Le cours est-il raisonnable ?",
+          "detail": "Le PER, le P/B et le rendement du dividende permettent de comparer le prix payé avec les résultats générés, en tenant compte de la liquidité du titre.",
+          "verifier": "Le volume échangé : le cours affiché est-il un prix réellement praticable ?"
+        }
+      ],
+      "etapes": [
+        {
+          "titre": "Comprendre l’activité et le modèle économique",
+          "detail": "Ce que l’entreprise vend, à qui, avec quels coûts et face à quels concurrents."
+        },
+        {
+          "titre": "Vérifier les comptes et leur qualité",
+          "detail": "Rapport d’audit, annexes, changements de méthode, opérations exceptionnelles."
+        },
+        {
+          "titre": "Mesurer croissance, rentabilité et risques sur plusieurs années",
+          "detail": "Au moins trois exercices, avec les mêmes définitions d’une année sur l’autre."
+        },
+        {
+          "titre": "Estimer la valeur de l’action",
+          "detail": "Multiples (PER, P/B), actualisation des flux (DCF), dividende.",
+          "cle": true
+        },
+        {
+          "titre": "Tenir compte du cours, de la liquidité et du prix d’exécution",
+          "detail": "Volumes, flottant, écart entre le prix demandé et le prix offert."
+        },
+        {
+          "titre": "Conclure avec des hypothèses et des risques explicites",
+          "detail": "Une valorisation est une approximation : ses hypothèses doivent être écrites.",
+          "cle": true
+        }
+      ],
+      "etapes_style": "frise",
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Règle d’or",
+          "texte": "Un PER faible ne suffit pas à prouver qu’une action est bon marché. Le bénéfice peut être exceptionnel, le risque élevé, la liquidité insuffisante ou les perspectives dégradées. Toujours croiser plusieurs indicateurs."
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "La BRVM : ce qui change la lecture des chiffres",
+      "contenu": "La Bourse Régionale des Valeurs Mobilières (BRVM) regroupe les sociétés de l’UEMOA, soit huit pays : Côte d’Ivoire, Sénégal, Burkina Faso, Mali, Niger, Bénin, Togo et Guinée-Bissau. Son marché présente des particularités qui influencent directement l’analyse fondamentale.\nLa liquidité en donne la mesure. Lors de la séance du 23 novembre 2026, 88 961 actions Sonatel ont changé de mains, contre 2 509 actions Orange Côte d’Ivoire. Les deux sociétés pèsent pourtant plusieurs milliers de milliards de FCFA en bourse : sur la seconde, un ordre important peut à lui seul déplacer le cours.\nLe tableau ci-dessous reprend les six particularités à garder en tête, leur effet sur l’analyse et la précaution qui va avec. Le bloc suivant affiche les derniers cours de quatre grandes valeurs, lus en base au moment où vous ouvrez la leçon.",
+      "stats": [
+        {
+          "label": "Titres Sonatel échangés le 23/11/2026",
+          "valeur": "88 961",
+          "detail": "Séance de la BRVM, base WESTBOURSE"
+        },
+        {
+          "label": "Titres Orange CI échangés le même jour",
+          "valeur": "2 509",
+          "detail": "Soit 35 fois moins"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Caractéristique",
+          "Impact sur l’analyse",
+          "Précaution"
+        ],
+        "lignes": [
+          [
+            "Liquidité parfois limitée",
+            "Certaines actions s’échangent peu. Le dernier cours affiché peut ne pas représenter un prix auquel on peut acheter ou vendre une quantité importante.",
+            "Vérifier les volumes quotidiens et l’écart achat-vente (bid-ask spread)."
+          ],
+          [
+            "Flottant variable",
+            "Une grande partie du capital est souvent détenue par des actionnaires de référence, ce qui réduit les titres réellement disponibles.",
+            "Consulter le nombre d’actions en circulation et le pourcentage de flottant."
+          ],
+          [
+            "Écarts achat-vente importants",
+            "Le prix demandé par les vendeurs peut être très éloigné du prix offert par les acheteurs.",
+            "Ne pas se fier au seul cours de clôture. Examiner le carnet d’ordres."
+          ],
+          [
+            "Données à dates variables",
+            "Les rapports peuvent être publiés à des dates différentes selon les sociétés.",
+            "Homogénéiser les périodes comparées. Toujours indiquer la date de chaque donnée."
+          ],
+          [
+            "Diversité sectorielle",
+            "Banque, assurance, télécoms, agro-industrie, distribution, énergie : les ratios pertinents ne sont pas les mêmes.",
+            "Ne pas comparer mécaniquement les postes d’une banque avec ceux d’une entreprise industrielle."
+          ],
+          [
+            "Référentiel SYSCOHADA",
+            "Les états financiers sont préparés selon le SYSCOHADA révisé, avec des règles propres aux banques et aux assurances.",
+            "Vérifier si des comptes consolidés en normes IFRS sont aussi publiés."
+          ]
+        ],
+        "note": "Le carnet d’ordres de chaque valeur figure sur sa fiche société : la BRVM publie chaque séance la meilleure limite de chaque côté dans son Bulletin officiel de la cote."
+      },
+      "donnees_reelles": {
+        "vue": "cours",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "ECOC",
+          "SGBC"
+        ],
+        "actions": 10
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Les sources à privilégier, dans l’ordre",
+      "contenu": "Une analyse ne vaut que par ses données. Les sources n’ont pas toutes le même statut : les documents publiés par la société et par la bourse font foi ; les sites d’information et les bases de données retraitent ces documents, parfois avec des définitions différentes.\nCe cours le montre sur des cas réels. Pour une même banque, deux séries de produit net bancaire circulent selon qu’on lit les comptes publiés ou une base standardisée ; pour un même opérateur, trois PER coexistent selon le bénéfice retenu. Aucune n’est fausse : elles ne mesurent pas la même chose.",
+      "etapes": [
+        {
+          "titre": "BRVM (brvm.org)",
+          "detail": "Rapports d’activité, états financiers, avis et communiqués, cours quotidiens et Bulletin officiel de la cote. Source primaire pour les données officielles.",
+          "cle": true
+        },
+        {
+          "titre": "Le site de la société cotée",
+          "detail": "Rapport annuel complet, présentation aux investisseurs, communiqués de presse, documents d’assemblée générale."
+        },
+        {
+          "titre": "Sika Finance (sikafinance.com)",
+          "detail": "Cotations en différé, historiques, fiches sociétés, dividendes, actualités et analyses."
+        },
+        {
+          "titre": "Richbourse (richbourse.com)",
+          "detail": "Outils de suivi, historiques, fiches de sociétés et informations de marché BRVM."
+        },
+        {
+          "titre": "StockAnalysis / S&P Global Market Intelligence",
+          "detail": "États financiers standardisés sur cinq ans et plus, ratios calculés : utile pour comparer plusieurs années, à condition de connaître ses définitions."
+        },
+        {
+          "titre": "FGI Bourse, CGF Bourse, allAfrica, Daba Finance",
+          "detail": "Analyses sectorielles, commentaires de résultats trimestriels, contexte macroéconomique régional."
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "info",
+          "titre": "Règle éditoriale",
+          "texte": "Distinguez toujours les données publiées par la société (rapports, communiqués), les cours de marché (BRVM, Sika Finance) et vos propres calculs. Indiquez la période comptable, la date du cours retenu, la devise, les unités et la définition du ratio utilisé."
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "L’analyse fondamentale compare une valeur estimée à un prix. Elle se construit sur plusieurs exercices, avec des définitions stables, et elle tient compte de ce qui fait la BRVM : une liquidité inégale, un flottant souvent réduit et des comptes publiés à des dates différentes.",
+      "points": [
+        {
+          "titre": "Quatre questions",
+          "detail": "Solidité, rentabilité, trésorerie, prix : aucune ne suffit seule."
+        },
+        {
+          "titre": "Six étapes",
+          "detail": "De la compréhension de l’activité à une conclusion qui écrit ses hypothèses."
+        },
+        {
+          "titre": "Une source datée pour chaque chiffre",
+          "detail": "Les comptes et la cote font foi ; les bases de données les retraitent."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Quel est l’objectif de l’analyse fondamentale ?",
+      "options": [
+        "Prévoir le cours de la prochaine séance à partir du graphique",
+        "Comparer une valeur estimée de l’entreprise à son cours",
+        "Suivre les volumes échangés chaque jour sur la cote",
+        "Classer les sociétés cotées selon leur taille"
+      ],
+      "correct": 1,
+      "explication": "Elle estime la valeur économique de l’entreprise à partir de ses comptes, de son activité et de ses risques, puis la compare au cours."
+    },
+    {
+      "question": "Le 23 novembre 2026, une société a vu s’échanger 2 509 de ses actions. Quelle précaution s’impose avant de se fier à son dernier cours ?",
+      "options": [
+        "Aucune, le dernier cours est toujours exécutable",
+        "Regarder le volume et le carnet d’ordres",
+        "Ne regarder que le PER",
+        "Attendre la publication du rapport annuel"
+      ],
+      "correct": 1,
+      "explication": "Sur un titre peu échangé, le dernier cours peut ne pas être un prix praticable pour une quantité importante : volume et carnet d’ordres le disent."
+    },
+    {
+      "question": "Pourquoi un PER faible ne suffit-il pas à conclure qu’une action est bon marché ?",
+      "options": [
+        "Parce que le PER ne dépend pas du cours de bourse",
+        "Parce que le bénéfice peut être exceptionnel ou le risque élevé",
+        "Parce que le PER n’existe que sur les bourses européennes et américaines",
+        "Parce qu’un PER faible est toujours une erreur de calcul"
+      ],
+      "correct": 1,
+      "explication": "Un bénéfice non récurrent, un risque élevé, une liquidité insuffisante ou des perspectives dégradées peuvent expliquer un PER bas : c’est la règle d’or de la leçon."
+    },
+    {
+      "question": "Quelle source fait foi pour les états financiers d’une société cotée à la BRVM ?",
+      "options": [
+        "Un forum de discussion entre investisseurs de la région",
+        "Une base de données standardisée",
+        "Les documents publiés par la société et par la BRVM",
+        "Le dernier article de presse publié sur la société"
+      ],
+      "correct": 2,
+      "explication": "Les rapports et états financiers publiés par la société et diffusés par la BRVM sont la source primaire ; les bases de données les retraitent."
+    },
+    {
+      "question": "Selon quel référentiel les sociétés cotées à la BRVM préparent-elles leurs comptes ?",
+      "options": [
+        "Le SYSCOHADA révisé, avec des plans propres aux banques",
+        "Les normes comptables américaines, communes à toutes les places financières",
+        "Aucun référentiel commun",
+        "Le plan comptable français de 1982"
+      ],
+      "correct": 0,
+      "explication": "Le SYSCOHADA révisé s’applique ; banques et assurances suivent des plans spécifiques, et certains groupes publient aussi des comptes consolidés en IFRS."
+    }
+  ],
+  "qcm": {
+    "question": "Quel est l’objectif de l’analyse fondamentale ?",
+    "options": [
+      "Prévoir le cours de la prochaine séance à partir du graphique",
+      "Comparer une valeur estimée de l’entreprise à son cours",
+      "Suivre les volumes échangés chaque jour sur la cote",
+      "Classer les sociétés cotées selon leur taille"
+    ],
+    "correct": 1,
+    "explication": "Elle estime la valeur économique de l’entreprise à partir de ses comptes, de son activité et de ses risques, puis la compare au cours."
+  },
+  "liens": [
+    {
+      "label": "Toutes les actions de la BRVM",
+      "href": "/actions"
+    },
+    {
+      "label": "La liquidité de chaque valeur",
+      "href": "/liquidite"
+    },
+    {
+      "label": "Les fiches sociétés",
+      "href": "/societes"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}

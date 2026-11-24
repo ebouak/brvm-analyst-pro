@@ -1,0 +1,276 @@
+{
+  "titre": "Leçon 0.2 — Les ratios essentiels : formules et calculateurs",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 18,
+  "sous_titre": "Croissance, rentabilité, valorisation, endettement : chaque formule, un exemple tiré des comptes réels et un calculateur pour s’exercer.",
+  "resume": "Quatre familles de ratios suffisent pour l’essentiel de l’analyse : la croissance (d’une année sur l’autre et en moyenne annuelle), la rentabilité (marge, ROE, ROA), la valorisation boursière (BPA, PER, P/B, rendement du dividende) et, pour les entreprises non financières, l’endettement. Chaque formule est illustrée par un calcul posé sur des comptes publiés, et des calculateurs permettent de refaire les calculs avec vos propres chiffres.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Croissance : d’une année sur l’autre, et en moyenne annuelle",
+      "contenu": "La croissance se mesure d’abord d’une année sur l’autre. Sur plusieurs années, on calcule un taux de croissance annuel moyen (TCAM), qui lisse le parcours : il dit à quel rythme régulier il aurait fallu croître pour passer de la valeur de départ à la valeur d’arrivée.\nExemple réel : le produit net bancaire d’Ecobank Côte d’Ivoire est passé de 90,5 à 132,7 milliards de FCFA entre 2021 et 2025, soit +46,6 % en quatre ans et un TCAM de 10,0 %. En 2025 seule, la progression est de 8,5 %.\nLe nombre d’années n est l’écart entre les deux exercices : de 2021 à 2025, il y en a quatre, pas cinq. C’est l’erreur la plus fréquente sur ce calcul.",
+      "formules": [
+        {
+          "nom": "Croissance annuelle (chiffre d’affaires ou PNB)",
+          "expression": "Croissance = (CA de l’année N ÷ CA de l’année N−1 − 1) × 100",
+          "exemple": "132,7 ÷ 122,3 − 1 = +8,5 % (PNB d’Ecobank CI en 2025)"
+        },
+        {
+          "nom": "Taux de croissance annuel moyen (TCAM)",
+          "expression": "TCAM = (valeur finale ÷ valeur initiale)^(1/n) − 1",
+          "exemple": "(132,7 ÷ 90,5)^(1/4) − 1 = 10,0 % par an"
+        }
+      ],
+      "simulation": {
+        "type": "croissance",
+        "consigne": "Reprenez le PNB d’Ecobank Côte d’Ivoire, puis remplacez par les chiffres d’une autre société : la croissance totale et le TCAM se recalculent.",
+        "valeur_initiale": 90.5,
+        "valeur_finale": 132.7,
+        "annees": 4,
+        "unite": "Md FCFA"
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Rentabilité : marge nette, ROE et ROA",
+      "contenu": "La marge nette rapporte le résultat net au chiffre d’affaires. Pour une banque, le produit net bancaire (PNB) remplace le chiffre d’affaires. Le ROE rapporte le résultat net aux capitaux propres, le ROA au total des actifs.\nLe ROE se calcule normalement sur les capitaux propres moyens, c’est-à-dire la moyenne entre le début et la fin de l’exercice. Faute de cette moyenne, un ROE calculé sur les capitaux propres de clôture reste indicatif : quand les capitaux propres augmentent dans l’année, il sous-estime légèrement le rendement réellement obtenu.\nExemple réel, Ecobank Côte d’Ivoire en 2025 : 63,5 milliards de résultat pour des capitaux propres passés de 199,4 à 218,6 milliards. ROE de clôture : 29,0 % ; ROE sur capitaux moyens : 30,4 %. Les deux chiffres sont justes ; ils ne se comparent qu’à méthode égale.",
+      "formules": [
+        {
+          "nom": "Marge nette",
+          "expression": "Marge nette = (résultat net ÷ chiffre d’affaires ou PNB) × 100",
+          "exemple": "63,5 ÷ 132,7 = 47,9 % (Ecobank CI, 2025)"
+        },
+        {
+          "nom": "ROE",
+          "expression": "ROE = (résultat net ÷ capitaux propres moyens) × 100",
+          "exemple": "63,5 ÷ ((199,4 + 218,6) ÷ 2) = 30,4 %"
+        },
+        {
+          "nom": "ROA",
+          "expression": "ROA = (résultat net ÷ total des actifs moyens) × 100",
+          "exemple": "63,5 ÷ ((2 050,7 + 2 054,5) ÷ 2) = 3,09 %"
+        }
+      ],
+      "simulation": {
+        "type": "roe_moyen",
+        "consigne": "Les valeurs proposées sont celles d’Ecobank Côte d’Ivoire pour 2025. Modifiez les capitaux propres du début : l’écart entre les deux ROE apparaît.",
+        "resultat_net": 63.5,
+        "capitaux_debut": 199.4,
+        "capitaux_fin": 218.6,
+        "actif_debut": 2050.7,
+        "actif_fin": 2054.5,
+        "unite": "Md FCFA"
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Valorisation boursière : BPA, PER, P/B et rendement",
+      "contenu": "Le bénéfice par action (BPA) rapporte le résultat net attribuable aux actionnaires au nombre moyen pondéré d’actions. Le PER divise le cours par le BPA : il dit combien d’années de bénéfice actuel le marché paie. Le P/B compare le cours à la valeur comptable par action. Le rendement du dividende rapporte le dividende au cours.\nExemple réel : à la clôture 2025, l’action Société Générale Côte d’Ivoire valait 29 895 FCFA pour un BPA 2025 de 3 257,73 FCFA, soit un PER de 9,18. Au 23 novembre 2026, au cours de 3 900 FCFA, le dividende net 2025 de Sonatel (174 FCFA) représente un rendement de 4,46 %.\nDeux précautions. Le PER se calcule avec un cours et un bénéfice de la même période ; et pour un groupe qui a des filiales, il faut savoir si le BPA porte sur le résultat consolidé ou sur la seule part du groupe. Les calculateurs ci-dessous lisent aussi les données réelles en base.",
+      "formules": [
+        {
+          "nom": "BPA",
+          "expression": "BPA = résultat net attribuable aux actionnaires ÷ nombre moyen pondéré d’actions",
+          "exemple": "413,6 milliards ÷ 1 milliard d’actions = 413,60 FCFA (Sonatel 2025, après fractionnement)"
+        },
+        {
+          "nom": "PER",
+          "expression": "PER = cours ÷ BPA, ou capitalisation ÷ résultat net",
+          "exemple": "29 895 ÷ 3 257,73 = 9,18 (SGBC, clôture 2025)"
+        },
+        {
+          "nom": "P/B (price to book)",
+          "expression": "P/B = cours ÷ valeur comptable par action",
+          "exemple": "Ecobank CI au 23/11/2026 : 14 455 ÷ (218,6 milliards ÷ 55,05 millions d’actions) = 3,64"
+        },
+        {
+          "nom": "Rendement du dividende",
+          "expression": "Rendement = (dividende par action ÷ cours) × 100",
+          "exemple": "174 ÷ 3 900 = 4,46 % (Sonatel, dividende net 2025)"
+        }
+      ],
+      "simulations": [
+        {
+          "type": "per",
+          "consigne": "Le PER de Sonatel au 23/11/2026, sur le BPA consolidé 2025. La croissance de 5 % par an est une hypothèse à modifier, pas une prévision. Choisissez une valeur pour passer aux données réelles.",
+          "cours": 3900,
+          "bpa": 413.6,
+          "croissance_pct": 5,
+          "annees": 3,
+          "codes": [
+            "SNTS",
+            "ORAC",
+            "ECOC",
+            "SGBC"
+          ]
+        },
+        {
+          "type": "pb_roe",
+          "consigne": "P/B = PER × ROE : les deux opérateurs de télécommunications au 23/11/2026, sur les comptes 2025.",
+          "societes": [
+            {
+              "nom": "Sonatel (SNTS)",
+              "per": 9.4,
+              "roe_pct": 29.6
+            },
+            {
+              "nom": "Orange CI (ORAC)",
+              "per": 17.1,
+              "roe_pct": 23.7
+            }
+          ],
+          "codes": [
+            "SNTS",
+            "ORAC"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "definition",
+      "titre": "Endettement et solvabilité des entreprises non financières",
+      "contenu": "La dette financière nette retranche la trésorerie des emprunts. Le gearing la rapporte aux capitaux propres ; la couverture des intérêts dit combien de fois le résultat opérationnel paie les charges financières.\nUne dette nette négative signifie que l’entreprise détient plus de trésorerie qu’elle ne doit d’emprunts. Selon S&P Global, Sonatel est ainsi passée d’une trésorerie nette (une dette nette de −199 milliards en 2021) à une dette nette de 133 milliards en 2025, pendant que ses investissements annuels passaient de 221 à 318 milliards.",
+      "formules": [
+        {
+          "nom": "Dette financière nette",
+          "expression": "Dette nette = emprunts et dettes financières − trésorerie"
+        },
+        {
+          "nom": "Gearing",
+          "expression": "Gearing = (dette nette ÷ capitaux propres) × 100"
+        },
+        {
+          "nom": "Couverture des intérêts",
+          "expression": "Couverture = résultat opérationnel ÷ charges d’intérêts"
+        }
+      ],
+      "simulation": {
+        "type": "endettement",
+        "consigne": "Exemple fictif d’entreprise industrielle : modifiez la trésorerie ou les charges d’intérêts et observez le gearing et la couverture.",
+        "dettes_financieres": 300,
+        "tresorerie": 100,
+        "capitaux_propres": 400,
+        "resultat_operationnel": 120,
+        "charges_interets": 20,
+        "unite": "Md FCFA"
+      },
+      "encadres": [
+        {
+          "ton": "alerte",
+          "titre": "Important pour les banques",
+          "texte": "Les ratios de dette nette, de gearing et d’EV/EBITDA sont inadaptés aux banques. Leur bilan est fait de dépôts, de crédits et de placements : la dette y est la matière première. Pour une banque, on examine plutôt la qualité des actifs, les créances en souffrance, le coût du risque, le ratio de solvabilité, le ROE et le P/B (leçon 0.3)."
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Chaque ratio répond à une question précise, et chacun a ses pièges de calcul : le nombre d’années du TCAM, les capitaux propres moyens du ROE, la même période pour le cours et le bénéfice du PER, le périmètre consolidé ou part du groupe du BPA.",
+      "points": [
+        {
+          "titre": "Croissance",
+          "detail": "Annuelle pour suivre le rythme, TCAM pour comparer des trajectoires."
+        },
+        {
+          "titre": "Rentabilité",
+          "detail": "Marge, ROE et ROA, à méthode identique d’une société à l’autre."
+        },
+        {
+          "titre": "Valorisation",
+          "detail": "PER, P/B et rendement, toujours datés et sourcés."
+        },
+        {
+          "titre": "Endettement",
+          "detail": "Dette nette, gearing et couverture, jamais pour une banque."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Un chiffre d’affaires passe de 100 à 146,4 en quatre ans. Quel est le TCAM ?",
+      "options": [
+        "10 %",
+        "11,6 %",
+        "9,2 %",
+        "46,4 %"
+      ],
+      "correct": 0,
+      "explication": "(146,4 ÷ 100)^(1/4) − 1 = 1,10 − 1 = 10 % par an. 46,4 % est la croissance totale, pas annuelle."
+    },
+    {
+      "question": "Résultat net 60, capitaux propres 200 au début et 240 à la fin de l’exercice. Quel est le ROE sur capitaux moyens ?",
+      "options": [
+        "25,0 %",
+        "27,3 %",
+        "30,0 %",
+        "22,0 %"
+      ],
+      "correct": 1,
+      "explication": "Capitaux moyens = (200 + 240) ÷ 2 = 220 ; 60 ÷ 220 = 27,3 %. Sur la seule clôture, on trouverait 25,0 %."
+    },
+    {
+      "question": "Une action cote 12 000 FCFA pour un BPA de 1 500 FCFA. Quel est son PER ?",
+      "options": [
+        "6",
+        "8",
+        "12",
+        "18"
+      ],
+      "correct": 1,
+      "explication": "12 000 ÷ 1 500 = 8 : le marché paie huit années du bénéfice actuel."
+    },
+    {
+      "question": "Dettes financières 300, trésorerie 100, capitaux propres 400. Quel est le gearing ?",
+      "options": [
+        "75 %",
+        "100 %",
+        "50 %",
+        "25 %"
+      ],
+      "correct": 2,
+      "explication": "Dette nette = 300 − 100 = 200 ; 200 ÷ 400 = 50 %."
+    },
+    {
+      "question": "Pourquoi n’applique-t-on pas le gearing à une banque ?",
+      "options": [
+        "Parce qu’une banque n’a jamais de capitaux propres au bilan",
+        "Parce que ses dépôts sont une dette par nature",
+        "Parce que les banques ne publient aucun bilan détaillé",
+        "Parce que le gearing d’une banque est toujours égal à zéro"
+      ],
+      "correct": 1,
+      "explication": "Les dépôts de la clientèle figurent au passif comme une dette : rapporter cette « dette » aux capitaux propres ne dit rien du risque de la banque."
+    }
+  ],
+  "qcm": {
+    "question": "Un chiffre d’affaires passe de 100 à 146,4 en quatre ans. Quel est le TCAM ?",
+    "options": [
+      "10 %",
+      "11,6 %",
+      "9,2 %",
+      "46,4 %"
+    ],
+    "correct": 0,
+    "explication": "(146,4 ÷ 100)^(1/4) − 1 = 1,10 − 1 = 10 % par an. 46,4 % est la croissance totale, pas annuelle."
+  },
+  "liens": [
+    {
+      "label": "La valorisation de toutes les valeurs",
+      "href": "/premium/valorisation"
+    },
+    {
+      "label": "Comparer des actions",
+      "href": "/actions/compare"
+    },
+    {
+      "label": "Le screener",
+      "href": "/screener"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}

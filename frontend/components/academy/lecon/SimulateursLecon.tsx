@@ -10,7 +10,10 @@ import {
   SaisieInvalide,
   calculerBanque,
   calculerChange,
+  calculerCroissance,
   calculerDistribution,
+  calculerEndettement,
+  calculerRoeMoyen,
   calculerDps,
   calculerFrais,
   calculerObligation,
@@ -499,6 +502,123 @@ function Banque({ sim }: { sim: Extract<Simulation, { type: 'banque' }> }) {
   );
 }
 
+// ── Module zéro : croissance (TCAM), endettement, ROE moyen ─────────────────
+
+function Croissance({ sim }: { sim: Extract<Simulation, { type: 'croissance' }> }) {
+  const id = useId();
+  const c = useChamps({ ini: sim.valeur_initiale, fin: sim.valeur_finale, ans: sim.annees });
+  const calc = essayer(() => calculerCroissance({ valeur_initiale: c.n.ini, valeur_finale: c.n.fin, annees: c.n.ans }));
+  const u = sim.unite;
+  return (
+    <Cadre
+      titre="Croissance totale et taux de croissance annuel moyen (TCAM)"
+      consigne={sim.consigne}
+      reinit={c.reinit}
+      hypotheses={[
+        'Le nombre d’années est l’écart entre les deux exercices : de 2021 à 2025, il y en a 4.',
+        'Le TCAM suppose une progression régulière : la trajectoire affichée n’est pas celle des comptes publiés.',
+      ]}
+    >
+      <Grille>
+        <Champ id={`${id}-i`} label="Valeur initiale" unite={u} value={c.v.ini} onChange={c.set('ini')} />
+        <Champ id={`${id}-f`} label="Valeur finale" unite={u} value={c.v.fin} onChange={c.set('fin')} />
+        <Champ id={`${id}-a`} label="Nombre d’années" unite="ans" value={c.v.ans} onChange={c.set('ans')} />
+      </Grille>
+      <Resultat calc={calc}>
+        {calc.ok && (
+          <Synthese items={[
+            ['Croissance totale', pct(calc.r.croissanceTotalePct)],
+            ['TCAM', pct(calc.r.tcamPct, 2)],
+            ['Valeur à mi-parcours (régulière)', `${nombre(calc.r.trajectoire[Math.floor(calc.r.trajectoire.length / 2)]!, 1)} ${u}`],
+          ]} />
+        )}
+      </Resultat>
+    </Cadre>
+  );
+}
+
+function Endettement({ sim }: { sim: Extract<Simulation, { type: 'endettement' }> }) {
+  const id = useId();
+  const c = useChamps({
+    dettes: sim.dettes_financieres, treso: sim.tresorerie, cp: sim.capitaux_propres,
+    ro: sim.resultat_operationnel, interets: sim.charges_interets,
+  });
+  const calc = essayer(() => calculerEndettement({
+    dettes_financieres: c.n.dettes, tresorerie: c.n.treso, capitaux_propres: c.n.cp,
+    resultat_operationnel: c.n.ro, charges_interets: c.n.interets,
+  }));
+  const u = sim.unite;
+  return (
+    <Cadre
+      titre="Dette nette, gearing et couverture des intérêts"
+      consigne={sim.consigne}
+      reinit={c.reinit}
+      hypotheses={[
+        `Montants en ${u}, lus au bilan et au compte de résultat du même exercice.`,
+        'Réservé aux entreprises non financières : pour une banque, la dette est la matière première, ces ratios n’ont pas de sens.',
+      ]}
+    >
+      <Grille>
+        <Champ id={`${id}-d`} label="Emprunts et dettes financières" unite={u} value={c.v.dettes} onChange={c.set('dettes')} />
+        <Champ id={`${id}-t`} label="Trésorerie" unite={u} value={c.v.treso} onChange={c.set('treso')} />
+        <Champ id={`${id}-c`} label="Capitaux propres" unite={u} value={c.v.cp} onChange={c.set('cp')} />
+        <Champ id={`${id}-r`} label="Résultat opérationnel" unite={u} value={c.v.ro} onChange={c.set('ro')} />
+        <Champ id={`${id}-i`} label="Charges d’intérêts" unite={u} value={c.v.interets} onChange={c.set('interets')} />
+      </Grille>
+      <Resultat calc={calc}>
+        {calc.ok && (
+          <Synthese items={[
+            ['Dette nette', `${nombre(calc.r.detteNette, 1)} ${u}`],
+            ['Gearing', pct(calc.r.gearingPct)],
+            ['Couverture des intérêts', calc.r.couverture == null ? 'non calculable' : `${nombre(calc.r.couverture, 1)} fois`],
+          ]} />
+        )}
+      </Resultat>
+    </Cadre>
+  );
+}
+
+function RoeMoyen({ sim }: { sim: Extract<Simulation, { type: 'roe_moyen' }> }) {
+  const id = useId();
+  const c = useChamps({
+    rn: sim.resultat_net, cpd: sim.capitaux_debut, cpf: sim.capitaux_fin,
+    ad: sim.actif_debut ?? 0, af: sim.actif_fin ?? 0,
+  });
+  const calc = essayer(() => calculerRoeMoyen({
+    resultat_net: c.n.rn, capitaux_debut: c.n.cpd, capitaux_fin: c.n.cpf,
+    actif_debut: c.n.ad > 0 ? c.n.ad : undefined, actif_fin: c.n.af > 0 ? c.n.af : undefined,
+  }));
+  const u = sim.unite;
+  return (
+    <Cadre
+      titre="ROE sur capitaux propres moyens ou de clôture"
+      consigne={sim.consigne}
+      reinit={c.reinit}
+      hypotheses={[
+        'Capitaux propres moyens = (début + fin) ÷ 2, soit la clôture de l’exercice précédent et celle de l’exercice étudié.',
+        'Laissez l’actif à zéro pour ne pas calculer le ROA.',
+      ]}
+    >
+      <Grille>
+        <Champ id={`${id}-r`} label="Résultat net de l’exercice" unite={u} value={c.v.rn} onChange={c.set('rn')} />
+        <Champ id={`${id}-d`} label="Capitaux propres au début" unite={u} value={c.v.cpd} onChange={c.set('cpd')} />
+        <Champ id={`${id}-f`} label="Capitaux propres à la fin" unite={u} value={c.v.cpf} onChange={c.set('cpf')} />
+        <Champ id={`${id}-ad`} label="Total de l’actif au début" unite={u} value={c.v.ad} onChange={c.set('ad')} />
+        <Champ id={`${id}-af`} label="Total de l’actif à la fin" unite={u} value={c.v.af} onChange={c.set('af')} />
+      </Grille>
+      <Resultat calc={calc}>
+        {calc.ok && (
+          <Synthese items={[
+            ['ROE (capitaux moyens)', pct(calc.r.roeMoyenPct)],
+            ['ROE (capitaux de clôture)', pct(calc.r.roeClotPct)],
+            ['ROA (actif moyen)', calc.r.roaMoyenPct == null ? 'non calculé' : pct(calc.r.roaMoyenPct, 2)],
+          ]} />
+        )}
+      </Resultat>
+    </Cadre>
+  );
+}
+
 // ── 7. DPS ──────────────────────────────────────────────────────────────────
 
 function Dps({ sim }: { sim: Extract<Simulation, { type: 'dps' }> }) {
@@ -901,5 +1021,8 @@ export default function SimulateurLecon({ sim }: { sim: SimulationSimple }) {
     case 'distribution': return <Distribution sim={sim} />;
     case 'change': return <Change sim={sim} />;
     case 'chandelier': return <Chandelier sim={sim} />;
+    case 'croissance': return <Croissance sim={sim} />;
+    case 'endettement': return <Endettement sim={sim} />;
+    case 'roe_moyen': return <RoeMoyen sim={sim} />;
   }
 }

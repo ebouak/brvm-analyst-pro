@@ -1,0 +1,245 @@
+{
+  "titre": "Leçon 0.3 — Analyser une banque cotée",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 14,
+  "sous_titre": "PNB, coût du risque, créances en souffrance, couverture, coefficient d’exploitation, solvabilité : les indicateurs propres aux banques.",
+  "resume": "Les banques représentent une part majeure de la capitalisation de la BRVM. Leur analyse exige des indicateurs qui n’ont pas d’équivalent dans l’industrie : le produit net bancaire tient lieu de chiffre d’affaires, le coût du risque mesure la qualité des crédits, et le ratio de solvabilité borne ce que la banque peut prêter. Cette leçon les définit, montre le chemin du crédit accordé au résultat net, et affiche les ratios réels des banques cotées.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Pourquoi une banque se lit à part",
+      "contenu": "Une banque vend de l’argent : elle collecte des dépôts, qu’elle prête à un taux plus élevé. Son bilan est fait de dépôts au passif et de crédits à l’actif, et son « chiffre d’affaires » est un écart de taux, complété par des commissions.\nLes banques représentent une part majeure de la capitalisation de la BRVM. Leur analyse exige donc des indicateurs spécifiques, qui n’ont pas d’équivalent dans l’industrie classique, et elle se lit toujours avec la qualité du portefeuille de crédits : c’est là que se loge le risque."
+    },
+    {
+      "type": "importance",
+      "titre": "Les sept indicateurs d’une banque",
+      "contenu": "Le tableau réunit les indicateurs à suivre, ce qu’ils mesurent et la lecture qui en découle. La plupart sont publiés par les banques elles-mêmes dans leur rapport d’activité ; le ratio de solvabilité est un ratio réglementaire, contrôlé par la Commission bancaire de l’UMOA.\nAppliqués aux deux banques étudiées ensuite, ces indicateurs donnent déjà des repères. En 2025, Société Générale Côte d’Ivoire prête 87,6 % de ses dépôts à sa clientèle, Ecobank Côte d’Ivoire 64,6 %. Un rapport élevé n’est pas un défaut en soi : la banque transforme une plus grande part de ses ressources en crédits, ce qui lui rapporte davantage d’intérêts et l’expose davantage au risque de crédit.\nCôté efficacité, Sika Finance donne pour Société Générale Côte d’Ivoire un coefficient d’exploitation de 36,8 % sur les neuf premiers mois de 2026 : sur 100 francs de PNB, environ 37 paient les frais généraux. Côté solvabilité, la même banque affiche 17,6 % au premier semestre 2026, pour un minimum réglementaire de 11,5 %.",
+      "tableau": {
+        "colonnes": [
+          "Indicateur bancaire",
+          "Définition",
+          "Pourquoi c’est important"
+        ],
+        "lignes": [
+          [
+            "Produit net bancaire (PNB)",
+            "Revenus d’intérêts, commissions et autres produits, nets des charges correspondantes, avant le coût du risque.",
+            "Équivalent du chiffre d’affaires pour une banque : il mesure l’activité globale."
+          ],
+          [
+            "Coût du risque",
+            "Dotations aux provisions pour créances en souffrance, nettes des reprises.",
+            "Il traduit la qualité du portefeuille de crédits ; un coût du risque faible et stable est un signal positif."
+          ],
+          [
+            "Créances en souffrance (NPL)",
+            "Encours de crédits dont le remboursement est retardé ou compromis.",
+            "Plus leur part est élevée, plus le risque de crédit est important."
+          ],
+          [
+            "Taux de couverture",
+            "Provisions ÷ créances en souffrance : la part des pertes potentielles déjà provisionnée.",
+            "Un taux élevé, de l’ordre de 80 % ou plus, traduit une approche prudente."
+          ],
+          [
+            "Coefficient d’exploitation",
+            "Frais généraux ÷ PNB : l’efficacité opérationnelle.",
+            "Plus il est bas, plus la banque est efficace ; sous 50 %, il est généralement jugé très bon."
+          ],
+          [
+            "Ratio de solvabilité",
+            "Fonds propres ÷ actifs pondérés par leur risque. Minimum réglementaire de l’UMOA : 11,5 % depuis 2023 (rapports annuels de la BCEAO).",
+            "Un ratio élevé donne une marge de sécurité réglementaire et de la capacité à prêter."
+          ],
+          [
+            "Ratio crédits ÷ dépôts",
+            "Crédits nets à la clientèle ÷ dépôts de la clientèle.",
+            "Il indique si la banque finance ses crédits par les ressources qu’elle collecte."
+          ]
+        ],
+        "note": "Ratio de solvabilité total minimum de 11,5 % depuis la fin de la période transitoire, en 2023 (11,25 % à fin 2022). Le cours fourni citait 12,5 % pour les banques d’importance systémique (EBIS) : ce seuil n’apparaît pas dans les rapports consultés."
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Du crédit accordé au résultat net",
+      "contenu": "Tout part d’un crédit. S’il est remboursé normalement, il produit des intérêts qui alimentent le PNB puis le résultat. S’il ne l’est pas, il devient une créance en souffrance, que la banque doit provisionner : la provision passe en coût du risque et réduit le résultat net, puis les fonds propres.\nC’est pourquoi une banque peut afficher un bénéfice élevé une année et le voir fondre la suivante : il suffit que des crédits accordés trop facilement se dégradent. Le cas d’Ecobank Côte d’Ivoire en 2026, étudié à la leçon 0.4, en donne un exemple mesuré.",
+      "flux": [
+        {
+          "titre": "Crédit accordé",
+          "detail": "La banque prête l’argent de ses dépôts.",
+          "icone": "paiement"
+        },
+        {
+          "titre": "Remboursement régulier ?",
+          "detail": "Le client paie ses échéances.",
+          "icone": "decision"
+        },
+        {
+          "titre": "Intérêts → PNB → résultat",
+          "detail": "Si oui : l’écart de taux devient du résultat.",
+          "icone": "benefices"
+        }
+      ],
+      "etapes": [
+        {
+          "titre": "Sinon : créance en souffrance",
+          "detail": "Le remboursement est retardé ou compromis."
+        },
+        {
+          "titre": "Provision, puis coût du risque",
+          "detail": "La banque anticipe la perte et la passe en charge.",
+          "cle": true
+        },
+        {
+          "titre": "Impact sur le résultat net et les fonds propres",
+          "detail": "Moins de résultat, donc moins de réserves et de dividende."
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Lecture clé",
+          "texte": "Une banque peut afficher un bénéfice élevé tout en portant des risques cachés sur ses crédits. Le résultat net doit toujours être lu avec la qualité des actifs, le coût du risque et le niveau de provisionnement."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Calculateur : ce que les frais et le coût du risque laissent à la banque",
+      "contenu": "Exemple fictif : une banque dégage 100 milliards de PNB, dépense 45 milliards de frais généraux et provisionne 5 milliards. Faites varier le coût du risque pour voir ce qu’il retire au résultat avant impôt.",
+      "simulation": {
+        "type": "banque",
+        "consigne": "Doublez le coût du risque : l’effet sur le résultat avant impôt est immédiat.",
+        "pnb": 100,
+        "frais_generaux": 45,
+        "cout_risque": 5,
+        "unite": "Md FCFA"
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Les banques de la BRVM, en direct",
+      "reel": true,
+      "contenu": "Les ratios ci-dessous sont recalculés au chargement de la leçon, sur le dernier exercice publié et le dernier cours connu en base. Ils ne sont donc pas figés à la date de rédaction : comparez-les à ceux du 23 novembre 2026 cités dans les leçons 0.4 à 0.6.",
+      "donnees_reelles": {
+        "vue": "ratios",
+        "codes": [
+          "ECOC",
+          "SGBC",
+          "SIBC",
+          "BOAC",
+          "NSBC",
+          "BICC"
+        ]
+      }
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Une banque se lit avec ses propres indicateurs : le PNB pour l’activité, le coefficient d’exploitation pour l’efficacité, le coût du risque, les créances en souffrance et leur couverture pour la qualité des crédits, et le ratio de solvabilité pour la marge réglementaire.",
+      "points": [
+        {
+          "titre": "Le risque est dans les crédits",
+          "detail": "Coût du risque et couverture se lisent avant le résultat net."
+        },
+        {
+          "titre": "Solvabilité : 11,5 % au minimum",
+          "detail": "Ratio de solvabilité total de l’UMOA depuis 2023."
+        },
+        {
+          "titre": "Pas de gearing pour une banque",
+          "detail": "Les dépôts sont une dette par nature."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Que mesure le coefficient d’exploitation d’une banque ?",
+      "options": [
+        "La part des crédits en souffrance",
+        "Les frais généraux rapportés au PNB",
+        "Les fonds propres rapportés aux actifs",
+        "Les dépôts rapportés aux crédits"
+      ],
+      "correct": 1,
+      "explication": "Frais généraux ÷ PNB : plus il est bas, plus la banque transforme son activité en résultat."
+    },
+    {
+      "question": "PNB 100, frais généraux 45, coût du risque 5. Quel est le résultat avant impôt ?",
+      "options": [
+        "55",
+        "50",
+        "45",
+        "60"
+      ],
+      "correct": 1,
+      "explication": "100 − 45 = 55 de résultat brut d’exploitation, moins 5 de coût du risque : 50."
+    },
+    {
+      "question": "Quel est le ratio de solvabilité total minimum dans l’UMOA depuis 2023 ?",
+      "options": [
+        "8,0 %",
+        "10,0 %",
+        "11,5 %",
+        "12,5 %"
+      ],
+      "correct": 2,
+      "explication": "Les rapports annuels de la BCEAO donnent 11,5 % depuis la fin de la période transitoire (11,25 % à fin 2022)."
+    },
+    {
+      "question": "Une banque a 40 de créances en souffrance et 36 de provisions. Quel est son taux de couverture ?",
+      "options": [
+        "80 %",
+        "111 %",
+        "90 %",
+        "36 %"
+      ],
+      "correct": 2,
+      "explication": "36 ÷ 40 = 90 % : neuf dixièmes des pertes potentielles sont déjà provisionnés."
+    },
+    {
+      "question": "Pourquoi un bénéfice bancaire élevé ne suffit-il pas à juger une banque ?",
+      "options": [
+        "Parce qu’il peut masquer des crédits qui se dégradent",
+        "Parce que les banques ne paient pas d’impôt",
+        "Parce que le PNB n’est jamais publié",
+        "Parce que le bénéfice d’une banque est toujours exceptionnel"
+      ],
+      "correct": 0,
+      "explication": "Le coût du risque et les créances en souffrance disent si le bénéfice tiendra : un portefeuille qui se dégrade finit par peser sur le résultat."
+    }
+  ],
+  "qcm": {
+    "question": "Que mesure le coefficient d’exploitation d’une banque ?",
+    "options": [
+      "La part des crédits en souffrance",
+      "Les frais généraux rapportés au PNB",
+      "Les fonds propres rapportés aux actifs",
+      "Les dépôts rapportés aux crédits"
+    ],
+    "correct": 1,
+    "explication": "Frais généraux ÷ PNB : plus il est bas, plus la banque transforme son activité en résultat."
+  },
+  "liens": [
+    {
+      "label": "Les secteurs",
+      "href": "/secteurs"
+    },
+    {
+      "label": "Comparer des actions",
+      "href": "/actions/compare"
+    },
+    {
+      "label": "La valorisation de toutes les valeurs",
+      "href": "/premium/valorisation"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}

@@ -8,6 +8,7 @@ import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
 import ApercuCours, { type LeconApercu } from '@/components/academy/ApercuCours';
+import type { Nouveaute } from '@/lib/academy/nouveaute';
 import { produitsActifs } from '@/lib/billing/chariow/catalogue';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,14 @@ async function getCard(slug: string) {
  * Ce que l'aperçu montre d'un cours : titres, sous-titres, résumés, modules,
  * durées et titres de sections. Le corps des sections n'est jamais lu ici.
  */
+/** `nouveaute` lue sans confiance (contenu jsonb) : forme exacte ou rien. */
+function nouveauteDe(v: unknown): Nouveaute | null {
+  if (!v || typeof v !== 'object') return null;
+  const { type, depuis } = v as { type?: unknown; depuis?: unknown };
+  if ((type !== 'nouveau' && type !== 'mis_a_jour') || typeof depuis !== 'string') return null;
+  return { type, depuis };
+}
+
 async function getContenuApercu(slug: string): Promise<{ intro: string | null; lessons: LeconApercu[] } | null> {
   const { data } = await getServiceClient()
     .from('academy_courses')
@@ -45,6 +54,7 @@ async function getContenuApercu(slug: string): Promise<{ intro: string | null; l
     sections: Array.isArray(l.sections)
       ? (l.sections as Record<string, unknown>[]).map((s) => ({ titre: texte(s.titre) ?? '' })).filter((s) => s.titre)
       : [],
+    nouveaute: nouveauteDe(l.nouveaute),
   }));
   return { intro: texte(c.intro), lessons };
 }

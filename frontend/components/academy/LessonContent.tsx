@@ -6,7 +6,8 @@ import type { PublicExercise } from '@/lib/academy/exercises';
 import QcmBlock from './QcmBlock';
 import LessonChart from './LessonChart';
 import ExerciseBlock from './ExerciseBlock';
-import { ChiffresCles, Flux, Formules, Frise, Points, Tableau, Texte } from './lecon/Blocs';
+import { ChiffresCles, Encadres, Flux, Formules, Frise, Points, Tableau, Texte } from './lecon/Blocs';
+import { badgeNouveaute } from '@/lib/academy/nouveaute';
 import SimulationLecon from './lecon/Simulations';
 import DonneesReelles from './lecon/DonneesReelles';
 import Illustration from './lecon/Illustration';
@@ -88,6 +89,16 @@ function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: Donn
           <Tableau tableau={s.tableau} />
         </div>
       )}
+      {s.tableaux.map((t, k) => (
+        <div key={`t${k}`} className="lp-bloc lp-col">
+          <Tableau tableau={t} />
+        </div>
+      ))}
+      {s.graphiques.map((g, k) => (
+        <div key={`g${k}`} className="lp-bloc">
+          <LessonChart chart={g} variant="slide" />
+        </div>
+      ))}
       {s.etapes.length > 0 && (
         <div className={`lp-bloc ${largeFrise ? 'lp-large' : 'lp-col'}`}>
           <Frise etapes={s.etapes} style={s.etapes_style} />
@@ -96,6 +107,11 @@ function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: Donn
       {s.points.length > 0 && (
         <div className="lp-bloc lp-col lp-corps">
           <Points points={s.points} />
+        </div>
+      )}
+      {s.encadres.length > 0 && (
+        <div className="lp-bloc lp-col">
+          <Encadres encadres={s.encadres} />
         </div>
       )}
     </section>
@@ -127,6 +143,7 @@ export default function LessonContent({
   const charts = [lesson.chart, ...(lesson.charts ?? [])].filter((c): c is NonNullable<typeof c> => Boolean(c));
   // Quiz en série s'il existe ; sinon la question unique historique.
   const questions = lesson.quiz?.length ? lesson.quiz : lesson.qcm ? [lesson.qcm] : [];
+  const badge = badgeNouveaute(lesson.nouveaute, new Date());
 
   return (
     <article className="lp">
@@ -134,6 +151,7 @@ export default function LessonContent({
         <div className="lp-meta">
           <span className="lp-categorie">{CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Général'}</span>
           {lesson.duree_min && <span className="lp-duree">{lesson.duree_min} min de lecture</span>}
+          {badge && <span className={`lp-nouveaute lp-nouveaute--${badge.type}`}>{badge.libelle}</span>}
         </div>
         <h1 className="lp-titre">{lesson.titre}</h1>
         {lesson.sous_titre && <p className="lp-sous-titre">{lesson.sous_titre}</p>}

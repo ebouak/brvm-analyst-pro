@@ -14,6 +14,9 @@ import { analyserAllocation, simulerScenario } from './allocation';
 import {
   calculerBanque,
   calculerChange,
+  calculerCroissance,
+  calculerEndettement,
+  calculerRoeMoyen,
   calculerDistribution,
   calculerDps,
   calculerFrais,
@@ -81,6 +84,12 @@ export function calculerSimulation(sim: Simulation, serie: PointSerie[] = []): {
       return calculerChange(sim);
     case 'chandelier':
       return lireBougie(sim);
+    case 'croissance':
+      return calculerCroissance(sim);
+    case 'endettement':
+      return calculerEndettement(sim);
+    case 'roe_moyen':
+      return calculerRoeMoyen(sim);
     case 'technique':
       if (sim.indicateur === 'variation') return lectureVariation(serie);
       if (sim.indicateur === 'moyennes') return lectureMoyennes(serie, sim.courte, sim.longue);

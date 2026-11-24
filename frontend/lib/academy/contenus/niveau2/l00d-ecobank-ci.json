@@ -1,0 +1,493 @@
+{
+  "titre": "Leçon 0.4 — Cas réel : Ecobank Côte d’Ivoire (ECOC)",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 18,
+  "sous_titre": "Cinq exercices de comptes, le cours, le PER et le dividende, puis les comptes de 2026 : une banque très rentable face à un provisionnement en hausse.",
+  "resume": "Filiale d’Ecobank Transnational Incorporated (ETI), cotée à la BRVM depuis décembre 2017, Ecobank Côte d’Ivoire affiche un ROE de 29,0 % en 2025 sur ses capitaux propres de clôture. Cette leçon reprend ses comptes 2021-2025 tels qu’ils sont publiés, recalcule chaque ratio, compare deux séries de PNB, puis lit les comptes de 2026 : la hausse du coût du risque y fait reculer le résultat.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "cas",
+      "titre": "La fiche au 23 novembre 2026",
+      "reel": true,
+      "contenu": "Au 23 novembre 2026, l’action Ecobank Côte d’Ivoire cotait 14 455 FCFA, en recul de 2,30 % sur la séance. Avec 55,05 millions d’actions, la capitalisation atteint 795,8 milliards de FCFA.\nSur le BPA de l’exercice 2025 (1 153,16 FCFA), le PER ressort à 12,54. StockAnalysis affiche 14,04 sur douze mois glissants : ce PER intègre les trimestres de 2026, où le résultat recule. Le dividende brut 2025 de 888 FCFA représente 6,14 % du cours, soit 5,41 % après retenue à la source.\nDepuis le 1er janvier 2026, le titre perd 9,66 % ; sur un an (depuis le 24/11/2025), 5,52 %. Sur trois ans (depuis le 23/11/2023), il a gagné 107,2 %. Le bloc en direct, en bas de section, recalcule ces ratios sur les derniers chiffres disponibles.",
+      "stats": [
+        {
+          "label": "Cours au 23/11/2026",
+          "valeur": "14 455 FCFA",
+          "detail": "−2,30 % sur la séance"
+        },
+        {
+          "label": "Capitalisation",
+          "valeur": "795,8 Md FCFA",
+          "detail": "55,05 millions d’actions"
+        },
+        {
+          "label": "PER sur le BPA 2025",
+          "valeur": "12,54",
+          "detail": "14,04 sur 12 mois glissants (StockAnalysis)"
+        },
+        {
+          "label": "Rendement du dividende 2025",
+          "valeur": "6,14 %",
+          "detail": "brut ; 5,41 % net"
+        },
+        {
+          "label": "Depuis le 1er janvier",
+          "valeur": "−9,66 %",
+          "detail": "sur un an : −5,52 %"
+        },
+        {
+          "label": "Bêta sur un an",
+          "valeur": "0,64",
+          "detail": "StockAnalysis / S&P Global"
+        }
+      ],
+      "donnees_reelles": {
+        "vue": "ratios",
+        "codes": [
+          "ECOC"
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Les comptes 2021-2025, recalculés",
+      "reel": true,
+      "contenu": "Le tableau reprend les comptes publiés et recalcule chaque ratio. Le PNB passe de 90,5 à 132,7 milliards de FCFA, soit un TCAM de 10,0 % ; le résultat net, de 34,3 à 63,5 milliards, soit 16,6 % par an. Le résultat croît plus vite que l’activité : la marge nette gagne 10,0 points en quatre ans.\nDeux séries de PNB circulent. Celle des comptes publiés, ici en première ligne, et celle de S&P Global / StockAnalysis, qui standardise les postes pour comparer des banques du monde entier. Elles concordent pour 2025 (132,7 milliards) et divergent avant, signe que les deux séries ne retiennent pas les mêmes postes. Pour suivre une banque dans le temps, gardez une seule série.\nLe rendement est ici calculé à la clôture de l’exercice : dividende de l’année divisé par le dernier cours de l’année. D’autres sites le calculent sur le dividende versé dans l’année ou sur un cours moyen, d’où des chiffres différents pour une même année.",
+      "tableau": {
+        "colonnes": [
+          "Indicateur",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "lignes": [
+          [
+            "Produit net bancaire, comptes publiés (Md FCFA)",
+            "90,5",
+            "99,2",
+            "110,2",
+            "122,3",
+            "132,7"
+          ],
+          [
+            "Croissance du PNB",
+            "—",
+            "+9,6 %",
+            "+11,1 %",
+            "+11,0 %",
+            "+8,5 %"
+          ],
+          [
+            "PNB, série standardisée S&P / StockAnalysis (Md FCFA)",
+            "—",
+            "94,5",
+            "104,2",
+            "119,4",
+            "132,7"
+          ],
+          [
+            "Résultat net (Md FCFA)",
+            "34,3",
+            "44,6",
+            "48,1",
+            "57,5",
+            "63,5"
+          ],
+          [
+            "Croissance du résultat net",
+            "—",
+            "+30,0 %",
+            "+7,8 %",
+            "+19,5 %",
+            "+10,4 %"
+          ],
+          [
+            "Total du bilan (Md FCFA)",
+            "1 677,7",
+            "1 901,2",
+            "1 953,3",
+            "2 050,7",
+            "2 054,5"
+          ],
+          [
+            "Capitaux propres (Md FCFA)",
+            "144,8",
+            "163,7",
+            "178,2",
+            "199,4",
+            "218,6"
+          ],
+          [
+            "Dépôts de la clientèle (Md FCFA)",
+            "—",
+            "—",
+            "—",
+            "1 412,5",
+            "1 626,2"
+          ],
+          [
+            "Crédits à la clientèle (Md FCFA)",
+            "—",
+            "—",
+            "—",
+            "972,6",
+            "1 050,8"
+          ],
+          [
+            "Crédits ÷ dépôts",
+            "—",
+            "—",
+            "—",
+            "68,9 %",
+            "64,6 %"
+          ],
+          [
+            "ROE sur capitaux propres de clôture",
+            "23,7 %",
+            "27,2 %",
+            "27,0 %",
+            "28,8 %",
+            "29,0 %"
+          ],
+          [
+            "ROE sur capitaux propres moyens",
+            "—",
+            "28,9 %",
+            "28,1 %",
+            "30,5 %",
+            "30,4 %"
+          ],
+          [
+            "Marge nette (résultat net ÷ PNB)",
+            "37,9 %",
+            "45,0 %",
+            "43,6 %",
+            "47,0 %",
+            "47,9 %"
+          ],
+          [
+            "BPA (FCFA)",
+            "623,14",
+            "810,13",
+            "873,00",
+            "1 044,00",
+            "1 153,16"
+          ],
+          [
+            "Cours de clôture de l’année (FCFA)",
+            "4 785",
+            "4 945",
+            "6 800",
+            "8 795",
+            "16 000"
+          ],
+          [
+            "PER à la clôture de l’année",
+            "7,68",
+            "6,10",
+            "7,79",
+            "8,42",
+            "13,87"
+          ],
+          [
+            "Dividende par action publié (FCFA)",
+            "420,30",
+            "549,00",
+            "594,00",
+            "708,00",
+            "888 brut / 781,44 net"
+          ],
+          [
+            "Rendement à la clôture de l’année",
+            "8,8 %",
+            "11,1 %",
+            "8,7 %",
+            "8,1 %",
+            "5,5 %"
+          ]
+        ],
+        "note": "Dividende : montant publié par exercice ; la base fiscale (brut ou net d’impôt) n’est connue avec certitude que pour 2025, d’après le calendrier de paiement des dividendes de la BRVM. Rendement à la clôture = dividende publié de l’exercice ÷ dernier cours de l’année. « — » : donnée absente de la source."
+      },
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Ecobank CI : PNB et résultat net (2021-2025, Md FCFA)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "Md FCFA",
+          "note": "Le résultat net progresse de 85,1 % en quatre ans, le PNB de 46,6 %. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "PNB",
+              "valeurs": [
+                90.5,
+                99.2,
+                110.2,
+                122.3,
+                132.7
+              ]
+            },
+            {
+              "nom": "Résultat net",
+              "valeurs": [
+                34.3,
+                44.6,
+                48.1,
+                57.5,
+                63.5
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bar",
+          "titre": "Ecobank CI : cours de clôture de l’année et PER (2021-2025)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "FCFA",
+          "note": "Le PER passe de 7,68 à 13,87 : le cours a monté plus vite que le bénéfice. Cliquez sur la légende pour masquer une série. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "Cours de clôture (FCFA)",
+              "valeurs": [
+                4785,
+                4945,
+                6800,
+                8795,
+                16000
+              ]
+            },
+            {
+              "nom": "PER",
+              "valeurs": [
+                7.68,
+                6.1,
+                7.79,
+                8.42,
+                13.87
+              ],
+              "type": "line",
+              "axe": "droite"
+            }
+          ],
+          "unite_droite": "x"
+        },
+        {
+          "type": "bar",
+          "titre": "Ecobank CI : dividende par action publié (FCFA, exercices 2021-2025)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "FCFA",
+          "note": "Dividende de l’exercice tel que publié ; 2025 : 888 FCFA brut, 781,44 FCFA net. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "valeurs": [
+            420.3,
+            549,
+            594,
+            708,
+            888
+          ]
+        }
+      ],
+      "donnees_reelles": {
+        "vue": "historique",
+        "codes": [
+          "ECOC"
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "2026 : les comptes intermédiaires",
+      "reel": true,
+      "contenu": "Les comptes de 2026 ne sont pas audités. Le PNB continue de progresser (+2,1 % au premier semestre), mais le résultat net recule : −8,7 % au premier semestre, et −11,0 % sur neuf mois si l’on rapporte le chiffre de Sika Finance (environ 39,5 milliards) aux 44,4 milliards de neuf mois 2025 en base. Sika Finance annonce −12,3 %.\nLa cause est connue : un provisionnement renforcé. Selon Sika Finance, le coût du risque atteint 5,2 milliards au premier semestre 2026, contre 0,7 milliard un an plus tôt. Le taux de couverture des créances en souffrance avoisine 90 % à fin juin 2026, après un coût du risque de seulement 0,2 % en 2025.",
+      "tableau": {
+        "colonnes": [
+          "Période 2026",
+          "PNB (Md FCFA)",
+          "Variation",
+          "Résultat net (Md FCFA)",
+          "Variation",
+          "Source"
+        ],
+        "lignes": [
+          [
+            "1er trimestre (31 mars)",
+            "30,8",
+            "+3,7 %",
+            "13,0",
+            "−2,3 %",
+            "Base WESTBOURSE"
+          ],
+          [
+            "1er semestre (30 juin)",
+            "64,1",
+            "+2,1 %",
+            "26,4",
+            "−8,7 %",
+            "Base WESTBOURSE ; total du bilan ≈ 2 078 Md (Sika Finance)"
+          ],
+          [
+            "9 premiers mois (30 sept.)",
+            "98,2",
+            "+1,9 %",
+            "≈ 39,5",
+            "−11,0 %",
+            "Sika Finance, articles du 30/04/2026, 10/09/2026 et 28/10/2026"
+          ]
+        ],
+        "note": "Comptes non audités. Variations calculées par rapport à la même période de 2025, en base. Les comptes intermédiaires sont des cumuls depuis le 1er janvier."
+      },
+      "donnees_reelles": {
+        "vue": "cours",
+        "codes": [
+          "ECOC"
+        ],
+        "actions": 10
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "La lecture d’Ecobank Côte d’Ivoire",
+      "contenu": "Croissance : le PNB progresse chaque année, de 10,0 % par an en moyenne de 2021 à 2025, et le résultat net plus vite encore, de 16,6 % par an.\nRentabilité : ROE de 29,0 % sur les capitaux de clôture 2025, 30,4 % sur les capitaux moyens ; comparez-le aux autres banques cotées dans le bloc en direct de la leçon 0.3. La marge nette atteint 48 % du PNB en 2025.\nRisque : un coût du risque très faible en 2025, puis un provisionnement nettement renforcé en 2026, qui explique le recul du résultat. Valorisation : le PER de fin d’année passe de 7,68 en 2021 à 13,87 en 2025 ; le cours a été réévalué plus vite que le bénéfice, puis il recule en 2026 (−9,7 % depuis le 1er janvier).",
+      "simulation": {
+        "type": "per",
+        "consigne": "Le PER d’Ecobank CI au 23/11/2026, sur le BPA 2025. Passez aux données réelles pour le recalculer au dernier cours.",
+        "cours": 14455,
+        "bpa": 1153.16,
+        "croissance_pct": 0,
+        "annees": 3,
+        "codes": [
+          "ECOC"
+        ]
+      }
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Ecobank Côte d’Ivoire illustre une banque très rentable dont le résultat dépend, à court terme, de son provisionnement. Ses chiffres se lisent avec une seule série de PNB, un ROE à méthode constante et un dividende dont on connaît la base fiscale.",
+      "points": [
+        {
+          "titre": "Une série, une méthode",
+          "detail": "Comptes publiés et base standardisée divergent : ne les mélangez pas."
+        },
+        {
+          "titre": "Le coût du risque fait le résultat",
+          "detail": "En 2026, il fait reculer le bénéfice malgré un PNB en hausse."
+        },
+        {
+          "titre": "Un PER qui a presque doublé",
+          "detail": "La réévaluation du cours a précédé le bénéfice."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Le PNB d’Ecobank CI passe de 90,5 à 132,7 milliards entre 2021 et 2025. Quel est le TCAM ?",
+      "options": [
+        "10,0 %",
+        "46,6 %",
+        "9,3 %",
+        "8,5 %"
+      ],
+      "correct": 0,
+      "explication": "(132,7 ÷ 90,5)^(1/4) − 1 = 10,0 %. 46,6 % est la croissance totale."
+    },
+    {
+      "question": "Cours de clôture 2025 : 16 000 FCFA ; BPA 2025 : 1 153,16 FCFA. Quel est le PER ?",
+      "options": [
+        "12,54",
+        "13,87",
+        "8,42",
+        "16,65"
+      ],
+      "correct": 1,
+      "explication": "16 000 ÷ 1 153,16 = 13,87."
+    },
+    {
+      "question": "Pourquoi le résultat net d’Ecobank CI recule-t-il en 2026 alors que le PNB progresse ?",
+      "options": [
+        "Parce que le nombre d’actions a doublé après une augmentation de capital",
+        "Parce que le coût du risque a fortement augmenté",
+        "Parce que la banque a cessé de prêter",
+        "Parce que le PNB n’est pas publié en 2026"
+      ],
+      "correct": 1,
+      "explication": "Le coût du risque passe de 0,7 à 5,2 milliards d’un premier semestre à l’autre (Sika Finance) : un provisionnement prudent pèse sur le résultat."
+    },
+    {
+      "question": "Le dividende 2025 est de 888 FCFA brut. Au cours de 14 455 FCFA, quel est le rendement brut ?",
+      "options": [
+        "5,41 %",
+        "5,55 %",
+        "6,14 %",
+        "9,21 %"
+      ],
+      "correct": 2,
+      "explication": "888 ÷ 14 455 = 6,14 % ; net de la retenue à la source, 5,41 %."
+    },
+    {
+      "question": "Deux séries de PNB d’Ecobank CI circulent pour 2022-2024. Que faire pour suivre la banque dans le temps ?",
+      "options": [
+        "Prendre chaque année la série la plus favorable",
+        "Additionner les deux séries",
+        "Ignorer le PNB et ne regarder que le cours",
+        "Garder une seule série, avec sa définition"
+      ],
+      "correct": 3,
+      "explication": "Comptes publiés et base standardisée n’ont pas la même définition : mélanger les deux fabriquerait une croissance fausse."
+    }
+  ],
+  "qcm": {
+    "question": "Le PNB d’Ecobank CI passe de 90,5 à 132,7 milliards entre 2021 et 2025. Quel est le TCAM ?",
+    "options": [
+      "10,0 %",
+      "46,6 %",
+      "9,3 %",
+      "8,5 %"
+    ],
+    "correct": 0,
+    "explication": "(132,7 ÷ 90,5)^(1/4) − 1 = 10,0 %. 46,6 % est la croissance totale."
+  },
+  "liens": [
+    {
+      "label": "Les fiches sociétés",
+      "href": "/societes"
+    },
+    {
+      "label": "Les dividendes",
+      "href": "/dividendes"
+    },
+    {
+      "label": "Comparer des actions",
+      "href": "/actions/compare"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}

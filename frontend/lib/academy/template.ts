@@ -33,9 +33,14 @@ function paras(s: string): string {
 function renderChart(ch: Chart): string {
   const W = 600, H = 300, padL = 48, padR = 18, padT = 18, padB = 52;
   const plotW = W - padL - padR, plotH = H - padT - padB;
-  const n = ch.valeurs.length;
-  const maxV = Math.max(...ch.valeurs);
-  const minV = Math.min(0, ...ch.valeurs);
+  // Rendu historique à une série : la première série d'un graphique multiple,
+  // et un point sans donnée (null) laissé vide, jamais compté à zéro.
+  const vals = ch.series.length > 0 ? ch.series[0]!.valeurs : ch.valeurs;
+  const nums = vals.filter((v): v is number => v != null);
+  if (nums.length === 0) return '';
+  const n = vals.length;
+  const maxV = Math.max(...nums);
+  const minV = Math.min(0, ...nums);
   const range = maxV - minV || 1;
   const yOf = (v: number) => padT + plotH - ((v - minV) / range) * plotH;
   const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
@@ -60,8 +65,9 @@ function renderChart(ch: Chart): string {
   let series = '';
   if (ch.type === 'bar') {
     const bw = Math.min(46, slot * 0.6);
-    series = ch.valeurs
+    series = vals
       .map((v, i) => {
+        if (v == null) return '';
         const x = xCenter(i) - bw / 2;
         const y = yOf(v);
         const h = yOf(minV) - y;
@@ -70,10 +76,13 @@ function renderChart(ch: Chart): string {
       })
       .join('');
   } else {
-    const pts = ch.valeurs.map((v, i) => `${xCenter(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
-    const dots = ch.valeurs
-      .map((v, i) => `<circle cx="${xCenter(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}" r="3.5" fill="#56D7FD"/>
-        <text x="${xCenter(i).toFixed(1)}" y="${(yOf(v) - 8).toFixed(1)}" text-anchor="middle" fill="#FCFCFC" font-size="10.5" font-family="JetBrains Mono,monospace">${fmt(v)}</text>`)
+    const pts = vals
+      .map((v, i) => (v == null ? null : `${xCenter(i).toFixed(1)},${yOf(v).toFixed(1)}`))
+      .filter(Boolean)
+      .join(' ');
+    const dots = vals
+      .map((v, i) => (v == null ? '' : `<circle cx="${xCenter(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}" r="3.5" fill="#56D7FD"/>
+        <text x="${xCenter(i).toFixed(1)}" y="${(yOf(v) - 8).toFixed(1)}" text-anchor="middle" fill="#FCFCFC" font-size="10.5" font-family="JetBrains Mono,monospace">${fmt(v)}</text>`))
       .join('');
     series = `<polyline points="${pts}" fill="none" stroke="#56D7FD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
   }

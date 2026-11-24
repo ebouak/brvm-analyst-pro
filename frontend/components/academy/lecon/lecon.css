@@ -385,3 +385,26 @@
   .lp-bougie-atelier { grid-template-columns: 1fr; justify-items: center; }
   .lp-bougie-atelier .lp-champs { width: 100%; }
 }
+
+/* ── Encadrés éditoriaux (2026-11-23) : filet de 1 px + teinte, pas de barre épaisse ── */
+.lp-encadres { display: grid; gap: 0.85rem; }
+.lp-encadre {
+  border: 1px solid var(--lp-trame); border-radius: 12px;
+  padding: 0.95rem 1.15rem; background: #fff;
+}
+.lp-encadre--info { background: var(--lp-accent-clair); border-color: color-mix(in srgb, var(--lp-accent) 35%, transparent); }
+.lp-encadre--cle { background: #fbf3df; border-color: color-mix(in srgb, var(--lp-retenir) 35%, transparent); }
+.lp-encadre--attention { background: #fdf6e7; border-color: color-mix(in srgb, var(--lp-retenir) 45%, transparent); }
+.lp-encadre--alerte { background: var(--lp-alerte-clair); border-color: color-mix(in srgb, var(--lp-alerte) 40%, transparent); }
+.lp-encadre-titre { margin: 0 0 0.35rem; font-weight: 600; color: var(--lp-encre); }
+.lp-encadre--alerte .lp-encadre-titre { color: var(--lp-alerte); }
+.lp-encadre--cle .lp-encadre-titre, .lp-encadre--attention .lp-encadre-titre { color: var(--lp-retenir); }
+.lp-encadre-texte { margin: 0.35rem 0 0; line-height: 1.6; }
+
+/* ── Badge « Nouveau » / « Mis à jour » (lib/academy/nouveaute.ts) ── */
+.lp-nouveaute {
+  display: inline-block; font-size: 0.72rem; font-weight: 600; line-height: 1;
+  padding: 0.3rem 0.6rem; border-radius: 999px;
+  color: var(--lp-hausse); background: color-mix(in srgb, var(--lp-hausse) 12%, transparent);
+}
+.lp-nouveaute--mis_a_jour { color: var(--lp-accent); background: var(--lp-accent-clair); }
