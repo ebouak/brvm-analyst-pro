@@ -337,6 +337,8 @@
 .lp-bouton:hover:not(:disabled) { background: #096a7d; }
 .lp-bouton:disabled { opacity: 0.55; cursor: not-allowed; }
 .lp-bouton--discret { color: var(--lp-accent); background: transparent; }
+/* Rangée de boutons d'un atelier (ex. « figer le cours » et « revenir »), qui passe à la ligne sur mobile. */
+.lp-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .lp-bouton--discret:hover:not(:disabled) { background: var(--lp-accent-clair); }
 .lp-resultat { margin-top: 1.1rem; }
 .lp-resultat:empty { margin-top: 0; }

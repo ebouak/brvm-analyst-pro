@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SaisieInvalide } from './simulateurs';
-import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, type PointSerie } from './simTechnique';
+import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, rsiPasAPas, type PointSerie } from './simTechnique';
+import { rsiSeries } from '@/lib/indicators';
 
 /** Série synthétique : n séances, cours donné par f(i). */
 function serie(n: number, f: (i: number) => number): PointSerie[] {
@@ -98,6 +99,73 @@ describe('moyennes mobiles', () => {
     const r = lectureMoyennes(serie(120, (i) => 1_000 + 5 * i), 20, 50);
     expect(r.ecartCourtePct).toBeCloseTo((r.derniere.cours / r.derniere.courte! - 1) * 100, 9);
     expect(r.ecartLonguePct).toBeCloseTo((r.derniere.cours / r.derniere.longue! - 1) * 100, 9);
+  });
+});
+
+// Leçon 4 enrichie (2026-11-24) : RSI pas à pas, et lecture qui tient compte des
+// séances sans échange et du RSI figé.
+describe('atelier : le RSI pas à pas', () => {
+  const CLOTURES = [1000, 1020, 1015, 1030, 1025, 1040, 1050, 1045, 1060, 1070, 1065, 1080, 1075, 1090, 1100, 1085, 1095];
+  it('aucun RSI avant 14 variations, soit 15 clôtures ; puis 83,3 (hausses 125, baisses 25)', () => {
+    const r = rsiPasAPas(CLOTURES, 14);
+    expect(r.lignes.slice(0, 14).every((l) => l.rsi == null)).toBe(true);
+    const l15 = r.lignes[14]!;
+    expect(l15.moyHausse).toBeCloseTo(125 / 14, 12);
+    expect(l15.moyBaisse).toBeCloseTo(25 / 14, 12);
+    expect(l15.rs).toBeCloseTo(5, 12);
+    expect(l15.rsi).toBeCloseTo(100 - 100 / 6, 12);
+  });
+  it('lissage de Wilder ensuite : (veille × 13 + séance) ÷ 14', () => {
+    const r = rsiPasAPas(CLOTURES, 14);
+    const mh = ((125 / 14) * 13 + 0) / 14;
+    const mb = ((25 / 14) * 13 + 15) / 14;
+    expect(r.lignes[15]!.moyHausse).toBeCloseTo(mh, 12);
+    expect(r.lignes[15]!.moyBaisse).toBeCloseTo(mb, 12);
+    expect(r.lignes[15]!.rsi).toBeCloseTo(100 - 100 / (1 + mh / mb), 12);
+  });
+  it('donne exactement le RSI du site (rsiSeries), sur des séries quelconques', () => {
+    let graine = 7;
+    const hasard = () => ((graine = (graine * 16807) % 2147483647) / 2147483647);
+    for (let essai = 0; essai < 20; essai++) {
+      const c = [1000];
+      for (let i = 1; i < 40; i++) c.push(Math.max(1, Math.round(c[i - 1]! * (1 + (hasard() - 0.5) * 0.1))));
+      const periode = 2 + (essai % 13);
+      const attendu = rsiSeries(c, periode);
+      rsiPasAPas(c, periode).lignes.forEach((l, i) => {
+        if (attendu[i] == null) expect(l.rsi).toBeNull();
+        else expect(l.rsi!).toBeCloseTo(attendu[i]!, 9);
+      });
+    }
+  });
+  it('refuse une période impossible et un cours non positif', () => {
+    expect(() => rsiPasAPas(CLOTURES, 1)).toThrow(SaisieInvalide);
+    expect(() => rsiPasAPas(CLOTURES.slice(0, 10), 14)).toThrow(SaisieInvalide);
+    expect(() => rsiPasAPas([100, 0, 101, 102, 103], 2)).toThrow(SaisieInvalide);
+  });
+  it('décrit sans recommander', () => {
+    expect(rsiPasAPas(CLOTURES, 14).lecture).not.toMatch(/achet|vend/i);
+  });
+});
+
+describe('RSI : séances sans échange et RSI figé', () => {
+  it('signale les séances sans échange de la fenêtre', () => {
+    const s = serie(60, (i) => 100 + (i % 3)).map((p, i) => ({ ...p, volume: i >= 55 ? 0 : 500 }));
+    const r = lectureRsi(s, 14, 70, 30);
+    expect(r.seancesSansEchange).toBe(5);
+    expect(r.alertes.join(' ')).toMatch(/5 des 14 dernières séances sans échange/);
+  });
+  it('un cours inchangé depuis 14 séances ou plus : RSI figé à sa dernière valeur, et dit', () => {
+    const s = serie(80, (i) => (i < 50 ? 100 + (i % 4) : 105));
+    const r = lectureRsi(s, 14, 70, 30);
+    const k = s.findIndex((p) => p.cours === 105);
+    expect(r.fige).toBe(true);
+    expect(r.dernier).toBeCloseTo(r.points[k]!.rsi!, 9);
+    expect(r.alertes.join(' ')).toMatch(/figé/);
+  });
+  it('sans volume connu, rien n’est affirmé sur les échanges', () => {
+    const r = lectureRsi(serie(60, (i) => 100 + i), 14, 70, 30);
+    expect(r.seancesSansEchange).toBeNull();
+    expect(r.fige).toBe(false);
   });
 });
 

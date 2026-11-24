@@ -457,8 +457,12 @@ const lecon = {
   charts: [],
   quiz,
   qcm: quiz[0],
+  // Liste FIXE : la reconstruire depuis la leçon précédente ajoutait les mêmes
+  // liens à chaque exécution (9 liens en production le 2026-11-24, corrigé).
   liens: [
-    ...ancienne.liens,
+    { label: 'Les fiches valeur et leurs graphiques', href: '/actions' },
+    { label: 'Le scanner technique', href: '/scanner' },
+    { label: 'Notre méthodologie des signaux', href: '/methodologie' },
     { label: 'Le classement de liquidité', href: '/liquidite' },
     { label: 'Le calendrier des dividendes et des assemblées', href: '/calendrier' },
   ],

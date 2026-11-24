@@ -2,7 +2,7 @@
   "genere_le": "2026-11-24",
   "periode": {
     "debut": "2021-01-04",
-    "fin": "2026-11-24"
+    "fin": "2026-11-23"
   },
   "valeurs": 48,
   "parametres": {
@@ -19,11 +19,11 @@
     "2023": 247,
     "2024": 249,
     "2025": 249,
-    "2026": 224
+    "2026": 223
   },
   "base_20": {
-    "cas": 62449,
-    "part_hausse_pct": 53.1,
+    "cas": 62402,
+    "part_hausse_pct": 53.2,
     "part_baisse_pct": 42.7,
     "part_inchange_pct": 4.1,
     "2021-2023": {
@@ -32,31 +32,31 @@
       "part_baisse_pct": 44.1
     },
     "2024-2026": {
-      "cas": 30962,
-      "part_hausse_pct": 55.3,
-      "part_baisse_pct": 41.4
+      "cas": 30915,
+      "part_hausse_pct": 55.4,
+      "part_baisse_pct": 41.3
     }
   },
   "simple": {
-    "croisements": 1467,
+    "croisements": 1465,
     "haussiers": 717,
-    "baissiers": 750,
+    "baissiers": 748,
     "par_valeur_et_par_an": 5.8,
     "allers_retours_10": {
-      "cas": 1458,
-      "allers_retours": 247,
+      "cas": 1457,
+      "allers_retours": 246,
       "part_pct": 16.9
     },
     "allers_retours_20": {
-      "cas": 1456,
-      "allers_retours": 438,
-      "part_pct": 30.1
+      "cas": 1455,
+      "allers_retours": 437,
+      "part_pct": 30
     },
     "selon_pente": {
       "plate": {
-        "cas": 882,
-        "allers_retours": 256,
-        "part_pct": 29
+        "cas": 881,
+        "allers_retours": 255,
+        "part_pct": 28.9
       },
       "orientee": {
         "cas": 573,
@@ -68,13 +68,13 @@
       "haussier_mediane_pct": 10.5,
       "baissier_mediane_pct": -9.1,
       "cas_haussiers": 717,
-      "cas_baissiers": 750
+      "cas_baissiers": 748
     },
     "apres_20": {
       "haussier": {
         "cas": 708,
         "part_pct": 49.2,
-        "part_base_pct": 53.1,
+        "part_base_pct": 53.2,
         "ic95_pct": [
           45.5,
           52.8
@@ -103,7 +103,7 @@
         "haussier": {
           "cas": 467,
           "part_pct": 47.1,
-          "part_base_pct": 53.1,
+          "part_base_pct": 53.2,
           "ic95_pct": [
             42.6,
             51.6
@@ -159,7 +159,7 @@
         "haussier": {
           "cas": 352,
           "part_pct": 56,
-          "part_base_pct": 55.3,
+          "part_base_pct": 55.4,
           "ic95_pct": [
             50.7,
             61.1
@@ -172,7 +172,7 @@
         "baissier": {
           "cas": 368,
           "part_pct": 37.5,
-          "part_base_pct": 41.4,
+          "part_base_pct": 41.3,
           "ic95_pct": [
             32.7,
             42.6
@@ -186,9 +186,9 @@
     }
   },
   "exponentielle": {
-    "croisements": 1193,
+    "croisements": 1191,
     "haussiers": 578,
-    "baissiers": 615,
+    "baissiers": 613,
     "par_valeur_et_par_an": 4.7,
     "allers_retours_10": {
       "cas": 1183,
@@ -196,13 +196,13 @@
       "part_pct": 29.6
     },
     "allers_retours_20": {
-      "cas": 1180,
+      "cas": 1179,
       "allers_retours": 488,
       "part_pct": 41.4
     },
     "selon_pente": {
       "plate": {
-        "cas": 1001,
+        "cas": 1000,
         "allers_retours": 427,
         "part_pct": 42.7
       },
@@ -216,16 +216,16 @@
       "haussier_mediane_pct": 11.1,
       "baissier_mediane_pct": -10.8,
       "cas_haussiers": 578,
-      "cas_baissiers": 615
+      "cas_baissiers": 613
     },
     "apres_20": {
       "haussier": {
-        "cas": 575,
-        "part_pct": 47.8,
-        "part_base_pct": 53.1,
+        "cas": 574,
+        "part_pct": 47.9,
+        "part_base_pct": 53.2,
         "ic95_pct": [
-          43.8,
-          51.9
+          43.9,
+          52
         ],
         "variation_mediane_pct": 0,
         "assez_de_cas": true,
@@ -233,12 +233,12 @@
         "ecart_sens": "moins"
       },
       "baissier": {
-        "cas": 603,
-        "part_pct": 35.5,
+        "cas": 602,
+        "part_pct": 35.4,
         "part_base_pct": 42.7,
         "ic95_pct": [
-          31.8,
-          39.4
+          31.7,
+          39.3
         ],
         "variation_mediane_pct": 2.1,
         "assez_de_cas": true,
@@ -251,7 +251,7 @@
         "haussier": {
           "cas": 313,
           "part_pct": 46.3,
-          "part_base_pct": 53.1,
+          "part_base_pct": 53.2,
           "ic95_pct": [
             40.9,
             51.9
@@ -262,12 +262,12 @@
           "ecart_sens": "moins"
         },
         "baissier": {
-          "cas": 382,
-          "part_pct": 35.1,
+          "cas": 381,
+          "part_pct": 34.9,
           "part_base_pct": 42.7,
           "ic95_pct": [
-            30.5,
-            40
+            30.3,
+            39.8
           ],
           "variation_mediane_pct": 2.5,
           "assez_de_cas": true,
@@ -305,12 +305,12 @@
       },
       "2024-2026": {
         "haussier": {
-          "cas": 276,
-          "part_pct": 56.2,
-          "part_base_pct": 55.3,
+          "cas": 275,
+          "part_pct": 56.4,
+          "part_base_pct": 55.4,
           "ic95_pct": [
-            50.3,
-            61.9
+            50.5,
+            62.1
           ],
           "variation_mediane_pct": 1.1,
           "assez_de_cas": true,
@@ -318,12 +318,12 @@
           "ecart_sens": null
         },
         "baissier": {
-          "cas": 286,
-          "part_pct": 36.7,
-          "part_base_pct": 41.4,
+          "cas": 285,
+          "part_pct": 36.5,
+          "part_base_pct": 41.3,
           "ic95_pct": [
-            31.3,
-            42.4
+            31.1,
+            42.2
           ],
           "variation_mediane_pct": 2.4,
           "assez_de_cas": true,
@@ -337,24 +337,24 @@
     "haussier_mediane_seances": 4,
     "baissier_mediane_seances": 4,
     "cas_haussiers": 333,
-    "cas_baissiers": 295,
+    "cas_baissiers": 293,
     "sans_equivalent": 839
   },
   "liquidite": {
     "fenetre": 50,
-    "du": "2026-09-16",
-    "au": "2026-11-24",
+    "du": "2026-09-15",
+    "au": "2026-11-23",
     "valeurs_mesurees": 47,
     "valeurs_10_plus": 2,
     "valeurs_25_plus": 2,
     "plus_touchees": [
       {
         "code": "SEMC",
-        "sans_echange": 50
+        "sans_echange": 49
       },
       {
         "code": "SICC",
-        "sans_echange": 50
+        "sans_echange": 49
       },
       {
         "code": "SCRC",
@@ -362,7 +362,7 @@
       },
       {
         "code": "UNLC",
-        "sans_echange": 2
+        "sans_echange": 1
       },
       {
         "code": "ABJC",
@@ -374,6 +374,13 @@
     "cbibf": {
       "code": "CBIBF",
       "seances": [
+        {
+          "date": "2026-11-06",
+          "cloture": 32575,
+          "volume": 175,
+          "moyenne_20": 31383.8,
+          "moyenne_50": 31833.3
+        },
         {
           "date": "2026-11-09",
           "cloture": 32200,
@@ -450,13 +457,6 @@
           "volume": 950,
           "moyenne_20": 31187.3,
           "moyenne_50": 31301.3
-        },
-        {
-          "date": "2026-11-24",
-          "cloture": 23970,
-          "volume": 706,
-          "moyenne_20": 30820.5,
-          "moyenne_50": 31094.7
         }
       ],
       "croisements": [
@@ -470,6 +470,10 @@
         }
       ],
       "clotures_70": [
+        {
+          "date": "2026-08-17",
+          "cloture": 28315
+        },
         {
           "date": "2026-08-18",
           "cloture": 28330
@@ -745,10 +749,6 @@
         {
           "date": "2026-11-23",
           "cloture": 25445
-        },
-        {
-          "date": "2026-11-24",
-          "cloture": 23970
         }
       ]
     },

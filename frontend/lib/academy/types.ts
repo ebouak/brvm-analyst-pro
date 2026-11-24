@@ -332,6 +332,16 @@ export const simulationSchema = z.discriminatedUnion('type', [
     clotures: z.array(z.number().positive().max(10_000_000)).min(4).max(15),
     periode: z.number().int().min(2).max(10).optional().default(5),
   }),
+  /**
+   * Atelier (2026-11-24) : le RSI calculé séance par séance (lissage de Wilder,
+   * celui de rsiSeries) sur des clôtures FICTIVES modifiables.
+   */
+  z.object({
+    type: z.literal('rsi_pas_a_pas'),
+    consigne: consigneSchema,
+    clotures: z.array(z.number().positive().max(10_000_000)).min(5).max(25),
+    periode: z.number().int().min(2).max(14).optional().default(14),
+  }),
   /** Chandelier japonais construit à partir de quatre prix saisis. */
   z.object({
     type: z.literal('chandelier'),
@@ -375,6 +385,9 @@ export const simulationSchema = z.discriminatedUnion('type', [
   }
   if (s.type === 'moyenne_glissante' && !(s.periode < s.clotures.length)) {
     ctx.addIssue({ code: 'custom', message: 'la période doit compter moins de séances que les clôtures saisies' });
+  }
+  if (s.type === 'rsi_pas_a_pas' && !(s.periode < s.clotures.length)) {
+    ctx.addIssue({ code: 'custom', message: 'un RSI sur N séances demande au moins N + 1 clôtures' });
   }
   if (s.type === 'scenario_baisse' || s.type === 'allocation') {
     const total = s.secteurs.reduce((t, x) => t + x.pct, 0);
