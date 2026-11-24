@@ -1,0 +1,15 @@
+{
+  "_": "Voix off de la leçon 0 (16:9). Reprend le texte déjà relu de remotion/ecosysteme.json, réordonné pour suivre un ordre d'achat. Aucune quantité, aucun prix, aucun délai de règlement : rien qui ne soit vérifié. Sigles écrits pour être épelés par la synthèse (DCBR).",
+  "voixTts": "fr-FR-DeniseNeural",
+  "debit": "+6%",
+  "segments": [
+    { "id": "hook", "texte": "Imaginons : vous voulez acheter des actions Sonatel. Entre votre ordre et vos titres, qui fait quoi ?" },
+    { "id": "vue", "texte": "Sur le marché financier régional de l'UMOA, chaque acteur a son rôle. Un seul marché, pour les huit pays de l'Union." },
+    { "id": "emet", "texte": "Tout part des émetteurs, qui cherchent des fonds. Les États, sur le marché obligataire. Les entreprises, en actions et en obligations. Les investisseurs apportent les capitaux ; en échange, ils reçoivent des titres." },
+    { "id": "sgi", "texte": "Pour acheter, vous passez par une SGI, une société de gestion et d'intermédiation agréée. Elle ouvre votre compte-titres et transmet votre ordre : c'est l'investissement direct. L'autre voie, c'est la SGO, qui gère des fonds communs de placement : c'est l'investissement indirect." },
+    { "id": "brvm", "texte": "Votre ordre arrive à la BRVM, la Bourse régionale. Elle organise la cotation : les ordres d'achat et de vente s'y rencontrent. Une seule Bourse, pour les huit pays de l'Union." },
+    { "id": "dcbr", "texte": "L'échange conclu, le DCBR entre en jeu : le dépositaire central et banque de règlement. Il livre les titres à l'acheteur, et règle les espèces au vendeur. Vos actions arrivent sur votre compte-titres." },
+    { "id": "amf", "texte": "Au-dessus de tous veille l'AMF-UMOA, le gendarme du marché. Elle délivre les agréments, surveille le marché, protège les investisseurs, et sanctionne les manquements." },
+    { "id": "fin", "texte": "Émetteurs, intermédiaires, Bourse, dépositaire, régulateur : chacun a son rôle. Et pour investir en direct, tout commence par une SGI agréée. Comparez-les sur westbourse point com." }
+  ]
+}
