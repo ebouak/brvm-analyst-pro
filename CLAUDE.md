@@ -1808,6 +1808,48 @@ vérifiées en base et en production (compte test Premium).
   1 243 lignes distinctes, dernière séance pour les onze codes. ⚠️ Chaque code ajouté à un
   bloc `technique` augmente ce volume : ne jamais revenir à une lecture non paginée.
 
+### Ajouts (passage 2026-11-24) — Academy niveau 3 : moyennes mobiles et RSI, mesurés
+
+PR #384, #385. Migrations `0263`, `0265`, `0266` **appliquées** après déploiement,
+vérifiées en base et en production (compte test).
+
+- **Leçon 3 (moyennes mobiles)** : atelier `moyenne_glissante` (`AtelierMoyenne.tsx`,
+  `moyenneGlissante`) ; simulateur `technique` avec `methode` simple | exponentielle et
+  `dernierCroisementMoyennes` (croisement des DEUX moyennes, distinct du passage du cours
+  sous sa moyenne longue) ; écart du cours à chaque moyenne dans le tableau « Données
+  réelles » (`ecart20Pct`, `ecart50Pct`). Mesure `scripts/academy-lecon3-stats.mjs` :
+  1 465 croisements 20/50, toutes actions, 2021 → 23/11/2026 ; aucun ne fait nettement
+  mieux qu’une séance quelconque (croisements isolés et sous-périodes compris).
+- **Leçon 4 (RSI)** : atelier `rsi_pas_a_pas` (`AtelierRsi.tsx`, `rsiPasAPas` testé
+  **égal à `rsiSeries`**) ; `lectureRsi` signale les séances sans échange de la fenêtre
+  et le RSI figé. Section « Focus BRVM : rendre le RSI intelligent pour les acteurs
+  régionaux » (titre exigé par l’exploitant, testé). Mesure
+  `scripts/academy-lecon4-stats.mjs` : ni la survente ni le surachat n’ont annoncé la
+  suite à 20 séances, dans aucune classe de liquidité.
+- ⚠️ **RSI figé** : avec le lissage de Wilder (celui de WESTBOURSE), un cours inchangé
+  fait décroître hausse et baisse moyennes du même facteur, donc le RSI garde
+  indéfiniment sa dernière valeur (SEMC 46,4 et SICC 56,3, sans échange depuis le
+  15/09/2026). Ce n’est pas une zone neutre : c’est une absence de marché.
+- **Faits mesurés, réutilisables** (2021 → 23/11/2026) : seuils 80/20 pour les valeurs
+  peu liquides **non confirmés** (classe C 9,2 % des séances en surachat contre 13,6 %
+  en A) ; survente toujours sous la moyenne 50, surachat toujours au-dessus (2 289 et
+  6 429 séances, aucune exception) ; détachement de dividende : −8,8 points de RSI en
+  médiane (34 cas 2026), détachements de mai à septembre ; janvier est le mois le plus
+  calme, pas l’été (valeur échangée médiane 2023-2025).
+- **Limites des données** : `liquidity_daily` n’existe que depuis le 17/07/2026 (les
+  classes appliquées à l’historique sont celles d’aujourd’hui) ; `valeur_echangee` n’est
+  renseignée sur toutes les lignes que depuis 2023 ; un volume nul n’est enregistré
+  presque qu’en 2026 (avant, une séance sans échange est souvent une ligne absente).
+- ⚠️ **Deux erreurs de ma part, corrigées par 0265** : (1) export lu PENDANT la séance,
+  donc des cours intraday pris pour des clôtures ; toute mesure s’arrête désormais à la
+  dernière séance COMPLÈTE (`FIN` dans les scripts). (2) générateur non idempotent
+  (`[...ancienne.liens, …]`), d’où des liens triplés en production ; un générateur de
+  leçon ne reprend RIEN de sa sortie précédente, et `niveaux3-4.test.ts` interdit les
+  liens en double.
+- **Non repris de la relecture fournie** : les lignes « candidat à surveiller » et les
+  fondamentaux non vérifiés (conseil sur une valeur) ; les affirmations contredites par
+  la mesure sont listées dans la PR #385.
+
 
 ## 9. Bugs connus / limites
 
