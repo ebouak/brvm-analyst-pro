@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Carte des acteurs UMOA</title>
+<!--
+  Leçon 0 — « Qui fait quoi sur le marché financier de l'UMOA », version 16:9.
+  Style : planche crème à trame de points, cartes pastel cernées de noir,
+  ombres franches, pastilles « ÉTAPE ». Une seule carte, la caméra s'y déplace.
+  Toute l'image est une fonction pure du temps : window.seek(t) calcule chaque
+  attribut, sans animation CSS ni minuterie.
+  Minutage : window.__VOIX, injecté par render.mjs depuis l'horodatage des mots
+  de la voix off (voix.py) — chaque événement part sur le mot prononcé.
+  Faits : remotion/ecosysteme.json (contenu déjà relu de la leçon 0) + brvm.org.
+  Aucune quantité, aucun prix, aucun délai de règlement : rien de non vérifié.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #F6F2E7; }
+  svg { display: block; }
+  text { font-family: Archivo, sans-serif; }
+</style>
+</head>
+<body>
+<svg id="stage" width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="mb" filterUnits="userSpaceOnUse" x="-200" y="-200" width="2320" height="1480">
+      <feGaussianBlur id="mbBlur" stdDeviation="0 0"/>
+    </filter>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.6" fill="#D5CEBB"/>
+    </pattern>
+    <pattern id="hazY" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#F3CF56"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazG" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#A6EB8C"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazP" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#F39BE6"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazC" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#BDEFF6"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="#F6F2E7"/>
+  <g id="shake"><g id="blurWrap"><g id="cam"></g></g></g>
+  <!-- Bandeau du titre : la carte passe dessous sans gêner la lecture. -->
+  <linearGradient id="bandeau" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#F6F2E7" stop-opacity="1"/>
+    <stop offset="0.72" stop-color="#F6F2E7" stop-opacity="1"/>
+    <stop offset="1" stop-color="#F6F2E7" stop-opacity="0"/>
+  </linearGradient>
+  <rect id="band" width="1920" height="200" fill="url(#bandeau)"/>
+  <g id="hud"></g>
+  <g id="endcard"></g>
+  <text id="meas" x="-5000" y="-5000" opacity="0"></text>
+</svg>
+<script>
+(async () => {
+'use strict';
+const VX = window.__VOIX;
+if (!VX) { document.body.innerHTML = '<p style="font:24px sans-serif;padding:40px">window.__VOIX manquant : ouvrir via render.mjs</p>'; return; }
+// Les largeurs de texte se mesurent : la police doit être chargée avant de construire.
+await Promise.all(['600', '700', '800', '900'].map((w) => document.fonts.load(`${w} 40px Archivo`, 'ÉÀÔÈÇéèêàô')));
+const NS = 'http://www.w3.org/2000/svg';
+const C = { bg: '#F6F2E7', ink: '#141414', pink: '#F39BE6', cyan: '#BDEFF6', green: '#A6EB8C', yellow: '#F3CF56', white: '#FFFFFF', ghost: '#A49D89', cream: '#FFFDF6' };
+const DURATION = VX.duration;
+
+/* ---------- outils ---------- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const win = (t, a, b) => clamp((t - a) / (b - a));
+const expoOut = (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
+const expoInOut = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2);
+const W = 8.5, SN = 1 - (1 + W) * Math.exp(-W);
+const spring = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : (1 - (1 + W * p) * Math.exp(-W * p)) / SN);
+// Ressorts avec dépassement : « pop » (échelle) et « drop » (chute).
+const popE = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : 1 - Math.exp(-6 * p) * Math.cos(10.5 * p));
+const dropE = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : 1 - Math.exp(-5 * p) * Math.cos(9 * p));
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const meas = document.getElementById('meas');
+function measure(s, size, w = 900, ls = 0) {
+  meas.setAttribute('font-size', size); meas.setAttribute('font-weight', w); meas.setAttribute('letter-spacing', ls);
+  meas.textContent = s;
+  return meas.getComputedTextLength();
+}
+function text(parent, s, x, y, size, o = {}) {
+  const e = el('text', { x, y, 'font-size': size, 'font-weight': o.w || 900, fill: o.fill || C.ink, 'text-anchor': o.anchor || 'start', 'letter-spacing': o.ls ?? 0 }, parent);
+  if (o.mid) e.setAttribute('dominant-baseline', 'central');
+  e.textContent = s;
+  return e;
+}
+function card(parent, x, y, w, h, fill, o = {}) {
+  const sh = o.sh ?? 10;
+  el('rect', { x: x + sh, y: y + sh, width: w, height: h, rx: o.r ?? 5, fill: C.ink }, parent);
+  return el('rect', { x, y, width: w, height: h, rx: o.r ?? 5, fill, stroke: C.ink, 'stroke-width': o.sw ?? 5 }, parent);
+}
+function pill(parent, s, cx, cy, fill, o = {}) {
+  const size = o.size || 22, ls = o.ls ?? 1.6;
+  const w = measure(s, size, o.w || 800, ls) + 2 * (o.padX || 18), h = o.h || size * 1.85, sh = o.sh ?? 4;
+  el('rect', { x: cx - w / 2 + sh, y: cy - h / 2 + sh, width: w, height: h, rx: h / 2, fill: C.ink }, parent);
+  el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: h / 2, fill, stroke: C.ink, 'stroke-width': o.sw ?? 3.5 }, parent);
+  text(parent, s, cx + ls / 2, cy + 1, size, { w: o.w || 800, anchor: 'middle', ls, mid: true });
+  return { w, h };
+}
+function starD(cx, cy, r, n = 5, inner = 0.46) {
+  let d = '';
+  for (let i = 0; i < n * 2; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / n, rr = i % 2 ? r * inner : r;
+    d += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1);
+  }
+  return d + 'Z';
+}
+function bars3(parent, x, y, w) {
+  for (let i = 0; i < 3; i++) {
+    el('rect', { x, y: y + i * 30, width: w, height: 17, rx: 3, fill: C.white, stroke: C.ink, 'stroke-width': 3 }, parent);
+    el('rect', { x: x + w - 14, y: y + i * 30 + 5, width: 7, height: 7, fill: C.ink }, parent);
+  }
+}
+
+/* ---------- minutage : mots de la voix off ---------- */
+const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function cue(id, word, occ = 1, edge = 'a') {
+  const target = norm(word);
+  let k = 0;
+  for (const m of VX.scenes[id].mots) if (norm(m.m) === target && ++k === occ) return m[edge];
+  throw new Error(`mot introuvable : ${id} / ${word} #${occ}`);
+}
+const S = (id) => VX.scenes[id].s;
+
+const SFX = [];   // bruitages, lus par la bande-son
+const SHAKES = [];
+const BEATS = []; // instants témoins pour la vérification image par image
+
+/* ---------- calques ---------- */
+const cam = document.getElementById('cam');
+const hud = document.getElementById('hud');
+const endcard = document.getElementById('endcard');
+el('rect', { x: -3000, y: -2000, width: 10000, height: 8000, fill: 'url(#dots)' }, cam);
+const L = { ghost: el('g', {}, cam), lines: el('g', {}, cam), items: el('g', {}, cam), over: el('g', {}, cam), tokens: el('g', {}, cam), top: el('g', {}, cam) };
+
+/* ---------- éléments : apparition, impulsions, extinction ---------- */
+const ITEMS = [];
+function item(layer, cx, cy, at, o = {}) {
+  const outer = el('g', {}, layer);
+  const g = el('g', {}, outer);
+  const it = { outer, g, cx, cy, at, kind: o.kind || 'pop', rot: o.rot || 0, out: o.out ?? Infinity, pulses: o.pulses || [], keep: !!o.keep, dur: o.dur || (o.kind === 'drop' ? 0.9 : 0.6), spin: o.spin || 0 };
+  ITEMS.push(it);
+  const s = o.sfx ?? (it.kind === 'drop' ? 'drop' : 'pop');
+  if (s !== 'none') SFX.push({ t: at, type: s, pitch: o.pitch || 1 });
+  if (it.kind === 'drop') SHAKES.push({ t: at + 0.18, amp: 7 });
+  return it;
+}
+function seekItem(it, t, dim) {
+  const p = win(t, it.at, it.at + it.dur);
+  let s = 1, dy = 0, op = 1, rot = it.rot;
+  if (it.kind === 'pop') { s = popE(p); op = clamp(p * 6); rot += 7 * (1 - expoOut(p)); }
+  else if (it.kind === 'drop') { dy = -260 * (1 - dropE(p)); op = clamp(p * 5); }
+  else if (it.kind === 'stamp') { s = lerp(2.4, 1, expoOut(p)); op = clamp(p * 4); }
+  else op = expoOut(p);
+  for (const pt of it.pulses) if (t > pt && t < pt + 0.8) s *= 1 + 0.09 * (1 - dropE(win(t, pt, pt + 0.8)));
+  if (it.spin) rot += it.spin * t;
+  if (Number.isFinite(it.out)) op *= 1 - win(t, it.out, it.out + 0.3);
+  if (!it.keep) op *= dim;
+  if (op <= 0.001 || (it.kind === 'pop' && s <= 0.001)) { it.outer.setAttribute('visibility', 'hidden'); return; }
+  it.outer.setAttribute('visibility', 'visible');
+  it.outer.setAttribute('opacity', op.toFixed(3));
+  it.outer.setAttribute('transform', `translate(${it.cx} ${(it.cy + dy).toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-it.cx} ${-it.cy})`);
+}
+
+// Silhouettes en pointillés : la carte avant que chaque acteur n'y entre.
+const GHOSTS = [];
+function ghost(x, y, w, h, label, at, until) {
+  const g = el('g', {}, L.ghost);
+  el('rect', { x, y, width: w, height: h, rx: 8, fill: 'none', stroke: C.ghost, 'stroke-width': 5, 'stroke-dasharray': '18 13' }, g);
+  text(g, label, x + w / 2, y + h / 2, Math.min(64, w / 4.2), { anchor: 'middle', fill: C.ghost, mid: true });
+  GHOSTS.push({ g, at, until });
+  SFX.push({ t: at, type: 'tick' });
+}
+
+// Liaisons : tracées dans le sens réel du mouvement, flèche à l'arrivée.
+const LINES = [];
+function line(d, at, dur = 0.5, o = {}) {
+  const p = el('path', { d, fill: 'none', stroke: C.ink, 'stroke-width': o.w || 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, o.layer || L.lines);
+  const len = p.getTotalLength();
+  p.setAttribute('stroke-dasharray', `${len} ${len}`);
+  const e = p.getPointAtLength(len), b = p.getPointAtLength(len - 6);
+  const ang = (Math.atan2(e.y - b.y, e.x - b.x) * 180) / Math.PI;
+  const arrow = o.arrow === false ? null : el('path', { d: 'M10 0L-16 -15L-16 15Z', fill: C.ink, stroke: C.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, o.layer || L.lines);
+  LINES.push({ p, len, at, dur, arrow, ex: e.x, ey: e.y, ang });
+  SFX.push({ t: at, type: 'draw', dur });
+}
+function hiddenPath(d) { const p = el('path', { d, fill: 'none', visibility: 'hidden' }, cam); return { p, len: p.getTotalLength() }; }
+
+// Jetons qui circulent en continu (pièces = capitaux / espèces, fiches = titres).
+function coin(parent) {
+  const g = el('g', {}, parent);
+  el('circle', { cx: 3, cy: 3, r: 17, fill: C.ink }, g);
+  el('circle', { r: 17, fill: C.green, stroke: C.ink, 'stroke-width': 3.5 }, g);
+  el('circle', { r: 8, fill: 'none', stroke: C.ink, 'stroke-width': 2.5 }, g);
+  return g;
+}
+function sheet(parent) {
+  const g = el('g', {}, parent);
+  el('rect', { x: -14, y: -18, width: 32, height: 40, rx: 3, fill: C.ink }, g);
+  el('rect', { x: -17, y: -21, width: 32, height: 40, rx: 3, fill: C.yellow, stroke: C.ink, 'stroke-width': 3.5 }, g);
+  el('path', { d: 'M-10 -9H8M-10 0H8M-10 9H2', stroke: C.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+  return g;
+}
+const FLOWS = [];
+function flow(d, t0, t1, shape, n = 4, speed = 230) {
+  const hp = hiddenPath(d);
+  const toks = [];
+  for (let i = 0; i < n; i++) toks.push(shape === 'coin' ? coin(L.tokens) : sheet(L.tokens));
+  const f = { p: hp.p, len: hp.len, toks, t0, t1, speed, gap: hp.len / n };
+  FLOWS.push(f);
+  let k = 0;
+  for (let i = 0; i < n && k < 10; i++) for (let at = t0 + (i * f.gap) / speed; at < t1 && k < 10; at += hp.len / speed, k++) SFX.push({ t: at, type: shape === 'coin' ? 'coin' : 'paper' });
+  return f;
+}
+
+/* ================================================================
+   LA CARTE (coordonnées monde)
+   ================================================================ */
+const ROW = 1400;
+
+/* --- Scène « hook » : vous, et votre ordre --- */
+const vous = item(L.items, 520, ROW, 0.25, { rot: -2, pitch: 0.8 });
+card(vous.g, 350, 1260, 340, 280, C.pink);
+pill(vous.g, 'INVESTISSEUR', 470, 1260, C.white);
+text(vous.g, 'VOUS', 380, 1415, 104);
+bars3(vous.g, 382, 1450, 276);
+item(L.items, 690, 1250, 0.75, { spin: 14, sfx: 'tick' }).g.appendChild(el('path', { d: starD(690, 1250, 40, 5), fill: C.yellow, stroke: C.ink, 'stroke-width': 4, 'stroke-linejoin': 'round' }));
+{ const tp = item(L.items, 470, 1610, 0.95, { rot: -7, sfx: 'tick' }); el('rect', { x: 370, y: 1590, width: 200, height: 42, fill: 'url(#hazG)', stroke: C.ink, 'stroke-width': 4 }, tp.g); }
+
+// Le ticket d'ordre (dessiné autour de 0,0, placé par seek).
+const ticket = el('g', {}, L.tokens);
+{
+  el('rect', { x: -142, y: -52, width: 300, height: 120, rx: 5, fill: C.ink }, ticket);
+  el('rect', { x: -150, y: -60, width: 300, height: 120, rx: 5, fill: C.yellow, stroke: C.ink, 'stroke-width': 5 }, ticket);
+  const pw = measure('ORDRE', 22, 800, 1.6) + 36;
+  pill(ticket, 'ORDRE', -150 + 18 + pw / 2, -60, C.white);
+  text(ticket, 'ACHAT · SNTS', 0, 26, 40, { anchor: 'middle', ls: -0.5 });
+}
+const T_TICKET = cue('hook', 'acheter');
+SFX.push({ t: T_TICKET, type: 'pop', pitch: 1.2 });
+const quiz = item(L.top, 1065, 1325, cue('hook', 'quoi') - 0.12, { rot: 10, out: S('vue') + 1.2, pitch: 1.4 });
+el('circle', { cx: 1069, cy: 1329, r: 46, fill: C.ink }, quiz.g);
+el('circle', { cx: 1065, cy: 1325, r: 46, fill: C.pink, stroke: C.ink, 'stroke-width': 5 }, quiz.g);
+text(quiz.g, '?', 1065, 1328, 62, { anchor: 'middle', mid: true });
+
+/* --- Silhouettes : la carte entière (scène « vue ») --- */
+const g0 = cue('vue', 'marche');
+ghost(1090, 1230, 460, 340, 'SGI', g0, cue('sgi', 'sgi') - 0.1);
+ghost(1110, 1860, 420, 240, 'SGO', g0 + 0.16, cue('sgi', 'sgo') - 0.1);
+ghost(1960, 1145, 640, 510, 'BRVM', g0 + 0.32, S('brvm') + 0.5);
+ghost(1930, 1880, 700, 410, 'DC/BR', g0 + 0.48, cue('dcbr', 'dcbr') - 0.15);
+ghost(3050, 1050, 420, 680, 'ÉMETTEURS', g0 + 0.64, cue('emet', 'emetteurs'));
+ghost(1675, 520, 640, 300, 'AMF-UMOA', g0 + 0.8, cue('amf', 'lamfumoa') - 0.2);
+
+// Huit pays, une Bourse.
+const T_PAYS = cue('vue', 'huit');
+const T_HUIT2 = cue('brvm', 'huit');
+const pays = item(L.items, 2825, 1220, T_PAYS, { rot: 2, pulses: [T_HUIT2], pitch: 0.9 });
+const PAYS = [['BÉNIN', 'MALI'], ['BURKINA FASO', 'NIGER'], ["CÔTE D'IVOIRE", 'SÉNÉGAL'], ['GUINÉE-BISSAU', 'TOGO']];
+card(pays.g, 2625, 1100, 400, 245, C.white);
+el('rect', { x: 2625, y: 1100, width: 400, height: 58, rx: 5, fill: C.green, stroke: C.ink, 'stroke-width': 5 }, pays.g);
+text(pays.g, 'UMOA · 8 PAYS', 2825, 1131, 30, { anchor: 'middle', mid: true });
+const PAYS_HL = [];
+PAYS.forEach((row, r) => row.forEach((nm, c) => {
+  const x = 2648 + c * 205, y = 1194 + r * 40;
+  const w = measure(nm, 21, 800, 0.4);
+  PAYS_HL.push(el('rect', { x: x - 5, y: y - 16, width: w + 10, height: 32, rx: 4, fill: C.yellow, opacity: 0 }, pays.g));
+  text(pays.g, nm, x, y, 21, { w: 800, ls: 0.4, mid: true });
+}));
+PAYS_HL.forEach((_, k) => SFX.push({ t: T_HUIT2 + k * 0.11, type: 'tick', pitch: 0.8 + k * 0.08 }));
+
+/* --- Étape 1 : les émetteurs --- */
+const T_EM = cue('emet', 'emetteurs');
+const emPill = item(L.items, 3260, 1075, T_EM, { rot: -2, pitch: 0.85 });
+pill(emPill.g, 'ÉMETTEURS', 3260, 1075, C.pink, { size: 38, padX: 28, sh: 6, sw: 4.5 });
+item(L.items, 3448, 1040, T_EM + 0.25, { spin: -12, sfx: 'tick' }).g.appendChild(el('path', { d: starD(3448, 1040, 36, 8, 0.55), fill: C.yellow, stroke: C.ink, 'stroke-width': 4, 'stroke-linejoin': 'round' }));
+const etats = item(L.items, 3260, 1250, cue('emet', 'etats'), { rot: 1.5 });
+card(etats.g, 3050, 1140, 420, 220, C.white);
+text(etats.g, 'ÉTATS', 3085, 1300, 92);
+const tagObl1 = item(L.items, 3170, 1140, cue('emet', 'obligataire'), { pitch: 1.3 });
+pill(tagObl1.g, 'OBLIGATIONS', 3170, 1140, C.cyan);
+const entr = item(L.items, 3260, 1620, cue('emet', 'entreprises'), { rot: -1.5 });
+card(entr.g, 3050, 1510, 420, 220, C.white);
+text(entr.g, 'ENTREPRISES', 3080, 1660, 62, { ls: -1 });
+const tagAct = item(L.items, 3138, 1510, cue('emet', 'actions'), { pitch: 1.3 });
+pill(tagAct.g, 'ACTIONS', 3138, 1510, C.pink);
+const tagObl2 = item(L.items, 3318, 1510, cue('emet', 'obligations'), { pitch: 1.4 });
+pill(tagObl2.g, 'OBLIGATIONS', 3318, 1510, C.cyan);
+const sonatel = item(L.items, 3395, 1745, cue('emet', 'entreprises') + 0.45, { rot: -6, pitch: 1.5 });
+pill(sonatel.g, 'EX. SONATEL', 3395, 1745, C.yellow, { size: 20 });
+{ const tp = item(L.items, 3115, 1790, cue('emet', 'entreprises') + 0.6, { rot: 8, sfx: 'tick' }); el('rect', { x: 3020, y: 1770, width: 190, height: 40, fill: 'url(#hazP)', stroke: C.ink, 'stroke-width': 4 }, tp.g); }
+// Capitaux : du marché vers les émetteurs ; titres : en sens inverse.
+const T_INV = cue('emet', 'investisseurs');
+line('M2615 1405H3030', T_INV, 0.55);
+line('M3030 1470H2615', cue('emet', 'echange'), 0.55);
+flow('M2615 1405H3030', cue('emet', 'capitaux'), S('sgi') + 0.6, 'coin', 3, 210);
+flow('M3030 1470H2615', cue('emet', 'recoivent'), S('sgi') + 0.6, 'sheet', 3, 210);
+const pCap = item(L.top, 2822, 1405, cue('emet', 'capitaux'), { pitch: 1.1 });
+pill(pCap.g, 'CAPITAUX', 2822, 1405, C.green, { size: 19 });
+const pTit = item(L.top, 2822, 1470, cue('emet', 'titres'), { pitch: 1.2 });
+pill(pTit.g, 'TITRES', 2822, 1470, C.yellow, { size: 19 });
+
+/* --- Étape 2 : SGI et SGO --- */
+const T_SGI = cue('sgi', 'sgi');
+const sgi = item(L.items, 1320, ROW, T_SGI - 0.1, { rot: 1.2, keep: true, pulses: [cue('fin', 'intermediaires'), cue('fin', 'tout')], pitch: 0.9 });
+card(sgi.g, 1090, 1230, 460, 340, C.cyan);
+pill(sgi.g, 'INTERMÉDIAIRE AGRÉÉ', 1240, 1230, C.white);
+text(sgi.g, 'SGI', 1122, 1390, 118);
+bars3(sgi.g, 1365, 1300, 150);
+line('M690 1400H1083', cue('sgi', 'passez'), 0.5);
+const T_CT = cue('sgi', 'comptetitres');
+const ct = item(L.items, 1320, 1495, T_CT, { keep: true, pulses: [cue('dcbr', 'comptetitres')], pitch: 1.1 });
+el('rect', { x: 1126, y: 1446, width: 400, height: 102, rx: 4, fill: C.ink }, ct.g);
+el('rect', { x: 1120, y: 1440, width: 400, height: 102, rx: 4, fill: C.white, stroke: C.ink, 'stroke-width': 4 }, ct.g);
+pill(ct.g, 'COMPTE-TITRES', 1228, 1440, C.yellow, { size: 19 });
+text(ct.g, 'VOS TITRES', 1142, 1505, 32, { mid: true });
+el('path', { d: 'M1350 1522H1500', stroke: C.ink, 'stroke-width': 6, 'stroke-linecap': 'round' }, ct.g);
+const pDirect = item(L.top, 885, 1400, cue('sgi', 'direct'), { pitch: 1.2 });
+pill(pDirect.g, 'DIRECT', 885, 1400, C.white, { size: 20 });
+const T_SGO = cue('sgi', 'sgo');
+const sgo = item(L.items, 1320, 1980, T_SGO - 0.1, { rot: -1.5, pulses: [cue('fin', 'intermediaires') + 0.15], pitch: 0.95 });
+card(sgo.g, 1110, 1860, 420, 240, C.green);
+pill(sgo.g, 'FONDS COMMUNS', 1232, 1860, C.white);
+text(sgo.g, 'SGO', 1140, 2030, 108);
+// Mutualisation : des lignes de toutes origines dans un même fonds.
+const T_POT = cue('sgi', 'communs');
+for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+  const it = item(L.items, 1433 + c * 36, 1925 + r * 36, T_POT + (r * 3 + c) * 0.06, { sfx: (r * 3 + c) % 3 ? 'none' : 'tick' });
+  el('rect', { x: 1420 + c * 36, y: 1912 + r * 36, width: 27, height: 27, rx: 3, fill: [C.pink, C.cyan, C.yellow][(r + c) % 3], stroke: C.ink, 'stroke-width': 3 }, it.g);
+}
+line('M600 1545C600 1800 800 1980 1104 1980', T_SGO + 0.25, 0.65);
+flow('M600 1545C600 1800 800 1980 1104 1980', cue('sgi', 'fonds'), cue('sgi', 'indirect') + 0.9, 'coin', 3, 260);
+const pIndirect = item(L.top, 738, 1858, cue('sgi', 'indirect'), { pitch: 1.25 });
+pill(pIndirect.g, 'INDIRECT', 738, 1858, C.white, { size: 20 });
+{ const tp = item(L.items, 1610, 2110, T_SGO + 0.35, { rot: -9, sfx: 'tick' }); el('rect', { x: 1520, y: 2090, width: 180, height: 40, fill: 'url(#hazY)', stroke: C.ink, 'stroke-width': 4 }, tp.g); }
+
+/* --- Étape 3 : la BRVM et son carnet d'ordres --- */
+const T_BRVM = S('brvm') + 0.5;
+const brvm = item(L.items, 2280, 1400, T_BRVM, { kind: 'drop', pulses: [cue('fin', 'bourse')] });
+el('rect', { x: 1970, y: 1155, width: 640, height: 510, rx: 5, fill: C.ink }, brvm.g);
+el('rect', { x: 1960, y: 1235, width: 640, height: 420, rx: 5, fill: C.yellow, stroke: C.ink, 'stroke-width': 5 }, brvm.g);
+el('rect', { x: 1960, y: 1612, width: 640, height: 43, fill: 'url(#hazY)', stroke: C.ink, 'stroke-width': 5 }, brvm.g);
+el('rect', { x: 1945, y: 1145, width: 670, height: 90, rx: 5, fill: C.yellow, stroke: C.ink, 'stroke-width': 5 }, brvm.g);
+text(brvm.g, 'BRVM', 2280, 1193, 64, { anchor: 'middle', mid: true });
+el('rect', { x: 1995, y: 1270, width: 570, height: 318, rx: 4, fill: C.white, stroke: C.ink, 'stroke-width': 4 }, brvm.g);
+el('path', { d: 'M2280 1352V1568', stroke: C.ink, 'stroke-width': 3 }, brvm.g);
+item(L.items, 2600, 1150, T_BRVM + 0.45, { spin: 10, sfx: 'tick' }).g.appendChild(el('path', { d: starD(2600, 1150, 46, 5), fill: C.pink, stroke: C.ink, 'stroke-width': 4, 'stroke-linejoin': 'round' }));
+const T_ORG = cue('brvm', 'organise');
+const tagCarnet = item(L.items, 2118, 1270, T_ORG, { pitch: 1.2 });
+pill(tagCarnet.g, "CARNET D'ORDRES", 2118, 1270, C.cyan, { size: 19 });
+const pAchat = item(L.items, 2140, 1325, cue('brvm', 'dachat'), { pitch: 1.3 });
+pill(pAchat.g, 'ACHAT', 2140, 1325, C.pink, { size: 19 });
+const pVente = item(L.items, 2420, 1325, cue('brvm', 'vente'), { pitch: 1.4 });
+pill(pVente.g, 'VENTE', 2420, 1325, C.cyan, { size: 19 });
+const T_COT = cue('brvm', 'cotation');
+const BUY_W = [150, 110, 190, 90], SELL_W = [130, 175, 100, 150];
+const BARS = [];
+[0, 1, 2, 3].forEach((i) => {
+  const y = 1372 + i * 50;
+  BARS.push({ r: el('rect', { x: 2266, y, height: 30, width: 0, rx: 3, fill: C.pink, stroke: C.ink, 'stroke-width': 3 }, brvm.g), side: -1, w: BUY_W[i], at: T_COT + i * 0.16, i });
+  BARS.push({ r: el('rect', { x: 2294, y, height: 30, width: 0, rx: 3, fill: C.cyan, stroke: C.ink, 'stroke-width': 3 }, brvm.g), side: 1, w: SELL_W[i], at: T_COT + 0.08 + i * 0.16, i });
+});
+BARS.forEach((b) => SFX.push({ t: b.at, type: 'tick', pitch: 0.7 + b.i * 0.12 }));
+line('M1555 1400H1953', cue('brvm', 'ordre'), 0.5);
+const T_MATCH = cue('brvm', 'rencontrent');
+SFX.push({ t: T_MATCH + 0.32, type: 'match' });
+const deal = item(L.top, 2280, 1556, T_MATCH + 0.55, { kind: 'stamp', rot: -7, sfx: 'stamp', dur: 0.4 });
+SHAKES.push({ t: T_MATCH + 0.6, amp: 9 });
+el('rect', { x: 2098, y: 1522, width: 364, height: 68, rx: 6, fill: C.white, stroke: C.ink, 'stroke-width': 5 }, deal.g);
+el('rect', { x: 2106, y: 1530, width: 348, height: 52, rx: 4, fill: 'none', stroke: C.pink, 'stroke-width': 4 }, deal.g);
+text(deal.g, 'ÉCHANGE CONCLU', 2280, 1557, 34, { anchor: 'middle', mid: true, ls: 0.5 });
+
+/* --- Étape 4 : le DC/BR livre et règle --- */
+const T_DC = cue('dcbr', 'dcbr') - 0.15;
+const dcbr = item(L.items, 2280, 2085, T_DC, { kind: 'drop', pulses: [cue('fin', 'depositaire')] });
+el('rect', { x: 1940, y: 1890, width: 700, height: 410, rx: 5, fill: C.ink }, dcbr.g);
+el('rect', { x: 1930, y: 1965, width: 700, height: 325, rx: 5, fill: C.cyan, stroke: C.ink, 'stroke-width': 5 }, dcbr.g);
+el('rect', { x: 1930, y: 2250, width: 700, height: 40, fill: 'url(#hazC)', stroke: C.ink, 'stroke-width': 5 }, dcbr.g);
+el('rect', { x: 1915, y: 1880, width: 730, height: 85, rx: 5, fill: C.cyan, stroke: C.ink, 'stroke-width': 5 }, dcbr.g);
+text(dcbr.g, 'DC/BR', 2280, 1925, 58, { anchor: 'middle', mid: true });
+el('rect', { x: 1962, y: 1998, width: 636, height: 230, rx: 4, fill: C.white, stroke: C.ink, 'stroke-width': 4 }, dcbr.g);
+line('M2280 1660V1873', cue('dcbr', 'conclu'), 0.45);
+const tagDc = item(L.items, 2215, 1998, cue('dcbr', 'depositaire'), { pitch: 1.2 });
+pill(tagDc.g, 'DÉPOSITAIRE CENTRAL · BANQUE DE RÈGLEMENT', 2215, 1998, C.yellow, { size: 17, ls: 1 });
+const T_ROLES = cue('dcbr', 'reglement');
+const pAch = item(L.items, 2060, 2130, T_ROLES, { pitch: 1.1 });
+pill(pAch.g, 'ACHETEUR', 2060, 2130, C.pink, { size: 20 });
+const pVen = item(L.items, 2496, 2130, T_ROLES + 0.18, { pitch: 1.25 });
+pill(pVen.g, 'VENDEUR', 2496, 2130, C.cyan, { size: 20 });
+const T_LIVRE = cue('dcbr', 'livre');
+line('M2400 2088H2165', T_LIVRE, 0.45, { layer: L.over, w: 5 });
+const lblT = item(L.items, 2282, 2062, T_LIVRE + 0.2, { sfx: 'none' });
+text(lblT.g, 'TITRES', 2282, 2062, 20, { anchor: 'middle', w: 800, ls: 1.5, mid: true });
+const T_REGLE = cue('dcbr', 'regle');
+line('M2165 2172H2400', T_REGLE, 0.45, { layer: L.over, w: 5 });
+const lblE = item(L.items, 2282, 2210, T_REGLE + 0.2, { sfx: 'none' });
+text(lblE.g, 'ESPÈCES', 2282, 2210, 20, { anchor: 'middle', w: 800, ls: 1.5, mid: true });
+// Le titre SNTS : du vendeur à l'acheteur, puis jusqu'à votre compte-titres.
+const chip = el('g', {}, L.tokens);
+el('rect', { x: -52, y: -25, width: 112, height: 56, rx: 4, fill: C.ink }, chip);
+el('rect', { x: -58, y: -31, width: 112, height: 56, rx: 4, fill: C.yellow, stroke: C.ink, 'stroke-width': 4 }, chip);
+text(chip, 'SNTS', -2, -2, 30, { anchor: 'middle', mid: true });
+const T_CHIP0 = cue('dcbr', 'titres'), T_CHIP1 = cue('dcbr', 'lacheteur', 1, 'b');
+SFX.push({ t: T_CHIP0 - 0.15, type: 'pop', pitch: 1.3 }, { t: T_CHIP0, type: 'zip', dur: T_CHIP1 - T_CHIP0 });
+const COINS = [0, 1, 2].map(() => coin(L.tokens));
+const T_COIN0 = T_REGLE + 0.1, T_COIN1 = cue('dcbr', 'vendeur', 1, 'b') + 0.3;
+[0, 1, 2].forEach((k) => SFX.push({ t: T_COIN0 + k * 0.28, type: 'coin' }));
+const T_FLY = cue('dcbr', 'arrivent'), T_LAND = cue('dcbr', 'comptetitres') + 0.25;
+const P_FLY = hiddenPath('M2060 2088C1800 2088 1600 1800 1424 1506');
+SFX.push({ t: T_FLY, type: 'zip', dur: T_LAND - T_FLY }, { t: T_LAND, type: 'land' });
+SHAKES.push({ t: T_LAND, amp: 4 });
+{ const tp = item(L.items, 1885, 2310, T_DC + 0.5, { rot: 7, sfx: 'tick' }); el('rect', { x: 1795, y: 2290, width: 180, height: 40, fill: 'url(#hazC)', stroke: C.ink, 'stroke-width': 4 }, tp.g); }
+
+/* --- Étape 5 : l'AMF-UMOA au-dessus de tous --- */
+const T_AMF = cue('amf', 'lamfumoa') - 0.2;
+const amf = item(L.items, 1995, 670, T_AMF, { kind: 'drop', pulses: [cue('fin', 'regulateur')] });
+el('rect', { x: 1685, y: 530, width: 640, height: 300, rx: 5, fill: C.ink }, amf.g);
+el('rect', { x: 1675, y: 605, width: 640, height: 215, rx: 5, fill: C.white, stroke: C.ink, 'stroke-width': 5 }, amf.g);
+el('rect', { x: 1660, y: 520, width: 670, height: 85, rx: 5, fill: C.pink, stroke: C.ink, 'stroke-width': 5 }, amf.g);
+text(amf.g, 'AMF-UMOA', 1995, 565, 56, { anchor: 'middle', mid: true });
+el('circle', { cx: 1772, cy: 716, r: 70, fill: C.pink, stroke: C.ink, 'stroke-width': 5 }, amf.g);
+el('circle', { cx: 1772, cy: 716, r: 52, fill: 'none', stroke: C.ink, 'stroke-width': 3, 'stroke-dasharray': '7 6' }, amf.g);
+el('path', { d: starD(1772, 716, 30, 5), fill: C.yellow, stroke: C.ink, 'stroke-width': 3.5, 'stroke-linejoin': 'round' }, amf.g);
+item(L.items, 2325, 530, T_AMF + 0.5, { spin: 12, sfx: 'tick' }).g.appendChild(el('path', { d: starD(2325, 530, 40, 8, 0.55), fill: C.green, stroke: C.ink, 'stroke-width': 4, 'stroke-linejoin': 'round' }));
+const ROLES = [['AGRÉMENTS', 'agrements', 1965, 672, C.yellow], ['SURVEILLANCE', 'surveille', 2190, 672, C.cyan], ['PROTECTION', 'protege', 1965, 756, C.green], ['SANCTIONS', 'sanctionne', 2190, 756, C.pink]];
+for (const [lb, mot, x, y, f] of ROLES) {
+  const it = item(L.items, x, y, cue('amf', mot), { pitch: 1.2 });
+  pill(it.g, lb, x, y, f, { size: 19, ls: 1 });
+}
+// Accolade : l'AMF couvre tout le marché.
+const T_BR = cue('amf', 'gendarme');
+line('M1995 830V900', T_BR, 0.3, { arrow: false });
+line('M1995 900H520', T_BR + 0.3, 0.7, { arrow: false });
+line('M1995 900H3260', T_BR + 0.3, 0.7, { arrow: false });
+const DROPS = [[520, 1228], [1320, 1198], [2280, 1112], [3260, 1036]];
+const T_DROPS = T_BR + 1.0;
+DROPS.forEach(([x, y], i) => line(`M${x} 900V${y}`, T_DROPS + i * 0.12, 0.35));
+// Agréments : le tampon tombe sur la SGI et la SGO.
+const T_AGR = cue('amf', 'agrements');
+function stampOn(x, y, at, rot, keep) {
+  const it = item(L.top, x, y, at, { kind: 'stamp', rot, sfx: 'stamp', dur: 0.35, keep });
+  el('rect', { x: x - 105, y: y - 32, width: 210, height: 64, rx: 6, fill: C.white, stroke: C.pink, 'stroke-width': 7 }, it.g);
+  text(it.g, 'AGRÉÉE', x, y + 2, 38, { anchor: 'middle', mid: true, fill: '#C2338F', ls: 2 });
+  SHAKES.push({ t: at + 0.1, amp: 8 });
+  return it;
+}
+const stampSgi = stampOn(1472, 1312, T_AGR + 0.3, -9, true);
+stampSgi.pulses.push(cue('fin', 'agreee'));
+stampOn(1455, 2068, T_AGR + 0.55, 6, false);
+// Protection : un cadre autour de l'investisseur.
+const T_PROT = cue('amf', 'protege');
+const T_SANC = cue('amf', 'sanctionne');
+const guard = el('path', { d: 'M318 1222H726V1578H318Z', fill: 'none', stroke: '#C2338F', 'stroke-width': 7, 'stroke-linejoin': 'round' }, L.top);
+const GUARD_LEN = guard.getTotalLength();
+SFX.push({ t: T_PROT + 0.15, type: 'draw', dur: 0.5 }, { t: T_SANC, type: 'thud' });
+
+/* --- Le trajet complet de l'ordre (récapitulatif) --- */
+const T_COMET = cue('fin', 'chacun');
+const COMET_D = 'M690 1400H2280V2088H2060C1800 2088 1600 1800 1424 1506';
+const cometBase = el('path', { d: COMET_D, fill: 'none', stroke: C.ink, 'stroke-width': 20, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, L.top);
+const comet = el('path', { d: COMET_D, fill: 'none', stroke: C.yellow, 'stroke-width': 11, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, L.top);
+const LEN_COMET = comet.getTotalLength();
+SFX.push({ t: T_COMET, type: 'zip', dur: 1.6 });
+const T_TOUT = cue('fin', 'tout');
+// Impulsions au fil de « émetteurs, intermédiaires, Bourse, dépositaire, régulateur ».
+[emPill, etats, entr].forEach((it) => it.pulses.push(cue('fin', 'emetteurs')));
+['emetteurs', 'intermediaires', 'bourse', 'depositaire', 'regulateur'].forEach((m, k) => SFX.push({ t: cue('fin', m), type: 'note', k }));
+
+/* ---------- titres (HUD) : pastille + texte tapé ---------- */
+const TITLES = [
+  { at: 0.15, pill: 'LEÇON 0', pf: C.yellow, text: 'OÙ VA VOTRE ORDRE ?' },
+  { at: S('vue') + 0.35, pill: 'LA CARTE', pf: C.cyan, text: 'UN MARCHÉ, HUIT PAYS', hl: 'HUIT PAYS' },
+  { at: S('emet') + 0.35, pill: 'ÉTAPE 1', pf: C.pink, text: 'ILS CHERCHENT DES FONDS', hl: 'FONDS' },
+  { at: S('sgi') + 0.35, pill: 'ÉTAPE 2', pf: C.cyan, text: 'PASSER PAR UNE SGI', hl: 'SGI' },
+  { at: S('brvm') + 0.35, pill: 'ÉTAPE 3', pf: C.yellow, text: 'LES ORDRES SE RENCONTRENT' },
+  { at: S('dcbr') + 0.35, pill: 'ÉTAPE 4', pf: C.green, text: 'LIVRER ET RÉGLER' },
+  { at: S('amf') + 0.35, pill: 'ÉTAPE 5', pf: C.pink, text: 'LE GENDARME DU MARCHÉ', hl: 'GENDARME' },
+  { at: S('fin') + 0.3, pill: 'À RETENIR', pf: C.yellow, text: 'CHACUN SON RÔLE' },
+  { at: T_TOUT - 0.2, pill: 'À RETENIR', pf: C.yellow, text: 'TOUT COMMENCE PAR UNE SGI AGRÉÉE', hl: 'SGI AGRÉÉE' },
+];
+const T_END = cue('fin', 'westbourse') - 0.6;
+TITLES.forEach((ti, i) => { ti.out = i + 1 < TITLES.length ? TITLES[i + 1].at - 0.45 : T_END - 0.3; });
+const CPS = 30;
+for (const ti of TITLES) {
+  ti.g = el('g', {}, hud);
+  let size = 74;
+  const pillW = measure(ti.pill, 26, 800, 2) + 44;
+  let tw = measure(ti.text, size, 900, -1);
+  if (pillW + 26 + tw > 1720) { size = Math.floor((size * (1720 - pillW - 26)) / tw); tw = measure(ti.text, size, 900, -1); }
+  const x0 = 960 - (pillW + 26 + tw) / 2;
+  ti.pg = el('g', {}, ti.g);
+  ti.pcx = x0 + pillW / 2; ti.pcy = 98;
+  pill(ti.pg, ti.pill, ti.pcx, ti.pcy, ti.pf, { size: 26, ls: 2, padX: 22, sh: 5 });
+  ti.tx = x0 + pillW + 26;
+  if (ti.hl) {
+    const i0 = ti.text.indexOf(ti.hl);
+    ti.h1 = i0 + ti.hl.length;
+    const pre = measure(ti.text.slice(0, i0), size, 900, -1), wd = measure(ti.hl, size, 900, -1);
+    ti.hlx = ti.tx + pre - 10;
+    ti.hlr = el('rect', { x: ti.hlx, y: 98 - size * 0.5, width: wd + 16, height: size * 0.98, rx: 4, fill: C.yellow, stroke: C.ink, 'stroke-width': 4 }, ti.g);
+  }
+  ti.te = text(ti.g, '', ti.tx, 98, size, { ls: -1, mid: true });
+  ti.caret = el('rect', { x: 0, y: 98 - size * 0.42, width: 7, height: size * 0.84, fill: C.ink }, ti.g);
+  SFX.push({ t: ti.at, type: 'pop', pitch: 1.6 });
+  for (let k = 0; k < ti.text.length; k++) if (ti.text[k] !== ' ') SFX.push({ t: ti.at + 0.25 + k / CPS, type: 'type' });
+  for (let k = 0; k < Math.min(ti.text.length, 14); k += 2) SFX.push({ t: ti.out + k / 70, type: 'erase' });
+}
+function seekTitle(ti, t) {
+  if (t < ti.at || t > ti.out + 0.6) { ti.g.setAttribute('visibility', 'hidden'); return; }
+  ti.g.setAttribute('visibility', 'visible');
+  const L0 = ti.text.length;
+  let n = clamp(Math.floor((t - ti.at - 0.25) * CPS), 0, L0);
+  if (t > ti.out) n = Math.max(0, n - Math.floor((t - ti.out) * 70));
+  ti.te.textContent = ti.text.slice(0, n);
+  const ps = popE(win(t, ti.at, ti.at + 0.5)) * (1 - expoOut(win(t, ti.out + 0.12, ti.out + 0.4)));
+  ti.pg.setAttribute('transform', `translate(${ti.pcx} ${ti.pcy}) scale(${Math.max(0, ps).toFixed(4)}) translate(${-ti.pcx} ${-ti.pcy})`);
+  const w = n ? ti.te.getComputedTextLength() : 0;
+  const typing = n < L0 && t <= ti.out;
+  const blink = Math.floor(t * 2.6) % 2 === 0;
+  ti.caret.setAttribute('x', (ti.tx + w + 8).toFixed(1));
+  ti.caret.setAttribute('opacity', t > ti.at + 0.2 && t <= ti.out && (typing || (t < ti.at + 0.25 + L0 / CPS + 0.9 && blink)) ? 1 : 0);
+  if (ti.hlr) {
+    const a = ti.at + 0.25 + ti.h1 / CPS;
+    let show = n >= ti.h1 ? expoOut(win(t, a, a + 0.25)) : 0;
+    ti.hlr.setAttribute('opacity', show > 0 ? 1 : 0);
+    ti.hlr.setAttribute('transform', `translate(${ti.hlx} 0) scale(${show.toFixed(3)} 1) translate(${-ti.hlx} 0)`);
+  }
+}
+
+/* ---------- carton final ---------- */
+const flood = el('circle', { cx: 960, cy: 560, r: 0, fill: C.green }, endcard);
+const endG = el('g', {}, endcard);
+const endPill = el('g', {}, endG);
+pill(endPill, 'westbourse.com', 960, 560, C.white, { size: 96, w: 900, ls: -1, padX: 56, sh: 12, sw: 7 });
+const endTag = el('g', {}, endG);
+pill(endTag, 'COMPAREZ LES SGI AGRÉÉES', 960, 420, C.yellow, { size: 30, ls: 2, padX: 26, sh: 6 });
+const endStars = [[470, 380, C.pink, 5], [1480, 720, C.yellow, 8], [1450, 330, C.cyan, 5]].map(([x, y, f, n]) => {
+  const g = el('g', {}, endG);
+  el('path', { d: starD(0, 0, 48, n, n === 8 ? 0.55 : 0.46), fill: f, stroke: C.ink, 'stroke-width': 5, 'stroke-linejoin': 'round' }, g);
+  return { g, x, y };
+});
+const endTape = el('rect', { x: -130, y: -24, width: 260, height: 48, fill: 'url(#hazY)', stroke: C.ink, 'stroke-width': 5 }, endG);
+SFX.push({ t: T_END, type: 'swoosh' }, { t: T_END + 0.5, type: 'end' });
+
+/* ---------- caméra : (centre x, centre y, largeur vue) ---------- */
+const V = {
+  hook: [720, 1430, 1450], all: [1960, 1250, 4000], emet: [2850, 1440, 2000], sgi: [1020, 1660, 2150],
+  brvm: [2050, 1480, 2300], dcbr: [2080, 1880, 2200], fly: [1800, 1700, 2300], sgiZoom: [1320, 1420, 1500],
+};
+const MOVES = [
+  [S('vue') + 0.1, 2.0, V.all], [S('emet') + 0.1, 1.8, V.emet], [S('sgi') + 0.1, 1.9, V.sgi],
+  [S('brvm') + 0.1, 1.8, V.brvm], [S('dcbr') + 0.1, 1.6, V.dcbr], [T_FLY - 0.35, 1.3, V.fly],
+  [S('amf') + 0.1, 2.0, V.all], [T_TOUT - 0.1, 1.7, V.sgiZoom],
+];
+MOVES.forEach(([at, dur]) => SFX.push({ t: at, type: 'whoosh', dur }));
+function camAt(t) {
+  let s = V.hook.slice();
+  for (const [at, dur, to] of MOVES) {
+    if (t <= at) break;
+    const p = spring(win(t, at, at + dur));
+    s = [lerp(s[0], to[0], p), lerp(s[1], to[1], p), Math.exp(lerp(Math.log(s[2]), Math.log(to[2]), p))];
+  }
+  return s;
+}
+
+const blurWrap = document.getElementById('blurWrap');
+const mbBlur = document.getElementById('mbBlur');
+const shakeG = document.getElementById('shake');
+const T_TR = cue('sgi', 'transmet'), T_AR = cue('brvm', 'arrive');
+
+/* ================================================================
+   rendu d'un instant
+   ================================================================ */
+function seek(t) {
+  // Caméra + flou de bougé dérivé de la vitesse (fonction pure de t).
+  const [cx, cy, vw] = camAt(t);
+  const z = 1920 / vw;
+  cam.setAttribute('transform', `translate(960 540) scale(${z}) translate(${-cx} ${-cy})`);
+  const dt = 1 / 240, a = camAt(t - dt), b = camAt(t + dt);
+  const vx = (((b[0] - a[0]) / (2 * dt)) * z) / 60, vy = (((b[1] - a[1]) / (2 * dt)) * z) / 60;
+  const vz = (Math.abs(Math.log(b[2]) - Math.log(a[2])) / (2 * dt) / 60) * 500;
+  const sx = Math.min(14, Math.abs(vx) * 0.35 + vz * 0.25), sy = Math.min(14, Math.abs(vy) * 0.35 + vz * 0.25);
+  if (sx + sy > 0.25) { mbBlur.setAttribute('stdDeviation', `${sx.toFixed(2)} ${sy.toFixed(2)}`); blurWrap.setAttribute('filter', 'url(#mb)'); }
+  else blurWrap.removeAttribute('filter');
+  // Secousse brève à chaque tampon et chaque chute.
+  let ox = 0, oy = 0;
+  for (const sk of SHAKES) if (t > sk.t && t < sk.t + 0.5) { const u = t - sk.t, d = sk.amp * Math.exp(-u * 9); ox += d * Math.sin(u * 71); oy += d * Math.cos(u * 57); }
+  shakeG.setAttribute('transform', `translate(${ox.toFixed(2)} ${oy.toFixed(2)})`);
+
+  const dim = 1 - 0.82 * expoOut(win(t, T_TOUT, T_TOUT + 0.6));
+
+  for (const g of GHOSTS) {
+    const o = expoOut(win(t, g.at, g.at + 0.35)) * (1 - win(t, g.until, g.until + 0.3)) * dim;
+    g.g.setAttribute('opacity', o.toFixed(3));
+    g.g.setAttribute('visibility', o > 0.001 ? 'visible' : 'hidden');
+  }
+  for (const it of ITEMS) seekItem(it, t, dim);
+
+  for (const l of LINES) {
+    const p = expoOut(win(t, l.at, l.at + l.dur));
+    l.p.setAttribute('stroke-dashoffset', (l.len * (1 - p)).toFixed(2));
+    l.p.setAttribute('visibility', p > 0 ? 'visible' : 'hidden');
+    l.p.setAttribute('opacity', dim.toFixed(3));
+    if (l.arrow) {
+      const s = popE(win(t, l.at + l.dur * 0.8, l.at + l.dur * 0.8 + 0.4));
+      l.arrow.setAttribute('transform', `translate(${l.ex} ${l.ey}) rotate(${l.ang.toFixed(1)}) scale(${s.toFixed(3)})`);
+      l.arrow.setAttribute('visibility', s > 0.001 ? 'visible' : 'hidden');
+      l.arrow.setAttribute('opacity', dim.toFixed(3));
+    }
+  }
+
+  // Barres du carnet d'ordres ; la ligne du haut devient « votre » ordre.
+  for (const bar of BARS) {
+    const w = bar.w * expoOut(win(t, bar.at, bar.at + 0.35));
+    bar.r.setAttribute('width', w.toFixed(2));
+    bar.r.setAttribute('x', bar.side < 0 ? (2266 - w).toFixed(2) : 2294);
+    bar.r.setAttribute('visibility', w > 0.5 ? 'visible' : 'hidden');
+    if (bar.i === 0) bar.r.setAttribute('fill', t > T_MATCH + 0.3 ? C.yellow : bar.side < 0 ? C.pink : C.cyan);
+  }
+  PAYS_HL.forEach((r, k) => {
+    const at = T_HUIT2 + k * 0.11;
+    r.setAttribute('opacity', (expoOut(win(t, at, at + 0.15)) * (1 - win(t, at + 1.4, at + 1.8))).toFixed(3));
+  });
+
+  // Ticket : apparition, traversée de la SGI, entrée dans le carnet, rencontre.
+  {
+    const pop = popE(win(t, T_TICKET, T_TICKET + 0.6));
+    let x = 900, y = 1400, s, rot = -3 + 8 * (1 - expoOut(win(t, T_TICKET, T_TICKET + 0.6)));
+    const p1 = expoInOut(win(t, T_TR, T_TR + 1.2));
+    x = lerp(900, 1760, p1); s = 1 - 0.18 * Math.sin(Math.PI * p1); rot = lerp(rot, 2, p1);
+    const p2 = expoInOut(win(t, T_AR, T_AR + 0.9));
+    x = lerp(x, 2132, p2); y = lerp(y, 1387, p2); s = lerp(s, 0.6, p2); rot = lerp(rot, 0, p2);
+    x = lerp(x, 2186, expoInOut(win(t, T_MATCH, T_MATCH + 0.3)));
+    ticket.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${(s * pop).toFixed(4)})`);
+    const o = 1 - win(t, T_MATCH + 0.3, T_MATCH + 0.5);
+    ticket.setAttribute('opacity', o.toFixed(3));
+    ticket.setAttribute('visibility', pop > 0.001 && o > 0.001 ? 'visible' : 'hidden');
+  }
+
+  // Titre SNTS : vendeur → acheteur, puis vol jusqu'au compte-titres.
+  {
+    const pop = popE(win(t, T_CHIP0 - 0.15, T_CHIP0 + 0.35));
+    let x = lerp(2420, 2150, expoInOut(win(t, T_CHIP0, T_CHIP1))), y = 2088, s = 0.78, rot = 0;
+    if (t > T_FLY) {
+      const p = expoInOut(win(t, T_FLY, T_LAND));
+      const pt = P_FLY.p.getPointAtLength(P_FLY.len * p);
+      x = pt.x; y = pt.y; s = lerp(0.78, 1, p) * (1 + 0.25 * Math.sin(Math.PI * p)); rot = -8 * Math.sin(Math.PI * p);
+    }
+    if (t > T_LAND) s *= 1 + 0.12 * (1 - dropE(win(t, T_LAND, T_LAND + 0.6)));
+    chip.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${(s * pop).toFixed(4)})`);
+    chip.setAttribute('visibility', pop > 0.001 ? 'visible' : 'hidden');
+  }
+  COINS.forEach((g, k) => {
+    const a0 = T_COIN0 + k * 0.28, a1 = a0 + 1.1;
+    const p = expoInOut(win(t, a0, a1));
+    const o = clamp((t - a0) * 6) * (1 - win(t, T_COIN1 + k * 0.1, T_COIN1 + k * 0.1 + 0.3)) * dim;
+    g.setAttribute('transform', `translate(${lerp(2160, 2430, p).toFixed(2)} 2172) scale(${popE(win(t, a0 - 0.05, a0 + 0.35)).toFixed(3)})`);
+    g.setAttribute('opacity', o.toFixed(3));
+    g.setAttribute('visibility', o > 0.001 ? 'visible' : 'hidden');
+  });
+
+  // Flux continus : jetons dans le sens réel du mouvement.
+  for (const f of FLOWS) {
+    const on = t >= f.t0 && t <= f.t1 + 0.5;
+    f.toks.forEach((e, i) => {
+      const travelled = (t - f.t0) * f.speed - i * f.gap;
+      if (!on || travelled < 0) { e.setAttribute('visibility', 'hidden'); return; }
+      const sDist = travelled % f.len;
+      const pt = f.p.getPointAtLength(sDist);
+      const edge = Math.min(sDist / 50, (f.len - sDist) / 50, 1);
+      const o = edge * (1 - win(t, f.t1, f.t1 + 0.5)) * dim;
+      e.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) scale(${Math.max(0.01, edge).toFixed(3)})`);
+      e.setAttribute('opacity', o.toFixed(3));
+      e.setAttribute('visibility', o > 0.001 ? 'visible' : 'hidden');
+    });
+  }
+
+  // Cadre de protection autour de l'investisseur.
+  {
+    const p = expoOut(win(t, T_PROT + 0.15, T_PROT + 0.65));
+    guard.setAttribute('stroke-dasharray', `${(GUARD_LEN * p).toFixed(1)} ${GUARD_LEN}`);
+    const o = (p > 0 ? 1 : 0) * (1 - win(t, T_SANC + 0.3, T_SANC + 0.7));
+    guard.setAttribute('opacity', o.toFixed(3));
+    guard.setAttribute('visibility', o > 0.001 ? 'visible' : 'hidden');
+  }
+
+  // Comète : le trajet complet de l'ordre, puis extinction avec le reste.
+  {
+    const p = expoInOut(win(t, T_COMET, T_COMET + 1.6));
+    const da = `${(LEN_COMET * p).toFixed(1)} ${LEN_COMET * 2}`;
+    comet.setAttribute('stroke-dasharray', da); cometBase.setAttribute('stroke-dasharray', da);
+    const o = (p > 0 ? 1 : 0) * dim;
+    comet.setAttribute('opacity', o.toFixed(3)); cometBase.setAttribute('opacity', o.toFixed(3));
+    const vis = o > 0.001 ? 'visible' : 'hidden';
+    comet.setAttribute('visibility', vis); cometBase.setAttribute('visibility', vis);
+  }
+
+  for (const ti of TITLES) seekTitle(ti, t);
+
+  // Carton final : la planche se teinte depuis la SGI, puis l'adresse.
+  {
+    const p = expoInOut(win(t, T_END, T_END + 0.8));
+    flood.setAttribute('r', (2300 * p).toFixed(1));
+    flood.setAttribute('visibility', p > 0 ? 'visible' : 'hidden');
+    const sp = popE(win(t, T_END + 0.45, T_END + 1.05));
+    endPill.setAttribute('transform', `translate(960 560) scale(${sp.toFixed(4)}) translate(-960 -560)`);
+    const tg = popE(win(t, T_END + 0.7, T_END + 1.3));
+    endTag.setAttribute('transform', `translate(960 420) rotate(-3) scale(${tg.toFixed(4)}) translate(-960 -420)`);
+    endStars.forEach((st, k) => {
+      const s = popE(win(t, T_END + 0.9 + k * 0.12, T_END + 1.5 + k * 0.12));
+      st.g.setAttribute('transform', `translate(${st.x} ${st.y}) rotate(${(t * 16 + k * 40).toFixed(1)}) scale(${s.toFixed(4)})`);
+    });
+    const ts = popE(win(t, T_END + 1.1, T_END + 1.7));
+    endTape.setAttribute('transform', `translate(960 760) rotate(-4) scale(${ts.toFixed(4)})`);
+    endG.setAttribute('visibility', t > T_END + 0.4 ? 'visible' : 'hidden');
+  }
+}
+
+/* ---------- instants témoins (une image par temps fort) ---------- */
+BEATS.push(0.9, T_TICKET + 0.8, cue('hook', 'quoi') + 0.5);
+for (const ti of TITLES) BEATS.push(+(ti.at + 0.25 + ti.text.length / CPS + 0.3).toFixed(2));
+BEATS.push(g0 + 1.2, T_PAYS + 0.8, cue('emet', 'obligations') + 0.6, cue('emet', 'titres') + 0.9,
+  T_CT + 0.6, T_TR + 0.7, cue('sgi', 'indirect') + 0.7,
+  T_COT + 1.0, T_MATCH + 1.0, T_HUIT2 + 0.6,
+  cue('dcbr', 'lacheteur') + 0.3, T_COIN0 + 0.8, T_FLY + 0.5, T_LAND + 0.6,
+  T_BR + 1.6, T_AGR + 1.0, T_PROT + 0.8, T_COMET + 1.8, cue('fin', 'agreee') + 0.4, T_END + 1.8, DURATION - 0.3);
+BEATS.sort((x, y) => x - y);
+
+const VOIX = Object.keys(VX.scenes).map((k) => { const sc = VX.scenes[k]; return [sc.mots[0].a, sc.mots[sc.mots.length - 1].b]; });
+window.seek = seek;
+window.__timeline = { DURATION, SFX: SFX.slice().sort((x, y) => x.t - y.t), BEATS, VOIX, MUSIQUE_FIN: T_END + 0.5 };
+
+/* ================================================================
+   Bande-son : musique + bruitages (OfflineAudioContext → WAV).
+   La voix off est mixée ensuite par ffmpeg ; la musique s'efface sous elle.
+   ================================================================ */
+window.renderAudio = async function renderAudio() {
+  const SR = 48000;
+  const ctx = new OfflineAudioContext(2, Math.ceil(SR * DURATION), SR);
+  const master = ctx.createGain(); master.gain.value = 0.85; master.connect(ctx.destination);
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.2; comp.connect(master);
+  const music = ctx.createGain(); music.connect(comp);
+  const fx = ctx.createGain(); fx.gain.value = 0.75; fx.connect(comp);
+  let seed = 20261124;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let x = Math.imul(seed ^ (seed >>> 15), 1 | seed); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
+  const noise = ctx.createBuffer(1, SR * 2, SR); const nd = noise.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = rnd() * 2 - 1;
+  const env = (g, at, peak, atk, dec) => { g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(peak, at + atk); g.gain.exponentialRampToValueAtTime(0.0001, at + atk + dec); };
+  const pan = (dest, v) => { const p = ctx.createStereoPanner(); p.pan.value = v; p.connect(dest); return p; };
+  function osc(type, f, at, dur, peak, dest, f2, atk = 0.004) {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, at);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dur * 0.8);
+    const g = ctx.createGain(); env(g, at, peak, atk, dur);
+    o.connect(g); g.connect(dest); o.start(at); o.stop(at + atk + dur + 0.05);
+  }
+  function nz(at, dur, peak, type, f, q, dest, f2) {
+    const n = ctx.createBufferSource(); n.buffer = noise;
+    const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.setValueAtTime(f, at); fl.Q.value = q;
+    if (f2) fl.frequency.exponentialRampToValueAtTime(f2, at + dur);
+    const g = ctx.createGain(); env(g, at, peak, Math.min(0.01, dur / 3), dur);
+    n.connect(fl); fl.connect(g); g.connect(dest);
+    n.start(at, rnd() * 1.5, dur + 0.1);
+  }
+
+  /* --- musique : boucle légère à 104 bpm, en fa majeur --- */
+  const BEAT = 60 / 104, BAR = BEAT * 4;
+  const midi = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  const CHORDS = [[53, 57, 60, 64], [50, 53, 57, 60], [46, 50, 53, 57], [48, 52, 55, 62]]; // F, Dm, Bb, C(add9)
+  const ARP = [0, 1, 2, 3, 2, 1, 2, 3];
+  const FIN_MUS = window.__timeline.MUSIQUE_FIN;
+  const plk = ctx.createBiquadFilter(); plk.type = 'lowpass'; plk.frequency.value = 2600; plk.connect(music);
+  const plL = pan(plk, -0.25), plR = pan(plk, 0.25);
+  for (let bar = 0; bar * BAR < FIN_MUS; bar++) {
+    const ch = CHORDS[bar % 4], t0 = bar * BAR;
+    [0, 2, 2.5].forEach((bt) => { const at = t0 + bt * BEAT; if (at < FIN_MUS) osc('sine', midi(ch[0] - 12), at, 0.42, 0.22, music); });
+    ARP.forEach((k, i) => {
+      const at = t0 + (i * BEAT) / 2; if (at >= FIN_MUS) return;
+      const f = midi(ch[k] + 12);
+      osc('triangle', f, at, 0.32, 0.075, i % 2 ? plR : plL);
+      osc('sine', f * 2, at, 0.18, 0.02, plk);
+    });
+    [0, 2].forEach((bt) => { const at = t0 + bt * BEAT; if (at < FIN_MUS) osc('sine', 120, at, 0.2, 0.28, music, 45); });
+    for (let i = 0; i < 4; i++) { const at = t0 + (i + 0.5) * BEAT; if (at < FIN_MUS) nz(at, 0.035, 0.03, 'highpass', 7500, 0.7, music); }
+  }
+  [53, 57, 60, 64, 69].forEach((m, i) => osc('triangle', midi(m + 12), FIN_MUS + 0.02 * i, 2.6, 0.06, plk, null, 0.02));
+  osc('sine', midi(41), FIN_MUS, 2.8, 0.25, music);
+  // Effacement de la musique sous la voix.
+  music.gain.setValueAtTime(0.0001, 0);
+  music.gain.exponentialRampToValueAtTime(1, 0.6);
+  for (const [a, b] of window.__timeline.VOIX) {
+    music.gain.setValueAtTime(1, Math.max(0.7, a - 0.25));
+    music.gain.linearRampToValueAtTime(0.3, Math.max(0.75, a));
+    music.gain.setValueAtTime(0.3, b + 0.05);
+    music.gain.linearRampToValueAtTime(1, b + 0.4);
+  }
+  music.gain.setValueAtTime(1, DURATION - 1.5);
+  music.gain.linearRampToValueAtTime(0.0001, DURATION - 0.05);
+
+  /* --- bruitages --- */
+  const NOTE = [72, 74, 76, 79, 81];
+  for (const s of window.__timeline.SFX) {
+    const at = Math.max(0.01, s.t), p = s.pitch || 1;
+    switch (s.type) {
+      case 'pop': osc('sine', 620 * p, at, 0.09, 0.32, fx, 240 * p); nz(at, 0.02, 0.12, 'bandpass', 3800, 1.5, fx); break;
+      case 'tick': osc('sine', 1500 * p, at, 0.05, 0.09, fx, 900 * p); break;
+      case 'drop': nz(at + 0.12, 0.2, 0.32, 'lowpass', 900, 0.8, fx); osc('sine', 130, at + 0.16, 0.32, 0.55, fx, 42); nz(at + 0.17, 0.08, 0.18, 'bandpass', 2200, 1.2, fx); break;
+      case 'type': nz(at, 0.022, 0.13 + rnd() * 0.05, 'bandpass', 2600 + rnd() * 1400, 2.5, fx); osc('square', 180 + rnd() * 40, at, 0.012, 0.025, fx); break;
+      case 'erase': nz(at, 0.018, 0.07, 'bandpass', 3800, 2.5, fx); break;
+      case 'draw': nz(at, s.dur || 0.5, 0.06, 'bandpass', 1400, 1.4, fx, 3400); break;
+      case 'whoosh': nz(at, (s.dur || 1.8) * 0.75, 0.2, 'bandpass', 380, 0.9, fx, 2200); break;
+      case 'zip': nz(at, s.dur || 0.8, 0.11, 'bandpass', 900, 3, fx, 4200); break;
+      case 'swoosh': nz(at, 0.9, 0.28, 'bandpass', 300, 0.8, fx, 3800); break;
+      case 'coin': [2637, 3520, 4186].forEach((f, i) => osc('sine', f * (0.98 + rnd() * 0.04), at + i * 0.004, 0.25 - i * 0.05, 0.05, fx)); break;
+      case 'paper': nz(at, 0.12, 0.09, 'highpass', 2500, 0.7, fx); break;
+      case 'match': osc('sine', 880, at, 0.5, 0.16, fx); osc('sine', 1318.5, at + 0.09, 0.7, 0.14, fx); nz(at, 0.03, 0.2, 'bandpass', 3000, 1.5, fx); break;
+      case 'stamp': osc('sine', 160, at + 0.3, 0.35, 0.7, fx, 40); nz(at + 0.3, 0.12, 0.4, 'lowpass', 1600, 0.7, fx); nz(at + 0.3, 0.05, 0.25, 'bandpass', 3200, 1, fx); break;
+      case 'land': osc('sine', 520, at, 0.12, 0.22, fx, 260); osc('sine', 1046.5, at + 0.05, 0.5, 0.1, fx); break;
+      case 'thud': osc('sine', 110, at, 0.3, 0.45, fx, 38); nz(at, 0.06, 0.2, 'lowpass', 700, 0.7, fx); break;
+      case 'note': osc('triangle', midi(NOTE[s.k]), at, 0.6, 0.16, fx); osc('sine', midi(NOTE[s.k] + 12), at, 0.4, 0.05, fx); break;
+      case 'end': [65, 69, 72, 76].forEach((m, i) => osc('sine', midi(m + 12), at + i * 0.05, 1.6, 0.07, fx)); osc('sine', 140, at, 0.4, 0.6, fx, 40); break;
+      default: break;
+    }
+  }
+
+  const buf = await ctx.startRendering();
+  const n = buf.length, ch = [buf.getChannelData(0), buf.getChannelData(1)];
+  const out = new DataView(new ArrayBuffer(44 + n * 4));
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); out.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+  out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true);
+  ws(36, 'data'); out.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++) for (let c = 0; c < 2; c++, o += 2) out.setInt16(o, Math.max(-1, Math.min(1, ch[c][i])) * 32767, true);
+  const bytes = new Uint8Array(out.buffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+seek(0);
+window.__ready = true;
+})().catch((e) => { window.__erreur = String(e && e.stack || e); });
+</script>
+</body>
+</html>
