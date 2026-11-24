@@ -421,8 +421,13 @@
   flex: none; display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 999px;
   font-size: 0.72rem; font-weight: 700; color: var(--lp-accent); background: var(--lp-accent-clair);
 }
-.lp-saisie-bougies input {
+.lp-saisie-bougies input,
+.lp-saisie-cours input {
   width: 100%; min-width: 4.5rem; padding: 0.35rem 0.45rem; border: 1px solid var(--lp-trame); border-radius: 6px;
   font: inherit; font-variant-numeric: tabular-nums; color: var(--lp-encre); background: #fff;
 }
-.lp-saisie-bougies input:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 1px; }
+.lp-saisie-bougies input:focus-visible,
+.lp-saisie-cours input:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 1px; }
+/* Atelier « la moyenne qui glisse » : colonne des clôtures retenues lisible sans casser chaque nombre. */
+.lp-saisie-cours td { white-space: nowrap; }
+.lp-graphe--court { height: 200px; }

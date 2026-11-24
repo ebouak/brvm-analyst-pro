@@ -1,0 +1,787 @@
+{
+  "genere_le": "2026-11-24",
+  "periode": {
+    "debut": "2021-01-04",
+    "fin": "2026-11-24"
+  },
+  "valeurs": 48,
+  "parametres": {
+    "courte": 20,
+    "longue": 50,
+    "horizon": 20,
+    "fenetre_avant": 50,
+    "seuil_pente_pct": 1,
+    "min_cas": 30
+  },
+  "seances_par_an": {
+    "2021": 259,
+    "2022": 259,
+    "2023": 247,
+    "2024": 249,
+    "2025": 249,
+    "2026": 224
+  },
+  "base_20": {
+    "cas": 62449,
+    "part_hausse_pct": 53.1,
+    "part_baisse_pct": 42.7,
+    "part_inchange_pct": 4.1,
+    "2021-2023": {
+      "cas": 31487,
+      "part_hausse_pct": 51,
+      "part_baisse_pct": 44.1
+    },
+    "2024-2026": {
+      "cas": 30962,
+      "part_hausse_pct": 55.3,
+      "part_baisse_pct": 41.4
+    }
+  },
+  "simple": {
+    "croisements": 1467,
+    "haussiers": 717,
+    "baissiers": 750,
+    "par_valeur_et_par_an": 5.8,
+    "allers_retours_10": {
+      "cas": 1458,
+      "allers_retours": 247,
+      "part_pct": 16.9
+    },
+    "allers_retours_20": {
+      "cas": 1456,
+      "allers_retours": 438,
+      "part_pct": 30.1
+    },
+    "selon_pente": {
+      "plate": {
+        "cas": 882,
+        "allers_retours": 256,
+        "part_pct": 29
+      },
+      "orientee": {
+        "cas": 573,
+        "allers_retours": 182,
+        "part_pct": 31.8
+      }
+    },
+    "avant": {
+      "haussier_mediane_pct": 10.5,
+      "baissier_mediane_pct": -9.1,
+      "cas_haussiers": 717,
+      "cas_baissiers": 750
+    },
+    "apres_20": {
+      "haussier": {
+        "cas": 708,
+        "part_pct": 49.2,
+        "part_base_pct": 53.1,
+        "ic95_pct": [
+          45.5,
+          52.8
+        ],
+        "variation_mediane_pct": 0,
+        "assez_de_cas": true,
+        "ecart_etabli": true,
+        "ecart_sens": "moins"
+      },
+      "baissier": {
+        "cas": 740,
+        "part_pct": 36.9,
+        "part_base_pct": 42.7,
+        "ic95_pct": [
+          33.5,
+          40.4
+        ],
+        "variation_mediane_pct": 1.4,
+        "assez_de_cas": true,
+        "ecart_etabli": true,
+        "ecart_sens": "moins"
+      }
+    },
+    "robustesse": {
+      "isoles": {
+        "haussier": {
+          "cas": 467,
+          "part_pct": 47.1,
+          "part_base_pct": 53.1,
+          "ic95_pct": [
+            42.6,
+            51.6
+          ],
+          "variation_mediane_pct": 0,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        },
+        "baissier": {
+          "cas": 553,
+          "part_pct": 38,
+          "part_base_pct": 42.7,
+          "ic95_pct": [
+            34,
+            42.1
+          ],
+          "variation_mediane_pct": 1.2,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        }
+      },
+      "2021-2023": {
+        "haussier": {
+          "cas": 356,
+          "part_pct": 42.4,
+          "part_base_pct": 51,
+          "ic95_pct": [
+            37.4,
+            47.6
+          ],
+          "variation_mediane_pct": -0.6,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        },
+        "baissier": {
+          "cas": 372,
+          "part_pct": 36.3,
+          "part_base_pct": 44.1,
+          "ic95_pct": [
+            31.6,
+            41.3
+          ],
+          "variation_mediane_pct": 1.1,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        }
+      },
+      "2024-2026": {
+        "haussier": {
+          "cas": 352,
+          "part_pct": 56,
+          "part_base_pct": 55.3,
+          "ic95_pct": [
+            50.7,
+            61.1
+          ],
+          "variation_mediane_pct": 1.2,
+          "assez_de_cas": true,
+          "ecart_etabli": false,
+          "ecart_sens": null
+        },
+        "baissier": {
+          "cas": 368,
+          "part_pct": 37.5,
+          "part_base_pct": 41.4,
+          "ic95_pct": [
+            32.7,
+            42.6
+          ],
+          "variation_mediane_pct": 1.7,
+          "assez_de_cas": true,
+          "ecart_etabli": false,
+          "ecart_sens": null
+        }
+      }
+    }
+  },
+  "exponentielle": {
+    "croisements": 1193,
+    "haussiers": 578,
+    "baissiers": 615,
+    "par_valeur_et_par_an": 4.7,
+    "allers_retours_10": {
+      "cas": 1183,
+      "allers_retours": 350,
+      "part_pct": 29.6
+    },
+    "allers_retours_20": {
+      "cas": 1180,
+      "allers_retours": 488,
+      "part_pct": 41.4
+    },
+    "selon_pente": {
+      "plate": {
+        "cas": 1001,
+        "allers_retours": 427,
+        "part_pct": 42.7
+      },
+      "orientee": {
+        "cas": 174,
+        "allers_retours": 57,
+        "part_pct": 32.8
+      }
+    },
+    "avant": {
+      "haussier_mediane_pct": 11.1,
+      "baissier_mediane_pct": -10.8,
+      "cas_haussiers": 578,
+      "cas_baissiers": 615
+    },
+    "apres_20": {
+      "haussier": {
+        "cas": 575,
+        "part_pct": 47.8,
+        "part_base_pct": 53.1,
+        "ic95_pct": [
+          43.8,
+          51.9
+        ],
+        "variation_mediane_pct": 0,
+        "assez_de_cas": true,
+        "ecart_etabli": true,
+        "ecart_sens": "moins"
+      },
+      "baissier": {
+        "cas": 603,
+        "part_pct": 35.5,
+        "part_base_pct": 42.7,
+        "ic95_pct": [
+          31.8,
+          39.4
+        ],
+        "variation_mediane_pct": 2.1,
+        "assez_de_cas": true,
+        "ecart_etabli": true,
+        "ecart_sens": "moins"
+      }
+    },
+    "robustesse": {
+      "isoles": {
+        "haussier": {
+          "cas": 313,
+          "part_pct": 46.3,
+          "part_base_pct": 53.1,
+          "ic95_pct": [
+            40.9,
+            51.9
+          ],
+          "variation_mediane_pct": -0.2,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        },
+        "baissier": {
+          "cas": 382,
+          "part_pct": 35.1,
+          "part_base_pct": 42.7,
+          "ic95_pct": [
+            30.5,
+            40
+          ],
+          "variation_mediane_pct": 2.5,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        }
+      },
+      "2021-2023": {
+        "haussier": {
+          "cas": 299,
+          "part_pct": 40.1,
+          "part_base_pct": 51,
+          "ic95_pct": [
+            34.7,
+            45.8
+          ],
+          "variation_mediane_pct": -1.3,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        },
+        "baissier": {
+          "cas": 317,
+          "part_pct": 34.4,
+          "part_base_pct": 44.1,
+          "ic95_pct": [
+            29.4,
+            39.8
+          ],
+          "variation_mediane_pct": 1.9,
+          "assez_de_cas": true,
+          "ecart_etabli": true,
+          "ecart_sens": "moins"
+        }
+      },
+      "2024-2026": {
+        "haussier": {
+          "cas": 276,
+          "part_pct": 56.2,
+          "part_base_pct": 55.3,
+          "ic95_pct": [
+            50.3,
+            61.9
+          ],
+          "variation_mediane_pct": 1.1,
+          "assez_de_cas": true,
+          "ecart_etabli": false,
+          "ecart_sens": null
+        },
+        "baissier": {
+          "cas": 286,
+          "part_pct": 36.7,
+          "part_base_pct": 41.4,
+          "ic95_pct": [
+            31.3,
+            42.4
+          ],
+          "variation_mediane_pct": 2.4,
+          "assez_de_cas": true,
+          "ecart_etabli": false,
+          "ecart_sens": null
+        }
+      }
+    }
+  },
+  "decalage_exponentielle": {
+    "haussier_mediane_seances": 4,
+    "baissier_mediane_seances": 4,
+    "cas_haussiers": 333,
+    "cas_baissiers": 295,
+    "sans_equivalent": 839
+  },
+  "liquidite": {
+    "fenetre": 50,
+    "du": "2026-09-16",
+    "au": "2026-11-24",
+    "valeurs_mesurees": 47,
+    "valeurs_10_plus": 2,
+    "valeurs_25_plus": 2,
+    "plus_touchees": [
+      {
+        "code": "SEMC",
+        "sans_echange": 50
+      },
+      {
+        "code": "SICC",
+        "sans_echange": 50
+      },
+      {
+        "code": "SCRC",
+        "sans_echange": 4
+      },
+      {
+        "code": "UNLC",
+        "sans_echange": 2
+      },
+      {
+        "code": "ABJC",
+        "sans_echange": 0
+      }
+    ]
+  },
+  "exemples": {
+    "cbibf": {
+      "code": "CBIBF",
+      "seances": [
+        {
+          "date": "2026-11-09",
+          "cloture": 32200,
+          "volume": 334,
+          "moyenne_20": 31493,
+          "moyenne_50": 31884.7
+        },
+        {
+          "date": "2026-11-10",
+          "cloture": 31000,
+          "volume": 931,
+          "moyenne_20": 31543,
+          "moyenne_50": 31892.6
+        },
+        {
+          "date": "2026-11-11",
+          "cloture": 32000,
+          "volume": 437,
+          "moyenne_20": 31618,
+          "moyenne_50": 31882.6
+        },
+        {
+          "date": "2026-11-12",
+          "cloture": 32000,
+          "volume": 253,
+          "moyenne_20": 31668,
+          "moyenne_50": 31860.6
+        },
+        {
+          "date": "2026-11-13",
+          "cloture": 31990,
+          "volume": 226,
+          "moyenne_20": 31692.5,
+          "moyenne_50": 31831.4
+        },
+        {
+          "date": "2026-11-16",
+          "cloture": 31495,
+          "volume": 228,
+          "moyenne_20": 31742,
+          "moyenne_50": 31795.3
+        },
+        {
+          "date": "2026-11-17",
+          "cloture": 31005,
+          "volume": 272,
+          "moyenne_20": 31742.3,
+          "moyenne_50": 31755.4
+        },
+        {
+          "date": "2026-11-18",
+          "cloture": 30800,
+          "volume": 637,
+          "moyenne_20": 31732.3,
+          "moyenne_50": 31701.4
+        },
+        {
+          "date": "2026-11-19",
+          "cloture": 28850,
+          "volume": 893,
+          "moyenne_20": 31629.8,
+          "moyenne_50": 31606.4
+        },
+        {
+          "date": "2026-11-20",
+          "cloture": 27505,
+          "volume": 998,
+          "moyenne_20": 31460,
+          "moyenne_50": 31470.5
+        },
+        {
+          "date": "2026-11-23",
+          "cloture": 25445,
+          "volume": 950,
+          "moyenne_20": 31187.3,
+          "moyenne_50": 31301.3
+        },
+        {
+          "date": "2026-11-24",
+          "cloture": 23970,
+          "volume": 706,
+          "moyenne_20": 30820.5,
+          "moyenne_50": 31094.7
+        }
+      ],
+      "croisements": [
+        {
+          "date": "2026-11-18",
+          "sens": "haussier"
+        },
+        {
+          "date": "2026-11-20",
+          "sens": "baissier"
+        }
+      ],
+      "clotures_70": [
+        {
+          "date": "2026-08-18",
+          "cloture": 28330
+        },
+        {
+          "date": "2026-08-19",
+          "cloture": 28700
+        },
+        {
+          "date": "2026-08-20",
+          "cloture": 29000
+        },
+        {
+          "date": "2026-08-21",
+          "cloture": 30000
+        },
+        {
+          "date": "2026-08-24",
+          "cloture": 29000
+        },
+        {
+          "date": "2026-08-26",
+          "cloture": 29390
+        },
+        {
+          "date": "2026-08-27",
+          "cloture": 29390
+        },
+        {
+          "date": "2026-08-28",
+          "cloture": 29600
+        },
+        {
+          "date": "2026-08-31",
+          "cloture": 29630
+        },
+        {
+          "date": "2026-09-01",
+          "cloture": 30605
+        },
+        {
+          "date": "2026-09-02",
+          "cloture": 32500
+        },
+        {
+          "date": "2026-09-03",
+          "cloture": 33100
+        },
+        {
+          "date": "2026-09-04",
+          "cloture": 33450
+        },
+        {
+          "date": "2026-09-07",
+          "cloture": 33300
+        },
+        {
+          "date": "2026-09-08",
+          "cloture": 33000
+        },
+        {
+          "date": "2026-09-09",
+          "cloture": 33500
+        },
+        {
+          "date": "2026-09-10",
+          "cloture": 33600
+        },
+        {
+          "date": "2026-09-11",
+          "cloture": 34300
+        },
+        {
+          "date": "2026-09-14",
+          "cloture": 33905
+        },
+        {
+          "date": "2026-09-15",
+          "cloture": 34300
+        },
+        {
+          "date": "2026-09-16",
+          "cloture": 34450
+        },
+        {
+          "date": "2026-09-17",
+          "cloture": 33500
+        },
+        {
+          "date": "2026-09-18",
+          "cloture": 33840
+        },
+        {
+          "date": "2026-09-21",
+          "cloture": 33000
+        },
+        {
+          "date": "2026-09-22",
+          "cloture": 31000
+        },
+        {
+          "date": "2026-09-23",
+          "cloture": 28675
+        },
+        {
+          "date": "2026-09-24",
+          "cloture": 30300
+        },
+        {
+          "date": "2026-09-25",
+          "cloture": 31500
+        },
+        {
+          "date": "2026-09-28",
+          "cloture": 32490
+        },
+        {
+          "date": "2026-09-29",
+          "cloture": 32490
+        },
+        {
+          "date": "2026-09-30",
+          "cloture": 30060
+        },
+        {
+          "date": "2026-10-01",
+          "cloture": 30300
+        },
+        {
+          "date": "2026-10-02",
+          "cloture": 31500
+        },
+        {
+          "date": "2026-10-05",
+          "cloture": 31450
+        },
+        {
+          "date": "2026-10-06",
+          "cloture": 31440
+        },
+        {
+          "date": "2026-10-07",
+          "cloture": 31500
+        },
+        {
+          "date": "2026-10-08",
+          "cloture": 31300
+        },
+        {
+          "date": "2026-10-09",
+          "cloture": 30005
+        },
+        {
+          "date": "2026-10-12",
+          "cloture": 30015
+        },
+        {
+          "date": "2026-10-13",
+          "cloture": 30000
+        },
+        {
+          "date": "2026-10-14",
+          "cloture": 30500
+        },
+        {
+          "date": "2026-10-15",
+          "cloture": 31000
+        },
+        {
+          "date": "2026-10-16",
+          "cloture": 31500
+        },
+        {
+          "date": "2026-10-19",
+          "cloture": 30505
+        },
+        {
+          "date": "2026-10-20",
+          "cloture": 31000
+        },
+        {
+          "date": "2026-10-21",
+          "cloture": 31000
+        },
+        {
+          "date": "2026-10-22",
+          "cloture": 30900
+        },
+        {
+          "date": "2026-10-23",
+          "cloture": 30900
+        },
+        {
+          "date": "2026-10-26",
+          "cloture": 30900
+        },
+        {
+          "date": "2026-10-27",
+          "cloture": 31305
+        },
+        {
+          "date": "2026-10-28",
+          "cloture": 32200
+        },
+        {
+          "date": "2026-10-29",
+          "cloture": 31900
+        },
+        {
+          "date": "2026-10-30",
+          "cloture": 31900
+        },
+        {
+          "date": "2026-11-02",
+          "cloture": 32000
+        },
+        {
+          "date": "2026-11-03",
+          "cloture": 32010
+        },
+        {
+          "date": "2026-11-04",
+          "cloture": 32990
+        },
+        {
+          "date": "2026-11-05",
+          "cloture": 32575
+        },
+        {
+          "date": "2026-11-06",
+          "cloture": 32575
+        },
+        {
+          "date": "2026-11-09",
+          "cloture": 32200
+        },
+        {
+          "date": "2026-11-10",
+          "cloture": 31000
+        },
+        {
+          "date": "2026-11-11",
+          "cloture": 32000
+        },
+        {
+          "date": "2026-11-12",
+          "cloture": 32000
+        },
+        {
+          "date": "2026-11-13",
+          "cloture": 31990
+        },
+        {
+          "date": "2026-11-16",
+          "cloture": 31495
+        },
+        {
+          "date": "2026-11-17",
+          "cloture": 31005
+        },
+        {
+          "date": "2026-11-18",
+          "cloture": 30800
+        },
+        {
+          "date": "2026-11-19",
+          "cloture": 28850
+        },
+        {
+          "date": "2026-11-20",
+          "cloture": 27505
+        },
+        {
+          "date": "2026-11-23",
+          "cloture": 25445
+        },
+        {
+          "date": "2026-11-24",
+          "cloture": 23970
+        }
+      ]
+    },
+    "ftsc": {
+      "code": "FTSC",
+      "veille": {
+        "date": "2025-09-25",
+        "cloture": 3760
+      },
+      "seance": {
+        "date": "2025-09-26",
+        "cloture": 2185
+      },
+      "baisse_fcfa": 1575,
+      "baisse_pct": -41.9,
+      "moyennes_veille": {
+        "moyenne_20": 4628,
+        "moyenne_50": 4714.5
+      },
+      "moyennes_seance": {
+        "moyenne_20": 4494.8,
+        "moyenne_50": 4671.7,
+        "ecart_20_pct": -51.4,
+        "ecart_50_pct": -53.2
+      },
+      "dividende": {
+        "exercice": 2024,
+        "montant_net": 1726.56,
+        "paiement": "2025-09-30",
+        "source": "brvm-boc"
+      },
+      "croisements_30_seances": []
+    }
+  },
+  "dividendes_lus_le": "2026-11-24"
+}

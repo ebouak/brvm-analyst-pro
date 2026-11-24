@@ -8,6 +8,8 @@ import type { DonneesSection } from '@/lib/academy/donneesServer';
 
 const nombre = (n: number) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n);
 const pct = (n: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n)} %`;
+/** Écart signé, au dixième : « +4,8 % », « −4,4 % » (vrai signe moins). */
+const pctSigne = (n: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(n)} %`.replace('-', '−');
 const dateFr = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 /** Date courte pour les cellules étroites : 26/05/2026. */
@@ -218,8 +220,14 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
                     <span className="lp-cellule-detail">{l.code}</span>
                   </th>
                   <td className="lp-num">{nombre(l.cours)}</td>
-                  <td className="lp-num">{nombre(Math.round(l.mm20))}</td>
-                  <td className="lp-num">{nombre(Math.round(l.mm50))}</td>
+                  <td className="lp-num">
+                    {nombre(Math.round(l.mm20))}
+                    <span className="lp-cellule-detail">écart {pctSigne(l.ecart20Pct)}</span>
+                  </td>
+                  <td className="lp-num">
+                    {nombre(Math.round(l.mm50))}
+                    <span className="lp-cellule-detail">écart {pctSigne(l.ecart50Pct)}</span>
+                  </td>
                   <td className="lp-num">{nombre(Math.round(l.rsi14))}</td>
                   <td>Cours {l.position} moyennes ; RSI {zone[l.zoneRsi]}</td>
                 </tr>
@@ -229,6 +237,7 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
         </div>
         <ul className="lp-hypotheses">
           {date && <li>Calculés sur les clôtures réelles jusqu’à la séance du {dateFr(date)}. Source : BRVM, via la base WestBourse.</li>}
+          <li>Écart : (cours − moyenne) ÷ moyenne. Plus il est grand, plus le mouvement récent a été rapide ; il ne dit pas s’il se prolongera.</li>
           <li>Une description de la situation, pas un signal : à la BRVM, des séances sans échange peuvent figer un cours et fausser ces indicateurs.</li>
         </ul>
         <Manquants codes={manquants} />
