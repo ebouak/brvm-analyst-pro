@@ -1,238 +1,553 @@
 {
- "titre": "Leçon 1 — Lire un graphique de cours",
- "module": "Module 1 — Graphiques et tendances",
- "categorie": "technical",
- "duree_min": 10,
- "sous_titre": "Tendance, supports, résistances et volume : les quatre choses à repérer avant tout indicateur.",
- "resume": "L’analyse technique étudie le cours et les volumes pour décrire le comportement du marché. Avant tout indicateur, il faut savoir lire un graphique : identifier une tendance, repérer les niveaux où le cours a déjà rebondi, et vérifier si les mouvements sont portés par des échanges réels. Cette leçon pose ces bases, et leurs limites à la BRVM.",
- "sections": [
-  {
-   "type": "definition",
-   "titre": "Quatre notions de base",
-   "contenu": "Un graphique de cours montre l’histoire des prix d’une action. Avant de calculer le moindre indicateur, il faut savoir le lire à l’œil, comme on lit une carte avant de mesurer une distance.\nL’analyse technique part d’une idée simple : le cours résume ce que les acheteurs et les vendeurs ont accepté de payer. En étudiant son évolution et les volumes échangés, on décrit le comportement du marché. On ne dit rien, en revanche, de la valeur de la société : c’est le rôle de l’analyse fondamentale du niveau 2.\nQuatre notions suffisent pour commencer. La tendance donne la direction. Le support et la résistance marquent les zones où le mouvement s’est déjà arrêté. Le volume dit si ces mouvements ont été portés par de vrais échanges. Les trois premières se lisent sur la courbe ; la quatrième, sur les barres placées sous la courbe.",
-   "points": [
+  "titre": "Leçon 1 — Lire un graphique de cours et reconnaître les bougies",
+  "module": "Module 1 — Graphiques et tendances",
+  "categorie": "technical",
+  "duree_min": 18,
+  "sous_titre": "Tendance, supports, résistances, volume, et lecture des bougies : les cinq choses à repérer avant tout indicateur.",
+  "resume": "L’analyse technique étudie le cours et les volumes pour décrire le comportement du marché. Avant tout indicateur, il faut savoir lire un graphique : identifier une tendance, repérer les niveaux où le cours a déjà rebondi, vérifier si les mouvements sont portés par des échanges réels, et reconnaître les bougies qui composent le graphique. Cette leçon pose ces bases, leurs limites à la BRVM, et une introduction pratique aux chandeliers japonais, avec quatre exercices corrigés.",
+  "sections": [
     {
-     "titre": "La tendance",
-     "detail": "Haussière si les sommets et les creux sont de plus en plus hauts ; baissière dans le cas inverse ; sans tendance sinon.",
-     "verifier": "Les trois derniers creux et sommets."
+      "type": "definition",
+      "titre": "Quatre notions de base",
+      "contenu": "Un graphique de cours montre l’histoire des prix d’une action. Avant de calculer le moindre indicateur, il faut savoir le lire à l’œil, comme on lit une carte avant de mesurer une distance.\nL’analyse technique part d’une idée simple : le cours résume ce que les acheteurs et les vendeurs ont accepté de payer. En étudiant son évolution et les volumes échangés, on décrit le comportement du marché. On ne dit rien, en revanche, de la valeur de la société : c’est le rôle de l’analyse fondamentale du niveau 2.\nQuatre notions suffisent pour commencer. La tendance donne la direction. Le support et la résistance marquent les zones où le mouvement s’est déjà arrêté. Le volume dit si ces mouvements ont été portés par de vrais échanges. Les trois premières se lisent sur la courbe ; la quatrième, sur les barres placées sous la courbe.",
+      "points": [
+        {
+          "titre": "La tendance",
+          "detail": "Haussière si les sommets et les creux sont de plus en plus hauts ; baissière dans le cas inverse ; sans tendance sinon.",
+          "verifier": "Les trois derniers creux et sommets."
+        },
+        {
+          "titre": "Le support",
+          "detail": "Une zone de prix où le cours a cessé de baisser plusieurs fois : des acheteurs y sont apparus."
+        },
+        {
+          "titre": "La résistance",
+          "detail": "Une zone où le cours a cessé de monter plusieurs fois : des vendeurs y sont apparus."
+        },
+        {
+          "titre": "Le volume",
+          "detail": "Le nombre de titres échangés. Un mouvement sans volume est fragile.",
+          "verifier": "Le volume du jour comparé à sa moyenne."
+        }
+      ],
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Tendance haussière : sommets et creux de plus en plus hauts",
+          "labels": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "valeurs": [
+            100,
+            108,
+            104,
+            115,
+            111,
+            122,
+            118
+          ],
+          "unite": "FCFA",
+          "note": "Exemple fictif : les sommets (108, 115, 122) montent, les creux (104, 111, 118) montent aussi. C’est la définition d’une tendance haussière ; l’inverse décrit une tendance baissière.",
+          "reel": false
+        }
+      ]
     },
     {
-     "titre": "Le support",
-     "detail": "Une zone de prix où le cours a cessé de baisser plusieurs fois : des acheteurs y sont apparus."
+      "type": "definition",
+      "titre": "La bougie (chandelier japonais) : anatomie et lecture",
+      "contenu": "Le graphique en bougies, ou chandeliers japonais, est le type de graphique le plus utilisé en bourse. Chaque bougie résume une séance en quatre prix : l’ouverture, le plus haut, le plus bas et la clôture. Savoir la lire, c’est voir d’un coup d’œil qui a dominé la séance : les acheteurs ou les vendeurs.\nUne bougie a deux parties. Le corps, un rectangle, va du prix d’ouverture au prix de clôture ; sa couleur dit le sens de la séance. Les mèches, ou ombres, sont les fines lignes qui le prolongent : elles montrent le plus haut et le plus bas atteints au-delà du corps.\nSur WESTBOURSE, comme sur la plupart des plateformes, une bougie haussière (clôture au-dessus de l’ouverture) est verte ou claire, une bougie baissière rouge ou sombre. Certaines places, en Asie notamment, inversent ces couleurs : vérifiez toujours la légende du graphique que vous lisez.\nLa taille du corps indique la force du mouvement : un grand corps traduit une séance nettement dominée par un camp, un petit corps une indécision. Les mèches longues révèlent un rejet : une longue mèche haute signifie que les prix ont monté puis ont été repoussés ; une longue mèche basse, qu’ils ont baissé puis rebondi.",
+      "tableau": {
+        "colonnes": [
+          "Élément",
+          "Ce qu’il dit"
+        ],
+        "lignes": [
+          [
+            "Ouverture",
+            "Le premier prix traité de la séance : le point de départ."
+          ],
+          [
+            "Clôture",
+            "Le dernier prix traité : le verdict de la séance. C’est le prix le plus important."
+          ],
+          [
+            "Plus haut",
+            "Le prix maximum atteint : jusqu’où les acheteurs ont pu pousser."
+          ],
+          [
+            "Plus bas",
+            "Le prix minimum atteint : jusqu’où les vendeurs ont pu pousser."
+          ]
+        ]
+      },
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Astuce de lecture",
+          "texte": "Devant une bougie haussière, demandez-vous si sa mèche basse est longue. Si oui, le cours est descendu puis remonté : les acheteurs ont défendu un niveau. Si c’est la mèche haute qui est longue, le cours a monté puis a été repoussé : les vendeurs résistent."
+        }
+      ],
+      "simulation": {
+        "type": "chandelier",
+        "consigne": "Saisissez quatre prix : la bougie se dessine, corps et mèches mesurés. Allongez la mèche basse ou haute et observez la lecture changer.",
+        "ouverture": 1000,
+        "haut": 1060,
+        "bas": 980,
+        "cloture": 1050
+      }
     },
     {
-     "titre": "La résistance",
-     "detail": "Une zone où le cours a cessé de monter plusieurs fois : des vendeurs y sont apparus."
+      "type": "importance",
+      "titre": "Reconnaître les figures de bougies",
+      "contenu": "Certaines bougies, ou combinaisons de bougies, reviennent si souvent qu’elles ont reçu un nom. Elles décrivent un comportement de marché ; elles ne le prédisent pas. Voici les six figures les plus utiles à reconnaître : trois à une bougie, trois à deux bougies.\nLes trois simulateurs ci-dessous dessinent les figures à une bougie. Modifiez un seul prix et regardez à quel moment la figure change de nom : c’est la meilleure façon de retenir leur définition. La leçon 2 approfondit ces configurations et leur lecture à la BRVM.",
+      "tableau": {
+        "colonnes": [
+          "Figure",
+          "Forme",
+          "Ce qu’elle décrit",
+          "Lecture courante"
+        ],
+        "lignes": [
+          [
+            "Marteau",
+            "Une bougie : petit corps en haut, longue mèche basse (au moins deux fois le corps), mèche haute courte ou absente.",
+            "Le cours a baissé pendant la séance, puis les acheteurs l’ont fait remonter.",
+            "Haussière, surtout sur un support"
+          ],
+          [
+            "Doji",
+            "Une bougie : ouverture et clôture presque égales, mèches de part et d’autre.",
+            "Acheteurs et vendeurs se sont neutralisés.",
+            "Indécision"
+          ],
+          [
+            "Étoile filante",
+            "Une bougie : petit corps en bas, longue mèche haute, mèche basse courte.",
+            "Le cours a monté pendant la séance, puis les vendeurs l’ont fait redescendre.",
+            "Baissière, surtout sous une résistance"
+          ],
+          [
+            "Avalement haussier",
+            "Deux bougies : une petite baissière, puis une grande haussière dont le corps englobe entièrement le premier.",
+            "Les acheteurs ont repris en une séance plus que tout le terrain perdu la veille.",
+            "Haussière"
+          ],
+          [
+            "Avalement baissier",
+            "Deux bougies : une petite haussière, puis une grande baissière dont le corps englobe entièrement le premier.",
+            "Les vendeurs ont effacé en une séance toute la hausse de la veille.",
+            "Baissière"
+          ],
+          [
+            "Harami",
+            "Deux bougies : une grande, puis une petite dont le corps tient dans celui de la première.",
+            "Le mouvement de la veille s’essouffle.",
+            "Ralentissement"
+          ]
+        ],
+        "note": "La « lecture courante » est celle que retient la tradition de l’analyse technique. Elle décrit une tendance des acheteurs ou des vendeurs pendant la séance ; elle ne garantit aucun mouvement à venir."
+      },
+      "encadres": [
+        {
+          "ton": "attention",
+          "titre": "Une figure n’est pas une garantie",
+          "texte": "Une figure décrit ce qui s’est passé. Un marteau signifie que les acheteurs sont revenus en fin de séance, rien de plus. Une figure ne devient pertinente qu’au bon endroit : un marteau sur un support compte davantage qu’un marteau au milieu d’une baisse, sans niveau proche. Confirmez toujours avec le contexte (tendance, support ou résistance) et le volume."
+        }
+      ],
+      "simulations": [
+        {
+          "type": "chandelier",
+          "consigne": "Le marteau : petit corps en haut, longue mèche basse. Raccourcissez la mèche basse : à quel moment n’est-ce plus un marteau ?",
+          "ouverture": 1000,
+          "haut": 1012,
+          "bas": 940,
+          "cloture": 1010
+        },
+        {
+          "type": "chandelier",
+          "consigne": "Le doji : ouverture et clôture presque égales. Écartez la clôture de l’ouverture : la figure change de nom.",
+          "ouverture": 1000,
+          "haut": 1030,
+          "bas": 970,
+          "cloture": 1000
+        },
+        {
+          "type": "chandelier",
+          "consigne": "L’étoile filante : petit corps en bas, longue mèche haute. C’est l’inverse du marteau.",
+          "ouverture": 1000,
+          "haut": 1060,
+          "bas": 995,
+          "cloture": 1010
+        }
+      ]
     },
     {
-     "titre": "Le volume",
-     "detail": "Le nombre de titres échangés. Un mouvement sans volume est fragile.",
-     "verifier": "Le volume du jour comparé à sa moyenne."
+      "type": "cas",
+      "titre": "Exercices : reconnaître les bougies",
+      "contenu": "Pour apprendre à reconnaître les bougies, rien ne remplace la pratique. Quatre exercices progressifs vous attendent dans le quiz de fin de leçon, chacun avec sa correction : identifier un doji, reconnaître un marteau, lire une séquence de trois bougies, puis interpréter les mèches d’une bougie construite à partir de prix.\nPour l’exercice 4, dessinez d’abord la bougie vous-même, puis vérifiez-la dans le simulateur ci-dessous. Une action de la BRVM, dans un exemple fictif, ouvre à 4 150 FCFA, touche un plus haut de 4 350 FCFA et un plus bas de 4 050 FCFA, puis clôture à 4 200 FCFA.",
+      "points": [
+        {
+          "titre": "Exercice 1 — Identifier le type de bougie",
+          "detail": "Un corps quasi inexistant, des mèches au-dessus et en dessous : de quelle bougie s’agit-il ?"
+        },
+        {
+          "titre": "Exercice 2 — Reconnaître un marteau",
+          "detail": "Parmi quatre descriptions de bougies, laquelle est un marteau ?"
+        },
+        {
+          "titre": "Exercice 3 — Lire une séquence de bougies",
+          "detail": "Trois séances consécutives : que décrit la séquence, et que faut-il vérifier avant de conclure ?"
+        },
+        {
+          "titre": "Exercice 4 — Interpréter les mèches",
+          "detail": "Corps, mèche haute, mèche basse : mesurez-les, puis dites qui a dominé la séance.",
+          "verifier": "Corps de 50 FCFA, mèche haute de 150 FCFA, mèche basse de 100 FCFA."
+        }
+      ],
+      "simulation": {
+        "type": "chandelier",
+        "consigne": "Exercice 4 : les prix de l’exemple fictif sont déjà saisis. Comparez la bougie dessinée à celle que vous aviez imaginée.",
+        "ouverture": 4150,
+        "haut": 4350,
+        "bas": 4050,
+        "cloture": 4200
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Les trois échelles de temps",
+      "contenu": "Une même action peut monter sur un mois et baisser sur un an. Les deux descriptions sont exactes : elles ne portent pas sur le même horizon. Avant toute lecture, choisissez donc l’échelle de temps qui correspond à votre projet.\nUn épargnant qui achète pour plusieurs années regarde d’abord le graphique long : où se situe le cours dans son histoire ? Le graphique de quelques mois sert ensuite à vérifier que la tendance n’est pas en train de se retourner. Le court terme ne sert qu’à choisir un moment d’achat, et c’est l’horizon le plus trompeur.\nÀ la BRVM, le court terme est particulièrement bruité. Sur une valeur peu échangée, quelques ordres suffisent à déplacer le cours d’une séance à l’autre, sans que rien n’ait changé dans la société.",
+      "tableau": {
+        "colonnes": [
+          "Horizon",
+          "Graphique utile",
+          "Question"
+        ],
+        "lignes": [
+          [
+            "Court terme",
+            "Quelques semaines, cours quotidien",
+            "Le mouvement récent est-il confirmé par le volume ?"
+          ],
+          [
+            "Moyen terme",
+            "Quelques mois",
+            "La tendance est-elle intacte ?"
+          ],
+          [
+            "Long terme",
+            "Plusieurs années",
+            "Où se situe le cours dans son histoire ?"
+          ]
+        ],
+        "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
+      },
+      "simulation": {
+        "type": "technique",
+        "indicateur": "variation",
+        "consigne": "Choisissez une valeur : sa variation est mesurée sur quatre horizons, à partir de ses clôtures réelles.",
+        "codes": [
+          "SNTS",
+          "SGBC",
+          "ORAC",
+          "PALC"
+        ]
+      }
+    },
+    {
+      "type": "piege",
+      "titre": "Les limites propres à la BRVM : pièges fréquents",
+      "contenu": "L’analyse technique a été développée sur des marchés très liquides, où des milliers d’ordres s’échangent chaque minute. La BRVM est un marché plus étroit, et plusieurs de ses particularités changent la lecture d’un graphique, y compris celle des bougies.\nUne valeur peut rester plusieurs séances sans échange : son cours reste figé au dernier prix traité. Sur le graphique, la courbe paraît calme ; en réalité, personne n’a acheté ni vendu, et ce calme ne contient aucune information.\nLa BRVM encadre aussi la variation d’un cours en une séance. Une nouvelle importante peut donc se traduire par plusieurs séances consécutives de hausse ou de baisse, au lieu d’un saut unique. Lire ces séances comme une tendance qui s’installe est une erreur : c’est le même événement, étalé par la règle.\nEnfin, une valeur suspendue garde son dernier cours affiché. Ce chiffre n’est pas un prix auquel on peut traiter tant que la cotation n’a pas repris.",
+      "points": [
+        {
+          "titre": "Des cours qui ne bougent pas",
+          "detail": "Une valeur peut rester plusieurs séances sans échange : son cours reste figé, sans information.",
+          "verifier": "Le volume des dernières séances."
+        },
+        {
+          "titre": "Une variation encadrée",
+          "detail": "La BRVM limite la variation d’un cours en une séance : un mouvement fort peut s’étaler sur plusieurs jours.",
+          "verifier": "Les règles de cotation publiées par la BRVM."
+        },
+        {
+          "titre": "Une suspension",
+          "detail": "Une valeur suspendue garde son dernier cours affiché : ce n’est pas un prix auquel on peut traiter.",
+          "verifier": "La mention « suspendue » sur la fiche."
+        },
+        {
+          "titre": "Une faible liquidité",
+          "detail": "Sur une valeur peu échangée, une grande bougie peut ne refléter qu’un seul ordre.",
+          "verifier": "Le volume de la séance comparé à sa moyenne."
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Piège",
+          "Description",
+          "Impact sur les bougies"
+        ],
+        "lignes": [
+          [
+            "Cours figé",
+            "Une valeur peut rester plusieurs séances sans échange : son cours reste figé au dernier prix traité.",
+            "La bougie est plate (corps et mèches nuls). Elle ne contient aucune information."
+          ],
+          [
+            "Variation encadrée",
+            "La BRVM limite la variation d’un cours en une séance.",
+            "Un événement fort s’étale sur plusieurs bougies consécutives. Ne pas lire cela comme une tendance qui s’installe."
+          ],
+          [
+            "Suspension",
+            "Une valeur suspendue garde son dernier cours affiché.",
+            "Aucune bougie n’est formée. Le cours affiché n’est pas un prix auquel on peut traiter."
+          ],
+          [
+            "Faible liquidité",
+            "Quelques ordres suffisent à déplacer le cours.",
+            "Une grande bougie peut n’être due qu’à un seul ordre : vérifiez le volume."
+          ]
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Sur la BRVM : une lecture du jour",
+      "reel": true,
+      "contenu": "Le cours de quatre valeurs très suivies, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.\nCes indicateurs sont expliqués dans les leçons suivantes. Pour l’instant, retenez la lecture la plus simple : un cours au-dessus de ses deux moyennes décrit une tendance récente haussière, un cours en dessous une tendance baissière. C’est ce qui s’est passé, pas ce qui va se passer.\nExercez-vous en ouvrant le graphique de l’une de ces valeurs sur sa fiche : repérez les trois derniers sommets et les trois derniers creux, puis vérifiez si votre lecture concorde avec la position du cours face à ses moyennes. Identifiez aussi les bougies des dernières séances : y a-t-il un marteau, un doji, un avalement ?",
+      "donnees_reelles": {
+        "vue": "technique",
+        "codes": [
+          "SNTS",
+          "SGBC",
+          "ORAC",
+          "PALC"
+        ]
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Ce que nous avons mesuré sur la BRVM",
+      "contenu": "WestBourse a rejoué son score technique sur 2008-2023, une période que la formule n’avait jamais vue : 109 634 notes, une par titre et par séance. Ces notes se chevauchent : pour juger un écart, seuls comptent les cas indépendants.\nLes titres les plus mal notés (score inférieur à −0,60 : 400 cas, dont 276 indépendants) ont fait en moyenne 8,4 % de mieux que le marché dans les 20 séances suivantes, avec un intervalle à 95 % de +5,5 % à +11,4 %. Les mieux notés n’ont pas fait mieux que le marché.\nSur 2024-2026, cet effet n’est pas confirmé à 60 séances. C’est une moyenne passée, sur un échantillon limité : certaines valeurs ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil, ni une prévision, et rien ne promet que cela se reproduise.",
+      "stats": [
+        {
+          "label": "Notes rejouées",
+          "valeur": "109 634",
+          "detail": "Une par titre et par séance, 2008-2023 : elles se chevauchent"
+        },
+        {
+          "label": "Scores les plus bas, 20 séances après",
+          "valeur": "+8,4 % face au marché",
+          "detail": "À 20 séances, 276 cas indépendants, 2008-2023 ; non confirmé sur 2024-2026 à 60 séances"
+        },
+        {
+          "label": "Scores les plus hauts, 20 séances après",
+          "valeur": "−1,5 % face au marché",
+          "detail": "À 20 séances, 305 cas indépendants, écart non établi"
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Lire avant de calculer. Un indicateur ne remplace pas l’œil : il précise ce que l’œil a déjà vu, ou il le contredit, et c’est alors qu’il devient utile.\nAvant de tirer la moindre conclusion d’un graphique de la BRVM, vérifiez deux choses : que la valeur s’échange réellement, et que l’horizon regardé correspond à votre projet.",
+      "points": [
+        {
+          "titre": "Une tendance se lit aux sommets et aux creux successifs"
+        },
+        {
+          "titre": "Une bougie résume une séance en quatre prix",
+          "detail": "Ouverture, clôture, plus haut, plus bas ; la couleur dit le sens de la séance (vert : hausse, rouge : baisse, sur WESTBOURSE)."
+        },
+        {
+          "titre": "Le corps indique la force, les mèches les rejets",
+          "detail": "Un grand corps : une séance dominée ; une longue mèche : un prix repoussé."
+        },
+        {
+          "titre": "Les figures décrivent, elles ne prédisent pas",
+          "detail": "Marteau, doji, avalement : toujours lus dans leur contexte (tendance, support ou résistance, volume)."
+        },
+        {
+          "titre": "Supports et résistances sont des zones, pas des prix exacts"
+        },
+        {
+          "titre": "Un mouvement sans volume est fragile, surtout à la BRVM"
+        },
+        {
+          "titre": "Un cours figé ou suspendu ne dit rien du prix réel"
+        }
+      ]
     }
-   ]
-  },
-  {
-   "type": "importance",
-   "titre": "Les trois échelles de temps",
-   "contenu": "Une même action peut monter sur un mois et baisser sur un an. Les deux descriptions sont exactes : elles ne portent pas sur le même horizon. Avant toute lecture, choisissez donc l’échelle de temps qui correspond à votre projet.\nUn épargnant qui achète pour plusieurs années regarde d’abord le graphique long : où se situe le cours dans son histoire ? Le graphique de quelques mois sert ensuite à vérifier que la tendance n’est pas en train de se retourner. Le court terme ne sert qu’à choisir un moment d’achat, et c’est l’horizon le plus trompeur.\nÀ la BRVM, le court terme est particulièrement bruité. Sur une valeur peu échangée, quelques ordres suffisent à déplacer le cours d’une séance à l’autre, sans que rien n’ait changé dans la société.",
-   "tableau": {
-    "colonnes": [
-     "Horizon",
-     "Graphique utile",
-     "Question"
-    ],
-    "lignes": [
-     [
-      "Court terme",
-      "Quelques semaines, cours quotidien",
-      "Le mouvement récent est-il confirmé par le volume ?"
-     ],
-     [
-      "Moyen terme",
-      "Quelques mois",
-      "La tendance est-elle intacte ?"
-     ],
-     [
-      "Long terme",
-      "Plusieurs années",
-      "Où se situe le cours dans son histoire ?"
-     ]
-    ],
-    "note": "À la BRVM, le court terme est le plus bruité : peu d’échanges suffisent à déplacer un cours."
-   },
-   "simulation": {
-    "type": "technique",
-    "indicateur": "variation",
-    "consigne": "Choisissez une valeur : sa variation est mesurée sur quatre horizons, à partir de ses clôtures réelles.",
-    "codes": [
-     "SNTS",
-     "SGBC",
-     "ORAC",
-     "PALC"
-    ]
-   }
-  },
-  {
-   "type": "piege",
-   "titre": "Les limites propres à la BRVM",
-   "contenu": "L’analyse technique a été développée sur des marchés très liquides, où des milliers d’ordres s’échangent chaque minute. La BRVM est un marché plus étroit, et plusieurs de ses particularités changent la lecture d’un graphique.\nUne valeur peut rester plusieurs séances sans échange : son cours reste figé au dernier prix traité. Sur le graphique, la courbe paraît calme ; en réalité, personne n’a acheté ni vendu, et ce calme ne contient aucune information.\nLa BRVM encadre aussi la variation d’un cours en une séance. Une nouvelle importante peut donc se traduire par plusieurs séances consécutives de hausse ou de baisse, au lieu d’un saut unique. Lire ces séances comme une tendance qui s’installe est une erreur : c’est le même événement, étalé par la règle.\nEnfin, une valeur suspendue garde son dernier cours affiché. Ce chiffre n’est pas un prix auquel on peut traiter tant que la cotation n’a pas repris.",
-   "points": [
-    {
-     "titre": "Des cours qui ne bougent pas",
-     "detail": "Une valeur peut rester plusieurs séances sans échange : son cours reste figé, sans information.",
-     "verifier": "Le volume des dernières séances."
-    },
-    {
-     "titre": "Une variation encadrée",
-     "detail": "La BRVM limite la variation d’un cours en une séance : un mouvement fort peut s’étaler sur plusieurs jours.",
-     "verifier": "Les règles de cotation publiées par la BRVM."
-    },
-    {
-     "titre": "Une suspension",
-     "detail": "Une valeur suspendue garde son dernier cours affiché : ce n’est pas un prix auquel on peut traiter.",
-     "verifier": "La mention « suspendue » sur la fiche."
-    }
-   ]
-  },
-  {
-   "type": "cas",
-   "titre": "Sur la BRVM : une lecture du jour",
-   "reel": true,
-   "contenu": "Le cours de quatre valeurs très suivies, comparé à ses moyennes sur 20 et 50 séances, et son RSI. Tout est recalculé à l’ouverture de la leçon sur les clôtures réelles. C’est une description, pas un conseil.\nCes indicateurs sont expliqués dans les leçons suivantes. Pour l’instant, retenez la lecture la plus simple : un cours au-dessus de ses deux moyennes décrit une tendance récente haussière, un cours en dessous une tendance baissière. C’est ce qui s’est passé, pas ce qui va se passer.\nExercez-vous en ouvrant le graphique de l’une de ces valeurs sur sa fiche : repérez les trois derniers sommets et les trois derniers creux, puis vérifiez si votre lecture concorde avec la position du cours face à ses moyennes.",
-   "donnees_reelles": {
-    "vue": "technique",
-    "codes": [
-     "SNTS",
-     "SGBC",
-     "ORAC",
-     "PALC"
-    ]
-   }
-  },
-  {
-   "type": "importance",
-   "titre": "Ce que nous avons mesuré sur la BRVM",
-   "contenu": "WestBourse a rejoué son score technique sur 2008-2023, une période que la formule n’avait jamais vue : 109 634 notes, une par titre et par séance. Ces notes se chevauchent : pour juger un écart, seuls comptent les cas indépendants.\nLes titres les plus mal notés (score inférieur à −0,60 : 400 cas, dont 276 indépendants) ont fait en moyenne 8,4 % de mieux que le marché dans les 20 séances suivantes, avec un intervalle à 95 % de +5,5 % à +11,4 %. Les mieux notés n’ont pas fait mieux que le marché.\nSur 2024-2026, cet effet n’est pas confirmé à 60 séances. C’est une moyenne passée, sur un échantillon limité : certaines valeurs ont continué à baisser, et une moyenne recouvre des cas très différents. Ce n’est ni une méthode, ni un conseil, ni une prévision, et rien ne promet que cela se reproduise.",
-   "stats": [
-    {
-     "label": "Notes rejouées",
-     "valeur": "109 634",
-     "detail": "Une par titre et par séance, 2008-2023 : elles se chevauchent"
-    },
-    {
-     "label": "Scores les plus bas, 20 séances après",
-     "valeur": "+8,4 % face au marché",
-     "detail": "À 20 séances, 276 cas indépendants, 2008-2023 ; non confirmé sur 2024-2026 à 60 séances"
-    },
-    {
-     "label": "Scores les plus hauts, 20 séances après",
-     "valeur": "−1,5 % face au marché",
-     "detail": "À 20 séances, 305 cas indépendants, écart non établi"
-    }
-   ]
-  },
-  {
-   "type": "retenir",
-   "titre": "L’essentiel",
-   "contenu": "Lire avant de calculer. Un indicateur ne remplace pas l’œil : il précise ce que l’œil a déjà vu, ou il le contredit, et c’est alors qu’il devient utile.\nAvant de tirer la moindre conclusion d’un graphique de la BRVM, vérifiez deux choses : que la valeur s’échange réellement, et que l’horizon regardé correspond à votre projet.",
-   "points": [
-    {
-     "titre": "Une tendance se lit aux sommets et aux creux successifs"
-    },
-    {
-     "titre": "Supports et résistances sont des zones, pas des prix exacts"
-    },
-    {
-     "titre": "Un mouvement sans volume est fragile, surtout à la BRVM"
-    },
-    {
-     "titre": "Un cours figé ou suspendu ne dit rien du prix réel"
-    }
-   ]
-  }
- ],
- "quiz": [
-  {
-   "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
-   "options": [
-    "Baissière",
-    "Haussière",
-    "Sans tendance",
-    "Impossible à dire"
-   ],
-   "correct": 1,
-   "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
-  },
-  {
-   "question": "Qu’est-ce qu’un support ?",
-   "options": [
-    "Le cours le plus haut de l’année écoulée",
-    "Un niveau où la baisse a cessé plusieurs fois",
-    "Le cours moyen pondéré des vingt dernières séances",
-    "Le volume moyen"
-   ],
-   "correct": 1,
-   "explication": "Un support est une zone de prix où des acheteurs sont apparus à plusieurs reprises."
-  },
-  {
-   "question": "Un cours monte de 5 % avec un volume très faible. Comment lire ce mouvement ?",
-   "options": [
-    "Comme très solide",
-    "Comme fragile : peu d’échanges l’ont produit",
-    "Comme une garantie de hausse",
-    "Comme une erreur"
-   ],
-   "correct": 1,
-   "explication": "Sans volume, un mouvement peut venir de quelques ordres isolés."
-  },
-  {
-   "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?",
-   "options": [
-    "Le prix exact du marché aujourd’hui",
-    "Le dernier prix échangé, sans plus",
-    "Zéro, faute d’échange",
-    "La moyenne des cours de son secteur"
-   ],
-   "correct": 1,
-   "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle."
-  },
-  {
-   "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés dans les 20 séances suivantes ?",
-   "options": [
-    "Ils ont continué à baisser en moyenne",
-    "Mieux que le marché, en moyenne",
-    "Ils ont tous été suspendus de cotation",
-    "Exactement comme le marché"
-   ],
-   "correct": 1,
-   "explication": "Sur 2008-2023, 276 cas indépendants ont fait en moyenne 8,4 % de mieux que le marché à 20 séances. Sur 2024-2026, l’effet n’est pas confirmé à 60 séances. C’est une moyenne passée, ni une règle ni une promesse."
-  }
- ],
- "liens": [
-  {
-   "label": "Les fiches valeur et leurs graphiques",
-   "href": "/actions"
-  },
-  {
-   "label": "Le scanner technique",
-   "href": "/scanner"
-  },
-  {
-   "label": "Notre méthodologie des signaux",
-   "href": "/methodologie"
-  }
- ],
- "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
- "charts": [],
- "qcm": {
-  "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
-  "options": [
-   "Baissière",
-   "Haussière",
-   "Sans tendance",
-   "Impossible à dire"
   ],
-  "correct": 1,
-  "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
- }
+  "quiz": [
+    {
+      "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+      "options": [
+        "Baissière",
+        "Haussière",
+        "Sans tendance",
+        "Impossible à dire"
+      ],
+      "correct": 1,
+      "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+    },
+    {
+      "question": "Qu’est-ce qu’un support ?",
+      "options": [
+        "Le cours le plus haut de l’année écoulée",
+        "Un niveau où la baisse a cessé plusieurs fois",
+        "Le cours moyen pondéré des vingt dernières séances",
+        "Le volume moyen"
+      ],
+      "correct": 1,
+      "explication": "Un support est une zone de prix où des acheteurs sont apparus à plusieurs reprises."
+    },
+    {
+      "question": "Un cours monte de 5 % avec un volume très faible. Comment lire ce mouvement ?",
+      "options": [
+        "Comme très solide",
+        "Comme fragile : peu d’échanges l’ont produit",
+        "Comme une garantie de hausse",
+        "Comme une erreur"
+      ],
+      "correct": 1,
+      "explication": "Sans volume, un mouvement peut venir de quelques ordres isolés."
+    },
+    {
+      "question": "Une valeur n’a pas été échangée depuis dix séances. Que vaut son cours affiché ?",
+      "options": [
+        "Le prix exact du marché aujourd’hui",
+        "Le dernier prix échangé, sans plus",
+        "Zéro, faute d’échange",
+        "La moyenne des cours de son secteur"
+      ],
+      "correct": 1,
+      "explication": "Sans échange, le cours reste figé : ce n’est pas une information nouvelle."
+    },
+    {
+      "question": "D’après la mesure WestBourse sur 2008-2023, qu’ont fait en moyenne les titres les plus mal notés dans les 20 séances suivantes ?",
+      "options": [
+        "Ils ont continué à baisser en moyenne",
+        "Mieux que le marché, en moyenne",
+        "Ils ont tous été suspendus de cotation",
+        "Exactement comme le marché"
+      ],
+      "correct": 1,
+      "explication": "Sur 2008-2023, 276 cas indépendants ont fait en moyenne 8,4 % de mieux que le marché à 20 séances. Sur 2024-2026, l’effet n’est pas confirmé à 60 séances. C’est une moyenne passée, ni une règle ni une promesse."
+    },
+    {
+      "question": "Sur une bougie, que représente le corps ?",
+      "options": [
+        "Le plus haut et le plus bas atteints pendant la séance",
+        "Le volume échangé pendant la séance",
+        "L’écart entre le prix d’ouverture et le prix de clôture",
+        "La moyenne des prix de la séance"
+      ],
+      "correct": 2,
+      "explication": "Le corps va de l’ouverture à la clôture. Les mèches, elles, montrent le plus haut et le plus bas."
+    },
+    {
+      "question": "Une bougie a un petit corps en haut et une longue mèche basse. Comment s’appelle-t-elle ?",
+      "options": [
+        "Un marteau",
+        "Un doji",
+        "Une étoile filante",
+        "Un avalement baissier"
+      ],
+      "correct": 0,
+      "explication": "Petit corps en haut, longue mèche basse : c’est un marteau. Le cours a baissé pendant la séance, puis les acheteurs l’ont fait remonter."
+    },
+    {
+      "question": "À la BRVM, une grande bougie haussière apparaît sur une valeur peu échangée. Que vérifier avant d’en tirer une conclusion ?",
+      "options": [
+        "Que la bougie est bien verte, donc haussière",
+        "Que la séance suivante sera aussi haussière",
+        "Que le RSI est en zone de survente",
+        "Le volume : un seul ordre peut avoir produit cette bougie"
+      ],
+      "correct": 3,
+      "explication": "Sur une valeur peu échangée, un seul ordre peut déplacer le cours. Le volume dit si la bougie est portée par de vrais échanges."
+    },
+    {
+      "question": "Exercice 1 — Une bougie a un corps quasi inexistant, avec une mèche au-dessus et une mèche en dessous. De quelle bougie s’agit-il ?",
+      "options": [
+        "Une bougie haussière à grand corps",
+        "Un doji",
+        "Une bougie baissière à grand corps, mèches comprises",
+        "Un marteau"
+      ],
+      "correct": 1,
+      "explication": "Ouverture et clôture presque égales, mèches de part et d’autre : c’est un doji. Il traduit une indécision, acheteurs et vendeurs s’étant neutralisés pendant la séance."
+    },
+    {
+      "question": "Exercice 2 — Laquelle de ces quatre bougies est un marteau ?",
+      "options": [
+        "Un corps quasi nul, avec des mèches haute et basse comparables",
+        "Un petit corps en bas, une longue mèche haute, une mèche basse courte",
+        "Un petit corps en haut, une longue mèche basse, une mèche haute courte",
+        "Un grand corps haussier, avec des mèches courtes des deux côtés de la séance"
+      ],
+      "correct": 2,
+      "explication": "Le marteau : petit corps en haut, longue mèche basse (au moins deux fois le corps), mèche haute courte ou absente. Les autres descriptions sont un doji (corps quasi nul), une étoile filante (l’inverse du marteau) et une forte bougie haussière."
+    },
+    {
+      "question": "Exercice 3 — Séance 1 : petite bougie baissière. Séance 2 : grande bougie haussière dont le corps englobe entièrement celui de la séance 1. Séance 3 : nouvelle bougie haussière, plus petite. Que décrit cette séquence ?",
+      "options": [
+        "Un avalement haussier, puis une hausse qui se poursuit",
+        "Un avalement baissier : la tendance s’inverse à la baisse",
+        "Trois dojis : les trois séances sont indécises",
+        "Un harami : la séance 3 est contenue dans la séance 2, le mouvement s’essouffle déjà"
+      ],
+      "correct": 0,
+      "explication": "La séance 2 englobe la séance 1 : c’est un avalement haussier, que la séance 3 prolonge. La séquence décrit un retournement à la hausse, mais à la BRVM, vérifiez toujours le volume et le contexte (la figure est-elle sur un support ?) avant de conclure."
+    },
+    {
+      "question": "Exercice 4 — Ouverture 4 150 FCFA, plus haut 4 350, plus bas 4 050, clôture 4 200 (exemple fictif). Comment lire cette bougie ?",
+      "options": [
+        "Une bougie baissière à longue mèche haute : les vendeurs ont rejeté les hauts et fait clôturer la séance en baisse",
+        "Un doji : ouverture et clôture sont identiques",
+        "Une bougie sans mèche : le cours n’a pas bougé pendant la séance",
+        "Une bougie haussière à longue mèche haute : clôture en hausse, mais plus hauts rejetés"
+      ],
+      "correct": 3,
+      "explication": "La clôture (4 200) dépasse l’ouverture (4 150) : la bougie est haussière, avec un corps de 50 FCFA. La mèche haute va de 4 200 à 4 350, soit 150 FCFA, trois fois le corps ; la mèche basse, de 4 150 à 4 050, 100 FCFA. Malgré la clôture en hausse, les acheteurs ont été repoussés à 4 350 : près d’une résistance, c’est un signe de rejet, à confirmer par la séance suivante et le volume."
+    }
+  ],
+  "liens": [
+    {
+      "label": "Les fiches valeur et leurs graphiques",
+      "href": "/actions"
+    },
+    {
+      "label": "Le scanner technique",
+      "href": "/scanner"
+    },
+    {
+      "label": "Notre méthodologie des signaux",
+      "href": "/methodologie"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Les figures de bougies décrivent un comportement de marché, elles ne garantissent aucun mouvement futur. Investir en actions comporte un risque de perte en capital.",
+  "charts": [],
+  "qcm": {
+    "question": "Les sommets et les creux d’un cours sont de plus en plus hauts. Quelle est la tendance ?",
+    "options": [
+      "Baissière",
+      "Haussière",
+      "Sans tendance",
+      "Impossible à dire"
+    ],
+    "correct": 1,
+    "explication": "Des sommets et des creux de plus en plus hauts définissent une tendance haussière."
+  },
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  }
 }
