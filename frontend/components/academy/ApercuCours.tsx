@@ -1,13 +1,15 @@
 import Link from 'next/link';
-import { Clock, Lock } from 'lucide-react';
+import { BookOpen, Calculator, CheckCircle2, Clock, Database, Lock } from 'lucide-react';
 import { badgeEnsemble, type Nouveaute } from '@/lib/academy/nouveaute';
+import { formatDuree } from '@/lib/academy/capsules';
 import BadgeNouveaute from './BadgeNouveaute';
 
 /**
  * Aperçu d'un niveau de l'Academy pour qui ne l'a pas encore acheté
  * (rendu serveur, aucune donnée personnelle). Montre la leçon demandée
- * (titre, sous-titre, résumé, plan des sections) et le sommaire du niveau ;
- * le contenu des sections, les données réelles et les quiz restent réservés.
+ * (titre, sous-titre, résumé, plan des sections) et le sommaire du niveau par
+ * modules accordéon ; le contenu des sections, les données réelles et les quiz
+ * restent réservés.
  */
 
 export interface LeconApercu {
@@ -16,6 +18,9 @@ export interface LeconApercu {
   sous_titre?: string | null;
   resume: string;
   duree_min?: number | null;
+  quizCount?: number;
+  simCount?: number;
+  hasRealData?: boolean;
   sections: { titre: string }[];
   /** Badge « Nouveau » / « Mis à jour » (lib/academy/nouveaute.ts). */
   nouveaute?: Nouveaute | null;
@@ -38,76 +43,147 @@ export default function ApercuCours({
   const i = Math.min(Math.max(indexDemande, 0), lecons.length - 1);
   const l = lecons[i]!;
   const modules = lecons.reduce<{ nom: string; lecons: { n: number; l: LeconApercu }[] }[]>((acc, lecon, n) => {
-    const nom = lecon.module ?? 'Leçons';
+    const nom = lecon.module ?? 'Programme complet';
     const dernier = acc[acc.length - 1];
     if (dernier && dernier.nom === nom) dernier.lecons.push({ n, l: lecon });
     else acc.push({ nom, lecons: [{ n, l: lecon }] });
     return acc;
   }, []);
 
-  return (
-    <section aria-labelledby="apercu-titre" className="mx-auto w-full max-w-3xl px-4 pt-8 sm:px-6">
-      <p className="text-sm text-muted">{titre}</p>
-      <h1 id="apercu-titre" className="mt-1 font-display text-2xl text-ivory sm:text-3xl">
-        {l.titre}
-      </h1>
-      {l.sous_titre && <p className="mt-2 text-base text-muted">{l.sous_titre}</p>}
-      {l.duree_min != null && (
-        <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted">
-          <Clock aria-hidden className="h-4 w-4" />
-          {l.duree_min} min de lecture
-        </p>
-      )}
-      <p className="mt-4 leading-relaxed text-ivory/90">{l.resume}</p>
+  const totalMinutes = lecons.reduce((s, x) => s + (x.duree_min ?? 0), 0);
+  const totalSims = lecons.reduce((s, x) => s + (x.simCount ?? 0), 0);
+  const totalQuiz = lecons.reduce((s, x) => s + (x.quizCount ?? 0), 0);
+  const quizLecon = l.quizCount ?? 0;
 
-      <div className="mt-6 rounded-xl border border-border/60 bg-surface/60 p-4 sm:p-5">
+  return (
+    <section aria-labelledby="apercu-titre" className="mx-auto w-full max-w-4xl space-y-6 px-4 pt-8 sm:px-6">
+      {/* En-tête de parcours + capsules récapitulatives */}
+      <div className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-accent-ink">{titre}</p>
+        <h1 id="apercu-titre" className="mt-1.5 font-display text-2xl font-medium text-ivory sm:text-3xl">
+          {l.titre}
+        </h1>
+        {l.sous_titre && <p className="mt-2 text-base text-muted">{l.sous_titre}</p>}
+
+        {/* Capsules de la leçon demandée */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {l.duree_min != null && l.duree_min > 0 && (
+            <span className="tabular inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated/60 px-3 py-1 text-xs font-medium text-ivory">
+              <Clock aria-hidden className="h-3.5 w-3.5 text-accent-ink" />
+              {l.duree_min} min de lecture
+            </span>
+          )}
+          {(l.simCount ?? 0) > 0 && (
+            <span className="tabular inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated/60 px-3 py-1 text-xs font-medium text-ivory">
+              <Calculator aria-hidden className="h-3.5 w-3.5 text-accent-ink" />
+              {l.simCount} simulateur{l.simCount! > 1 ? 's' : ''} interactif{l.simCount! > 1 ? 's' : ''}
+            </span>
+          )}
+          {quizLecon > 0 && (
+            <span className="tabular inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated/60 px-3 py-1 text-xs font-medium text-ivory">
+              <CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-up" />
+              Quiz · {quizLecon} question{quizLecon > 1 ? 's' : ''}
+            </span>
+          )}
+          {l.hasRealData && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated/60 px-3 py-1 text-xs font-medium text-ivory">
+              <Database aria-hidden className="h-3.5 w-3.5 text-accent-ink" />
+              Données réelles BRVM
+            </span>
+          )}
+        </div>
+
+        <p className="mt-4 leading-relaxed text-ivory/90">{l.resume}</p>
+      </div>
+
+      {/* Plan de la leçon demandée */}
+      <div className="rounded-2xl border border-border/70 bg-surface/70 p-5">
         <h2 className="text-sm font-semibold text-ivory">Au programme de cette leçon</h2>
-        <ol className="mt-3 space-y-2">
+        <ol className="mt-3 grid gap-2 sm:grid-cols-2">
           {l.sections.map((s, k) => (
-            <li key={k} className="flex items-start gap-2 text-sm text-muted">
-              <Lock aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <li key={k} className="flex items-start gap-2 rounded-lg border border-border/50 bg-bg/50 px-3 py-2 text-sm text-muted">
+              <Lock aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" />
               <span>{s.titre}</span>
             </li>
           ))}
-          <li className="flex items-start gap-2 text-sm text-muted">
-            <Lock aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <span>Quiz de cinq questions, avec corrigé</span>
-          </li>
+          {quizLecon > 0 && (
+            <li className="flex items-start gap-2 rounded-lg border border-border/50 bg-bg/50 px-3 py-2 text-sm text-muted">
+              <Lock aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" />
+              <span>
+                Quiz de {quizLecon} question{quizLecon > 1 ? 's' : ''}, avec corrigé détaillé
+              </span>
+            </li>
+          )}
         </ol>
       </div>
 
-      <details className="mt-6 rounded-xl border border-border/60 p-4 sm:p-5">
-        <summary className="cursor-pointer text-sm font-semibold text-ivory">
-          Le sommaire du niveau : {lecons.length} leçons
-        </summary>
-        {intro && <p className="mt-3 text-sm leading-relaxed text-muted">{intro}</p>}
-        <div className="mt-4 space-y-4">
-          {modules.map((m) => (
-            <div key={m.nom}>
-              <h3 className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-ivory">
-                {m.nom}
-                {(() => {
-                  const b = badgeEnsemble(m.lecons.map(({ l: x }) => x), new Date());
-                  return b ? <BadgeNouveaute badge={b} /> : null;
-                })()}
-              </h3>
-              <ul className="mt-2 space-y-1.5">
-                {m.lecons.map(({ n, l: lecon }) => (
-                  <li key={n}>
-                    <Link
-                      href={`/formations/academy/${slug}?lecon=${n + 1}`}
-                      aria-current={n === i ? 'page' : undefined}
-                      className={`text-sm ${n === i ? 'text-ivory' : 'text-muted hover:text-ivory'}`}
-                    >
-                      {lecon.titre}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+      {/* Sommaire du cours par modules en accordéon */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg text-ivory">Programme complet du parcours</h2>
+          <p className="tabular flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span className="inline-flex items-center gap-1">
+              <BookOpen size={13} aria-hidden />
+              {modules.length} module{modules.length > 1 ? 's' : ''} · {lecons.length} leçons
+            </span>
+            {totalMinutes > 0 && <span>· {formatDuree(totalMinutes)}</span>}
+            {totalSims > 0 && <span>· {totalSims} simulateurs</span>}
+            {totalQuiz > 0 && <span>· {totalQuiz} questions de quiz</span>}
+          </p>
         </div>
-      </details>
+
+        {intro && <p className="text-sm leading-relaxed text-muted">{intro}</p>}
+
+        <div className="space-y-2.5">
+          {modules.map((m) => {
+            const contientActive = m.lecons.some(({ n }) => n === i);
+            const b = badgeEnsemble(m.lecons.map(({ l: x }) => x), new Date());
+            const modMin = m.lecons.reduce((s, x) => s + (x.l.duree_min ?? 0), 0);
+            return (
+              <details
+                key={m.nom}
+                open={contientActive}
+                className="rounded-xl border border-border bg-surface p-4"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                  <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ivory">
+                    <span>{m.nom}</span>
+                    {b && <BadgeNouveaute badge={b} />}
+                  </span>
+                  <span className="tabular shrink-0 text-xs text-faint">
+                    {m.lecons.length} leçon{m.lecons.length > 1 ? 's' : ''}
+                    {modMin > 0 ? ` · ${formatDuree(modMin)}` : ''}
+                  </span>
+                </summary>
+                <ul className="mt-3 space-y-1.5 border-t border-border/50 pt-3">
+                  {m.lecons.map(({ n, l: lecon }) => {
+                    const active = n === i;
+                    return (
+                      <li key={n}>
+                        <Link
+                          href={`/formations/academy/${slug}?lecon=${n + 1}`}
+                          aria-current={active ? 'page' : undefined}
+                          className={`flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-sm transition ${
+                            active
+                              ? 'bg-accent/10 font-medium text-ivory'
+                              : 'text-muted hover:bg-elevated/50 hover:text-ivory'
+                          }`}
+                        >
+                          <span className="min-w-0 truncate">{lecon.titre}</span>
+                          <span className="tabular shrink-0 text-xs text-faint">
+                            {lecon.duree_min ? `${lecon.duree_min} min` : ''}
+                            {lecon.quizCount ? ` · ${lecon.quizCount} Q` : ''}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            );
+          })}
+        </div>
+      </div>
     </section>
   );
 }

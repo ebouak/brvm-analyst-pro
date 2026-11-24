@@ -1,35 +1,32 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createClient } from '@/lib/supabase/server';
 import { accesAcademy } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
-import { SectionHeader } from '@/components/ui/premium';
 import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
-import { NIVEAUX, NIVEAU_LABEL, type CourseContent, type Niveau } from '@/lib/academy/types';
+import AcademyCatalogCoursera, { type CertificatEtat } from '@/components/academy/AcademyCatalogCoursera';
+import { NIVEAUX, type CourseContent, type Niveau } from '@/lib/academy/types';
 import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academy/progressCalc';
-import { badgeEnsemble, type Badge } from '@/lib/academy/nouveaute';
-import BadgeNouveaute from '@/components/academy/BadgeNouveaute';
+import {
+  calculerActiviteCalendrier,
+  extraireCapsulesLecon,
+  extraireMetadonneesCours,
+  type HubCourseEnriched,
+  type LessonLike,
+} from '@/lib/academy/capsules';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'WestBourse Academy · Formation complète BRVM',
-  description: 'Cours interactifs par niveau, progression, quiz. Maîtrisez l’investissement à la BRVM.',
+  description: 'Cours interactifs par niveau, capsules intelligentes, progression, quiz et certificats BRVM.',
 };
 
-interface HubCourse {
-  id: string;
-  slug: string;
-  titre: string;
-  niveau: string | null;
-  resume: string | null;
-  lessonsCount: number;
-  cover: string | null;
-  /** « Nouveau » / « Mis à jour » d'après les leçons ; s'éteint seul (lib/academy/nouveaute.ts). */
-  badge: Badge | null;
-}
+const rangNiveau = (n: string | null) => {
+  const i = NIVEAUX.indexOf((n ?? '') as Niveau);
+  return i === -1 ? NIVEAUX.length : i;
+};
 
 export default async function AcademyHubPage() {
   // Abonnement premium = tout ; sinon, seuls les niveaux achetés à l'unité.
@@ -54,151 +51,119 @@ export default async function AcademyHubPage() {
   }
 
   const svc = getServiceClient();
-  const { data: rows } = await svc
-    .from('academy_courses')
-    .select('id, slug, titre, niveau, resume, content')
-    .eq('published', true)
-    .order('created_at', { ascending: true });
-
-  const courses: HubCourse[] = ((rows ?? []) as {
-    id: string; slug: string; titre: string; niveau: string | null; resume: string | null;
-    content: CourseContent | null;
-  }[])
-    .filter((r) => complet || (r.niveau !== null && acces.niveaux.has(r.niveau as Niveau)))
-    .map((r) => ({
-    id: r.id, slug: r.slug, titre: r.titre, niveau: r.niveau, resume: r.resume,
-    lessonsCount: r.content?.lessons?.length ?? 0,
-    cover: r.content?.lessons?.find((l) => l.image?.url)?.image?.url ?? null,
-    badge: badgeEnsemble(r.content?.lessons ?? [], new Date()),
-  }));
-
-  // Progression de l'utilisateur (RLS owner via session).
   const db = createClient();
-  const { data: prog } = await db
-    .from('academy_progress')
-    .select('course_id, lesson_idx, completed, updated_at');
+
+  const [{ data: rows }, { data: prog }] = await Promise.all([
+    svc
+      .from('academy_courses')
+      .select('id, slug, titre, niveau, resume, content')
+      .eq('published', true)
+      .order('created_at', { ascending: true }),
+    db.from('academy_progress').select('course_id, lesson_idx, completed, updated_at'),
+  ]);
+
+  let displayName: string | null = null;
+  let certificats: CertificatEtat[] = [];
+  let examensReussis: string[] = [];
+
+  if (acces.userId) {
+    const [profRes, certRes, examRes] = await Promise.all([
+      db.from('profiles').select('display_name').eq('id', acces.userId).maybeSingle(),
+      svc
+        .from('academy_certificates')
+        .select('id, niveau, display_name, consent_at, revoked')
+        .eq('user_id', acces.userId),
+      svc
+        .from('academy_exam_attempts')
+        .select('niveau, passed')
+        .eq('user_id', acces.userId)
+        .eq('passed', true),
+    ]);
+    displayName = (profRes.data as { display_name?: string | null } | null)?.display_name?.trim() || null;
+    certificats = ((certRes.data ?? []) as CertificatEtat[]) || [];
+    examensReussis = [...new Set(((examRes.data ?? []) as { niveau: string }[]).map((e) => e.niveau))];
+  }
+
   const progRows = (prog ?? []) as ProgressRowFull[];
-
-  const resume = resumeTarget(
-    courses.map((c) => ({ id: c.id, slug: c.slug, lessonsCount: c.lessonsCount })),
-    progRows,
-  );
-
   const byCourse = new Map<string, ProgressRowFull[]>();
   for (const r of progRows) {
     if (!byCourse.has(r.course_id)) byCourse.set(r.course_id, []);
     byCourse.get(r.course_id)!.push(r);
   }
 
+  const now = new Date();
+  const rawCourses = ((rows ?? []) as {
+    id: string;
+    slug: string;
+    titre: string;
+    niveau: string | null;
+    resume: string | null;
+    content: CourseContent | null;
+  }[])
+    .filter((r) => complet || (r.niveau !== null && acces.niveaux.has(r.niveau as Niveau)))
+    .sort((a, b) => rangNiveau(a.niveau) - rangNiveau(b.niveau));
+
+  const courses: HubCourseEnriched[] = rawCourses.map((r) => {
+    const lessons = (r.content?.lessons ?? []) as LessonLike[];
+    const meta = extraireMetadonneesCours(lessons, now, {
+      niveau: r.niveau,
+      slug: r.slug,
+      titre: r.titre,
+    });
+    const p = courseProgress(lessons.length, byCourse.get(r.id) ?? []);
+    const nextLesson = lessons[p.nextIdx];
+    const cover =
+      r.content?.coverUrl ??
+      r.content?.lessons?.find((l) => l.image?.url)?.image?.url ??
+      null;
+
+    return {
+      id: r.id,
+      slug: r.slug,
+      titre: r.titre,
+      niveau: r.niveau,
+      resume: r.resume,
+      cover,
+      lessonsCount: lessons.length,
+      modulesCount: meta.modulesCount,
+      totalMinutes: meta.totalMinutes,
+      simulatorsCount: meta.simulatorsCount,
+      quizCount: meta.quizCount,
+      hasRealData: meta.hasRealData,
+      hasVideo: meta.hasVideo,
+      categories: meta.categories,
+      themes: meta.themes,
+      badge: meta.badge,
+      capsules: meta.capsules,
+      moduleTitles: meta.moduleTitles,
+      nextLessonTitle: nextLesson?.titre ?? null,
+      nextLessonCapsules: extraireCapsulesLecon(nextLesson),
+      progress: p,
+    };
+  });
+
+  const resume = resumeTarget(
+    courses.map((c) => ({ id: c.id, slug: c.slug, lessonsCount: c.lessonsCount })),
+    progRows,
+  );
+  const calendrier = calculerActiviteCalendrier(progRows, now);
+
   return (
     <div className="min-h-screen bg-bg">
-      <div className="mx-auto max-w-5xl space-y-8 px-4 py-10">
-        <Link href="/formations" className="text-sm text-muted transition-colors hover:text-white">
-          ← Formations
-        </Link>
-        <SectionHeader
-          title="WestBourse Academy"
-          subtitle="Des cours interactifs par niveau, avec progression sauvegardée, quiz, examens et certificats."
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6">
+        <AcademyCatalogCoursera
+          courses={courses}
+          displayName={displayName}
+          resumeTarget={resume}
+          calendrier={calendrier}
+          certificats={certificats}
+          examensReussis={examensReussis}
+          complet={complet}
         />
-
-        <Lecon0Carte className="mt-4" />
-
-        {resume && (
-          <Link
-            href={`/formations/academy/${resume.slug}?lecon=${resume.lessonIdx + 1}`}
-            className="flex items-center justify-between gap-3 rounded-xl border border-accent/40 bg-accent/[0.06] px-5 py-4 transition hover:border-accent/60"
-          >
-            <div>
-              <p className="overline text-accent">Reprendre où j’en étais</p>
-              <p className="mt-0.5 text-sm text-ivory">Leçon {resume.lessonIdx + 1} — continuer le cours en cours</p>
-            </div>
-            <span aria-hidden className="text-accent">→</span>
-          </Link>
-        )}
-
-        {NIVEAUX.map((niveau) => {
-          const list = courses.filter((c) => c.niveau === niveau);
-          if (list.length === 0) return null;
-          return (
-            <section key={niveau} className="space-y-3">
-              <h2 className="font-display text-lg text-white">{NIVEAU_LABEL[niveau]}</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {list.map((c) => {
-                  const p = courseProgress(c.lessonsCount, byCourse.get(c.id) ?? []);
-                  return (
-                    <div
-                      key={c.slug}
-                      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:border-accent/40"
-                    >
-                      <Link
-                        href={`/formations/academy/${c.slug}${p.done > 0 ? `?lecon=${p.nextIdx + 1}` : ''}`}
-                        className="flex flex-1 flex-col"
-                      >
-                        {c.cover && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={c.cover} alt="" className="h-28 w-full object-cover" loading="lazy" />
-                        )}
-                        <div className="flex flex-1 flex-col p-5 pb-0">
-                        <h3 className="font-display text-base text-white transition group-hover:text-accent">
-                          {c.titre}
-                        </h3>
-                        {c.resume && <p className="mt-1 line-clamp-2 text-sm text-muted">{c.resume}</p>}
-                        <div className="mt-4">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-                            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${p.pct}%` }} />
-                          </div>
-                          <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-faint">
-                            <span>
-                              {c.lessonsCount} leçons ·{' '}
-                              {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
-                            </span>
-                            {c.badge && <BadgeNouveaute badge={c.badge} />}
-                          </p>
-                        </div>
-                        </div>
-                      </Link>
-                      {c.niveau && (
-                        <div className="px-5 pb-5">
-                          {p.pct === 100 ? (
-                            <Link
-                              href={`/formations/academy/examen/${c.niveau}`}
-                              className="mt-3 inline-block rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold hover:bg-gold/20"
-                            >
-                              Passer l’examen →
-                            </Link>
-                          ) : (
-                            <span className="mt-3 inline-block text-[11px] text-faint">
-                              Terminez les leçons pour débloquer l’examen
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
 
         {/* Acheteur à l'unité : les autres niveaux restent à sa portée. */}
         {!complet && (
           <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations/academy" />
-        )}
-
-        {/* Édition Intégrale statique — legacy jusqu'à sa migration en cours DB (P3).
-            Elle couvre tous les niveaux : réservée à l'abonnement. */}
-        {complet && (
-          <Link
-            href="/formations/academy/integrale"
-            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent/30"
-          >
-            <div>
-              <p className="text-sm font-semibold text-ivory">Édition intégrale (44 leçons) · version classique</p>
-              <p className="text-xs text-muted">L’ancien format, en attendant sa migration vers les cours interactifs.</p>
-            </div>
-            <span aria-hidden className="text-muted">→</span>
-          </Link>
         )}
       </div>
     </div>

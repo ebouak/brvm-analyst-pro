@@ -45,17 +45,27 @@ async function getContenuApercu(slug: string): Promise<{ intro: string | null; l
   const c = (data as { content: { intro?: unknown; lessons?: unknown } | null } | null)?.content;
   if (!c || !Array.isArray(c.lessons)) return null;
   const texte = (v: unknown) => (typeof v === 'string' ? v : null);
-  const lessons = (c.lessons as Record<string, unknown>[]).map((l) => ({
-    titre: texte(l.titre) ?? 'Leçon',
-    module: texte(l.module),
-    sous_titre: texte(l.sous_titre),
-    resume: texte(l.resume) ?? '',
-    duree_min: typeof l.duree_min === 'number' ? l.duree_min : null,
-    sections: Array.isArray(l.sections)
-      ? (l.sections as Record<string, unknown>[]).map((s) => ({ titre: texte(s.titre) ?? '' })).filter((s) => s.titre)
-      : [],
-    nouveaute: nouveauteDe(l.nouveaute),
-  }));
+  const lessons = (c.lessons as Record<string, unknown>[]).map((l) => {
+    const secs = Array.isArray(l.sections) ? (l.sections as Record<string, unknown>[]) : [];
+    const quizCount = Array.isArray(l.quiz) && l.quiz.length > 0 ? l.quiz.length : l.qcm ? 1 : 0;
+    const simCount = secs.reduce(
+      (acc, s) => acc + (s.simulation ? 1 : 0) + (Array.isArray(s.simulations) ? s.simulations.length : 0),
+      0,
+    );
+    const hasRealData = secs.some((s) => Boolean(s.donnees_reelles) || Boolean(s.reel));
+    return {
+      titre: texte(l.titre) ?? 'Leçon',
+      module: texte(l.module),
+      sous_titre: texte(l.sous_titre),
+      resume: texte(l.resume) ?? '',
+      duree_min: typeof l.duree_min === 'number' ? l.duree_min : null,
+      quizCount,
+      simCount,
+      hasRealData,
+      sections: secs.map((s) => ({ titre: texte(s.titre) ?? '' })).filter((s) => s.titre),
+      nouveaute: nouveauteDe(l.nouveaute),
+    };
+  });
   return { intro: texte(c.intro), lessons };
 }
 

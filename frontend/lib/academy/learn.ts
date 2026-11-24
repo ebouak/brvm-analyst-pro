@@ -15,6 +15,7 @@ export interface LessonState {
   completed: boolean;
   quizPassed: boolean | null;
   exercicePassed: boolean | null;
+  updatedAt?: string | null;
 }
 
 export interface LearnData {
@@ -70,7 +71,7 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
   const db = createClient();
   const [{ data: prog }, { data: notes }] = await Promise.all([
     db.from('academy_progress')
-      .select('lesson_idx, completed, quiz_passed, exercice_passed')
+      .select('lesson_idx, completed, quiz_passed, exercice_passed, updated_at')
       .eq('course_id', course.id),
     db.from('academy_notes')
       .select('lesson_idx, note')
@@ -79,12 +80,13 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
 
   const progress: Record<number, LessonState> = {};
   for (const r of (prog ?? []) as {
-    lesson_idx: number; completed: boolean; quiz_passed: boolean | null; exercice_passed: boolean | null;
+    lesson_idx: number; completed: boolean; quiz_passed: boolean | null; exercice_passed: boolean | null; updated_at?: string | null;
   }[]) {
     progress[r.lesson_idx] = {
       completed: r.completed,
       quizPassed: r.quiz_passed,
       exercicePassed: r.exercice_passed ?? null,
+      updatedAt: r.updated_at ?? null,
     };
   }
   const notesMap: Record<number, string> = {};
