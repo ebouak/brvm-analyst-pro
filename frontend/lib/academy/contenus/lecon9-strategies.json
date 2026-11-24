@@ -6,7 +6,7 @@
     "credit": "Photo : RDNE Stock project / Pexels"
   },
   "categorie": "general",
-  "duree_min": 7,
+  "duree_min": 10,
   "sous_titre": "Valeur, revenu ou croissance : choisir une approche, et l’horizon qui va avec.",
   "resume": "Trois grandes approches structurent l’investissement en actions : acheter sous la valeur, viser un revenu régulier, ou miser sur la croissance.\nAucune n’est gagnante en soi : la bonne dépend de votre objectif, de votre horizon et de votre tolérance au risque.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
@@ -14,7 +14,7 @@
     {
       "type": "definition",
       "titre": "Trois approches",
-      "contenu": "Une stratégie dit quoi acheter, quand, et comment réagir à une baisse. Sans elle, chaque décision est improvisée.",
+      "contenu": "Acheter sans stratégie revient à réagir à chaque variation du jour. À la BRVM, trois approches complémentaires dominent chez les investisseurs disciplinés.\n1. La stratégie Revenu privilégie la régularité et le rendement net du dividende (ex. SGBC à 6,11 % net ou STBC à 8,37 % net).\n2. La stratégie Valeur (décote) cherche des sociétés rentables payées sous leur moyenne historique de PER ou de P/B — en vérifiant toujours qu’il ne s’agit pas d’un piège (« value trap »).\n3. La stratégie Croissance accepte un rendement immédiat plus modeste pour capter la progression durable des bénéfices et du dividende (ex. SNTS ou SGBC sur 5 ans).",
       "points": [
         {
           "titre": "Valeur (« value »)",
@@ -31,6 +31,48 @@
           "detail": "Miser sur des sociétés dont l’activité progresse vite, quitte à recevoir peu de dividendes et à subir plus de volatilité.",
           "verifier": "la progression du chiffre d’affaires et des bénéfices sur plusieurs années."
         }
+      ],
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Croissance régulière du dividende net sur 5 ans : SNTS vs SGBC (base 100 en 2021)",
+          "reel": true,
+          "note": "Sources : BRVM (calendrier officiel 2025) et historiques 2021–2024 rebasés à 100 en 2021.",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "valeurs": [],
+          "series": [
+            {
+              "nom": "SNTS (base 100)",
+              "valeurs": [
+                100,
+                107,
+                113,
+                119,
+                124
+              ],
+              "type": "line",
+              "axe": "gauche"
+            },
+            {
+              "nom": "SGBC (base 100)",
+              "valeurs": [
+                100,
+                110,
+                154,
+                163,
+                228
+              ],
+              "type": "line",
+              "axe": "gauche"
+            }
+          ]
+        }
       ]
     },
     {
@@ -42,28 +84,72 @@
       "type": "cas",
       "reel": true,
       "titre": "Revenu : des dividendes à suivre dans le temps",
-      "contenu": "Une stratégie de revenu recherche des distributions régulières, idéalement croissantes.\nLe tableau montre l’historique de quatre valeurs de la BRVM : repérez celles dont le dividende a progressé, et celles où il a reculé. Le passé ne garantit pas la suite : la régularité se vérifie chaque année.",
-      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "BOAB", "SGBC", "SIBC"] }
+      "contenu": "Le PER (Price-to-Earnings Ratio) rapporte le cours de l’action au bénéfice par action (BPA). Un PER de 8 signifie qu’au rythme actuel, il faut 8 ans de bénéfices pour égaler le prix payé.\nAttention au piège du PER bas : si le bénéfice vient d’un gain exceptionnel ou s’il est en train de chuter, un PER apparemment bon marché devient cher l’année suivante.\nÀ la BRVM, comparez toujours le PER d’une banque avec celui des autres banques, et le ROE (rentabilité des capitaux propres) avec la solidité du bilan.",
+      "donnees_reelles": {
+        "vue": "historique",
+        "codes": [
+          "SNTS",
+          "BOAB",
+          "SGBC",
+          "SIBC"
+        ]
+      }
     },
     {
       "type": "cas",
       "titre": "Valeur : lire le PER",
       "contenu": "Le PER compare le prix d’une action au bénéfice qu’elle génère. Un PER de 8 signifie que l’on paie l’action 8 fois son bénéfice annuel.\nUn PER bas peut signaler une décote à saisir, ou une société en difficulté. Il se compare toujours à celui du secteur et à son propre historique.",
       "formules": [
-        { "nom": "PER", "expression": "Cours de l’action ÷ Bénéfice par action", "exemple": "10 000 ÷ 1 250 = 8" }
+        {
+          "nom": "PER",
+          "expression": "Cours de l’action ÷ Bénéfice par action",
+          "exemple": "10 000 ÷ 1 250 = 8"
+        }
       ],
-      "simulation": { "type": "per", "consigne": "Calculez un PER sur l’exemple de la leçon, puis sur une valeur cotée, à partir de ses derniers comptes publiés.", "cours": 10000, "bpa": 1250, "croissance_pct": 0, "annees": 3, "codes": ["SNTS", "SGBC", "BOAB"] }
+      "simulation": {
+        "type": "per",
+        "consigne": "Calculez un PER sur l’exemple de la leçon, puis sur une valeur cotée, à partir de ses derniers comptes publiés.",
+        "cours": 10000,
+        "bpa": 1250,
+        "croissance_pct": 0,
+        "annees": 3,
+        "codes": [
+          "SNTS",
+          "SGBC",
+          "BOAB"
+        ]
+      }
     },
     {
       "type": "importance",
       "titre": "Associer stratégie et horizon",
-      "contenu": "Chaque approche a son rythme. Juger une action de rendement sur trois mois, c’est la juger sur le mauvais critère.",
+      "contenu": "En pratique, beaucoup d’investisseurs combinent un socle « Revenu / Qualité » (60 à 70 % du portefeuille) avec une poche « Valeur ou Croissance » (30 à 40 %).\nQuelle que soit la stratégie, donnez-lui un horizon cohérent : 5 ans minimum pour juger une valeur de rendement ou de croissance, et un suivi semestriel des comptes publiés.",
       "tableau": {
-        "colonnes": ["Stratégie", "Objectif", "Horizon", "Profil"],
+        "colonnes": [
+          "Stratégie",
+          "Objectif",
+          "Horizon",
+          "Profil"
+        ],
         "lignes": [
-          ["Valeur", "Acheter sous la valeur", "3 à 5 ans", "Patient et analytique"],
-          ["Revenu", "Encaisser un revenu régulier", "5 ans et plus", "Recherche un revenu régulier"],
-          ["Croissance", "Viser une plus-value", "5 ans et plus", "Tolérant à la volatilité"]
+          [
+            "Valeur",
+            "Acheter sous la valeur",
+            "3 à 5 ans",
+            "Patient et analytique"
+          ],
+          [
+            "Revenu",
+            "Encaisser un revenu régulier",
+            "5 ans et plus",
+            "Recherche un revenu régulier"
+          ],
+          [
+            "Croissance",
+            "Viser une plus-value",
+            "5 ans et plus",
+            "Tolérant à la volatilité"
+          ]
         ],
         "note": "Repères pédagogiques, pas des règles : votre situation personnelle prime."
       }
@@ -73,10 +159,22 @@
       "titre": "Les erreurs à éviter",
       "contenu": "Les mêmes erreurs reviennent quand la stratégie n’est pas tenue.",
       "points": [
-        { "titre": "Mélanger les approches sans cohérence", "detail": "Acheter une action pour son dividende, puis la vendre trois mois après parce que le cours n’a pas bougé." },
-        { "titre": "Choisir sur le seul rendement", "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou refléter un cours en chute." },
-        { "titre": "Confondre PER bas et bonne affaire", "detail": "Un PER bas peut traduire des bénéfices qui vont reculer." },
-        { "titre": "Suivre la rumeur", "detail": "Ce dont tout le monde parle est souvent déjà dans le prix." }
+        {
+          "titre": "Mélanger les approches sans cohérence",
+          "detail": "Acheter une action pour son dividende, puis la vendre trois mois après parce que le cours n’a pas bougé."
+        },
+        {
+          "titre": "Choisir sur le seul rendement",
+          "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou refléter un cours en chute."
+        },
+        {
+          "titre": "Confondre PER bas et bonne affaire",
+          "detail": "Un PER bas peut traduire des bénéfices qui vont reculer."
+        },
+        {
+          "titre": "Suivre la rumeur",
+          "detail": "Ce dont tout le monde parle est souvent déjà dans le prix."
+        }
       ]
     },
     {
@@ -84,24 +182,49 @@
       "titre": "L’essentiel",
       "contenu": "Cinq idées à garder en tête.",
       "points": [
-        { "titre": "Trois approches : valeur, revenu, croissance", "detail": "Chacune a ses critères et son horizon." },
-        { "titre": "La stratégie revenu demande le moins de suivi quotidien", "detail": "Elle repose sur des dividendes votés chaque année, pas sur le cours du jour." },
-        { "titre": "PER = cours ÷ bénéfice par action", "detail": "À comparer au secteur, jamais seul." },
-        { "titre": "Une stratégie se juge sur son horizon", "detail": "Cinq ans pour une action de rendement, pas trois mois." },
-        { "titre": "Le passé ne garantit pas la suite", "detail": "Un dividende en hausse se revérifie chaque année." }
+        {
+          "titre": "Trois approches : valeur, revenu, croissance",
+          "detail": "Chacune a ses critères et son horizon."
+        },
+        {
+          "titre": "La stratégie revenu demande le moins de suivi quotidien",
+          "detail": "Elle repose sur des dividendes votés chaque année, pas sur le cours du jour."
+        },
+        {
+          "titre": "PER = cours ÷ bénéfice par action",
+          "detail": "À comparer au secteur, jamais seul."
+        },
+        {
+          "titre": "Une stratégie se juge sur son horizon",
+          "detail": "Cinq ans pour une action de rendement, pas trois mois."
+        },
+        {
+          "titre": "Le passé ne garantit pas la suite",
+          "detail": "Un dividende en hausse se revérifie chaque année."
+        }
       ]
     }
   ],
   "quiz": [
     {
       "question": "Quelle stratégie vise d’abord un revenu régulier ?",
-      "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
+      "options": [
+        "La stratégie valeur",
+        "La stratégie revenu",
+        "La stratégie croissance",
+        "Le trading quotidien"
+      ],
       "correct": 1,
       "explication": "La stratégie revenu vise des dividendes réguliers, encaissés ou réinvestis. Elle demande peu de suivi quotidien."
     },
     {
       "question": "Une action cote 12 000 FCFA et son bénéfice par action est de 1 500 FCFA. Quel est son PER ?",
-      "options": ["5", "8", "18", "0,125"],
+      "options": [
+        "5",
+        "8",
+        "18",
+        "0,125"
+      ],
       "correct": 1,
       "explication": "PER = cours ÷ bénéfice par action = 12 000 ÷ 1 500 = 8."
     },
@@ -118,25 +241,96 @@
     },
     {
       "question": "Sur quel horizon juger une action achetée pour son dividende ?",
-      "options": ["Une semaine", "Trois mois", "Cinq ans environ", "Un jour"],
+      "options": [
+        "Une semaine",
+        "Trois mois",
+        "Cinq ans environ",
+        "Un jour"
+      ],
       "correct": 2,
       "explication": "Une stratégie de revenu se juge sur la régularité des dividendes, donc sur plusieurs années."
     },
     {
       "question": "Quelle stratégie accepte de recevoir peu de dividendes en échange d’un potentiel de plus-value ?",
-      "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Aucune"],
+      "options": [
+        "La stratégie valeur",
+        "La stratégie revenu",
+        "La stratégie croissance",
+        "Aucune"
+      ],
       "correct": 2,
       "explication": "La stratégie croissance mise sur la progression de l’activité et du cours, au prix d’une volatilité plus forte."
+    },
+    {
+      "question": "Qu’est-ce qu’un « value trap » (piège de valeur) en analyse boursière ?",
+      "options": [
+        "Une action chère qui double chaque mois",
+        "Une action à PER très bas dont les bénéfices et l’activité continuent de se dégrader",
+        "Un dividende payé deux fois",
+        "Un titre obligataire d’État"
+      ],
+      "correct": 1,
+      "explication": "Un PER bas n’est une opportunité que si les bénéfices sont durables ; s’ils chutent, le cours peut continuer de baisser."
+    },
+    {
+      "question": "Sur 5 exercices (2021–2025), comment a évolué le dividende net de SGBC ?",
+      "options": [
+        "Il a été supprimé",
+        "Il est passé d’environ 1 005 FCFA à 2 293 FCFA (+128 %)",
+        "Il a été divisé par deux",
+        "Il est resté figé à 500 FCFA"
+      ],
+      "correct": 1,
+      "explication": "Le dividende net de SGBC est passé de 1 004,93 FCFA (2021) à 2 293,28 FCFA (2025), illustrant une dynamique bénéficiaire soutenue."
+    },
+    {
+      "question": "Pourquoi faut-il comparer le PER d’une banque uniquement à d’autres banques ?",
+      "options": [
+        "Parce que les banques n’ont pas de clients",
+        "Parce que leur structure comptable (PNB, levier, coût du risque) diffère des sociétés industrielles",
+        "Parce que le PER des banques est toujours égal à 1",
+        "Parce que la BRVM interdit de comparer deux secteurs"
+      ],
+      "correct": 1,
+      "explication": "Les banques et les industries ont des modèles économiques et des ratios de bilan incomparables directement : comparez toujours au sein du même secteur."
+    },
+    {
+      "question": "Quel indicateur complète le PER pour vérifier la rentabilité réelle des capitaux investis ?",
+      "options": [
+        "Le ROE (Return on Equity)",
+        "Le numéro ISIN",
+        "L’heure de clôture",
+        "Le nombre de pages du rapport"
+      ],
+      "correct": 0,
+      "explication": "Le ROE (résultat net ÷ capitaux propres) mesure la rentabilité créée pour les actionnaires ; il éclaire si un P/B ou PER est justifié."
     }
   ],
   "qcm": {
     "question": "Quelle stratégie vise d’abord un revenu régulier ?",
-    "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
+    "options": [
+      "La stratégie valeur",
+      "La stratégie revenu",
+      "La stratégie croissance",
+      "Le trading quotidien"
+    ],
     "correct": 1,
     "explication": "La stratégie revenu vise des dividendes réguliers, encaissés ou réinvestis. Elle demande peu de suivi quotidien."
   },
   "liens": [
-    { "label": "Screener des actions", "href": "/screener" },
-    { "label": "Espace dividendes", "href": "/dividendes" }
-  ]
+    {
+      "label": "Screener des actions",
+      "href": "/screener"
+    },
+    {
+      "label": "Espace dividendes",
+      "href": "/dividendes"
+    }
+  ],
+  "module": "Module 3 — Stratégies et compte",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "charts": []
 }

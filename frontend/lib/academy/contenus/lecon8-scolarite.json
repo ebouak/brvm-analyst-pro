@@ -6,7 +6,7 @@
     "credit": "Photo : Ron Lach / Pexels"
   },
   "categorie": "income",
-  "duree_min": 7,
+  "duree_min": 10,
   "sous_titre": "Partir d’un objectif daté, mesurer l’effort réel, et laisser le temps travailler.",
   "resume": "Les études supérieures se préparent des années à l’avance : c’est un objectif idéal pour un placement de long terme.\nCette leçon chiffre honnêtement ce qu’un capital de départ peut produire, et ce qu’il ne suffit pas à financer seul.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
@@ -14,47 +14,151 @@
     {
       "type": "definition",
       "titre": "Un objectif connu à l’avance",
-      "contenu": "Vous savez aujourd’hui que, dans 10 ou 15 ans, il faudra payer des études. C’est le profil d’un objectif de long terme.\nLe principe : investir tôt, réinvestir les dividendes, et laisser le nombre d’actions grandir jusqu’à l’échéance.",
+      "contenu": "Financer une scolarité future demande deux ingrédients : un horizon long (8 à 12 ans) pour laisser travailler la capitalisation, et un calendrier d’encaissement cohérent avec la rentrée.\nBonne nouvelle à la BRVM : la majorité des dividendes sont versés entre mai et septembre, juste avant les frais de rentrée d’octobre.\nSur l’exercice 2025, BOAB a payé le 2026-05-26, PALC le 2026-06-29, STBC le 2026-08-13 et ABJC le 2026-09-30.",
       "flux": [
-        { "titre": "Objectif daté", "detail": "Un budget et une année d’entrée en études.", "icone": "calendrier" },
-        { "titre": "Capital investi", "detail": "Un premier achat, puis des versements réguliers.", "icone": "piece" },
-        { "titre": "Dividendes réinvestis", "detail": "Ils achètent de nouvelles actions chaque année.", "icone": "graphique" },
-        { "titre": "Revenu à l’échéance", "detail": "Les dividendes et le capital financent les études.", "icone": "paiement" }
+        {
+          "titre": "Objectif daté",
+          "detail": "Un budget et une année d’entrée en études.",
+          "icone": "calendrier"
+        },
+        {
+          "titre": "Capital investi",
+          "detail": "Un premier achat, puis des versements réguliers.",
+          "icone": "piece"
+        },
+        {
+          "titre": "Dividendes réinvestis",
+          "detail": "Ils achètent de nouvelles actions chaque année.",
+          "icone": "graphique"
+        },
+        {
+          "titre": "Revenu à l’échéance",
+          "detail": "Les dividendes et le capital financent les études.",
+          "icone": "paiement"
+        }
       ]
     },
     {
       "type": "cas",
       "titre": "Ce que 200 000 FCFA peuvent produire",
-      "contenu": "Hypothèse pédagogique : 200 000 FCFA placés dans une action à 5 000 FCFA, soit 40 actions, versant 400 FCFA par action (8 % de rendement).\nAvec les dividendes réinvestis pendant dix ans, le revenu annuel progresse nettement. Il reste pourtant loin d’une année d’études : un capital de départ seul ne suffit pas.",
-      "simulation": { "type": "reinvestissement", "actions": 40, "dpa": 400, "cours": 5000, "croissance_pct": 5, "annees": 10 }
+      "contenu": "Pour construire un revenu annuel cible, partez toujours du rendement net d’IRVM (12 % en Côte d’Ivoire) et déduisez environ 1 % de frais de courtage à chaque achat.\nAvec un rendement net hypothétique de 8 %, viser 1 000 000 FCFA par an demande un capital de 12 500 000 FCFA (1 000 000 ÷ 0,08).\nÀ défaut de ce capital dès le départ, un versement mensuel régulier combiné au réinvestissement des dividendes permet de s’en rapprocher année après année.",
+      "simulation": {
+        "type": "reinvestissement",
+        "actions": 40,
+        "dpa": 400,
+        "cours": 5000,
+        "croissance_pct": 5,
+        "annees": 10
+      },
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Calendrier réel des paiements de dividendes (mai à septembre 2026, FCFA net/action)",
+          "reel": true,
+          "note": "Sources : Calendrier officiel des dividendes BRVM (ex. 2025). Montants nets versés.",
+          "labels": [
+            "BOAB (mai)",
+            "PALC (juin)",
+            "SGBC (août)",
+            "STBC (août)",
+            "ABJC (sept.)"
+          ],
+          "valeurs": [
+            585,
+            441.4,
+            2293.28,
+            1707.2,
+            201.52
+          ]
+        }
+      ]
     },
     {
       "type": "cas",
       "titre": "Le capital nécessaire, sans détour",
       "contenu": "Pour qu’un portefeuille verse 1 000 000 FCFA par an, montant pris comme hypothèse pour une année d’études, il faut diviser ce revenu par le rendement.\nLe résultat montre pourquoi l’épargne régulière et le temps font l’essentiel du travail.",
       "formules": [
-        { "nom": "Capital nécessaire", "expression": "Revenu annuel visé ÷ Rendement", "exemple": "1 000 000 ÷ 8 % = 12 500 000 FCFA" }
+        {
+          "nom": "Capital nécessaire",
+          "expression": "Revenu annuel visé ÷ Rendement",
+          "exemple": "1 000 000 ÷ 8 % = 12 500 000 FCFA"
+        }
       ],
-      "simulation": { "type": "objectif", "revenu_cible": 1000000, "rendements_pct": [6, 8, 10] }
+      "simulation": {
+        "type": "objectif",
+        "revenu_cible": 1000000,
+        "rendements_pct": [
+          6,
+          8,
+          10
+        ]
+      }
     },
     {
       "type": "cas",
       "reel": true,
       "titre": "Sur la BRVM : ce que rapportent 100 actions",
       "contenu": "Les mêmes calculs s’appliquent aux valeurs cotées. Le tableau montre, pour quatre sociétés, le dernier dividende enregistré, le cours de la dernière séance et le revenu de 100 actions.",
-      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "SIBC", "ORAC", "BOAB"], "actions": 100 }
+      "donnees_reelles": {
+        "vue": "rendement",
+        "codes": [
+          "SNTS",
+          "SIBC",
+          "ORAC",
+          "BOAB"
+        ],
+        "actions": 100
+      }
     },
     {
       "type": "importance",
       "titre": "Un plan en cinq étapes",
-      "contenu": "Un objectif daté se prépare comme un projet : chaque étape a son moment.",
+      "contenu": "À l’approche de l’échéance (les 2 à 3 dernières années avant le paiement des frais universitaires), il faut sécuriser progressivement le capital accumulé.\nVendre une partie des actions lors des bonnes périodes pour basculer vers des obligations d’État UEMOA (6,15 % à 6,30 % par an) ou des dépôts à terme évite d’être forcé de vendre en pleine baisse boursière.",
       "etapes_style": "frise",
       "etapes": [
-        { "titre": "Fixer le budget et la date", "detail": "Combien, et pour quelle rentrée." },
-        { "titre": "Ouvrir un compte titres", "detail": "Auprès d’une SGI agréée." },
-        { "titre": "Investir régulièrement", "detail": "Chaque mois ou chaque trimestre, même un petit montant.", "cle": true },
-        { "titre": "Réinvestir les dividendes", "detail": "Jusqu’à quelques années de l’échéance." },
-        { "titre": "Sécuriser avant l’échéance", "detail": "Réduire la part en actions deux à trois ans avant les études." }
+        {
+          "titre": "Fixer le budget et la date",
+          "detail": "Combien, et pour quelle rentrée."
+        },
+        {
+          "titre": "Ouvrir un compte titres",
+          "detail": "Auprès d’une SGI agréée."
+        },
+        {
+          "titre": "Investir régulièrement",
+          "detail": "Chaque mois ou chaque trimestre, même un petit montant.",
+          "cle": true
+        },
+        {
+          "titre": "Réinvestir les dividendes",
+          "detail": "Jusqu’à quelques années de l’échéance."
+        },
+        {
+          "titre": "Sécuriser avant l’échéance",
+          "detail": "Réduire la part en actions deux à trois ans avant les études."
+        }
+      ],
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Exemple pédagogique : trajectoire d’un capital de 1 000 FCFA à 10 %/an sur 10 ans",
+          "reel": false,
+          "note": "Exemple pédagogique à taux composé constant (10 %/an), hors frais et impôts.",
+          "labels": [
+            "Année 0",
+            "Année 3",
+            "Année 5",
+            "Année 8",
+            "Année 10"
+          ],
+          "valeurs": [
+            1000,
+            1331,
+            1611,
+            2144,
+            2594
+          ]
+        }
       ]
     },
     {
@@ -62,39 +166,88 @@
       "titre": "Les erreurs à éviter",
       "contenu": "Le temps est l’allié de ce projet : chaque année perdue réduit l’effet du réinvestissement.",
       "formules": [
-        { "nom": "Valeur future d’un montant placé", "expression": "Montant × (1 + taux) ^ années", "exemple": "1 000 × 1,10 ^ 10 ≈ 2 594 FCFA" }
+        {
+          "nom": "Valeur future d’un montant placé",
+          "expression": "Montant × (1 + taux) ^ années",
+          "exemple": "1 000 × 1,10 ^ 10 ≈ 2 594 FCFA"
+        }
       ],
       "points": [
-        { "titre": "Attendre le moment parfait", "detail": "Il n’existe pas. Commencer tôt, même petit, compte davantage que choisir le bon jour." },
-        { "titre": "Surestimer le rendement", "detail": "Un dividende peut baisser. Construisez votre plan sur une hypothèse prudente." },
-        { "titre": "Tout miser sur un seul titre", "detail": "Un projet de dix ans traversera de mauvaises années : répartissez sur plusieurs valeurs." },
-        { "titre": "Rester tout en actions jusqu’au dernier jour", "detail": "Une baisse juste avant la rentrée obligerait à vendre au mauvais moment." }
+        {
+          "titre": "Attendre le moment parfait",
+          "detail": "Il n’existe pas. Commencer tôt, même petit, compte davantage que choisir le bon jour."
+        },
+        {
+          "titre": "Surestimer le rendement",
+          "detail": "Un dividende peut baisser. Construisez votre plan sur une hypothèse prudente."
+        },
+        {
+          "titre": "Tout miser sur un seul titre",
+          "detail": "Un projet de dix ans traversera de mauvaises années : répartissez sur plusieurs valeurs."
+        },
+        {
+          "titre": "Rester tout en actions jusqu’au dernier jour",
+          "detail": "Une baisse juste avant la rentrée obligerait à vendre au mauvais moment."
+        }
       ],
-      "simulation": { "type": "valeur_future", "consigne": "Ajoutez un versement mensuel ou un capital visé : le simulateur compare aussi avec un départ trois ans plus tard.", "capital_initial": 200000, "versement_mensuel": 0, "taux_pct": 8, "annees": 10, "objectif": 0 }
+      "simulation": {
+        "type": "valeur_future",
+        "consigne": "Ajoutez un versement mensuel ou un capital visé : le simulateur compare aussi avec un départ trois ans plus tard.",
+        "capital_initial": 200000,
+        "versement_mensuel": 0,
+        "taux_pct": 8,
+        "annees": 10,
+        "objectif": 0
+      }
     },
     {
       "type": "retenir",
       "titre": "L’essentiel",
       "contenu": "Cinq idées à garder en tête.",
       "points": [
-        { "titre": "Un objectif daté convient bien à la bourse", "detail": "À condition de commencer des années à l’avance." },
-        { "titre": "Un capital de départ seul ne suffit pas", "detail": "Les versements réguliers font l’essentiel de l’effort." },
-        { "titre": "Capital nécessaire = revenu visé ÷ rendement", "detail": "À 8 %, 1 000 000 FCFA par an demandent 12 500 000 FCFA." },
-        { "titre": "Réinvestir multiplie les actions", "detail": "Chaque dividende réinvesti rapporte à son tour." },
-        { "titre": "Sécuriser avant l’échéance", "detail": "On réduit le risque quand la date approche." }
+        {
+          "titre": "Un objectif daté convient bien à la bourse",
+          "detail": "À condition de commencer des années à l’avance."
+        },
+        {
+          "titre": "Un capital de départ seul ne suffit pas",
+          "detail": "Les versements réguliers font l’essentiel de l’effort."
+        },
+        {
+          "titre": "Capital nécessaire = revenu visé ÷ rendement",
+          "detail": "À 8 %, 1 000 000 FCFA par an demandent 12 500 000 FCFA."
+        },
+        {
+          "titre": "Réinvestir multiplie les actions",
+          "detail": "Chaque dividende réinvesti rapporte à son tour."
+        },
+        {
+          "titre": "Sécuriser avant l’échéance",
+          "detail": "On réduit le risque quand la date approche."
+        }
       ]
     }
   ],
   "quiz": [
     {
       "question": "Vous détenez 200 actions versant 1 200 FCFA et 100 actions versant 400 FCFA. Quel est votre revenu annuel de dividendes ?",
-      "options": ["160 000 FCFA", "280 000 FCFA", "320 000 FCFA", "1 600 FCFA"],
+      "options": [
+        "160 000 FCFA",
+        "280 000 FCFA",
+        "320 000 FCFA",
+        "1 600 FCFA"
+      ],
       "correct": 1,
       "explication": "(200 × 1 200) + (100 × 400) = 240 000 + 40 000 = 280 000 FCFA."
     },
     {
       "question": "Quel capital faut-il pour recevoir 1 000 000 FCFA par an, à 8 % de rendement hypothétique ?",
-      "options": ["8 000 000 FCFA", "12 500 000 FCFA", "80 000 FCFA", "125 000 000 FCFA"],
+      "options": [
+        "8 000 000 FCFA",
+        "12 500 000 FCFA",
+        "80 000 FCFA",
+        "125 000 000 FCFA"
+      ],
       "correct": 1,
       "explication": "Capital = revenu visé ÷ rendement : 1 000 000 ÷ 8 % = 12 500 000 FCFA."
     },
@@ -111,7 +264,12 @@
     },
     {
       "question": "1 000 FCFA placés à 10 % par an pendant 10 ans deviennent environ :",
-      "options": ["2 000 FCFA", "2 594 FCFA", "1 100 FCFA", "10 000 FCFA"],
+      "options": [
+        "2 000 FCFA",
+        "2 594 FCFA",
+        "1 100 FCFA",
+        "10 000 FCFA"
+      ],
       "correct": 1,
       "explication": "1 000 × 1,10 ^ 10 ≈ 2 594 FCFA : les gains de chaque année produisent à leur tour des gains."
     },
@@ -125,16 +283,77 @@
       ],
       "correct": 1,
       "explication": "Chaque dividende réinvesti achète de nouvelles actions, qui rapportent à leur tour : le revenu grandit d’année en année."
+    },
+    {
+      "question": "Pourquoi la période mai–septembre de la BRVM convient-elle bien à un projet de rentrée scolaire ?",
+      "options": [
+        "Parce que la Bourse est fermée de mai à septembre",
+        "Parce que la majorité des dividendes sont payés entre mai et septembre, avant la rentrée",
+        "Parce que les frais SGI sont supprimés en été",
+        "Parce que l’IRVM est remboursé en septembre"
+      ],
+      "correct": 1,
+      "explication": "Le gros des détachements et paiements de dividendes BRVM a lieu entre mai et septembre, alimentant le compte espèces avant octobre."
+    },
+    {
+      "question": "Quelle poche d’actifs privilégier à 1 ou 2 ans de l’entrée à l’université pour sécuriser le capital ?",
+      "options": [
+        "Des actions de classe D très volatiles",
+        "Des obligations d’État UEMOA ou de l’épargne bancaire sécurisée",
+        "Un seul titre cyclique",
+        "Des crypto-actifs à fort levier"
+      ],
+      "correct": 1,
+      "explication": "À court terme (1–2 ans), la priorité est la préservation du capital : obligations courtes ou épargne garantie."
+    },
+    {
+      "question": "Que permet le réinvestissement des dividendes pendant les 6 à 8 premières années du projet ?",
+      "options": [
+        "D’acheter de nouvelles actions qui produiront à leur tour des dividendes",
+        "De réduire le nombre d’actions détenues",
+        "D’éviter toute variation de cours",
+        "De supprimer le risque sectoriel"
+      ],
+      "correct": 0,
+      "explication": "Chaque dividende réinvesti augmente le nombre d’actions génératrices de revenus futurs (effet boule de neige)."
+    },
+    {
+      "question": "Quel risque guette un parent qui reste investi à 100 % en actions jusqu’au mois de la rentrée ?",
+      "options": [
+        "Devoir vendre ses titres en pleine baisse temporaire du marché",
+        "Recevoir deux fois le même dividende",
+        "Ne pas pouvoir payer par virement",
+        "Payer un IRVM de 0 %"
+      ],
+      "correct": 0,
+      "explication": "Un repli boursier de −20 % à −30 % juste avant la rentrée réduirait le budget disponible s’il n’a pas été sécurisé à l’avance."
     }
   ],
   "qcm": {
     "question": "Vous détenez 200 actions versant 1 200 FCFA et 100 actions versant 400 FCFA. Quel est votre revenu annuel de dividendes ?",
-    "options": ["160 000 FCFA", "280 000 FCFA", "320 000 FCFA", "1 600 FCFA"],
+    "options": [
+      "160 000 FCFA",
+      "280 000 FCFA",
+      "320 000 FCFA",
+      "1 600 FCFA"
+    ],
     "correct": 1,
     "explication": "(200 × 1 200) + (100 × 400) = 240 000 + 40 000 = 280 000 FCFA."
   },
   "liens": [
-    { "label": "Simulateur de budget", "href": "/simulateur-budget" },
-    { "label": "Espace dividendes", "href": "/dividendes" }
-  ]
+    {
+      "label": "Simulateur de budget",
+      "href": "/simulateur-budget"
+    },
+    {
+      "label": "Espace dividendes",
+      "href": "/dividendes"
+    }
+  ],
+  "module": "Module 2 — Dividendes et investissement pratique",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "charts": []
 }

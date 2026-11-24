@@ -6,7 +6,7 @@
     "credit": "Photo : Diana ✨ / Pexels"
   },
   "categorie": "general",
-  "duree_min": 7,
+  "duree_min": 10,
   "sous_titre": "Rendement, risque, liquidité et effort : situer la bourse dans un patrimoine.",
   "resume": "Il n’existe pas de placement idéal pour tout : chaque support a ses forces et ses contraintes.\nCette leçon compare la BRVM à l’épargne bancaire, à l’immobilier et au commerce, puis montre les rendements de dividende réels du marché.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
@@ -14,14 +14,44 @@
     {
       "type": "definition",
       "titre": "Quatre placements, quatre profils",
-      "contenu": "Comparer des placements, c’est regarder quatre critères à la fois : ce qu’ils rapportent, la vitesse à laquelle on récupère son argent, le risque, et le temps qu’ils demandent.",
+      "contenu": "Comparer les placements suppose de regarder quatre critères ensemble : le rendement espéré, le risque de perte en capital, la liquidité (vitesse de sortie) et l’horizon recommandé.\nEn UEMOA, le taux directeur de la BCEAO sert de boussole monétaire (3,00 % au 16 mars 2026, guichet marginal à 5,00 %).\nAucun placement ne gagne sur les quatre tableaux : un livret offre une liquidité totale mais un rendement modeste ; les actions offrent le potentiel long terme mais fluctuent fortement.",
       "tableau": {
-        "colonnes": ["Placement", "Rendement", "Liquidité", "Risque", "Effort"],
+        "colonnes": [
+          "Placement",
+          "Rendement",
+          "Liquidité",
+          "Risque",
+          "Effort"
+        ],
         "lignes": [
-          ["Épargne bancaire", "Faible, connu d’avance", "Immédiate", "Très faible", "Aucun"],
-          ["Actions BRVM", "Dividendes et variation du cours, non garantis", "Rapide si la valeur s’échange", "Moyen à élevé à court terme", "Faible"],
-          ["Immobilier", "Loyers et valeur du bien", "Faible : des mois pour vendre", "Moyen", "Élevé : gestion, entretien"],
-          ["Commerce propre", "Très variable", "Très faible", "Élevé", "Très élevé"]
+          [
+            "Épargne bancaire",
+            "Faible, connu d’avance",
+            "Immédiate",
+            "Très faible",
+            "Aucun"
+          ],
+          [
+            "Actions BRVM",
+            "Dividendes et variation du cours, non garantis",
+            "Rapide si la valeur s’échange",
+            "Moyen à élevé à court terme",
+            "Faible"
+          ],
+          [
+            "Immobilier",
+            "Loyers et valeur du bien",
+            "Faible : des mois pour vendre",
+            "Moyen",
+            "Élevé : gestion, entretien"
+          ],
+          [
+            "Commerce propre",
+            "Très variable",
+            "Très faible",
+            "Élevé",
+            "Très élevé"
+          ]
         ],
         "note": "Repères qualitatifs : les rendements réels varient selon les périodes, les produits et les situations."
       }
@@ -30,8 +60,44 @@
       "type": "cas",
       "reel": true,
       "titre": "Les rendements de dividende réels du marché",
-      "contenu": "Le tableau donne le rendement de dividende de six valeurs de la BRVM, calculé sur le dernier dividende enregistré et le cours de la dernière séance.\nCe rendement n’est qu’une partie du rendement total : le cours peut monter ou baisser.",
-      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "STBC", "BOAB", "CIEC"] }
+      "contenu": "Sur le compartiment obligataire de la BRVM au 24 novembre 2026, les emprunts d’État et privés cotés affichent des coupons faciaux de 6,15 % (ETAT DU SENEGAL 6,15% 2023-2030), 6,30 % (ETAT DU MALI 6,30% 2022-2032) ou 6,80 % (GSS BAOBAB 6,80% 2024-2029).\nFace à ces coupons fixes, les actions les plus généreuses versent des dividendes nets entre 5,78 % (SPHC) et 8,37 % (STBC) en 2026, auxquels s’ajoute la variation possible du cours.\nEntre les deux, les OPCVM (FCP) mutualisent un panier géré par un professionnel, moyennant des frais de gestion annuels.",
+      "donnees_reelles": {
+        "vue": "rendement",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "STBC",
+          "BOAB",
+          "CIEC"
+        ]
+      },
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Repères réels de rendement en UEMOA (%) : BCEAO, obligations et dividendes nets",
+          "reel": true,
+          "note": "Sources : BCEAO (16/03/2026), BRVM Obligations (24/11/2026) et Calendrier officiel des dividendes BRVM (ex. 2025).",
+          "labels": [
+            "Taux BCEAO",
+            "Sénégal 2030",
+            "Mali 2032",
+            "Baobab 2029",
+            "SGBC (div. net)",
+            "ABJC (div. net)",
+            "STBC (div. net)"
+          ],
+          "valeurs": [
+            3,
+            6.15,
+            6.3,
+            6.8,
+            6.11,
+            7.78,
+            8.37
+          ]
+        }
+      ]
     },
     {
       "type": "importance",
@@ -44,7 +110,15 @@
           "exemple": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 %"
         }
       ],
-      "simulation": { "type": "rendement_total", "consigne": "Comparez avec et sans dividende, puis allongez la durée : le rendement annuel moyen se compare d’un placement à l’autre.", "prix_achat": 10000, "prix_vente": 10600, "actions": 1, "dividendes_par_action": 400, "annees": 1 },
+      "simulation": {
+        "type": "rendement_total",
+        "consigne": "Comparez avec et sans dividende, puis allongez la durée : le rendement annuel moyen se compare d’un placement à l’autre.",
+        "prix_achat": 10000,
+        "prix_vente": 10600,
+        "actions": 1,
+        "dividendes_par_action": 400,
+        "annees": 1
+      },
       "illustration": {
         "gabarit": "decomposition",
         "titre": "Un an de bourse : dividende et hausse du cours (exemple de la leçon)",
@@ -72,12 +146,22 @@
     {
       "type": "importance",
       "titre": "Bâtir un patrimoine par étapes",
-      "contenu": "Les placements ne s’opposent pas : ils se complètent, dans un ordre logique.",
+      "contenu": "Comment articuler ces placements dans la vraie vie ? Par couches successives plutôt qu’en opposant un produit à un autre.\nCouche 1 (urgence, disponible sous 24 h) : épargne bancaire ou livret pour couvrir 3 à 6 mois de dépenses.\nCouche 2 (moyen terme, 2 à 5 ans) : dépôts à terme, obligations UEMOA ou OPCVM obligataires pour stabiliser le capital.\nCouche 3 (long terme, 5 ans et plus) : actions BRVM diversifiées et réinvestissement des dividendes.",
       "etapes_style": "frise",
       "etapes": [
-        { "titre": "Épargne de précaution", "detail": "Trois à six mois de charges, disponibles immédiatement.", "cle": true },
-        { "titre": "Placements de long terme", "detail": "Actions BRVM diversifiées, pour l’argent dont on n’a pas besoin avant plusieurs années." },
-        { "titre": "Actifs réels", "detail": "Immobilier ou activité propre, selon ses moyens et son temps." }
+        {
+          "titre": "Épargne de précaution",
+          "detail": "Trois à six mois de charges, disponibles immédiatement.",
+          "cle": true
+        },
+        {
+          "titre": "Placements de long terme",
+          "detail": "Actions BRVM diversifiées, pour l’argent dont on n’a pas besoin avant plusieurs années."
+        },
+        {
+          "titre": "Actifs réels",
+          "detail": "Immobilier ou activité propre, selon ses moyens et son temps."
+        }
       ]
     },
     {
@@ -85,9 +169,18 @@
       "titre": "Ce que la bourse apporte, et ce qu’elle demande",
       "contenu": "Face à l’immobilier ou au commerce, la bourse se distingue sur deux points : la liquidité et le peu de temps qu’elle exige.",
       "points": [
-        { "titre": "Liquidité", "detail": "Une action qui s’échange se vend en séance, quand un bien immobilier peut demander des mois." },
-        { "titre": "Peu de gestion", "detail": "Ni locataire, ni stock, ni salarié : le suivi se limite aux publications et au portefeuille." },
-        { "titre": "Fractionnement", "detail": "On peut investir des montants modestes, et répartir sur plusieurs sociétés." },
+        {
+          "titre": "Liquidité",
+          "detail": "Une action qui s’échange se vend en séance, quand un bien immobilier peut demander des mois."
+        },
+        {
+          "titre": "Peu de gestion",
+          "detail": "Ni locataire, ni stock, ni salarié : le suivi se limite aux publications et au portefeuille."
+        },
+        {
+          "titre": "Fractionnement",
+          "detail": "On peut investir des montants modestes, et répartir sur plusieurs sociétés."
+        },
         {
           "titre": "En contrepartie, la volatilité",
           "detail": "Le cours varie chaque jour : la bourse convient à l’argent dont on n’a pas besoin à court terme.",
@@ -100,10 +193,22 @@
       "titre": "Les erreurs de comparaison",
       "contenu": "Une comparaison mal posée conduit à de mauvaises décisions.",
       "points": [
-        { "titre": "Juger sur une seule année", "detail": "« La bourse a baissé cette année » ne dit rien du rendement sur dix ans." },
-        { "titre": "Oublier les dividendes", "detail": "Ne regarder que le cours sous-estime le rendement des actions." },
-        { "titre": "Comparer un brut à un net", "detail": "Rendements de dividendes, loyers et intérêts se comparent après impôts et frais." },
-        { "titre": "Tout mettre sur un seul support", "detail": "Un patrimoine solide combine plusieurs placements." }
+        {
+          "titre": "Juger sur une seule année",
+          "detail": "« La bourse a baissé cette année » ne dit rien du rendement sur dix ans."
+        },
+        {
+          "titre": "Oublier les dividendes",
+          "detail": "Ne regarder que le cours sous-estime le rendement des actions."
+        },
+        {
+          "titre": "Comparer un brut à un net",
+          "detail": "Rendements de dividendes, loyers et intérêts se comparent après impôts et frais."
+        },
+        {
+          "titre": "Tout mettre sur un seul support",
+          "detail": "Un patrimoine solide combine plusieurs placements."
+        }
       ]
     },
     {
@@ -111,24 +216,49 @@
       "titre": "L’essentiel",
       "contenu": "Cinq idées à garder en tête.",
       "points": [
-        { "titre": "Aucun placement n’est idéal pour tout", "detail": "Chacun a son rendement, sa liquidité, son risque et son effort." },
-        { "titre": "La bourse offre liquidité et peu de gestion", "detail": "En échange d’une volatilité à court terme." },
-        { "titre": "Rendement total = dividendes + variation du cours", "detail": "Le rendement de dividende n’en est qu’une partie." },
-        { "titre": "On compare sur cinq à dix ans", "detail": "Et toujours dans les mêmes conditions : brut avec brut, net avec net." },
-        { "titre": "L’épargne de précaution vient en premier", "detail": "Avant la bourse, avant l’immobilier." }
+        {
+          "titre": "Aucun placement n’est idéal pour tout",
+          "detail": "Chacun a son rendement, sa liquidité, son risque et son effort."
+        },
+        {
+          "titre": "La bourse offre liquidité et peu de gestion",
+          "detail": "En échange d’une volatilité à court terme."
+        },
+        {
+          "titre": "Rendement total = dividendes + variation du cours",
+          "detail": "Le rendement de dividende n’en est qu’une partie."
+        },
+        {
+          "titre": "On compare sur cinq à dix ans",
+          "detail": "Et toujours dans les mêmes conditions : brut avec brut, net avec net."
+        },
+        {
+          "titre": "L’épargne de précaution vient en premier",
+          "detail": "Avant la bourse, avant l’immobilier."
+        }
       ]
     }
   ],
   "quiz": [
     {
       "question": "Quel placement offre la liquidité la plus immédiate ?",
-      "options": ["L’épargne bancaire", "L’immobilier", "Un commerce", "Aucun des trois"],
+      "options": [
+        "L’épargne bancaire",
+        "L’immobilier",
+        "Un commerce",
+        "Aucun des trois"
+      ],
       "correct": 0,
       "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution."
     },
     {
       "question": "Vous achetez une action 10 000 FCFA. Un an plus tard, elle cote 10 600 FCFA et vous avez reçu 400 FCFA de dividende. Quel est votre rendement total ?",
-      "options": ["4 %", "6 %", "10 %", "16 %"],
+      "options": [
+        "4 %",
+        "6 %",
+        "10 %",
+        "16 %"
+      ],
       "correct": 2,
       "explication": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 % : 4 % de dividende et 6 % de hausse du cours."
     },
@@ -164,16 +294,77 @@
       ],
       "correct": 2,
       "explication": "L’épargne de précaution couvre les imprévus : elle évite de devoir vendre ses actions ou son bien au mauvais moment."
+    },
+    {
+      "question": "Quelle différence essentielle oppose une obligation d’État UEMOA (ex. 6,15 % à 6,30 %) à une action cotée ?",
+      "options": [
+        "L’obligation verse un coupon défini et rembourse le nominal à l’échéance (hors défaut)",
+        "L’obligation n’a jamais de date d’échéance",
+        "L’action garantit un remboursement fixe chaque année",
+        "L’obligation donne un droit de vote en AG d’entreprise"
+      ],
+      "correct": 0,
+      "explication": "L’obligation est un titre de créance à échéancier défini ; l’action est un titre de propriété dont le dividende et le cours fluctuent."
+    },
+    {
+      "question": "Quel est le rôle d’un OPCVM (ou FCP) par rapport à un achat d’actions en direct ?",
+      "options": [
+        "Supprimer tout risque de marché",
+        "Déléguer la gestion d’un portefeuille diversifié à un gérant agréé",
+        "Doubler le dividende net versé",
+        "Contourner les SGI agréées"
+      ],
+      "correct": 1,
+      "explication": "Un OPCVM mutualise l’épargne et confie la sélection et le suivi à un gérant professionnel, en échange de frais de gestion."
+    },
+    {
+      "question": "Pourquoi l’immobilier locatif ne remplace-t-il pas totalement les actifs financiers dans un patrimoine ?",
+      "options": [
+        "Parce que l’immobilier demande un ticket d’entrée élevé et reste peu liquide en cas de besoin rapide",
+        "Parce qu’il est interdit en UEMOA",
+        "Parce qu’il rapporte toujours 0 %",
+        "Parce qu’il est coté chaque jour à la BRVM"
+      ],
+      "correct": 0,
+      "explication": "L’immobilier est peu fractionnable et long à vendre : la bourse apporte divisibilité et liquidité sur les grandes valeurs."
+    },
+    {
+      "question": "Dans une allocation patrimoniale équilibrée, à quel horizon réserver les actions BRVM ?",
+      "options": [
+        "Moins de 3 mois",
+        "1 an maximum",
+        "5 ans et plus, une fois l’épargne de précaution constituée",
+        "Uniquement pour l’épargne de la semaine"
+      ],
+      "correct": 2,
+      "explication": "Un horizon de 5 ans et plus permet d’absorber les baisses cycliques et de profiter du réinvestissement des dividendes."
     }
   ],
   "qcm": {
     "question": "Quel placement offre la liquidité la plus immédiate ?",
-    "options": ["L’épargne bancaire", "L’immobilier", "Un commerce", "Aucun des trois"],
+    "options": [
+      "L’épargne bancaire",
+      "L’immobilier",
+      "Un commerce",
+      "Aucun des trois"
+    ],
     "correct": 0,
     "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution."
   },
   "liens": [
-    { "label": "Rendement réel et vrai", "href": "/rendement-vrai" },
-    { "label": "Espace dividendes", "href": "/dividendes" }
-  ]
+    {
+      "label": "Rendement réel et vrai",
+      "href": "/rendement-vrai"
+    },
+    {
+      "label": "Espace dividendes",
+      "href": "/dividendes"
+    }
+  ],
+  "module": "Module 3 — Stratégies et compte",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "charts": []
 }
