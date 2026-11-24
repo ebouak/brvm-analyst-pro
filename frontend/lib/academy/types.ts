@@ -319,6 +319,18 @@ export const simulationSchema = z.discriminatedUnion('type', [
     periode: z.number().int().min(2).max(50).optional().default(14),
     seuil_haut: z.number().min(50).max(95).optional().default(70),
     seuil_bas: z.number().min(5).max(50).optional().default(30),
+    /** Moyennes : simple (défaut) ou exponentielle — l'apprenant peut basculer (2026-11-24). */
+    methode: z.enum(['simple', 'exponentielle']).optional().default('simple'),
+  }),
+  /**
+   * Atelier (2026-11-24) : la moyenne qui glisse, séance par séance, sur des
+   * clôtures FICTIVES modifiables ; moyenne simple et exponentielle côte à côte.
+   */
+  z.object({
+    type: z.literal('moyenne_glissante'),
+    consigne: consigneSchema,
+    clotures: z.array(z.number().positive().max(10_000_000)).min(4).max(15),
+    periode: z.number().int().min(2).max(10).optional().default(5),
   }),
   /** Chandelier japonais construit à partir de quatre prix saisis. */
   z.object({
@@ -360,6 +372,9 @@ export const simulationSchema = z.discriminatedUnion('type', [
   }
   if (s.type === 'technique' && !(s.longue > s.courte)) {
     ctx.addIssue({ code: 'custom', message: 'la moyenne longue doit compter plus de séances que la courte' });
+  }
+  if (s.type === 'moyenne_glissante' && !(s.periode < s.clotures.length)) {
+    ctx.addIssue({ code: 'custom', message: 'la période doit compter moins de séances que les clôtures saisies' });
   }
   if (s.type === 'scenario_baisse' || s.type === 'allocation') {
     const total = s.secteurs.reduce((t, x) => t + x.pct, 0);

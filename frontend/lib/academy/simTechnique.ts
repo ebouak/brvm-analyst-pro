@@ -6,7 +6,7 @@
  * Chaque lecture DÉCRIT ce qui s'est passé. Aucune ne prévoit, aucune ne
  * recommande : « au-dessus des moyennes » n'est pas « à acheter ».
  */
-import { macdSeries, rsiSeries, smaSeries } from '@/lib/indicators';
+import { emaSeries, macdSeries, rsiSeries, smaSeries } from '@/lib/indicators';
 import { SaisieInvalide, fmtPct, type Lecture } from './simulateurs';
 
 export interface PointSerie {
@@ -84,29 +84,68 @@ export interface PointMoyennes { date: string; cours: number; courte: number | n
 
 export type PositionMoyennes = 'au-dessus des deux' | 'sous les deux' | 'entre les deux';
 export type PenteMoyenne = 'monte' | 'plate' | 'baisse';
+/** Simple (SMA) : poids égal à chaque séance. Exponentielle (EMA) : poids décroissant, k = 2 ÷ (N + 1). */
+export type MethodeMoyenne = 'simple' | 'exponentielle';
+
+/** Dernier croisement des DEUX moyennes entre elles (et non du cours avec l'une d'elles). */
+export interface CroisementMoyennes {
+  sens: 'haussier' | 'baissier';
+  /** Séances écoulées depuis la séance du croisement (0 = dernière séance). */
+  seances: number;
+  date: string;
+}
 
 export interface ResultatMoyennes extends Lecture {
   points: PointMoyennes[];
+  methode: MethodeMoyenne;
   position: PositionMoyennes;
   pente: PenteMoyenne;
   pentePct: number;
   derniere: PointMoyennes;
+  /** Écart du dernier cours à chaque moyenne, en % : (cours − moyenne) ÷ moyenne. */
+  ecartCourtePct: number;
+  ecartLonguePct: number;
   /** Séances entre la dernière fois où le cours a croisé la moyenne longue et aujourd'hui (null si jamais). */
   seancesDepuisCroisement: number | null;
+  /** Dernier passage de la moyenne courte au-dessus (haussier) ou en dessous (baissier) de la longue. */
+  croisementMoyennes: CroisementMoyennes | null;
+}
+
+const dateCourte = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
+
+/**
+ * Dernier croisement de la moyenne courte et de la longue. On retient le
+ * dernier SIGNE non nul de l'écart : deux moyennes égales sur quelques séances
+ * ne fabriquent pas de croisement, il faut qu'elles changent de côté.
+ */
+export function dernierCroisementMoyennes(points: PointMoyennes[]): CroisementMoyennes | null {
+  let signePrecedent = 0;
+  let trouve: CroisementMoyennes | null = null;
+  points.forEach((p, i) => {
+    if (p.courte == null || p.longue == null) return;
+    const s = Math.sign(p.courte - p.longue);
+    if (s === 0) return;
+    if (signePrecedent !== 0 && s !== signePrecedent) {
+      trouve = { sens: s > 0 ? 'haussier' : 'baissier', seances: points.length - 1 - i, date: p.date };
+    }
+    signePrecedent = s;
+  });
+  return trouve;
 }
 
 /** Une moyenne longue qui varie de moins de ±1 % en 10 séances est dite « plate » (convention de ce simulateur). */
 export const SEUIL_PENTE_PCT = 1;
 
-export function lectureMoyennes(serie: PointSerie[], courte: number, longue: number): ResultatMoyennes {
+export function lectureMoyennes(serie: PointSerie[], courte: number, longue: number, methode: MethodeMoyenne = 'simple'): ResultatMoyennes {
   if (!(Number.isInteger(courte) && Number.isInteger(longue) && courte >= 2 && longue > courte && longue <= 200)) {
     throw new SaisieInvalide('La moyenne courte doit compter moins de séances que la longue (2 à 200).');
   }
   const s = nettoyerSerie(serie);
   if (s.length < longue + 10) throw new SaisieInvalide(`Historique insuffisant : il faut au moins ${longue + 10} séances cotées.`);
   const closes = s.map((p) => p.cours);
-  const c = smaSeries(closes, courte);
-  const l = smaSeries(closes, longue);
+  const calcul = methode === 'exponentielle' ? emaSeries : smaSeries;
+  const c = calcul(closes, courte);
+  const l = calcul(closes, longue);
   const points = s.map((p, i) => ({ date: p.date, cours: p.cours, courte: c[i] ?? null, longue: l[i] ?? null }));
   const derniere = points[points.length - 1]!;
   const mc = derniere.courte!;
@@ -134,8 +173,13 @@ export function lectureMoyennes(serie: PointSerie[], courte: number, longue: num
     baisse: 'baisse : la tendance de fond est orientée à la baisse',
     plate: 'est plate : un marché sans direction, où les croisements perdent leur sens',
   };
+  const ecartCourtePct = (derniere.cours / mc - 1) * 100;
+  const ecartLonguePct = (derniere.cours / ml - 1) * 100;
+  const croisementMoyennes = dernierCroisementMoyennes(points);
+  const genre = methode === 'exponentielle' ? 'moyennes exponentielles' : 'moyennes';
   let lecture =
-    `Le cours (${fmtFcfa(derniere.cours)}) est ${position} moyennes (${courte} séances : ${fmtFcfa(mc)} ; ${longue} séances : ${fmtFcfa(ml)}) : ${LECT[position]}. ` +
+    `Le cours (${fmtFcfa(derniere.cours)}) est ${position} ${genre} (${courte} séances : ${fmtFcfa(mc)}, écart ${fmtPct(ecartCourtePct)} ; ` +
+    `${longue} séances : ${fmtFcfa(ml)}, écart ${fmtPct(ecartLonguePct)}) : ${LECT[position]}. ` +
     `La moyenne longue ${PENTE[pente]} (${fmtPct(pentePct)} en 10 séances).`;
   if (position === 'sous les deux' && pente === 'monte') lecture += ' La baisse récente n’a pas encore retourné la tendance de fond.';
   if (position === 'au-dessus des deux' && pente === 'baisse') lecture += ' La hausse récente n’a pas encore retourné la tendance de fond.';
@@ -144,10 +188,71 @@ export function lectureMoyennes(serie: PointSerie[], courte: number, longue: num
       ? ' Le cours a croisé sa moyenne longue à la dernière séance.'
       : ` Le cours a croisé sa moyenne longue il y a ${nb(seancesDepuisCroisement)} séance${seancesDepuisCroisement > 1 ? 's' : ''}.`;
   }
+  if (croisementMoyennes) {
+    const { sens, seances, date } = croisementMoyennes;
+    lecture += ` La moyenne ${courte} séances est passée ${sens === 'haussier' ? 'au-dessus' : 'en dessous'} de la moyenne ${longue} séances ` +
+      `(croisement ${sens}) le ${dateCourte(date)}, ${seances === 0 ? 'à la dernière séance' : `il y a ${nb(seances)} séance${seances > 1 ? 's' : ''}`}.`;
+  }
   lecture += ` ${CONCLUSION}`;
   const alertes: string[] = [];
   if (courte < 5) alertes.push('Une moyenne sur moins de 5 séances suit presque chaque mouvement : elle lisse très peu.');
-  return { points, position, pente, pentePct, derniere, seancesDepuisCroisement, lecture, alertes };
+  return { points, methode, position, pente, pentePct, derniere, ecartCourtePct, ecartLonguePct, seancesDepuisCroisement, croisementMoyennes, lecture, alertes };
+}
+
+// ── Atelier : la moyenne qui glisse (clôtures saisies) ──────────────────────
+
+export interface LigneGlissante {
+  seance: number;
+  cloture: number;
+  /** Les N clôtures retenues ; null tant qu'il n'y en a pas N. */
+  fenetre: number[] | null;
+  sma: number | null;
+  ema: number | null;
+  /** (clôture − moyenne simple) ÷ moyenne simple, en %. */
+  ecartSmaPct: number | null;
+}
+
+export interface ResultatGlissante extends Lecture {
+  lignes: LigneGlissante[];
+  periode: number;
+  /** Poids de la dernière clôture dans la moyenne exponentielle : 2 ÷ (N + 1). */
+  k: number;
+}
+
+/**
+ * Calcul pas à pas, séance par séance. La moyenne simple est la somme de la
+ * fenêtre divisée par N (somme recalculée, pas glissée : aucune dérive
+ * d'arrondi). L'exponentielle part de la première moyenne simple, comme
+ * emaSeries — c'est la convention de lib/indicators, celle du MACD.
+ */
+export function moyenneGlissante(clotures: number[], periode: number): ResultatGlissante {
+  if (!(Number.isInteger(periode) && periode >= 2 && periode < clotures.length)) {
+    throw new SaisieInvalide('La période doit compter au moins 2 séances, et moins que le nombre de clôtures saisies.');
+  }
+  if (clotures.some((c) => !(Number.isFinite(c) && c > 0))) throw new SaisieInvalide('Chaque clôture doit être un cours positif.');
+  const ema = emaSeries(clotures, periode);
+  const lignes: LigneGlissante[] = clotures.map((cloture, i) => {
+    if (i < periode - 1) return { seance: i + 1, cloture, fenetre: null, sma: null, ema: null, ecartSmaPct: null };
+    const fenetre = clotures.slice(i - periode + 1, i + 1);
+    const sma = fenetre.reduce((t, x) => t + x, 0) / periode;
+    return { seance: i + 1, cloture, fenetre, sma, ema: ema[i] ?? null, ecartSmaPct: (cloture / sma - 1) * 100 };
+  });
+  const k = 2 / (periode + 1);
+  const d = lignes[lignes.length - 1]!;
+  const p = lignes[lignes.length - 2]!;
+  const sansMoyenne = periode - 1 === 1 ? 'la première séance n’en a pas' : `les ${periode - 1} premières séances n’en ont pas`;
+  let lecture =
+    `La moyenne simple sur ${periode} séances a besoin de ${periode} clôtures : ${sansMoyenne}. ` +
+    `À la séance ${d.seance}, le cours (${nb(d.cloture, 2)}) est ${d.cloture > d.sma! ? 'au-dessus de' : d.cloture < d.sma! ? 'en dessous de' : 'égal à'} sa moyenne simple ` +
+    `(${nb(d.sma!, 2)}, écart ${fmtPct(d.ecartSmaPct!)}). La moyenne exponentielle (${nb(d.ema!, 2)}) donne à la dernière clôture un poids de ${nb(k * 100, 1)} % ` +
+    `contre ${nb(100 / periode, 1)} % dans la simple : elle ${Math.abs(d.cloture - d.ema!) < Math.abs(d.cloture - d.sma!) ? 'en est plus proche' : 'n’en est pas plus proche ici'}.`;
+  if (p.sma != null && d.cloture < p.cloture && d.sma! > p.sma) {
+    lecture += ' Le cours vient de baisser, mais la moyenne simple monte encore : c’est le retard, elle est faite de cours passés.';
+  } else if (p.sma != null && d.cloture > p.cloture && d.sma! < p.sma) {
+    lecture += ' Le cours vient de monter, mais la moyenne simple baisse encore : c’est le retard, elle est faite de cours passés.';
+  }
+  const alertes = periode === 2 ? ['Une moyenne sur 2 séances lisse très peu : elle suit presque chaque mouvement.'] : [];
+  return { lignes, periode, k, lecture, alertes };
 }
 
 // ── RSI ─────────────────────────────────────────────────────────────────────

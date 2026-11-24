@@ -1,236 +1,906 @@
 {
- "titre": "Leçon 3 — Les moyennes mobiles",
- "module": "Module 2 — Indicateurs",
- "categorie": "technical",
- "duree_min": 10,
- "sous_titre": "Lisser le bruit des séances pour voir la tendance : moyenne courte, moyenne longue, et leurs croisements.",
- "resume": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, recalculée à chaque séance. Elle lisse les variations et révèle la tendance. Cette leçon explique le calcul, la lecture du cours face à ses moyennes, et pourquoi les croisements arrivent toujours en retard.",
- "sections": [
-  {
-   "type": "definition",
-   "titre": "Le calcul",
-   "contenu": "Une moyenne mobile calcule la moyenne des derniers cours de clôture, sur un nombre de séances fixé. À chaque nouvelle séance, la clôture la plus ancienne sort du calcul et la plus récente y entre : la moyenne « glisse » avec le temps, d’où son nom.\nSon intérêt est de lisser les variations d’une séance à l’autre. Une action qui monte, baisse un peu, puis remonte dessine une courbe en dents de scie ; sa moyenne mobile dessine une ligne plus régulière, qui fait apparaître la direction de fond.\nExemple fictif sur cinq séances : les clôtures 100, 102, 101, 105 et 107 donnent une moyenne de 103. Si l’action clôture à 108 à la séance suivante, la clôture 100 sort du calcul et la nouvelle moyenne vaut (102 + 101 + 105 + 107 + 108) ÷ 5, soit 104,6. L’écart du cours à sa moyenne mesure, en pourcentage, de combien il s’en éloigne.",
-   "formules": [
+  "titre": "Leçon 3 — Les moyennes mobiles : calcul, lecture et ce que valent les croisements",
+  "module": "Module 2 — Indicateurs",
+  "categorie": "technical",
+  "duree_min": 18,
+  "sous_titre": "Lisser le bruit des séances pour voir la tendance : moyenne simple et exponentielle, courte et longue, leurs croisements, et ce qu’ils ont valu sur six ans de BRVM.",
+  "resume": "Une moyenne mobile calcule la moyenne des dernières clôtures, recalculée à chaque séance. Cette leçon la calcule pas à pas, compare la moyenne simple et l’exponentielle, justifie les durées de 20 et 50 séances par le calendrier de la BRVM, définit les croisements, puis les met à l’épreuve : un cas réel daté, et 1 467 croisements mesurés sur toutes les actions de la BRVM depuis 2021.",
+  "nouveaute": {
+    "type": "mis_a_jour",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
     {
-     "nom": "Moyenne mobile simple sur N séances",
-     "expression": "(Somme des N dernières clôtures) ÷ N",
-     "exemple": "(100 + 102 + 101 + 105 + 107) ÷ 5 = 103"
+      "type": "definition",
+      "titre": "Le calcul : une moyenne qui glisse",
+      "contenu": "Une moyenne mobile calcule la moyenne des dernières clôtures, sur un nombre de séances fixé. À chaque nouvelle séance, la clôture la plus ancienne sort du calcul et la plus récente y entre : la moyenne « glisse » avec le temps, d’où son nom. La plus courante, la moyenne mobile simple, donne le même poids à chaque séance.\nElle a besoin de toutes ses clôtures : sur 5 séances, les 4 premières n’ont pas de moyenne. Le tableau ci-dessous suit le calcul séance par séance sur un exemple fictif. Observez les dernières lignes : le cours redescend de 108 à 104, la moyenne continue de monter, de 103,0 à 106,0. Elle reflète le retournement avec plusieurs séances de retard.\nL’écart du cours à sa moyenne mesure, en pourcentage, de combien il s’en éloigne. Un écart élevé décrit un mouvement récent rapide ; il ne dit pas si ce mouvement se prolongera, ni s’il se corrigera.",
+      "formules": [
+        {
+          "nom": "Moyenne mobile simple sur N séances",
+          "expression": "(somme des N dernières clôtures) ÷ N",
+          "exemple": "(100 + 102 + 101 + 105 + 107) ÷ 5 = 103,0"
+        },
+        {
+          "nom": "Écart du cours à sa moyenne",
+          "expression": "(cours − moyenne) ÷ moyenne",
+          "exemple": "(107 − 103,0) ÷ 103,0 ≈ +3,9 %"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Séance",
+          "Clôture",
+          "Clôtures retenues",
+          "Moyenne simple 5 séances",
+          "Écart du cours"
+        ],
+        "lignes": [
+          [
+            "S1",
+            "100",
+            "—",
+            "—",
+            "—"
+          ],
+          [
+            "S2",
+            "102",
+            "—",
+            "—",
+            "—"
+          ],
+          [
+            "S3",
+            "101",
+            "—",
+            "—",
+            "—"
+          ],
+          [
+            "S4",
+            "105",
+            "—",
+            "—",
+            "—"
+          ],
+          [
+            "S5",
+            "107",
+            "100 · 102 · 101 · 105 · 107",
+            "103,0",
+            "+3,9 %"
+          ],
+          [
+            "S6",
+            "108",
+            "102 · 101 · 105 · 107 · 108",
+            "104,6",
+            "+3,3 %"
+          ],
+          [
+            "S7",
+            "106",
+            "101 · 105 · 107 · 108 · 106",
+            "105,4",
+            "+0,6 %"
+          ],
+          [
+            "S8",
+            "104",
+            "105 · 107 · 108 · 106 · 104",
+            "106,0",
+            "−1,9 %"
+          ]
+        ],
+        "note": "Valeurs d’exemple. Les 4 premières séances n’ont pas encore 5 clôtures : aucune moyenne n’est calculée, plutôt qu’une moyenne sur moins de séances."
+      },
+      "simulation": {
+        "type": "moyenne_glissante",
+        "consigne": "Modifiez une clôture ou la durée de la moyenne : la colonne « clôtures retenues » montre la fenêtre qui glisse, et la moyenne exponentielle suit le dernier cours de plus près que la simple.",
+        "clotures": [
+          100,
+          102,
+          101,
+          105,
+          107,
+          108,
+          106,
+          104
+        ],
+        "periode": 5
+      }
     },
     {
-     "nom": "Écart à la moyenne",
-     "expression": "(Cours − Moyenne) ÷ Moyenne",
-     "exemple": "(107 − 103) ÷ 103 ≈ +3,9 %"
+      "type": "definition",
+      "titre": "Simple, pondérée, exponentielle",
+      "contenu": "La moyenne simple donne le même poids à chaque séance : la clôture d’il y a vingt séances compte autant que celle d’hier. Deux variantes donnent plus de poids aux séances récentes.\nLa moyenne pondérée attribue des poids décroissants en ligne droite : sur N séances, la plus récente pèse N, la précédente N − 1, et ainsi de suite jusqu’à 1. La moyenne exponentielle, elle, part d’une première moyenne simple, puis donne à chaque nouvelle clôture le poids k = 2 ÷ (N + 1) et au reste de son passé le poids restant. Les anciennes clôtures pèsent de moins en moins, sans jamais tout à fait disparaître.\nUn fait se vérifie au calcul : la dernière clôture pèse autant dans la pondérée que dans l’exponentielle, 2 ÷ (N + 1), soit 9,5 % sur 20 séances contre 5,0 % dans la simple. La différence est dans les anciennes : la pondérée les oublie au bout de N séances, l’exponentielle jamais tout à fait.\nL’exponentielle réagit plus vite à un retournement, au prix de plus de bruit. Sur le graphique d’exemple, le cours culmine à la séance 12 : l’exponentielle commence à baisser dès la séance 14, la simple à la séance 15. Le MACD, objet de la leçon 5, est construit sur des moyennes exponentielles de 12 et 26 séances.",
+      "formules": [
+        {
+          "nom": "Moyenne exponentielle",
+          "expression": "k × clôture du jour + (1 − k) × moyenne de la veille, avec k = 2 ÷ (N + 1)",
+          "exemple": "Sur 5 séances, k = 1/3 : à la séance 6 de l’exemple, 108 ÷ 3 + 103,0 × 2/3 ≈ 104,67"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Moyenne",
+          "Poids des séances",
+          "Poids de la dernière clôture (20 séances)",
+          "Réactivité"
+        ],
+        "lignes": [
+          [
+            "Simple",
+            "Égal pour toutes",
+            "5,0 %",
+            "La plus lente"
+          ],
+          [
+            "Pondérée",
+            "Décroissant en ligne droite, nul au-delà de N séances",
+            "9,5 %",
+            "Plus rapide"
+          ],
+          [
+            "Exponentielle",
+            "Décroissant sans jamais s’annuler",
+            "9,5 %",
+            "Plus rapide, la plus bruitée"
+          ]
+        ],
+        "note": "Le simulateur de la section suivante calcule la simple et l’exponentielle ; la pondérée est donnée pour mémoire."
+      },
+      "graphiques": [
+        {
+          "type": "line",
+          "titre": "Un retournement, vu par une moyenne simple et une moyenne exponentielle sur 5 séances (exemple)",
+          "labels": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7",
+            "S8",
+            "S9",
+            "S10",
+            "S11",
+            "S12",
+            "S13",
+            "S14",
+            "S15",
+            "S16"
+          ],
+          "series": [
+            {
+              "nom": "Clôture",
+              "valeurs": [
+                100,
+                101,
+                100,
+                99,
+                100,
+                101,
+                100,
+                104,
+                108,
+                112,
+                115,
+                117,
+                116,
+                112,
+                108,
+                105
+              ]
+            },
+            {
+              "nom": "Moyenne simple 5",
+              "valeurs": [
+                null,
+                null,
+                null,
+                null,
+                100,
+                100.2,
+                100,
+                100.8,
+                102.6,
+                105,
+                107.8,
+                111.2,
+                113.6,
+                114.4,
+                113.6,
+                111.6
+              ]
+            },
+            {
+              "nom": "Moyenne exponentielle 5",
+              "valeurs": [
+                null,
+                null,
+                null,
+                null,
+                100,
+                100.3,
+                100.2,
+                101.5,
+                103.7,
+                106.4,
+                109.3,
+                111.9,
+                113.2,
+                112.8,
+                111.2,
+                109.1
+              ]
+            }
+          ],
+          "unite": "FCFA",
+          "note": "Valeurs d’exemple. Le cours culmine à 117 à la séance 12 ; l’exponentielle baisse dès la séance 14, la simple à partir de la séance 15. Aucune des deux ne l’annonce : toutes deux le constatent.",
+          "reel": false
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Moyenne courte et moyenne longue : pourquoi 20 et 50 ?",
+      "contenu": "Le nombre de séances change ce que la moyenne décrit. La BRVM a tenu entre 247 et 259 séances par an de 2021 à 2025, soit environ 21 par mois. Une moyenne sur 20 séances couvre donc à peu près un mois de cotation ; sur 50 séances, deux mois et demi ; sur 200 séances, plus de neuf mois.\nCes durées sont des conventions, pas des lois : rien ne rend 20 et 50 meilleurs que 10 et 30. Elles ont l’avantage d’être partagées, donc comparables d’un outil à l’autre. Une moyenne courte suit le cours de près et réagit vite ; une moyenne longue réagit lentement et décrit la tendance de fond.\nUne moyenne demande autant de cotations que de séances. Bridge Bank Group Côte d’Ivoire (BBGC), admise à la cote le 24 septembre 2026, n’en comptait que 44 au 24 novembre : ni sa moyenne 50 séances ni sa moyenne 200 séances n’existent encore.",
+      "tableau": {
+        "colonnes": [
+          "Moyenne",
+          "Séances",
+          "Équivalent à la BRVM",
+          "Ce qu’elle décrit"
+        ],
+        "lignes": [
+          [
+            "Courte",
+            "20",
+            "≈ 1,0 mois",
+            "Le mouvement récent"
+          ],
+          [
+            "Longue",
+            "50",
+            "≈ 2,4 mois",
+            "La tendance de fond"
+          ],
+          [
+            "Très longue",
+            "200",
+            "≈ 9,5 mois",
+            "La tendance de plusieurs trimestres"
+          ]
+        ],
+        "note": "Équivalences calculées sur 252,6 séances par an en moyenne de 2021 à 2025 (2021 : 259 ; 2022 : 259 ; 2023 : 247 ; 2024 : 249 ; 2025 : 249). Source : calendrier des séances en base WESTBOURSE."
+      },
+      "stats": [
+        {
+          "label": "Séances par an, 2021-2025",
+          "valeur": "247 à 259",
+          "detail": "soit environ 21 par mois"
+        },
+        {
+          "label": "20 séances",
+          "valeur": "≈ 1,0 mois",
+          "detail": "la moyenne courte de la leçon"
+        },
+        {
+          "label": "50 séances",
+          "valeur": "≈ 2,4 mois",
+          "detail": "la moyenne longue de la leçon"
+        }
+      ],
+      "simulation": {
+        "type": "technique",
+        "indicateur": "moyennes",
+        "consigne": "Raccourcissez ou allongez les moyennes sur une série réelle, et basculez entre moyenne simple et exponentielle : plus elles sont courtes ou réactives, plus elles suivent le cours de près, et plus elles se croisent.",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "ETIT",
+          "SIBC"
+        ],
+        "courte": 20,
+        "longue": 50
+      }
+    },
+    {
+      "type": "definition",
+      "titre": "Lire le cours face à ses moyennes, et leurs croisements",
+      "contenu": "On lit d’abord la position du cours face aux deux moyennes. Au-dessus des deux, le mouvement récent et la tendance de fond vont ensemble vers le haut. En dessous des deux, ils vont ensemble vers le bas. Entre les deux, court terme et fond divergent : c’est souvent une phase d’hésitation.\nOn lit ensuite la pente de la moyenne longue. Une moyenne longue qui monte régulièrement décrit une tendance installée ; une moyenne plate, un marché sans direction de fond. Les manuels ajoutent que les croisements y perdent leur sens ; la mesure présentée plus bas nuance ce conseil pour la BRVM.\nUn croisement se lit entre les deux moyennes, pas entre le cours et l’une d’elles. Il est haussier quand la moyenne courte passe au-dessus de la longue, baissier quand elle passe en dessous. En anglais, on parle de « golden cross » et de « death cross » ; ces mots désignent d’abord le croisement des moyennes 50 et 200 séances. Un croisement est une conséquence du mouvement des cours, jamais sa cause.",
+      "tableau": {
+        "colonnes": [
+          "Ce que l’on observe",
+          "Ce que cela décrit"
+        ],
+        "lignes": [
+          [
+            "Cours au-dessus des deux moyennes",
+            "Mouvement récent et tendance de fond orientés à la hausse"
+          ],
+          [
+            "Cours sous les deux moyennes",
+            "Mouvement récent et tendance de fond orientés à la baisse"
+          ],
+          [
+            "Cours entre les deux",
+            "Court terme et fond divergent : hésitation"
+          ],
+          [
+            "Moyenne courte qui passe au-dessus de la longue",
+            "Croisement haussier : la hausse récente a duré assez pour remonter la moyenne courte"
+          ],
+          [
+            "Moyenne courte qui passe sous la longue",
+            "Croisement baissier : la baisse récente a duré assez pour abaisser la moyenne courte"
+          ]
+        ],
+        "note": "Des descriptions du passé. Aucune ligne de ce tableau n’est une raison d’acheter ou de vendre."
+      },
+      "encadres": [
+        {
+          "ton": "info",
+          "titre": "Deux croisements à ne pas confondre",
+          "texte": "Le cours qui passe sa moyenne longue arrive tôt et souvent. Les deux moyennes qui se croisent arrivent plus tard et plus rarement, car la moyenne courte elle-même doit avoir changé de côté. Le simulateur donne les deux dates."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Sur la BRVM : le cours face à ses moyennes",
+      "reel": true,
+      "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles. Sous chaque moyenne figure l’écart du cours à cette moyenne.\nPour chaque ligne, faites la lecture en deux temps vue plus haut : où se situe le cours face à ses deux moyennes, et quel écart les sépare ? Un cours très éloigné de sa moyenne courte décrit un mouvement récent rapide. Rien ne dit qu’il se prolongera, ni qu’il se corrigera.\nLa colonne RSI relève de la leçon suivante. Les deux outils répondent à deux questions différentes : les moyennes décrivent la direction du mouvement, le RSI son intensité récente.",
+      "donnees_reelles": {
+        "vue": "technique",
+        "codes": [
+          "SNTS",
+          "ORAC",
+          "SGBC",
+          "ETIT",
+          "SIBC"
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Un cas réel : Coris Bank International Burkina Faso, novembre 2026",
+      "reel": true,
+      "contenu": "Du 9 au 24 novembre 2026, le cours de Coris Bank International Burkina Faso (CBIBF) passe de 32 200 à 23 970 FCFA, soit −25,6 %. Aucun détachement de dividende ne l’explique : celui de l’exercice 2025 a eu lieu le 18 juin 2026. Les échanges augmentent, de 334 titres le 9 novembre 2026 à 998 le 20 novembre 2026.\nLe 18 novembre 2026, alors que le cours baisse depuis 4 séances, la moyenne 20 séances passe au-dessus de la 50 : un croisement haussier. Ce jour-là, la moyenne courte baisse à peine, de 31 742 à 31 732 FCFA, quand la longue baisse davantage, de 31 755 à 31 701 : c’est ce décalage qui les fait se croiser, pas un regain d’acheteurs.\nLe 20 novembre 2026, la moyenne courte repasse sous la longue : un croisement baissier. Le cours vaut alors 27 505 FCFA, déjà 14,6 % sous son niveau du 9 novembre 2026. Les deux croisements sont arrivés après le mouvement ; le premier l’a même contredit.",
+      "tableau": {
+        "colonnes": [
+          "Séance",
+          "Clôture (FCFA)",
+          "Moyenne 20",
+          "Moyenne 50",
+          "Titres échangés",
+          "Croisement"
+        ],
+        "lignes": [
+          [
+            "09/11",
+            "32 200",
+            "31 493",
+            "31 885",
+            "334",
+            ""
+          ],
+          [
+            "10/11",
+            "31 000",
+            "31 543",
+            "31 893",
+            "931",
+            ""
+          ],
+          [
+            "11/11",
+            "32 000",
+            "31 618",
+            "31 883",
+            "437",
+            ""
+          ],
+          [
+            "12/11",
+            "32 000",
+            "31 668",
+            "31 861",
+            "253",
+            ""
+          ],
+          [
+            "13/11",
+            "31 990",
+            "31 693",
+            "31 831",
+            "226",
+            ""
+          ],
+          [
+            "16/11",
+            "31 495",
+            "31 742",
+            "31 795",
+            "228",
+            ""
+          ],
+          [
+            "17/11",
+            "31 005",
+            "31 742",
+            "31 755",
+            "272",
+            ""
+          ],
+          [
+            "18/11",
+            "30 800",
+            "31 732",
+            "31 701",
+            "637",
+            "Haussier"
+          ],
+          [
+            "19/11",
+            "28 850",
+            "31 630",
+            "31 606",
+            "893",
+            ""
+          ],
+          [
+            "20/11",
+            "27 505",
+            "31 460",
+            "31 471",
+            "998",
+            "Baissier"
+          ],
+          [
+            "23/11",
+            "25 445",
+            "31 187",
+            "31 301",
+            "950",
+            ""
+          ],
+          [
+            "24/11",
+            "23 970",
+            "30 821",
+            "31 095",
+            "706",
+            ""
+          ]
+        ],
+        "note": "Clôtures et titres échangés publiés par la BRVM, séances du 09/11 au 24/11/2026 ; moyennes simples calculées par WESTBOURSE (base lue le 24/11/2026). Un cas daté : le simulateur ci-dessous montre la situation d’aujourd’hui."
+      },
+      "simulation": {
+        "type": "technique",
+        "indicateur": "moyennes",
+        "consigne": "La même valeur, en direct : la lecture donne la date du dernier croisement des deux moyennes et celle du dernier passage du cours sous ou au-dessus de sa moyenne longue.",
+        "codes": [
+          "CBIBF"
+        ],
+        "courte": 20,
+        "longue": 50
+      },
+      "donnees_reelles": {
+        "vue": "technique",
+        "codes": [
+          "CBIBF"
+        ]
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Ce que valent les croisements à la BRVM",
+      "contenu": "Nous avons repéré tous les croisements des moyennes 20 et 50 séances sur les clôtures de toutes les actions de la BRVM, du 4 janvier 2021 au 24 novembre 2026 : 1 467 croisements de moyennes simples, 717 haussiers et 750 baissiers, soit environ 6 par valeur et par an. Pour chacun, une question : 20 séances plus tard, le cours avait-il bougé dans le sens du croisement ?\nLe point de comparaison est une séance quelconque : sur toutes les séances, le cours était plus haut 20 séances plus tard dans 53,1 % des cas, plus bas dans 42,7 %. Après un croisement haussier, il était plus haut dans 49,2 % des cas ; après un croisement baissier, plus bas dans 36,9 %. Aucun croisement n’a fait nettement mieux qu’une séance quelconque, ni avec des moyennes simples ni avec des exponentielles.\nLe résultat tient dans tous les découpages essayés : croisements isolés, ou deux sous-périodes comparées chacune à ses propres séances. De 2021 à 2023, les croisements ont même fait nettement moins bien qu’une séance quelconque, dans les deux sens. Depuis 2024, ni mieux ni moins bien. Le retard, lui, se chiffre : au croisement haussier, le cours avait déjà monté de 10,5 % depuis son plus-bas des 50 séances précédentes (médiane) ; au croisement baissier, il avait déjà perdu 9,1 % depuis son plus-haut.\nCette mesure a ses limites. Les cas ne sont pas indépendants : quand le marché se retourne, plusieurs valeurs croisent la même semaine, ce qui rend les intervalles trop étroits. Retenez l’ordre de grandeur, pas la décimale. Ce n’est pas non plus un test de stratégie : ni frais, ni dividendes. Elle suffit à une conclusion : à la BRVM, un croisement de moyennes décrit un mouvement passé ; il n’a pas annoncé la suite.",
+      "stats": [
+        {
+          "label": "Croisements mesurés",
+          "valeur": "1 467",
+          "detail": "moyennes simples 20 et 50, toutes actions, 2021-2026"
+        },
+        {
+          "label": "Défaits dans les 20 séances",
+          "valeur": "30,1 %",
+          "detail": "16,9 % dès les 10 séances"
+        },
+        {
+          "label": "Déjà parcouru au croisement haussier",
+          "valeur": "+10,5 %",
+          "detail": "depuis le plus-bas des 50 séances, médiane"
+        },
+        {
+          "label": "Hausse 20 séances après un croisement haussier",
+          "valeur": "49,2 %",
+          "detail": "contre 53,1 % après une séance quelconque"
+        }
+      ],
+      "tableau": {
+        "colonnes": [
+          "Croisement",
+          "Cas mesurés",
+          "Sens attendu",
+          "Part, 20 séances après",
+          "Séance quelconque",
+          "Intervalle à 95 %",
+          "Verdict"
+        ],
+        "lignes": [
+          [
+            "Haussier, moyennes simples",
+            "708",
+            "Hausse",
+            "49,2 %",
+            "53,1 %",
+            "45,5 à 52,8 %",
+            "Moins souvent qu’une séance quelconque"
+          ],
+          [
+            "Baissier, moyennes simples",
+            "740",
+            "Baisse",
+            "36,9 %",
+            "42,7 %",
+            "33,5 à 40,4 %",
+            "Moins souvent qu’une séance quelconque"
+          ],
+          [
+            "Haussier, moyennes exponentielles",
+            "575",
+            "Hausse",
+            "47,8 %",
+            "53,1 %",
+            "43,8 à 51,9 %",
+            "Moins souvent qu’une séance quelconque"
+          ],
+          [
+            "Baissier, moyennes exponentielles",
+            "603",
+            "Baisse",
+            "35,5 %",
+            "42,7 %",
+            "31,8 à 39,4 %",
+            "Moins souvent qu’une séance quelconque"
+          ]
+        ],
+        "note": "Part des cas où le cours, 20 séances après le croisement, était dans le sens du croisement (plus haut après un haussier, plus bas après un baissier). Intervalle de Wilson à 95 %, au moins 30 cas. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 24/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE."
+      },
+      "tableaux": [
+        {
+          "colonnes": [
+            "Découpage (moyennes simples)",
+            "Haussier : plus haut 20 séances après",
+            "Baissier : plus bas 20 séances après"
+          ],
+          "lignes": [
+            [
+              "Tous les croisements",
+              "49,2 % contre 53,1 % (708 cas) : moins souvent",
+              "36,9 % contre 42,7 % (740 cas) : moins souvent"
+            ],
+            [
+              "Croisements isolés (aucun autre dans les 20 séances avant)",
+              "47,1 % contre 53,1 % (467 cas) : moins souvent",
+              "38,0 % contre 42,7 % (553 cas) : moins souvent"
+            ],
+            [
+              "2021 à 2023",
+              "42,4 % contre 51,0 % (356 cas) : moins souvent",
+              "36,3 % contre 44,1 % (372 cas) : moins souvent"
+            ],
+            [
+              "2024 à 2026",
+              "56,0 % contre 55,3 % (352 cas) : écart non établi",
+              "37,5 % contre 41,4 % (368 cas) : écart non établi"
+            ]
+          ],
+          "note": "Chaque sous-période est comparée à ses propres séances quelconques. « Écart non établi » : l’intervalle à 95 % contient la part d’une séance quelconque."
+        }
+      ],
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "Après le croisement, le cours est-il allé dans son sens plus souvent ? (%, 20 séances après)",
+          "labels": [
+            "Haussier, simple",
+            "Baissier, simple",
+            "Haussier, exponentielle",
+            "Baissier, exponentielle"
+          ],
+          "series": [
+            {
+              "nom": "Après le croisement",
+              "valeurs": [
+                49.2,
+                36.9,
+                47.8,
+                35.5
+              ]
+            },
+            {
+              "nom": "Séance quelconque",
+              "valeurs": [
+                53.1,
+                42.7,
+                53.1,
+                42.7
+              ]
+            }
+          ],
+          "unite": "%",
+          "note": "Dans chaque paire, la barre « après le croisement » n’est jamais au-dessus de celle d’une séance quelconque. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 24/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE.",
+          "reel": true
+        }
+      ],
+      "encadres": [
+        {
+          "ton": "cle",
+          "titre": "Ce que cela veut dire pour vous",
+          "texte": "Une moyenne mobile reste un bon outil de lecture : elle situe le cours dans sa tendance et évite de confondre une séance agitée avec un retournement. Un croisement, lui, ne justifie pas à lui seul un achat ou une vente : la grille de décision de la leçon 0 demande toujours le contexte, les niveaux, le volume et un niveau d’invalidation."
+        }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Les pièges des moyennes mobiles à la BRVM",
+      "contenu": "Une moyenne mobile est faite de cours passés, et la BRVM ajoute ses propres pièges : des valeurs qui ne s’échangent pas, des dividendes qui font chuter le cours en une séance.\nLe conseil des manuels sur la pente plate se vérifie mal ici pour les moyennes simples : les croisements survenus quand la moyenne longue était plate se sont défaits dans 29,0 % des cas en 20 séances, contre 31,8 % quand elle était orientée. Avec des moyennes exponentielles, l’écart existe : 42,7 % contre 32,8 %.",
+      "points": [
+        {
+          "titre": "Le retard inévitable",
+          "detail": "Au croisement haussier, le cours avait déjà monté de 10,5 % depuis son plus-bas des 50 séances (médiane, BRVM 2021-2026).",
+          "verifier": "L’écart du cours à sa moyenne au moment du croisement : plus il est grand, plus le mouvement a déjà eu lieu."
+        },
+        {
+          "titre": "Les allers-retours",
+          "detail": "30,1 % des croisements de moyennes simples se sont défaits dans les 20 séances, 41,4 % pour les exponentielles, plus réactives.",
+          "verifier": "Le croisement précédent : s’il date de quelques séances, le suivant a toutes les chances d’être un aller-retour de plus."
+        },
+        {
+          "titre": "Les séances sans échange",
+          "detail": "Du 16 septembre 2026 au 24 novembre 2026, deux valeurs, SEMC et SICC, n’ont connu aucun échange sur 50 séances : leur cours est resté figé, et leurs moyennes valent exactement ce cours.",
+          "verifier": "Les volumes récents sur la fiche de la valeur, et sa classe de liquidité."
+        },
+        {
+          "titre": "Le détachement d’un dividende",
+          "detail": "Le 26 septembre 2025, Filtisac CI (FTSC) passe de 3 760 à 2 185 FCFA, quelques jours avant le paiement d’un dividende de 1 726,56 FCFA net : le cours finit 51,4 % sous sa moyenne 20 séances, qui contient encore 19 cours d’avant. L’écart décrit le dividende, pas une tendance.",
+          "verifier": "Le calendrier des dividendes avant de lire un écart soudain."
+        },
+        {
+          "titre": "La moyenne n’est pas un support",
+          "detail": "Un cours qui revient vers sa moyenne n’y rebondit pas mécaniquement : la moyenne est un calcul, pas un niveau où des acheteurs attendent.",
+          "verifier": "Les volumes et le carnet d’ordres, qui montrent où se trouvent réellement les acheteurs et les vendeurs."
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Une moyenne mobile décrit, elle ne prévoit pas. C’est un outil de lecture, qui rend une tendance plus visible et évite de confondre une séance agitée avec un retournement. Ses croisements arrivent après le mouvement ; sur six ans de BRVM, ils n’ont pas annoncé la suite.",
+      "points": [
+        {
+          "titre": "Simple ou exponentielle",
+          "detail": "La simple pèse chaque séance pareil ; l’exponentielle donne 2 ÷ (N + 1) à la dernière, réagit plus vite, se trompe plus souvent."
+        },
+        {
+          "titre": "20 et 50 séances",
+          "detail": "Environ un mois et deux mois et demi de cotation à la BRVM : des conventions, pas des lois."
+        },
+        {
+          "titre": "Position, pente, écart",
+          "detail": "Où est le cours face à ses moyennes, la moyenne longue monte-t-elle, de combien le cours s’en éloigne-t-il."
+        },
+        {
+          "titre": "Les croisements, mesurés",
+          "detail": "En retard par construction, défaits trois fois sur dix en 20 séances, sans avantage établi sur une séance quelconque."
+        },
+        {
+          "titre": "Les pièges de la BRVM",
+          "detail": "Séances sans échange, détachements de dividende : vérifier avant de lire un écart."
+        }
+      ]
     }
-   ]
-  },
-  {
-   "type": "importance",
-   "titre": "Moyenne courte et moyenne longue",
-   "contenu": "Le nombre de séances change ce que la moyenne décrit. Une moyenne courte, sur 20 séances, soit environ un mois de cotation, suit le cours de près et réagit vite. Une moyenne longue, sur 50 séances ou plus, réagit lentement et décrit la tendance de fond.\nOn lit d’abord la position du cours face aux deux moyennes. Au-dessus des deux, le mouvement récent et la tendance de fond vont ensemble vers le haut. En dessous des deux, ils vont ensemble vers le bas. Entre les deux, court terme et fond divergent : c’est souvent une phase d’hésitation.\nOn lit ensuite la pente de la moyenne longue. Une moyenne longue qui monte régulièrement décrit une tendance installée ; une moyenne plate décrit un marché sans direction, où les croisements perdent leur sens. Le graphique de la leçon montre, avec des valeurs d’exemple, un cours qui passe au-dessus de sa moyenne et y reste.",
-   "stats": [
-    {
-     "label": "Cours au-dessus des deux moyennes",
-     "valeur": "Tendance haussière",
-     "detail": "Description de la situation, pas une prévision"
-    },
-    {
-     "label": "Cours sous les deux moyennes",
-     "valeur": "Tendance baissière",
-     "detail": "Idem"
-    },
-    {
-     "label": "Cours entre les deux",
-     "valeur": "Hésitation",
-     "detail": "Tendances courte et longue divergentes"
-    }
-   ],
-   "simulation": {
-    "type": "technique",
-    "indicateur": "moyennes",
-    "consigne": "Raccourcissez ou allongez les moyennes sur une série réelle : plus elles sont courtes, plus elles suivent le cours de près.",
-    "codes": [
-     "SNTS",
-     "ORAC",
-     "SGBC",
-     "ETIT",
-     "SIBC"
-    ],
-    "courte": 20,
-    "longue": 50
-   }
-  },
-  {
-   "type": "cas",
-   "titre": "Sur la BRVM : le cours face à ses moyennes",
-   "reel": true,
-   "contenu": "Les moyennes sur 20 et 50 séances de cinq valeurs, calculées à l’ouverture de la leçon sur les clôtures réelles.\nPour chaque ligne, faites la lecture en deux temps vue plus haut : où se situe le cours face à ses deux moyennes, et quel écart les sépare ? Un cours très éloigné de sa moyenne courte décrit un mouvement récent rapide. Rien ne dit qu’il se prolongera, ni qu’il se corrigera.\nGardez en tête une particularité de la BRVM : si une valeur a connu plusieurs séances sans échange, sa moyenne a été calculée en partie sur des cours figés. Elle paraît plus stable qu’elle ne l’est. La fiche de chaque valeur indique ses volumes récents.",
-   "donnees_reelles": {
-    "vue": "technique",
-    "codes": [
-     "SNTS",
-     "ORAC",
-     "SGBC",
-     "ETIT",
-     "SIBC"
-    ]
-   }
-  },
-  {
-   "type": "piege",
-   "titre": "Le retard, défaut inévitable",
-   "contenu": "Une moyenne mobile regarde en arrière par construction : elle est faite de cours passés. Elle confirme donc une tendance quand celle-ci est déjà installée, jamais avant.\nExemple fictif : une action passe de 1 000 à 1 300 FCFA en deux mois. La moyenne courte ne croise la moyenne longue à la hausse qu’après plusieurs semaines, quand le cours a déjà parcouru une bonne partie du chemin. Celui qui attend le croisement pour acheter paie plus cher que celui qui a acheté au début ; celui qui attend le croisement inverse pour vendre vend sous le sommet.\nCe retard est le prix de la régularité. Une moyenne plus courte le réduit, mais elle croise le cours plus souvent et multiplie les faux signaux, surtout quand le marché oscille sans direction. Aucun réglage ne supprime ce dilemme.",
-   "points": [
-    {
-     "titre": "Les croisements arrivent tard",
-     "detail": "Quand la moyenne courte croise la longue, une bonne partie du mouvement a souvent eu lieu.",
-     "verifier": "L’écart du cours à sa moyenne au moment du croisement."
-    },
-    {
-     "titre": "Les faux signaux en marché sans tendance",
-     "detail": "Quand le cours oscille, les moyennes se croisent sans cesse.",
-     "verifier": "La pente de la moyenne longue."
-    },
-    {
-     "titre": "Des séances sans échange",
-     "detail": "Une moyenne calculée sur des cours figés paraît stable sans l’être.",
-     "verifier": "Le nombre de séances réellement échangées."
-    }
-   ]
-  },
-  {
-   "type": "retenir",
-   "titre": "L’essentiel",
-   "contenu": "Une moyenne mobile décrit, elle ne prévoit pas. C’est un outil de lecture, qui rend une tendance plus visible et évite de confondre une séance agitée avec un retournement.\nUtilisez-la comme un repère de contexte : savoir si le cours est au-dessus ou en dessous de sa moyenne longue, et si cette moyenne monte ou baisse, situe un achat. Cela ne dit rien du juste prix de la société, qui relève de ses comptes.",
-   "points": [
-    {
-     "titre": "Moyenne mobile = moyenne des N dernières clôtures"
-    },
-    {
-     "titre": "Courte pour le mouvement récent, longue pour la tendance de fond"
-    },
-    {
-     "titre": "Le cours face à ses deux moyennes décrit la tendance"
-    },
-    {
-     "titre": "Les croisements arrivent en retard et se trompent sans tendance"
-    }
-   ]
-  }
- ],
- "charts": [
-  {
-   "type": "line",
-   "titre": "Un cours qui repasse au-dessus de sa moyenne (exemple)",
-   "labels": [
-    "S1",
-    "S2",
-    "S3",
-    "S4",
-    "S5",
-    "S6",
-    "S7",
-    "S8",
-    "S9",
-    "S10"
-   ],
-   "valeurs": [
-    100,
-    98,
-    97,
-    99,
-    102,
-    105,
-    107,
-    106,
-    109,
-    112
-   ],
-   "unite": "FCFA",
-   "note": "Valeurs d’exemple. Moyenne sur 5 séances : 99,2 à la séance 5, 105,8 à la séance 9, 107,8 à la séance 10. Le cours passe au-dessus de sa moyenne à partir de la séance 5 et y reste : la moyenne confirme la hausse, avec retard.",
-   "reel": false
-  }
- ],
- "quiz": [
-  {
-   "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
-   "options": [
-    "200",
-    "205",
-    "210",
-    "820"
-   ],
-   "correct": 1,
-   "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
-  },
-  {
-   "question": "Le cours est au-dessus de sa moyenne sur 20 séances et de sa moyenne sur 50 séances. Comment le décrire ?",
-   "options": [
-    "Tendance baissière",
-    "Tendance haussière",
-    "Valeur suspendue",
-    "Achat garanti"
-   ],
-   "correct": 1,
-   "explication": "Un cours au-dessus de ses deux moyennes décrit une tendance haussière, sans rien garantir."
-  },
-  {
-   "question": "Pourquoi un croisement de moyennes arrive-t-il en retard ?",
-   "options": [
-    "Parce que les moyennes regardent les cours passés",
-    "Parce que la BRVM publie tard",
-    "Parce que le volume est faible",
-    "Il n’arrive jamais en retard"
-   ],
-   "correct": 0,
-   "explication": "Une moyenne se calcule sur des cours passés : elle réagit après le mouvement."
-  },
-  {
-   "question": "Dans un marché sans tendance, les croisements de moyennes :",
-   "options": [
-    "Sont très fiables",
-    "Se multiplient et donnent beaucoup de faux signaux",
-    "Disparaissent",
-    "Annoncent un dividende"
-   ],
-   "correct": 1,
-   "explication": "Quand le cours oscille, les moyennes se croisent souvent sans tendance réelle."
-  },
-  {
-   "question": "Un cours vaut 110 et sa moyenne 100. Quel est son écart à la moyenne ?",
-   "options": [
-    "+1 %",
-    "+10 %",
-    "+110 %",
-    "−10 %"
-   ],
-   "correct": 1,
-   "explication": "(110 − 100) ÷ 100 = +10 %."
-  }
- ],
- "liens": [
-  {
-   "label": "Les fiches valeur et leurs graphiques",
-   "href": "/actions"
-  },
-  {
-   "label": "Le scanner technique",
-   "href": "/scanner"
-  },
-  {
-   "label": "Notre méthodologie des signaux",
-   "href": "/methodologie"
-  }
- ],
- "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
- "qcm": {
-  "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
-  "options": [
-   "200",
-   "205",
-   "210",
-   "820"
   ],
-  "correct": 1,
-  "explication": "(200 + 210 + 190 + 220) ÷ 4 = 205."
- }
+  "charts": [],
+  "quiz": [
+    {
+      "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+      "options": [
+        "200",
+        "205",
+        "210",
+        "820"
+      ],
+      "correct": 1,
+      "explication": "(200 + 210 + 190 + 220) ÷ 4 = 820 ÷ 4 = 205. 820 est la somme, pas la moyenne."
+    },
+    {
+      "question": "Une moyenne mobile simple sur 5 séances : à partir de quelle séance existe-t-elle ?",
+      "options": [
+        "Dès la première séance",
+        "À partir de la deuxième",
+        "À partir de la sixième",
+        "À partir de la cinquième"
+      ],
+      "correct": 3,
+      "explication": "Il faut 5 clôtures pour la calculer : les 4 premières séances n’en ont pas. Le tableau pas à pas et l’atelier de la leçon le montrent."
+    },
+    {
+      "question": "Dans une moyenne exponentielle sur 5 séances, quel poids a la dernière clôture ?",
+      "options": [
+        "Un tiers, soit 2 ÷ (5 + 1)",
+        "Un cinquième, comme dans la simple",
+        "La moitié de la moyenne",
+        "Tout le poids du calcul"
+      ],
+      "correct": 0,
+      "explication": "k = 2 ÷ (N + 1) = 2 ÷ 6 = 1/3. Dans la moyenne simple, chaque clôture pèse 1/5 : l’exponentielle suit donc le dernier cours de plus près."
+    },
+    {
+      "question": "Le cours est au-dessus de sa moyenne sur 20 séances et de sa moyenne sur 50 séances. Comment le décrire ?",
+      "options": [
+        "Tendance baissière",
+        "Achat garanti",
+        "Tendance haussière",
+        "Valeur suspendue"
+      ],
+      "correct": 2,
+      "explication": "Un cours au-dessus de ses deux moyennes décrit un mouvement orienté à la hausse. Une description du passé, qui ne garantit rien."
+    },
+    {
+      "question": "Qu’appelle-t-on un croisement haussier des moyennes 20 et 50 séances ?",
+      "options": [
+        "La moyenne 20 séances passe au-dessus de la 50",
+        "Le cours passe au-dessus de sa moyenne 50 séances",
+        "La moyenne 50 séances passe au-dessus de la 20",
+        "Le cours dépasse son plus-haut des 50 séances"
+      ],
+      "correct": 0,
+      "explication": "Un croisement se lit entre les deux MOYENNES : la courte passe au-dessus de la longue. Le cours qui passe sa moyenne longue est une autre information, plus précoce et plus fréquente."
+    },
+    {
+      "question": "Pourquoi un croisement de moyennes arrive-t-il en retard ?",
+      "options": [
+        "Parce que la BRVM publie ses cours tard",
+        "Parce que le volume est faible",
+        "Il n’arrive jamais en retard",
+        "Parce que les moyennes sont faites de cours passés"
+      ],
+      "correct": 3,
+      "explication": "Une moyenne se calcule sur des clôtures passées : elle réagit après le mouvement, jamais avant."
+    },
+    {
+      "question": "Sur la BRVM de 2021 à 2026, au moment d’un croisement haussier 20/50, de combien le cours avait-il déjà monté depuis son plus-bas des 50 séances précédentes (médiane) ?",
+      "options": [
+        "Il n’avait pas encore monté",
+        "D’environ 1 %",
+        "D’environ 11 %",
+        "D’environ 50 %"
+      ],
+      "correct": 2,
+      "explication": "+10,5 % en médiane, sur 717 croisements haussiers : une bonne partie du mouvement avait déjà eu lieu."
+    },
+    {
+      "question": "Combien de croisements 20/50 se sont défaits, par un croisement inverse, dans les 20 séances suivantes ?",
+      "options": [
+        "Environ 1 sur 100",
+        "Environ 6 sur 10",
+        "Environ 9 sur 10",
+        "Environ 3 sur 10"
+      ],
+      "correct": 3,
+      "explication": "30,1 % des croisements de moyennes simples (438 sur 1 456), et 16,9 % dès les 10 séances suivantes."
+    },
+    {
+      "question": "Sur la BRVM de 2021 à 2026, 20 séances après un croisement haussier 20/50, le cours était plus haut :",
+      "options": [
+        "Bien plus souvent qu’après une séance quelconque",
+        "Dans neuf cas sur dix, à peu de choses près",
+        "Moins souvent qu’après une séance quelconque",
+        "Dans tous les cas où la moyenne longue montait"
+      ],
+      "correct": 2,
+      "explication": "49,2 % des cas, contre 53,1 % pour une séance quelconque. Le croisement n’a pas annoncé la suite."
+    },
+    {
+      "question": "Par rapport à la moyenne simple, la moyenne exponentielle :",
+      "options": [
+        "Croise plus tard, et se trompe moins souvent",
+        "Croise plus tôt, mais se défait plus souvent",
+        "Donne les mêmes croisements, aux mêmes dates",
+        "Ne peut pas croiser une moyenne simple"
+      ],
+      "correct": 1,
+      "explication": "Quand les deux croisent dans le même sens, l’exponentielle le fait 4 séances plus tôt en médiane ; mais 29,6 % de ses croisements se défont en 10 séances, contre 16,9 % pour la simple."
+    },
+    {
+      "question": "Une valeur n’a connu aucun échange depuis 50 séances, à cours inchangé. Que vaut sa moyenne sur 20 séances ?",
+      "options": [
+        "Exactement ce cours figé",
+        "Zéro, faute d’échange",
+        "La moyenne de son secteur",
+        "Elle ne peut plus se calculer"
+      ],
+      "correct": 0,
+      "explication": "Vingt clôtures identiques donnent une moyenne égale à ce cours. Aucune tendance n’y est lisible : il n’y a pas eu de marché."
+    },
+    {
+      "question": "Le jour du détachement d’un gros dividende, le cours chute fortement. Que décrit surtout l’écart du cours à sa moyenne 20 séances ?",
+      "options": [
+        "Un retournement de la tendance de fond",
+        "Le dividende versé, plus qu’une tendance",
+        "Une dégradation des comptes de la société",
+        "Rien, l’écart reste inchangé ce jour-là"
+      ],
+      "correct": 1,
+      "explication": "La moyenne contient encore 19 cours d’avant le détachement. Filtisac CI (FTSC), le 26 septembre 2025 : 51,4 % sous sa moyenne 20 séances, une baisse de 1 575 FCFA du même ordre que le dividende de 1 726,56 FCFA net."
+    },
+    {
+      "question": "Un cours vaut 110 et sa moyenne 100. Quel est son écart à la moyenne ?",
+      "options": [
+        "+1 %",
+        "+110 %",
+        "−10 %",
+        "+10 %"
+      ],
+      "correct": 3,
+      "explication": "(110 − 100) ÷ 100 = +10 %."
+    }
+  ],
+  "qcm": {
+    "question": "Quelle est la moyenne mobile sur 4 séances des clôtures 200, 210, 190 et 220 ?",
+    "options": [
+      "200",
+      "205",
+      "210",
+      "820"
+    ],
+    "correct": 1,
+    "explication": "(200 + 210 + 190 + 220) ÷ 4 = 820 ÷ 4 = 205. 820 est la somme, pas la moyenne."
+  },
+  "liens": [
+    {
+      "label": "Les fiches valeur et leurs graphiques",
+      "href": "/actions"
+    },
+    {
+      "label": "Le scanner technique",
+      "href": "/scanner"
+    },
+    {
+      "label": "Notre méthodologie des signaux",
+      "href": "/methodologie"
+    },
+    {
+      "label": "Le classement de liquidité",
+      "href": "/liquidite"
+    },
+    {
+      "label": "Le calendrier des dividendes et des assemblées",
+      "href": "/calendrier"
+    },
+    {
+      "label": "Le classement de liquidité",
+      "href": "/liquidite"
+    },
+    {
+      "label": "Le calendrier des dividendes et des assemblées",
+      "href": "/calendrier"
+    },
+    {
+      "label": "Le classement de liquidité",
+      "href": "/liquidite"
+    },
+    {
+      "label": "Le calendrier des dividendes et des assemblées",
+      "href": "/calendrier"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital."
 }

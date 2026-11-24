@@ -268,6 +268,9 @@ export interface LectureTechnique {
   cours: number;
   mm20: number;
   mm50: number;
+  /** (cours − moyenne) ÷ moyenne, en % : de combien le cours s'éloigne de chaque moyenne. */
+  ecart20Pct: number;
+  ecart50Pct: number;
   rsi14: number;
   /** Position du cours face aux deux moyennes : description, jamais un conseil. */
   position: 'au-dessus des deux' | 'sous les deux' | 'entre les deux';
@@ -307,6 +310,8 @@ export function lectureTechnique(
       cours,
       mm20,
       mm50,
+      ecart20Pct: (cours / mm20 - 1) * 100,
+      ecart50Pct: (cours / mm50 - 1) * 100,
       rsi14: r,
       position: cours > mm20 && cours > mm50 ? 'au-dessus des deux' : cours < mm20 && cours < mm50 ? 'sous les deux' : 'entre les deux',
       zoneRsi: r >= 70 ? 'surachat' : r <= 30 ? 'survente' : 'neutre',

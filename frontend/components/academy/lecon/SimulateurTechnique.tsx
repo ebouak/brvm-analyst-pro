@@ -9,6 +9,7 @@ import {
   lectureMoyennes,
   lectureRsi,
   lectureVariation,
+  type MethodeMoyenne,
   type PointSerie,
 } from '@/lib/academy/simTechnique';
 import { dateSeanceLongue } from '@/components/CarnetOrdres';
@@ -83,6 +84,7 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
   const serie = useSerie(code);
   const [courte, setCourte] = useState(sim.courte);
   const [longue, setLongue] = useState(sim.longue);
+  const [methode, setMethode] = useState<MethodeMoyenne>(sim.methode);
   const [periode, setPeriode] = useState(sim.periode);
   const [haut, setHaut] = useState(sim.seuil_haut);
   const [bas, setBas] = useState(sim.seuil_bas);
@@ -94,12 +96,13 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
     : sim.indicateur === 'variation'
       ? essayer(() => lectureVariation(points))
       : sim.indicateur === 'moyennes'
-        ? essayer(() => lectureMoyennes(points, courte, Math.max(longue, courte + 1)))
+        ? essayer(() => lectureMoyennes(points, courte, Math.max(longue, courte + 1), methode))
         : sim.indicateur === 'rsi'
           ? essayer(() => lectureRsi(points, periode, haut, bas))
           : essayer(() => lectureMacd(points));
   const derniere = points.at(-1) ?? null;
-  const reinit = () => { setCourte(sim.courte); setLongue(sim.longue); setPeriode(sim.periode); setHaut(sim.seuil_haut); setBas(sim.seuil_bas); setFenetre(120); };
+  const reinit = () => { setCourte(sim.courte); setLongue(sim.longue); setMethode(sim.methode); setPeriode(sim.periode); setHaut(sim.seuil_haut); setBas(sim.seuil_bas); setFenetre(120); };
+  const prefixe = methode === 'exponentielle' ? 'Moyenne exponentielle' : 'Moyenne';
 
   return (
     <figure className="lp-figure lp-large lp-atelier">
@@ -115,6 +118,13 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
           {sim.codes.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
+
+      {sim.indicateur === 'moyennes' && (
+        <div className="lp-choix" role="radiogroup" aria-label="Type de moyenne">
+          <label><input type="radio" name={`${id}-meth`} checked={methode === 'simple'} onChange={() => setMethode('simple')} /> Moyenne simple</label>
+          <label><input type="radio" name={`${id}-meth`} checked={methode === 'exponentielle'} onChange={() => setMethode('exponentielle')} /> Moyenne exponentielle</label>
+        </div>
+      )}
 
       {sim.indicateur !== 'variation' && (
         <div className="lp-curseurs lp-bloc-court">
@@ -165,7 +175,7 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
               <CartesianGrid stroke={COULEUR.trame} vertical={false} />
               <XAxis dataKey="date" {...axeX} />
               <YAxis {...axeY} domain={['auto', 'auto']} tickFormatter={(v: number) => nombre(v)} />
-              <Tooltip {...bulle} labelFormatter={(d: string) => dateSeanceLongue(d)} formatter={(v: number, n: string) => [nombre(v, 1), n === 'cours' ? 'Cours' : n === 'courte' ? `MM ${courte}` : `MM ${longue}`]} />
+              <Tooltip {...bulle} labelFormatter={(d: string) => dateSeanceLongue(d)} formatter={(v: number, n: string) => [nombre(v, 1), n === 'cours' ? 'Cours' : n === 'courte' ? `${prefixe} ${courte}` : `${prefixe} ${longue}`]} />
               <Line dataKey="cours" stroke={COULEUR.cours} strokeWidth={1.6} dot={false} isAnimationActive={false} />
               <Line dataKey="courte" stroke={COULEUR.a} strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
               <Line dataKey="longue" stroke={COULEUR.b} strokeWidth={2} strokeDasharray="5 4" dot={false} isAnimationActive={false} connectNulls />
@@ -176,8 +186,8 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
       {sim.indicateur === 'moyennes' && calc?.ok && (
         <div className="lp-legende" aria-hidden="true">
           <span><i style={{ background: COULEUR.cours }} />Cours de clôture</span>
-          <span><i style={{ background: COULEUR.a }} />Moyenne {courte} séances</span>
-          <span><i style={{ background: COULEUR.b }} />Moyenne {longue} séances</span>
+          <span><i style={{ background: COULEUR.a }} />{prefixe} {courte} séances</span>
+          <span><i style={{ background: COULEUR.b }} />{prefixe} {longue} séances</span>
         </div>
       )}
 

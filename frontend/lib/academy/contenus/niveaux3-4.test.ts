@@ -145,3 +145,77 @@ describe('niveau 3, leçon 2 — figures à trois bougies et séances réelles (
     expect(brut).not.toMatch(/probabilité de succès|signal fiable|garantit (une|la) (hausse|baisse)/);
   });
 });
+
+describe('niveau 3, leçon 3 — moyennes mobiles, mesurées sur la BRVM (2026-11-24)', () => {
+  type Apres = { cas: number; part_pct: number; part_base_pct: number; ic95_pct: [number, number]; assez_de_cas: boolean; ecart_etabli: boolean; ecart_sens: string | null };
+  type Methode = {
+    croisements: number; haussiers: number; baissiers: number;
+    allers_retours_20: { part_pct: number }; avant: { haussier_mediane_pct: number };
+    apres_20: { haussier: Apres; baissier: Apres };
+    robustesse: Record<string, { haussier: Apres; baissier: Apres }>;
+  };
+  const src = JSON.parse(readFileSync(fileURLToPath(new URL('./niveau3/sources/moyennes-brvm-2026-11-24.json', import.meta.url)), 'utf-8')) as {
+    base_20: { part_hausse_pct: number }; simple: Methode; exponentielle: Methode;
+    exemples: { cbibf: { clotures_70: { date: string; cloture: number }[]; croisements: { date: string; sens: string }[] } };
+  };
+  const [, l3, brut] = N3[2]!;
+  const fr = (n: number) => n.toFixed(1).replace('.', ',');
+  const ent = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  it('les chiffres de la leçon sont ceux de la mesure', () => {
+    expect(brut).toContain(`${ent(src.simple.croisements)} croisements de moyennes simples`);
+    expect(brut).toContain(`plus haut 20 séances plus tard dans ${fr(src.base_20.part_hausse_pct)} %`);
+    expect(brut).toContain(`il était plus haut dans ${fr(src.simple.apres_20.haussier.part_pct)} % des cas`);
+    expect(brut).toContain(`monté de ${fr(src.simple.avant.haussier_mediane_pct)} %`);
+  });
+  it('le calcul pas à pas, recalculé : rien avant la cinquième séance, puis 103 ; 104,6 ; 105,4 ; 106', () => {
+    const t = l3.sections[0]!.tableau!;
+    const c = [100, 102, 101, 105, 107, 108, 106, 104];
+    t.lignes.forEach((ligne, i) => {
+      if (i < 4) expect(ligne[3]).toBe('—');
+      else expect(ligne[3]).toBe(fr(c.slice(i - 4, i + 1).reduce((a, b) => a + b, 0) / 5));
+    });
+    expect(brut).toMatch(/les 4 premières n’ont pas de moyenne/);
+  });
+  it('la dernière clôture pèse autant dans la pondérée que dans l’exponentielle : 2 ÷ (N + 1)', () => {
+    for (const n of [5, 20, 50]) expect(n / ((n * (n + 1)) / 2)).toBeCloseTo(2 / (n + 1), 12);
+  });
+  it('le cas CBIBF : moyennes et croisements recalculés depuis les 70 clôtures figées', () => {
+    const s = src.exemples.cbibf.clotures_70;
+    const moy = (i: number, n: number) => (i + 1 < n ? null : s.slice(i - n + 1, i + 1).reduce((a, p) => a + p.cloture, 0) / n);
+    const croisements: { date: string; sens: string }[] = [];
+    let prec = 0;
+    s.forEach((p, i) => {
+      const a = moy(i, 20);
+      const b = moy(i, 50);
+      if (a == null || b == null) return;
+      const sg = Math.sign(a - b);
+      if (sg === 0) return;
+      if (prec !== 0 && sg !== prec) croisements.push({ date: p.date, sens: sg > 0 ? 'haussier' : 'baissier' });
+      prec = sg;
+    });
+    expect(croisements.slice(-2)).toEqual(src.exemples.cbibf.croisements);
+    expect(src.exemples.cbibf.croisements.map((x) => x.sens)).toEqual(['haussier', 'baissier']);
+  });
+  it('le tableau donne une ligne par croisement mesuré, et le verdict suit le calcul', () => {
+    const t = l3.sections.find((s) => s.titre.startsWith('Ce que valent les croisements'))!.tableau!;
+    const cas = [src.simple.apres_20.haussier, src.simple.apres_20.baissier, src.exponentielle.apres_20.haussier, src.exponentielle.apres_20.baissier];
+    expect(t.lignes).toHaveLength(4);
+    t.lignes.forEach((ligne, i) => {
+      const x = cas[i]!;
+      expect(ligne[3]).toBe(`${fr(x.part_pct)} %`);
+      expect(ligne[6]).toMatch(!x.assez_de_cas ? /Trop peu de cas/ : x.ecart_etabli ? (x.ecart_sens === 'plus' ? /Plus souvent/ : /Moins souvent/) : /non établi/);
+    });
+    // Aucune comparaison ne fait mieux qu'une séance quelconque : la conclusion de la leçon en dépend.
+    const toutes = [src.simple, src.exponentielle].flatMap((m) => [m.apres_20, ...Object.values(m.robustesse)].flatMap((g) => [g.haussier, g.baissier]));
+    expect(toutes.some((x) => x.ecart_etabli && x.ecart_sens === 'plus')).toBe(false);
+  });
+  it('l’atelier pas à pas et le simulateur réel sont là', () => {
+    const sims = l3.sections.flatMap((s) => [...(s.simulation ? [s.simulation] : []), ...s.simulations]);
+    expect(sims.some((s) => s.type === 'moyenne_glissante')).toBe(true);
+    expect(sims.filter((s) => s.type === 'technique' && s.indicateur === 'moyennes').length).toBeGreaterThanOrEqual(2);
+  });
+  it('aucune promesse : un croisement décrit, il n’annonce pas', () => {
+    expect(brut).toMatch(/il n’a pas annoncé la suite/);
+    expect(brut).not.toMatch(/probabilité de succès|signal fiable|garantit (une|la) (hausse|baisse)/);
+  });
+});

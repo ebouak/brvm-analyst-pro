@@ -99,6 +99,9 @@ describe('lectureTechnique', () => {
     expect(l.position).toBe('au-dessus des deux');
     expect(l.zoneRsi).toBe('surachat');
     expect(r.manquants).toEqual(['COURT']);
+    // Écart du cours à chaque moyenne (leçon 3 enrichie, 2026-11-24).
+    expect(l.ecart20Pct).toBeCloseTo((159 / 149.5 - 1) * 100, 9);
+    expect(l.ecart50Pct).toBeCloseTo((159 / 134.5 - 1) * 100, 9);
   });
   it('baisse régulière : sous les deux moyennes, RSI en survente', () => {
     const l = lectureTechnique(['DN'], {}, { DN: serie(60, (i) => 300 - i) }).lignes[0]!;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SaisieInvalide } from './simulateurs';
-import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, type PointSerie } from './simTechnique';
+import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, type PointSerie } from './simTechnique';
 
 /** Série synthétique : n séances, cours donné par f(i). */
 function serie(n: number, f: (i: number) => number): PointSerie[] {
@@ -61,6 +61,69 @@ describe('moyennes mobiles', () => {
   it('la lecture décrit, ne recommande pas', () => {
     const r = lectureMoyennes(serie(120, (i) => 1_000 + 5 * i), 20, 50);
     expect(r.lecture).toMatch(/pas ce qui va se passer/);
+    expect(r.lecture).not.toMatch(/achet|vend/i);
+  });
+  // Leçon 3 enrichie (2026-11-24) : moyenne exponentielle, croisement des deux
+  // moyennes entre elles, écart du cours à chacune.
+  it('méthode exponentielle : les moyennes sont celles de emaSeries, plus proches du dernier cours', () => {
+    const s = serie(120, (i) => (i < 100 ? 1_000 : 1_000 + 20 * (i - 99)));
+    const simple = lectureMoyennes(s, 20, 50);
+    const expo = lectureMoyennes(s, 20, 50, 'exponentielle');
+    expect(simple.methode).toBe('simple');
+    expect(expo.methode).toBe('exponentielle');
+    const k = 2 / 21;
+    let e = 1_000;
+    for (let i = 20; i < 120; i++) e = s[i]!.cours * k + e * (1 - k);
+    expect(expo.derniere.courte).toBeCloseTo(e, 6);
+    expect(Math.abs(expo.derniere.cours - expo.derniere.courte!)).toBeLessThan(Math.abs(simple.derniere.cours - simple.derniere.courte!));
+    expect(expo.lecture).toMatch(/exponentielles/);
+  });
+  it('repère le dernier croisement des deux moyennes, son sens et sa date', () => {
+    // Hausse régulière puis chute : la moyenne courte finit par passer sous la longue.
+    const s = serie(160, (i) => (i < 110 ? 1_000 + 10 * i : 2_090 - 40 * (i - 109)));
+    const r = lectureMoyennes(s, 20, 50);
+    expect(r.croisementMoyennes?.sens).toBe('baissier');
+    const i = r.points.length - 1 - r.croisementMoyennes!.seances;
+    expect(r.points[i]!.courte! < r.points[i]!.longue!).toBe(true);
+    expect(r.points[i - 1]!.courte! >= r.points[i - 1]!.longue!).toBe(true);
+    expect(r.croisementMoyennes!.date).toBe(r.points[i]!.date);
+    expect(r.lecture).toMatch(/croisement baissier/);
+  });
+  it('sans croisement des deux moyennes sur la série, rien n’est inventé', () => {
+    const r = lectureMoyennes(serie(120, (i) => 1_000 + 5 * i), 20, 50);
+    expect(r.croisementMoyennes).toBeNull();
+    expect(r.lecture).not.toMatch(/croisement (haussier|baissier)/);
+  });
+  it('écart du cours à chaque moyenne, en pourcentage', () => {
+    const r = lectureMoyennes(serie(120, (i) => 1_000 + 5 * i), 20, 50);
+    expect(r.ecartCourtePct).toBeCloseTo((r.derniere.cours / r.derniere.courte! - 1) * 100, 9);
+    expect(r.ecartLonguePct).toBeCloseTo((r.derniere.cours / r.derniere.longue! - 1) * 100, 9);
+  });
+});
+
+describe('atelier : la moyenne qui glisse', () => {
+  const CLOTURES = [100, 102, 101, 105, 107, 108, 106, 104];
+  it('reproduit le calcul pas à pas : rien avant la cinquième séance, puis 103 ; 104,6 ; 105,4 ; 106', () => {
+    const r = moyenneGlissante(CLOTURES, 5);
+    expect(r.lignes.slice(0, 4).every((l) => l.sma == null && l.ema == null && l.fenetre == null)).toBe(true);
+    expect(r.lignes.slice(4).map((l) => l.sma)).toEqual([103, 104.6, 105.4, 106]);
+    expect(r.lignes[4]!.fenetre).toEqual([100, 102, 101, 105, 107]);
+    expect(r.lignes[7]!.ecartSmaPct).toBeCloseTo((104 / 106 - 1) * 100, 9);
+    expect(r.lecture).toMatch(/4 premières séances/);
+  });
+  it('la moyenne exponentielle part de la simple puis pondère : k = 2 ÷ (N + 1)', () => {
+    const r = moyenneGlissante(CLOTURES, 5);
+    expect(r.lignes[4]!.ema).toBeCloseTo(103, 9);
+    expect(r.lignes[5]!.ema).toBeCloseTo(108 / 3 + (103 * 2) / 3, 9);
+    expect(r.k).toBeCloseTo(1 / 3, 12);
+  });
+  it('refuse une période impossible et un cours non positif', () => {
+    expect(() => moyenneGlissante(CLOTURES, 1)).toThrow(SaisieInvalide);
+    expect(() => moyenneGlissante(CLOTURES, 8)).toThrow(SaisieInvalide);
+    expect(() => moyenneGlissante([100, 0, 101, 102], 2)).toThrow(SaisieInvalide);
+  });
+  it('décrit sans recommander', () => {
+    const r = moyenneGlissante(CLOTURES, 5);
     expect(r.lecture).not.toMatch(/achet|vend/i);
   });
 });
