@@ -6,11 +6,12 @@
 //   node scripts/academy-module-zero.mjs
 //
 // Aucun chiffre n'est recopié à la main : chaque ratio affiché (croissance,
-// TCAM, ROE, marge, PER, rendement, capitalisation, performances) est
-// recalculé ici depuis les données lues en base. Les chiffres de tiers
-// (Sika Finance, StockAnalysis / S&P Global, BCEAO) sont cités avec leur
-// source. niveau2.test.ts recalcule les mêmes valeurs et échoue si un JSON
-// diverge de ses sources.
+// TCAM, ROE, marges, coût du risque, PER — dont le PER sur 12 mois glissants —,
+// rendement, free cash flow, dette nette, capitalisation, performances) est
+// recalculé ici depuis la base WESTBOURSE et les comptes officiels.
+// Choix éditorial (2026-11-24) : aucun site d'information tiers n'est cité ;
+// seules sources : WESTBOURSE, la BRVM, les sociétés, la BCEAO.
+// niveau2.test.ts recalcule les chiffres clés indépendamment.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,8 +20,7 @@ import { fileURLToPath } from 'node:url';
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const DOSSIER = path.join(ICI, '..', 'lib', 'academy', 'contenus', 'niveau2');
 const S = JSON.parse(fs.readFileSync(path.join(DOSSIER, 'sources', 'cours-complet-2026-11-23.json'), 'utf8'));
-const T = S.tiers;
-const sp = T.stockanalysis_sp;
+const BCEAO = S.bceao;
 const ANS = ['2021', '2022', '2023', '2024', '2025'];
 
 // ── Mise en forme française (espace ordinaire en milliers, virgule décimale, signe moins typographique) ──
@@ -46,8 +46,9 @@ const mult = (v) => fr(v, 2);
 // ── Calculs ──
 const varPct = (a, b) => (a == null || b == null || !(b > 0) ? null : (a / b - 1) * 100);
 const tcam = (a, b, n) => (Math.pow(b / a, 1 / n) - 1) * 100;
+const somme = (a, b) => (a == null || b == null ? null : a + b);
 
-function calculer(code) {
+function calculer(code, periodeGlissante) {
   const s = S.societes[code];
   const A = ANS.map((y) => s.annuel[y]);
   const col = (k) => A.map((a) => a[k] ?? null);
@@ -60,19 +61,40 @@ function calculer(code) {
   const cloture = col('cloture');
   const cours = s.cours['2026-11-23'];
   const d25 = s.dividende_2025;
+  // Bénéfice sur 12 mois glissants : exercice 2025 − période 2025 + même période 2026.
+  const [p25, p26] = [`2025-${periodeGlissante}`, `2026-${periodeGlissante}`];
+  const rnGlissant = rn[4] - s.interim[p25].rn + s.interim[p26].rn;
+  const bpaGlissant = (rnGlissant * 1e9) / s.titres;
+  // Banques.
+  const rbe = col('rbe');
+  const cdr = col('cout_du_risque');
+  const credits = col('credits');
+  // Opérateurs.
+  const rex = col('rex');
+  const fe = col('flux_exploitation');
+  const inv = col('investissements');
+  const dispo = col('disponibilites');
+  const dettes = A.map((a) => somme(a.dettes_fin_courantes ?? null, a.dettes_fin_non_courantes ?? null));
   return {
-    s, revenu, rn, cp, actif, bpa, dpa, cloture, cours, d25,
+    s, revenu, rn, cp, actif, bpa, dpa, cloture, cours, d25, rbe, cdr, credits, rex, fe, inv, dispo, dettes,
     croisRev: revenu.map((v, i) => (i === 0 ? null : varPct(v, revenu[i - 1]))),
     croisRn: rn.map((v, i) => (i === 0 ? null : varPct(v, rn[i - 1]))),
     roeClot: rn.map((v, i) => (v / cp[i]) * 100),
     roeMoy: rn.map((v, i) => (i === 0 ? null : (v / ((cp[i - 1] + cp[i]) / 2)) * 100)),
     marge: rn.map((v, i) => (v / revenu[i]) * 100),
+    // Coefficient publié quand il existe ; sinon 1 − RBE ÷ PNB (PNB arrondi au dixième).
+    coef: rbe.map((v, i) => A[i].coefficient_exploitation_pct ?? (v == null ? null : (1 - v / revenu[i]) * 100)),
+    cdrCredits: cdr.map((v, i) => (v == null || credits[i] == null ? null : (v / credits[i]) * 100)),
+    margeEx: rex.map((v, i) => (v == null ? null : (v / revenu[i]) * 100)),
+    fcf: fe.map((v, i) => (v == null || inv[i] == null ? null : v - inv[i])),
+    detteNette: dettes.map((v, i) => (v == null || dispo[i] == null ? null : v - dispo[i])),
     per: cloture.map((c, i) => (c == null ? null : c / bpa[i])),
     rdt: cloture.map((c, i) => (c == null ? null : (dpa[i] / c) * 100)),
     base100: rn.map((v) => (v / rn[0]) * 100),
     cap: (cours * s.titres) / 1e9,
     perAuj: cours / bpa[4],
     perBoc: s.cours['2026-11-20'] / bpa[4],
+    rnGlissant, bpaGlissant, perGlissant: cours / bpaGlissant,
     perf: {
       jour: varPct(cours, s.cours['2026-11-20']),
       ytd: varPct(cours, cloture[4]),
@@ -89,23 +111,26 @@ function calculer(code) {
   };
 }
 
-const E = calculer('ECOC');
-const G = calculer('SGBC');
-const N = calculer('SNTS');
-const O = calculer('ORAC');
-const tE = T.sika_finance.ECOC;
-const tG = T.sika_finance.SGBC;
-const tO = T.sika_finance.ORAC;
+const E = calculer('ECOC', 'S1');
+const G = calculer('SGBC', 'S1');
+const N = calculer('SNTS', 'T3');
+const O = calculer('ORAC', 'T3');
 const credDep = (X) => (X.s.annuel['2025'].credits / X.s.annuel['2025'].depots) * 100;
 /** ROA et levier sur bilans et capitaux MOYENS 2024-2025 : ROA × levier = ROE moyen. */
 const roaMoy = (X) => (X.rn[4] / ((X.actif[3] + X.actif[4]) / 2)) * 100;
 const levier = (X) => (X.actif[3] + X.actif[4]) / (X.cp[3] + X.cp[4]);
+const sn25 = N.s.annuel['2025'];
+const sn24 = N.s.annuel['2024'];
+const perPdgN = N.cours / ((sn25.rn_part_du_groupe * 1e9) / N.s.titres);
+const roePdgN = (sn25.rn_part_du_groupe / sn25.cp_part_du_groupe) * 100;
+const couvertureN = sn25.rex / sn25.charges_endettement;
 
 // ── Briques de leçon ──
 const MODULE = 'Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM';
 const AVERT = 'Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital.';
 const NOUVEAUTE = { type: 'nouveau', depuis: '2026-11-24' };
-const SRC_BASE = 'Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.';
+const SRC_BASE = 'Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.';
+const SRC_SNTS = 'Sources : comptes 2025 publiés par Sonatel le 16/02/2026 et comptes publiés en base WESTBOURSE, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.';
 
 const ligne = (libelle, valeurs, fmt) => [libelle, ...valeurs.map((v) => (typeof v === 'string' ? v : fmt(v)))];
 
@@ -185,14 +210,14 @@ const l01 = lecon({
       tableau: {
         colonnes: ['Caractéristique', 'Impact sur l’analyse', 'Précaution'],
         lignes: [
-          ['Liquidité parfois limitée', 'Certaines actions s’échangent peu. Le dernier cours affiché peut ne pas représenter un prix auquel on peut acheter ou vendre une quantité importante.', 'Vérifier les volumes quotidiens et l’écart achat-vente (bid-ask spread).'],
-          ['Flottant variable', 'Une grande partie du capital est souvent détenue par des actionnaires de référence, ce qui réduit les titres réellement disponibles.', 'Consulter le nombre d’actions en circulation et le pourcentage de flottant.'],
-          ['Écarts achat-vente importants', 'Le prix demandé par les vendeurs peut être très éloigné du prix offert par les acheteurs.', 'Ne pas se fier au seul cours de clôture. Examiner le carnet d’ordres.'],
+          ['Liquidité parfois limitée', 'Certaines actions s’échangent peu. Le dernier cours affiché peut ne pas représenter un prix auquel on peut acheter ou vendre une quantité importante.', 'Vérifier les volumes quotidiens et l’écart achat-vente (bid-ask spread) : la page Liquidité de WESTBOURSE les réunit.'],
+          ['Flottant variable', 'Une grande partie du capital est souvent détenue par des actionnaires de référence, ce qui réduit les titres réellement disponibles.', 'Consulter le nombre d’actions en circulation et le pourcentage de flottant, sur la fiche de la société.'],
+          ['Écarts achat-vente importants', 'Le prix demandé par les vendeurs peut être très éloigné du prix offert par les acheteurs.', 'Ne pas se fier au seul cours de clôture. Examiner le carnet d’ordres, affiché sur chaque fiche société.'],
           ['Données à dates variables', 'Les rapports peuvent être publiés à des dates différentes selon les sociétés.', 'Homogénéiser les périodes comparées. Toujours indiquer la date de chaque donnée.'],
           ['Diversité sectorielle', 'Banque, assurance, télécoms, agro-industrie, distribution, énergie : les ratios pertinents ne sont pas les mêmes.', 'Ne pas comparer mécaniquement les postes d’une banque avec ceux d’une entreprise industrielle.'],
           ['Référentiel SYSCOHADA', 'Les états financiers sont préparés selon le SYSCOHADA révisé, avec des règles propres aux banques et aux assurances.', 'Vérifier si des comptes consolidés en normes IFRS sont aussi publiés.'],
         ],
-        note: 'Le carnet d’ordres de chaque valeur figure sur sa fiche société : la BRVM publie chaque séance la meilleure limite de chaque côté dans son Bulletin officiel de la cote.',
+        note: 'Le carnet d’ordres affiché sur WESTBOURSE vient du Bulletin officiel de la cote : la BRVM y publie chaque séance la meilleure limite de chaque côté.',
       },
       donnees_reelles: { vue: 'cours', codes: ['SNTS', 'ORAC', 'ECOC', 'SGBC'], actions: 10 },
     },
@@ -200,19 +225,17 @@ const l01 = lecon({
       type: 'definition',
       titre: 'Les sources à privilégier, dans l’ordre',
       contenu: [
-        'Une analyse ne vaut que par ses données. Les sources n’ont pas toutes le même statut : les documents publiés par la société et par la bourse font foi ; les sites d’information et les bases de données retraitent ces documents, parfois avec des définitions différentes.',
-        'Ce cours le montre sur des cas réels. Pour une même banque, deux séries de produit net bancaire circulent selon qu’on lit les comptes publiés ou une base standardisée ; pour un même opérateur, trois PER coexistent selon le bénéfice retenu. Aucune n’est fausse : elles ne mesurent pas la même chose.',
+        'Une analyse ne vaut que par ses données. Les documents publiés par la société et par la bourse font foi : ce sont eux qu’il faut lire en premier. WESTBOURSE les rassemble ensuite sur plusieurs exercices et recalcule chaque ratio avec la même méthode d’une société à l’autre, en indiquant pour chaque chiffre sa date et sa source.',
+        'Ce cours n’utilise que ces sources. Les bases de données et sites d’information retraitent souvent les mêmes documents avec leurs propres définitions : un chiffre différent n’est pas forcément faux, mais il ne se compare qu’à définition égale. Le module le montre sur un cas réel : pour un même opérateur, quatre PER coexistent selon le cours et le bénéfice retenus.',
       ].join('\n'),
       etapes: [
-        { titre: 'BRVM (brvm.org)', detail: 'Rapports d’activité, états financiers, avis et communiqués, cours quotidiens et Bulletin officiel de la cote. Source primaire pour les données officielles.', cle: true },
+        { titre: 'BRVM (brvm.org)', detail: 'Rapports d’activité, états financiers, avis et communiqués, cours quotidiens, Bulletin officiel de la cote et calendrier de paiement des dividendes. Source primaire pour les données officielles.', cle: true },
         { titre: 'Le site de la société cotée', detail: 'Rapport annuel complet, présentation aux investisseurs, communiqués de presse, documents d’assemblée générale.' },
-        { titre: 'Sika Finance (sikafinance.com)', detail: 'Cotations en différé, historiques, fiches sociétés, dividendes, actualités et analyses.' },
-        { titre: 'Richbourse (richbourse.com)', detail: 'Outils de suivi, historiques, fiches de sociétés et informations de marché BRVM.' },
-        { titre: 'StockAnalysis / S&P Global Market Intelligence', detail: 'États financiers standardisés sur cinq ans et plus, ratios calculés : utile pour comparer plusieurs années, à condition de connaître ses définitions.' },
-        { titre: 'FGI Bourse, CGF Bourse, allAfrica, Daba Finance', detail: 'Analyses sectorielles, commentaires de résultats trimestriels, contexte macroéconomique régional.' },
+        { titre: 'WESTBOURSE', detail: 'Les comptes publiés de chaque société rassemblés sur plusieurs exercices ; les ratios recalculés à méthode constante (BPA, PER, P/B, ROE, rendement) ; le carnet d’ordres du Bulletin officiel ; le calendrier officiel des dividendes ; la note de liquidité ; le comparateur et le screener. Chaque chiffre porte sa date et sa source.', cle: true },
+        { titre: 'Les autorités : BCEAO et AMF-UMOA', detail: 'Rapports annuels de la BCEAO et règles prudentielles des banques ; avis et décisions de l’AMF-UMOA, régulateur du marché financier régional.' },
       ],
       encadres: [
-        { ton: 'info', titre: 'Règle éditoriale', texte: 'Distinguez toujours les données publiées par la société (rapports, communiqués), les cours de marché (BRVM, Sika Finance) et vos propres calculs. Indiquez la période comptable, la date du cours retenu, la devise, les unités et la définition du ratio utilisé.' },
+        { ton: 'info', titre: 'Règle éditoriale', texte: 'Distinguez toujours les données publiées par la société (rapports, communiqués), les cours de marché (BRVM, Bulletin officiel de la cote) et vos propres calculs. Indiquez la période comptable, la date du cours retenu, la devise, les unités et la définition du ratio utilisé.' },
       ],
     },
     {
@@ -222,7 +245,7 @@ const l01 = lecon({
       points: [
         { titre: 'Quatre questions', detail: 'Solidité, rentabilité, trésorerie, prix : aucune ne suffit seule.' },
         { titre: 'Six étapes', detail: 'De la compréhension de l’activité à une conclusion qui écrit ses hypothèses.' },
-        { titre: 'Une source datée pour chaque chiffre', detail: 'Les comptes et la cote font foi ; les bases de données les retraitent.' },
+        { titre: 'Une source datée pour chaque chiffre', detail: 'Les comptes publiés et la cote font foi ; WESTBOURSE les rassemble et recalcule les ratios.' },
       ],
     },
   ],
@@ -264,12 +287,12 @@ const l01 = lecon({
       question: 'Quelle source fait foi pour les états financiers d’une société cotée à la BRVM ?',
       options: [
         'Un forum de discussion entre investisseurs de la région',
-        'Une base de données standardisée',
+        'Un chiffre repris sans sa date ni sa définition',
         'Les documents publiés par la société et par la BRVM',
         'Le dernier article de presse publié sur la société',
       ],
       correct: 2,
-      explication: 'Les rapports et états financiers publiés par la société et diffusés par la BRVM sont la source primaire ; les bases de données les retraitent.',
+      explication: 'Les rapports et états financiers publiés par la société et diffusés par la BRVM sont la source primaire ; WESTBOURSE les rassemble et recalcule les ratios.',
     },
     {
       question: 'Selon quel référentiel les sociétés cotées à la BRVM préparent-elles leurs comptes ?',
@@ -293,7 +316,7 @@ const l01 = lecon({
 // ════════════════════════════════════════════════════════════════════════════
 // Leçon 0.2 — Les ratios essentiels : formules et calculateurs
 // ════════════════════════════════════════════════════════════════════════════
-const roaE = (E.rn[4] / ((E.actif[3] + E.actif[4]) / 2)) * 100;
+const roaE = roaMoy(E);
 const pbE = E.cours / ((E.cp[4] * 1e9) / E.s.titres);
 const l02 = lecon({
   titre: 'Leçon 0.2 — Les ratios essentiels : formules et calculateurs',
@@ -347,8 +370,9 @@ const l02 = lecon({
         'Deux précautions. Le PER se calcule avec un cours et un bénéfice de la même période ; et pour un groupe qui a des filiales, il faut savoir si le BPA porte sur le résultat consolidé ou sur la seule part du groupe. Les calculateurs ci-dessous lisent aussi les données réelles en base.',
       ].join('\n'),
       formules: [
-        { nom: 'BPA', expression: 'BPA = résultat net attribuable aux actionnaires ÷ nombre moyen pondéré d’actions', exemple: `${md(N.rn[4])} milliards ÷ 1 milliard d’actions = ${fcfa2(N.bpa[4])} FCFA (Sonatel 2025, après fractionnement)` },
+        { nom: 'BPA', expression: 'BPA = résultat net attribuable aux actionnaires ÷ nombre moyen pondéré d’actions', exemple: `${md(N.rn[4])} milliards ÷ 1 milliard d’actions = ${fcfa2(N.bpa[4])} FCFA (Sonatel 2025, résultat consolidé, après fractionnement)` },
         { nom: 'PER', expression: 'PER = cours ÷ BPA, ou capitalisation ÷ résultat net', exemple: `${ent(G.cloture[4])} ÷ ${fcfa2(G.bpa[4])} = ${mult(G.per[4])} (SGBC, clôture 2025)` },
+        { nom: 'PER sur 12 mois glissants', expression: 'Bénéfice glissant = résultat de l’exercice − période de l’an dernier + même période de cette année', exemple: `Sonatel : ${md(N.rn[4])} − ${md(N.interim('2025-T3', 'rn'))} + ${md(N.interim('2026-T3', 'rn'))} = ${md(N.rnGlissant)} milliards ; ${ent(N.cours)} ÷ ${fcfa2(N.bpaGlissant)} = ${mult(N.perGlissant)}` },
         { nom: 'P/B (price to book)', expression: 'P/B = cours ÷ valeur comptable par action', exemple: `Ecobank CI au 23/11/2026 : ${ent(E.cours)} ÷ (${md(E.cp[4])} milliards ÷ ${fr(E.s.titres / 1e6, 2)} millions d’actions) = ${mult(pbE)}` },
         { nom: 'Rendement du dividende', expression: 'Rendement = (dividende par action ÷ cours) × 100', exemple: `${ent(N.d25.net)} ÷ ${ent(N.cours)} = ${pc(N.rdtNetAuj, 2)} (Sonatel, dividende net 2025)` },
       ],
@@ -374,17 +398,18 @@ const l02 = lecon({
       titre: 'Endettement et solvabilité des entreprises non financières',
       contenu: [
         'La dette financière nette retranche la trésorerie des emprunts. Le gearing la rapporte aux capitaux propres ; la couverture des intérêts dit combien de fois le résultat opérationnel paie les charges financières.',
-        `Une dette nette négative signifie que l’entreprise détient plus de trésorerie qu’elle ne doit d’emprunts. Selon S&P Global, Sonatel est ainsi passée d’une trésorerie nette (une dette nette de ${ent(sp.dette_nette.SNTS[0])} milliards en 2021) à une dette nette de ${ent(sp.dette_nette.SNTS[4])} milliards en 2025, pendant que ses investissements annuels passaient de ${ent(sp.capex.SNTS[0])} à ${ent(sp.capex.SNTS[4])} milliards.`,
+        `Une dette nette négative signifie que l’entreprise détient plus de trésorerie qu’elle ne doit d’emprunts. Selon ses comptes 2025 publiés, Sonatel doit ${md(N.dettes[4])} milliards de passifs financiers (courants et non courants) et détient ${md(N.dispo[4])} milliards de disponibilités : sa dette financière nette est de ${md(N.detteNette[4])} milliards, c’est-à-dire une trésorerie nette. Un an plus tôt, les deux montants s’équilibraient (${md(N.dettes[3])} contre ${md(N.dispo[3])} milliards).`,
+        'La définition doit toujours être écrite : certains ajoutent les dettes locatives aux dettes financières, d’autres non. Le résultat change de signe pour peu qu’un seul poste soit compté différemment.',
       ].join('\n'),
       formules: [
-        { nom: 'Dette financière nette', expression: 'Dette nette = emprunts et dettes financières − trésorerie' },
-        { nom: 'Gearing', expression: 'Gearing = (dette nette ÷ capitaux propres) × 100' },
-        { nom: 'Couverture des intérêts', expression: 'Couverture = résultat opérationnel ÷ charges d’intérêts' },
+        { nom: 'Dette financière nette', expression: 'Dette nette = emprunts et dettes financières − trésorerie', exemple: `Sonatel 2025 : ${md(N.dettes[4])} − ${md(N.dispo[4])} = ${md(N.detteNette[4])} milliards (trésorerie nette)` },
+        { nom: 'Gearing', expression: 'Gearing = (dette nette ÷ capitaux propres) × 100', exemple: `${md(N.detteNette[4])} ÷ ${md(sn25.cp)} = ${pc((N.detteNette[4] / sn25.cp) * 100)}` },
+        { nom: 'Couverture des intérêts', expression: 'Couverture = résultat opérationnel ÷ charges d’intérêts', exemple: `${md(sn25.rex)} ÷ ${md(sn25.charges_endettement)} = ${fr(couvertureN, 1)} fois (coût de l’endettement financier brut)` },
       ],
       simulation: {
         type: 'endettement',
-        consigne: 'Exemple fictif d’entreprise industrielle : modifiez la trésorerie ou les charges d’intérêts et observez le gearing et la couverture.',
-        dettes_financieres: 300, tresorerie: 100, capitaux_propres: 400, resultat_operationnel: 120, charges_interets: 20, unite: 'Md FCFA',
+        consigne: 'Les valeurs proposées sont celles des comptes 2025 publiés par Sonatel. Remplacez-les par celles d’une entreprise endettée : le gearing et la couverture changent de lecture.',
+        dettes_financieres: sn25.dettes_fin_courantes + sn25.dettes_fin_non_courantes, tresorerie: sn25.disponibilites, capitaux_propres: sn25.cp, resultat_operationnel: sn25.rex, charges_interets: sn25.charges_endettement, unite: 'Md FCFA',
       },
       encadres: [
         { ton: 'alerte', titre: 'Important pour les banques', texte: 'Les ratios de dette nette, de gearing et d’EV/EBITDA sont inadaptés aux banques. Leur bilan est fait de dépôts, de crédits et de placements : la dette y est la matière première. Pour une banque, on examine plutôt la qualité des actifs, les créances en souffrance, le coût du risque, le ratio de solvabilité, le ROE et le P/B (leçon 0.3).' },
@@ -393,12 +418,12 @@ const l02 = lecon({
     {
       type: 'retenir',
       titre: 'L’essentiel',
-      contenu: 'Chaque ratio répond à une question précise, et chacun a ses pièges de calcul : le nombre d’années du TCAM, les capitaux propres moyens du ROE, la même période pour le cours et le bénéfice du PER, le périmètre consolidé ou part du groupe du BPA.',
+      contenu: 'Chaque ratio répond à une question précise, et chacun a ses pièges de calcul : le nombre d’années du TCAM, les capitaux propres moyens du ROE, la même période pour le cours et le bénéfice du PER, le périmètre consolidé ou part du groupe du BPA, la définition de la dette nette.',
       points: [
         { titre: 'Croissance', detail: 'Annuelle pour suivre le rythme, TCAM pour comparer des trajectoires.' },
         { titre: 'Rentabilité', detail: 'Marge, ROE et ROA, à méthode identique d’une société à l’autre.' },
-        { titre: 'Valorisation', detail: 'PER, P/B et rendement, toujours datés et sourcés.' },
-        { titre: 'Endettement', detail: 'Dette nette, gearing et couverture, jamais pour une banque.' },
+        { titre: 'Valorisation', detail: 'PER, P/B et rendement, toujours datés : exercice clos ou 12 mois glissants.' },
+        { titre: 'Endettement', detail: 'Dette nette, gearing et couverture, définition écrite, jamais pour une banque.' },
       ],
     },
   ],
@@ -469,7 +494,7 @@ const l03 = lecon({
       contenu: [
         'Le tableau réunit les indicateurs à suivre, ce qu’ils mesurent et la lecture qui en découle. La plupart sont publiés par les banques elles-mêmes dans leur rapport d’activité ; le ratio de solvabilité est un ratio réglementaire, contrôlé par la Commission bancaire de l’UMOA.',
         `Appliqués aux deux banques étudiées ensuite, ces indicateurs donnent déjà des repères. En 2025, Société Générale Côte d’Ivoire prête ${pc(credDep(G))} de ses dépôts à sa clientèle, Ecobank Côte d’Ivoire ${pc(credDep(E))}. Un rapport élevé n’est pas un défaut en soi : la banque transforme une plus grande part de ses ressources en crédits, ce qui lui rapporte davantage d’intérêts et l’expose davantage au risque de crédit.`,
-        `Côté efficacité, Sika Finance donne pour Société Générale Côte d’Ivoire un coefficient d’exploitation de ${pc(tG.coefficient_exploitation_9m_2026_pct)} sur les neuf premiers mois de 2026 : sur 100 francs de PNB, environ ${fr(tG.coefficient_exploitation_9m_2026_pct, 0)} paient les frais généraux. Côté solvabilité, la même banque affiche ${pc(tG.solvabilite_pct)} au premier semestre 2026, pour un minimum réglementaire de ${pc(T.bceao.solvabilite_minimum_pct)}.`,
+        `Côté efficacité, les comptes 2025 donnent un coefficient d’exploitation de ${pc(G.coef[4])} pour Société Générale Côte d’Ivoire et de ${pc(E.coef[4])} pour Ecobank Côte d’Ivoire : sur 100 francs de PNB, environ ${fr(G.coef[4], 0)} et ${fr(E.coef[4], 0)} paient les frais généraux. Côté solvabilité, Société Générale Côte d’Ivoire publie ${pc(G.interim('2026-S1', 'solvabilite_pct'))} au premier semestre 2026, pour un minimum réglementaire de ${pc(BCEAO.solvabilite_minimum_pct)}.`,
       ].join('\n'),
       tableau: {
         colonnes: ['Indicateur bancaire', 'Définition', 'Pourquoi c’est important'],
@@ -478,11 +503,11 @@ const l03 = lecon({
           ['Coût du risque', 'Dotations aux provisions pour créances en souffrance, nettes des reprises.', 'Il traduit la qualité du portefeuille de crédits ; un coût du risque faible et stable est un signal positif.'],
           ['Créances en souffrance (NPL)', 'Encours de crédits dont le remboursement est retardé ou compromis.', 'Plus leur part est élevée, plus le risque de crédit est important.'],
           ['Taux de couverture', 'Provisions ÷ créances en souffrance : la part des pertes potentielles déjà provisionnée.', 'Un taux élevé, de l’ordre de 80 % ou plus, traduit une approche prudente.'],
-          ['Coefficient d’exploitation', 'Frais généraux ÷ PNB : l’efficacité opérationnelle.', 'Plus il est bas, plus la banque est efficace ; sous 50 %, il est généralement jugé très bon.'],
-          ['Ratio de solvabilité', `Fonds propres ÷ actifs pondérés par leur risque. Minimum réglementaire de l’UMOA : ${pc(T.bceao.solvabilite_minimum_pct)} depuis 2023 (rapports annuels de la BCEAO).`, 'Un ratio élevé donne une marge de sécurité réglementaire et de la capacité à prêter.'],
+          ['Coefficient d’exploitation', 'Frais généraux ÷ PNB, ou 1 − résultat brut d’exploitation ÷ PNB : l’efficacité opérationnelle.', 'Plus il est bas, plus la banque est efficace ; sous 50 %, il est généralement jugé très bon.'],
+          ['Ratio de solvabilité', `Fonds propres ÷ actifs pondérés par leur risque. Minimum réglementaire de l’UMOA : ${pc(BCEAO.solvabilite_minimum_pct)} depuis 2023 (rapports annuels de la BCEAO).`, 'Un ratio élevé donne une marge de sécurité réglementaire et de la capacité à prêter.'],
           ['Ratio crédits ÷ dépôts', 'Crédits nets à la clientèle ÷ dépôts de la clientèle.', 'Il indique si la banque finance ses crédits par les ressources qu’elle collecte.'],
         ],
-        note: T.bceao.note,
+        note: BCEAO.note,
       },
     },
     {
@@ -516,7 +541,7 @@ const l03 = lecon({
       type: 'cas',
       titre: 'Les banques de la BRVM, en direct',
       reel: true,
-      contenu: 'Les ratios ci-dessous sont recalculés au chargement de la leçon, sur le dernier exercice publié et le dernier cours connu en base. Ils ne sont donc pas figés à la date de rédaction : comparez-les à ceux du 23 novembre 2026 cités dans les leçons 0.4 à 0.6.',
+      contenu: 'Les ratios ci-dessous sont recalculés par WESTBOURSE au chargement de la leçon, sur le dernier exercice publié et le dernier cours connu en base. Ils ne sont donc pas figés à la date de rédaction : comparez-les à ceux du 23 novembre 2026 cités dans les leçons 0.4 à 0.6.',
       donnees_reelles: { vue: 'ratios', codes: ['ECOC', 'SGBC', 'SIBC', 'BOAC', 'NSBC', 'BICC'] },
     },
     {
@@ -525,7 +550,7 @@ const l03 = lecon({
       contenu: 'Une banque se lit avec ses propres indicateurs : le PNB pour l’activité, le coefficient d’exploitation pour l’efficacité, le coût du risque, les créances en souffrance et leur couverture pour la qualité des crédits, et le ratio de solvabilité pour la marge réglementaire.',
       points: [
         { titre: 'Le risque est dans les crédits', detail: 'Coût du risque et couverture se lisent avant le résultat net.' },
-        { titre: `Solvabilité : ${pc(T.bceao.solvabilite_minimum_pct)} au minimum`, detail: 'Ratio de solvabilité total de l’UMOA depuis 2023.' },
+        { titre: `Solvabilité : ${pc(BCEAO.solvabilite_minimum_pct)} au minimum`, detail: 'Ratio de solvabilité total de l’UMOA depuis 2023.' },
         { titre: 'Pas de gearing pour une banque', detail: 'Les dépôts sont une dette par nature.' },
       ],
     },
@@ -577,16 +602,18 @@ const l03 = lecon({
 // ════════════════════════════════════════════════════════════════════════════
 // Cas réels bancaires : mêmes blocs pour les deux banques, chiffres recalculés
 // ════════════════════════════════════════════════════════════════════════════
-function tableauBanque(X, revStd) {
+function tableauBanque(X) {
   const an = (k) => ANS.map((y) => X.s.annuel[y][k] ?? null);
   const dep = an('depots');
   const cre = an('credits');
   return {
     colonnes: ['Indicateur', ...ANS],
     lignes: [
-      ligne('Produit net bancaire, comptes publiés (Md FCFA)', X.revenu, md),
+      ligne('Produit net bancaire (Md FCFA)', X.revenu, md),
       ligne('Croissance du PNB', X.croisRev, (v) => sg(v)),
-      ligne('PNB, série standardisée S&P / StockAnalysis (Md FCFA)', revStd, md),
+      ligne('Résultat brut d’exploitation (Md FCFA)', X.rbe, md),
+      ligne('Coefficient d’exploitation (publié, sinon 1 − RBE ÷ PNB)', X.coef, (v) => pc(v)),
+      ligne('Coût du risque (Md FCFA)', X.cdr, md),
       ligne('Résultat net (Md FCFA)', X.rn, md),
       ligne('Croissance du résultat net', X.croisRn, (v) => sg(v)),
       ligne('Total du bilan (Md FCFA)', X.actif, md),
@@ -594,6 +621,7 @@ function tableauBanque(X, revStd) {
       ligne('Dépôts de la clientèle (Md FCFA)', dep, md),
       ligne('Crédits à la clientèle (Md FCFA)', cre, md),
       ligne('Crédits ÷ dépôts', cre.map((c, i) => (c == null ? null : (c / dep[i]) * 100)), (v) => pc(v)),
+      ligne('Coût du risque ÷ crédits', X.cdrCredits, (v) => pc(v, 2)),
       ligne('ROE sur capitaux propres de clôture', X.roeClot, (v) => pc(v)),
       ligne('ROE sur capitaux propres moyens', X.roeMoy, (v) => pc(v)),
       ligne('Marge nette (résultat net ÷ PNB)', X.marge, (v) => pc(v)),
@@ -603,23 +631,28 @@ function tableauBanque(X, revStd) {
       ligne('Dividende par action publié (FCFA)', X.dpa.map((v, i) => (i === 4 ? `${ent(X.d25.brut)} brut / ${fcfa2(X.d25.net)} net` : fcfa2(v))), (v) => v),
       ligne('Rendement à la clôture de l’année', X.rdt, (v) => pc(v)),
     ],
-    note: 'Dividende : montant publié par exercice ; la base fiscale (brut ou net d’impôt) n’est connue avec certitude que pour 2025, d’après le calendrier de paiement des dividendes de la BRVM. Rendement à la clôture = dividende publié de l’exercice ÷ dernier cours de l’année. « — » : donnée absente de la source.',
+    note: 'Comptes publiés par la banque, en base WESTBOURSE ; ratios calculés par WESTBOURSE. Dividende : montant publié par exercice ; la base fiscale (brut ou net d’impôt) n’est connue avec certitude que pour 2025, d’après le calendrier de paiement des dividendes de la BRVM. Rendement à la clôture = dividende publié de l’exercice ÷ dernier cours de l’année. « — » : donnée absente des comptes en base.',
   };
 }
 
 function graphiquesBanque(X, nom) {
   return [
     graphique({
-      titre: `${nom} : PNB et résultat net (2021-2025, Md FCFA)`,
-      series: [{ nom: 'PNB', valeurs: X.revenu }, { nom: 'Résultat net', valeurs: X.rn }],
+      titre: `${nom} : du PNB au résultat net (2021-2025, Md FCFA)`,
+      series: [
+        { nom: 'PNB', valeurs: X.revenu },
+        { nom: 'Résultat brut d’exploitation', valeurs: X.rbe },
+        { nom: 'Coût du risque', valeurs: X.cdr },
+        { nom: 'Résultat net', valeurs: X.rn },
+      ],
       unite: 'Md FCFA',
-      note: `Le résultat net progresse de ${pc(varPct(X.rn[4], X.rn[0]))} en quatre ans, le PNB de ${pc(varPct(X.revenu[4], X.revenu[0]))}. ${SRC_BASE}`,
+      note: `Le résultat net progresse de ${pc(varPct(X.rn[4], X.rn[0]))} en quatre ans, le résultat brut d’exploitation de ${pc(varPct(X.rbe[4], X.rbe[0]))} ; le coût du risque passe de ${md(X.cdr[0])} à ${md(X.cdr[4])} milliards. Cliquez sur la légende pour isoler une série. ${SRC_BASE}`,
     }),
     graphique({
       titre: `${nom} : cours de clôture de l’année et PER (2021-2025)`,
       series: [{ nom: 'Cours de clôture (FCFA)', valeurs: X.cloture }, { nom: 'PER', valeurs: X.per, type: 'line', axe: 'droite' }],
       unite: 'FCFA', unite_droite: 'x',
-      note: `Le PER passe de ${mult(X.per[0])} à ${mult(X.per[4])} : le cours a monté plus vite que le bénéfice. Cliquez sur la légende pour masquer une série. ${SRC_BASE}`,
+      note: `Le PER passe de ${mult(X.per[0])} à ${mult(X.per[4])} : le cours a monté plus vite que le bénéfice. ${SRC_BASE}`,
     }),
     graphique({
       titre: `${nom} : dividende par action publié (FCFA, exercices 2021-2025)`,
@@ -630,27 +663,30 @@ function graphiquesBanque(X, nom) {
   ];
 }
 
-function tableauInterim(X, t9m, notes) {
-  const L = (lib, p, q, src) => [lib, md(X.interim(p, 'revenu')), sg(X.vi(p, 'revenu', q)), md(X.interim(p, 'rn')), sg(X.vi(p, 'rn', q)), src];
+function tableauInterim(X) {
+  const L = (lib, p, q) => [lib, md(X.interim(p, 'revenu')), sg(X.vi(p, 'revenu', q)), md(X.interim(p, 'rn')), sg(X.vi(p, 'rn', q))];
   return {
-    colonnes: ['Période 2026', 'PNB (Md FCFA)', 'Variation', 'Résultat net (Md FCFA)', 'Variation', 'Source'],
+    colonnes: ['Période 2026', 'PNB (Md FCFA)', 'Variation', 'Résultat net (Md FCFA)', 'Variation'],
     lignes: [
-      L('1er trimestre (31 mars)', '2026-T1', '2025-T1', 'Base WESTBOURSE'),
-      L('1er semestre (30 juin)', '2026-S1', '2025-S1', notes.s1),
-      ['9 premiers mois (30 sept.)', md(t9m.pnb_9m_2026), sg(varPct(t9m.pnb_9m_2026, X.interim('2025-T3', 'revenu'))), `${notes.approx ? '≈ ' : ''}${md(t9m.rn_9m_2026)}`, sg(varPct(t9m.rn_9m_2026, X.interim('2025-T3', 'rn'))), `Sika Finance, articles du ${t9m.articles}`],
+      L('1er trimestre (31 mars)', '2026-T1', '2025-T1'),
+      L('1er semestre (30 juin)', '2026-S1', '2025-S1'),
     ],
-    note: 'Comptes non audités. Variations calculées par rapport à la même période de 2025, en base. Les comptes intermédiaires sont des cumuls depuis le 1er janvier.',
+    note: 'Comptes publiés par la banque, non audités, en base WESTBOURSE. Variations calculées par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier.',
   };
 }
+
+const sgPts = (a, b) => (a == null || b == null ? '—' : `${a - b >= 0 ? '+' : '−'}${fr(Math.abs(a - b), 1)} pt`);
 
 // ════════════════════════════════════════════════════════════════════════════
 // Leçon 0.4 — Ecobank Côte d'Ivoire
 // ════════════════════════════════════════════════════════════════════════════
+const eS1 = (k) => E.interim('2026-S1', k);
+const eS0 = (k) => E.interim('2025-S1', k);
 const l04 = lecon({
   titre: 'Leçon 0.4 — Cas réel : Ecobank Côte d’Ivoire (ECOC)',
   duree_min: 18,
   sous_titre: 'Cinq exercices de comptes, le cours, le PER et le dividende, puis les comptes de 2026 : une banque très rentable face à un provisionnement en hausse.',
-  resume: `Filiale d’Ecobank Transnational Incorporated (ETI), cotée à la BRVM depuis décembre 2017, Ecobank Côte d’Ivoire affiche un ROE de ${pc(E.roeClot[4])} en 2025 sur ses capitaux propres de clôture. Cette leçon reprend ses comptes 2021-2025 tels qu’ils sont publiés, recalcule chaque ratio, compare deux séries de PNB, puis lit les comptes de 2026 : la hausse du coût du risque y fait reculer le résultat.`,
+  resume: `Filiale d’Ecobank Transnational Incorporated (ETI), cotée à la BRVM depuis décembre 2017, Ecobank Côte d’Ivoire affiche un ROE de ${pc(E.roeClot[4])} en 2025 sur ses capitaux propres de clôture. Cette leçon reprend ses comptes 2021-2025 tels qu’ils sont publiés, recalcule chaque ratio, suit le coût du risque du PNB au résultat, calcule un PER sur douze mois glissants, puis lit les comptes de 2026 : la hausse du coût du risque y fait reculer le résultat.`,
   sections: [
     {
       type: 'cas',
@@ -658,16 +694,16 @@ const l04 = lecon({
       reel: true,
       contenu: [
         `Au 23 novembre 2026, l’action Ecobank Côte d’Ivoire cotait ${ent(E.cours)} FCFA, en recul de ${fr(Math.abs(E.perf.jour), 2)} % sur la séance. Avec ${fr(E.s.titres / 1e6, 2)} millions d’actions, la capitalisation atteint ${md(E.cap)} milliards de FCFA.`,
-        `Sur le BPA de l’exercice 2025 (${fcfa2(E.bpa[4])} FCFA), le PER ressort à ${mult(E.perAuj)}. StockAnalysis affiche ${fr(sp.per_ttm.ECOC, 2)} sur douze mois glissants : ce PER intègre les trimestres de 2026, où le résultat recule. Le dividende brut 2025 de ${ent(E.d25.brut)} FCFA représente ${pc(E.rdtBrutAuj, 2)} du cours, soit ${pc(E.rdtNetAuj, 2)} après retenue à la source.`,
+        `Sur le BPA de l’exercice 2025 (${fcfa2(E.bpa[4])} FCFA), le PER ressort à ${mult(E.perAuj)}. Sur douze mois glissants, de juillet 2025 à juin 2026, le bénéfice recule à ${md(E.rnGlissant)} milliards (${md(E.rn[4])} − ${md(eS0('rn'))} + ${md(eS1('rn'))}) : le PER glissant monte à ${mult(E.perGlissant)}. Le dividende brut 2025 de ${ent(E.d25.brut)} FCFA représente ${pc(E.rdtBrutAuj, 2)} du cours, soit ${pc(E.rdtNetAuj, 2)} après retenue à la source.`,
         `Depuis le 1er janvier 2026, le titre perd ${fr(Math.abs(E.perf.ytd), 2)} % ; sur un an (depuis le 24/11/2025), ${fr(Math.abs(E.perf.unAn), 2)} %. Sur trois ans (depuis le 23/11/2023), il a gagné ${pc(E.perf.troisAns)}. Le bloc en direct, en bas de section, recalcule ces ratios sur les derniers chiffres disponibles.`,
       ].join('\n'),
       stats: [
         { label: 'Cours au 23/11/2026', valeur: `${ent(E.cours)} FCFA`, detail: `${sg(E.perf.jour, 2)} sur la séance` },
         { label: 'Capitalisation', valeur: `${md(E.cap)} Md FCFA`, detail: `${fr(E.s.titres / 1e6, 2)} millions d’actions` },
-        { label: 'PER sur le BPA 2025', valeur: mult(E.perAuj), detail: `${fr(sp.per_ttm.ECOC, 2)} sur 12 mois glissants (StockAnalysis)` },
+        { label: 'PER sur le BPA 2025', valeur: mult(E.perAuj), detail: `${mult(E.perGlissant)} sur 12 mois glissants (calcul WESTBOURSE)` },
         { label: 'Rendement du dividende 2025', valeur: pc(E.rdtBrutAuj, 2), detail: `brut ; ${pc(E.rdtNetAuj, 2)} net` },
         { label: 'Depuis le 1er janvier', valeur: sg(E.perf.ytd, 2), detail: `sur un an : ${sg(E.perf.unAn, 2)}` },
-        { label: 'Bêta sur un an', valeur: fr(sp.beta_1an.ECOC, 2), detail: 'StockAnalysis / S&P Global' },
+        { label: 'Coefficient d’exploitation 2025', valeur: pc(E.coef[4]), detail: `${pc(E.coef[3])} en 2024` },
       ],
       donnees_reelles: { vue: 'ratios', codes: ['ECOC'] },
     },
@@ -677,10 +713,10 @@ const l04 = lecon({
       reel: true,
       contenu: [
         `Le tableau reprend les comptes publiés et recalcule chaque ratio. Le PNB passe de ${md(E.revenu[0])} à ${md(E.revenu[4])} milliards de FCFA, soit un TCAM de ${pc(E.tcamRev)} ; le résultat net, de ${md(E.rn[0])} à ${md(E.rn[4])} milliards, soit ${pc(E.tcamRn)} par an. Le résultat croît plus vite que l’activité : la marge nette gagne ${fr(E.marge[4] - E.marge[0], 1)} points en quatre ans.`,
-        `Deux séries de PNB circulent. Celle des comptes publiés, ici en première ligne, et celle de S&P Global / StockAnalysis, qui standardise les postes pour comparer des banques du monde entier. Elles concordent pour 2025 (${md(E.revenu[4])} milliards) et divergent avant, signe que les deux séries ne retiennent pas les mêmes postes. Pour suivre une banque dans le temps, gardez une seule série.`,
-        'Le rendement est ici calculé à la clôture de l’exercice : dividende de l’année divisé par le dernier cours de l’année. D’autres sites le calculent sur le dividende versé dans l’année ou sur un cours moyen, d’où des chiffres différents pour une même année.',
+        `Le premier graphique montre d’où vient cet écart. Le résultat brut d’exploitation progresse de ${pc(varPct(E.rbe[4], E.rbe[0]))}, porté par un coefficient d’exploitation qui baisse ; surtout, le coût du risque tombe de ${md(E.cdr[0])} milliards en 2021 à ${md(E.cdr[4])} milliard en 2025, soit ${pc(E.cdrCredits[4], 2)} des crédits. Moins de provisions, c’est autant de résultat en plus.`,
+        'Le rendement est ici calculé à la clôture de l’exercice : dividende de l’année divisé par le dernier cours de l’année. Calculé sur le cours du jour ou sur le dividende versé dans l’année, il donnerait un autre chiffre pour une même année : la définition doit toujours être écrite.',
       ].join('\n'),
-      tableau: tableauBanque(E, sp.revenus_standardises.ECOC),
+      tableau: tableauBanque(E),
       graphiques: graphiquesBanque(E, 'Ecobank CI'),
       donnees_reelles: { vue: 'historique', codes: ['ECOC'] },
     },
@@ -689,17 +725,29 @@ const l04 = lecon({
       titre: '2026 : les comptes intermédiaires',
       reel: true,
       contenu: [
-        `Les comptes de 2026 ne sont pas audités. Le PNB continue de progresser (${sg(E.vi('2026-S1', 'revenu', '2025-S1'))} au premier semestre), mais le résultat net recule : ${sg(E.vi('2026-S1', 'rn', '2025-S1'))} au premier semestre, et ${sg(varPct(tE.rn_9m_2026, E.interim('2025-T3', 'rn')))} sur neuf mois si l’on rapporte le chiffre de Sika Finance (environ ${md(tE.rn_9m_2026)} milliards) aux ${md(E.interim('2025-T3', 'rn'))} milliards de neuf mois 2025 en base. Sika Finance annonce ${sg(tE.variation_rn_9m_2026_pct)}.`,
-        `La cause est connue : un provisionnement renforcé. Selon Sika Finance, le coût du risque atteint ${md(tE.cout_du_risque_s1_2026)} milliards au premier semestre 2026, contre ${md(tE.cout_du_risque_s1_2025)} milliard un an plus tôt. Le taux de couverture des créances en souffrance avoisine ${tE.couverture_s1_2026_pct} % à fin juin 2026, après un coût du risque de seulement ${fr(tE.cout_du_risque_2025_pct, 1)} % en 2025.`,
+        `Les comptes de 2026 ne sont pas audités. Le PNB continue de progresser (${sg(E.vi('2026-S1', 'revenu', '2025-S1'))} au premier semestre), mais le résultat net recule de ${fr(Math.abs(E.vi('2026-S1', 'rn', '2025-S1')), 1)} %.`,
+        `La cause se lit dans les comptes semestriels : le coût du risque passe de ${md(eS0('cout_du_risque'))} milliard au premier semestre 2025 à ${md(eS1('cout_du_risque'))} milliards au premier semestre 2026, et les créances en souffrance brutes de ${md(eS0('creances_souffrance_brutes'))} à ${md(eS1('creances_souffrance_brutes'))} milliards (${sg(varPct(eS1('creances_souffrance_brutes'), eS0('creances_souffrance_brutes')))}). La banque les couvre à ${eS1('couverture_pct')} % par des provisions, un niveau prudent ; ce sont ces provisions qui pèsent sur le résultat du semestre.`,
       ].join('\n'),
-      tableau: tableauInterim(E, tE, { s1: `Base WESTBOURSE ; total du bilan ≈ ${fr(tE.bilan_s1_2026, 0)} Md (Sika Finance)`, approx: true }),
+      tableaux: [
+        tableauInterim(E),
+        {
+          colonnes: ['Indicateur de risque', '1er semestre 2025', '1er semestre 2026', 'Variation'],
+          lignes: [
+            ['Coût du risque (Md FCFA)', md(eS0('cout_du_risque')), md(eS1('cout_du_risque')), sg(varPct(eS1('cout_du_risque'), eS0('cout_du_risque')), 0)],
+            ['Créances en souffrance brutes (Md FCFA)', md(eS0('creances_souffrance_brutes')), md(eS1('creances_souffrance_brutes')), sg(varPct(eS1('creances_souffrance_brutes'), eS0('creances_souffrance_brutes')))],
+            ['Taux de couverture des créances en souffrance', '—', `${eS1('couverture_pct')} %`, '—'],
+            ['Total du bilan (Md FCFA)', md(eS0('total_bilan')), md(eS1('total_bilan')), sg(varPct(eS1('total_bilan'), eS0('total_bilan')))],
+          ],
+          note: 'Comptes semestriels publiés par la banque, en base WESTBOURSE. « — » : donnée non publiée dans les comptes en base pour la période.',
+        },
+      ],
       donnees_reelles: { vue: 'cours', codes: ['ECOC'], actions: 10 },
     },
     {
       type: 'importance',
       titre: 'La lecture d’Ecobank Côte d’Ivoire',
       contenu: [
-        `Croissance : le PNB progresse chaque année, de ${pc(E.tcamRev)} par an en moyenne de 2021 à 2025, et le résultat net plus vite encore, de ${pc(E.tcamRn)} par an.`,
+        `Croissance : le PNB progresse chaque année, de ${pc(E.tcamRev)} par an en moyenne de 2021 à 2025, et le résultat net plus vite encore, de ${pc(E.tcamRn)} par an, aidé par la baisse du coût du risque.`,
         `Rentabilité : ROE de ${pc(E.roeClot[4])} sur les capitaux de clôture 2025, ${pc(E.roeMoy[4])} sur les capitaux moyens ; comparez-le aux autres banques cotées dans le bloc en direct de la leçon 0.3. La marge nette atteint ${fr(E.marge[4], 0)} % du PNB en 2025.`,
         `Risque : un coût du risque très faible en 2025, puis un provisionnement nettement renforcé en 2026, qui explique le recul du résultat. Valorisation : le PER de fin d’année passe de ${mult(E.per[0])} en 2021 à ${mult(E.per[4])} en 2025 ; le cours a été réévalué plus vite que le bénéfice, puis il recule en 2026 (${sg(E.perf.ytd, 1)} depuis le 1er janvier).`,
       ].join('\n'),
@@ -712,10 +760,10 @@ const l04 = lecon({
     {
       type: 'retenir',
       titre: 'L’essentiel',
-      contenu: 'Ecobank Côte d’Ivoire illustre une banque très rentable dont le résultat dépend, à court terme, de son provisionnement. Ses chiffres se lisent avec une seule série de PNB, un ROE à méthode constante et un dividende dont on connaît la base fiscale.',
+      contenu: 'Ecobank Côte d’Ivoire illustre une banque très rentable dont le résultat dépend, à court terme, de son provisionnement. Ses chiffres se lisent avec le coût du risque, un ROE à méthode constante, un PER daté et un dividende dont on connaît la base fiscale.',
       points: [
-        { titre: 'Une série, une méthode', detail: 'Comptes publiés et base standardisée divergent : ne les mélangez pas.' },
-        { titre: 'Le coût du risque fait le résultat', detail: 'En 2026, il fait reculer le bénéfice malgré un PNB en hausse.' },
+        { titre: 'Le coût du risque fait le résultat', detail: 'Sa baisse a porté le bénéfice jusqu’en 2025 ; sa hausse le fait reculer en 2026.' },
+        { titre: 'Un PER, une période', detail: `${mult(E.perAuj)} sur l’exercice 2025, ${mult(E.perGlissant)} sur 12 mois glissants : les deux sont justes.` },
         { titre: 'Un PER qui a presque doublé', detail: 'La réévaluation du cours a précédé le bénéfice.' },
       ],
     },
@@ -742,7 +790,7 @@ const l04 = lecon({
         'Parce que le PNB n’est pas publié en 2026',
       ],
       correct: 1,
-      explication: `Le coût du risque passe de ${md(tE.cout_du_risque_s1_2025)} à ${md(tE.cout_du_risque_s1_2026)} milliards d’un premier semestre à l’autre (Sika Finance) : un provisionnement prudent pèse sur le résultat.`,
+      explication: `Le coût du risque passe de ${md(eS0('cout_du_risque'))} à ${md(eS1('cout_du_risque'))} milliards d’un premier semestre à l’autre, selon les comptes publiés : un provisionnement prudent pèse sur le résultat.`,
     },
     {
       question: `Le dividende 2025 est de ${ent(E.d25.brut)} FCFA brut. Au cours de ${ent(E.cours)} FCFA, quel est le rendement brut ?`,
@@ -751,15 +799,15 @@ const l04 = lecon({
       explication: `${ent(E.d25.brut)} ÷ ${ent(E.cours)} = ${pc(E.rdtBrutAuj, 2)} ; net de la retenue à la source, ${pc(E.rdtNetAuj, 2)}.`,
     },
     {
-      question: 'Deux séries de PNB d’Ecobank CI circulent pour 2022-2024. Que faire pour suivre la banque dans le temps ?',
+      question: `Pourquoi le PER d’Ecobank CI sur 12 mois glissants (${mult(E.perGlissant)}) dépasse-t-il le PER sur l’exercice 2025 (${mult(E.perAuj)}) au même cours ?`,
       options: [
-        'Prendre chaque année la série la plus favorable',
-        'Additionner les deux séries',
-        'Ignorer le PNB et ne regarder que le cours',
-        'Garder une seule série, avec sa définition',
+        'Parce que le cours retenu est celui de fin 2025, plus élevé que celui du 23 novembre 2026',
+        'Parce que le PER glissant ajoute le dividende au bénéfice de l’exercice',
+        'Parce que le nombre d’actions a augmenté au premier semestre 2026',
+        'Parce que le bénéfice des douze derniers mois est plus faible',
       ],
       correct: 3,
-      explication: 'Comptes publiés et base standardisée n’ont pas la même définition : mélanger les deux fabriquerait une croissance fausse.',
+      explication: `Au même cours, un bénéfice plus petit donne un PER plus grand : ${md(E.rnGlissant)} milliards sur douze mois glissants contre ${md(E.rn[4])} sur l’exercice 2025.`,
     },
   ],
   liens: [
@@ -772,11 +820,13 @@ const l04 = lecon({
 // ════════════════════════════════════════════════════════════════════════════
 // Leçon 0.5 — Société Générale Côte d'Ivoire
 // ════════════════════════════════════════════════════════════════════════════
+const gS1 = (k) => G.interim('2026-S1', k);
+const gS0 = (k) => G.interim('2025-S1', k);
 const l05 = lecon({
   titre: 'Leçon 0.5 — Cas réel : Société Générale Côte d’Ivoire (SGBC)',
   duree_min: 18,
-  sous_titre: 'La plus grande banque du cas : croissance qui ralentit, capitaux propres renforcés, solvabilité confortable et un dividende 2025 en forte hausse.',
-  resume: `Filiale du groupe Société Générale, présent en Côte d’Ivoire depuis 1941 selon la banque, Société Générale Côte d’Ivoire est la plus grande des deux banques étudiées : ${md(G.revenu[4])} milliards de PNB et ${md(G.actif[4])} milliards de bilan en 2025. Cette leçon reprend ses comptes 2021-2025, recalcule les ratios, explique pourquoi une autre série de PNB, plus élevée, circule, puis lit les comptes de 2026.`,
+  sous_titre: 'La plus grande banque du cas : croissance qui ralentit, coût du risque en hausse, capitaux propres renforcés et un dividende 2025 en forte hausse.',
+  resume: `Filiale du groupe Société Générale, présent en Côte d’Ivoire depuis 1941 selon la banque, Société Générale Côte d’Ivoire est la plus grande des deux banques étudiées : ${md(G.revenu[4])} milliards de PNB et ${fr(G.actif[4], 1)} milliards de bilan en 2025. Cette leçon reprend ses comptes 2021-2025, recalcule les ratios, montre ce que le coût du risque retire au résultat, puis lit les comptes de 2026.`,
   sections: [
     {
       type: 'cas',
@@ -784,16 +834,16 @@ const l05 = lecon({
       reel: true,
       contenu: [
         `Au 23 novembre 2026, l’action Société Générale Côte d’Ivoire cotait ${ent(G.cours)} FCFA, en recul de ${fr(Math.abs(G.perf.jour), 2)} % sur la séance. Avec ${fr(G.s.titres / 1e6, 2)} millions d’actions, la capitalisation atteint ${fr(G.cap, 1)} milliards de FCFA.`,
-        `Sur le BPA 2025 (${fcfa2(G.bpa[4])} FCFA), le PER ressort à ${mult(G.perAuj)} ; StockAnalysis affiche ${fr(sp.per_ttm.SGBC, 2)} sur douze mois glissants. Le dividende brut 2025, ${ent(G.d25.brut)} FCFA, représente ${pc(G.rdtBrutAuj, 2)} du cours, ${pc(G.rdtNetAuj, 2)} net.`,
+        `Sur le BPA 2025 (${fcfa2(G.bpa[4])} FCFA), le PER ressort à ${mult(G.perAuj)} ; sur douze mois glissants, de juillet 2025 à juin 2026, le bénéfice atteint ${md(G.rnGlissant)} milliards et le PER ${mult(G.perGlissant)}. Le dividende brut 2025, ${ent(G.d25.brut)} FCFA, représente ${pc(G.rdtBrutAuj, 2)} du cours, ${pc(G.rdtNetAuj, 2)} net.`,
         `Le titre gagne ${fr(G.perf.ytd, 2)} % depuis le 1er janvier 2026 et ${fr(G.perf.unAn, 1)} % sur un an (depuis le 24/11/2025) : le marché l’a nettement réévalué.`,
       ].join('\n'),
       stats: [
         { label: 'Cours au 23/11/2026', valeur: `${ent(G.cours)} FCFA`, detail: `${sg(G.perf.jour, 2)} sur la séance` },
         { label: 'Capitalisation', valeur: `${fr(G.cap, 1)} Md FCFA`, detail: `${fr(G.s.titres / 1e6, 2)} millions d’actions` },
-        { label: 'PER sur le BPA 2025', valeur: mult(G.perAuj), detail: `${fr(sp.per_ttm.SGBC, 2)} sur 12 mois glissants (StockAnalysis)` },
+        { label: 'PER sur le BPA 2025', valeur: mult(G.perAuj), detail: `${mult(G.perGlissant)} sur 12 mois glissants (calcul WESTBOURSE)` },
         { label: 'Rendement du dividende 2025', valeur: pc(G.rdtBrutAuj, 2), detail: `brut ; ${pc(G.rdtNetAuj, 2)} net` },
         { label: 'Depuis le 1er janvier', valeur: sg(G.perf.ytd, 2), detail: `sur un an : ${sg(G.perf.unAn, 1)}` },
-        { label: 'Bêta sur un an', valeur: fr(sp.beta_1an.SGBC, 2), detail: 'StockAnalysis / S&P Global' },
+        { label: 'Coefficient d’exploitation 2025', valeur: pc(G.coef[4]), detail: `${pc(G.coef[3])} en 2024` },
       ],
       donnees_reelles: { vue: 'ratios', codes: ['SGBC'] },
     },
@@ -803,10 +853,10 @@ const l05 = lecon({
       reel: true,
       contenu: [
         `Le PNB publié passe de ${md(G.revenu[0])} à ${md(G.revenu[4])} milliards de FCFA, soit ${pc(G.tcamRev)} par an ; le résultat net, de ${md(G.rn[0])} à ${md(G.rn[4])} milliards, soit ${pc(G.tcamRn)} par an. Mais la croissance ralentit nettement : ${sg(G.croisRn[4])} seulement pour le résultat 2025.`,
-        `Une série plus élevée circule, de ${md(sp.revenus_standardises.SGBC[0])} à ${md(sp.revenus_standardises.SGBC[4])} milliards : c’est la série standardisée de S&P Global / StockAnalysis, qui ne retient pas le même périmètre. Les comptes intermédiaires tranchent : ${md(G.interim('2025-T3', 'revenu'))} milliards de PNB sur neuf mois 2025, soit un rythme annuel proche des ${md(G.revenu[4])} milliards publiés, pas des ${md(sp.revenus_standardises.SGBC[4])}.`,
+        `Le premier graphique montre pourquoi. En 2025, le résultat brut d’exploitation progresse encore de ${pc(varPct(G.rbe[4], G.rbe[3]))}, mais le coût du risque augmente de ${pc(varPct(G.cdr[4], G.cdr[3]))}, de ${md(G.cdr[3])} à ${md(G.cdr[4])} milliards, soit ${pc(G.cdrCredits[4], 2)} des crédits. Sur quatre ans, il a été multiplié par ${fr(G.cdr[4] / G.cdr[0], 1)} : c’est l’inverse d’Ecobank Côte d’Ivoire.`,
         `Les capitaux propres augmentent fortement, de ${md(G.cp[3])} à ${md(G.cp[4])} milliards en 2025 : le ROE de clôture baisse à ${pc(G.roeClot[4])}, alors que le résultat est stable. C’est l’effet mécanique d’un dénominateur qui grossit.`,
       ].join('\n'),
-      tableau: tableauBanque(G, sp.revenus_standardises.SGBC),
+      tableau: tableauBanque(G),
       graphiques: graphiquesBanque(G, 'Société Générale CI'),
       donnees_reelles: { vue: 'historique', codes: ['SGBC'] },
     },
@@ -815,19 +865,31 @@ const l05 = lecon({
       titre: '2026 : les comptes intermédiaires',
       reel: true,
       contenu: [
-        `Le premier semestre 2026 est stable : PNB ${sg(G.vi('2026-S1', 'revenu', '2025-S1'))}, résultat net ${sg(G.vi('2026-S1', 'rn', '2025-S1'))}. Sur neuf mois, selon Sika Finance, le PNB recule à ${md(tG.pnb_9m_2026)} milliards (${sg(varPct(tG.pnb_9m_2026, G.interim('2025-T3', 'revenu')))} par rapport aux neuf mois 2025 en base) et le résultat net à ${md(tG.rn_9m_2026)} milliards (${sg(varPct(tG.rn_9m_2026, G.interim('2025-T3', 'rn')))}).`,
-        `Le bilan franchit ${fr(4000, 0)} milliards au premier semestre (${fr(tG.bilan_s1_2026, 1)} milliards), les capitaux propres atteignent ${fr(tG.cp_s1_2026, 1)} milliards (${sg(tG.variation_cp_pct)} sur un an) et le ratio de solvabilité ${pc(tG.solvabilite_pct)}, bien au-dessus du minimum de ${pc(T.bceao.solvabilite_minimum_pct)}. Le coefficient d’exploitation reste bas, ${pc(tG.coefficient_exploitation_9m_2026_pct)} sur neuf mois ; la hausse du coût du risque (${sg(tG.hausse_cout_risque_s1_pct)} au premier semestre) pèse sur la rentabilité.`,
+        `Le premier semestre 2026 est stable : PNB ${sg(G.vi('2026-S1', 'revenu', '2025-S1'))}, résultat net ${sg(G.vi('2026-S1', 'rn', '2025-S1'))}. Le coût du risque continue de monter (${sg(varPct(gS1('cout_du_risque'), gS0('cout_du_risque')))}, à ${md(gS1('cout_du_risque'))} milliards).`,
+        `Le bilan franchit ${fr(4000, 0)} milliards (${fr(gS1('total_bilan'), 1)} milliards), les capitaux propres atteignent ${fr(gS1('cp'), 1)} milliards (${sg(varPct(gS1('cp'), gS0('cp')))} sur un an) et le ratio de solvabilité ${pc(gS1('solvabilite_pct'))}, bien au-dessus du minimum de ${pc(BCEAO.solvabilite_minimum_pct)}.`,
       ].join('\n'),
-      tableau: tableauInterim(G, tG, { s1: `Base WESTBOURSE ; bilan ${fr(tG.bilan_s1_2026, 1)} Md (Sika Finance)`, approx: false }),
+      tableaux: [
+        tableauInterim(G),
+        {
+          colonnes: ['Indicateur', '1er semestre 2025', '1er semestre 2026', 'Variation'],
+          lignes: [
+            ['Coût du risque (Md FCFA)', md(gS0('cout_du_risque')), md(gS1('cout_du_risque')), sg(varPct(gS1('cout_du_risque'), gS0('cout_du_risque')))],
+            ['Capitaux propres (Md FCFA)', md(gS0('cp')), md(gS1('cp')), sg(varPct(gS1('cp'), gS0('cp')))],
+            ['Ratio de solvabilité', pc(gS0('solvabilite_pct')), pc(gS1('solvabilite_pct')), sgPts(gS1('solvabilite_pct'), gS0('solvabilite_pct'))],
+            ['Total du bilan (Md FCFA)', md(gS0('total_bilan')), md(gS1('total_bilan')), sg(varPct(gS1('total_bilan'), gS0('total_bilan')))],
+          ],
+          note: 'Comptes semestriels publiés par la banque, en base WESTBOURSE.',
+        },
+      ],
       donnees_reelles: { vue: 'cours', codes: ['SGBC'], actions: 5 },
     },
     {
       type: 'importance',
       titre: 'La lecture de Société Générale Côte d’Ivoire',
       contenu: [
-        `Taille : la banque détient environ ${tG.part_marche_credits_pct} % des crédits en Côte d’Ivoire (APBEF-CI, avril 2026, via Sika Finance). Croissance : solide jusqu’en 2023, puis quasi nulle pour le résultat 2025.`,
-        `Rentabilité : ROE de ${pc(G.roeClot[4])} sur les capitaux de clôture 2025 et ${pc(G.roeMoy[4])} sur les capitaux moyens, en baisse parce que les fonds propres ont été renforcés. La marge nette reste élevée, ${pc(G.marge[4])} du PNB publié.`,
-        `Qualité des actifs (2025, Sika Finance) : créances en souffrance autour de ${tG.npl_2025_pct} % des crédits, couverture d’environ ${tG.couverture_2025_pct} %. Valorisation : le PER de fin d’année passe de ${mult(G.per[0])} en 2021 à ${mult(G.per[4])} en 2025, puis à ${mult(G.perAuj)} au cours du 23/11/2026.`,
+        `Taille : ${fr(G.actif[4], 1)} milliards de bilan fin 2025, ${fr(G.actif[4] / E.actif[4], 1)} fois celui d’Ecobank Côte d’Ivoire. Croissance : solide jusqu’en 2023, puis quasi nulle pour le résultat 2025.`,
+        `Rentabilité : ROE de ${pc(G.roeClot[4])} sur les capitaux de clôture 2025 et ${pc(G.roeMoy[4])} sur les capitaux moyens, en baisse parce que les fonds propres ont été renforcés. La marge nette reste élevée, ${pc(G.marge[4])} du PNB, et le coefficient d’exploitation bas, ${pc(G.coef[4])}.`,
+        `Qualité des actifs (comptes 2025) : créances en souffrance à ${G.s.annuel['2025'].taux_creances_souffrance_pct} % des crédits, couvertes à ${G.s.annuel['2025'].couverture_pct} %. Valorisation : le PER de fin d’année passe de ${mult(G.per[0])} en 2021 à ${mult(G.per[4])} en 2025, puis à ${mult(G.perAuj)} au cours du 23/11/2026.`,
         `Dividende : le montant publié pour 2025 (${ent(G.dpa[4])} FCFA brut) dépasse de ${pc(varPct(G.dpa[4], G.dpa[3]), 0)} celui publié pour 2024 (${ent(G.dpa[3])} FCFA, base fiscale non précisée) et représente ${pc((G.dpa[4] / G.bpa[4]) * 100, 0)} du BPA 2025. Sa soutenabilité se vérifie dans les flux de trésorerie, pas dans le seul résultat.`,
       ].join('\n'),
       simulation: {
@@ -839,11 +901,11 @@ const l05 = lecon({
     {
       type: 'retenir',
       titre: 'L’essentiel',
-      contenu: 'Société Générale Côte d’Ivoire est une grande banque solide dont la croissance ralentit. Son ROE baisse parce que ses capitaux propres augmentent ; sa valorisation monte parce que le marché l’a réévaluée en 2026.',
+      contenu: 'Société Générale Côte d’Ivoire est une grande banque solide dont la croissance ralentit. Son ROE baisse parce que ses capitaux propres augmentent ; son résultat plafonne parce que son coût du risque monte ; sa valorisation monte parce que le marché l’a réévaluée en 2026.',
       points: [
-        { titre: 'Une série de PNB vérifiable', detail: 'Les comptes intermédiaires départagent les séries annuelles.' },
+        { titre: 'Le coût du risque absorbe la croissance', detail: 'Le résultat brut d’exploitation monte, le coût du risque plus vite encore.' },
         { titre: 'ROE en baisse, fonds propres en hausse', detail: 'Le dénominateur explique la baisse, pas le résultat.' },
-        { titre: 'Solvabilité confortable', detail: `${pc(tG.solvabilite_pct)} pour un minimum de ${pc(T.bceao.solvabilite_minimum_pct)}.` },
+        { titre: 'Solvabilité confortable', detail: `${pc(gS1('solvabilite_pct'))} pour un minimum de ${pc(BCEAO.solvabilite_minimum_pct)}.` },
       ],
     },
   ],
@@ -866,21 +928,26 @@ const l05 = lecon({
       explication: `Les capitaux propres passent de ${md(G.cp[3])} à ${md(G.cp[4])} milliards : à résultat égal, le ROE baisse mécaniquement.`,
     },
     {
-      question: `Sur neuf mois 2025, le PNB de SGBC atteint ${md(G.interim('2025-T3', 'revenu'))} milliards. Quelle série annuelle 2025 cela rend-il plausible ?`,
-      options: [`Environ ${md(G.revenu[4])} milliards`, `Environ ${md(sp.revenus_standardises.SGBC[4])} milliards`, 'Environ 600 milliards', 'Aucune des deux'],
+      question: `En 2025, le résultat brut d’exploitation de SGBC progresse de ${pc(varPct(G.rbe[4], G.rbe[3]))} et son résultat net de ${pc(G.croisRn[4])}. Qu’est-ce qui absorbe l’essentiel de l’écart ?`,
+      options: [
+        'La hausse du coût du risque',
+        'Une baisse du nombre d’actions en circulation',
+        'Une chute du produit net bancaire de plus de moitié',
+        'La suppression du dividende versé aux actionnaires',
+      ],
       correct: 0,
-      explication: `Trois trimestres à ${md(G.interim('2025-T3', 'revenu'))} milliards donnent un rythme annuel proche de ${md(G.revenu[4])} ; atteindre ${md(sp.revenus_standardises.SGBC[4])} supposerait un dernier trimestre exceptionnel.`,
+      explication: `Le coût du risque passe de ${md(G.cdr[3])} à ${md(G.cdr[4])} milliards (${sg(varPct(G.cdr[4], G.cdr[3]))}) : les provisions absorbent la hausse de l’exploitation.`,
     },
     {
-      question: `Le ratio de solvabilité de SGBC est de ${pc(tG.solvabilite_pct)}. Que signifie-t-il ?`,
+      question: `Le ratio de solvabilité de SGBC est de ${pc(gS1('solvabilite_pct'))} au premier semestre 2026. Que signifie-t-il ?`,
       options: [
         'Que la banque est insolvable',
         'Que ses fonds propres couvrent largement le minimum réglementaire',
-        `Que ${pc(tG.solvabilite_pct)} de ses crédits à la clientèle sont aujourd’hui en souffrance`,
-        `Que son coefficient d’exploitation est de ${pc(tG.solvabilite_pct)}`,
+        `Que ${pc(gS1('solvabilite_pct'))} de ses crédits à la clientèle sont aujourd’hui en souffrance`,
+        `Que son coefficient d’exploitation est de ${pc(gS1('solvabilite_pct'))}`,
       ],
       correct: 1,
-      explication: `Fonds propres ÷ actifs pondérés : ${pc(tG.solvabilite_pct)} contre un minimum de ${pc(T.bceao.solvabilite_minimum_pct)} dans l’UMOA.`,
+      explication: `Fonds propres ÷ actifs pondérés : ${pc(gS1('solvabilite_pct'))} contre un minimum de ${pc(BCEAO.solvabilite_minimum_pct)} dans l’UMOA.`,
     },
     {
       question: `Dividende brut 2025 : ${ent(G.d25.brut)} FCFA ; cours au 23/11/2026 : ${ent(G.cours)} FCFA. Quel est le rendement brut ?`,
@@ -905,7 +972,7 @@ const l06 = lecon({
   titre: 'Leçon 0.6 — Comparer deux banques : ECOC face à SGBC',
   duree_min: 16,
   sous_titre: 'Même pays, même métier, deux profils : la plus rentable face à la plus grande, et ce qu’une comparaison honnête exige d’aligner.',
-  resume: 'Ecobank Côte d’Ivoire et Société Générale Côte d’Ivoire exercent le même métier sur le même marché. La première est plus rentable, la seconde plus grande et moins chère au regard du bénéfice. Cette leçon met les deux banques côte à côte, chiffre par chiffre et graphique par graphique, puis rappelle ce qu’il faut aligner avant de conclure.',
+  resume: 'Ecobank Côte d’Ivoire et Société Générale Côte d’Ivoire exercent le même métier sur le même marché. La première est plus rentable, la seconde plus grande, plus efficace dans ses frais et moins chère au regard du bénéfice. Cette leçon met les deux banques côte à côte, chiffre par chiffre et graphique par graphique, décompose leur rentabilité, puis rappelle ce qu’il faut aligner avant de conclure.',
   sections: [
     {
       type: 'cas',
@@ -940,16 +1007,17 @@ const l06 = lecon({
           ['Capitaux propres (Md FCFA)', md(E.cp[4]), md(G.cp[4]), `SGBC ${fois(G.cp[4], E.cp[4])}`],
           ['Dépôts de la clientèle (Md FCFA)', md(E.s.annuel['2025'].depots), md(G.s.annuel['2025'].depots), `SGBC ${sg(varPct(G.s.annuel['2025'].depots, E.s.annuel['2025'].depots))}`],
           ['Crédits ÷ dépôts', pc(credDep(E)), pc(credDep(G)), 'SGBC prête une plus grande part de ses dépôts'],
+          ['Coefficient d’exploitation', pc(E.coef[4]), pc(G.coef[4]), 'SGBC plus efficace'],
+          ['Coût du risque ÷ crédits', pc(E.cdrCredits[4], 2), pc(G.cdrCredits[4], 2), 'SGBC provisionne davantage'],
           ['ROE (capitaux de clôture)', pc(E.roeClot[4]), pc(G.roeClot[4]), ecartPts(E.roeClot[4], G.roeClot[4])],
           ['ROE (capitaux moyens)', pc(E.roeMoy[4]), pc(G.roeMoy[4]), ecartPts(E.roeMoy[4], G.roeMoy[4])],
           ['Marge nette (résultat ÷ PNB)', pc(E.marge[4]), pc(G.marge[4]), ecartPts(E.marge[4], G.marge[4])],
           ['PER à la clôture 2025', mult(E.per[4]), mult(G.per[4]), 'SGBC moins chère'],
           ['PER au 23/11/2026 (BPA 2025)', mult(E.perAuj), mult(G.perAuj), 'SGBC moins chère'],
-          ['PER sur 12 mois glissants (StockAnalysis)', fr(sp.per_ttm.ECOC, 2), fr(sp.per_ttm.SGBC, 2), 'SGBC moins chère'],
+          ['PER sur 12 mois glissants (calcul WESTBOURSE)', mult(E.perGlissant), mult(G.perGlissant), 'SGBC moins chère'],
           ['Dividende 2025 (FCFA)', `${ent(E.d25.brut)} brut / ${fcfa2(E.d25.net)} net`, `${ent(G.d25.brut)} brut / ${fcfa2(G.d25.net)} net`, `SGBC ${fois(G.d25.net, E.d25.net)}`],
           ['Rendement brut au 23/11/2026', pc(E.rdtBrutAuj, 2), pc(G.rdtBrutAuj, 2), `SGBC +${fr(G.rdtBrutAuj - E.rdtBrutAuj, 2)} pt`],
           ['Performance depuis le 1er janvier 2026', sg(E.perf.ytd, 2), sg(G.perf.ytd, 2), 'SGBC nettement devant'],
-          ['Bêta sur un an (StockAnalysis)', fr(sp.beta_1an.ECOC, 2), fr(sp.beta_1an.SGBC, 2), 'Sensibilité au marché comparable'],
         ],
         note: SRC_BASE,
       },
@@ -959,13 +1027,14 @@ const l06 = lecon({
       type: 'cas',
       titre: 'Les trajectoires côte à côte',
       reel: true,
-      contenu: 'Les cinq graphiques suivants reprennent 2021-2025 pour les deux banques. Cliquez sur la légende pour masquer une série et isoler l’autre. Le dernier ramène les deux résultats à 100 en 2021 : il compare les trajectoires, pas les tailles.',
+      contenu: 'Les six graphiques suivants reprennent 2021-2025 pour les deux banques. Cliquez sur la légende pour masquer une série et isoler l’autre. Le cinquième ramène les deux résultats à 100 en 2021 : il compare les trajectoires, pas les tailles. Le dernier montre que leurs coûts du risque ont suivi des chemins opposés.',
       graphiques: [
         graphique({ titre: 'PNB comparé (Md FCFA)', series: [{ nom: 'ECOC', valeurs: E.revenu }, { nom: 'SGBC', valeurs: G.revenu }], unite: 'Md FCFA', note: `PNB des comptes publiés. ${SRC_BASE}` }),
         graphique({ titre: 'Résultat net comparé (Md FCFA)', series: [{ nom: 'ECOC', valeurs: E.rn }, { nom: 'SGBC', valeurs: G.rn }], unite: 'Md FCFA', note: `Le résultat de SGBC plafonne depuis 2023 ; celui d’ECOC continue de croître jusqu’en 2025. ${SRC_BASE}` }),
         graphique({ type: 'line', titre: 'PER à la clôture de chaque année', series: [{ nom: 'ECOC', valeurs: E.per }, { nom: 'SGBC', valeurs: G.per }], unite: 'x', note: `Cours de clôture de l’année ÷ BPA de l’exercice. ${SRC_BASE}` }),
         graphique({ type: 'line', titre: 'Rendement du dividende à la clôture de chaque année (%)', series: [{ nom: 'ECOC', valeurs: E.rdt }, { nom: 'SGBC', valeurs: G.rdt }], unite: '%', note: `Dividende de l’exercice tel que publié ÷ dernier cours de l’année : le rendement baisse quand le cours monte plus vite que le dividende. ${SRC_BASE}` }),
         graphique({ type: 'line', titre: 'Résultat net, base 100 en 2021', series: [{ nom: 'ECOC', valeurs: E.base100 }, { nom: 'SGBC', valeurs: G.base100 }], unite: '', note: `ECOC atteint ${fr(E.base100[4], 0)} en 2025, SGBC ${fr(G.base100[4], 0)}. ${SRC_BASE}` }),
+        graphique({ type: 'line', titre: 'Coût du risque comparé (Md FCFA)', series: [{ nom: 'ECOC', valeurs: E.cdr }, { nom: 'SGBC', valeurs: G.cdr }], unite: 'Md FCFA', note: `De 2021 à 2025, le coût du risque d’ECOC passe de ${md(E.cdr[0])} à ${md(E.cdr[4])} milliards, celui de SGBC de ${md(G.cdr[0])} à ${md(G.cdr[4])} milliards ; rapporté aux crédits, ${pc(E.cdrCredits[4], 2)} contre ${pc(G.cdrCredits[4], 2)} en 2025. ${SRC_BASE}` }),
       ],
       donnees_reelles: { vue: 'historique', codes: ['ECOC', 'SGBC'] },
     },
@@ -973,7 +1042,7 @@ const l06 = lecon({
       type: 'importance',
       titre: 'Lecture comparée',
       contenu: [
-        'Six angles, six constats. Aucun ne suffit à départager les deux banques : c’est leur combinaison, avec des définitions alignées, qui fait l’analyse.',
+        'Sept angles, sept constats. Aucun ne suffit à départager les deux banques : c’est leur combinaison, avec des définitions alignées, qui fait l’analyse.',
         `D’où vient l’écart de rentabilité ? Le ROE se décompose : ROE = ROA × levier, le levier rapportant le bilan moyen aux capitaux propres moyens. ECOC obtient un ROA de ${pc(roaMoy(E), 2)} avec un levier de ${fr(levier(E), 1)}, soit un ROE de ${pc(E.roeMoy[4])}. SGBC obtient ${pc(roaMoy(G), 2)} avec un levier de ${fr(levier(G), 1)}, soit ${pc(G.roeMoy[4])}.`,
         'L’écart vient donc des deux côtés : ECOC tire un peu plus de résultat de chaque franc de bilan, et elle le fait avec moins de fonds propres par franc engagé. Un levier plus élevé augmente le ROE quand tout va bien, et réduit le coussin quand les crédits se dégradent : c’est la contrepartie à garder en tête.',
       ].join('\n'),
@@ -985,11 +1054,12 @@ const l06 = lecon({
         },
       ],
       points: [
-        { titre: 'Taille', detail: `SGBC est nettement plus grande : PNB ${fois(G.revenu[4], E.revenu[4])} plus élevé, bilan ${fois(G.actif[4], E.actif[4])}, capitaux propres ${fois(G.cp[4], E.cp[4])}. Elle détient environ ${tG.part_marche_credits_pct} % des crédits en Côte d’Ivoire (APBEF-CI, avril 2026).` },
+        { titre: 'Taille', detail: `SGBC est nettement plus grande : PNB ${fois(G.revenu[4], E.revenu[4])} plus élevé, bilan ${fois(G.actif[4], E.actif[4])}, capitaux propres ${fois(G.cp[4], E.cp[4])}.` },
         { titre: 'Rentabilité', detail: `ECOC affiche un ROE plus élevé (${pc(E.roeClot[4])} contre ${pc(G.roeClot[4])} sur les capitaux de clôture, ${pc(E.roeMoy[4])} contre ${pc(G.roeMoy[4])} sur les capitaux moyens) et une marge nette supérieure (${pc(E.marge[4])} contre ${pc(G.marge[4])}).` },
-        { titre: 'Valorisation', detail: `SGBC est moins chère au regard du bénéfice : PER ${mult(G.perAuj)} contre ${mult(E.perAuj)} au 23/11/2026. Cela peut refléter une croissance plus faible : son PNB recule de ${fr(Math.abs(varPct(tG.pnb_9m_2026, G.interim('2025-T3', 'revenu'))), 1)} % sur neuf mois 2026.` },
+        { titre: 'Efficacité', detail: `SGBC dépense moins pour produire son PNB : coefficient d’exploitation de ${pc(G.coef[4])} contre ${pc(E.coef[4])} en 2025.` },
+        { titre: 'Valorisation', detail: `SGBC est moins chère au regard du bénéfice : PER ${mult(G.perAuj)} contre ${mult(E.perAuj)} au 23/11/2026. Cela peut refléter une croissance plus faible : son résultat n’a progressé que de ${pc(G.croisRn[4])} en 2025.` },
         { titre: 'Dividende', detail: `SGBC distribue davantage par action (${fcfa2(G.d25.net)} FCFA net contre ${fcfa2(E.d25.net)}) et offre un rendement brut plus élevé au cours du 23/11/2026 (${pc(G.rdtBrutAuj, 2)} contre ${pc(E.rdtBrutAuj, 2)}).` },
-        { titre: 'Qualité des actifs', detail: `ECOC : coût du risque de ${fr(tE.cout_du_risque_2025_pct, 1)} % en 2025, couverture d’environ ${tE.couverture_s1_2026_pct} % à mi-2026. SGBC : créances en souffrance autour de ${tG.npl_2025_pct} %, couverture d’environ ${tG.couverture_2025_pct} % en 2025. Ces indicateurs ne sont pas les mêmes : il faut retrouver le même dans chaque rapport.`, verifier: 'Coût du risque et taux de créances en souffrance ne mesurent pas la même chose.' },
+        { titre: 'Qualité des actifs', detail: `Le même indicateur pour les deux, le coût du risque rapporté aux crédits : ${pc(E.cdrCredits[4], 2)} pour ECOC contre ${pc(G.cdrCredits[4], 2)} pour SGBC en 2025. SGBC publie aussi un taux de créances en souffrance de ${G.s.annuel['2025'].taux_creances_souffrance_pct} %, couvert à ${G.s.annuel['2025'].couverture_pct} % ; ECOC, ${E.interim('2025-T3', 'taux_creances_souffrance_pct')} % à fin septembre 2025.`, verifier: 'Comparer à la même date : les comptes en base ne publient pas ces taux aux mêmes périodes.' },
         { titre: 'Tendance boursière 2026', detail: `SGBC gagne ${pc(G.perf.ytd, 1)} depuis le 1er janvier, ECOC perd ${pc(Math.abs(E.perf.ytd), 1)}. Les comptes ne disent pas pourquoi ; on peut seulement constater que SGBC a renforcé ses fonds propres et relevé son dividende, et que le cours d’ECOC avait gagné ${pc(varPct(E.cloture[4], E.cloture[3]), 1)} en 2025.` },
       ],
       simulation: {
@@ -1005,17 +1075,17 @@ const l06 = lecon({
     {
       type: 'piege',
       titre: 'Avertissement de comparabilité',
-      contenu: 'Le ROE de clôture et le ROE moyen ne se comparent qu’entre eux. Les deux banques peuvent présenter leurs comptes selon des référentiels différents, SYSCOHADA pour les comptes sociaux, IFRS pour certains comptes consolidés. Et les indicateurs de risque publiés ne sont pas homogènes d’une banque à l’autre.',
+      contenu: 'Le ROE de clôture et le ROE moyen ne se comparent qu’entre eux. Les deux banques peuvent présenter leurs comptes selon des référentiels différents, SYSCOHADA pour les comptes sociaux, IFRS pour certains comptes consolidés. Et les indicateurs de risque publiés ne sont pas homogènes d’une banque à l’autre, ni d’une date à l’autre.',
       encadres: [
-        { ton: 'alerte', titre: 'Ces chiffres illustrent la méthode', texte: 'Ils ne suffisent pas à établir un classement définitif. Pour une comparaison complète, il faut aligner les normes comptables, la définition du résultat, la méthode du ROE, l’indicateur de qualité des crédits, le coût du risque, le dividende et sa base fiscale, le BPA, la date du cours et la liquidité du titre.' },
+        { ton: 'alerte', titre: 'Ces chiffres illustrent la méthode', texte: 'Ils ne suffisent pas à établir un classement définitif. Pour une comparaison complète, il faut aligner les normes comptables, la définition du résultat, la méthode du ROE, l’indicateur de qualité des crédits et sa date, le coût du risque, le dividende et sa base fiscale, le BPA, la date du cours et la liquidité du titre.' },
       ],
     },
     {
       type: 'retenir',
       titre: 'Synthèse : ECOC face à SGBC',
       contenu: [
-        `SGBC est plus grande en PNB, en bilan et en capitaux propres. Elle présente un PER plus bas et un rendement du dividende plus élevé, et son cours a progressé en 2026 (${sg(G.perf.ytd, 1)} depuis le 1er janvier).`,
-        `ECOC affiche un ROE plus élevé et une meilleure marge nette : elle transforme mieux son PNB en résultat. Son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (${sg(E.perf.ytd, 1)} depuis le 1er janvier).`,
+        `SGBC est plus grande en PNB, en bilan et en capitaux propres, et plus efficace dans ses frais. Elle présente un PER plus bas et un rendement du dividende plus élevé, et son cours a progressé en 2026 (${sg(G.perf.ytd, 1)} depuis le 1er janvier).`,
+        `ECOC affiche un ROE plus élevé et une meilleure marge nette : elle transforme mieux son PNB en résultat, avec un coût du risque bien plus faible jusqu’en 2025. Son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (${sg(E.perf.ytd, 1)} depuis le 1er janvier).`,
         'Il serait incorrect de désigner une banque « meilleure » sur cette seule base. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente.',
       ].join('\n'),
     },
@@ -1047,18 +1117,18 @@ const l06 = lecon({
         'Parce que SGBC ne verse pas de dividende',
       ],
       correct: 1,
-      explication: 'Le marché paie moins une banque dont le PNB recule en 2026 : un PER bas peut traduire des perspectives plus faibles.',
+      explication: 'Le marché paie moins une banque dont le résultat plafonne : un PER bas peut traduire des perspectives plus faibles.',
     },
     {
       question: 'Que faut-il aligner avant de comparer la qualité des crédits de deux banques ?',
       options: [
         'Leur cours de bourse',
         'Leur nombre d’agences et de distributeurs automatiques',
-        'Le même indicateur, défini de la même façon',
+        'Le même indicateur, défini de la même façon, à la même date',
         'Leur date de création',
       ],
       correct: 2,
-      explication: 'Un coût du risque et un taux de créances en souffrance ne mesurent pas la même chose : il faut le même indicateur dans chaque rapport.',
+      explication: 'Un coût du risque et un taux de créances en souffrance ne mesurent pas la même chose, et un taux de fin juin ne se compare pas à un taux de fin décembre.',
     },
     {
       question: 'P/B = PER × ROE. Avec un PER de 12,5 et un ROE de 29 %, quel est le P/B ?',
@@ -1078,50 +1148,55 @@ const l06 = lecon({
 // Leçon 0.7 — Télécoms : Sonatel face à Orange Côte d'Ivoire
 // ════════════════════════════════════════════════════════════════════════════
 function tableauTelecom(X, code) {
-  const pdg = sp.rn_part_du_groupe[code];
+  const pdg = ANS.map((y) => X.s.annuel[y].rn_part_du_groupe ?? null);
+  const lignes = [
+    ligne('Chiffre d’affaires (Md FCFA)', X.revenu, md),
+    ligne('Croissance du chiffre d’affaires', X.croisRev, (v) => sg(v)),
+    ligne('Résultat d’exploitation (Md FCFA)', X.rex, md),
+    ligne('Marge d’exploitation', X.margeEx, (v) => pc(v)),
+    ligne('Résultat net consolidé (Md FCFA)', X.rn, md),
+    ligne('Croissance du résultat net consolidé', X.croisRn, (v) => sg(v)),
+  ];
+  if (code === 'SNTS') lignes.push(ligne('Résultat net part du groupe (Md FCFA)', pdg, md));
+  lignes.push(
+    ligne('Marge nette consolidée', X.marge, (v) => pc(v)),
+    ligne('BPA consolidé (FCFA)', X.bpa, fcfa2),
+    ligne('Capitaux propres (Md FCFA)', X.cp, md),
+    ligne('ROE consolidé (capitaux de clôture)', X.roeClot, (v) => pc(v)),
+    ligne('Flux de trésorerie d’exploitation (Md FCFA)', X.fe, md),
+    ligne('Investissements (Md FCFA)', X.inv, md),
+    ligne('Free cash flow (flux − investissements, Md FCFA)', X.fcf, md),
+    ligne('Disponibilités (Md FCFA)', X.dispo, md),
+    ligne('Dettes financières, courantes et non courantes (Md FCFA)', X.dettes, md),
+    ligne('Dette financière nette (Md FCFA)', X.detteNette, md),
+    ligne('Cours de clôture de l’année (FCFA)', X.cloture, (v) => fr(v, v != null && v % 1 ? 1 : 0)),
+    ligne('PER à la clôture (BPA consolidé)', X.per, mult),
+    ligne('Dividende par action publié (FCFA)', X.dpa, fcfa2),
+    ligne('Rendement à la clôture de l’année', X.rdt, (v) => pc(v)),
+  );
   return {
     colonnes: ['Indicateur', ...ANS],
-    lignes: [
-      ligne('Chiffre d’affaires (Md FCFA)', X.revenu, md),
-      ligne('Croissance du chiffre d’affaires', X.croisRev, (v) => sg(v)),
-      ligne('Résultat net consolidé (Md FCFA)', X.rn, md),
-      ligne('Croissance du résultat net consolidé', X.croisRn, (v) => sg(v)),
-      ligne('Résultat net part du groupe, S&P (Md FCFA)', pdg, md),
-      ligne('BPA consolidé (FCFA)', X.bpa, fcfa2),
-      ligne(code === 'ORAC' ? 'EBITDAaL estimé, S&P (Md FCFA)' : 'EBITDA estimé, S&P (Md FCFA)', code === 'ORAC' ? sp.ebitda.ORAC_ebitdaal : sp.ebitda.SNTS, ent),
-      ligne('Marge brute, S&P', sp.marge_brute_pct[code], (v) => pc(v)),
-      ligne('Marge opérationnelle, S&P', sp.marge_operationnelle_pct[code], (v) => pc(v)),
-      ligne('Marge nette consolidée', X.marge, (v) => pc(v)),
-      ligne('Marge nette part du groupe', pdg.map((v, i) => (v / X.revenu[i]) * 100), (v) => pc(v)),
-      ligne('Capitaux propres (Md FCFA)', X.cp, md),
-      ligne('ROE consolidé (capitaux de clôture)', X.roeClot, (v) => pc(v)),
-      ligne('Free cash flow, S&P (Md FCFA)', sp.fcf[code], ent),
-      ligne('Dette nette, S&P (Md FCFA)', sp.dette_nette[code], ent),
-      ligne('Investissements (capex), S&P (Md FCFA)', sp.capex[code], ent),
-      ligne('Cours de clôture de l’année (FCFA)', X.cloture, (v) => fr(v, v != null && v % 1 ? 1 : 0)),
-      ligne('PER à la clôture (BPA consolidé)', X.per, mult),
-      ligne('PER à la clôture (part du groupe, S&P)', sp.per_part_du_groupe[code], mult),
-      ligne('Dividende par action publié (FCFA)', X.dpa, fcfa2),
-      ligne('Rendement à la clôture de l’année', X.rdt, (v) => pc(v)),
-    ],
-    note: `Lignes « S&P » : StockAnalysis / S&P Global Market Intelligence, consulté le 23/11/2026. Autres lignes : comptes publiés en base WESTBOURSE et clôtures de la BRVM${code === 'SNTS' ? ', cours et BPA ajustés du fractionnement par 10 du 26/10/2026' : ' ; pas de clôture pour 2021, le titre n’étant coté qu’à partir de fin 2022'}. « — » : donnée absente de la source.`,
+    lignes,
+    note: code === 'SNTS'
+      ? 'Comptes publiés en base WESTBOURSE ; 2024 et 2025 relus sur les comptes 2025 publiés par Sonatel le 16/02/2026 ; cours et BPA ajustés du fractionnement par 10 du 26/10/2026. Dette financière nette = passifs financiers − disponibilités, hors dettes locatives ; négative = trésorerie nette. Free cash flow et ratios calculés par WESTBOURSE.'
+      : 'Comptes publiés en base WESTBOURSE ; pas de clôture pour 2021, le titre n’étant coté qu’à partir de fin 2022. Dette financière nette = dettes financières − disponibilités, calculée seulement quand les deux sont en base ; « — » : donnée absente. Free cash flow et ratios calculés par WESTBOURSE.',
   };
 }
 const rnCroiss9m = (X) => X.vi('2026-T3', 'rn', '2025-T3');
 const caCroiss9m = (X) => X.vi('2026-T3', 'revenu', '2025-T3');
-const capexPct = (code, X) => (sp.capex[code][4] / X.revenu[4]) * 100;
+const capexPct = (X) => (X.inv[4] / X.revenu[4]) * 100;
 const l07 = lecon({
   titre: 'Leçon 0.7 — Télécoms : Sonatel face à Orange Côte d’Ivoire',
   duree_min: 22,
   sous_titre: 'La même grille appliquée à deux opérateurs : un groupe multi-pays de très grande taille face à un groupe régional en croissance rapide.',
-  resume: 'Après les banques, la même grille d’analyse s’applique à deux opérateurs de télécommunications. Contrairement aux banques, les télécoms se lisent avec les ratios classiques d’endettement, d’EV/EBITDA et de free cash flow. Sonatel est plus grande, plus rentable et plus liquide ; Orange Côte d’Ivoire croît plus vite et se paie plus cher. Cette leçon le montre chiffres à l’appui, et explique pourquoi trois PER différents circulent pour chacune.',
+  resume: 'Après les banques, la même grille d’analyse s’applique à deux opérateurs de télécommunications. Contrairement aux banques, les télécoms se lisent avec les ratios classiques d’endettement, de marge d’exploitation et de free cash flow. Sonatel est plus grande, plus rentable, plus liquide, et dispose d’une trésorerie nette ; Orange Côte d’Ivoire croît plus vite et se paie plus cher. Cette leçon le montre chiffres à l’appui, et explique pourquoi quatre PER différents se calculent pour un même titre.',
   sections: [
     {
       type: 'definition',
       titre: 'Ce qui change pour un opérateur télécom',
       contenu: [
-        'Un opérateur de télécommunications est une entreprise industrielle : il investit lourdement dans ses réseaux (les capex), puis vend des abonnements, des données mobiles et des services financiers comme le mobile money. Sa dette sert à financer ces investissements.',
-        'Les ratios écartés pour les banques reprennent donc tout leur sens : dette nette, gearing, EV/EBITDA, free cash flow. Il faut aussi savoir lire un groupe : Sonatel et Orange Côte d’Ivoire consolident des filiales dans plusieurs pays, dont elles ne détiennent pas 100 %. Le résultat consolidé inclut la part des actionnaires minoritaires ; le résultat part du groupe ne la compte pas.',
+        'Un opérateur de télécommunications est une entreprise industrielle : il investit lourdement dans ses réseaux, puis vend des abonnements, des données mobiles et des services financiers comme le mobile money. Sa dette sert à financer ces investissements.',
+        'Les ratios écartés pour les banques reprennent donc tout leur sens : dette nette, gearing, marge d’exploitation, free cash flow. Il faut aussi savoir lire un groupe : Sonatel et Orange Côte d’Ivoire consolident des filiales dans plusieurs pays, dont elles ne détiennent pas 100 %. Le résultat consolidé inclut la part des actionnaires minoritaires ; le résultat part du groupe ne la compte pas.',
       ].join('\n'),
     },
     {
@@ -1131,7 +1206,7 @@ const l07 = lecon({
       contenu: `Au 23 novembre 2026, Sonatel cotait ${ent(N.cours)} FCFA pour ${fr(N.cap, 0)} milliards de capitalisation (un milliard d’actions depuis le fractionnement), Orange Côte d’Ivoire ${ent(O.cours)} FCFA pour ${fr(O.cap, 1)} milliards : Sonatel pèse ${fr(varPct(N.cap, O.cap), 0)} % de plus en bourse.`,
       points: [
         { titre: 'Sonatel (SNTS)', detail: 'Premier opérateur du Sénégal, présent dans cinq pays (Sénégal, Mali, Guinée-Bissau, Guinée, Sierra Leone). Filiale du groupe Orange, sous la marque Orange. Fondée en 1985, cotée à la BRVM depuis 1998. Action fractionnée le 26/10/2026 : une action ancienne en a donné dix, ce qui a ramené le cours d’environ 40 000 à environ 4 000 FCFA.' },
-        { titre: 'Orange Côte d’Ivoire (ORAC)', detail: `Opérateur leader en Côte d’Ivoire, présent aussi au Burkina Faso et au Liberia. Filiale du groupe Orange, cotée à la BRVM depuis fin 2022 (première séance en base le 30/12/2022). Mobile, fixe, internet, fibre et Orange Money ; ${fr(tO.lignes_9m_2026_millions, 2)} millions de lignes à fin septembre 2026 (Sika Finance).` },
+        { titre: 'Orange Côte d’Ivoire (ORAC)', detail: 'Opérateur leader en Côte d’Ivoire, présent aussi au Burkina Faso et au Liberia. Filiale du groupe Orange, cotée à la BRVM depuis fin 2022 (première séance en base le 30/12/2022). Mobile, fixe, internet, fibre et Orange Money.' },
       ],
       stats: [
         { label: 'Sonatel : cours au 23/11/2026', valeur: `${ent(N.cours)} FCFA`, detail: `capitalisation ${fr(N.cap, 0)} Md` },
@@ -1144,8 +1219,8 @@ const l07 = lecon({
       titre: 'Sonatel : les comptes 2021-2025',
       reel: true,
       contenu: [
-        `Le chiffre d’affaires passe de ${md(N.revenu[0])} à ${md(N.revenu[4])} milliards de FCFA (${pc(N.tcamRev)} par an), le résultat net consolidé de ${md(N.rn[0])} à ${md(N.rn[4])} milliards (${pc(N.tcamRn)} par an). La part du groupe, selon S&P Global, est plus faible : ${md(sp.rn_part_du_groupe.SNTS[4])} milliards en 2025, les ${md(N.rn[4] - sp.rn_part_du_groupe.SNTS[4])} milliards d’écart revenant aux actionnaires minoritaires des filiales.`,
-        'D’où deux marges nettes et deux PER pour la même année. Aucun n’est faux ; ils ne répondent pas à la même question. Le PER sur le résultat part du groupe mesure ce que l’actionnaire de Sonatel paie pour la part qui lui revient.',
+        `Le chiffre d’affaires passe de ${md(N.revenu[0])} à ${md(N.revenu[4])} milliards de FCFA (${pc(N.tcamRev)} par an), le résultat net consolidé de ${md(N.rn[0])} à ${md(N.rn[4])} milliards (${pc(N.tcamRn)} par an). Selon les comptes 2025 publiés par Sonatel, la part du groupe s’élève à ${md(sn25.rn_part_du_groupe)} milliards : les ${md(N.rn[4] - sn25.rn_part_du_groupe)} milliards d’écart reviennent aux actionnaires minoritaires des filiales.`,
+        `Le groupe dégage ${md(N.fcf[4])} milliards de free cash flow en 2025 (flux d’exploitation de ${md(N.fe[4])} milliards moins ${md(N.inv[4])} milliards d’investissements) et détient plus de disponibilités qu’il ne doit de dettes financières : une trésorerie nette de ${md(-N.detteNette[4])} milliards.`,
       ].join('\n'),
       tableau: tableauTelecom(N, 'SNTS'),
       donnees_reelles: { vue: 'historique', codes: ['SNTS'] },
@@ -1155,8 +1230,8 @@ const l07 = lecon({
       titre: 'Orange Côte d’Ivoire : les comptes 2021-2025',
       reel: true,
       contenu: [
-        `Le chiffre d’affaires stagne en 2022 puis accélère : ${sg(O.croisRev[4])} en 2025, à ${md(O.revenu[4])} milliards. Le résultat net consolidé progresse de ${pc(O.croisRn[4])} en 2025, à ${md(O.rn[4])} milliards ; la part du groupe, selon S&P Global, atteint ${md(sp.rn_part_du_groupe.ORAC[4])} milliards.`,
-        `Les capitaux propres en base restent stables, entre ${fr(Math.min(...O.cp), 0)} et ${fr(Math.max(...O.cp), 0)} milliards sur la période : c’est sur eux que se calcule le ROE consolidé de ${pc(O.roeClot[4])} en 2025. La dette nette, selon S&P Global, s’établit à ${ent(sp.dette_nette.ORAC[4])} milliards en 2025, contre ${ent(sp.dette_nette.ORAC[1])} milliards en 2022.`,
+        `Le chiffre d’affaires stagne en 2022 puis accélère : ${sg(O.croisRev[4])} en 2025, à ${md(O.revenu[4])} milliards. Le résultat net consolidé progresse de ${pc(O.croisRn[4])} en 2025, à ${md(O.rn[4])} milliards ; la marge d’exploitation, elle, glisse de ${fr(O.margeEx[0], 0)} % en 2021 à ${fr(O.margeEx[4], 0)} % en 2025.`,
+        `Les capitaux propres en base restent stables, entre ${fr(Math.min(...O.cp), 0)} et ${fr(Math.max(...O.cp), 0)} milliards sur la période : c’est sur eux que se calcule le ROE consolidé de ${pc(O.roeClot[4])} en 2025. Contrairement à Sonatel, Orange Côte d’Ivoire est endettée : ${md(O.detteNette[4])} milliards de dette financière nette fin 2025, contre ${md(O.detteNette[3])} milliards un an plus tôt.`,
       ].join('\n'),
       tableau: tableauTelecom(O, 'ORAC'),
       donnees_reelles: { vue: 'historique', codes: ['ORAC'] },
@@ -1167,7 +1242,7 @@ const l07 = lecon({
       reel: true,
       contenu: [
         `Sur neuf mois 2026, Sonatel affiche ${md(N.interim('2026-T3', 'revenu'))} milliards de chiffre d’affaires (${sg(caCroiss9m(N))}) et ${md(N.interim('2026-T3', 'rn'))} milliards de résultat net consolidé (${sg(rnCroiss9m(N))}). Orange Côte d’Ivoire, ${md(O.interim('2026-T3', 'revenu'))} milliards (${sg(caCroiss9m(O))}) et ${md(O.interim('2026-T3', 'rn'))} milliards (${sg(rnCroiss9m(O))}).`,
-        `Selon Sika Finance, l’EBITDAaL d’Orange Côte d’Ivoire progresse d’environ ${tO.variation_ebitdaal_9m_2026_pct} % sur neuf mois 2026 et ses investissements hors licences (eCapex) d’environ ${tO.variation_ecapex_9m_2026_pct} %. Le bloc en direct, sous les graphiques, donne le dernier dividende et le rendement au dernier cours.`,
+        `Sur douze mois glissants, d’octobre 2025 à septembre 2026, le résultat consolidé atteint ${md(N.rnGlissant)} milliards pour Sonatel (${md(N.rn[4])} − ${md(N.interim('2025-T3', 'rn'))} + ${md(N.interim('2026-T3', 'rn'))}) et ${md(O.rnGlissant)} milliards pour Orange Côte d’Ivoire. C’est ce bénéfice que retient le PER glissant, calculé plus bas.`,
       ].join('\n'),
       tableau: {
         colonnes: ['Période 2026', 'Société', 'Chiffre d’affaires (Md FCFA)', 'Variation', 'Résultat net (Md FCFA)', 'Variation'],
@@ -1178,12 +1253,13 @@ const l07 = lecon({
           ['1er trimestre', 'Orange CI', md(O.interim('2026-T1', 'revenu')), sg(O.vi('2026-T1', 'revenu', '2025-T1')), md(O.interim('2026-T1', 'rn')), sg(O.vi('2026-T1', 'rn', '2025-T1'))],
           ['9 premiers mois', 'Orange CI', md(O.interim('2026-T3', 'revenu')), sg(caCroiss9m(O)), md(O.interim('2026-T3', 'rn')), sg(rnCroiss9m(O))],
         ],
-        note: 'Comptes consolidés, non audités, en base WESTBOURSE ; variations par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier ; le semestre d’Orange CI n’est pas en base.',
+        note: 'Comptes consolidés, non audités, publiés par les sociétés, en base WESTBOURSE ; variations par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier ; le semestre d’Orange CI n’est pas en base.',
       },
       graphiques: [
         graphique({ titre: 'Chiffre d’affaires comparé (Md FCFA, 2021-2025)', series: [{ nom: 'Sonatel', valeurs: N.revenu }, { nom: 'Orange CI', valeurs: O.revenu }], unite: 'Md FCFA', note: `Sonatel réalise ${fr(N.revenu[4] / O.revenu[4], 1)} fois le chiffre d’affaires d’Orange CI en 2025. ${SRC_BASE}` }),
-        graphique({ titre: 'Résultat net consolidé comparé (Md FCFA, 2021-2025)', series: [{ nom: 'Sonatel', valeurs: N.rn }, { nom: 'Orange CI', valeurs: O.rn }], unite: 'Md FCFA', note: `Résultat consolidé, minoritaires compris ; en part du groupe (S&P Global), Sonatel ${md(sp.rn_part_du_groupe.SNTS[4])} et Orange CI ${md(sp.rn_part_du_groupe.ORAC[4])} milliards en 2025. ${SRC_BASE}` }),
-        graphique({ type: 'line', titre: 'PER à la clôture de chaque année (BPA consolidé)', series: [{ nom: 'Sonatel', valeurs: N.per }, { nom: 'Orange CI', valeurs: O.per }], unite: 'x', note: `Pas de point pour Orange CI en 2021 : le titre n’était pas encore coté. Sur la part du groupe, les PER sont plus élevés (S&P Global). ${SRC_BASE}` }),
+        graphique({ titre: 'Résultat net consolidé comparé (Md FCFA, 2021-2025)', series: [{ nom: 'Sonatel', valeurs: N.rn }, { nom: 'Orange CI', valeurs: O.rn }], unite: 'Md FCFA', note: `Résultat consolidé, minoritaires compris ; la part du groupe de Sonatel est de ${md(sn25.rn_part_du_groupe)} milliards en 2025. ${SRC_SNTS}` }),
+        graphique({ titre: 'Free cash flow comparé (Md FCFA, 2021-2025)', series: [{ nom: 'Sonatel', valeurs: N.fcf }, { nom: 'Orange CI', valeurs: O.fcf }], unite: 'Md FCFA', note: `Flux de trésorerie d’exploitation moins investissements, recalculé par WESTBOURSE : ${md(N.fcf[4])} et ${md(O.fcf[4])} milliards en 2025. ${SRC_SNTS}` }),
+        graphique({ type: 'line', titre: 'PER à la clôture de chaque année (BPA consolidé)', series: [{ nom: 'Sonatel', valeurs: N.per }, { nom: 'Orange CI', valeurs: O.per }], unite: 'x', note: `Pas de point pour Orange CI en 2021 : le titre n’était pas encore coté. Sur le résultat part du groupe, le PER de Sonatel serait plus élevé. ${SRC_BASE}` }),
         graphique({ type: 'line', titre: 'Rendement du dividende à la clôture de chaque année (%)', series: [{ nom: 'Sonatel', valeurs: N.rdt }, { nom: 'Orange CI', valeurs: O.rdt }], unite: '%', note: `Dividende de l’exercice tel que publié ÷ dernier cours de l’année. ${SRC_BASE}` }),
       ],
       donnees_reelles: { vue: 'rendement', codes: ['SNTS', 'ORAC'] },
@@ -1193,9 +1269,9 @@ const l07 = lecon({
       titre: 'Marché et liquidité au 23 novembre 2026',
       reel: true,
       contenu: [
-        `Trois PER circulent pour chaque opérateur, et ils sont tous justes. Sur le BPA consolidé 2025 et le cours du 23/11/2026 : ${mult(N.perAuj)} pour Sonatel, ${mult(O.perAuj)} pour Orange CI. Le Bulletin officiel de la cote du 20/11/2026 donnait ${mult(N.perBoc)} et ${mult(O.perBoc)} : c’est le même calcul au cours du 20 novembre (${ent(N.s.cours['2026-11-20'])} et ${ent(O.s.cours['2026-11-20'])} FCFA).`,
-        `StockAnalysis affiche ${fr(sp.per_ttm.SNTS, 2)} et ${fr(sp.per_ttm.ORAC, 2)} : un bénéfice sur douze mois glissants, en part du groupe. Même chose pour le rendement : ${pc(N.rdtNetAuj, 2)} et ${pc(O.rdtNetAuj, 2)} sur le dividende net 2025 et le cours du jour, quand Sika Finance affiche ${fr(T.sika_finance.rendement_affiche.SNTS, 2)} % et ${fr(T.sika_finance.rendement_affiche.ORAC, 2)} %.`,
-        `Pour Sonatel, le chiffre de Sika Finance se retrouve en rapportant le même dividende net à la clôture 2025 : ${ent(N.d25.net)} ÷ ${ent(N.cloture[4])} = ${pc(N.rdt[4], 2)}. Même dividende, autre cours. Une analyse sérieuse dit toujours lequel elle utilise.`,
+        `Quatre PER se calculent pour Sonatel, et ils sont tous justes. Sur le BPA consolidé 2025 et le cours du 23/11/2026 : ${mult(N.perAuj)}. Le Bulletin officiel de la cote du 20/11/2026 donnait ${mult(N.perBoc)} : le même calcul au cours du 20 novembre (${ent(N.s.cours['2026-11-20'])} FCFA). Sur douze mois glissants : ${mult(N.perGlissant)}. Sur le résultat part du groupe 2025 : ${mult(perPdgN)}.`,
+        `Pour Orange Côte d’Ivoire, les mêmes calculs donnent ${mult(O.perAuj)} sur l’exercice 2025, ${mult(O.perBoc)} au cours du 20/11/2026 et ${mult(O.perGlissant)} sur douze mois glissants ; la part du groupe n’est pas en base. Même chose pour le rendement de Sonatel : ${pc(N.rdtNetAuj, 2)} sur le cours du jour, mais ${pc(N.rdt[4], 2)} sur la clôture 2025 (${ent(N.d25.net)} ÷ ${ent(N.cloture[4])}). Même dividende, autre cours.`,
+        'Une analyse sérieuse dit toujours lequel elle utilise. WESTBOURSE affiche, pour chaque ratio, le cours, la période et le bénéfice retenus.',
       ].join('\n'),
       tableau: {
         colonnes: ['Indicateur', 'Sonatel (SNTS)', 'Orange CI (ORAC)', 'Écart'],
@@ -1204,23 +1280,25 @@ const l07 = lecon({
           ['Capitalisation', `${fr(N.cap, 0)} Md FCFA`, `${fr(O.cap, 1)} Md FCFA`, `SNTS ${sg(varPct(N.cap, O.cap), 0)}`],
           ['PER (BPA consolidé 2025, cours du 23/11)', mult(N.perAuj), mult(O.perAuj), 'SNTS moins chère'],
           ['PER du Bulletin officiel (20/11/2026)', mult(N.perBoc), mult(O.perBoc), 'Même calcul au cours du 20/11'],
-          ['PER sur 12 mois glissants (StockAnalysis)', fr(sp.per_ttm.SNTS, 2), fr(sp.per_ttm.ORAC, 2), 'Part du groupe'],
+          ['PER sur 12 mois glissants (calcul WESTBOURSE)', mult(N.perGlissant), mult(O.perGlissant), 'SNTS moins chère'],
+          ['PER sur le résultat part du groupe 2025', mult(perPdgN), '—', 'Comptes publiés par Sonatel'],
           ['Dividende 2025 (FCFA)', `${ent(N.d25.net)} net`, `${ent(O.d25.brut)} brut / ${ent(O.d25.net)} net`, '—'],
-          ['Rendement net au 23/11/2026', pc(N.rdtNetAuj, 2), pc(O.rdtNetAuj, 2), `SNTS +${fr(N.rdtNetAuj - O.rdtNetAuj, 2)} pt`],
-          ['Rendement affiché par Sika Finance', `${fr(T.sika_finance.rendement_affiche.SNTS, 2)} %`, `${fr(T.sika_finance.rendement_affiche.ORAC, 2)} %`, 'Définition propre à Sika'],
+          ['Rendement net au cours du 23/11/2026', pc(N.rdtNetAuj, 2), pc(O.rdtNetAuj, 2), `SNTS +${fr(N.rdtNetAuj - O.rdtNetAuj, 2)} pt`],
+          ['Rendement à la clôture 2025', pc(N.rdt[4], 2), pc(O.rdt[4], 2), 'Même dividende, cours de fin 2025'],
           ['ROE consolidé 2025 (capitaux de clôture)', pc(N.roeClot[4]), pc(O.roeClot[4]), `SNTS +${fr(N.roeClot[4] - O.roeClot[4], 1)} pts`],
+          ['Marge d’exploitation 2025', pc(N.margeEx[4]), pc(O.margeEx[4]), `SNTS +${fr(N.margeEx[4] - O.margeEx[4], 1)} pts`],
           ['Marge nette consolidée 2025', pc(N.marge[4]), pc(O.marge[4]), `SNTS +${fr(N.marge[4] - O.marge[4], 1)} pts`],
           ['Taux de distribution 2025 (dividende net ÷ BPA)', pc(N.payoutNet), pc(O.payoutNet), 'ORAC distribue une plus grande part'],
-          ['Bêta sur un an (StockAnalysis)', fr(sp.beta_1an.SNTS, 2), fr(sp.beta_1an.ORAC, 2), 'Sensibilité au marché comparable'],
+          ['Dette financière nette fin 2025 (Md FCFA)', md(N.detteNette[4]), md(O.detteNette[4]), 'SNTS en trésorerie nette'],
           ['Titres échangés le 23/11/2026', ent(N.s.volume_2026_11_23), ent(O.s.volume_2026_11_23), 'SNTS bien plus liquide'],
           ['Performance depuis le 1er janvier 2026', sg(N.perf.ytd, 2), sg(O.perf.ytd, 2), 'SNTS devant'],
           ['Performance sur un an (depuis le 24/11/2025)', sg(N.perf.unAn, 1), sg(O.perf.unAn, 1), 'SNTS devant'],
           ['Performance sur trois ans (depuis le 23/11/2023)', sg(N.perf.troisAns, 1), sg(O.perf.troisAns, 1), 'SNTS devant'],
         ],
-        note: 'Cours, volumes, BPA et dividendes : base WESTBOURSE (clôtures de la BRVM, comptes publiés, calendrier des dividendes). Performances calculées sur nos clôtures aux dates indiquées ; d’autres sites retiennent d’autres dates de référence.',
+        note: 'Cours, volumes, BPA et dividendes : base WESTBOURSE (clôtures de la BRVM, comptes publiés, calendrier officiel des dividendes). Performances calculées sur nos clôtures aux dates indiquées.',
       },
       encadres: [
-        { ton: 'info', titre: 'Pourquoi les sources ne donnent pas le même PER', texte: 'Trois raisons, toujours les mêmes : la date du cours retenu, le bénéfice utilisé (exercice clos ou douze mois glissants, consolidé ou part du groupe) et, pour le rendement, la définition du dividende (brut ou net, de l’exercice ou versé dans l’année). C’est pourquoi ce cours présente les sources côte à côte, chacune avec sa définition.' },
+        { ton: 'info', titre: 'Pourquoi un même titre a plusieurs PER', texte: 'Trois raisons, toujours les mêmes : la date du cours retenu, le bénéfice utilisé (exercice clos ou douze mois glissants, consolidé ou part du groupe) et, pour le rendement, la définition du dividende (brut ou net, de l’exercice ou versé dans l’année). C’est pourquoi ce cours présente les calculs côte à côte, chacun avec sa définition.' },
       ],
       simulation: {
         type: 'distribution',
@@ -1235,28 +1313,28 @@ const l07 = lecon({
       contenu: 'Huit angles, huit constats. Comme pour les banques, ils ne désignent pas un gagnant : ils décrivent deux profils.',
       points: [
         { titre: 'Taille et présence', detail: `Sonatel réalise ${fr(N.revenu[4] / O.revenu[4], 1)} fois le chiffre d’affaires d’Orange CI (${md(N.revenu[4])} contre ${md(O.revenu[4])} milliards en 2025), dans cinq pays contre trois. Sa capitalisation dépasse celle d’Orange CI de ${fr(varPct(N.cap, O.cap), 0)} %.` },
-        { titre: 'Rentabilité', detail: `Marge nette consolidée de ${pc(N.marge[4])} contre ${pc(O.marge[4])}, ROE de ${pc(N.roeClot[4])} contre ${pc(O.roeClot[4])}, marge opérationnelle de ${pc(sp.marge_operationnelle_pct.SNTS[4])} contre ${pc(sp.marge_operationnelle_pct.ORAC[4])} (S&P Global) : Sonatel garde plus de chaque franc de chiffre d’affaires.` },
+        { titre: 'Rentabilité', detail: `Marge d’exploitation de ${pc(N.margeEx[4])} contre ${pc(O.margeEx[4])}, marge nette consolidée de ${pc(N.marge[4])} contre ${pc(O.marge[4])}, ROE de ${pc(N.roeClot[4])} contre ${pc(O.roeClot[4])} : Sonatel garde plus de chaque franc de chiffre d’affaires.` },
         { titre: 'Croissance', detail: `Orange CI croît plus vite : ${sg(O.croisRev[4])} de chiffre d’affaires en 2025 contre ${sg(N.croisRev[4])}, et ${sg(rnCroiss9m(O))} de résultat sur neuf mois 2026 contre ${sg(rnCroiss9m(N))}.` },
-        { titre: 'Valorisation', detail: `Sonatel se négocie à un PER de ${mult(N.perAuj)} à ${fr(sp.per_ttm.SNTS, 2)} selon la source, Orange CI de ${mult(O.perAuj)} à ${fr(sp.per_ttm.ORAC, 2)} : le marché paie plus cher chaque franc de bénéfice d’Orange CI.` },
-        { titre: 'Trésorerie et investissements', detail: `Capex 2025 : ${ent(sp.capex.SNTS[4])} milliards pour Sonatel (${pc(capexPct('SNTS', N))} du chiffre d’affaires), ${ent(sp.capex.ORAC[4])} pour Orange CI (${pc(capexPct('ORAC', O))}). Free cash flow : ${ent(sp.fcf.SNTS[4])} et ${ent(sp.fcf.ORAC[4])} milliards (S&P Global).` },
+        { titre: 'Valorisation', detail: `Sonatel se négocie entre ${mult(N.perGlissant)} et ${mult(perPdgN)} fois ses bénéfices selon le calcul retenu, Orange CI entre ${mult(O.perGlissant)} et ${mult(O.perAuj)} : le marché paie plus cher chaque franc de bénéfice d’Orange CI.` },
+        { titre: 'Trésorerie et investissements', detail: `Investissements 2025 : ${md(N.inv[4])} milliards pour Sonatel (${pc(capexPct(N))} du chiffre d’affaires), ${md(O.inv[4])} pour Orange CI (${pc(capexPct(O))}). Free cash flow : ${md(N.fcf[4])} et ${md(O.fcf[4])} milliards.` },
+        { titre: 'Endettement', detail: `Sonatel est en trésorerie nette (${md(-N.detteNette[4])} milliards fin 2025), Orange CI porte une dette financière nette de ${md(O.detteNette[4])} milliards, soit ${pc((O.detteNette[4] / O.cp[4]) * 100)} de ses capitaux propres.` },
         { titre: 'Liquidité boursière', detail: `${ent(N.s.volume_2026_11_23)} titres Sonatel échangés le 23/11/2026, contre ${ent(O.s.volume_2026_11_23)} pour Orange CI. Le fractionnement d’octobre 2026 a aussi ramené le prix d’une action Sonatel à la portée d’un petit budget.` },
         { titre: 'Dividende', detail: `Sonatel distribue ${pc(N.payoutNet, 0)} de son BPA consolidé 2025 en dividende net, avec un dividende net en hausse de ${pc(tcam(N.dpa[0], N.dpa[4], 4))} par an depuis 2021 ; Orange CI distribue ${pc(O.payoutNet, 0)}, mais son rendement au cours du jour est plus faible après la hausse du titre.` },
-        { titre: 'Tendance boursière 2026', detail: `Les deux titres progressent : ${sg(N.perf.ytd, 1)} pour Sonatel et ${sg(O.perf.ytd, 1)} pour Orange CI depuis le 1er janvier, dans une année où les deux résultats augmentent.` },
       ],
     },
     {
       type: 'piege',
       titre: 'Avertissement de comparabilité',
-      contenu: 'Les PER et les rendements diffèrent selon les sources parce que les définitions et les dates varient. Mélanger un PER consolidé et un PER part du groupe, ou un rendement brut et un rendement net, fausse toute comparaison.',
+      contenu: 'Les PER, les rendements et la dette nette changent selon les définitions et les dates retenues. Mélanger un PER consolidé et un PER part du groupe, un rendement brut et un rendement net, ou une dette avec et sans dettes locatives, fausse toute comparaison.',
       encadres: [
-        { ton: 'alerte', titre: 'Toujours indiquer la source et la méthode', texte: 'WESTBOURSE calcule ses ratios sur les comptes de l’exercice clos et le dernier cours ; StockAnalysis utilise douze mois glissants et la part du groupe ; Sika Finance affiche un rendement selon sa propre définition du dividende et du cours. Dans toute publication, écrivez lequel vous retenez.' },
+        { ton: 'alerte', titre: 'Toujours indiquer la source et la méthode', texte: 'Pour chaque ratio, écrivez le cours retenu et sa date, la période du bénéfice (exercice clos ou douze mois glissants), le périmètre (consolidé ou part du groupe) et la base du dividende (brut ou net). Un chiffre repris ailleurs sans ces quatre précisions ne se compare à rien.' },
       ],
     },
     {
       type: 'retenir',
       titre: 'Synthèse : Sonatel face à Orange Côte d’Ivoire',
       contenu: [
-        'Sonatel est plus grande, plus rentable, moins chère au regard du bénéfice et bien plus liquide ; son rendement du dividende est plus élevé. Elle présente un profil de rendement et de stabilité à grande échelle.',
+        'Sonatel est plus grande, plus rentable, moins chère au regard du bénéfice et bien plus liquide ; elle dispose d’une trésorerie nette et son rendement du dividende est plus élevé. Elle présente un profil de rendement et de stabilité à grande échelle.',
         'Orange Côte d’Ivoire croît plus vite, sur trois marchés, et le marché lui accorde un PER plus élevé : elle présente un profil de croissance, payé plus cher.',
         'Le choix entre les deux profils dépend de l’objectif de chacun. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente.',
       ].join('\n'),
@@ -1264,27 +1342,27 @@ const l07 = lecon({
   ],
   quiz: [
     {
-      question: `Le résultat consolidé 2025 de Sonatel est de ${md(N.rn[4])} milliards, la part du groupe de ${md(sp.rn_part_du_groupe.SNTS[4])}. À qui revient la différence ?`,
+      question: `Le résultat consolidé 2025 de Sonatel est de ${md(N.rn[4])} milliards, la part du groupe de ${md(sn25.rn_part_du_groupe)}. À qui revient la différence ?`,
       options: ['À l’État du Sénégal', 'Aux actionnaires minoritaires des filiales', 'Aux banques qui ont financé les investissements du groupe', 'Au fisc'],
       correct: 1,
       explication: 'Le résultat consolidé inclut la part des actionnaires minoritaires des filiales que Sonatel ne détient pas à 100 % ; la part du groupe l’exclut.',
     },
     {
       question: `Au cours du 20/11/2026 (${ent(N.s.cours['2026-11-20'])} FCFA) et avec un BPA consolidé de ${fcfa2(N.bpa[4])} FCFA, quel PER obtient-on pour Sonatel ?`,
-      options: [mult(N.perAuj), fr(sp.per_ttm.SNTS, 2), mult(N.perBoc), mult(N.per[4])],
+      options: [mult(N.perAuj), mult(N.perGlissant), mult(N.perBoc), mult(N.per[4])],
       correct: 2,
       explication: `${ent(N.s.cours['2026-11-20'])} ÷ ${fcfa2(N.bpa[4])} = ${mult(N.perBoc)}, le chiffre du Bulletin officiel de la cote du 20/11/2026.`,
     },
     {
-      question: 'Pourquoi StockAnalysis affiche-t-il un PER plus élevé pour Sonatel que celui calculé sur les comptes 2025 ?',
+      question: `Pourquoi le PER de Sonatel calculé sur le résultat part du groupe (${mult(perPdgN)}) dépasse-t-il celui calculé sur le résultat consolidé (${mult(N.perAuj)}) ?`,
       options: [
-        'Parce qu’il utilise un cours plus ancien',
-        'Parce qu’il retient un autre bénéfice, en part du groupe et sur douze mois',
-        'Parce qu’il ignore le fractionnement d’octobre 2026 et garde l’ancien nombre d’actions',
-        'Parce qu’il ajoute le dividende au cours',
+        'Parce que le cours retenu est plus ancien',
+        'Parce que la part du groupe, sans les minoritaires, est un bénéfice plus petit',
+        'Parce que le fractionnement d’octobre 2026 n’a pas été pris en compte dans le calcul du BPA',
+        'Parce que le dividende est ajouté au cours',
       ],
       correct: 1,
-      explication: 'Un bénéfice plus petit (part du groupe) au dénominateur donne un PER plus grand : la différence vient de la définition, pas d’une erreur.',
+      explication: `Au même cours, un bénéfice plus petit donne un PER plus grand : ${md(sn25.rn_part_du_groupe)} milliards en part du groupe contre ${md(N.rn[4])} en consolidé.`,
     },
     {
       question: 'Quelle société croît le plus vite en 2025 et sur les neuf premiers mois de 2026 ?',
@@ -1293,15 +1371,10 @@ const l07 = lecon({
       explication: `Orange CI : ${sg(O.croisRev[4])} de chiffre d’affaires en 2025 et ${sg(rnCroiss9m(O))} de résultat sur neuf mois 2026.`,
     },
     {
-      question: `${ent(N.s.volume_2026_11_23)} titres Sonatel échangés contre ${ent(O.s.volume_2026_11_23)} titres Orange CI le même jour. Qu’en déduire ?`,
-      options: [
-        'Qu’Orange CI est plus chère',
-        'Qu’un ordre important s’exécute plus facilement sur Sonatel',
-        'Que Sonatel verse chaque année un dividende plus élevé que celui d’Orange Côte d’Ivoire',
-        'Que les deux titres sont aussi liquides',
-      ],
+      question: `Fin 2025, Sonatel doit ${md(N.dettes[4])} milliards de dettes financières et détient ${md(N.dispo[4])} milliards de disponibilités. Que vaut sa dette financière nette ?`,
+      options: [`${md(N.dettes[4] + N.dispo[4])} milliards`, `${md(N.detteNette[4])} milliards`, `${md(N.dettes[4])} milliards`, 'Elle ne se calcule pas pour un opérateur'],
       correct: 1,
-      explication: 'Un volume élevé signifie qu’un ordre trouve plus facilement une contrepartie sans déplacer le cours.',
+      explication: `${md(N.dettes[4])} − ${md(N.dispo[4])} = ${md(N.detteNette[4])} milliards : une dette nette négative, c’est-à-dire une trésorerie nette.`,
     },
   ],
   liens: [
@@ -1329,7 +1402,7 @@ const l08 = lecon({
         'L’ordre compte. Choisir les ratios avant d’avoir compris l’activité conduit à appliquer à une banque les indicateurs d’un industriel ; évaluer avant d’avoir vérifié la qualité des comptes revient à valoriser un bénéfice qui n’existe peut-être pas.',
       ].join('\n'),
       etapes: [
-        { titre: 'Rassembler les données', detail: 'Les états financiers sur au moins trois exercices ; la date et la source de chaque donnée.' },
+        { titre: 'Rassembler les données', detail: 'Les états financiers sur au moins trois exercices ; la date et la source de chaque donnée. Les fiches sociétés de WESTBOURSE les réunissent.' },
         { titre: 'Vérifier la qualité', detail: 'Le rapport d’audit, les annexes, les changements de méthode et les opérations exceptionnelles.' },
         { titre: 'Comprendre l’activité', detail: 'Le modèle économique, les clients, les coûts, les concurrents et les risques principaux.' },
         { titre: 'Observer les tendances', detail: 'PNB ou chiffre d’affaires, marges, résultat net, BPA, dette, flux de trésorerie et dividendes sur plusieurs années.' },
@@ -1345,7 +1418,7 @@ const l08 = lecon({
       contenu: [
         'Huit situations doivent faire ralentir l’analyse. Aucune n’est une condamnation ; chacune appelle une vérification dans les comptes.',
         `Appliqués aux sociétés de ce module, ces signaux orientent les vérifications sans rien trancher. Le dividende publié pour 2025 par Société Générale Côte d’Ivoire représente ${pc((G.dpa[4] / G.bpa[4]) * 100, 0)} de son BPA : un taux élevé, qui reste sous le bénéfice mais appelle un regard sur les flux de trésorerie. Orange Côte d’Ivoire distribue ${pc(O.payoutNet, 0)} de son BPA en dividende net, Sonatel ${pc(N.payoutNet, 0)}.`,
-        `La dette nette de Sonatel, selon S&P Global, passe de ${ent(sp.dette_nette.SNTS[3])} milliards en 2024 à ${ent(sp.dette_nette.SNTS[4])} milliards en 2025 ; elle reste modeste au regard de son free cash flow (${ent(sp.fcf.SNTS[4])} milliards en 2025). Chez Ecobank Côte d’Ivoire, c’est le coût du risque qui se tend en 2026, après une année 2025 très favorable : le signal à suivre est la qualité des crédits, pas l’endettement.`,
+        `Chez Ecobank Côte d’Ivoire, les créances en souffrance brutes passent de ${md(eS0('creances_souffrance_brutes'))} à ${md(eS1('creances_souffrance_brutes'))} milliards d’un premier semestre à l’autre : le signal à suivre est la qualité des crédits. Chez Orange Côte d’Ivoire, la dette financière nette passe de ${md(O.detteNette[3])} à ${md(O.detteNette[4])} milliards en 2025, quand le résultat progresse de ${pc(O.croisRn[4])} : la dette avance plus vite que les résultats, à suivre sur les prochains exercices.`,
       ].join('\n'),
       points: [
         { titre: 'Bénéfices en hausse, trésorerie en baisse', detail: 'Si les bénéfices progressent mais que les flux de trésorerie opérationnels se dégradent durablement, il faut chercher une hausse des créances, des stocks ou d’autres éléments.' },
@@ -1369,17 +1442,18 @@ const l08 = lecon({
       tableau: {
         colonnes: ['Indicateur', '2023', '2024', '2025', 'Tendance', 'Source et date'],
         lignes: [
-          ['PNB (Md FCFA)', md(E.revenu[2]), md(E.revenu[3]), md(E.revenu[4]), tendance(E.revenu[2], E.revenu[4]), 'Comptes publiés, BRVM'],
-          ['Résultat net (Md FCFA)', md(E.rn[2]), md(E.rn[3]), md(E.rn[4]), tendance(E.rn[2], E.rn[4]), 'Comptes publiés, BRVM'],
+          ['PNB (Md FCFA)', md(E.revenu[2]), md(E.revenu[3]), md(E.revenu[4]), tendance(E.revenu[2], E.revenu[4]), 'Comptes publiés, base WESTBOURSE'],
+          ['Coût du risque (Md FCFA)', md(E.cdr[2]), md(E.cdr[3]), md(E.cdr[4]), tendance(E.cdr[2], E.cdr[4]), 'Comptes publiés, base WESTBOURSE'],
+          ['Résultat net (Md FCFA)', md(E.rn[2]), md(E.rn[3]), md(E.rn[4]), tendance(E.rn[2], E.rn[4]), 'Comptes publiés, base WESTBOURSE'],
           ['ROE (capitaux de clôture)', pc(E.roeClot[2]), pc(E.roeClot[3]), pc(E.roeClot[4]), tendance(E.roeClot[2], E.roeClot[4]), 'Calcul WESTBOURSE'],
-          ['Total du bilan (Md FCFA)', md(E.actif[2]), md(E.actif[3]), md(E.actif[4]), tendance(E.actif[2], E.actif[4]), 'Comptes publiés, BRVM'],
-          ['Capitaux propres (Md FCFA)', md(E.cp[2]), md(E.cp[3]), md(E.cp[4]), tendance(E.cp[2], E.cp[4]), 'Comptes publiés, BRVM'],
+          ['Total du bilan (Md FCFA)', md(E.actif[2]), md(E.actif[3]), md(E.actif[4]), tendance(E.actif[2], E.actif[4]), 'Comptes publiés, base WESTBOURSE'],
+          ['Capitaux propres (Md FCFA)', md(E.cp[2]), md(E.cp[3]), md(E.cp[4]), tendance(E.cp[2], E.cp[4]), 'Comptes publiés, base WESTBOURSE'],
           ['Dividende par action publié (FCFA)', fcfa2(E.dpa[2]), fcfa2(E.dpa[3]), `${ent(E.d25.brut)} brut`, tendance(E.dpa[2], E.dpa[4]), 'Calendrier des dividendes, BRVM'],
           ['PER à la clôture de l’année', mult(E.per[2]), mult(E.per[3]), mult(E.per[4]), tendance(E.per[2], E.per[4]), 'Calcul WESTBOURSE'],
           ['Rendement à la clôture de l’année', pc(E.rdt[2]), pc(E.rdt[3]), pc(E.rdt[4]), tendance(E.rdt[2], E.rdt[4]), 'Calcul WESTBOURSE'],
           ['Cours de clôture de l’année (FCFA)', ent(E.cloture[2]), ent(E.cloture[3]), ent(E.cloture[4]), tendance(E.cloture[2], E.cloture[4]), 'Clôtures de la BRVM'],
         ],
-        note: 'Une tendance « en hausse » du PER ou « en baisse » du rendement n’est ni bonne ni mauvaise en soi : elle dit que le cours a monté plus vite que le bénéfice ou le dividende.',
+        note: 'Une tendance « en hausse » du PER ou « en baisse » du rendement n’est ni bonne ni mauvaise en soi : elle dit que le cours a monté plus vite que le bénéfice ou le dividende. Une tendance « en baisse » du coût du risque, elle, ajoute au résultat.',
       },
       donnees_reelles: { vue: 'ratios', codes: ['ECOC'] },
     },
@@ -1388,7 +1462,7 @@ const l08 = lecon({
       titre: 'Erreurs courantes à éviter',
       contenu: [
         'Neuf erreurs reviennent sans cesse, chez les débutants comme chez les lecteurs pressés. Chacune a sa correction.',
-        `Ce module en a croisé plusieurs sur des cas réels. Trois PER différents pour Sonatel au même moment (${mult(N.perAuj)}, ${mult(N.perBoc)} et ${fr(sp.per_ttm.SNTS, 2)}) illustrent l’erreur des périodes et des définitions mélangées. Deux séries de PNB pour Ecobank Côte d’Ivoire illustrent celle des données retraitées. Le rendement de ${fr(T.sika_finance.rendement_affiche.SNTS, 2)} % affiché pour Sonatel, qui se retrouve exactement sur la clôture 2025 et non sur le cours du jour, illustre celle de la date du cours.`,
+        `Ce module en a croisé plusieurs sur des cas réels. Quatre PER différents pour Sonatel au même moment (${mult(N.perGlissant)}, ${mult(N.perAuj)}, ${mult(N.perBoc)} et ${mult(perPdgN)}) illustrent l’erreur des périodes et des définitions mélangées. Le rendement de Sonatel, ${pc(N.rdtNetAuj, 2)} sur le cours du jour et ${pc(N.rdt[4], 2)} sur la clôture 2025, illustre celle de la date du cours. La dette nette, qui change de signe selon qu’on compte ou non certains postes, illustre celle des définitions non écrites.`,
       ].join('\n'),
       tableau: {
         colonnes: ['Erreur', 'Correction'],
@@ -1411,13 +1485,13 @@ const l08 = lecon({
       contenu: 'Les deux comparaisons se concluent de la même façon : elles décrivent des profils, elles ne désignent pas de gagnant.',
       encadres: [
         { ton: 'cle', titre: 'Banques : ECOC face à SGBC (exercice 2025, cours au 23/11/2026)', texte: [
-          `SGBC est plus grande en PNB, en bilan et en capitaux propres ; elle présente un PER plus bas (${mult(G.perAuj)} contre ${mult(E.perAuj)}) et un rendement du dividende plus élevé, et son cours a progressé en 2026 (${sg(G.perf.ytd, 1)}).`,
-          `ECOC affiche un ROE plus élevé (${pc(E.roeClot[4])} contre ${pc(G.roeClot[4])}) et une meilleure marge nette ; son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (${sg(E.perf.ytd, 1)}).`,
-          'Pour conclure davantage, il faudrait aligner normes comptables, définition du résultat, ROE sur capitaux moyens, indicateur de qualité des crédits, coût du risque, dividende, BPA, date du cours et liquidité.',
+          `SGBC est plus grande en PNB, en bilan et en capitaux propres, et plus efficace dans ses frais ; elle présente un PER plus bas (${mult(G.perAuj)} contre ${mult(E.perAuj)}) et un rendement du dividende plus élevé, et son cours a progressé en 2026 (${sg(G.perf.ytd, 1)}).`,
+          `ECOC affiche un ROE plus élevé (${pc(E.roeClot[4])} contre ${pc(G.roeClot[4])}), une meilleure marge nette et un coût du risque bien plus faible jusqu’en 2025 ; son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (${sg(E.perf.ytd, 1)}).`,
+          'Pour conclure davantage, il faudrait aligner normes comptables, définition du résultat, ROE sur capitaux moyens, indicateur de qualité des crédits et sa date, coût du risque, dividende, BPA, date du cours et liquidité.',
         ].join('\n') },
         { ton: 'cle', titre: 'Télécoms : Sonatel face à Orange CI (exercice 2025, cours au 23/11/2026)', texte: [
-          `Sonatel est plus grande (${md(N.revenu[4])} milliards de chiffre d’affaires contre ${md(O.revenu[4])}), plus rentable (marge nette consolidée ${pc(N.marge[4])} contre ${pc(O.marge[4])}), moins chère (PER ${mult(N.perAuj)} contre ${mult(O.perAuj)}) et bien plus liquide.`,
-          `Orange CI croît plus vite (${sg(rnCroiss9m(O))} de résultat sur neuf mois 2026) et le marché lui accorde un PER plus élevé. Les deux opérateurs investissent environ ${fr((capexPct('SNTS', N) + capexPct('ORAC', O)) / 2, 0)} % de leur chiffre d’affaires dans leurs réseaux.`,
+          `Sonatel est plus grande (${md(N.revenu[4])} milliards de chiffre d’affaires contre ${md(O.revenu[4])}), plus rentable (marge d’exploitation ${pc(N.margeEx[4])} contre ${pc(O.margeEx[4])}), moins chère (PER ${mult(N.perAuj)} contre ${mult(O.perAuj)}), en trésorerie nette et bien plus liquide.`,
+          `Orange CI croît plus vite (${sg(rnCroiss9m(O))} de résultat sur neuf mois 2026) et le marché lui accorde un PER plus élevé. Les deux opérateurs investissent environ ${fr((capexPct(N) + capexPct(O)) / 2, 0)} % de leur chiffre d’affaires dans leurs réseaux.`,
         ].join('\n') },
         { ton: 'alerte', titre: 'À lire avec ces conclusions', texte: 'Ces comparaisons sont informatives et ne constituent pas une recommandation d’achat ou de vente.' },
       ],
@@ -1427,25 +1501,20 @@ const l08 = lecon({
       titre: 'Modèle de conclusion pour une fiche',
       contenu: 'Une conclusion honnête nomme les profils, dit ce que les ratios ne disent pas, cite ses sources et sa date. Le modèle ci-dessous se complète entre crochets.',
       encadres: [
-        { ton: 'info', titre: 'Modèle à compléter', texte: '« Sur la base des informations disponibles pour l’exercice [année] et des cours de référence du [date], [Société A] et [Société B] présentent des profils différents. [A] affiche [atout principal : taille, rentabilité, rendement], tandis que [B] se distingue par [atout principal]. Les PER ne constituent qu’un élément de comparaison. L’analyse doit être complétée par des données homogènes sur [indicateurs sectoriels pertinents], les fonds propres, le dividende, la liquidité boursière et les perspectives. Les données proviennent de la BRVM et des comptes publiés par les sociétés, recalculées par WESTBOURSE, et de [autres sources], chacune avec sa date. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente. »' },
+        { ton: 'info', titre: 'Modèle à compléter', texte: '« Sur la base des informations disponibles pour l’exercice [année] et des cours de référence du [date], [Société A] et [Société B] présentent des profils différents. [A] affiche [atout principal : taille, rentabilité, rendement], tandis que [B] se distingue par [atout principal]. Les PER ne constituent qu’un élément de comparaison. L’analyse doit être complétée par des données homogènes sur [indicateurs sectoriels pertinents], les fonds propres, le dividende, la liquidité boursière et les perspectives. Les données proviennent des comptes publiés par les sociétés et de la BRVM, rassemblés et recalculés par WESTBOURSE, chacune avec sa date. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente. »' },
       ],
     },
     {
       type: 'lexique',
-      titre: 'Sources consultées',
-      contenu: 'Chaque chiffre de ce module renvoie à l’une de ces sources. Les données de la BRVM et des sociétés font foi ; les autres sont citées avec leur date de consultation.',
+      titre: 'Sources de ce module',
+      contenu: 'Chaque chiffre de ce module renvoie à l’une de ces sources : les documents officiels font foi, WESTBOURSE les rassemble et recalcule les ratios.',
       tableau: {
-        colonnes: ['Source', 'Type de données', 'Date d’accès'],
+        colonnes: ['Source', 'Type de données', 'Date'],
         lignes: [
-          ['BRVM (brvm.org)', 'Rapports d’activité et états financiers d’ECOC, SGBC, SNTS et ORAC, avis, cours officiels, Bulletin officiel de la cote, calendrier de paiement des dividendes', '23/11/2026'],
-          ['WESTBOURSE (westbourse.com)', 'Comptes publiés en base, ratios recalculés (BPA, PER, ROE, marge nette, rendement), clôtures, carnet d’ordres et notes de liquidité', 'Lus le 24/11/2026'],
-          ['Sika Finance (sikafinance.com)', 'Comptes intermédiaires de 2026 non encore en base, coût du risque, solvabilité, rendements affichés, actualités', '23/11/2026'],
-          ['StockAnalysis / S&P Global Market Intelligence', 'États financiers standardisés, PER sur douze mois glissants, résultat part du groupe, EBITDA, free cash flow, dette nette, capex, bêta', '23/11/2026'],
-          ['Sonatel (sonatel.sn)', 'Présentation du groupe, présence dans cinq pays', '23/11/2026'],
-          ['BCEAO (bceao.int)', 'Rapports annuels 2022 et 2023 : ratio de solvabilité minimum de l’UMOA', '24/11/2026'],
-          ['allAfrica, Daba Finance', 'Résultats trimestriels d’ECOC, contexte sectoriel', '23/11/2026'],
-          ['FGI Bourse (fgi-bourse.com)', 'Analyse des états financiers d’ECOC 2025', '23/11/2026'],
-          ['APBEF-CI', 'Parts de marché bancaires en Côte d’Ivoire (avril 2026)', 'Via Sika Finance'],
+          ['BRVM (brvm.org)', 'Cours officiels, Bulletin officiel de la cote, calendrier de paiement des dividendes, avis et communiqués', 'Séances du 23/11/2023 au 23/11/2026'],
+          ['Les sociétés étudiées', 'Rapports d’activité et états financiers annuels et intermédiaires d’Ecobank CI, Société Générale CI, Sonatel et Orange CI ; comptes 2025 de Sonatel publiés le 16/02/2026', 'Exercices 2021 à 2025, comptes 2026 jusqu’à fin septembre'],
+          ['WESTBOURSE (westbourse.com)', 'Comptes publiés rassemblés en base, ratios recalculés (BPA, PER, PER glissant, ROE, marges, coût du risque, free cash flow, dette nette, rendement), clôtures, volumes, carnet d’ordres et notes de liquidité', 'Lus le 24/11/2026'],
+          ['BCEAO (bceao.int)', 'Rapports annuels 2022 et 2023 : ratio de solvabilité minimum de l’UMOA', 'Lus le 24/11/2026'],
         ],
       },
       encadres: [
@@ -1523,6 +1592,7 @@ const LECONS = [
   ['l00g-telecoms.json', l07],
   ['l00h-methode-conclusion.json', l08],
 ];
+const TIERS = /sika|rich ?bourse|stockanalysis|S&P|FGI|CGF|allAfrica|Daba/i;
 let questions = 0;
 let plusLongues = 0;
 const alertes = [];
@@ -1533,7 +1603,9 @@ for (const [fichier, l] of LECONS) {
     for (const p of s.contenu.split(/\n+/)) if (p.length > 650) alertes.push(`${fichier} · ${s.titre} : paragraphe de ${p.length} caractères`);
     if (s.reel && !s.donnees_reelles) alertes.push(`${fichier} · ${s.titre} : section réelle sans donnees_reelles`);
   }
-  if (/—\s*$|NaN|undefined|Infinity/.test(JSON.stringify(l))) alertes.push(`${fichier} : valeur non calculée (NaN, undefined, Infinity)`);
+  const brut = JSON.stringify(l);
+  if (/NaN|undefined|Infinity/.test(brut)) alertes.push(`${fichier} : valeur non calculée (NaN, undefined, Infinity)`);
+  if (TIERS.test(brut)) alertes.push(`${fichier} : site tiers cité (${brut.match(TIERS)[0]})`);
   for (const q of l.quiz) {
     questions += 1;
     const autres = q.options.filter((_, i) => i !== q.correct).map((o) => o.length);
@@ -1546,6 +1618,7 @@ for (const [fichier, l] of LECONS) {
   console.log(`écrit ${fichier} — ${l.sections.length} sections, ${l.quiz.length} questions, ${l.sections.reduce((n, s) => n + s.contenu.length, 0)} caractères`);
 }
 console.log(`bonne réponse strictement la plus longue : ${plusLongues}/${questions}`);
+console.log(`PER glissants : ECOC ${mult(E.perGlissant)}, SGBC ${mult(G.perGlissant)}, SNTS ${mult(N.perGlissant)}, ORAC ${mult(O.perGlissant)} ; SNTS part du groupe ${mult(perPdgN)}`);
 if (alertes.length) {
   console.error(alertes.join('\n'));
   process.exitCode = 1;

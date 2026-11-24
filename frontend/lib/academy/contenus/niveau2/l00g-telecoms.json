@@ -4,7 +4,7 @@
   "categorie": "fundamental",
   "duree_min": 22,
   "sous_titre": "La même grille appliquée à deux opérateurs : un groupe multi-pays de très grande taille face à un groupe régional en croissance rapide.",
-  "resume": "Après les banques, la même grille d’analyse s’applique à deux opérateurs de télécommunications. Contrairement aux banques, les télécoms se lisent avec les ratios classiques d’endettement, d’EV/EBITDA et de free cash flow. Sonatel est plus grande, plus rentable et plus liquide ; Orange Côte d’Ivoire croît plus vite et se paie plus cher. Cette leçon le montre chiffres à l’appui, et explique pourquoi trois PER différents circulent pour chacune.",
+  "resume": "Après les banques, la même grille d’analyse s’applique à deux opérateurs de télécommunications. Contrairement aux banques, les télécoms se lisent avec les ratios classiques d’endettement, de marge d’exploitation et de free cash flow. Sonatel est plus grande, plus rentable, plus liquide, et dispose d’une trésorerie nette ; Orange Côte d’Ivoire croît plus vite et se paie plus cher. Cette leçon le montre chiffres à l’appui, et explique pourquoi quatre PER différents se calculent pour un même titre.",
   "nouveaute": {
     "type": "nouveau",
     "depuis": "2026-11-24"
@@ -13,7 +13,7 @@
     {
       "type": "definition",
       "titre": "Ce qui change pour un opérateur télécom",
-      "contenu": "Un opérateur de télécommunications est une entreprise industrielle : il investit lourdement dans ses réseaux (les capex), puis vend des abonnements, des données mobiles et des services financiers comme le mobile money. Sa dette sert à financer ces investissements.\nLes ratios écartés pour les banques reprennent donc tout leur sens : dette nette, gearing, EV/EBITDA, free cash flow. Il faut aussi savoir lire un groupe : Sonatel et Orange Côte d’Ivoire consolident des filiales dans plusieurs pays, dont elles ne détiennent pas 100 %. Le résultat consolidé inclut la part des actionnaires minoritaires ; le résultat part du groupe ne la compte pas."
+      "contenu": "Un opérateur de télécommunications est une entreprise industrielle : il investit lourdement dans ses réseaux, puis vend des abonnements, des données mobiles et des services financiers comme le mobile money. Sa dette sert à financer ces investissements.\nLes ratios écartés pour les banques reprennent donc tout leur sens : dette nette, gearing, marge d’exploitation, free cash flow. Il faut aussi savoir lire un groupe : Sonatel et Orange Côte d’Ivoire consolident des filiales dans plusieurs pays, dont elles ne détiennent pas 100 %. Le résultat consolidé inclut la part des actionnaires minoritaires ; le résultat part du groupe ne la compte pas."
     },
     {
       "type": "cas",
@@ -27,7 +27,7 @@
         },
         {
           "titre": "Orange Côte d’Ivoire (ORAC)",
-          "detail": "Opérateur leader en Côte d’Ivoire, présent aussi au Burkina Faso et au Liberia. Filiale du groupe Orange, cotée à la BRVM depuis fin 2022 (première séance en base le 30/12/2022). Mobile, fixe, internet, fibre et Orange Money ; 40,35 millions de lignes à fin septembre 2026 (Sika Finance)."
+          "detail": "Opérateur leader en Côte d’Ivoire, présent aussi au Burkina Faso et au Liberia. Filiale du groupe Orange, cotée à la BRVM depuis fin 2022 (première séance en base le 30/12/2022). Mobile, fixe, internet, fibre et Orange Money."
         }
       ],
       "stats": [
@@ -55,7 +55,7 @@
       "type": "cas",
       "titre": "Sonatel : les comptes 2021-2025",
       "reel": true,
-      "contenu": "Le chiffre d’affaires passe de 1 334,9 à 1 923,1 milliards de FCFA (9,6 % par an), le résultat net consolidé de 252,5 à 413,6 milliards (13,1 % par an). La part du groupe, selon S&P Global, est plus faible : 342,0 milliards en 2025, les 71,6 milliards d’écart revenant aux actionnaires minoritaires des filiales.\nD’où deux marges nettes et deux PER pour la même année. Aucun n’est faux ; ils ne répondent pas à la même question. Le PER sur le résultat part du groupe mesure ce que l’actionnaire de Sonatel paie pour la part qui lui revient.",
+      "contenu": "Le chiffre d’affaires passe de 1 334,9 à 1 923,1 milliards de FCFA (9,6 % par an), le résultat net consolidé de 252,5 à 413,6 milliards (13,1 % par an). Selon les comptes 2025 publiés par Sonatel, la part du groupe s’élève à 342,0 milliards : les 71,6 milliards d’écart reviennent aux actionnaires minoritaires des filiales.\nLe groupe dégage 392,4 milliards de free cash flow en 2025 (flux d’exploitation de 681,6 milliards moins 289,2 milliards d’investissements) et détient plus de disponibilités qu’il ne doit de dettes financières : une trésorerie nette de 133,4 milliards.",
       "tableau": {
         "colonnes": [
           "Indicateur",
@@ -83,6 +83,22 @@
             "+8,3 %"
           ],
           [
+            "Résultat d’exploitation (Md FCFA)",
+            "399,7",
+            "437,1",
+            "515,7",
+            "619,5",
+            "669,8"
+          ],
+          [
+            "Marge d’exploitation",
+            "29,9 %",
+            "30,0 %",
+            "31,8 %",
+            "34,9 %",
+            "34,8 %"
+          ],
+          [
             "Résultat net consolidé (Md FCFA)",
             "252,5",
             "278,9",
@@ -99,44 +115,12 @@
             "+5,1 %"
           ],
           [
-            "Résultat net part du groupe, S&P (Md FCFA)",
-            "211,1",
-            "236,0",
-            "279,4",
+            "Résultat net part du groupe (Md FCFA)",
+            "—",
+            "—",
+            "—",
             "328,8",
             "342,0"
-          ],
-          [
-            "BPA consolidé (FCFA)",
-            "252,46",
-            "278,90",
-            "331,70",
-            "393,70",
-            "413,60"
-          ],
-          [
-            "EBITDA estimé, S&P (Md FCFA)",
-            "400",
-            "435",
-            "520",
-            "618",
-            "681"
-          ],
-          [
-            "Marge brute, S&P",
-            "57,0 %",
-            "56,1 %",
-            "58,0 %",
-            "58,9 %",
-            "60,7 %"
-          ],
-          [
-            "Marge opérationnelle, S&P",
-            "30,0 %",
-            "30,0 %",
-            "32,1 %",
-            "34,8 %",
-            "35,4 %"
           ],
           [
             "Marge nette consolidée",
@@ -147,12 +131,12 @@
             "21,5 %"
           ],
           [
-            "Marge nette part du groupe",
-            "15,8 %",
-            "16,2 %",
-            "17,2 %",
-            "18,5 %",
-            "17,8 %"
+            "BPA consolidé (FCFA)",
+            "252,46",
+            "278,90",
+            "331,70",
+            "393,70",
+            "413,60"
           ],
           [
             "Capitaux propres (Md FCFA)",
@@ -171,28 +155,52 @@
             "29,6 %"
           ],
           [
-            "Free cash flow, S&P (Md FCFA)",
-            "242",
-            "201",
-            "355",
-            "359",
-            "364"
+            "Flux de trésorerie d’exploitation (Md FCFA)",
+            "463,3",
+            "464,1",
+            "643,1",
+            "660,0",
+            "681,6"
           ],
           [
-            "Dette nette, S&P (Md FCFA)",
-            "−199",
-            "−146",
-            "14",
-            "−3",
-            "133"
+            "Investissements (Md FCFA)",
+            "221,4",
+            "263,0",
+            "288,1",
+            "300,9",
+            "289,2"
           ],
           [
-            "Investissements (capex), S&P (Md FCFA)",
-            "221",
-            "263",
-            "288",
-            "301",
-            "318"
+            "Free cash flow (flux − investissements, Md FCFA)",
+            "241,9",
+            "201,1",
+            "355,0",
+            "359,1",
+            "392,4"
+          ],
+          [
+            "Disponibilités (Md FCFA)",
+            "244,2",
+            "276,8",
+            "400,0",
+            "460,4",
+            "536,1"
+          ],
+          [
+            "Dettes financières, courantes et non courantes (Md FCFA)",
+            "416,4",
+            "400,1",
+            "381,9",
+            "460,5",
+            "402,7"
+          ],
+          [
+            "Dette financière nette (Md FCFA)",
+            "172,2",
+            "123,3",
+            "−18,1",
+            "0,2",
+            "−133,4"
           ],
           [
             "Cours de clôture de l’année (FCFA)",
@@ -211,14 +219,6 @@
             "6,32"
           ],
           [
-            "PER à la clôture (part du groupe, S&P)",
-            "6,62",
-            "6,44",
-            "6,43",
-            "7,30",
-            "7,64"
-          ],
-          [
             "Dividende par action publié (FCFA)",
             "140,00",
             "150,00",
@@ -235,7 +235,7 @@
             "6,7 %"
           ]
         ],
-        "note": "Lignes « S&P » : StockAnalysis / S&P Global Market Intelligence, consulté le 23/11/2026. Autres lignes : comptes publiés en base WESTBOURSE et clôtures de la BRVM, cours et BPA ajustés du fractionnement par 10 du 26/10/2026. « — » : donnée absente de la source."
+        "note": "Comptes publiés en base WESTBOURSE ; 2024 et 2025 relus sur les comptes 2025 publiés par Sonatel le 16/02/2026 ; cours et BPA ajustés du fractionnement par 10 du 26/10/2026. Dette financière nette = passifs financiers − disponibilités, hors dettes locatives ; négative = trésorerie nette. Free cash flow et ratios calculés par WESTBOURSE."
       },
       "donnees_reelles": {
         "vue": "historique",
@@ -248,7 +248,7 @@
       "type": "cas",
       "titre": "Orange Côte d’Ivoire : les comptes 2021-2025",
       "reel": true,
-      "contenu": "Le chiffre d’affaires stagne en 2022 puis accélère : +10,4 % en 2025, à 1 197,1 milliards. Le résultat net consolidé progresse de 6,1 % en 2025, à 167,8 milliards ; la part du groupe, selon S&P Global, atteint 129,1 milliards.\nLes capitaux propres en base restent stables, entre 708 et 727 milliards sur la période : c’est sur eux que se calcule le ROE consolidé de 23,7 % en 2025. La dette nette, selon S&P Global, s’établit à 149 milliards en 2025, contre 46 milliards en 2022.",
+      "contenu": "Le chiffre d’affaires stagne en 2022 puis accélère : +10,4 % en 2025, à 1 197,1 milliards. Le résultat net consolidé progresse de 6,1 % en 2025, à 167,8 milliards ; la marge d’exploitation, elle, glisse de 27 % en 2021 à 24 % en 2025.\nLes capitaux propres en base restent stables, entre 708 et 727 milliards sur la période : c’est sur eux que se calcule le ROE consolidé de 23,7 % en 2025. Contrairement à Sonatel, Orange Côte d’Ivoire est endettée : 110,1 milliards de dette financière nette fin 2025, contre 48,8 milliards un an plus tôt.",
       "tableau": {
         "colonnes": [
           "Indicateur",
@@ -276,6 +276,22 @@
             "+10,4 %"
           ],
           [
+            "Résultat d’exploitation (Md FCFA)",
+            "256,8",
+            "255,5",
+            "251,3",
+            "263,2",
+            "287,2"
+          ],
+          [
+            "Marge d’exploitation",
+            "26,6 %",
+            "26,5 %",
+            "24,7 %",
+            "24,3 %",
+            "24,0 %"
+          ],
+          [
             "Résultat net consolidé (Md FCFA)",
             "155,8",
             "153,5",
@@ -292,46 +308,6 @@
             "+6,1 %"
           ],
           [
-            "Résultat net part du groupe, S&P (Md FCFA)",
-            "125,4",
-            "118,3",
-            "110,5",
-            "112,8",
-            "129,1"
-          ],
-          [
-            "BPA consolidé (FCFA)",
-            "1 034,38",
-            "1 018,78",
-            "1 028,00",
-            "1 050,00",
-            "1 114,00"
-          ],
-          [
-            "EBITDAaL estimé, S&P (Md FCFA)",
-            "256",
-            "255",
-            "251",
-            "266",
-            "288"
-          ],
-          [
-            "Marge brute, S&P",
-            "57,5 %",
-            "55,5 %",
-            "61,7 %",
-            "54,1 %",
-            "53,3 %"
-          ],
-          [
-            "Marge opérationnelle, S&P",
-            "26,6 %",
-            "26,5 %",
-            "24,7 %",
-            "24,6 %",
-            "24,0 %"
-          ],
-          [
             "Marge nette consolidée",
             "16,1 %",
             "15,9 %",
@@ -340,12 +316,12 @@
             "14,0 %"
           ],
           [
-            "Marge nette part du groupe",
-            "13,0 %",
-            "12,3 %",
-            "10,9 %",
-            "10,4 %",
-            "10,8 %"
+            "BPA consolidé (FCFA)",
+            "1 034,38",
+            "1 018,78",
+            "1 028,00",
+            "1 050,00",
+            "1 114,00"
           ],
           [
             "Capitaux propres (Md FCFA)",
@@ -364,28 +340,52 @@
             "23,7 %"
           ],
           [
-            "Free cash flow, S&P (Md FCFA)",
-            "149",
-            "125",
-            "88",
-            "97",
-            "151"
+            "Flux de trésorerie d’exploitation (Md FCFA)",
+            "308,1",
+            "296,8",
+            "281,5",
+            "256,3",
+            "335,5"
           ],
           [
-            "Dette nette, S&P (Md FCFA)",
+            "Investissements (Md FCFA)",
+            "159,3",
+            "171,8",
+            "193,5",
+            "159,5",
+            "184,2"
+          ],
+          [
+            "Free cash flow (flux − investissements, Md FCFA)",
+            "148,8",
+            "125,1",
+            "88,0",
+            "96,8",
+            "151,3"
+          ],
+          [
+            "Disponibilités (Md FCFA)",
+            "177,8",
+            "283,5",
+            "237,8",
+            "287,0",
+            "225,8"
+          ],
+          [
+            "Dettes financières, courantes et non courantes (Md FCFA)",
             "—",
-            "46",
-            "175",
-            "134",
-            "149"
+            "—",
+            "—",
+            "335,8",
+            "335,9"
           ],
           [
-            "Investissements (capex), S&P (Md FCFA)",
-            "159",
-            "172",
-            "194",
-            "160",
-            "184"
+            "Dette financière nette (Md FCFA)",
+            "—",
+            "—",
+            "—",
+            "48,8",
+            "110,1"
           ],
           [
             "Cours de clôture de l’année (FCFA)",
@@ -404,14 +404,6 @@
             "12,79"
           ],
           [
-            "PER à la clôture (part du groupe, S&P)",
-            "—",
-            "—",
-            "14,87",
-            "23,37",
-            "16,63"
-          ],
-          [
             "Dividende par action publié (FCFA)",
             "717,00",
             "752,76",
@@ -428,7 +420,7 @@
             "5,6 %"
           ]
         ],
-        "note": "Lignes « S&P » : StockAnalysis / S&P Global Market Intelligence, consulté le 23/11/2026. Autres lignes : comptes publiés en base WESTBOURSE et clôtures de la BRVM ; pas de clôture pour 2021, le titre n’étant coté qu’à partir de fin 2022. « — » : donnée absente de la source."
+        "note": "Comptes publiés en base WESTBOURSE ; pas de clôture pour 2021, le titre n’étant coté qu’à partir de fin 2022. Dette financière nette = dettes financières − disponibilités, calculée seulement quand les deux sont en base ; « — » : donnée absente. Free cash flow et ratios calculés par WESTBOURSE."
       },
       "donnees_reelles": {
         "vue": "historique",
@@ -441,7 +433,7 @@
       "type": "cas",
       "titre": "Trajectoires comparées et comptes de 2026",
       "reel": true,
-      "contenu": "Sur neuf mois 2026, Sonatel affiche 1 583,0 milliards de chiffre d’affaires (+10,5 %) et 354,0 milliards de résultat net consolidé (+13,8 %). Orange Côte d’Ivoire, 1 012,0 milliards (+15,6 %) et 141,0 milliards (+18,7 %).\nSelon Sika Finance, l’EBITDAaL d’Orange Côte d’Ivoire progresse d’environ 18 % sur neuf mois 2026 et ses investissements hors licences (eCapex) d’environ 20 %. Le bloc en direct, sous les graphiques, donne le dernier dividende et le rendement au dernier cours.",
+      "contenu": "Sur neuf mois 2026, Sonatel affiche 1 583,0 milliards de chiffre d’affaires (+10,5 %) et 354,0 milliards de résultat net consolidé (+13,8 %). Orange Côte d’Ivoire, 1 012,0 milliards (+15,6 %) et 141,0 milliards (+18,7 %).\nSur douze mois glissants, d’octobre 2025 à septembre 2026, le résultat consolidé atteint 456,6 milliards pour Sonatel (413,6 − 311,0 + 354,0) et 190,0 milliards pour Orange Côte d’Ivoire. C’est ce bénéfice que retient le PER glissant, calculé plus bas.",
       "tableau": {
         "colonnes": [
           "Période 2026",
@@ -493,7 +485,7 @@
             "+18,7 %"
           ]
         ],
-        "note": "Comptes consolidés, non audités, en base WESTBOURSE ; variations par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier ; le semestre d’Orange CI n’est pas en base."
+        "note": "Comptes consolidés, non audités, publiés par les sociétés, en base WESTBOURSE ; variations par rapport à la même période de 2025. Les comptes intermédiaires sont des cumuls depuis le 1er janvier ; le semestre d’Orange CI n’est pas en base."
       },
       "graphiques": [
         {
@@ -507,7 +499,7 @@
             "2025"
           ],
           "unite": "Md FCFA",
-          "note": "Sonatel réalise 1,6 fois le chiffre d’affaires d’Orange CI en 2025. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Sonatel réalise 1,6 fois le chiffre d’affaires d’Orange CI en 2025. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -543,7 +535,7 @@
             "2025"
           ],
           "unite": "Md FCFA",
-          "note": "Résultat consolidé, minoritaires compris ; en part du groupe (S&P Global), Sonatel 342,0 et Orange CI 129,1 milliards en 2025. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Résultat consolidé, minoritaires compris ; la part du groupe de Sonatel est de 342,0 milliards en 2025. Sources : comptes 2025 publiés par Sonatel le 16/02/2026 et comptes publiés en base WESTBOURSE, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -569,6 +561,42 @@
           ]
         },
         {
+          "type": "bar",
+          "titre": "Free cash flow comparé (Md FCFA, 2021-2025)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "Md FCFA",
+          "note": "Flux de trésorerie d’exploitation moins investissements, recalculé par WESTBOURSE : 392,4 et 151,3 milliards en 2025. Sources : comptes 2025 publiés par Sonatel le 16/02/2026 et comptes publiés en base WESTBOURSE, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "Sonatel",
+              "valeurs": [
+                241.86,
+                201.15,
+                354.95,
+                359.09,
+                392.39
+              ]
+            },
+            {
+              "nom": "Orange CI",
+              "valeurs": [
+                148.83,
+                125.09,
+                88.01,
+                96.8,
+                151.3
+              ]
+            }
+          ]
+        },
+        {
           "type": "line",
           "titre": "PER à la clôture de chaque année (BPA consolidé)",
           "labels": [
@@ -579,7 +607,7 @@
             "2025"
           ],
           "unite": "x",
-          "note": "Pas de point pour Orange CI en 2021 : le titre n’était pas encore coté. Sur la part du groupe, les PER sont plus élevés (S&P Global). Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Pas de point pour Orange CI en 2021 : le titre n’était pas encore coté. Sur le résultat part du groupe, le PER de Sonatel serait plus élevé. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -615,7 +643,7 @@
             "2025"
           ],
           "unite": "%",
-          "note": "Dividende de l’exercice tel que publié ÷ dernier cours de l’année. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "note": "Dividende de l’exercice tel que publié ÷ dernier cours de l’année. Sources : comptes publiés par les sociétés et clôtures de la BRVM (base WESTBOURSE), exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
           "reel": true,
           "series": [
             {
@@ -653,7 +681,7 @@
       "type": "cas",
       "titre": "Marché et liquidité au 23 novembre 2026",
       "reel": true,
-      "contenu": "Trois PER circulent pour chaque opérateur, et ils sont tous justes. Sur le BPA consolidé 2025 et le cours du 23/11/2026 : 9,43 pour Sonatel, 17,06 pour Orange CI. Le Bulletin officiel de la cote du 20/11/2026 donnait 9,77 et 17,28 : c’est le même calcul au cours du 20 novembre (4 040 et 19 250 FCFA).\nStockAnalysis affiche 11,25 et 20,27 : un bénéfice sur douze mois glissants, en part du groupe. Même chose pour le rendement : 4,46 % et 3,70 % sur le dividende net 2025 et le cours du jour, quand Sika Finance affiche 6,66 % et 4,02 %.\nPour Sonatel, le chiffre de Sika Finance se retrouve en rapportant le même dividende net à la clôture 2025 : 174 ÷ 2 612 = 6,66 %. Même dividende, autre cours. Une analyse sérieuse dit toujours lequel elle utilise.",
+      "contenu": "Quatre PER se calculent pour Sonatel, et ils sont tous justes. Sur le BPA consolidé 2025 et le cours du 23/11/2026 : 9,43. Le Bulletin officiel de la cote du 20/11/2026 donnait 9,77 : le même calcul au cours du 20 novembre (4 040 FCFA). Sur douze mois glissants : 8,54. Sur le résultat part du groupe 2025 : 11,40.\nPour Orange Côte d’Ivoire, les mêmes calculs donnent 17,06 sur l’exercice 2025, 17,28 au cours du 20/11/2026 et 15,07 sur douze mois glissants ; la part du groupe n’est pas en base. Même chose pour le rendement de Sonatel : 4,46 % sur le cours du jour, mais 6,66 % sur la clôture 2025 (174 ÷ 2 612). Même dividende, autre cours.\nUne analyse sérieuse dit toujours lequel elle utilise. WESTBOURSE affiche, pour chaque ratio, le cours, la période et le bénéfice retenus.",
       "tableau": {
         "colonnes": [
           "Indicateur",
@@ -687,10 +715,16 @@
             "Même calcul au cours du 20/11"
           ],
           [
-            "PER sur 12 mois glissants (StockAnalysis)",
-            "11,25",
-            "20,27",
-            "Part du groupe"
+            "PER sur 12 mois glissants (calcul WESTBOURSE)",
+            "8,54",
+            "15,07",
+            "SNTS moins chère"
+          ],
+          [
+            "PER sur le résultat part du groupe 2025",
+            "11,40",
+            "—",
+            "Comptes publiés par Sonatel"
           ],
           [
             "Dividende 2025 (FCFA)",
@@ -699,22 +733,28 @@
             "—"
           ],
           [
-            "Rendement net au 23/11/2026",
+            "Rendement net au cours du 23/11/2026",
             "4,46 %",
             "3,70 %",
             "SNTS +0,76 pt"
           ],
           [
-            "Rendement affiché par Sika Finance",
+            "Rendement à la clôture 2025",
             "6,66 %",
-            "4,02 %",
-            "Définition propre à Sika"
+            "5,61 %",
+            "Même dividende, cours de fin 2025"
           ],
           [
             "ROE consolidé 2025 (capitaux de clôture)",
             "29,6 %",
             "23,7 %",
             "SNTS +5,9 pts"
+          ],
+          [
+            "Marge d’exploitation 2025",
+            "34,8 %",
+            "24,0 %",
+            "SNTS +10,8 pts"
           ],
           [
             "Marge nette consolidée 2025",
@@ -729,10 +769,10 @@
             "ORAC distribue une plus grande part"
           ],
           [
-            "Bêta sur un an (StockAnalysis)",
-            "1,37",
-            "1,35",
-            "Sensibilité au marché comparable"
+            "Dette financière nette fin 2025 (Md FCFA)",
+            "−133,4",
+            "110,1",
+            "SNTS en trésorerie nette"
           ],
           [
             "Titres échangés le 23/11/2026",
@@ -759,13 +799,13 @@
             "SNTS devant"
           ]
         ],
-        "note": "Cours, volumes, BPA et dividendes : base WESTBOURSE (clôtures de la BRVM, comptes publiés, calendrier des dividendes). Performances calculées sur nos clôtures aux dates indiquées ; d’autres sites retiennent d’autres dates de référence."
+        "note": "Cours, volumes, BPA et dividendes : base WESTBOURSE (clôtures de la BRVM, comptes publiés, calendrier officiel des dividendes). Performances calculées sur nos clôtures aux dates indiquées."
       },
       "encadres": [
         {
           "ton": "info",
-          "titre": "Pourquoi les sources ne donnent pas le même PER",
-          "texte": "Trois raisons, toujours les mêmes : la date du cours retenu, le bénéfice utilisé (exercice clos ou douze mois glissants, consolidé ou part du groupe) et, pour le rendement, la définition du dividende (brut ou net, de l’exercice ou versé dans l’année). C’est pourquoi ce cours présente les sources côte à côte, chacune avec sa définition."
+          "titre": "Pourquoi un même titre a plusieurs PER",
+          "texte": "Trois raisons, toujours les mêmes : la date du cours retenu, le bénéfice utilisé (exercice clos ou douze mois glissants, consolidé ou part du groupe) et, pour le rendement, la définition du dividende (brut ou net, de l’exercice ou versé dans l’année). C’est pourquoi ce cours présente les calculs côte à côte, chacun avec sa définition."
         }
       ],
       "simulation": {
@@ -794,7 +834,7 @@
         },
         {
           "titre": "Rentabilité",
-          "detail": "Marge nette consolidée de 21,5 % contre 14,0 %, ROE de 29,6 % contre 23,7 %, marge opérationnelle de 35,4 % contre 24,0 % (S&P Global) : Sonatel garde plus de chaque franc de chiffre d’affaires."
+          "detail": "Marge d’exploitation de 34,8 % contre 24,0 %, marge nette consolidée de 21,5 % contre 14,0 %, ROE de 29,6 % contre 23,7 % : Sonatel garde plus de chaque franc de chiffre d’affaires."
         },
         {
           "titre": "Croissance",
@@ -802,11 +842,15 @@
         },
         {
           "titre": "Valorisation",
-          "detail": "Sonatel se négocie à un PER de 9,43 à 11,25 selon la source, Orange CI de 17,06 à 20,27 : le marché paie plus cher chaque franc de bénéfice d’Orange CI."
+          "detail": "Sonatel se négocie entre 8,54 et 11,40 fois ses bénéfices selon le calcul retenu, Orange CI entre 15,07 et 17,06 : le marché paie plus cher chaque franc de bénéfice d’Orange CI."
         },
         {
           "titre": "Trésorerie et investissements",
-          "detail": "Capex 2025 : 318 milliards pour Sonatel (16,5 % du chiffre d’affaires), 184 pour Orange CI (15,4 %). Free cash flow : 364 et 151 milliards (S&P Global)."
+          "detail": "Investissements 2025 : 289,2 milliards pour Sonatel (15,0 % du chiffre d’affaires), 184,2 pour Orange CI (15,4 %). Free cash flow : 392,4 et 151,3 milliards."
+        },
+        {
+          "titre": "Endettement",
+          "detail": "Sonatel est en trésorerie nette (133,4 milliards fin 2025), Orange CI porte une dette financière nette de 110,1 milliards, soit 15,6 % de ses capitaux propres."
         },
         {
           "titre": "Liquidité boursière",
@@ -815,29 +859,25 @@
         {
           "titre": "Dividende",
           "detail": "Sonatel distribue 42 % de son BPA consolidé 2025 en dividende net, avec un dividende net en hausse de 5,6 % par an depuis 2021 ; Orange CI distribue 63 %, mais son rendement au cours du jour est plus faible après la hausse du titre."
-        },
-        {
-          "titre": "Tendance boursière 2026",
-          "detail": "Les deux titres progressent : +49,3 % pour Sonatel et +33,4 % pour Orange CI depuis le 1er janvier, dans une année où les deux résultats augmentent."
         }
       ]
     },
     {
       "type": "piege",
       "titre": "Avertissement de comparabilité",
-      "contenu": "Les PER et les rendements diffèrent selon les sources parce que les définitions et les dates varient. Mélanger un PER consolidé et un PER part du groupe, ou un rendement brut et un rendement net, fausse toute comparaison.",
+      "contenu": "Les PER, les rendements et la dette nette changent selon les définitions et les dates retenues. Mélanger un PER consolidé et un PER part du groupe, un rendement brut et un rendement net, ou une dette avec et sans dettes locatives, fausse toute comparaison.",
       "encadres": [
         {
           "ton": "alerte",
           "titre": "Toujours indiquer la source et la méthode",
-          "texte": "WESTBOURSE calcule ses ratios sur les comptes de l’exercice clos et le dernier cours ; StockAnalysis utilise douze mois glissants et la part du groupe ; Sika Finance affiche un rendement selon sa propre définition du dividende et du cours. Dans toute publication, écrivez lequel vous retenez."
+          "texte": "Pour chaque ratio, écrivez le cours retenu et sa date, la période du bénéfice (exercice clos ou douze mois glissants), le périmètre (consolidé ou part du groupe) et la base du dividende (brut ou net). Un chiffre repris ailleurs sans ces quatre précisions ne se compare à rien."
         }
       ]
     },
     {
       "type": "retenir",
       "titre": "Synthèse : Sonatel face à Orange Côte d’Ivoire",
-      "contenu": "Sonatel est plus grande, plus rentable, moins chère au regard du bénéfice et bien plus liquide ; son rendement du dividende est plus élevé. Elle présente un profil de rendement et de stabilité à grande échelle.\nOrange Côte d’Ivoire croît plus vite, sur trois marchés, et le marché lui accorde un PER plus élevé : elle présente un profil de croissance, payé plus cher.\nLe choix entre les deux profils dépend de l’objectif de chacun. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente."
+      "contenu": "Sonatel est plus grande, plus rentable, moins chère au regard du bénéfice et bien plus liquide ; elle dispose d’une trésorerie nette et son rendement du dividende est plus élevé. Elle présente un profil de rendement et de stabilité à grande échelle.\nOrange Côte d’Ivoire croît plus vite, sur trois marchés, et le marché lui accorde un PER plus élevé : elle présente un profil de croissance, payé plus cher.\nLe choix entre les deux profils dépend de l’objectif de chacun. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente."
     }
   ],
   "quiz": [
@@ -856,7 +896,7 @@
       "question": "Au cours du 20/11/2026 (4 040 FCFA) et avec un BPA consolidé de 413,60 FCFA, quel PER obtient-on pour Sonatel ?",
       "options": [
         "9,43",
-        "11,25",
+        "8,54",
         "9,77",
         "6,32"
       ],
@@ -864,15 +904,15 @@
       "explication": "4 040 ÷ 413,60 = 9,77, le chiffre du Bulletin officiel de la cote du 20/11/2026."
     },
     {
-      "question": "Pourquoi StockAnalysis affiche-t-il un PER plus élevé pour Sonatel que celui calculé sur les comptes 2025 ?",
+      "question": "Pourquoi le PER de Sonatel calculé sur le résultat part du groupe (11,40) dépasse-t-il celui calculé sur le résultat consolidé (9,43) ?",
       "options": [
-        "Parce qu’il utilise un cours plus ancien",
-        "Parce qu’il retient un autre bénéfice, en part du groupe et sur douze mois",
-        "Parce qu’il ignore le fractionnement d’octobre 2026 et garde l’ancien nombre d’actions",
-        "Parce qu’il ajoute le dividende au cours"
+        "Parce que le cours retenu est plus ancien",
+        "Parce que la part du groupe, sans les minoritaires, est un bénéfice plus petit",
+        "Parce que le fractionnement d’octobre 2026 n’a pas été pris en compte dans le calcul du BPA",
+        "Parce que le dividende est ajouté au cours"
       ],
       "correct": 1,
-      "explication": "Un bénéfice plus petit (part du groupe) au dénominateur donne un PER plus grand : la différence vient de la définition, pas d’une erreur."
+      "explication": "Au même cours, un bénéfice plus petit donne un PER plus grand : 342,0 milliards en part du groupe contre 413,6 en consolidé."
     },
     {
       "question": "Quelle société croît le plus vite en 2025 et sur les neuf premiers mois de 2026 ?",
@@ -886,15 +926,15 @@
       "explication": "Orange CI : +10,4 % de chiffre d’affaires en 2025 et +18,7 % de résultat sur neuf mois 2026."
     },
     {
-      "question": "88 961 titres Sonatel échangés contre 2 509 titres Orange CI le même jour. Qu’en déduire ?",
+      "question": "Fin 2025, Sonatel doit 402,7 milliards de dettes financières et détient 536,1 milliards de disponibilités. Que vaut sa dette financière nette ?",
       "options": [
-        "Qu’Orange CI est plus chère",
-        "Qu’un ordre important s’exécute plus facilement sur Sonatel",
-        "Que Sonatel verse chaque année un dividende plus élevé que celui d’Orange Côte d’Ivoire",
-        "Que les deux titres sont aussi liquides"
+        "938,8 milliards",
+        "−133,4 milliards",
+        "402,7 milliards",
+        "Elle ne se calcule pas pour un opérateur"
       ],
       "correct": 1,
-      "explication": "Un volume élevé signifie qu’un ordre trouve plus facilement une contrepartie sans déplacer le cours."
+      "explication": "402,7 − 536,1 = −133,4 milliards : une dette nette négative, c’est-à-dire une trésorerie nette."
     }
   ],
   "qcm": {

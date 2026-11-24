@@ -134,7 +134,7 @@ describe('module 0 — chiffres recalculés depuis les sources', () => {
   };
   const SRC = JSON.parse(readFileSync(`${DIR}sources/cours-complet-2026-11-23.json`, 'utf-8')) as {
     societes: Record<'ECOC' | 'SGBC' | 'SNTS' | 'ORAC', Societe>;
-    tiers: { bceao: { solvabilite_minimum_pct: number } };
+    bceao: { solvabilite_minimum_pct: number };
   };
   const ANS = ['2021', '2022', '2023', '2024', '2025'];
   const fr = (n: number, d: number) => {
@@ -151,7 +151,8 @@ describe('module 0 — chiffres recalculés depuis les sources', () => {
     expect(texte('l00e')).toContain(`le PER ressort à ${fr(SGBC.cours['2026-11-23']! / a(SGBC).bpa, 2)}`);
     const boc = [SNTS, ORAC].map((s) => fr(s.cours['2026-11-20']! / a(s).bpa, 2));
     expect(boc).toEqual(['9,77', '17,28']); // chiffres imprimés dans le Bulletin officiel de la cote du 20/11/2026
-    expect(texte('l00g')).toContain(`donnait ${boc[0]} et ${boc[1]}`);
+    expect(texte('l00g')).toContain(`donnait ${boc[0]} :`);
+    expect(texte('l00g')).toContain(`${boc[1]} au cours du 20/11/2026`);
   });
 
   it('ROE de clôture et ROE moyen, TCAM du PNB (n = 4 années, pas 5)', () => {
@@ -178,15 +179,16 @@ describe('module 0 — chiffres recalculés depuis les sources', () => {
 
   it('les graphiques réels reproduisent les séries des sources, années manquantes laissées vides', () => {
     const g = lecon('l00d').sections.flatMap((s) => s.graphiques);
+    expect(g[0]!.series.map((x) => x.nom)).toEqual(['PNB', 'Résultat brut d’exploitation', 'Coût du risque', 'Résultat net']);
     expect(g[0]!.series[0]!.valeurs).toEqual(ANS.map((y) => a(ECOC, y).revenu));
-    expect(g[0]!.series[1]!.valeurs).toEqual(ANS.map((y) => a(ECOC, y).rn));
+    expect(g[0]!.series[3]!.valeurs).toEqual(ANS.map((y) => a(ECOC, y).rn));
     const per = lecon('l00g').sections.flatMap((s) => s.graphiques).find((c) => c.titre.startsWith('PER'))!;
     expect(per.series[1]!.valeurs[0]).toBeNull(); // ORAC n’était pas coté en 2021
     expect(per.series[0]!.valeurs).toEqual(ANS.map((y) => Number((a(SNTS, y).cloture! / a(SNTS, y).bpa).toFixed(2))));
   });
 
   it('corrections du cours source : solvabilité 11,5 %, Orange CI cotée fin 2022, part du groupe nommée', () => {
-    const min = `${fr(SRC.tiers.bceao.solvabilite_minimum_pct, 1)} %`;
+    const min = `${fr(SRC.bceao.solvabilite_minimum_pct, 1)} %`;
     expect(texte('l00c')).toContain(min);
     expect(texte('l00c')).not.toMatch(/minimum[^.]{0,60}12,5 %/);
     expect(texte('l00g')).not.toMatch(/cotée[^.]{0,30}2017/);
@@ -199,5 +201,33 @@ describe('module 0 — chiffres recalculés depuis les sources', () => {
       expect(brut, f).not.toMatch(/\b(achetez|vendez|conservez|à acheter|à vendre|objectif de cours de)\b/i);
       expect(brut, f).not.toMatch(/Why it matters/);
     }
+  });
+
+  it('aucun site d’information tiers cité, WESTBOURSE mis en avant (choix éditorial du 2026-11-24)', () => {
+    for (const [f, , brut] of MODULE0) expect(brut, f).not.toMatch(/sika|rich ?bourse|stockanalysis|S&P|FGI|CGF|allAfrica|Daba/i);
+    expect(readFileSync(`${DIR}sources/cours-complet-2026-11-23.json`, 'utf-8')).not.toMatch(/"tiers"|stockanalysis|sika_finance/i);
+    const sources = lecon('l00a').sections.find((s) => s.titre.startsWith('Les sources'))!;
+    expect(sources.etapes.map((e) => e.titre)).toContain('WESTBOURSE');
+  });
+
+  it('PER sur 12 mois glissants : exercice − période 2025 + période 2026', () => {
+    const glissant = (s: Societe & { interim: Record<string, { rn: number }> }, p: string) => {
+      const rn = a(s).rn - s.interim[`2025-${p}`]!.rn + s.interim[`2026-${p}`]!.rn;
+      return fr(s.cours['2026-11-23']! / ((rn * 1e9) / s.titres), 2);
+    };
+    const S = SRC.societes as unknown as Record<string, Societe & { interim: Record<string, { rn: number }> }>;
+    expect(texte('l00d')).toContain(`le PER glissant monte à ${glissant(S.ECOC!, 'S1')}`);
+    expect(texte('l00g')).toContain(`Sur douze mois glissants : ${glissant(S.SNTS!, 'T3')}`);
+  });
+
+  it('dette nette et free cash flow de Sonatel 2025 : recalculés sur les comptes officiels relus sur le PDF', () => {
+    const off = JSON.parse(readFileSync(`${DIR}sources/sonatel-2025.json`, 'utf-8')) as {
+      bilan_passif: Record<string, number[]>; bilan_actif: Record<string, number[]>; flux_de_tresorerie: Record<string, number[]>;
+    };
+    const dettes = (off.bilan_passif['Passifs financiers non courants']![0]! + off.bilan_passif['Passifs financiers courants']![0]!) / 1000;
+    const dispo = off.bilan_actif['Disponibilités et quasi-disponibilités']![0]! / 1000;
+    expect(texte('l00b')).toContain(`sa dette financière nette est de ${fr(dettes - dispo, 1)} milliards, c’est-à-dire une trésorerie nette`);
+    const fcf = (off.flux_de_tresorerie['Trésorerie générée par les activités d’exploitation']![0]! + off.flux_de_tresorerie['Acquisitions d’immobilisations corporelles et incorporelles']![0]!) / 1000;
+    expect(texte('l00g')).toContain(`${fr(fcf, 1)} milliards de free cash flow en 2025`);
   });
 });
