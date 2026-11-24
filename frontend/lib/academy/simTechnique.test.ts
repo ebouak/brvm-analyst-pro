@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SaisieInvalide } from './simulateurs';
-import { lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, rsiPasAPas, type PointSerie } from './simTechnique';
+import { atelierMacd, lectureMacd, lectureMoyennes, lectureRsi, lectureVariation, lireBougie, moyenneGlissante, rsiPasAPas, type PointSerie } from './simTechnique';
 import { rsiSeries } from '@/lib/indicators';
 
 /** Série synthétique : n séances, cours donné par f(i). */
@@ -217,13 +217,50 @@ describe('MACD', () => {
     const r = lectureMacd(serie(120, (i) => 1_000 + 0.05 * i * i));
     expect(r.etat).toBe('positif_croissant');
     expect(r.dernier.macd).toBeGreaterThan(0);
+    expect(r.dernier.macdPct).toBeCloseTo((r.dernier.macd / r.dernier.cours) * 100, 9);
+    expect(r.points.at(-1)!.cours).toBe(r.dernier.cours);
   });
   it('hausse qui s’essouffle : positif et décroissant', () => {
     const r = lectureMacd(serie(115, (i) => (i <= 110 ? 1_000 + 0.05 * i * i : 1_605 + 11 * (i - 110))));
     expect(r.etat).toBe('positif_decroissant');
   });
+  it('paramètres personnalisés acceptés, alerte affichée et pluriel propre', () => {
+    const s = serie(120, (i) => 1_000 + 80 * Math.sin(i / 8) + i);
+    const r = lectureMacd(s, 6, 13, 5);
+    expect(r.alertes.some((a) => /12, 26, 9/.test(a))).toBe(true);
+    expect(r.lecture).not.toMatch(/séance\(s\)/);
+    expect(r.lecture).not.toMatch(/achet|vend/i);
+  });
   it('historique trop court refusé', () => {
     expect(() => lectureMacd(serie(30, (i) => i + 1))).toThrow(SaisieInvalide);
+  });
+});
+
+describe('atelier : le MACD pas à pas', () => {
+  const PAS = [100, 100, 101, 102, 103, 105, 108, 112, 115, 116, 114, 111];
+  const FIGE = [100, 100, 102, 105, 109, 114, 120, 120, 120, 120, 120, 120];
+  it('rien avant la 6e séance pour le MACD, premier histogramme à la 8e (6 + 3 − 1)', () => {
+    const r = atelierMacd(PAS, 3, 6, 3);
+    expect(r.seancesMin).toBe(8);
+    expect(r.lignes.slice(0, 5).every((l) => l.macd == null && l.hist == null)).toBe(true);
+    expect(r.lignes[5]!.macd).not.toBeNull();
+    expect(r.lignes[5]!.hist).toBeNull();
+    expect(r.lignes[7]!.hist).toBeGreaterThan(0);
+    expect(r.lignes[10]!.hist).toBeLessThan(0);
+    expect(r.etat).toBe('negatif_decroissant');
+    expect(r.lecture).not.toMatch(/achet|vend/i);
+  });
+  it('scénario cours figé : histogramme négatif malgré un prix constant à 120', () => {
+    const r = atelierMacd(FIGE, 3, 6, 3);
+    const dernier = r.lignes.at(-1)!;
+    expect(dernier.macd).toBeGreaterThan(0);
+    expect(dernier.hist).toBeLessThan(0);
+    expect(r.lecture).toMatch(/cours est pourtant resté figé|cours figé/);
+  });
+  it('refuse des paramètres incohérents ou un cours non positif', () => {
+    expect(() => atelierMacd(PAS, 6, 6, 3)).toThrow(SaisieInvalide);
+    expect(() => atelierMacd(PAS.slice(0, 6), 3, 6, 3)).toThrow(SaisieInvalide);
+    expect(() => atelierMacd([100, 0, 101, 102, 103, 104, 105, 106, 107], 3, 6, 3)).toThrow(SaisieInvalide);
   });
 });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useState } from 'react';
-import { Bar, CartesianGrid, ComposedChart, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, CartesianGrid, Cell, ComposedChart, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { Simulation } from '@/lib/academy/types';
 import { SaisieInvalide } from '@/lib/academy/simulateurs';
 import {
@@ -88,6 +88,9 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
   const [periode, setPeriode] = useState(sim.periode);
   const [haut, setHaut] = useState(sim.seuil_haut);
   const [bas, setBas] = useState(sim.seuil_bas);
+  const [rapide, setRapide] = useState(sim.rapide);
+  const [lente, setLente] = useState(sim.lente);
+  const [signal, setSignal] = useState(sim.signal);
   const [fenetre, setFenetre] = useState(120);
 
   const points = serie.etat === 'pret' ? serie.points : [];
@@ -99,9 +102,20 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
         ? essayer(() => lectureMoyennes(points, courte, Math.max(longue, courte + 1), methode))
         : sim.indicateur === 'rsi'
           ? essayer(() => lectureRsi(points, periode, haut, bas))
-          : essayer(() => lectureMacd(points));
+          : essayer(() => lectureMacd(points, rapide, Math.max(lente, rapide + 1), signal));
   const derniere = points.at(-1) ?? null;
-  const reinit = () => { setCourte(sim.courte); setLongue(sim.longue); setMethode(sim.methode); setPeriode(sim.periode); setHaut(sim.seuil_haut); setBas(sim.seuil_bas); setFenetre(120); };
+  const reinit = () => {
+    setCourte(sim.courte);
+    setLongue(sim.longue);
+    setMethode(sim.methode);
+    setPeriode(sim.periode);
+    setHaut(sim.seuil_haut);
+    setBas(sim.seuil_bas);
+    setRapide(sim.rapide);
+    setLente(sim.lente);
+    setSignal(sim.signal);
+    setFenetre(120);
+  };
   const prefixe = methode === 'exponentielle' ? 'Moyenne exponentielle' : 'Moyenne';
 
   return (
@@ -140,6 +154,13 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
               <Curseur id={`${id}-p`} label="Période du RSI" min={5} max={30} value={periode} onChange={setPeriode} />
               <Curseur id={`${id}-h`} label="Seuil haut" min={60} max={90} step={5} value={haut} onChange={setHaut} unite="" />
               <Curseur id={`${id}-b`} label="Seuil bas" min={10} max={40} step={5} value={bas} onChange={setBas} unite="" />
+            </>
+          )}
+          {sim.indicateur === 'macd' && (
+            <>
+              <Curseur id={`${id}-mr`} label="Moyenne rapide" min={5} max={20} value={rapide} onChange={(n) => { setRapide(n); if (lente <= n) setLente(n + 1); }} />
+              <Curseur id={`${id}-ml2`} label="Moyenne lente" min={15} max={50} value={lente} onChange={(n) => { setLente(n); if (rapide >= n) setRapide(n - 1); }} />
+              <Curseur id={`${id}-ms`} label="Ligne de signal" min={4} max={20} value={signal} onChange={setSignal} />
             </>
           )}
         </div>
@@ -209,25 +230,48 @@ export default function SimulateurTechnique({ sim }: { sim: Sim }) {
 
       {calc && calc.ok && sim.indicateur === 'macd' && 'etat' in calc.r && (
         <>
-          <div className="lp-graphe" role="img" aria-label={`MACD 12, 26, 9 de ${code} : ligne MACD, ligne de signal et histogramme.`}>
+          <div className="lp-graphe lp-graphe--court" role="img" aria-label={`Cours de clôture de ${code} sur les ${fenetre} dernières séances.`}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={calc.r.points.slice(-fenetre)} margin={{ top: 10, right: 12, left: 4, bottom: 4 }}>
+              <LineChart syncId={`${id}-macd`} data={calc.r.points.slice(-fenetre)} margin={{ top: 10, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid stroke={COULEUR.trame} vertical={false} />
+                <XAxis dataKey="date" {...axeX} hide />
+                <YAxis {...axeY} domain={['auto', 'auto']} tickFormatter={(v: number) => nombre(v)} />
+                <Tooltip {...bulle} labelFormatter={(d: string) => dateSeanceLongue(d)} formatter={(v: number) => [`${nombre(v)} FCFA`, 'Clôture']} />
+                <Line dataKey="cours" stroke={COULEUR.cours} strokeWidth={1.8} dot={false} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="lp-graphe" role="img" aria-label={`MACD ${rapide}, ${lente}, ${signal} de ${code} : ligne MACD, ligne de signal et histogramme.`}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart syncId={`${id}-macd`} data={calc.r.points.slice(-fenetre)} margin={{ top: 6, right: 12, left: 4, bottom: 4 }}>
                 <CartesianGrid stroke={COULEUR.trame} vertical={false} />
                 <XAxis dataKey="date" {...axeX} />
                 <YAxis {...axeY} tickFormatter={(v: number) => nombre(v, 1)} />
                 <ReferenceLine y={0} stroke={COULEUR.axe} />
                 <Tooltip {...bulle} labelFormatter={(d: string) => dateSeanceLongue(d)} formatter={(v: number, n: string) => [nombre(v, 2), n === 'hist' ? 'Histogramme' : n === 'macd' ? 'MACD' : 'Signal']} />
-                <Bar dataKey="hist" fill={COULEUR.axe} opacity={0.45} isAnimationActive={false} />
+                <Bar dataKey="hist" isAnimationActive={false}>
+                  {calc.r.points.slice(-fenetre).map((pt) => (
+                    <Cell key={pt.date} fill={(pt.hist ?? 0) >= 0 ? COULEUR.a : COULEUR.b} fillOpacity={0.45} />
+                  ))}
+                </Bar>
                 <Line dataKey="macd" stroke={COULEUR.a} strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
                 <Line dataKey="signal" stroke={COULEUR.b} strokeWidth={2} strokeDasharray="5 4" dot={false} isAnimationActive={false} connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
           <div className="lp-legende" aria-hidden="true">
-            <span><i style={{ background: COULEUR.a }} />Ligne MACD</span>
-            <span><i style={{ background: COULEUR.b }} />Ligne de signal</span>
-            <span><i style={{ background: COULEUR.axe }} />Histogramme</span>
+            <span><i style={{ background: COULEUR.cours }} />Cours de clôture</span>
+            <span><i style={{ background: COULEUR.a }} />Ligne MACD ({rapide}, {lente})</span>
+            <span><i style={{ background: COULEUR.b }} />Ligne de signal ({signal})</span>
+            <span><i style={{ background: COULEUR.a, opacity: 0.45 }} />Histogramme (+) / (−)</span>
           </div>
+          <dl className="lp-synthese">
+            <div><dt>Dernier cours</dt><dd>{nombre(calc.r.dernier.cours)} FCFA</dd></div>
+            <div><dt>Ligne MACD</dt><dd>{nombre(calc.r.dernier.macd, 2).replace('-', '−')}</dd></div>
+            <div><dt>Signal</dt><dd>{nombre(calc.r.dernier.signal, 2).replace('-', '−')}</dd></div>
+            <div><dt>Histogramme</dt><dd>{nombre(calc.r.dernier.hist, 2).replace('-', '−')}</dd></div>
+            <div><dt>MACD / cours</dt><dd>{pct(calc.r.dernier.macdPct)}</dd></div>
+          </dl>
         </>
       )}
 

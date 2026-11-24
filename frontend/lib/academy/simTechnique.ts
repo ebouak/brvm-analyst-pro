@@ -400,10 +400,29 @@ export const LECTURE_HISTOGRAMME: Record<LectureHistogramme, string> = {
 };
 
 export interface ResultatMacd extends Lecture {
-  points: { date: string; macd: number | null; signal: number | null; hist: number | null }[];
+  points: { date: string; cours: number; macd: number | null; signal: number | null; hist: number | null }[];
   etat: LectureHistogramme;
-  dernier: { macd: number; signal: number; hist: number };
+  dernier: { cours: number; macd: number; signal: number; hist: number; macdPct: number };
   seancesDepuisCroisement: number | null;
+  seancesDepuisZero: number | null;
+}
+
+function dernierChangementSigne(vals: (number | null)[]): number | null {
+  let signeActuel = 0;
+  for (let i = vals.length - 1; i >= 0; i--) {
+    const v = vals[i];
+    if (v == null) break;
+    const s = Math.sign(v);
+    if (s === 0) continue;
+    if (signeActuel === 0) {
+      signeActuel = s;
+    } else if (s !== signeActuel) {
+      let k = i + 1;
+      while (k < vals.length && (vals[k] == null || Math.sign(vals[k]!) === 0)) k++;
+      return vals.length - 1 - k;
+    }
+  }
+  return null;
 }
 
 export function lectureMacd(serie: PointSerie[], rapide = 12, lente = 26, signal = 9): ResultatMacd {
@@ -413,26 +432,114 @@ export function lectureMacd(serie: PointSerie[], rapide = 12, lente = 26, signal
   const s = nettoyerSerie(serie);
   if (s.length < lente + signal + 2) throw new SaisieInvalide(`Historique insuffisant : il faut au moins ${lente + signal + 2} séances cotées.`);
   const m = macdSeries(s.map((p) => p.cours), rapide, lente, signal);
-  const points = s.map((p, i) => ({ date: p.date, ...m[i]! }));
+  const points = s.map((p, i) => ({ date: p.date, cours: p.cours, ...m[i]! }));
   const d = m[m.length - 1]!;
   const p = m[m.length - 2]!;
+  const dernierCours = s[s.length - 1]!.cours;
   if (d.hist == null || p.hist == null || d.macd == null || d.signal == null) throw new SaisieInvalide('Historique insuffisant pour lire l’histogramme.');
   const etat: LectureHistogramme = d.hist >= 0 ? (d.hist >= p.hist ? 'positif_croissant' : 'positif_decroissant') : (d.hist <= p.hist ? 'negatif_decroissant' : 'negatif_croissant');
-  let seancesDepuisCroisement: number | null = null;
-  for (let i = m.length - 1; i > 0; i--) {
-    const a = m[i]!.hist;
-    const b = m[i - 1]!.hist;
-    if (a == null || b == null) break;
-    if (Math.sign(a) !== Math.sign(b)) { seancesDepuisCroisement = m.length - 1 - i; break; }
-  }
-  let lecture = `Histogramme ${LECTURE_HISTOGRAMME[etat]}. Ligne MACD ${d.macd >= 0 ? 'positive' : 'négative'} : la moyenne courte est ${d.macd >= 0 ? 'au-dessus' : 'en dessous'} de la longue.`;
+  const seancesDepuisCroisement = dernierChangementSigne(m.map((x) => x.hist));
+  const seancesDepuisZero = dernierChangementSigne(m.map((x) => x.macd));
+  const macdPct = (d.macd / dernierCours) * 100;
+  let lecture =
+    `Histogramme ${LECTURE_HISTOGRAMME[etat]}. ` +
+    `Ligne MACD ${d.macd >= 0 ? 'positive' : 'négative'} (${nb(d.macd, 2).replace('-', '−')}, soit ${fmtPct(macdPct)} du cours) : ` +
+    `la moyenne courte (${rapide}) est ${d.macd >= 0 ? 'au-dessus' : 'en dessous'} de la longue (${lente}).`;
   if (seancesDepuisCroisement != null) {
-    lecture += ` Les lignes MACD et signal se sont croisées il y a ${nb(seancesDepuisCroisement)} séance(s) ; ce croisement hérite du retard des moyennes.`;
+    const quand =
+      seancesDepuisCroisement === 0
+        ? 'à la dernière séance'
+        : `il y a ${nb(seancesDepuisCroisement)} séance${seancesDepuisCroisement > 1 ? 's' : ''}`;
+    lecture += ` Les lignes MACD et signal se sont croisées ${quand} ; ce croisement hérite du retard des moyennes.`;
+  }
+  if (seancesDepuisZero != null) {
+    const quandZ =
+      seancesDepuisZero === 0
+        ? 'à la dernière séance'
+        : `il y a ${nb(seancesDepuisZero)} séance${seancesDepuisZero > 1 ? 's' : ''}`;
+    lecture += ` Dernier franchissement de la ligne zéro ${quandZ}.`;
   }
   lecture += ` ${CONCLUSION}`;
   const alertes: string[] = [];
   if (rapide !== 12 || lente !== 26 || signal !== 9) alertes.push('Paramètres différents des réglages usuels (12, 26, 9) : la lecture n’est plus comparable à celle des autres outils.');
-  return { points, etat, dernier: { macd: d.macd, signal: d.signal, hist: d.hist }, seancesDepuisCroisement, lecture, alertes };
+  if (rapide < 6) alertes.push('Une moyenne rapide aussi courte suit presque chaque séance : les croisements se multiplient.');
+  return {
+    points,
+    etat,
+    dernier: { cours: dernierCours, macd: d.macd, signal: d.signal, hist: d.hist, macdPct },
+    seancesDepuisCroisement,
+    seancesDepuisZero,
+    lecture,
+    alertes,
+  };
+}
+
+// ── Atelier : le MACD pas à pas (clôtures saisies) ──────────────────────────
+
+export interface LigneAtelierMacd {
+  seance: number;
+  cloture: number;
+  emaRapide: number | null;
+  emaLente: number | null;
+  macd: number | null;
+  signal: number | null;
+  hist: number | null;
+}
+
+export interface ResultatAtelierMacd extends Lecture {
+  lignes: LigneAtelierMacd[];
+  rapide: number;
+  lente: number;
+  signal: number;
+  seancesMin: number;
+  etat: LectureHistogramme;
+}
+
+export function atelierMacd(clotures: number[], rapide = 3, lente = 6, signal = 3): ResultatAtelierMacd {
+  if (!(Number.isInteger(rapide) && Number.isInteger(lente) && Number.isInteger(signal) && rapide >= 2 && lente > rapide && signal >= 2)) {
+    throw new SaisieInvalide('La moyenne rapide doit compter moins de séances que la lente (au moins 2).');
+  }
+  const seancesMin = lente + signal - 1;
+  if (clotures.length < seancesMin + 1) {
+    throw new SaisieInvalide(`Il faut au moins ${seancesMin + 1} clôtures pour lire l’évolution de l’histogramme.`);
+  }
+  if (clotures.some((c) => !(Number.isFinite(c) && c > 0))) {
+    throw new SaisieInvalide('Chaque clôture doit être un cours positif.');
+  }
+  const er = emaSeries(clotures, rapide);
+  const el = emaSeries(clotures, lente);
+  const m = macdSeries(clotures, rapide, lente, signal);
+  const lignes: LigneAtelierMacd[] = clotures.map((cloture, i) => ({
+    seance: i + 1,
+    cloture,
+    emaRapide: er[i] ?? null,
+    emaLente: el[i] ?? null,
+    macd: m[i]!.macd,
+    signal: m[i]!.signal,
+    hist: m[i]!.hist,
+  }));
+  const d = lignes[lignes.length - 1]!;
+  const p = lignes[lignes.length - 2]!;
+  const etat: LectureHistogramme =
+    d.hist! >= 0
+      ? d.hist! >= p.hist!
+        ? 'positif_croissant'
+        : 'positif_decroissant'
+      : d.hist! <= p.hist!
+        ? 'negatif_decroissant'
+        : 'negatif_croissant';
+
+  const nDernieres = clotures.slice(-4);
+  const coursFige = nDernieres.every((x) => x === nDernieres[0]);
+  let lecture =
+    `Avec les réglages (${rapide}, ${lente}, ${signal}), la première ligne MACD apparaît à la séance ${lente} et le premier histogramme à la séance ${seancesMin} (${lente} + ${signal} − 1). ` +
+    `À la séance ${d.seance}, l’histogramme (${nb(d.hist!, 2).replace('-', '−')}) est ${LECTURE_HISTOGRAMME[etat]}.`;
+  if (coursFige && d.hist! < 0 && d.macd! > 0) {
+    lecture += ' Le cours est pourtant resté figé sans baisser : les deux moyennes se rattrapent mécaniquement et fabriquent un croisement baissier sans aucun vendeur.';
+  } else if (coursFige) {
+    lecture += ' Sur un cours figé, les deux moyennes se rapprochent mécaniquement du prix et le MACD tend vers zéro.';
+  }
+  return { lignes, rapide, lente, signal, seancesMin, etat, lecture, alertes: [] };
 }
 
 // ── Chandelier japonais (hypothèses saisies) ─────────────────────────────────
