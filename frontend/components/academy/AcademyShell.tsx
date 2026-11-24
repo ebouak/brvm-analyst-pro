@@ -10,6 +10,8 @@ import LessonContent from './LessonContent';
 import ToolsPanel from './ToolsPanel';
 import SlideDeck from './SlideDeck';
 import LessonVideo from './LessonVideo';
+import BadgeNouveaute from './BadgeNouveaute';
+import { badgeEnsemble, badgeNouveaute } from '@/lib/academy/nouveaute';
 
 /**
  * Shell d'apprentissage type Coursera :
@@ -247,17 +249,22 @@ function Sommaire({
   idx: number;
   goTo: (i: number) => void;
 }) {
+  // Badge « Nouveau » / « Mis à jour » : s'éteint seul (lib/academy/nouveaute.ts).
+  const maintenant = new Date();
   return (
     <ol className="mt-2 space-y-1 lg:mt-0">
       {lessons.map((l, i) => {
         const st = progress[i];
         // En-tête de module quand il change (organisation par niveau → modules).
         const showModule = l.module && l.module !== lessons[i - 1]?.module;
+        const badgeModule = showModule ? badgeEnsemble(lessons.filter((x) => x.module === l.module), maintenant) : null;
+        const badge = badgeNouveaute(l.nouveaute, maintenant);
         return (
           <li key={i}>
             {showModule && (
-              <p className="mb-1 mt-3 px-1 text-xs font-semibold text-faint first:mt-0">
+              <p className="mb-1 mt-3 flex flex-wrap items-center gap-1.5 px-1 text-xs font-semibold text-faint first:mt-0">
                 {l.module}
+                {badgeModule && <BadgeNouveaute badge={badgeModule} />}
               </p>
             )}
             <button
@@ -280,9 +287,10 @@ function Sommaire({
               </span>
               <span className="min-w-0">
                 <span className="block truncate">{l.titre}</span>
-                <span className="text-[11px] text-faint">
+                <span className="flex flex-wrap items-center gap-1.5 text-[11px] text-faint">
                   {l.duree_min ? `${l.duree_min} min` : 'leçon'}
                   {l.quiz?.length || l.qcm ? ' · quiz' : ''}
+                  {badge && <BadgeNouveaute badge={badge} />}
                 </span>
               </span>
             </button>

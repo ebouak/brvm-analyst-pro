@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { Clock, Lock } from 'lucide-react';
+import { badgeEnsemble, type Nouveaute } from '@/lib/academy/nouveaute';
+import BadgeNouveaute from './BadgeNouveaute';
 
 /**
  * Aperçu d'un niveau de l'Academy pour qui ne l'a pas encore acheté
@@ -15,6 +17,8 @@ export interface LeconApercu {
   resume: string;
   duree_min?: number | null;
   sections: { titre: string }[];
+  /** Badge « Nouveau » / « Mis à jour » (lib/academy/nouveaute.ts). */
+  nouveaute?: Nouveaute | null;
 }
 
 export default function ApercuCours({
@@ -80,7 +84,13 @@ export default function ApercuCours({
         <div className="mt-4 space-y-4">
           {modules.map((m) => (
             <div key={m.nom}>
-              <h3 className="text-xs font-semibold text-ivory">{m.nom}</h3>
+              <h3 className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-ivory">
+                {m.nom}
+                {(() => {
+                  const b = badgeEnsemble(m.lecons.map(({ l: x }) => x), new Date());
+                  return b ? <BadgeNouveaute badge={b} /> : null;
+                })()}
+              </h3>
               <ul className="mt-2 space-y-1.5">
                 {m.lecons.map(({ n, l: lecon }) => (
                   <li key={n}>

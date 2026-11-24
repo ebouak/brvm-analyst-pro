@@ -16,19 +16,24 @@ export const NIVEAUX = ['debutant', 'intermediaire', 'avance', 'expert'] as cons
 export type Niveau = (typeof NIVEAUX)[number];
 
 /** Bloc « chiffres clés » — rangée de cartes KPI sous le texte de la section. */
+// ── PLAFONDS (relevés le 2026-11-23, demande de l'exploitant) ──
+// Les anciens plafonds (12 sections, 12 lignes de tableau, 3 formules par
+// section, une seule série par graphique, aucune année sans donnée) empêchaient
+// d'intégrer un cours complet. Ils sont relevés largement, pas supprimés : ils
+// bornent aussi la sortie des LLM de génération (lib/academy/generate.ts).
 export const statSchema = z.object({
-  label: z.string().min(1).max(60),
-  valeur: z.string().min(1).max(40),
+  label: z.string().min(1).max(120),
+  valeur: z.string().min(1).max(80),
   /** Précision optionnelle sous la valeur (ex. « contre 836 Md en 1998 »). */
-  detail: z.string().max(120).optional().default(''),
+  detail: z.string().max(300).optional().default(''),
 });
 
 /** Bloc tableau — colonnes + lignes de texte (rendu stylé, scroll horizontal). */
 export const tableauSchema = z
   .object({
-    colonnes: z.array(z.string().min(1).max(60)).min(2).max(6),
-    lignes: z.array(z.array(z.string().max(160))).min(1).max(12),
-    note: z.string().max(300).optional().default(''),
+    colonnes: z.array(z.string().min(1).max(120)).min(2).max(12),
+    lignes: z.array(z.array(z.string().max(600))).min(1).max(60),
+    note: z.string().max(1200).optional().default(''),
   })
   .refine((t) => t.lignes.every((l) => l.length === t.colonnes.length), {
     message: 'chaque ligne doit avoir autant de cellules que de colonnes',
@@ -36,8 +41,8 @@ export const tableauSchema = z
 
 /** Bloc étapes — frise numérotée verticale (phases de séance, parcours, dates). */
 export const etapeSchema = z.object({
-  titre: z.string().min(1).max(120),
-  detail: z.string().max(600).optional().default(''),
+  titre: z.string().min(1).max(200),
+  detail: z.string().max(1500).optional().default(''),
   /** Étape mise en avant (ex. la date de détachement). */
   cle: z.boolean().optional().default(false),
 });
@@ -47,9 +52,9 @@ export const etapeSchema = z.object({
 
 /** Formule clé, avec son exemple chiffré. */
 export const formuleSchema = z.object({
-  nom: z.string().min(1).max(80),
-  expression: z.string().min(1).max(160),
-  exemple: z.string().max(200).optional().default(''),
+  nom: z.string().min(1).max(160),
+  expression: z.string().min(1).max(400),
+  exemple: z.string().max(800).optional().default(''),
 });
 
 /** Pictogrammes disponibles pour le schéma de mécanisme (components/academy/lecon/Pictogramme). */
@@ -60,17 +65,28 @@ export type IconeFlux = (typeof ICONES_FLUX)[number];
 
 /** Étape d'un schéma de mécanisme (A → B → C), dessiné en chaîne. */
 export const fluxEtapeSchema = z.object({
-  titre: z.string().min(1).max(40),
-  detail: z.string().max(120).optional().default(''),
+  titre: z.string().min(1).max(80),
+  detail: z.string().max(300).optional().default(''),
   icone: z.enum(ICONES_FLUX),
 });
 
 /** Point d'une liste éditoriale numérotée (critère, piège, idée essentielle). */
 export const pointSchema = z.object({
-  titre: z.string().min(1).max(80),
-  detail: z.string().max(600).optional().default(''),
+  titre: z.string().min(1).max(200),
+  detail: z.string().max(1500).optional().default(''),
   /** « À vérifier » — ce que le lecteur doit contrôler (facultatif). */
-  verifier: z.string().max(160).optional().default(''),
+  verifier: z.string().max(400).optional().default(''),
+});
+
+/**
+ * Encadré éditorial (2026-11-23) : règle d'or, lecture clé, avertissement de
+ * comparabilité. `ton` ne règle que l'apparence ; il ne porte aucun verdict.
+ */
+export const TONS_ENCADRE = ['info', 'cle', 'attention', 'alerte'] as const;
+export const encadreSchema = z.object({
+  ton: z.enum(TONS_ENCADRE).optional().default('info'),
+  titre: z.string().min(1).max(200),
+  texte: z.string().min(1).max(4000),
 });
 
 /**
@@ -260,6 +276,38 @@ export const simulationSchema = z.discriminatedUnion('type', [
     frais_fixes_eur: z.number().min(0).max(10_000).optional().default(0),
     cours_action: z.number().min(0).max(10_000_000).optional().default(0),
   }),
+  // ── Simulateurs du module zéro (2026-11-23) ──
+  /** Croissance d'une année sur l'autre et taux de croissance annuel moyen (TCAM). */
+  z.object({
+    type: z.literal('croissance'),
+    consigne: consigneSchema,
+    valeur_initiale: z.number().positive().max(1e15),
+    valeur_finale: z.number().positive().max(1e15),
+    annees: z.number().int().min(1).max(50),
+    unite: z.string().min(1).max(20).optional().default('Md FCFA'),
+  }),
+  /** Entreprise non financière : dette nette, gearing, couverture des intérêts. */
+  z.object({
+    type: z.literal('endettement'),
+    consigne: consigneSchema,
+    dettes_financieres: z.number().min(0).max(1e15),
+    tresorerie: z.number().min(0).max(1e15),
+    capitaux_propres: z.number().positive().max(1e15),
+    resultat_operationnel: z.number().min(-1e15).max(1e15),
+    charges_interets: z.number().min(0).max(1e15),
+    unite: z.string().min(1).max(20).optional().default('Md FCFA'),
+  }),
+  /** ROE sur capitaux propres moyens contre ROE de clôture, et ROA. */
+  z.object({
+    type: z.literal('roe_moyen'),
+    consigne: consigneSchema,
+    resultat_net: z.number().min(-1e15).max(1e15),
+    capitaux_debut: z.number().positive().max(1e15),
+    capitaux_fin: z.number().positive().max(1e15),
+    actif_debut: z.number().positive().max(1e16).optional(),
+    actif_fin: z.number().positive().max(1e16).optional(),
+    unite: z.string().min(1).max(20).optional().default('Md FCFA'),
+  }),
   /** Indicateur technique sur une SÉRIE RÉELLE (/api/academy/serie). */
   z.object({
     type: z.literal('technique'),
@@ -323,60 +371,87 @@ export const donneesReellesSchema = z.object({
 });
 export type DonneesReellesSpec = z.infer<typeof donneesReellesSchema>;
 
-export const sectionSchema = z.object({
-  type: z.enum(SECTION_TYPES),
-  titre: z.string().min(1).max(120),
-  contenu: z.string().min(1).max(6000),
-  // ── Blocs structurés optionnels (mise en page riche type slide) ──
-  stats: z.array(statSchema).max(6).optional().default([]),
-  tableau: tableauSchema.nullable().optional(),
-  etapes: z.array(etapeSchema).max(8).optional().default([]),
-  // ── Blocs éditoriaux ──
-  /** Une section `cas` ne s'intitule « Cas réel BRVM » que si elle l'est. */
-  reel: z.boolean().optional().default(false),
-  formules: z.array(formuleSchema).max(3).optional().default([]),
-  flux: z
-    .array(fluxEtapeSchema)
-    .max(5)
-    .optional()
-    .default([])
-    .refine((f) => f.length === 0 || f.length >= 2, { message: 'un schéma de mécanisme compte au moins deux étapes' }),
-  points: z.array(pointSchema).max(8).optional().default([]),
-  /** `frise` : étapes en frise horizontale sur ordinateur (verticale sur mobile). */
-  etapes_style: z.enum(['liste', 'frise']).optional().default('liste'),
-  simulation: simulationSchema.nullable().optional(),
-  /** Simulations supplémentaires, rendues après `simulation` (ex. répartition puis scénario). */
-  simulations: z.array(simulationSchema).max(3).optional().default([]),
-  donnees_reelles: donneesReellesSchema.nullable().optional(),
-  /** Schéma pédagogique dessiné par le code (lib/academy/illustrations.ts). */
-  illustration: illustrationSchema.nullable().optional(),
-});
-
 export const qcmSchema = z.object({
-  question: z.string().min(1).max(400),
-  options: z.array(z.string().min(1).max(300)).min(2).max(5),
+  question: z.string().min(1).max(800),
+  options: z.array(z.string().min(1).max(500)).min(2).max(6),
   correct: z.number().int().min(0),
-  explication: z.string().min(1).max(900),
+  explication: z.string().min(1).max(2000),
 });
 
 /**
- * Graphique pédagogique illustratif. Les valeurs sont des EXEMPLES (jamais
- * présentés comme des données de marché réelles) — la note porte l'interprétation.
+ * Série d'un graphique à plusieurs séries (2026-11-23). `null` = année sans
+ * donnée : le point est laissé vide, jamais remplacé par zéro ni interpolé.
+ */
+export const serieChartSchema = z.object({
+  nom: z.string().min(1).max(80),
+  valeurs: z.array(z.number().nullable()).min(1).max(40),
+  /** Rendu de la série dans un graphique mixte ; par défaut, celui du graphique. */
+  type: z.enum(['bar', 'line']).optional(),
+  /** Axe de la série : gauche par défaut, droite pour une seconde unité (ex. PER face au cours). */
+  axe: z.enum(['gauche', 'droite']).optional().default('gauche'),
+});
+
+/**
+ * Graphique pédagogique. Les valeurs sont des EXEMPLES, sauf `reel: true`
+ * (données publiées, source et année dans la note) — la note porte l'interprétation.
+ * Une seule série : `valeurs`. Plusieurs séries : `series` (et `valeurs` vide).
  */
 export const chartSchema = z
   .object({
     type: z.enum(['bar', 'line', 'pie']),
-    titre: z.string().min(1).max(160),
-    labels: z.array(z.string().min(1).max(40)).min(2).max(10),
-    valeurs: z.array(z.number()).min(2).max(10),
+    titre: z.string().min(1).max(300),
+    labels: z.array(z.string().min(1).max(80)).min(2).max(40),
+    valeurs: z.array(z.number().nullable()).max(40).optional().default([]),
+    series: z.array(serieChartSchema).max(8).optional().default([]),
     unite: z.string().max(20).optional().default(''),
-    note: z.string().min(1).max(700), // interprétation pédagogique
+    /** Unité de l'axe de droite, quand une série y est rangée. */
+    unite_droite: z.string().max(20).optional().default(''),
+    note: z.string().min(1).max(2000), // interprétation pédagogique
     // true = données RÉELLES sourcées (études de cas) ; false = valeurs d'exemple.
     reel: z.boolean().optional().default(false),
   })
-  .refine((c) => c.labels.length === c.valeurs.length, {
-    message: 'labels et valeurs doivent avoir la même longueur',
-  });
+  .refine(
+    (c) => (c.series.length > 0
+      ? c.series.every((s) => s.valeurs.length === c.labels.length)
+      : c.valeurs.length === c.labels.length),
+    { message: 'labels et valeurs (ou chaque série) doivent avoir la même longueur' },
+  )
+  .refine((c) => c.type !== 'pie' || c.series.length === 0, { message: 'un camembert n’a qu’une série' });
+
+export const sectionSchema = z.object({
+  type: z.enum(SECTION_TYPES),
+  titre: z.string().min(1).max(200),
+  contenu: z.string().min(1).max(30000),
+  // ── Blocs structurés optionnels (mise en page riche type slide) ──
+  stats: z.array(statSchema).max(16).optional().default([]),
+  tableau: tableauSchema.nullable().optional(),
+  /** Tableaux supplémentaires, rendus après `tableau` (2026-11-23). */
+  tableaux: z.array(tableauSchema).max(8).optional().default([]),
+  etapes: z.array(etapeSchema).max(20).optional().default([]),
+  // ── Blocs éditoriaux ──
+  /** Une section `cas` ne s'intitule « Cas réel BRVM » que si elle l'est. */
+  reel: z.boolean().optional().default(false),
+  formules: z.array(formuleSchema).max(20).optional().default([]),
+  flux: z
+    .array(fluxEtapeSchema)
+    .max(10)
+    .optional()
+    .default([])
+    .refine((f) => f.length === 0 || f.length >= 2, { message: 'un schéma de mécanisme compte au moins deux étapes' }),
+  points: z.array(pointSchema).max(20).optional().default([]),
+  /** `frise` : étapes en frise horizontale sur ordinateur (verticale sur mobile). */
+  etapes_style: z.enum(['liste', 'frise']).optional().default('liste'),
+  simulation: simulationSchema.nullable().optional(),
+  /** Simulations supplémentaires, rendues après `simulation` (ex. répartition puis scénario). */
+  simulations: z.array(simulationSchema).max(10).optional().default([]),
+  donnees_reelles: donneesReellesSchema.nullable().optional(),
+  /** Schéma pédagogique dessiné par le code (lib/academy/illustrations.ts). */
+  illustration: illustrationSchema.nullable().optional(),
+  /** Encadrés (règle d'or, lecture clé, avertissement), rendus après le texte. */
+  encadres: z.array(encadreSchema).max(10).optional().default([]),
+  /** Graphiques placés DANS la section, à côté de ce qu'ils illustrent. */
+  graphiques: z.array(chartSchema).max(16).optional().default([]),
+});
 
 /** Image illustrative d'une leçon — remplie côté serveur après recherche Pexels. */
 export const lessonImageSchema = z.object({
@@ -385,18 +460,29 @@ export const lessonImageSchema = z.object({
   credit: z.string().max(200).default(''),
 });
 
+/**
+ * Badge « Nouveau » / « Mis à jour » (2026-11-23). `depuis` = date de mise en
+ * ligne ; le badge s'éteint seul au bout de DUREE_NOUVEAUTE_JOURS
+ * (lib/academy/nouveaute.ts) : jamais un « nouveau » permanent.
+ */
+export const nouveauteSchema = z.object({
+  type: z.enum(['nouveau', 'mis_a_jour']),
+  depuis: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
 export const lessonSchema = z.object({
-  titre: z.string().min(1).max(160),
+  titre: z.string().min(1).max(200),
   categorie: z.enum(CATEGORIES).default('general'),
   /** Sous-titre pédagogique de l'en-tête éditorial (facultatif). */
-  sous_titre: z.string().max(160).nullable().optional(),
-  resume: z.string().min(1).max(600),
+  sous_titre: z.string().max(300).nullable().optional(),
+  resume: z.string().min(1).max(2000),
   /** Mention réglementaire affichée en pied d'article (facultatif). */
-  avertissement: z.string().max(300).nullable().optional(),
-  sections: z.array(sectionSchema).min(1).max(12),
+  avertissement: z.string().max(1000).nullable().optional(),
+  sections: z.array(sectionSchema).min(1).max(40),
   chart: chartSchema.nullable().optional(),
   // Graphiques multiples (leçons enrichies) — rendus après `chart`.
-  charts: z.array(chartSchema).max(4).optional().default([]),
+  charts: z.array(chartSchema).max(24).optional().default([]),
+  nouveaute: nouveauteSchema.nullable().optional(),
   qcm: qcmSchema.nullable().optional(),
   /**
    * Quiz en série (2026-10-20). Prime sur `qcm` à l'affichage quand il est
@@ -405,7 +491,7 @@ export const lessonSchema = z.object({
   quiz: z
     .array(qcmSchema.refine((q) => q.correct < q.options.length, { message: 'bonne réponse hors des options' }))
     .min(1)
-    .max(10)
+    .max(20)
     .nullable()
     .optional(),
   // Mots-clés EN fournis par le LLM pour rechercher une image (ex. "stock market chart").
@@ -414,28 +500,28 @@ export const lessonSchema = z.object({
   image: lessonImageSchema.nullable().optional(),
   // ── Academy v2 ──
   // Durée de lecture estimée, affichée dans le sommaire.
-  duree_min: z.number().int().min(1).max(60).nullable().optional(),
+  duree_min: z.number().int().min(1).max(180).nullable().optional(),
   // Liens « Pratiquer sur WESTBOURSE » (onglet Ressources du shell).
   liens: z
     .array(z.object({ label: z.string().min(1).max(120), href: z.string().min(1).max(300) }))
-    .max(6)
+    .max(12)
     .optional()
     .default([]),
   // P3 : identifiant d'exercice live (registre lib/academy/exercises.ts).
   exercice_id: z.string().max(60).nullable().optional(),
   // Nom du module — regroupe les leçons dans le sommaire (organisation par niveau).
-  module: z.string().max(160).nullable().optional(),
+  module: z.string().max(200).nullable().optional(),
 });
 
 export const glossaireItemSchema = z.object({
   terme: z.string().min(1).max(120),
-  definition: z.string().min(1).max(500),
+  definition: z.string().min(1).max(1000),
 });
 
 export const courseContentSchema = z.object({
   titre: z.string().min(1).max(200),
   niveau: z.enum(NIVEAUX),
-  intro: z.string().min(1).max(1200),
+  intro: z.string().min(1).max(3000),
   // Visuel de couverture (bannière en tête), défini côté serveur/admin — jamais
   // par le LLM. Stocké dans content pour survivre à la régénération (préservé).
   coverUrl: z.string().url().nullable().optional(),
@@ -444,8 +530,8 @@ export const courseContentSchema = z.object({
     .array(z.object({ slug: z.string().min(1), label: z.string().min(1).max(120) }))
     .optional()
     .default([]),
-  lessons: z.array(lessonSchema).min(1).max(20),
-  glossaire: z.array(glossaireItemSchema).max(40).optional().default([]),
+  lessons: z.array(lessonSchema).min(1).max(60),
+  glossaire: z.array(glossaireItemSchema).max(120).optional().default([]),
 });
 
 export type CourseContent = z.infer<typeof courseContentSchema>;

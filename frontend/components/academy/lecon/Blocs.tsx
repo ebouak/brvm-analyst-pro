@@ -7,6 +7,26 @@ import Pictogramme from './Pictogramme';
  * typographie, de l'espace et des filets.
  */
 
+/**
+ * Encadrés éditoriaux (2026-11-23) : règle d'or, lecture clé, avertissement.
+ * Un filet de 1 px et une teinte de fond, pas de barre latérale épaisse ; le
+ * ton n'est qu'une apparence, jamais un verdict.
+ */
+export function Encadres({ encadres }: { encadres: Section['encadres'] }) {
+  return (
+    <div className="lp-encadres">
+      {encadres.map((e, i) => (
+        <aside key={i} className={`lp-encadre lp-encadre--${e.ton}`} aria-label={e.titre}>
+          <p className="lp-encadre-titre">{e.titre}</p>
+          {e.texte.split(/\n+/).map((p) => p.trim()).filter(Boolean).map((p, k) => (
+            <p key={k} className="lp-encadre-texte">{p}</p>
+          ))}
+        </aside>
+      ))}
+    </div>
+  );
+}
+
 /** Un retour à la ligne du contenu = un paragraphe (paragraphes courts). */
 export function Texte({ contenu }: { contenu: string }) {
   const paragraphes = contenu.split(/\n+/).map((p) => p.trim()).filter(Boolean);

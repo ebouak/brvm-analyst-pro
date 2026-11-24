@@ -1,0 +1,523 @@
+{
+  "titre": "Leçon 0.6 — Comparer deux banques : ECOC face à SGBC",
+  "module": "Module 0 — Le cours complet : analyse fondamentale appliquée à la BRVM",
+  "categorie": "fundamental",
+  "duree_min": 16,
+  "sous_titre": "Même pays, même métier, deux profils : la plus rentable face à la plus grande, et ce qu’une comparaison honnête exige d’aligner.",
+  "resume": "Ecobank Côte d’Ivoire et Société Générale Côte d’Ivoire exercent le même métier sur le même marché. La première est plus rentable, la seconde plus grande et moins chère au regard du bénéfice. Cette leçon met les deux banques côte à côte, chiffre par chiffre et graphique par graphique, puis rappelle ce qu’il faut aligner avant de conclure.",
+  "nouveaute": {
+    "type": "nouveau",
+    "depuis": "2026-11-24"
+  },
+  "sections": [
+    {
+      "type": "cas",
+      "titre": "Face à face au 23 novembre 2026",
+      "reel": true,
+      "contenu": "Au 23 novembre 2026, Ecobank Côte d’Ivoire cotait 14 455 FCFA pour 795,8 milliards de capitalisation, Société Générale Côte d’Ivoire 37 610 FCFA pour 1 170,1 milliards. Le bloc en direct compare leurs ratios sur les derniers chiffres disponibles.\nLes deux banques partagent le même marché, la même monnaie et le même régulateur, la Commission bancaire de l’UMOA. Les écarts qui suivent tiennent donc à leur modèle : taille du bilan, part des dépôts prêtée, niveau de fonds propres, coût du risque. C’est ce qui rend la comparaison instructive, et c’est aussi ce qui en fixe les limites.",
+      "stats": [
+        {
+          "label": "Ecobank CI : cours",
+          "valeur": "14 455 FCFA",
+          "detail": "capitalisation 795,8 Md"
+        },
+        {
+          "label": "Société Générale CI : cours",
+          "valeur": "37 610 FCFA",
+          "detail": "capitalisation 1 170,1 Md"
+        },
+        {
+          "label": "Ecobank CI : ROE 2025",
+          "valeur": "29,0 %",
+          "detail": "capitaux de clôture"
+        },
+        {
+          "label": "Société Générale CI : ROE 2025",
+          "valeur": "20,5 %",
+          "detail": "capitaux de clôture"
+        }
+      ],
+      "donnees_reelles": {
+        "vue": "ratios",
+        "codes": [
+          "ECOC",
+          "SGBC"
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Tableau de synthèse",
+      "reel": true,
+      "contenu": "Chaque ligne compare la même grandeur, calculée de la même façon pour les deux banques. Les montants viennent des comptes 2025 publiés ; les cours, des clôtures du 23 novembre 2026. Le bloc en direct, sous le tableau, affiche le dernier dividende et le rendement au dernier cours.\nLa colonne « Écart » se lit selon la grandeur : un rapport (« 2,1× ») pour les tailles, une variation en pourcentage pour les montants, un écart en points pour les ratios déjà exprimés en pourcentage. Un écart de 8,6 points de ROE n’est pas une différence de 8,6 % : c’est la distance entre deux pourcentages.",
+      "tableau": {
+        "colonnes": [
+          "Indicateur",
+          "ECOC",
+          "SGBC",
+          "Écart"
+        ],
+        "lignes": [
+          [
+            "PNB 2025 (Md FCFA)",
+            "132,7",
+            "276,0",
+            "SGBC 2,1×"
+          ],
+          [
+            "Résultat net 2025 (Md FCFA)",
+            "63,5",
+            "101,4",
+            "SGBC +59,7 %"
+          ],
+          [
+            "Total du bilan (Md FCFA)",
+            "2 054,5",
+            "3 769,2",
+            "SGBC 1,8×"
+          ],
+          [
+            "Capitaux propres (Md FCFA)",
+            "218,6",
+            "495,1",
+            "SGBC 2,3×"
+          ],
+          [
+            "Dépôts de la clientèle (Md FCFA)",
+            "1 626,2",
+            "2 907,7",
+            "SGBC +78,8 %"
+          ],
+          [
+            "Crédits ÷ dépôts",
+            "64,6 %",
+            "87,6 %",
+            "SGBC prête une plus grande part de ses dépôts"
+          ],
+          [
+            "ROE (capitaux de clôture)",
+            "29,0 %",
+            "20,5 %",
+            "ECOC +8,6 pts"
+          ],
+          [
+            "ROE (capitaux moyens)",
+            "30,4 %",
+            "21,4 %",
+            "ECOC +9,0 pts"
+          ],
+          [
+            "Marge nette (résultat ÷ PNB)",
+            "47,9 %",
+            "36,7 %",
+            "ECOC +11,1 pts"
+          ],
+          [
+            "PER à la clôture 2025",
+            "13,87",
+            "9,18",
+            "SGBC moins chère"
+          ],
+          [
+            "PER au 23/11/2026 (BPA 2025)",
+            "12,54",
+            "11,54",
+            "SGBC moins chère"
+          ],
+          [
+            "PER sur 12 mois glissants (StockAnalysis)",
+            "14,04",
+            "12,26",
+            "SGBC moins chère"
+          ],
+          [
+            "Dividende 2025 (FCFA)",
+            "888 brut / 781,44 net",
+            "2 606 brut / 2 293,28 net",
+            "SGBC 2,9×"
+          ],
+          [
+            "Rendement brut au 23/11/2026",
+            "6,14 %",
+            "6,93 %",
+            "SGBC +0,79 pt"
+          ],
+          [
+            "Performance depuis le 1er janvier 2026",
+            "−9,66 %",
+            "+25,81 %",
+            "SGBC nettement devant"
+          ],
+          [
+            "Bêta sur un an (StockAnalysis)",
+            "0,64",
+            "0,68",
+            "Sensibilité au marché comparable"
+          ]
+        ],
+        "note": "Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE."
+      },
+      "donnees_reelles": {
+        "vue": "rendement",
+        "codes": [
+          "ECOC",
+          "SGBC"
+        ]
+      }
+    },
+    {
+      "type": "cas",
+      "titre": "Les trajectoires côte à côte",
+      "reel": true,
+      "contenu": "Les cinq graphiques suivants reprennent 2021-2025 pour les deux banques. Cliquez sur la légende pour masquer une série et isoler l’autre. Le dernier ramène les deux résultats à 100 en 2021 : il compare les trajectoires, pas les tailles.",
+      "graphiques": [
+        {
+          "type": "bar",
+          "titre": "PNB comparé (Md FCFA)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "Md FCFA",
+          "note": "PNB des comptes publiés. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "ECOC",
+              "valeurs": [
+                90.5,
+                99.2,
+                110.2,
+                122.3,
+                132.7
+              ]
+            },
+            {
+              "nom": "SGBC",
+              "valeurs": [
+                189.1,
+                215.1,
+                253.3,
+                263.2,
+                276
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bar",
+          "titre": "Résultat net comparé (Md FCFA)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "Md FCFA",
+          "note": "Le résultat de SGBC plafonne depuis 2023 ; celui d’ECOC continue de croître jusqu’en 2025. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "ECOC",
+              "valeurs": [
+                34.3,
+                44.6,
+                48.1,
+                57.5,
+                63.5
+              ]
+            },
+            {
+              "nom": "SGBC",
+              "valeurs": [
+                67.4,
+                74.6,
+                97.2,
+                101.2,
+                101.4
+              ]
+            }
+          ]
+        },
+        {
+          "type": "line",
+          "titre": "PER à la clôture de chaque année",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "x",
+          "note": "Cours de clôture de l’année ÷ BPA de l’exercice. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "ECOC",
+              "valeurs": [
+                7.68,
+                6.1,
+                7.79,
+                8.42,
+                13.87
+              ]
+            },
+            {
+              "nom": "SGBC",
+              "valeurs": [
+                4.89,
+                4.84,
+                5.14,
+                6.45,
+                9.18
+              ]
+            }
+          ]
+        },
+        {
+          "type": "line",
+          "titre": "Rendement du dividende à la clôture de chaque année (%)",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "%",
+          "note": "Dividende de l’exercice tel que publié ÷ dernier cours de l’année : le rendement baisse quand le cours monte plus vite que le dividende. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "ECOC",
+              "valeurs": [
+                8.78,
+                11.1,
+                8.74,
+                8.05,
+                5.55
+              ]
+            },
+            {
+              "nom": "SGBC",
+              "valeurs": [
+                9.48,
+                9.54,
+                9.64,
+                7.8,
+                8.72
+              ]
+            }
+          ]
+        },
+        {
+          "type": "line",
+          "titre": "Résultat net, base 100 en 2021",
+          "labels": [
+            "2021",
+            "2022",
+            "2023",
+            "2024",
+            "2025"
+          ],
+          "unite": "",
+          "note": "ECOC atteint 185 en 2025, SGBC 150. Sources : états financiers publiés (base WESTBOURSE) et clôtures de la BRVM, exercices 2021 à 2025, lus le 24/11/2026 ; calculs WESTBOURSE.",
+          "reel": true,
+          "series": [
+            {
+              "nom": "ECOC",
+              "valeurs": [
+                100,
+                130.03,
+                140.23,
+                167.64,
+                185.13
+              ]
+            },
+            {
+              "nom": "SGBC",
+              "valeurs": [
+                100,
+                110.68,
+                144.21,
+                150.15,
+                150.45
+              ]
+            }
+          ]
+        }
+      ],
+      "donnees_reelles": {
+        "vue": "historique",
+        "codes": [
+          "ECOC",
+          "SGBC"
+        ]
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "Lecture comparée",
+      "contenu": "Six angles, six constats. Aucun ne suffit à départager les deux banques : c’est leur combinaison, avec des définitions alignées, qui fait l’analyse.\nD’où vient l’écart de rentabilité ? Le ROE se décompose : ROE = ROA × levier, le levier rapportant le bilan moyen aux capitaux propres moyens. ECOC obtient un ROA de 3,09 % avec un levier de 9,8, soit un ROE de 30,4 %. SGBC obtient 2,75 % avec un levier de 7,8, soit 21,4 %.\nL’écart vient donc des deux côtés : ECOC tire un peu plus de résultat de chaque franc de bilan, et elle le fait avec moins de fonds propres par franc engagé. Un levier plus élevé augmente le ROE quand tout va bien, et réduit le coussin quand les crédits se dégradent : c’est la contrepartie à garder en tête.",
+      "formules": [
+        {
+          "nom": "Décomposition du ROE",
+          "expression": "ROE = (résultat net ÷ bilan moyen) × (bilan moyen ÷ capitaux propres moyens) = ROA × levier",
+          "exemple": "ECOC 2025 : 3,09 % × 9,82 = 30,4 % ; SGBC : 2,75 % × 7,80 = 21,4 %"
+        }
+      ],
+      "points": [
+        {
+          "titre": "Taille",
+          "detail": "SGBC est nettement plus grande : PNB 2,1× plus élevé, bilan 1,8×, capitaux propres 2,3×. Elle détient environ 18 % des crédits en Côte d’Ivoire (APBEF-CI, avril 2026)."
+        },
+        {
+          "titre": "Rentabilité",
+          "detail": "ECOC affiche un ROE plus élevé (29,0 % contre 20,5 % sur les capitaux de clôture, 30,4 % contre 21,4 % sur les capitaux moyens) et une marge nette supérieure (47,9 % contre 36,7 %)."
+        },
+        {
+          "titre": "Valorisation",
+          "detail": "SGBC est moins chère au regard du bénéfice : PER 11,54 contre 12,54 au 23/11/2026. Cela peut refléter une croissance plus faible : son PNB recule de 1,7 % sur neuf mois 2026."
+        },
+        {
+          "titre": "Dividende",
+          "detail": "SGBC distribue davantage par action (2 293,28 FCFA net contre 781,44) et offre un rendement brut plus élevé au cours du 23/11/2026 (6,93 % contre 6,14 %)."
+        },
+        {
+          "titre": "Qualité des actifs",
+          "detail": "ECOC : coût du risque de 0,2 % en 2025, couverture d’environ 90 % à mi-2026. SGBC : créances en souffrance autour de 8 %, couverture d’environ 82 % en 2025. Ces indicateurs ne sont pas les mêmes : il faut retrouver le même dans chaque rapport.",
+          "verifier": "Coût du risque et taux de créances en souffrance ne mesurent pas la même chose."
+        },
+        {
+          "titre": "Tendance boursière 2026",
+          "detail": "SGBC gagne 25,8 % depuis le 1er janvier, ECOC perd 9,7 %. Les comptes ne disent pas pourquoi ; on peut seulement constater que SGBC a renforcé ses fonds propres et relevé son dividende, et que le cours d’ECOC avait gagné 81,9 % en 2025."
+        }
+      ],
+      "simulation": {
+        "type": "pb_roe",
+        "consigne": "P/B = PER × ROE : les deux banques au 23/11/2026, sur les comptes 2025. Passez aux données réelles pour les recalculer.",
+        "societes": [
+          {
+            "nom": "Ecobank CI (ECOC)",
+            "per": 12.5,
+            "roe_pct": 29
+          },
+          {
+            "nom": "Société Générale CI (SGBC)",
+            "per": 11.5,
+            "roe_pct": 20.5
+          }
+        ],
+        "codes": [
+          "ECOC",
+          "SGBC"
+        ]
+      }
+    },
+    {
+      "type": "piege",
+      "titre": "Avertissement de comparabilité",
+      "contenu": "Le ROE de clôture et le ROE moyen ne se comparent qu’entre eux. Les deux banques peuvent présenter leurs comptes selon des référentiels différents, SYSCOHADA pour les comptes sociaux, IFRS pour certains comptes consolidés. Et les indicateurs de risque publiés ne sont pas homogènes d’une banque à l’autre.",
+      "encadres": [
+        {
+          "ton": "alerte",
+          "titre": "Ces chiffres illustrent la méthode",
+          "texte": "Ils ne suffisent pas à établir un classement définitif. Pour une comparaison complète, il faut aligner les normes comptables, la définition du résultat, la méthode du ROE, l’indicateur de qualité des crédits, le coût du risque, le dividende et sa base fiscale, le BPA, la date du cours et la liquidité du titre."
+        }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "Synthèse : ECOC face à SGBC",
+      "contenu": "SGBC est plus grande en PNB, en bilan et en capitaux propres. Elle présente un PER plus bas et un rendement du dividende plus élevé, et son cours a progressé en 2026 (+25,8 % depuis le 1er janvier).\nECOC affiche un ROE plus élevé et une meilleure marge nette : elle transforme mieux son PNB en résultat. Son résultat recule en 2026 sous l’effet d’un provisionnement prudent, et son cours recule aussi (−9,7 % depuis le 1er janvier).\nIl serait incorrect de désigner une banque « meilleure » sur cette seule base. Cette comparaison est informative et ne constitue pas une recommandation d’achat ou de vente."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Laquelle des deux banques transforme le mieux son PNB en résultat net en 2025 ?",
+      "options": [
+        "Société Générale CI",
+        "Les deux à égalité",
+        "Ecobank CI",
+        "Impossible à dire sans le cours"
+      ],
+      "correct": 2,
+      "explication": "Marge nette 2025 : 47,9 % pour ECOC contre 36,7 % pour SGBC."
+    },
+    {
+      "question": "Le résultat net d’ECOC vaut 185 en 2025, base 100 en 2021. Que mesure ce chiffre ?",
+      "options": [
+        "Le rendement du dividende versé chaque année depuis 2021",
+        "Une progression de 85 % du résultat depuis 2021",
+        "Le PER de 2025",
+        "La part de marché de la banque"
+      ],
+      "correct": 1,
+      "explication": "Base 100 : 63,5 ÷ 34,3 × 100 = 185, soit +85 %."
+    },
+    {
+      "question": "Pourquoi un PER plus bas ne prouve-t-il pas que SGBC est la meilleure affaire ?",
+      "options": [
+        "Parce que le PER de SGBC est faux",
+        "Parce qu’il peut refléter une croissance attendue plus faible",
+        "Parce que le PER ne s’applique pas aux banques, seulement aux industriels",
+        "Parce que SGBC ne verse pas de dividende"
+      ],
+      "correct": 1,
+      "explication": "Le marché paie moins une banque dont le PNB recule en 2026 : un PER bas peut traduire des perspectives plus faibles."
+    },
+    {
+      "question": "Que faut-il aligner avant de comparer la qualité des crédits de deux banques ?",
+      "options": [
+        "Leur cours de bourse",
+        "Leur nombre d’agences et de distributeurs automatiques",
+        "Le même indicateur, défini de la même façon",
+        "Leur date de création"
+      ],
+      "correct": 2,
+      "explication": "Un coût du risque et un taux de créances en souffrance ne mesurent pas la même chose : il faut le même indicateur dans chaque rapport."
+    },
+    {
+      "question": "P/B = PER × ROE. Avec un PER de 12,5 et un ROE de 29 %, quel est le P/B ?",
+      "options": [
+        "3,6",
+        "2,3",
+        "4,3",
+        "0,4"
+      ],
+      "correct": 0,
+      "explication": "12,5 × 0,29 = 3,6 : le cours vaut 3,6 fois les capitaux propres par action."
+    }
+  ],
+  "qcm": {
+    "question": "Laquelle des deux banques transforme le mieux son PNB en résultat net en 2025 ?",
+    "options": [
+      "Société Générale CI",
+      "Les deux à égalité",
+      "Ecobank CI",
+      "Impossible à dire sans le cours"
+    ],
+    "correct": 2,
+    "explication": "Marge nette 2025 : 47,9 % pour ECOC contre 36,7 % pour SGBC."
+  },
+  "liens": [
+    {
+      "label": "Comparer des actions",
+      "href": "/actions/compare"
+    },
+    {
+      "label": "La valorisation de toutes les valeurs",
+      "href": "/premium/valorisation"
+    },
+    {
+      "label": "Les secteurs",
+      "href": "/secteurs"
+    }
+  ],
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les ratios décrivent le passé et ne garantissent aucune performance future. Investir en actions comporte un risque de perte en capital."
+}
