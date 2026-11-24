@@ -1,0 +1,623 @@
+{
+  "genere_le": "2026-11-24",
+  "periode": {
+    "debut": "2021-01-04",
+    "fin": "2026-11-23"
+  },
+  "valeurs": 48,
+  "parametres": {
+    "periode": 14,
+    "horizon": 20,
+    "min_cas": 30,
+    "methode": "Wilder (lib/indicators.ts, rsiSeries)"
+  },
+  "classes_au": "2026-11-23",
+  "valeurs_par_classe": {
+    "A": [
+      "BBGC",
+      "BOAC",
+      "SGBC",
+      "SNTS"
+    ],
+    "B": [
+      "BICB",
+      "BOAB",
+      "BOABF",
+      "BOAM",
+      "BOAN",
+      "BOAS",
+      "CBIBF",
+      "CIEC",
+      "ECOC",
+      "ETIT",
+      "NSBC",
+      "ORAC",
+      "PALC",
+      "SCRC",
+      "SDSC",
+      "SIBC",
+      "SMBC",
+      "SPHC",
+      "STBC",
+      "TTLS"
+    ],
+    "C": [
+      "ABJC",
+      "BICC",
+      "CFAC",
+      "FTSC",
+      "LNBB",
+      "NEIC",
+      "NTLC",
+      "ONTBF",
+      "ORGT",
+      "SAFC",
+      "SDCC",
+      "SHEC",
+      "SIVC",
+      "SLBC",
+      "SOGC",
+      "STAC",
+      "TTLC",
+      "UNXC"
+    ],
+    "D": [
+      "BNBC",
+      "CABC",
+      "PRSC",
+      "SEMC",
+      "SICC",
+      "UNLC"
+    ]
+  },
+  "zones": {
+    "tout": {
+      "seances": 63613,
+      "surachat_70_pct": 10.2,
+      "survente_30_pct": 3.7,
+      "surachat_80_pct": 3.1,
+      "survente_20_pct": 0.9
+    },
+    "A": {
+      "seances": 4481,
+      "surachat_70_pct": 13.6,
+      "survente_30_pct": 2.5,
+      "surachat_80_pct": 4.2,
+      "survente_20_pct": 0.6
+    },
+    "B": {
+      "seances": 27782,
+      "surachat_70_pct": 10.5,
+      "survente_30_pct": 3.3,
+      "surachat_80_pct": 2.8,
+      "survente_20_pct": 0.8
+    },
+    "C": {
+      "seances": 24560,
+      "surachat_70_pct": 9.2,
+      "survente_30_pct": 3.9,
+      "surachat_80_pct": 3.1,
+      "survente_20_pct": 0.8
+    },
+    "D": {
+      "seances": 6790,
+      "surachat_70_pct": 10.1,
+      "survente_30_pct": 5.1,
+      "surachat_80_pct": 4,
+      "survente_20_pct": 1.9
+    }
+  },
+  "seuils_equivalents": {
+    "A": {
+      "haut": 70,
+      "bas": 30
+    },
+    "B": {
+      "haut": 67,
+      "bas": 28
+    },
+    "C": {
+      "haut": 66,
+      "bas": 27
+    },
+    "D": {
+      "haut": 66,
+      "bas": 23
+    }
+  },
+  "seances_en_zone_selon_moyenne_50": {
+    "survente": {
+      "au-dessus": 0,
+      "sous": 2289
+    },
+    "surachat": {
+      "au-dessus": 6429,
+      "sous": 0
+    }
+  },
+  "base_20": {
+    "tout": {
+      "cas": 62653,
+      "part_hausse_pct": 53.2,
+      "part_baisse_pct": 42.7
+    },
+    "A": {
+      "cas": 4401,
+      "part_hausse_pct": 61.6,
+      "part_baisse_pct": 35.3
+    },
+    "B": {
+      "cas": 27382,
+      "part_hausse_pct": 55.1,
+      "part_baisse_pct": 40
+    },
+    "C": {
+      "cas": 24200,
+      "part_hausse_pct": 50,
+      "part_baisse_pct": 46.7
+    },
+    "D": {
+      "cas": 6670,
+      "part_hausse_pct": 51.4,
+      "part_baisse_pct": 44.2
+    }
+  },
+  "entrees": {
+    "survente": 589,
+    "surachat": 1230
+  },
+  "duree_mediane_seances": {
+    "survente": 2,
+    "surachat": 3
+  },
+  "part_zone_plus_de_10_seances_pct": {
+    "survente": 7.9,
+    "surachat": 13.1
+  },
+  "apres_20": {
+    "survente": {
+      "tout": {
+        "cas": 555,
+        "part_pct": 56,
+        "part_base_pct": 53.2,
+        "ic95_pct": [
+          51.9,
+          60.1
+        ],
+        "variation_mediane_pct": 2,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "au-dessus": {
+        "cas": 0,
+        "part_pct": null,
+        "part_base_pct": 53.2,
+        "ic95_pct": null,
+        "variation_mediane_pct": null,
+        "assez_de_cas": false,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "sous": {
+        "cas": 552,
+        "part_pct": 56,
+        "part_base_pct": 53.2,
+        "ic95_pct": [
+          51.8,
+          60.1
+        ],
+        "variation_mediane_pct": 2,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "A": {
+        "cas": 27,
+        "part_pct": 59.3,
+        "part_base_pct": 61.6,
+        "ic95_pct": [
+          40.7,
+          75.5
+        ],
+        "variation_mediane_pct": 3,
+        "assez_de_cas": false,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "B": {
+        "cas": 224,
+        "part_pct": 59.8,
+        "part_base_pct": 55.1,
+        "ic95_pct": [
+          53.3,
+          66
+        ],
+        "variation_mediane_pct": 3.3,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "C": {
+        "cas": 240,
+        "part_pct": 52.5,
+        "part_base_pct": 50,
+        "ic95_pct": [
+          46.2,
+          58.7
+        ],
+        "variation_mediane_pct": 1.1,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "D": {
+        "cas": 64,
+        "part_pct": 54.7,
+        "part_base_pct": 51.4,
+        "ic95_pct": [
+          42.6,
+          66.3
+        ],
+        "variation_mediane_pct": 1.3,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      }
+    },
+    "surachat": {
+      "tout": {
+        "cas": 1227,
+        "part_pct": 40.7,
+        "part_base_pct": 42.7,
+        "ic95_pct": [
+          38,
+          43.5
+        ],
+        "variation_mediane_pct": 1.9,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "au-dessus": {
+        "cas": 1222,
+        "part_pct": 40.8,
+        "part_base_pct": 42.7,
+        "ic95_pct": [
+          38,
+          43.5
+        ],
+        "variation_mediane_pct": 1.9,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "sous": {
+        "cas": 0,
+        "part_pct": null,
+        "part_base_pct": 42.7,
+        "ic95_pct": null,
+        "variation_mediane_pct": null,
+        "assez_de_cas": false,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "A": {
+        "cas": 107,
+        "part_pct": 33.6,
+        "part_base_pct": 35.3,
+        "ic95_pct": [
+          25.4,
+          43
+        ],
+        "variation_mediane_pct": 1.4,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "B": {
+        "cas": 598,
+        "part_pct": 41.5,
+        "part_base_pct": 40,
+        "ic95_pct": [
+          37.6,
+          45.5
+        ],
+        "variation_mediane_pct": 1.8,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      },
+      "C": {
+        "cas": 423,
+        "part_pct": 41.4,
+        "part_base_pct": 46.7,
+        "ic95_pct": [
+          36.8,
+          46.1
+        ],
+        "variation_mediane_pct": 2.6,
+        "assez_de_cas": true,
+        "ecart_etabli": true,
+        "ecart_sens": "moins"
+      },
+      "D": {
+        "cas": 99,
+        "part_pct": 41.4,
+        "part_base_pct": 44.2,
+        "ic95_pct": [
+          32.2,
+          51.3
+        ],
+        "variation_mediane_pct": 2,
+        "assez_de_cas": true,
+        "ecart_etabli": false,
+        "ecart_sens": null
+      }
+    }
+  },
+  "figes": [
+    {
+      "code": "SEMC",
+      "cours": 1495,
+      "seances_sans_variation": 49,
+      "depuis": "2026-09-15",
+      "rsi_au_debut": 46.4,
+      "rsi_aujourdhui": 46.4,
+      "dernier_echange": "2026-09-15"
+    },
+    {
+      "code": "SICC",
+      "cours": 8400,
+      "seances_sans_variation": 49,
+      "depuis": "2026-09-15",
+      "rsi_au_debut": 56.3,
+      "rsi_aujourdhui": 56.3,
+      "dernier_echange": "2026-09-15"
+    }
+  ],
+  "detachements": {
+    "cas": 34,
+    "ecart_rsi_median": -8.8,
+    "ecart_rsi_median_autres_jours_2026": 0,
+    "variation_cours_mediane_pct": -2.1,
+    "rendement_median_pct": 4.2,
+    "baisse_de_10_points_ou_plus": 16,
+    "passages_sous_30": 0,
+    "plus_fortes": [
+      {
+        "code": "BOAM",
+        "date": "2026-06-02",
+        "montant": 305.04,
+        "rendement_pct": 5.8,
+        "variation_cours_pct": -5.1,
+        "rsi_veille": 89.7,
+        "rsi_jour": 58.9,
+        "ecart_rsi": -30.8
+      },
+      {
+        "code": "NEIC",
+        "date": "2026-09-09",
+        "montant": 140.3952,
+        "rendement_pct": 4.7,
+        "variation_cours_pct": -11.7,
+        "rsi_veille": 79.8,
+        "rsi_jour": 50.3,
+        "ecart_rsi": -29.5
+      },
+      {
+        "code": "BOAB",
+        "date": "2026-05-22",
+        "montant": 585,
+        "rendement_pct": 6.2,
+        "variation_cours_pct": -5,
+        "rsi_veille": 83.1,
+        "rsi_jour": 54.3,
+        "ecart_rsi": -28.8
+      },
+      {
+        "code": "SMBC",
+        "date": "2026-09-17",
+        "montant": 704,
+        "rendement_pct": 3.8,
+        "variation_cours_pct": -7.6,
+        "rsi_veille": 72.8,
+        "rsi_jour": 44.3,
+        "ecart_rsi": -28.5
+      },
+      {
+        "code": "BOABF",
+        "date": "2026-04-22",
+        "montant": 397,
+        "rendement_pct": 7.1,
+        "variation_cours_pct": -3.7,
+        "rsi_veille": 70.2,
+        "rsi_jour": 46.7,
+        "ecart_rsi": -23.5
+      }
+    ],
+    "par_mois": {
+      "2026-04": 1,
+      "2026-05": 6,
+      "2026-06": 6,
+      "2026-07": 7,
+      "2026-08": 6,
+      "2026-09": 6,
+      "2026-10": 2
+    }
+  },
+  "calendrier_2023_2025": [
+    {
+      "mois": "janvier",
+      "seances": 66,
+      "valeur_par_seance_md": 0.4,
+      "indice": 50,
+      "mediane_md": 0.4,
+      "indice_mediane": 65
+    },
+    {
+      "mois": "février",
+      "seances": 60,
+      "valeur_par_seance_md": 0.8,
+      "indice": 98,
+      "mediane_md": 0.5,
+      "indice_mediane": 90
+    },
+    {
+      "mois": "mars",
+      "seances": 63,
+      "valeur_par_seance_md": 0.6,
+      "indice": 82,
+      "mediane_md": 0.5,
+      "indice_mediane": 84
+    },
+    {
+      "mois": "avril",
+      "seances": 58,
+      "valeur_par_seance_md": 0.6,
+      "indice": 73,
+      "mediane_md": 0.5,
+      "indice_mediane": 85
+    },
+    {
+      "mois": "mai",
+      "seances": 60,
+      "valeur_par_seance_md": 0.8,
+      "indice": 103,
+      "mediane_md": 0.6,
+      "indice_mediane": 101
+    },
+    {
+      "mois": "juin",
+      "seances": 59,
+      "valeur_par_seance_md": 0.9,
+      "indice": 109,
+      "mediane_md": 0.6,
+      "indice_mediane": 109
+    },
+    {
+      "mois": "juillet",
+      "seances": 67,
+      "valeur_par_seance_md": 0.8,
+      "indice": 99,
+      "mediane_md": 0.6,
+      "indice_mediane": 96
+    },
+    {
+      "mois": "août",
+      "seances": 60,
+      "valeur_par_seance_md": 0.8,
+      "indice": 97,
+      "mediane_md": 0.7,
+      "indice_mediane": 122
+    },
+    {
+      "mois": "septembre",
+      "seances": 62,
+      "valeur_par_seance_md": 0.7,
+      "indice": 87,
+      "mediane_md": 0.7,
+      "indice_mediane": 115
+    },
+    {
+      "mois": "octobre",
+      "seances": 68,
+      "valeur_par_seance_md": 1.2,
+      "indice": 150,
+      "mediane_md": 1,
+      "indice_mediane": 164
+    },
+    {
+      "mois": "novembre",
+      "seances": 59,
+      "valeur_par_seance_md": 1,
+      "indice": 132,
+      "mediane_md": 0.7,
+      "indice_mediane": 124
+    },
+    {
+      "mois": "décembre",
+      "seances": 63,
+      "valeur_par_seance_md": 0.9,
+      "indice": 118,
+      "mediane_md": 0.7,
+      "indice_mediane": 121
+    }
+  ],
+  "performance_depuis_2021": {
+    "mediane_pct": 297,
+    "valeurs": 44,
+    "classe_A": [
+      {
+        "code": "BOAC",
+        "classe": "A",
+        "depuis": "2021-01-04",
+        "variation_pct": 517.6
+      },
+      {
+        "code": "SGBC",
+        "classe": "A",
+        "depuis": "2021-01-04",
+        "variation_pct": 401.5
+      },
+      {
+        "code": "SNTS",
+        "classe": "A",
+        "depuis": "2021-01-04",
+        "variation_pct": 200
+      }
+    ]
+  },
+  "cas_20_novembre": [
+    {
+      "code": "SCRC",
+      "classe": "B",
+      "cours": 1230,
+      "rsi": 15.5,
+      "moyenne_50": 2339,
+      "position_50": "sous",
+      "seances_echangees_14": 14,
+      "seances_cotees": 1559
+    },
+    {
+      "code": "CBIBF",
+      "classe": "B",
+      "cours": 27505,
+      "rsi": 26.4,
+      "moyenne_50": 31471,
+      "position_50": "sous",
+      "seances_echangees_14": 14,
+      "seances_cotees": 1519
+    },
+    {
+      "code": "SAFC",
+      "classe": "C",
+      "cours": 3030,
+      "rsi": 19.7,
+      "moyenne_50": 4051,
+      "position_50": "sous",
+      "seances_echangees_14": 14,
+      "seances_cotees": 1283
+    },
+    {
+      "code": "NSBC",
+      "classe": "B",
+      "cours": 15000,
+      "rsi": 13,
+      "moyenne_50": 20095,
+      "position_50": "sous",
+      "seances_echangees_14": 14,
+      "seances_cotees": 1561
+    },
+    {
+      "code": "BBGC",
+      "classe": "A",
+      "cours": 8145,
+      "rsi": 31,
+      "moyenne_50": null,
+      "position_50": null,
+      "seances_echangees_14": 14,
+      "seances_cotees": 42
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { pageExiste } from '@/lib/routes/pageExiste';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { lessonSchema, type Lesson } from '../types';
+import { rsiSeries } from '@/lib/indicators';
 
 /**
  * Niveaux 3 (analyse technique, 7 leçons) et 4 (expert : régulation et marché
@@ -89,6 +90,9 @@ describe.each([L0, ...N3, ...N4])('%s — règles éditoriales', (_f, l, brut) =
   });
   it('les liens mènent à des pages qui existent', () => {
     for (const lien of l.liens) expect(pageExiste(APP, lien.href), lien.href).toBe(true);
+  });
+  it('aucun lien en double (un générateur non idempotent les avait triplés, 2026-11-24)', () => {
+    expect(new Set(l.liens.map((x) => x.href)).size).toBe(l.liens.length);
   });
 });
 
@@ -217,5 +221,76 @@ describe('niveau 3, leçon 3 — moyennes mobiles, mesurées sur la BRVM (2026-1
   it('aucune promesse : un croisement décrit, il n’annonce pas', () => {
     expect(brut).toMatch(/il n’a pas annoncé la suite/);
     expect(brut).not.toMatch(/probabilité de succès|signal fiable|garantit (une|la) (hausse|baisse)/);
+  });
+});
+
+describe('niveau 3, leçon 4 — le RSI, mesuré sur la BRVM (2026-11-24)', () => {
+  type Apres = { cas: number; part_pct: number; part_base_pct: number; assez_de_cas: boolean; ecart_etabli: boolean; ecart_sens: string | null };
+  type Zone = { surachat_70_pct: number; survente_30_pct: number; survente_20_pct: number };
+  const src = JSON.parse(readFileSync(fileURLToPath(new URL('./niveau3/sources/rsi-brvm-2026-11-24.json', import.meta.url)), 'utf-8')) as {
+    zones: Record<'tout' | 'A' | 'B' | 'C' | 'D', Zone>;
+    seuils_equivalents: Record<'A' | 'B' | 'C' | 'D', { haut: number; bas: number }>;
+    seances_en_zone_selon_moyenne_50: { survente: Record<string, number>; surachat: Record<string, number> };
+    base_20: { tout: { part_hausse_pct: number; part_baisse_pct: number } };
+    apres_20: Record<'survente' | 'surachat', Record<string, Apres>>;
+    figes: { code: string; rsi_aujourdhui: number }[];
+    detachements: { cas: number; ecart_rsi_median: number };
+    entrees: { survente: number; surachat: number };
+  };
+  const [, l4, brut] = N3[3]!;
+  const fr = (n: number) => n.toFixed(1).replace('.', ',');
+  const ent = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  it('le Focus BRVM demandé par l’exploitant est là, sous ce titre exact', () => {
+    expect(l4.sections.some((s) => s.titre === 'Focus BRVM : rendre le RSI intelligent pour les acteurs régionaux')).toBe(true);
+  });
+  it('le calcul pas à pas, recalculé depuis le tableau : 14 variations, puis RSI 83,3', () => {
+    const t = l4.sections[0]!.tableau!;
+    expect(t.lignes).toHaveLength(15);
+    const h = t.lignes.slice(1).reduce((s, l) => s + Number(l[3]), 0);
+    const b = t.lignes.slice(1).reduce((s, l) => s + Number(l[4]), 0);
+    expect(brut).toContain(`RSI ${fr(100 - 100 / (1 + h / b))}`);
+  });
+  it('la divergence du graphique d’exemple existe bien avec le RSI du site', () => {
+    const g = l4.sections.find((s) => s.titre === 'Les divergences')!.graphiques[0]!;
+    const cours = g.series[0]!.valeurs as number[];
+    const rsi = rsiSeries(cours, 14);
+    g.series[1]!.valeurs.forEach((v, i) => { if (v != null) expect(v).toBeCloseTo(rsi[i]!, 1); });
+    const p1 = cours.indexOf(Math.max(...cours.slice(0, 23)));
+    const p2 = cours.lastIndexOf(Math.max(...cours));
+    expect(cours[p2]! > cours[p1]! && rsi[p2]! < rsi[p1]!).toBe(true);
+  });
+  it('les chiffres de la leçon sont ceux de la mesure', () => {
+    expect(brut).toContain(`plus haut dans ${fr(src.apres_20.survente.tout!.part_pct)} % des cas`);
+    expect(brut).toContain(`plus haut dans ${fr(src.base_20.tout.part_hausse_pct)} % des cas`);
+    expect(brut).toContain(`Sur ${ent(src.seances_en_zone_selon_moyenne_50.survente.sous!)} séances en survente`);
+    expect(src.seances_en_zone_selon_moyenne_50.survente['au-dessus']).toBe(0);
+    expect(src.seances_en_zone_selon_moyenne_50.surachat.sous).toBe(0);
+    for (const f of src.figes) expect(brut).toContain(fr(f.rsi_aujourdhui));
+    expect(brut).toContain(`perdu ${fr(Math.abs(src.detachements.ecart_rsi_median))} points en médiane`);
+    const t = l4.sections.find((s) => s.titre.startsWith('Focus BRVM : rendre'))!.tableau!;
+    for (const [k, ligne] of (['A', 'B', 'C', 'D'] as const).map((k, i) => [k, t.lignes[i]!] as const)) {
+      expect(ligne[2]).toBe(`${fr(src.zones[k].surachat_70_pct)} %`);
+      expect(ligne[5]).toBe(`${src.seuils_equivalents[k].haut} et ${src.seuils_equivalents[k].bas}`);
+    }
+  });
+  it('le tableau de la mesure : une ligne par zone et par classe, et le verdict suit le calcul', () => {
+    const t = l4.sections.find((s) => s.titre === 'Ce que le RSI a valu à la BRVM')!.tableau!;
+    expect(t.lignes).toHaveLength(10);
+    const ordre = (['survente', 'surachat'] as const).flatMap((z) => ['tout', 'A', 'B', 'C', 'D'].map((g) => src.apres_20[z][g]!));
+    t.lignes.forEach((ligne, i) => {
+      const x = ordre[i]!;
+      expect(ligne[4]).toBe(`${fr(x.part_pct)} %`);
+      expect(ligne[7]).toMatch(!x.assez_de_cas ? /Trop peu de cas/ : x.ecart_etabli ? (x.ecart_sens === 'plus' ? /Plus souvent/ : /Moins souvent/) : /non établi/);
+    });
+  });
+  it('l’atelier pas à pas, le simulateur réel et les blocs en direct sont là', () => {
+    const sims = l4.sections.flatMap((s) => [...(s.simulation ? [s.simulation] : []), ...s.simulations]);
+    expect(sims.some((s) => s.type === 'rsi_pas_a_pas')).toBe(true);
+    expect(sims.some((s) => s.type === 'technique' && s.indicateur === 'rsi')).toBe(true);
+    expect(l4.sections.filter((s) => s.donnees_reelles?.vue === 'technique').length).toBeGreaterThanOrEqual(2);
+  });
+  it('aucune promesse ni aucun conseil sur une valeur', () => {
+    expect(brut).toMatch(/il n’en a pas annoncé la fin/);
+    expect(brut).not.toMatch(/candidat|signal d’achat|à surveiller pour|probabilité de succès|garantit (une|la) (hausse|baisse)/i);
   });
 });

@@ -32,7 +32,11 @@ const ICI = path.dirname(fileURLToPath(import.meta.url));
 const { smaSeries, emaSeries } = await import(pathToFileURL(path.join(ICI, '..', 'lib', 'indicators.ts')).href);
 
 const [EXPORT, FAITS] = process.argv.slice(2);
-const lignes = JSON.parse(fs.readFileSync(EXPORT, 'utf8')).rows;
+// Dernière séance COMPLÈTE au moment de l'export : celle du 24/11/2026 était en
+// cours, ses « clôtures » n'étaient que des cours intraday (constaté sur CBIBF :
+// 23 970 à l'export, 24 000 ensuite). Rien n'est lu au-delà.
+const FIN = '2026-11-23';
+const lignes = JSON.parse(fs.readFileSync(EXPORT, 'utf8')).rows.filter((r) => r.date <= FIN);
 const faits = JSON.parse(fs.readFileSync(FAITS, 'utf8'));
 
 const COURTE = 20;

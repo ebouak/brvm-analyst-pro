@@ -4,7 +4,7 @@
   "categorie": "technical",
   "duree_min": 18,
   "sous_titre": "Lisser le bruit des séances pour voir la tendance : moyenne simple et exponentielle, courte et longue, leurs croisements, et ce qu’ils ont valu sur six ans de BRVM.",
-  "resume": "Une moyenne mobile calcule la moyenne des dernières clôtures, recalculée à chaque séance. Cette leçon la calcule pas à pas, compare la moyenne simple et l’exponentielle, justifie les durées de 20 et 50 séances par le calendrier de la BRVM, définit les croisements, puis les met à l’épreuve : un cas réel daté, et 1 467 croisements mesurés sur toutes les actions de la BRVM depuis 2021.",
+  "resume": "Une moyenne mobile calcule la moyenne des dernières clôtures, recalculée à chaque séance. Cette leçon la calcule pas à pas, compare la moyenne simple et l’exponentielle, justifie les durées de 20 et 50 séances par le calendrier de la BRVM, définit les croisements, puis les met à l’épreuve : un cas réel daté, et 1 465 croisements mesurés sur toutes les actions de la BRVM depuis 2021.",
   "nouveaute": {
     "type": "mis_a_jour",
     "depuis": "2026-11-24"
@@ -369,7 +369,7 @@
       "type": "cas",
       "titre": "Un cas réel : Coris Bank International Burkina Faso, novembre 2026",
       "reel": true,
-      "contenu": "Du 9 au 24 novembre 2026, le cours de Coris Bank International Burkina Faso (CBIBF) passe de 32 200 à 23 970 FCFA, soit −25,6 %. Aucun détachement de dividende ne l’explique : celui de l’exercice 2025 a eu lieu le 18 juin 2026. Les échanges augmentent, de 334 titres le 9 novembre 2026 à 998 le 20 novembre 2026.\nLe 18 novembre 2026, alors que le cours baisse depuis 4 séances, la moyenne 20 séances passe au-dessus de la 50 : un croisement haussier. Ce jour-là, la moyenne courte baisse à peine, de 31 742 à 31 732 FCFA, quand la longue baisse davantage, de 31 755 à 31 701 : c’est ce décalage qui les fait se croiser, pas un regain d’acheteurs.\nLe 20 novembre 2026, la moyenne courte repasse sous la longue : un croisement baissier. Le cours vaut alors 27 505 FCFA, déjà 14,6 % sous son niveau du 9 novembre 2026. Les deux croisements sont arrivés après le mouvement ; le premier l’a même contredit.",
+      "contenu": "Du 6 au 23 novembre 2026, le cours de Coris Bank International Burkina Faso (CBIBF) passe de 32 575 à 25 445 FCFA, soit −21,9 %. Aucun détachement de dividende ne l’explique : celui de l’exercice 2025 a eu lieu le 18 juin 2026. Les échanges augmentent, de 175 titres le 6 novembre 2026 à 998 le 20 novembre 2026.\nLe 18 novembre 2026, alors que le cours baisse depuis 4 séances, la moyenne 20 séances passe au-dessus de la 50 : un croisement haussier. Ce jour-là, la moyenne courte baisse à peine, de 31 742 à 31 732 FCFA, quand la longue baisse davantage, de 31 755 à 31 701 : c’est ce décalage qui les fait se croiser, pas un regain d’acheteurs.\nLe 20 novembre 2026, la moyenne courte repasse sous la longue : un croisement baissier. Le cours vaut alors 27 505 FCFA, déjà 15,6 % sous son niveau du 6 novembre 2026. Les deux croisements sont arrivés après le mouvement ; le premier l’a même contredit.",
       "tableau": {
         "colonnes": [
           "Séance",
@@ -380,6 +380,14 @@
           "Croisement"
         ],
         "lignes": [
+          [
+            "06/11",
+            "32 575",
+            "31 384",
+            "31 833",
+            "175",
+            ""
+          ],
           [
             "09/11",
             "32 200",
@@ -467,17 +475,9 @@
             "31 301",
             "950",
             ""
-          ],
-          [
-            "24/11",
-            "23 970",
-            "30 821",
-            "31 095",
-            "706",
-            ""
           ]
         ],
-        "note": "Clôtures et titres échangés publiés par la BRVM, séances du 09/11 au 24/11/2026 ; moyennes simples calculées par WESTBOURSE (base lue le 24/11/2026). Un cas daté : le simulateur ci-dessous montre la situation d’aujourd’hui."
+        "note": "Clôtures et titres échangés publiés par la BRVM, séances du 06/11 au 23/11/2026 ; moyennes simples calculées par WESTBOURSE (base lue le 24/11/2026). Un cas daté : le simulateur ci-dessous montre la situation d’aujourd’hui."
       },
       "simulation": {
         "type": "technique",
@@ -499,16 +499,16 @@
     {
       "type": "importance",
       "titre": "Ce que valent les croisements à la BRVM",
-      "contenu": "Nous avons repéré tous les croisements des moyennes 20 et 50 séances sur les clôtures de toutes les actions de la BRVM, du 4 janvier 2021 au 24 novembre 2026 : 1 467 croisements de moyennes simples, 717 haussiers et 750 baissiers, soit environ 6 par valeur et par an. Pour chacun, une question : 20 séances plus tard, le cours avait-il bougé dans le sens du croisement ?\nLe point de comparaison est une séance quelconque : sur toutes les séances, le cours était plus haut 20 séances plus tard dans 53,1 % des cas, plus bas dans 42,7 %. Après un croisement haussier, il était plus haut dans 49,2 % des cas ; après un croisement baissier, plus bas dans 36,9 %. Aucun croisement n’a fait nettement mieux qu’une séance quelconque, ni avec des moyennes simples ni avec des exponentielles.\nLe résultat tient dans tous les découpages essayés : croisements isolés, ou deux sous-périodes comparées chacune à ses propres séances. De 2021 à 2023, les croisements ont même fait nettement moins bien qu’une séance quelconque, dans les deux sens. Depuis 2024, ni mieux ni moins bien. Le retard, lui, se chiffre : au croisement haussier, le cours avait déjà monté de 10,5 % depuis son plus-bas des 50 séances précédentes (médiane) ; au croisement baissier, il avait déjà perdu 9,1 % depuis son plus-haut.\nCette mesure a ses limites. Les cas ne sont pas indépendants : quand le marché se retourne, plusieurs valeurs croisent la même semaine, ce qui rend les intervalles trop étroits. Retenez l’ordre de grandeur, pas la décimale. Ce n’est pas non plus un test de stratégie : ni frais, ni dividendes. Elle suffit à une conclusion : à la BRVM, un croisement de moyennes décrit un mouvement passé ; il n’a pas annoncé la suite.",
+      "contenu": "Nous avons repéré tous les croisements des moyennes 20 et 50 séances sur les clôtures de toutes les actions de la BRVM, du 4 janvier 2021 au 23 novembre 2026 : 1 465 croisements de moyennes simples, 717 haussiers et 748 baissiers, soit environ 6 par valeur et par an. Pour chacun, une question : 20 séances plus tard, le cours avait-il bougé dans le sens du croisement ?\nLe point de comparaison est une séance quelconque : sur toutes les séances, le cours était plus haut 20 séances plus tard dans 53,2 % des cas, plus bas dans 42,7 %. Après un croisement haussier, il était plus haut dans 49,2 % des cas ; après un croisement baissier, plus bas dans 36,9 %. Aucun croisement n’a fait nettement mieux qu’une séance quelconque, ni avec des moyennes simples ni avec des exponentielles.\nLe résultat tient dans tous les découpages essayés : croisements isolés, ou deux sous-périodes comparées chacune à ses propres séances. De 2021 à 2023, les croisements ont même fait nettement moins bien qu’une séance quelconque, dans les deux sens. Depuis 2024, ni mieux ni moins bien. Le retard, lui, se chiffre : au croisement haussier, le cours avait déjà monté de 10,5 % depuis son plus-bas des 50 séances précédentes (médiane) ; au croisement baissier, il avait déjà perdu 9,1 % depuis son plus-haut.\nCette mesure a ses limites. Les cas ne sont pas indépendants : quand le marché se retourne, plusieurs valeurs croisent la même semaine, ce qui rend les intervalles trop étroits. Retenez l’ordre de grandeur, pas la décimale. Ce n’est pas non plus un test de stratégie : ni frais, ni dividendes. Elle suffit à une conclusion : à la BRVM, un croisement de moyennes décrit un mouvement passé ; il n’a pas annoncé la suite.",
       "stats": [
         {
           "label": "Croisements mesurés",
-          "valeur": "1 467",
+          "valeur": "1 465",
           "detail": "moyennes simples 20 et 50, toutes actions, 2021-2026"
         },
         {
           "label": "Défaits dans les 20 séances",
-          "valeur": "30,1 %",
+          "valeur": "30,0 %",
           "detail": "16,9 % dès les 10 séances"
         },
         {
@@ -519,7 +519,7 @@
         {
           "label": "Hausse 20 séances après un croisement haussier",
           "valeur": "49,2 %",
-          "detail": "contre 53,1 % après une séance quelconque"
+          "detail": "contre 53,2 % après une séance quelconque"
         }
       ],
       "tableau": {
@@ -538,7 +538,7 @@
             "708",
             "Hausse",
             "49,2 %",
-            "53,1 %",
+            "53,2 %",
             "45,5 à 52,8 %",
             "Moins souvent qu’une séance quelconque"
           ],
@@ -553,24 +553,24 @@
           ],
           [
             "Haussier, moyennes exponentielles",
-            "575",
+            "574",
             "Hausse",
-            "47,8 %",
-            "53,1 %",
-            "43,8 à 51,9 %",
+            "47,9 %",
+            "53,2 %",
+            "43,9 à 52,0 %",
             "Moins souvent qu’une séance quelconque"
           ],
           [
             "Baissier, moyennes exponentielles",
-            "603",
+            "602",
             "Baisse",
-            "35,5 %",
+            "35,4 %",
             "42,7 %",
-            "31,8 à 39,4 %",
+            "31,7 à 39,3 %",
             "Moins souvent qu’une séance quelconque"
           ]
         ],
-        "note": "Part des cas où le cours, 20 séances après le croisement, était dans le sens du croisement (plus haut après un haussier, plus bas après un baissier). Intervalle de Wilson à 95 %, au moins 30 cas. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 24/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE."
+        "note": "Part des cas où le cours, 20 séances après le croisement, était dans le sens du croisement (plus haut après un haussier, plus bas après un baissier). Intervalle de Wilson à 95 %, au moins 30 cas. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 23/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE."
       },
       "tableaux": [
         {
@@ -582,12 +582,12 @@
           "lignes": [
             [
               "Tous les croisements",
-              "49,2 % contre 53,1 % (708 cas) : moins souvent",
+              "49,2 % contre 53,2 % (708 cas) : moins souvent",
               "36,9 % contre 42,7 % (740 cas) : moins souvent"
             ],
             [
               "Croisements isolés (aucun autre dans les 20 séances avant)",
-              "47,1 % contre 53,1 % (467 cas) : moins souvent",
+              "47,1 % contre 53,2 % (467 cas) : moins souvent",
               "38,0 % contre 42,7 % (553 cas) : moins souvent"
             ],
             [
@@ -597,8 +597,8 @@
             ],
             [
               "2024 à 2026",
-              "56,0 % contre 55,3 % (352 cas) : écart non établi",
-              "37,5 % contre 41,4 % (368 cas) : écart non établi"
+              "56,0 % contre 55,4 % (352 cas) : écart non établi",
+              "37,5 % contre 41,3 % (368 cas) : écart non établi"
             ]
           ],
           "note": "Chaque sous-période est comparée à ses propres séances quelconques. « Écart non établi » : l’intervalle à 95 % contient la part d’une séance quelconque."
@@ -620,22 +620,22 @@
               "valeurs": [
                 49.2,
                 36.9,
-                47.8,
-                35.5
+                47.9,
+                35.4
               ]
             },
             {
               "nom": "Séance quelconque",
               "valeurs": [
-                53.1,
+                53.2,
                 42.7,
-                53.1,
+                53.2,
                 42.7
               ]
             }
           ],
           "unite": "%",
-          "note": "Dans chaque paire, la barre « après le croisement » n’est jamais au-dessus de celle d’une séance quelconque. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 24/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE.",
+          "note": "Dans chaque paire, la barre « après le croisement » n’est jamais au-dessus de celle d’une séance quelconque. Sources : clôtures de toutes les actions de la BRVM du 04/01/2021 au 23/11/2026 (base WESTBOURSE, lue le 24/11/2026) ; moyennes et croisements calculés par WESTBOURSE.",
           "reel": true
         }
       ],
@@ -650,7 +650,7 @@
     {
       "type": "piege",
       "titre": "Les pièges des moyennes mobiles à la BRVM",
-      "contenu": "Une moyenne mobile est faite de cours passés, et la BRVM ajoute ses propres pièges : des valeurs qui ne s’échangent pas, des dividendes qui font chuter le cours en une séance.\nLe conseil des manuels sur la pente plate se vérifie mal ici pour les moyennes simples : les croisements survenus quand la moyenne longue était plate se sont défaits dans 29,0 % des cas en 20 séances, contre 31,8 % quand elle était orientée. Avec des moyennes exponentielles, l’écart existe : 42,7 % contre 32,8 %.",
+      "contenu": "Une moyenne mobile est faite de cours passés, et la BRVM ajoute ses propres pièges : des valeurs qui ne s’échangent pas, des dividendes qui font chuter le cours en une séance.\nLe conseil des manuels sur la pente plate se vérifie mal ici pour les moyennes simples : les croisements survenus quand la moyenne longue était plate se sont défaits dans 28,9 % des cas en 20 séances, contre 31,8 % quand elle était orientée. Avec des moyennes exponentielles, l’écart existe : 42,7 % contre 32,8 %.",
       "points": [
         {
           "titre": "Le retard inévitable",
@@ -659,12 +659,12 @@
         },
         {
           "titre": "Les allers-retours",
-          "detail": "30,1 % des croisements de moyennes simples se sont défaits dans les 20 séances, 41,4 % pour les exponentielles, plus réactives.",
+          "detail": "30,0 % des croisements de moyennes simples se sont défaits dans les 20 séances, 41,4 % pour les exponentielles, plus réactives.",
           "verifier": "Le croisement précédent : s’il date de quelques séances, le suivant a toutes les chances d’être un aller-retour de plus."
         },
         {
           "titre": "Les séances sans échange",
-          "detail": "Du 16 septembre 2026 au 24 novembre 2026, deux valeurs, SEMC et SICC, n’ont connu aucun échange sur 50 séances : leur cours est resté figé, et leurs moyennes valent exactement ce cours.",
+          "detail": "Du 15 septembre 2026 au 23 novembre 2026, 0 valeurs, , n’ont connu aucun échange sur 50 séances : leur cours est resté figé, et leurs moyennes valent exactement ce cours.",
           "verifier": "Les volumes récents sur la fiche de la valeur, et sa classe de liquidité."
         },
         {
@@ -795,7 +795,7 @@
         "Environ 3 sur 10"
       ],
       "correct": 3,
-      "explication": "30,1 % des croisements de moyennes simples (438 sur 1 456), et 16,9 % dès les 10 séances suivantes."
+      "explication": "30,0 % des croisements de moyennes simples (437 sur 1 455), et 16,9 % dès les 10 séances suivantes."
     },
     {
       "question": "Sur la BRVM de 2021 à 2026, 20 séances après un croisement haussier 20/50, le cours était plus haut :",
@@ -806,7 +806,7 @@
         "Dans tous les cas où la moyenne longue montait"
       ],
       "correct": 2,
-      "explication": "49,2 % des cas, contre 53,1 % pour une séance quelconque. Le croisement n’a pas annoncé la suite."
+      "explication": "49,2 % des cas, contre 53,2 % pour une séance quelconque. Le croisement n’a pas annoncé la suite."
     },
     {
       "question": "Par rapport à la moyenne simple, la moyenne exponentielle :",
@@ -876,22 +876,6 @@
     {
       "label": "Notre méthodologie des signaux",
       "href": "/methodologie"
-    },
-    {
-      "label": "Le classement de liquidité",
-      "href": "/liquidite"
-    },
-    {
-      "label": "Le calendrier des dividendes et des assemblées",
-      "href": "/calendrier"
-    },
-    {
-      "label": "Le classement de liquidité",
-      "href": "/liquidite"
-    },
-    {
-      "label": "Le calendrier des dividendes et des assemblées",
-      "href": "/calendrier"
     },
     {
       "label": "Le classement de liquidité",

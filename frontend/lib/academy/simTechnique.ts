@@ -265,6 +265,14 @@ export interface ResultatRsi extends Lecture {
   zone: ZoneRsi;
   /** Séances passées dans chaque zone sur la fenêtre affichée. */
   repartition: Record<ZoneRsi, number>;
+  /** Séances sans échange parmi les `periode` dernières ; null quand les volumes ne sont pas connus. */
+  seancesSansEchange: number | null;
+  /**
+   * Cours inchangé depuis au moins `periode` séances. Avec le lissage de Wilder,
+   * hausse et baisse moyennes s'amenuisent alors du même facteur : le RSI garde
+   * indéfiniment sa dernière valeur (constaté sur SEMC et SICC en novembre 2026).
+   */
+  fige: boolean;
 }
 
 export function lectureRsi(serie: PointSerie[], periode: number, haut: number, bas: number): ResultatRsi {
@@ -290,9 +298,94 @@ export function lectureRsi(serie: PointSerie[], periode: number, haut: number, b
     `Sur ${nb(total)} séances mesurées, ${nb(repartition.surachat)} en surachat et ${nb(repartition.survente)} en survente. ` +
     'Une zone extrême décrit l’intensité d’un mouvement récent, pas sa fin.';
   const alertes: string[] = [];
+  // BRVM (leçon 4 enrichie, 2026-11-24) : avant de lire un RSI, vérifier qu'il
+  // repose sur de vrais échanges.
+  const fenetre = s.slice(-periode);
+  const volumesConnus = fenetre.every((p) => typeof p.volume === 'number');
+  const seancesSansEchange = volumesConnus ? fenetre.filter((p) => !((p.volume as number) > 0)).length : null;
+  let k = s.length - 1;
+  while (k > 0 && s[k]!.cours === s[k - 1]!.cours) k--;
+  const immobiles = s.length - 1 - k;
+  const fige = immobiles >= periode;
+  if (fige) {
+    alertes.push(`Cours inchangé depuis ${nb(immobiles)} séances (depuis le ${dateCourte(s[k]!.date)}) : le RSI reste figé à sa dernière valeur et ne décrit plus aucun mouvement. Vérifiez les échanges avant de le lire.`);
+  } else if (seancesSansEchange) {
+    alertes.push(`${seancesSansEchange} des ${periode} dernières séances sans échange : le RSI s’y appuie en partie sur des cours immobiles.`);
+  }
   if (periode < 7) alertes.push('Sur une période très courte, le RSI passe d’une zone extrême à l’autre au gré de quelques séances : il devient du bruit.');
   if (haut - bas < 30) alertes.push('Des seuils aussi rapprochés classent presque toutes les séances en excès : la zone perd son sens.');
-  return { points, dernier, zone, repartition, lecture, alertes };
+  return { points, dernier, zone, repartition, seancesSansEchange, fige, lecture, alertes };
+}
+
+// ── Atelier : le RSI pas à pas (clôtures saisies) ───────────────────────────
+
+export interface LigneRsi {
+  seance: number;
+  cloture: number;
+  /** Variation depuis la clôture précédente (null pour la première séance). */
+  variation: number | null;
+  hausse: number | null;
+  baisse: number | null;
+  /** Moyennes lissées : null tant que `periode` variations ne sont pas réunies. */
+  moyHausse: number | null;
+  moyBaisse: number | null;
+  /** Force relative ; null quand aucune baisse (division impossible, RSI = 100). */
+  rs: number | null;
+  rsi: number | null;
+}
+
+export interface ResultatRsiPasAPas extends Lecture {
+  lignes: LigneRsi[];
+  periode: number;
+}
+
+/**
+ * Le RSI séance par séance, avec le calcul de WESTBOURSE (rsiSeries, lissage de
+ * Wilder) : première moyenne simple des `periode` premières variations, puis
+ * moyenne du jour = (moyenne de la veille × (periode − 1) + séance) ÷ periode.
+ * Un test vérifie l'égalité avec rsiSeries sur des séries quelconques.
+ */
+export function rsiPasAPas(clotures: number[], periode: number): ResultatRsiPasAPas {
+  if (!(Number.isInteger(periode) && periode >= 2 && periode < clotures.length)) {
+    throw new SaisieInvalide(`Un RSI sur ${periode} séances demande au moins ${periode + 1} clôtures (période de 2 à 14).`);
+  }
+  if (clotures.some((c) => !(Number.isFinite(c) && c > 0))) throw new SaisieInvalide('Chaque clôture doit être un cours positif.');
+  let mh = 0;
+  let mb = 0;
+  const lignes: LigneRsi[] = clotures.map((cloture, i) => {
+    if (i === 0) return { seance: 1, cloture, variation: null, hausse: null, baisse: null, moyHausse: null, moyBaisse: null, rs: null, rsi: null };
+    const variation = cloture - clotures[i - 1]!;
+    const hausse = variation > 0 ? variation : 0;
+    const baisse = variation < 0 ? -variation : 0;
+    if (i < periode) {
+      mh += hausse;
+      mb += baisse;
+      return { seance: i + 1, cloture, variation, hausse, baisse, moyHausse: null, moyBaisse: null, rs: null, rsi: null };
+    }
+    if (i === periode) {
+      mh = (mh + hausse) / periode;
+      mb = (mb + baisse) / periode;
+    } else {
+      mh = (mh * (periode - 1) + hausse) / periode;
+      mb = (mb * (periode - 1) + baisse) / periode;
+    }
+    const rs = mb === 0 ? null : mh / mb;
+    const rsi = mb === 0 ? (mh === 0 ? 50 : 100) : 100 - 100 / (1 + mh / mb);
+    return { seance: i + 1, cloture, variation, hausse, baisse, moyHausse: mh, moyBaisse: mb, rs, rsi };
+  });
+  const d = lignes[lignes.length - 1]!;
+  const zone = d.rsi! >= 70 ? 'surachat' : d.rsi! <= 30 ? 'survente' : 'zone neutre';
+  let lecture =
+    `Un RSI sur ${periode} séances demande ${periode} variations, donc ${periode + 1} clôtures : il apparaît à la séance ${periode + 1}. ` +
+    `À la séance ${d.seance}, hausse moyenne ${nb(d.moyHausse!, 2)}, baisse moyenne ${nb(d.moyBaisse!, 2)}` +
+    `${d.rs == null ? '' : `, force relative ${nb(d.rs, 2)}`} : RSI ${nb(d.rsi!, 1)} (${zone}).`;
+  if (lignes.length > periode + 1) {
+    lecture += ` Après la séance ${periode + 1}, chaque nouvelle séance ne pèse que 1/${periode} : moyenne du jour = (moyenne de la veille × ${periode - 1} + séance) ÷ ${periode}. C’est le lissage de Wilder, celui de WESTBOURSE.`;
+  }
+  if (d.moyBaisse === 0) lecture += ' Aucune baisse sur la période : le RSI vaut 100, quelle que soit l’ampleur des hausses.';
+  const alertes: string[] = [];
+  if (periode < 7) alertes.push('Sur une période très courte, le RSI passe d’un extrême à l’autre au gré de quelques séances.');
+  return { lignes, periode, lecture, alertes };
 }
 
 // ── MACD ────────────────────────────────────────────────────────────────────
