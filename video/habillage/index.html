@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Habillage WESTBOURSE</title>
+<!--
+  Habillage des formations WESTBOURSE : intro (7,5 s), outro (8,2 s, + 1,6 s avec
+  l'auteur), signature (2 s). Fichier autonome : police Geist locale (OFL, la
+  même que le site), logo officiel reproduit à l'identique depuis
+  frontend/public/icon.svg et components/brand/AnimatedLogo.tsx.
+
+  API : window.render(t, config) dessine l'image à l'instant t (secondes),
+  sans état gardé entre deux images ; window.renderAudio() rend la
+  bande-son en WAV (base64). Prévisualisation : ouvrir avec ?seq=intro|outro|signature
+  (requestAnimationFrame n'est utilisé QUE pour cet aperçu).
+  Aucun chiffre, aucune promesse de rendement : la courbe est illustrative.
+-->
+<style>
+  @font-face { font-family: 'Geist'; src: url('Geist-latin.woff2') format('woff2'); font-weight: 100 900; font-style: normal; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #F6F2E7; }
+  svg { display: block; }
+  text { font-family: Geist, sans-serif; }
+</style>
+</head>
+<body>
+<svg id="stage" width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="photoClip"><circle cx="0" cy="0" r="120"/></clipPath>
+  </defs>
+  <rect id="fond" width="1920" height="1080" fill="#F6F2E7"/>
+  <g id="scene"></g>
+  <text id="meas" x="-5000" y="-5000" opacity="0"></text>
+</svg>
+<script>
+(async () => {
+'use strict';
+
+/* ================================================================
+   CONFIGURATION — tout ce qui change d'une formation à l'autre
+   ================================================================ */
+const CONFIG_DEFAUT = {
+  sequence: 'intro',                         // intro | outro | signature
+  textes: {
+    marque: 'Formation WESTBOURSE',
+    bouton: 'Commencer',
+    motCle: 'COMPRENDRE',
+    surtitre: 'FORMATION',
+    titre: 'Qui fait quoi sur le marché de l’UMOA',
+    module: 'Leçon 0',
+    motsOutro: ['COMPRENDRE', 'ANALYSER', 'DÉCIDER'],
+    final: 'Continuez votre apprentissage',
+    site: 'westbourse.com',
+    mention: 'Formation à visée pédagogique — pas un conseil en investissement.',
+  },
+  // Auteur (outro) : null = pas de passage. { photo: 'fichier.jpg', prenom, nom, role }
+  auteur: null,
+  couleurs: {
+    creme: '#F6F2E7', nuit: '#0B1016', encre: '#11161C', accent: '#16B6A4',
+    marine: '#0C1D2E', blanc: '#FFFFFF', motLogo: '#F4F6F8', gris: '#8B9097',
+  },
+  audio: { bpm: 120, musique: true, volume: 0.9 },
+};
+function fusion(a, b) {
+  const o = { ...a };
+  for (const k in b || {}) o[k] = b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) ? fusion(a[k] || {}, b[k]) : b[k];
+  return o;
+}
+const url = new URLSearchParams(location.search);
+const CONFIG = fusion(CONFIG_DEFAUT, window.__CONFIG || {});
+if (url.get('seq')) CONFIG.sequence = url.get('seq');
+if (url.get('musique') === '0') CONFIG.audio.musique = false;
+const C = CONFIG.couleurs;
+
+await Promise.all(['400', '600', '700', '800', '900'].map((w) => document.fonts.load(`${w} 40px Geist`, 'ÉÀÔÈéèêàôçÇ’')));
+
+/* ---------- outils : fonctions pures du temps ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const win = (t, a, b) => clamp((t - a) / (b - a));
+const expoOut = (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
+const expoIn = (p) => (p <= 0 ? 0 : Math.pow(2, 10 * p - 10));
+const expoInOut = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2);
+// Ressort critique (sans dépassement), normalisé à 1 en p = 1.
+const W = 8.5, SN = 1 - (1 + W) * Math.exp(-W);
+const ressort = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : (1 - (1 + W * p) * Math.exp(-W * p)) / SN);
+// Ressort sous-amorti, forme fermée : léger dépassement puis stabilisation.
+function elastique(p, zeta = 0.42, omega = 11) {
+  if (p <= 0) return 0;
+  const wd = omega * Math.sqrt(1 - zeta * zeta);
+  const v = 1 - Math.exp(-zeta * omega * p) * (Math.cos(wd * p) + ((zeta * omega) / wd) * Math.sin(wd * p));
+  return p >= 1 ? 1 : v;
+}
+// LA courbe : réponse indicielle d'un ressort (ζ = 0,35, ω = 9). Elle sert à la
+// fois au tracé et au déplacement du point : une seule fonction pour les deux.
+const ZC = 0.35, OC = 9, WDC = OC * Math.sqrt(1 - ZC * ZC);
+const courbe = (u) => 1 - Math.exp(-ZC * OC * u) * (Math.cos(WDC * u) + ((ZC * OC) / WDC) * Math.sin(WDC * u));
+const U_PIC = Math.PI / WDC; // instant du dépassement maximal
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const meas = document.getElementById('meas');
+function mesure(s, size, w, ls = 0) {
+  meas.setAttribute('font-size', size); meas.setAttribute('font-weight', w); meas.setAttribute('letter-spacing', ls);
+  meas.textContent = s;
+  return meas.getComputedTextLength();
+}
+function texte(parent, s, x, y, size, o = {}) {
+  const e = el('text', { x, y, 'font-size': size, 'font-weight': o.w || 700, fill: o.fill || C.encre, 'text-anchor': o.anchor || 'start', 'letter-spacing': o.ls ?? 0 }, parent);
+  if (o.mid) e.setAttribute('dominant-baseline', 'central');
+  e.textContent = s;
+  return e;
+}
+// Positions de chaque lettre d'un texte (crénage et espacement compris).
+function lettres(s, x, y, size, w, ls, anchor = 'middle') {
+  const t = el('text', { x, y, 'font-size': size, 'font-weight': w, 'letter-spacing': ls, 'text-anchor': anchor, opacity: 0 }, document.getElementById('stage'));
+  t.textContent = s;
+  const out = [...s].map((ch, i) => ({ ch, x: t.getStartPositionOfChar(i).x, y, w: t.getExtentOfChar(i).width }));
+  t.remove();
+  return out;
+}
+const scene = document.getElementById('scene');
+const fond = document.getElementById('fond');
+const rayonCouvrant = (x, y) => Math.max(Math.hypot(x, y), Math.hypot(1920 - x, y), Math.hypot(x, 1080 - y), Math.hypot(1920 - x, 1080 - y)) + 24;
+const SFX = [];
+
+/* ---------- le logo officiel, en pièces (pour le tourbillon) ---------- */
+// Proportions exactes du composant du site : marque 130×105, écart 0,28 × taille,
+// mot « WESTBOURSE » en Geist 700, corps 0,42 × taille, interlettrage 0,42 em.
+function logo(parent, cx, cy, taille) {
+  const k = taille / 130, corps = taille * 0.42, ls = corps * 0.42;
+  const mot = 'WESTBOURSE';
+  const largMot = mesure(mot, corps, 700, ls);
+  const total = taille + taille * 0.28 + ls + largMot;
+  const x0 = cx - total / 2, y0 = cy - (105 * k) / 2;
+  const pieces = [];
+  const piece = (dessin, fx, fy) => { const g = el('g', {}, parent); dessin(g); pieces.push({ g, fx, fy }); };
+  const m = (g) => el('g', { transform: `translate(${x0} ${y0}) scale(${k})` }, g);
+  piece((g) => el('rect', { x: 2, y: 2, width: 126, height: 101, rx: 22, fill: C.marine }, m(g)), x0 + 65 * k, y0 + 52.5 * k);
+  piece((g) => el('path', { d: 'M16 24 L40 82 L58 48 L76 82', fill: 'none', stroke: C.blanc, 'stroke-width': 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, m(g)), x0 + 46 * k, y0 + 53 * k);
+  piece((g) => el('path', { d: 'M76 82 L100 33', fill: 'none', stroke: C.accent, 'stroke-width': 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, m(g)), x0 + 88 * k, y0 + 57.5 * k);
+  piece((g) => el('polygon', { points: '110,12 117,40 86,28', fill: C.accent }, m(g)), x0 + 104 * k, y0 + 26.7 * k);
+  const xMot = x0 + taille + taille * 0.28 + ls, base = cy + corps * 0.36;
+  const L = lettres(mot, xMot, base, corps, 700, ls, 'start');
+  for (const l of L) piece((g) => texte(g, l.ch, l.x, base, corps, { w: 700, fill: C.motLogo }), l.x + l.w / 2, cy);
+  return { pieces, finMot: xMot + largMot - ls, base, corps };
+}
+// Tourbillon : chaque pièce part du point d'origine, tourne autour, et se pose
+// EXACTEMENT à sa place (le logo final n'est jamais déformé).
+function tourbillon(L, t, t0, O, o = {}) {
+  const D = o.duree ?? 0.5, dec = o.decalage ?? 0.025, tours = o.tours ?? 1.6;
+  L.pieces.forEach((pc, i) => {
+    const p = win(t, t0 + i * dec, t0 + i * dec + D);
+    if (p <= 0) { pc.g.setAttribute('visibility', 'hidden'); return; }
+    const e = elastique(p, 0.5, 9);
+    const th = (1 - clamp(e, 0, 1.2)) * tours * Math.PI * (i % 2 ? 1 : -1);
+    const dx = (pc.fx - O[0]) * e, dy = (pc.fy - O[1]) * e;
+    const x = O[0] + dx * Math.cos(th) - dy * Math.sin(th), y = O[1] + dx * Math.sin(th) + dy * Math.cos(th);
+    const rot = (1 - clamp(e)) * 160 * (i % 2 ? 1 : -1), s = lerp(0.25, 1, clamp(e));
+    pc.g.setAttribute('visibility', 'visible');
+    pc.g.setAttribute('opacity', clamp(p * 5).toFixed(3));
+    pc.g.setAttribute('transform', p >= 1 ? '' : `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-pc.fx} ${-pc.fy})`);
+  });
+}
+
+/* ================================================================
+   INTRO — 7,5 s, temps forts sur la grille à 120 bpm (0,5 s)
+   ================================================================ */
+function construireIntro() {
+  const T = { clic: 1.0, pose: 2.5, depart: 2.6, courbe0: 3.0, couvre: 4.35, origine: 5.05, tourb: 5.25, ponct: 6.05, textes: 6.1, sortie: 7.0, fin: 7.5 };
+  T.courbeD = (3.5 - T.courbe0) / U_PIC;     // le pic de la courbe tombe sur le temps 3,5 s
+  T.courbe1 = T.courbe0 + T.courbeD;
+  const tx = CONFIG.textes;
+  // Interface d'ouverture.
+  const ui = el('g', {}, scene);
+  el('rect', { x: 670, y: 410, width: 600, height: 280, rx: 26, fill: C.encre }, ui);
+  el('rect', { x: 660, y: 400, width: 600, height: 280, rx: 26, fill: C.blanc, stroke: C.encre, 'stroke-width': 3 }, ui);
+  texte(ui, tx.marque, 960, 480, 34, { w: 600, anchor: 'middle' });
+  const bouton = el('g', {}, ui);
+  el('rect', { x: 810, y: 558, width: 300, height: 84, rx: 42, fill: C.encre }, bouton);
+  texte(bouton, tx.bouton, 978, 601, 32, { w: 600, anchor: 'middle', fill: C.creme, mid: true });
+  const IND = [852, 600];
+  const curseur = el('path', { d: 'M0 0L0 36L9.5 27.5L16 42L22.5 39L16 25L28.5 25Z', fill: C.encre, stroke: C.blanc, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, scene);
+  const anneau = el('circle', { r: 0, fill: 'none', stroke: C.accent, 'stroke-width': 4 }, scene);
+  // Mot-clé, lettre par lettre ; le point s'y pose en ponctuation.
+  const MC = lettres(tx.motCle, 960, 610, 168, 900, -4);
+  const lettresMC = MC.map((l) => texte(scene, l.ch, l.x, l.y, 168, { w: 900 }));
+  const finMC = MC[MC.length - 1].x + MC[MC.length - 1].w;
+  const PONCT = [finMC + 30, 610 - 16];
+  // Graphique illustratif (sans aucun chiffre).
+  const G = { x0: 300, x1: 1560, y0: 800, A: 380 };
+  const axe = el('path', { d: `M${G.x0 - 30} ${G.y0}H${G.x1 + 60}`, stroke: C.encre, 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, scene);
+  const AXE_L = G.x1 + 90 - G.x0;
+  const grille = [0.5, 1, 1.5].map((f) => el('path', { d: `M${G.x0} ${G.y0 - G.A * f}H${G.x1 + 40}`, stroke: C.encre, 'stroke-width': 1.5, 'stroke-dasharray': '6 10', opacity: 0, fill: 'none' }, scene));
+  const trace = el('path', { d: '', fill: 'none', stroke: C.accent, 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, scene);
+  const posCourbe = (u) => [G.x0 + (G.x1 - G.x0) * u, G.y0 - G.A * courbe(u)];
+  const FIN_C = posCourbe(1);
+  // Disque : le point grandit jusqu'à couvrir les quatre coins.
+  const R_COUV = rayonCouvrant(FIN_C[0], FIN_C[1]);
+  const disque = el('circle', { cx: FIN_C[0], cy: FIN_C[1], r: 0, fill: C.nuit }, scene);
+  const bord = el('circle', { cx: FIN_C[0], cy: FIN_C[1], r: 0, fill: 'none', stroke: C.accent, 'stroke-width': 14 }, scene);
+  // Logo + titres.
+  const O = [960, 450];
+  const LG = logo(scene, O[0], O[1], 190);
+  const PFIN = [LG.finMot + 16, LG.base - 9];
+  const sur = texte(scene, tx.surtitre, 960, 610, 26, { w: 700, ls: 9, anchor: 'middle', fill: C.accent });
+  const titre = texte(scene, tx.titre, 960, 680, 58, { w: 700, ls: -1, anchor: 'middle', fill: C.motLogo });
+  const modG = el('g', {}, scene);
+  if (tx.module) {
+    const w = mesure(tx.module, 26, 600, 1) + 44;
+    el('rect', { x: 960 - w / 2, y: 728, width: w, height: 46, rx: 23, fill: 'none', stroke: C.accent, 'stroke-width': 2.5 }, modG);
+    texte(modG, tx.module, 960, 752, 26, { w: 600, ls: 1, anchor: 'middle', fill: C.motLogo, mid: true });
+  }
+  // Sortie : un disque crème repart de la ponctuation et rend la planche du cours.
+  const R_SORT = rayonCouvrant(PFIN[0], PFIN[1]);
+  const sortie = el('circle', { cx: PFIN[0], cy: PFIN[1], r: 0, fill: C.creme }, scene);
+  const point = el('circle', { r: 10, fill: C.accent }, scene);
+
+  // Bruitages, alignés sur la même grille de temps.
+  SFX.push({ t: T.clic, type: 'clic' });
+  MC.forEach((_, i) => SFX.push({ t: 1.35 + i * 0.07, type: 'lettre', k: i }));
+  SFX.push({ t: T.pose, type: 'pose' }, { t: T.depart, type: 'glisse', dur: 0.4 });
+  SFX.push({ t: T.courbe0, type: 'courbe', dur: T.courbeD, sens: 1 });
+  SFX.push({ t: T.couvre, type: 'monte', dur: T.origine - T.couvre });
+  SFX.push({ t: T.tourb, type: 'tourbillon', dur: 0.8 }, { t: 6.0, type: 'impact', fort: true });
+  SFX.push({ t: T.ponct, type: 'pose' }, { t: T.sortie, type: 'souffle', dur: 0.45 });
+
+  const seek = function seekIntro(t) {
+    // Interface : entrée, clic, repli.
+    const fold = expoInOut(win(t, 1.2, 1.5));
+    const entree = elastique(win(t, 0, 0.5), 0.6, 10);
+    ui.setAttribute('transform', `translate(960 540) scale(${(0.92 + 0.08 * entree).toFixed(4)} ${((0.92 + 0.08 * entree) * (1 - fold)).toFixed(4)}) translate(-960 -540)`);
+    ui.setAttribute('opacity', (clamp(t * 6) * (1 - win(t, 1.35, 1.5))).toFixed(3));
+    ui.setAttribute('visibility', t < 1.5 ? 'visible' : 'hidden');
+    let appui = 1;
+    if (t > T.clic - 0.08 && t <= T.clic) appui = 1 - 0.07 * win(t, T.clic - 0.08, T.clic);
+    else if (t > T.clic) appui = 1 - 0.07 * Math.exp(-9 * (t - T.clic)) * Math.cos(16 * (t - T.clic));
+    bouton.setAttribute('transform', `translate(960 600) scale(${appui.toFixed(4)}) translate(-960 -600)`);
+    // Curseur : arrive sur le bouton par un ressort, clique, s'efface.
+    const pc = ressort(win(t, 0.15, 0.85));
+    const cxp = lerp(1500, 978, pc), cyp = lerp(930, 612, pc);
+    const sc = 1.7 * (t > 0.92 && t < 1.12 ? 1 - 0.12 * Math.sin(Math.PI * win(t, 0.92, 1.12)) : 1);
+    curseur.setAttribute('transform', `translate(${cxp.toFixed(2)} ${cyp.toFixed(2)}) scale(${sc.toFixed(3)})`);
+    curseur.setAttribute('opacity', (clamp((t - 0.15) * 8) * (1 - win(t, 1.15, 1.35))).toFixed(3));
+    const pa = win(t, T.clic, T.clic + 0.45);
+    anneau.setAttribute('cx', IND[0]); anneau.setAttribute('cy', IND[1]);
+    anneau.setAttribute('r', (10 + 46 * expoOut(pa)).toFixed(2));
+    anneau.setAttribute('opacity', (pa > 0 && pa < 1 ? 1 - pa : 0).toFixed(3));
+
+    // Mot-clé : chaque lettre monte avec un léger dépassement, puis s'envole.
+    lettresMC.forEach((e, i) => {
+      const a = 1.35 + i * 0.07, p = win(t, a, a + 0.55);
+      const sortieL = expoIn(win(t, T.depart + i * 0.02, T.depart + 0.3 + i * 0.02));
+      const dy = (1 - elastique(p, 0.5, 11)) * 70 - sortieL * 80;
+      e.setAttribute('transform', `translate(0 ${dy.toFixed(2)})`);
+      e.setAttribute('opacity', (clamp(p * 4) * (1 - sortieL)).toFixed(3));
+    });
+
+    // Graphique : axe, grille, puis la courbe tracée par le point lui-même.
+    const pAxe = expoOut(win(t, 2.75, 3.1)) * (1 - win(t, T.origine - 0.1, T.origine));
+    axe.setAttribute('stroke-dasharray', `${(AXE_L * pAxe).toFixed(1)} ${AXE_L}`);
+    axe.setAttribute('visibility', pAxe > 0.002 ? 'visible' : 'hidden');
+    grille.forEach((g, i) => g.setAttribute('opacity', (0.14 * expoOut(win(t, 2.85 + i * 0.07, 3.15 + i * 0.07))).toFixed(3)));
+    const u = win(t, T.courbe0, T.courbe1);
+    if (u > 0 && t < T.origine) {
+      let d = '';
+      const n = Math.max(2, Math.ceil(u * 140));
+      for (let j = 0; j <= n; j++) { const [x, y] = posCourbe((u * j) / n); d += (j ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+      trace.setAttribute('d', d);
+    } else trace.setAttribute('d', '');
+
+    // Disque de transformation.
+    const pd = expoInOut(win(t, T.couvre, T.origine - 0.05));
+    disque.setAttribute('r', (16 + (R_COUV - 16) * pd).toFixed(1));
+    disque.setAttribute('visibility', t >= T.couvre ? 'visible' : 'hidden');
+    bord.setAttribute('r', (16 + (R_COUV - 16) * pd).toFixed(1));
+    bord.setAttribute('visibility', t >= T.couvre && pd < 1 ? 'visible' : 'hidden');
+    fond.setAttribute('fill', t >= T.origine ? C.nuit : C.creme);
+
+    // Logo : tourbillon depuis le point, puis titres.
+    tourbillon(LG, t, T.tourb, O);
+    [sur, titre, modG].forEach((e, i) => {
+      const p = win(t, T.textes + i * 0.08, T.textes + i * 0.08 + 0.45);
+      e.setAttribute('opacity', clamp(p * 3).toFixed(3));
+      e.setAttribute('transform', `translate(0 ${((1 - elastique(p, 0.6, 10)) * 30).toFixed(2)})`);
+    });
+
+    // Le point : bouton → ponctuation → courbe → disque → origine du tourbillon → ponctuation du logo.
+    let px = IND[0], py = IND[1], pr = 10, vis = true, sy = 1;
+    if (t >= 1.05) {
+      const p = ressort(win(t, 1.25, T.pose));
+      const ctrl = [lerp(IND[0], PONCT[0], 0.5), 300];
+      const q = (a, b, c) => (1 - p) * (1 - p) * a + 2 * (1 - p) * p * b + p * p * c;
+      px = q(IND[0], ctrl[0], PONCT[0]); py = q(IND[1], ctrl[1], PONCT[1]); pr = lerp(10, 16, p);
+      if (t > T.pose) sy = 1 - 0.28 * Math.exp(-10 * (t - T.pose)) * Math.cos(18 * (t - T.pose));
+    }
+    if (t >= T.depart) {
+      const p = expoInOut(win(t, T.depart, T.courbe0));
+      const [sx0, sy0] = posCourbe(0);
+      px = lerp(PONCT[0], sx0, p); py = lerp(PONCT[1], sy0, p) - Math.sin(Math.PI * p) * 120; sy = 1;
+    }
+    if (t >= T.courbe0) { [px, py] = posCourbe(u); pr = 16; }
+    if (t >= T.origine) {
+      const p = expoInOut(win(t, T.origine, T.tourb));
+      px = lerp(FIN_C[0], O[0], p); py = lerp(FIN_C[1], O[1], p); pr = lerp(16, 8, p);
+    }
+    if (t >= T.tourb) vis = false;
+    if (t >= T.ponct) {
+      vis = true; px = PFIN[0]; py = PFIN[1];
+      pr = 10 * elastique(win(t, T.ponct, T.ponct + 0.4), 0.45, 12);
+    }
+    point.setAttribute('cx', px.toFixed(2)); point.setAttribute('cy', py.toFixed(2));
+    point.setAttribute('r', Math.max(0, pr).toFixed(2));
+    point.setAttribute('transform', sy !== 1 ? `translate(${px} ${py}) scale(${(2 - sy).toFixed(3)} ${sy.toFixed(3)}) translate(${-px} ${-py})` : '');
+    point.setAttribute('visibility', vis && t >= 0.35 ? 'visible' : 'hidden');
+
+    // Sortie crème.
+    const ps = expoInOut(win(t, T.sortie, T.fin - 0.05));
+    sortie.setAttribute('r', (R_SORT * ps).toFixed(1));
+    sortie.setAttribute('visibility', ps > 0 ? 'visible' : 'hidden');
+  };
+  seek.T = T;
+  return seek;
+}
+
+/* ================================================================
+   OUTRO — 8,2 s (+ 1,6 s avec l'auteur)
+   ================================================================ */
+function construireOutro() {
+  const tx = CONFIG.textes, aut = CONFIG.auteur;
+  const AUT = aut ? 1.6 : 0;
+  const T = { pop: 0.05, retour0: 0.25, retour1: 1.5, centre: 1.75, orbite: 1.6, demi: 3.0, plein: 4.0, couvert: 4.5 };
+  T.auteur = T.couvert; T.carte = T.couvert + AUT; T.fin = T.carte + 3.7;
+  const G = { x0: 300, x1: 1560, y0: 800, A: 380 };
+  const posCourbe = (u) => [G.x0 + (G.x1 - G.x0) * u, G.y0 - G.A * courbe(u)];
+  const trace = el('path', { d: '', fill: 'none', stroke: C.accent, 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, scene);
+  const P = [960, 540];
+  // Orbite de trois mots autour du point.
+  const MOTS = tx.motsOutro.map((m) => ({ m, L: lettres(m, 0, 0, 62, 800, 1, 'middle') }));
+  const lettresO = MOTS.map((w) => w.L.map((l) => texte(scene, l.ch, 0, 0, 62, { w: 800, mid: true, anchor: 'middle' })));
+  // Demi-teinte : grille régulière, taille liée à la distance au point.
+  const PAS = 60, points = [];
+  for (let y = -PAS / 2; y <= 1080 + PAS; y += PAS) for (let x = -PAS / 2; x <= 1920 + PAS; x += PAS) {
+    points.push({ e: el('circle', { cx: x, cy: y, r: 0, fill: C.nuit }, scene), d: Math.hypot(x - P[0], y - P[1]) });
+  }
+  const DMAX = rayonCouvrant(P[0], P[1]);
+  // Auteur (facultatif) : photo ronde façon profil, nom en passage rapide.
+  let auteurG = null, photoG = null, nomL = [], roleE = null;
+  if (aut) {
+    auteurG = el('g', {}, scene);
+    photoG = el('g', {}, auteurG);
+    el('circle', { cx: 0, cy: 0, r: 132, fill: C.accent }, photoG);
+    el('circle', { cx: 0, cy: 0, r: 125, fill: C.blanc }, photoG);
+    el('image', { href: aut.photo, x: -120, y: -120, width: 240, height: 240, preserveAspectRatio: 'xMidYMid slice', 'clip-path': 'url(#photoClip)' }, photoG);
+    const prenomL = lettres(aut.prenom, 840, 520, 54, 400, 2, 'start');
+    const nomLL = lettres(aut.nom.toUpperCase(), 836, 596, 84, 900, -1, 'start');
+    nomL = [...prenomL.map((l) => texte(auteurG, l.ch, l.x, l.y, 54, { w: 400, fill: C.motLogo })), ...nomLL.map((l) => texte(auteurG, l.ch, l.x, l.y, 84, { w: 900, fill: C.motLogo }))];
+    roleE = texte(auteurG, aut.role || '', 842, 652, 28, { w: 600, ls: 3, fill: C.accent });
+  }
+  // Carte finale.
+  const LG = logo(scene, 960, 450, 170);
+  const PFIN = [LG.finMot + 15, LG.base - 8];
+  const fin1 = texte(scene, tx.final, 960, 640, 54, { w: 600, ls: -0.5, anchor: 'middle', fill: C.motLogo });
+  const fin2 = texte(scene, tx.site, 960, 718, 40, { w: 700, ls: 0.5, anchor: 'middle', fill: C.accent });
+  const larg2 = mesure(tx.site, 40, 700, 0.5);
+  const souligne = el('path', { d: `M${960 - larg2 / 2} 738H${960 + larg2 / 2}`, stroke: C.accent, 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, scene);
+  const mention = texte(scene, tx.mention, 960, 990, 22, { w: 400, anchor: 'middle', fill: C.gris });
+  const point = el('circle', { r: 16, fill: C.accent }, scene);
+
+  SFX.push({ t: T.pop, type: 'pose' }, { t: T.retour0, type: 'courbe', dur: T.retour1 - T.retour0, sens: -1 });
+  MOTS.forEach((w, k) => w.L.forEach((_, j) => { if (j % 2 === 0) SFX.push({ t: T.orbite + k * 0.12 + j * 0.02, type: 'lettre', k: j + k * 3 }); }));
+  SFX.push({ t: T.demi, type: 'monte', dur: T.couvert - T.demi }, { t: T.couvert, type: 'impact', fort: false });
+  if (aut) SFX.push({ t: T.auteur + 0.05, type: 'souffle', dur: 0.35 }, { t: T.auteur + 0.2, type: 'glisse', dur: 0.4 }, { t: T.carte - 0.35, type: 'souffle', dur: 0.3 });
+  SFX.push({ t: T.carte, type: 'tourbillon', dur: 0.7 }, { t: T.carte + 0.7, type: 'impact', fort: true }, { t: T.carte + 0.75, type: 'pose' });
+
+  const seek = function seekOutro(t) {
+    fond.setAttribute('fill', t >= T.couvert ? C.nuit : C.creme);
+    // Le point revient et refait la courbe à l'envers.
+    let px, py, pr = 16 * elastique(win(t, T.pop, T.pop + 0.35), 0.45, 12), vis = true;
+    const u = 1 - win(t, T.retour0, T.retour1);
+    [px, py] = posCourbe(u);
+    if (t > T.retour0 && t < T.centre + 0.2) {
+      let d = '';
+      const n = 120;
+      for (let j = 0; j <= n; j++) { const [x, y] = posCourbe(u + ((1 - u) * j) / n); d += (j ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+      trace.setAttribute('d', d);
+      trace.setAttribute('opacity', (1 - win(t, T.retour1 - 0.1, T.centre)).toFixed(3));
+    } else trace.setAttribute('d', '');
+    if (t >= T.retour1) { const p = expoInOut(win(t, T.retour1, T.centre)); px = lerp(G.x0, P[0], p); py = lerp(G.y0, P[1], p); }
+    // Orbite : lettres sorties du point, mots droits et lisibles.
+    const base = -Math.PI / 2 + 1.1 * win(t, T.orbite, T.demi + 0.6);
+    MOTS.forEach((w, k) => {
+      const a = base + (k * 2 * Math.PI) / 3;
+      const cx = P[0] + 560 * Math.cos(a), cy = P[1] + 250 * Math.sin(a);
+      w.L.forEach((l, j) => {
+        const p = win(t, T.orbite + k * 0.12 + j * 0.02, T.orbite + k * 0.12 + j * 0.02 + 0.42);
+        const e = elastique(p, 0.5, 10);
+        let x = lerp(P[0], cx + l.x + l.w / 2, e), y = lerp(P[1], cy, e);
+        // Demi-teinte : les lettres s'écartent du point.
+        const ec = expoIn(win(t, T.demi, T.demi + 0.6));
+        const dx = x - P[0], dy = y - P[1], dd = Math.hypot(dx, dy) || 1;
+        x += (dx / dd) * 900 * ec; y += (dy / dd) * 900 * ec;
+        const e2 = lettresO[k][j];
+        e2.setAttribute('x', x.toFixed(2)); e2.setAttribute('y', y.toFixed(2));
+        e2.setAttribute('opacity', (clamp(p * 4) * (1 - ec)).toFixed(3));
+      });
+    });
+    // Grille de points : front qui s'étend au-delà des bords, puis remplissage.
+    const front = (DMAX + 200) * expoOut(win(t, T.demi, T.plein));
+    const rempl = expoIn(win(t, T.plein, T.couvert));
+    for (const q of points) {
+      const rb = lerp(15, 5, clamp(q.d / DMAX));
+      let r = q.d < front ? rb * clamp((front - q.d) / 140) : 0;
+      r = lerp(r, PAS * 0.74, rempl);
+      q.e.setAttribute('r', r.toFixed(2));
+      q.e.setAttribute('visibility', r > 0.05 && t < T.couvert + 0.05 ? 'visible' : 'hidden');
+    }
+    if (t >= T.demi) { px = P[0]; py = P[1]; pr = 16 * (1 - win(t, T.plein, T.couvert)); }
+    // Auteur : passage rapide.
+    if (auteurG) {
+      const inP = win(t, T.auteur, T.auteur + 0.45), outP = expoIn(win(t, T.carte - 0.35, T.carte - 0.02));
+      photoG.setAttribute('transform', `translate(${lerp(700, 620, expoOut(inP)).toFixed(1)} 560) scale(${elastique(inP, 0.5, 11).toFixed(4)})`);
+      nomL.forEach((e, j) => {
+        const p = win(t, T.auteur + 0.15 + j * 0.022, T.auteur + 0.45 + j * 0.022);
+        e.setAttribute('transform', `translate(${((1 - expoOut(p)) * 220).toFixed(1)} 0) skewX(${(-18 * (1 - expoOut(p))).toFixed(2)})`);
+        e.setAttribute('opacity', clamp(p * 3).toFixed(3));
+      });
+      roleE.setAttribute('opacity', win(t, T.auteur + 0.5, T.auteur + 0.75).toFixed(3));
+      auteurG.setAttribute('transform', `translate(${(-1400 * outP).toFixed(1)} 0)`);
+      auteurG.setAttribute('visibility', t >= T.auteur && t < T.carte ? 'visible' : 'hidden');
+    }
+    // Carte finale : tourbillon du logo depuis le point, puis les textes.
+    tourbillon(LG, t, T.carte, P);
+    [fin1, fin2, mention].forEach((e, i) => {
+      const p = win(t, T.carte + 0.8 + i * 0.12, T.carte + 1.25 + i * 0.12);
+      e.setAttribute('opacity', clamp(p * 3).toFixed(3));
+      e.setAttribute('transform', `translate(0 ${((1 - elastique(p, 0.6, 10)) * 26).toFixed(2)})`);
+    });
+    const ps = expoOut(win(t, T.carte + 1.05, T.carte + 1.45));
+    souligne.setAttribute('stroke-dasharray', `${(larg2 * ps).toFixed(1)} ${larg2 + 10}`);
+    souligne.setAttribute('visibility', ps > 0 ? 'visible' : 'hidden');
+    if (t >= T.couvert) {
+      vis = t >= T.carte + 0.75;
+      px = PFIN[0]; py = PFIN[1]; pr = 10 * elastique(win(t, T.carte + 0.75, T.carte + 1.15), 0.45, 12);
+    }
+    point.setAttribute('cx', px.toFixed(2)); point.setAttribute('cy', py.toFixed(2));
+    point.setAttribute('r', Math.max(0, pr).toFixed(2));
+    point.setAttribute('visibility', vis ? 'visible' : 'hidden');
+  };
+  seek.T = T;
+  return seek;
+}
+
+/* ================================================================
+   SIGNATURE — 2 s, entre deux chapitres
+   ================================================================ */
+function construireSignature() {
+  const T = { c0: 0.1, c1: 0.75, couvre: 0.75, tourb: 1.08, ponct: 1.62, fin: 2.0 };
+  const G = { x0: 560, x1: 1260, y0: 720, A: 240 };
+  const UMAX = 0.62;
+  const posCourbe = (u) => [G.x0 + (G.x1 - G.x0) * (u / UMAX), G.y0 - G.A * courbe(u)];
+  const trace = el('path', { d: '', fill: 'none', stroke: C.accent, 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, scene);
+  const FIN_C = posCourbe(UMAX);
+  const R = rayonCouvrant(FIN_C[0], FIN_C[1]);
+  const disque = el('circle', { cx: FIN_C[0], cy: FIN_C[1], r: 0, fill: C.nuit }, scene);
+  const O = [960, 540];
+  const LG = logo(scene, O[0], O[1], 160);
+  const PFIN = [LG.finMot + 14, LG.base - 7];
+  const point = el('circle', { r: 14, fill: C.accent }, scene);
+  SFX.push({ t: 0.02, type: 'pose' }, { t: T.c0, type: 'courbe', dur: T.c1 - T.c0, sens: 1 }, { t: T.couvre, type: 'monte', dur: 0.33 }, { t: T.tourb, type: 'tourbillon', dur: 0.5 }, { t: 1.5, type: 'impact', fort: true });
+  const seek = function seekSignature(t) {
+    const u = UMAX * win(t, T.c0, T.c1);
+    let d = '';
+    if (u > 0 && t < T.tourb) { const n = 80; for (let j = 0; j <= n; j++) { const [x, y] = posCourbe((u * j) / n); d += (j ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); } }
+    trace.setAttribute('d', d);
+    const pd = expoInOut(win(t, T.couvre, T.tourb));
+    disque.setAttribute('r', (14 + (R - 14) * pd).toFixed(1));
+    disque.setAttribute('visibility', t >= T.couvre ? 'visible' : 'hidden');
+    fond.setAttribute('fill', t >= T.tourb ? C.nuit : C.creme);
+    tourbillon(LG, t, T.tourb, O, { duree: 0.42, decalage: 0.012, tours: 1.2 });
+    let [px, py] = posCourbe(u), pr = 14 * elastique(win(t, 0, 0.3), 0.45, 12), vis = true;
+    if (t >= T.tourb - 0.1) { const p = expoInOut(win(t, T.tourb - 0.1, T.tourb)); px = lerp(FIN_C[0], O[0], p); py = lerp(FIN_C[1], O[1], p); }
+    if (t >= T.tourb) vis = false;
+    if (t >= T.ponct) { vis = true; px = PFIN[0]; py = PFIN[1]; pr = 9 * elastique(win(t, T.ponct, T.ponct + 0.3), 0.45, 12); }
+    point.setAttribute('cx', px.toFixed(2)); point.setAttribute('cy', py.toFixed(2)); point.setAttribute('r', Math.max(0, pr).toFixed(2));
+    point.setAttribute('visibility', vis ? 'visible' : 'hidden');
+  };
+  seek.T = T;
+  return seek;
+}
+
+const SEQ = CONFIG.sequence;
+const seekSeq = SEQ === 'outro' ? construireOutro() : SEQ === 'signature' ? construireSignature() : construireIntro();
+const DUREE = seekSeq.T.fin;
+
+/* Rendu : une image = une fonction du seul temps absolu. */
+function render(t, config) {
+  if (config && config.sequence && config.sequence !== SEQ) throw new Error('changer de séquence = recharger la page avec cette configuration');
+  seekSeq(clamp(t, 0, DUREE));
+}
+window.render = render;
+window.seek = (t) => render(t);
+
+/* ================================================================
+   BANDE-SON : musique à 120 bpm + bruitages, OfflineAudioContext → WAV
+   ================================================================ */
+window.renderAudio = async function renderAudio() {
+  const SR = 48000, A = CONFIG.audio;
+  const ctx = new OfflineAudioContext(2, Math.ceil(SR * DUREE), SR);
+  const master = ctx.createGain(); master.gain.value = A.volume; master.connect(ctx.destination);
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 3; comp.attack.value = 0.003; comp.release.value = 0.15; comp.connect(master);
+  const mus = ctx.createGain(); mus.connect(comp);
+  const fx = ctx.createGain(); fx.gain.value = A.musique ? 0.8 : 1.0; fx.connect(comp);
+  let seed = 20261125;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let x = Math.imul(seed ^ (seed >>> 15), 1 | seed); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
+  const bruit = ctx.createBuffer(1, SR * 2, SR); const nd = bruit.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = rnd() * 2 - 1;
+  const env = (g, at, pk, atk, dec) => { g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(pk, at + atk); g.gain.exponentialRampToValueAtTime(0.0001, at + atk + dec); };
+  function osc(type, f, at, dur, pk, dest, f2, atk = 0.004) {
+    if (at >= DUREE) return;
+    const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, at);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dur * 0.8);
+    const g = ctx.createGain(); env(g, at, pk, atk, dur);
+    o.connect(g); g.connect(dest); o.start(at); o.stop(Math.min(DUREE, at + atk + dur + 0.05));
+  }
+  function nz(at, dur, pk, type, f, q, dest, f2) {
+    if (at >= DUREE) return;
+    const n = ctx.createBufferSource(); n.buffer = bruit;
+    const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.setValueAtTime(f, at); fl.Q.value = q;
+    if (f2) fl.frequency.exponentialRampToValueAtTime(f2, at + dur);
+    const g = ctx.createGain(); env(g, at, pk, Math.min(0.01, dur / 3), dur);
+    n.connect(fl); fl.connect(g); g.connect(dest); n.start(at, rnd() * 1.5, dur + 0.1);
+  }
+  const midi = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  const BEAT = 60 / A.bpm;
+  const T = seekSeq.T;
+  // Plages rythmées et instant de résolution, par séquence.
+  const PLAN = {
+    intro: { drums: [1.0, 5.0], reprise: [6.0, 7.0], resolution: 7.0 },
+    outro: { drums: [1.5, 4.5], reprise: CONFIG.auteur ? [4.5, T.carte] : [99, 99], resolution: T.carte + 0.7 },
+    signature: { drums: [0, 0], reprise: [0, 0], resolution: 1.5 },
+  }[SEQ];
+  const ACC = [[53, 57, 60, 64], [48, 55, 60, 64], [50, 57, 60, 65], [46, 53, 58, 62]]; // F, C, Dm, Bb
+  if (A.musique) {
+    const ptf = ctx.createBiquadFilter(); ptf.type = 'lowpass'; ptf.frequency.value = 2400; ptf.connect(mus);
+    for (let b = 0; b * BEAT < PLAN.resolution - 0.01; b++) {
+      const at = b * BEAT, acc = ACC[Math.floor(b / 4) % 4];
+      const rythme = (at >= PLAN.drums[0] && at < PLAN.drums[1]) || (at >= PLAN.reprise[0] && at < PLAN.reprise[1]);
+      [0, 0.5].forEach((h, j) => { const a2 = at + h * BEAT; if (a2 < PLAN.resolution) osc('triangle', midi(acc[(b * 2 + j) % 4] + 12), a2, 0.26, rythme ? 0.07 : 0.045, ptf); });
+      if (rythme) {
+        osc('sine', 130, at, 0.22, 0.5, mus, 42);                                                   // grosse caisse sur chaque temps
+        if (b % 2 === 1) { nz(at, 0.12, 0.22, 'bandpass', 1700, 0.9, mus); nz(at + 0.012, 0.1, 0.12, 'bandpass', 1100, 1.2, mus); } // claquement 2 et 4
+        nz(at + BEAT / 2, 0.035, 0.05, 'highpass', 8000, 0.7, mus);                               // charleston à la croche
+        osc('sine', midi(acc[0] - 12), at + BEAT / 2, 0.2, 0.2, mus);                             // basse à contretemps
+      }
+    }
+    // Résolution nette : accord de tonique tenu jusqu'au bout, puis extinction douce.
+    const R = PLAN.resolution;
+    [53, 57, 60, 65, 69].forEach((m, i) => osc('triangle', midi(m + 12), R + i * 0.015, Math.max(0.4, DUREE - R - 0.1), 0.055, ptf, null, 0.01));
+    osc('sine', midi(41), R, Math.max(0.4, DUREE - R - 0.1), 0.28, mus);
+    mus.gain.setValueAtTime(1, Math.max(0, DUREE - 0.9));
+    mus.gain.linearRampToValueAtTime(0.0001, DUREE - 0.02);
+  }
+  for (const s of SFX) {
+    const at = Math.max(0.005, s.t);
+    switch (s.type) {
+      case 'clic': nz(at, 0.012, 0.5, 'highpass', 3000, 0.7, fx); osc('sine', 1800, at, 0.03, 0.25, fx, 1200); osc('sine', 520, at + 0.01, 0.12, 0.25, fx, 260); break;
+      case 'lettre': osc('sine', 900 + (s.k % 6) * 90, at, 0.05, 0.08, fx, 600); break;
+      case 'pose': osc('sine', 660, at, 0.1, 0.3, fx, 300); nz(at, 0.02, 0.12, 'bandpass', 3500, 1.5, fx); break;
+      case 'glisse': nz(at, s.dur, 0.12, 'bandpass', 700, 2.5, fx, 3500); break;
+      case 'courbe': {
+        const o = ctx.createOscillator(); o.type = 'sine';
+        const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.07, at + 0.08);
+        g.gain.setValueAtTime(0.07, at + s.dur - 0.1); g.gain.exponentialRampToValueAtTime(0.0001, at + s.dur + 0.15);
+        for (let j = 0; j <= 40; j++) { const u = j / 40, v = courbe(s.sens > 0 ? u : 1 - u); o.frequency.setValueAtTime(330 * Math.pow(2, v * 1.1), at + u * s.dur); }
+        o.connect(g); g.connect(fx); o.start(at); o.stop(Math.min(DUREE, at + s.dur + 0.2)); break;
+      }
+      case 'monte': nz(at, s.dur, 0.22, 'bandpass', 250, 1.1, fx, 4200); osc('sawtooth', 110, at, s.dur, 0.03, fx, 330, 0.2); break;
+      case 'tourbillon': {
+        const n = ctx.createBufferSource(); n.buffer = bruit;
+        const fl = ctx.createBiquadFilter(); fl.type = 'bandpass'; fl.Q.value = 3;
+        for (let j = 0; j <= 30; j++) fl.frequency.setValueAtTime(600 + 1800 * Math.abs(Math.sin(j * 0.9)) * (1 - j / 40), at + (j / 30) * s.dur);
+        const pan = ctx.createStereoPanner();
+        for (let j = 0; j <= 30; j++) pan.pan.setValueAtTime(Math.sin(j * 1.3) * 0.8, at + (j / 30) * s.dur);
+        const g = ctx.createGain(); env(g, at, 0.2, 0.15, s.dur);
+        n.connect(fl); fl.connect(pan); pan.connect(g); g.connect(fx); n.start(at, 0, s.dur + 0.3); break;
+      }
+      case 'impact':
+        osc('sine', 150, at, 0.5, s.fort ? 0.8 : 0.55, fx, 40); nz(at, 0.05, 0.3, 'bandpass', 2600, 1, fx);
+        if (s.fort) { nz(at, 1.1, 0.06, 'highpass', 6000, 0.5, fx); [65, 72, 76, 81].forEach((m, i) => osc('triangle', midi(m), at + i * 0.01, 1.1, 0.04, fx)); }
+        break;
+      case 'souffle': nz(at, s.dur, 0.2, 'bandpass', 400, 0.9, fx, 3000); break;
+      default: break;
+    }
+  }
+  const buf = await ctx.startRendering();
+  const n = buf.length, ch = [buf.getChannelData(0), buf.getChannelData(1)];
+  const out = new DataView(new ArrayBuffer(44 + n * 4));
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); out.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+  out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true);
+  ws(36, 'data'); out.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++) for (let c = 0; c < 2; c++, o += 2) out.setInt16(o, Math.max(-1, Math.min(1, ch[c][i])) * 32767, true);
+  const bytes = new Uint8Array(out.buffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+// Temps forts prévus (carte rythmique) et instants témoins.
+window.__timeline = {
+  DURATION: DUREE, SEQ,
+  PREVUS: SFX.filter((s) => ['clic', 'pose', 'impact', 'monte', 'tourbillon', 'courbe'].includes(s.type)).map((s) => [s.type, +s.t.toFixed(3)]),
+  T: seekSeq.T,
+};
+render(0);
+window.__ready = true;
+
+// Aperçu seulement : requestAnimationFrame, jamais utilisé par le rendu.
+if (url.get('seq') && !window.__CONFIG) {
+  const t0 = performance.now();
+  const boucle = () => { render(((performance.now() - t0) / 1000) % (DUREE + 0.8)); requestAnimationFrame(boucle); };
+  requestAnimationFrame(boucle);
+}
+})().catch((e) => { window.__erreur = String((e && e.stack) || e); });
+</script>
+</body>
+</html>
