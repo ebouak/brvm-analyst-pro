@@ -1799,6 +1799,14 @@ vérifiées en base et en production (compte test Premium).
   le calcul. ⚠️ Ne pas réécrire une figure comme « signal » sans une nouvelle mesure.
 - ⚠️ Un curseur `.lp-curseur` (grille à trois colonnes) ne tient pas dans une cellule
   `.lp-champs` : il s’y réduit à un point. Le placer dans un bloc `.lp-curseurs` (#382).
+- **DÉFAUT CORRIGÉ — indicateurs « Données réelles » figés au 23 octobre.** Les blocs
+  `donnees_reelles` de vue `technique` (moyennes, RSI) de TOUT le niveau 3 lisaient leurs
+  clôtures en une requête `.limit(1000)` triée par date croissante
+  (`lib/academy/donneesServer.ts`). À onze codes × 113 séances (1 243 lignes), PostgREST
+  coupait EN SILENCE les séances les plus récentes : le 24 novembre, le tableau s’arrêtait
+  au 23 octobre. Paginé (`fetchAllRows`, second tri sur `code`), vérifié sur la base :
+  1 243 lignes distinctes, dernière séance pour les onze codes. ⚠️ Chaque code ajouté à un
+  bloc `technique` augmente ce volume : ne jamais revenir à une lecture non paginée.
 
 
 ## 9. Bugs connus / limites

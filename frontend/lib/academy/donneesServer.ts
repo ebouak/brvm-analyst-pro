@@ -1,5 +1,6 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import type { Lesson } from './types';
 import {
   exemplesCours,
@@ -89,15 +90,27 @@ export async function chargerDonneesReelles(lessons: Lesson[]): Promise<DonneesL
     const codesTech = [...new Set(blocs.filter((b) => b.spec.vue === 'technique').flatMap((b) => b.spec.codes))];
     if (codesTech.length > 0 && date) {
       const depuis = new Date(new Date(date).getTime() - 160 * 86_400_000).toISOString().slice(0, 10);
-      const h = await sb
-        .from('brvm_actions_daily')
-        .select('code, date_marche, cours_jour')
-        .in('code', codesTech)
-        .gte('date_marche', depuis)
-        .order('date_marche', { ascending: true })
-        .limit(1000);
-      if (h.error) throw new Error('lecture des clôtures impossible');
-      for (const r of (h.data ?? []) as { code: string; date_marche: string; cours_jour: number | null }[]) {
+      // Paginé : onze codes × ~113 séances dépassent les 1 000 lignes que
+      // PostgREST renvoie au plus, et la troncature est SILENCIEUSE. Triées par
+      // date croissante, ce sont les séances les plus RÉCENTES qui tombaient :
+      // le 2026-11-24, le tableau s'arrêtait au 23 octobre sous l'étiquette
+      // « Données réelles ». Second tri sur le code : sans clé unique, deux
+      // pages peuvent se recouvrir ou sauter une ligne.
+      type Ligne = { code: string; date_marche: string; cours_jour: number | null };
+      const lignes = await fetchAllRows<Ligne>(async (de, a) => {
+        const h = await sb
+          .from('brvm_actions_daily')
+          .select('code, date_marche, cours_jour')
+          .in('code', codesTech)
+          .gte('date_marche', depuis)
+          .order('date_marche', { ascending: true })
+          .order('code', { ascending: true })
+          .range(de, a);
+        // fetchAllRows ignore `error` : on lève ici, la section passe à null.
+        if (h.error) throw new Error('lecture des clôtures impossible');
+        return { data: h.data as Ligne[] | null };
+      });
+      for (const r of lignes) {
         if (r.cours_jour == null || Number(r.cours_jour) <= 0) continue;
         (series[r.code] ??= []).push({ date: r.date_marche, cours: Number(r.cours_jour) });
       }
