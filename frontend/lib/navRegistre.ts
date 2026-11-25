@@ -219,6 +219,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/cgu', libelle: "Conditions générales d'utilisation", racine: true, statut: 'public', raison: 'page légale' },
   { chemin: '/confidentialite', libelle: 'Politique de confidentialité', racine: true, statut: 'public', raison: 'page légale' },
   { chemin: '/mentions-legales', libelle: 'Mentions légales', racine: true, statut: 'public', raison: 'page légale' },
+  { chemin: '/contact', libelle: 'Contact et aide', racine: true, statut: 'public', raison: 'e-mail, WhatsApp et rappel par l’assistant vocal' },
   { chemin: '/certificat/[id]', libelle: 'Certificat', racine: true, statut: 'public', raison: 'vérification publique d’un certificat partagé' },
   { chemin: '/login', libelle: 'Connexion', racine: true, statut: 'parcours', raison: 'authentification' },
   { chemin: '/signup', libelle: 'Inscription', racine: true, statut: 'parcours', raison: 'authentification' },

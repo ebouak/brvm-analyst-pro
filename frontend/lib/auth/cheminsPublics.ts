@@ -16,7 +16,7 @@
 export const PUBLIC_EXACT = new Set<string>([
   '/', '/login', '/signup', '/pricing',
   '/mentions-legales', '/cgu', '/confidentialite',
-  '/methodologie', '/debutant', '/developers',
+  '/methodologie', '/debutant', '/developers', '/contact',
   '/rendement-vrai', '/fiscalite', '/simulateur-budget',
   '/comparateur-sgi', '/actualites', '/formations', '/secteurs',
   '/apercu',

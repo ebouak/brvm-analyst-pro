@@ -39,7 +39,8 @@ export default function PublicShell({
           <p className="text-[11px] text-faint">
             Données : BRVM, publications officielles. Performances passées ne préjugent pas des performances futures. ·{' '}
             <Link href="/mentions-legales" className="underline hover:text-muted">Mentions légales</Link> ·{' '}
-            <Link href="/methodologie" className="underline hover:text-muted">Méthodologie</Link>
+            <Link href="/methodologie" className="underline hover:text-muted">Méthodologie</Link> ·{' '}
+            <Link href="/contact" className="underline hover:text-muted">Contact</Link>
           </p>
         </div>
       </footer>

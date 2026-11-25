@@ -14,6 +14,8 @@ export const ANNONCE = "Bonjour, ici l'assistant vocal automatisé de WESTBOURSE
 export const DUREE_MAX_RAPPEL = 3;
 /** Durée maximale d'une alerte exploitant (minutes). */
 export const DUREE_MAX_ALERTE = 2;
+/** Durée maximale d'un appel de test lancé depuis la console (minutes). */
+export const DUREE_MAX_TEST = 1;
 
 export interface ParametresAppel {
   task: string;
@@ -95,6 +97,29 @@ export function parametresAlerte(type: TypeAlerte, resume: unknown): ParametresA
     first_sentence: phrase,
     language: 'fr',
     max_duration: DUREE_MAX_ALERTE,
+    wait_for_greeting: true,
+    record: false,
+  };
+}
+
+export const PREMIERE_PHRASE_TEST =
+  `${ANNONCE} Ceci est un appel de test lancé depuis la console d'administration. ` +
+  "Aucune action n'est requise. La chaîne d'appel fonctionne.";
+
+/**
+ * Appel de test vers l'exploitant (bouton de /admin/controle). Script FIXE : il
+ * prouve la chaîne site → Bland → téléphone sans simuler un faux incident.
+ */
+export function parametresTest(): ParametresAppel {
+  return {
+    task: [
+      "Tu es l'assistant vocal automatisé de WESTBOURSE et tu passes un appel de test à l'exploitant du service.",
+      "Tu as déjà dit qu'il s'agit d'un test. Si on te demande de répéter, répète-le en une phrase.",
+      "N'ajoute aucune information ni aucun chiffre. Raccroche poliment dès que la personne a entendu le message.",
+    ].join('\n'),
+    first_sentence: PREMIERE_PHRASE_TEST,
+    language: 'fr',
+    max_duration: DUREE_MAX_TEST,
     wait_for_greeting: true,
     record: false,
   };
