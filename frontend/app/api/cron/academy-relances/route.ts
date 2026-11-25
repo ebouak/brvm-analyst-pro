@@ -130,10 +130,13 @@ export async function POST(req: Request) {
       fetchAllRowsOuErreur<{ user_id: string; course_id: string; updated_at: string }>((a, b) =>
         svc
           .from('academy_progress')
-          .select('user_id, course_id, updated_at')
+          .select('user_id, course_id, lesson_idx, updated_at')
           .eq('completed', true)
           .gte('updated_at', depuisProgression)
           .order('updated_at', { ascending: true })
+          .order('user_id', { ascending: true })
+          .order('course_id', { ascending: true })
+          .order('lesson_idx', { ascending: true })
           .range(a, b),
       ),
       fetchAllRowsOuErreur<{ user_id: string; created_at: string }>((a, b) =>
@@ -143,6 +146,7 @@ export async function POST(req: Request) {
           .in('statut', statutsCooldown(mode))
           .gte('created_at', depuisCooldown)
           .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
           .range(a, b),
       ),
       fetchAllRowsOuErreur<{ email_norm: string }>((a, b) =>
@@ -301,8 +305,14 @@ export async function POST(req: Request) {
     const msg = composerEmailRelanceAcademy(cible, { jetonArret, siteUrl: SITE_URL });
     const res = await sendEmail({ to: cible.email, subject: msg.subject, html: msg.html, text: msg.text, headers: msg.headers });
 
-    // 3. Issue. Si elle ne peut pas être notée, la ligne reste `envoi` et compte
-    //    dans le délai de 14 jours : « peut-être parti » ne se renvoie pas.
+    // 3. Issue. Réponse ambiguë de Resend (coupure, délai, 5xx) : le message a PU
+    //    partir, la ligne reste `envoi` et compte dans le délai de 14 jours.
+    //    Même chose si l'issue ne peut pas être notée : « peut-être parti » ne se renvoie pas.
+    if (!res.ok && res.incertain) {
+      console.error('[academy-relances] issue de l’envoi inconnue, laissé en « envoi » :', res.error);
+      incertains += 1;
+      continue;
+    }
     const { error: errMaj } = await svc
       .from('academy_reminder_logs')
       .update({ statut: res.ok ? 'envoye' : 'echec', resend_id: res.id ?? null })
