@@ -1,0 +1,36 @@
+name: Academy relances de progression (J+5)
+
+# Relances automatiques de progression WESTBOURSE Academy — route /api/cron/academy-relances.
+# Le mode est piloté par la variable Vercel ACADEMY_RELANCES_MODE :
+#   off         : ne fait rien
+#   simulation  : journalise sans envoyer d'e-mail (défaut sûr)
+#   actif       : envoie les rappels personnalisés (plafonné, cooldown 14 jours)
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: academy-relances
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  relances:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://www.westbourse.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Déclencher les relances Academy J+5
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : relances NON exécutées."; exit 1; fi
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/academy-relances")
+          code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"; echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::Relances Academy : HTTP $code"; exit 1; }
