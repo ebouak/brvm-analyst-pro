@@ -65,6 +65,12 @@ const NIVEAU_VISUEL: Record<string, { badge: string; accent: string }> = {
   expert: { badge: 'Niveau 4', accent: 'from-purple/25 via-elevated to-surface' },
 };
 
+const DEFAULT_COVER_BY_SLUG: Record<string, string> = {
+  'academy-niveau-2-fondamental': '/academy/cover-niveau-2-fondamental.svg',
+  'academy-niveau-3-technique': '/academy/cover-niveau-3-technique.svg',
+  'academy-niveau-4-expert': '/academy/cover-niveau-4-expert.svg',
+};
+
 function capsuleStyle(ton: 'up' | 'accent' | 'purple' | 'neutre'): string {
   if (ton === 'up') return 'bg-up/15 text-up border border-up/25';
   if (ton === 'accent') return 'bg-accent/15 text-accent-ink border border-accent/25';
@@ -774,6 +780,7 @@ function CourseraCourseCard({
     unlocked && course.progress.done > 0 ? `?lecon=${course.progress.nextIdx + 1}` : ''
   }`;
   const visuel = course.niveau ? NIVEAU_VISUEL[course.niveau] : null;
+  const coverSrc = course.cover ?? DEFAULT_COVER_BY_SLUG[course.slug] ?? null;
   const nivLabel = course.niveau ? NIVEAU_LABEL[course.niveau as keyof typeof NIVEAU_LABEL] ?? course.niveau : 'Parcours';
 
   const capsules: { id: string; label: string; ton: 'up' | 'accent' | 'purple' | 'neutre' }[] = [
@@ -786,10 +793,10 @@ function CourseraCourseCard({
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition hover:border-accent/50">
       <Link href={href} className="flex flex-1 flex-col">
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-elevated">
-          {course.cover ? (
+          {coverSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={course.cover}
+              src={coverSrc}
               alt=""
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"

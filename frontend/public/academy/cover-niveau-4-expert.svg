@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Niveau 4 — Expert BRVM, régulation et marché primaire">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d0b14"/>
+      <stop offset="55%" stop-color="#171326"/>
+      <stop offset="100%" stop-color="#1e182e"/>
+    </linearGradient>
+    <radialGradient id="glow4" cx="78%" cy="28%" r="58%">
+      <stop offset="0%" stop-color="#c59b27" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#c59b27" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="colGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e5c45f"/>
+      <stop offset="100%" stop-color="#9e7818"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg4)"/>
+  <rect width="1200" height="675" fill="url(#glow4)"/>
+
+  <!-- Subtle architectural grid -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="135" x2="1200" y2="135"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="405" x2="1200" y2="405"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+  </g>
+
+  <!-- Pill -->
+  <rect x="72" y="72" width="256" height="44" rx="22" fill="#c59b27" fill-opacity="0.16" stroke="#e5c45f" stroke-opacity="0.55"/>
+  <text x="96" y="100" fill="#f0d37a" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="18" font-weight="700" letter-spacing="1.6">NIVEAU 4 · EXPERT</text>
+
+  <!-- Title -->
+  <text x="72" y="210" fill="#f5f2eb" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="600">Régulation &amp;</text>
+  <text x="72" y="282" fill="#e5c45f" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="600">Marché Primaire</text>
+
+  <text x="72" y="346" fill="#bab3cc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24">AMF-UMOA, SGI &amp; DC/BR, compartiments,</text>
+  <text x="72" y="380" fill="#bab3cc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24">abus de marché et introductions en bourse (IPO).</text>
+
+  <!-- Tags bottom-left -->
+  <g transform="translate(72, 460)">
+    <rect width="174" height="92" rx="14" fill="#171225" stroke="#31294a"/>
+    <text x="20" y="34" fill="#9a8fb8" font-family="system-ui, sans-serif" font-size="16" font-weight="600">RÉGULATEUR</text>
+    <text x="20" y="70" fill="#f0d37a" font-family="system-ui, sans-serif" font-size="24" font-weight="700">AMF-UMOA</text>
+
+    <rect x="192" width="174" height="92" rx="14" fill="#171225" stroke="#31294a"/>
+    <text x="212" y="34" fill="#9a8fb8" font-family="system-ui, sans-serif" font-size="16" font-weight="600">OPÉRATIONS</text>
+    <text x="212" y="70" fill="#f5f2eb" font-family="system-ui, sans-serif" font-size="24" font-weight="700">IPO &amp; OPV</text>
+
+    <rect x="384" width="174" height="92" rx="14" fill="#171225" stroke="#31294a"/>
+    <text x="404" y="34" fill="#9a8fb8" font-family="system-ui, sans-serif" font-size="16" font-weight="600">EXAMEN</text>
+    <text x="404" y="70" fill="#22c98d" font-family="system-ui, sans-serif" font-size="24" font-weight="700">52 questions</text>
+  </g>
+
+  <!-- Right Panel: Institutional Architecture + IPO Seal -->
+  <g transform="translate(692, 92)">
+    <rect width="436" height="490" rx="22" fill="#141022" fill-opacity="0.95" stroke="#342a52" stroke-width="1.5"/>
+    <text x="32" y="48" fill="#f5f2eb" font-family="system-ui, sans-serif" font-size="20" font-weight="600">Architecture UEMOA &amp; IPO</text>
+    <text x="32" y="74" fill="#8e82ad" font-family="system-ui, sans-serif" font-size="15">Visa AMF-UMOA · SGI · BRVM · DC/BR</text>
+
+    <!-- Stylized temple / institutional pediment -->
+    <polygon points="218,112 76,172 360,172" fill="none" stroke="url(#colGrad)" stroke-width="3"/>
+    <rect x="76" y="176" width="284" height="10" rx="3" fill="url(#colGrad)" opacity="0.85"/>
+    <rect x="98" y="196" width="28" height="118" rx="4" fill="#2a2242" stroke="#e5c45f" stroke-opacity="0.5"/>
+    <rect x="160" y="196" width="28" height="118" rx="4" fill="#2a2242" stroke="#e5c45f" stroke-opacity="0.5"/>
+    <rect x="248" y="196" width="28" height="118" rx="4" fill="#2a2242" stroke="#e5c45f" stroke-opacity="0.5"/>
+    <rect x="310" y="196" width="28" height="118" rx="4" fill="#2a2242" stroke="#e5c45f" stroke-opacity="0.5"/>
+    <rect x="64" y="322" width="308" height="14" rx="4" fill="url(#colGrad)"/>
+
+    <!-- IPO oversubscription bar -->
+    <rect x="32" y="366" width="372" height="94" rx="14" fill="#0d0a16" stroke="#2d2446"/>
+    <text x="48" y="394" fill="#9a8fb8" font-family="system-ui, sans-serif" font-size="14" font-weight="600">CAS RÉEL · BBGC (2026) · SOUSCRIPTION 142 %</text>
+    <rect x="48" y="410" width="340" height="12" rx="6" fill="#241d38"/>
+    <rect x="48" y="410" width="240" height="12" rx="6" fill="#22c98d"/>
+    <rect x="288" y="410" width="100" height="12" rx="6" fill="#e5c45f" opacity="0.8"/>
+    <text x="48" y="446" fill="#e5c45f" font-family="system-ui, sans-serif" font-size="14" font-weight="600">5 simulateurs interactifs · Allocation IPO &amp; Visa</text>
+  </g>
+
+  <text x="72" y="620" fill="#7c7396" font-family="system-ui, sans-serif" font-size="16" font-weight="600" letter-spacing="1.2">WESTBOURSE ACADEMY</text>
+</svg>

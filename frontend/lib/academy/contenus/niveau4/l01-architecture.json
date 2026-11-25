@@ -97,7 +97,15 @@
      "detail": "Les actions sont inscrites à votre nom",
      "icone": "piece"
     }
-   ]
+   ],
+   "simulation": {
+    "type": "frais_ordre",
+    "consigne": "Simulez les frais cumulés prélevés dans la chaîne SGI, BRVM et DC/BR lors d’un ordre au comptant.",
+    "cours": 25000,
+    "quantite": 10,
+    "taux_frais_pct": 1.4,
+    "minimum_fcfa": 2500
+   }
   },
   {
    "type": "piege",
@@ -196,6 +204,72 @@
    ],
    "correct": 1,
    "explication": "La réforme a doté l’AMF-UMOA d’une Commission des sanctions et d’un Médiateur."
+  },
+  {
+   "question": "À quelle date l’AMF-UMOA a-t-elle officiellement succédé à l’ex-CREPMF ?",
+   "options": [
+    "Le 1er janvier 1998",
+    "Le 1er octobre 2022",
+    "Le 15 mars 2015",
+    "Le 1er juillet 2024"
+   ],
+   "correct": 1,
+   "explication": "Le Traité révisé de l’UMOA entré en vigueur le 1er octobre 2022 a transformé l’ex-CREPMF en AMF-UMOA."
+  },
+  {
+   "question": "Pourquoi les espèces et titres des clients sont-ils cantonnés au DC/BR séparément des fonds propres de la SGI ?",
+   "options": [
+    "Pour protéger les avoirs des clients en cas de défaut de la SGI",
+    "Pour augmenter le dividende versé chaque année aux actionnaires",
+    "Pour permettre à la BRVM de fixer des cours sans carnet d’ordres",
+    "Pour dispenser les particuliers de tout prélèvement fiscal IRVM"
+   ],
+   "correct": 0,
+   "explication": "La ségrégation des comptes au DC/BR isole les titres et avoirs des clients du bilan propre de l’intermédiaire."
+  },
+  {
+   "question": "Quelle mission relève directement de la Bourse Régionale des Valeurs Mobilières (BRVM) ?",
+   "options": [
+    "La politique monétaire des huit États de l’UEMOA",
+    "L’organisation des séances de cotation et du carnet",
+    "La gestion individuelle des portefeuilles des particuliers",
+    "Le prélèvement de l’impôt sur le revenu des sociétés"
+   ],
+   "correct": 1,
+   "explication": "La BRVM organise la cotation centralisée, la diffusion des cours officiels et la surveillance technique des séances."
+  },
+  {
+   "question": "Un épargnant souhaite déposer une réclamation après un litige avec sa SGI. Quel recours interne existe depuis la réforme de 2022 ?",
+   "options": [
+    "Le Médiateur institué auprès de l’AMF-UMOA",
+    "La chambre commerciale du Fonds monétaire international",
+    "L’assemblée générale annuelle des sociétés du compartiment",
+    "Le service client de la Bourse de Dakar uniquement"
+   ],
+   "correct": 0,
+   "explication": "La réforme instituant l’AMF-UMOA a mis en place un Médiateur chargé de traiter les différends entre épargnants et intervenants agréés."
+  },
+  {
+   "question": "Qui délivre l’agrément indispensable pour exercer en tant que SGI dans l’espace UEMOA ?",
+   "options": [
+    "L’AMF-UMOA, autorité de régulation du marché financier",
+    "La chambre de commerce du pays du demandeur",
+    "Le conseil d’administration de chaque société cotée",
+    "La première SGI historique implantée à Abidjan"
+   ],
+   "correct": 0,
+   "explication": "Seule l’AMF-UMOA délivre l’agrément aux SGI, sociétés de gestion d’OPCVM et autres acteurs du marché financier régional."
+  },
+  {
+   "question": "Que se passe-t-il durant l’étape de règlement-livraison pilotée par le DC/BR après exécution d’un achat ?",
+   "options": [
+    "La SGI conserve les titres en papier dans ses propres coffres",
+    "Les titres sont virés au compte de l’acheteur contre espèces",
+    "La société émettrice verse immédiatement un dividende spécial",
+    "Le prix exécuté est recalculé selon la séance du lendemain"
+   ],
+   "correct": 1,
+   "explication": "Le DC/BR garantit la livraison simultanée des titres sur le compte-titres de l’acheteur contre le règlement en espèces."
   }
  ],
  "liens": [
@@ -224,5 +298,9 @@
   ],
   "correct": 1,
   "explication": "L’AMF-UMOA a succédé au CREPMF le 1er octobre 2022, à l’entrée en vigueur du Traité révisé de l’UMOA."
+ },
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-25"
  }
 }

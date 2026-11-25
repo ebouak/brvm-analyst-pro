@@ -1156,5 +1156,6 @@
       "href": "/calendrier"
     }
   ],
-  "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital."
+  "avertissement": "Ceci n’est pas un conseil en investissement. Un indicateur technique décrit le passé des cours ; il ne prédit pas l’avenir. Investir en actions comporte un risque de perte en capital.",
+  "exercice_id": "rsi-zone-du-jour"
 }

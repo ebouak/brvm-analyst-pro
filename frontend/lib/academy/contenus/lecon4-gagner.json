@@ -648,5 +648,6 @@
     ],
     "correct": 2,
     "explication": "(5 600 − 5 000) × 200 = 600 × 200 = 120 000 FCFA."
-  }
+  },
+  "exercice_id": "rendement-net"
 }

@@ -53,7 +53,17 @@
      "titre": "BRVM Prestige",
      "detail": "Les valeurs du compartiment Prestige ; sa composition est révisée chaque année."
     }
-   ]
+   ],
+   "simulation": {
+    "type": "technique",
+    "consigne": "Observez l’évolution récente de valeurs phares éligibles aux indices et compartiments de la BRVM.",
+    "indicateur": "variation",
+    "codes": [
+     "SNTS",
+     "ORAC",
+     "SGBC"
+    ]
+   }
   },
   {
    "type": "cas",
@@ -167,6 +177,61 @@
    ],
    "correct": 1,
    "explication": "Le classement repose sur des critères de taille, de flottant et d’information, pas sur une garantie de performance."
+  },
+  {
+   "question": "Comment sont pondérées les actions au sein de l’indice BRVM Composite ?",
+   "options": [
+    "De manière strictement égale entre les sociétés cotées",
+    "Selon leur capitalisation boursière respective sur la cote",
+    "Uniquement selon le montant du dividende versé l’année précédente",
+    "À parts fixes selon le pays d’implantation du siège social"
+   ],
+   "correct": 1,
+   "explication": "Un indice pondéré par la capitalisation donne un poids proportionnel à la taille boursière de chaque émetteur."
+  },
+  {
+   "question": "Quelle différence distingue le BRVM 30 du BRVM Principal en termes de nature ?",
+   "options": [
+    "Le BRVM 30 est un indice, alors que le Principal est un compartiment",
+    "Le BRVM 30 réunit les obligations souveraines et le Principal les actions",
+    "Le BRVM Principal rassemble uniquement des PME non encore rentables",
+    "Le BRVM 30 mesure l’inflation moyenne de la zone UEMOA"
+   ],
+   "correct": 0,
+   "explication": "Les compartiments (Prestige, Principal, Croissance) classent les sociétés admises ; le BRVM 30 est un indice mesurant les 30 valeurs les plus actives."
+  },
+  {
+   "question": "Quel principe permet à une société initialement cotée sur le compartiment Principal ou Croissance de changer de catégorie ?",
+   "options": [
+    "Le respect durable des critères exigés lors de la revue annuelle",
+    "Une décision libre prise par le PDG sans examen de la BRVM",
+    "Une augmentation ponctuelle du cours sur une seule séance",
+    "Le versement d’un dividende exceptionnel supérieur à 20 %"
+   ],
+   "correct": 0,
+   "explication": "La BRVM vérifie périodiquement les critères de flottant, capitalisation, liquidité et gouvernance avant tout reclassement."
+  },
+  {
+   "question": "À quoi servent les indices sectoriels publiés parallèlement au BRVM Composite ?",
+   "options": [
+    "À suivre la performance d’un secteur précis face au marché global",
+    "À garantir un rendement minimal aux détenteurs d’actions bancaires",
+    "À remplacer les rapports annuels certifiés des entreprises cotées",
+    "À fixer le tarif des frais de courtage pratiqués par les SGI"
+   ],
+   "correct": 0,
+   "explication": "Les indices sectoriels (Finance, Télécoms, Services publics, Distribution…) isolent la dynamique propre à chaque branche d’activité."
+  },
+  {
+   "question": "Pourquoi un indice large peut-il monter alors que la majorité des titres de la cote stagne ?",
+   "options": [
+    "Parce que deux ou trois très grosses capitalisations tirent la moyenne",
+    "Parce que la BRVM retire automatiquement les valeurs en baisse",
+    "Parce que l’indice intègre les dépôts à terme des banques centrales",
+    "Parce que les dividendes sont comptés en double dans le calcul"
+   ],
+   "correct": 0,
+   "explication": "Dans un indice pondéré par la capitalisation, les plus grandes valeurs représentent une part majeure de la variation totale."
   }
  ],
  "liens": [
@@ -195,5 +260,9 @@
   ],
   "correct": 1,
   "explication": "La réorganisation est entrée en vigueur le 2 janvier 2023."
+ },
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-25"
  }
 }

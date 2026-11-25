@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import QRCode from 'qrcode';
 import { createPublicClient } from '@/lib/supabase/public';
 import CertificatPublicCarte from '@/components/academy/CertificatPublicCarte';
 
@@ -68,6 +69,13 @@ export default async function CertificatPublicPage(props: { params: Promise<{ id
     month: 'long',
     day: 'numeric',
   });
+  const verifyUrl = `${SITE_URL}/certificat/${c.id}`;
+  const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
+    width: 160,
+    margin: 1,
+    color: { dark: '#0b0e14', light: '#f5f2eb' },
+  }).catch(() => undefined);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-10">
       <CertificatPublicCarte
@@ -77,7 +85,8 @@ export default async function CertificatPublicPage(props: { params: Promise<{ id
         niveauCode={c.niveau}
         issuedDate={date}
         competences={COMPETENCES_PAR_NIVEAU[c.niveau] ?? []}
-        verifyUrl={`${SITE_URL}/certificat/${c.id}`}
+        verifyUrl={verifyUrl}
+        qrDataUrl={qrDataUrl}
       />
     </div>
   );

@@ -73,6 +73,29 @@
      ]
     ],
     "note": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+   },
+   "simulation": {
+    "type": "carnet",
+    "niveaux": [
+     {
+      "prix": 4000,
+      "quantite": 20
+     },
+     {
+      "prix": 4250,
+      "quantite": 15
+     },
+     {
+      "prix": 4600,
+      "quantite": 25
+     }
+    ],
+    "quantite_defaut": 45,
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "ORAC"
+    ]
    }
   },
   {
@@ -177,6 +200,61 @@
    ],
    "correct": 1,
    "explication": "L’AMF-UMOA enquête et sanctionne ; des poursuites pénales relèvent des législations nationales."
+  },
+  {
+   "question": "Qu’est-ce qu’une « fenêtre négative » (black-out period) appliquée aux dirigeants d’une société cotée ?",
+   "options": [
+    "Une interdiction temporaire d’intervenir sur les titres avant publication",
+    "Une suspension automatique de l’action pendant trois mois consécutifs",
+    "Une exonération fiscale accordée aux fondateurs lors des dividendes",
+    "Une séance réservée aux ordres exécutés par la SGI chef de file"
+   ],
+   "correct": 0,
+   "explication": "Avant la publication des comptes, les dirigeants doivent s’abstenir d’acheter ou de vendre afin d’éviter tout soupçon de délit d’initié."
+  },
+  {
+   "question": "Deux complices se vendent et s’achètent simultanément le même titre au même prix pour gonfler le volume affiché. De quel abus s’agit-il ?",
+   "options": [
+    "D’une offre publique d’achat obligatoire",
+    "D’une manipulation de marché par opérations fictives",
+    "D’un fractionnement régulier de la valeur nominale",
+    "D’une couverture réglementaire imposée par le DC/BR"
+   ],
+   "correct": 1,
+   "explication": "Créer une apparence artificielle d’activité ou de liquidité trompe les autres investisseurs : c’est une manipulation de cours prohibée."
+  },
+  {
+   "question": "Transmettre à un proche un tuyau confidentiel avant la publication officielle d’une acquisition constitue :",
+   "options": [
+    "Une pratique courante tolérée hors séance boursière",
+    "Une communication illicite d’information privilégiée",
+    "Un service commercial normal entre actionnaires individuels",
+    "Une obligation liée à la transparence financière permanente"
+   ],
+   "correct": 1,
+   "explication": "Communiquer une information privilégiée hors du cadre professionnel normal expose l’initié et le bénéficiaire à des sanctions."
+  },
+  {
+   "question": "Quel type de message relayé sur les réseaux sociaux peut être sanctionné au titre de la manipulation de marché ?",
+   "options": [
+    "La diffusion d’informations fausses ou trompeuses sur une société",
+    "La lecture publique du dernier bilan annuel officiel certifié",
+    "Le calcul d’un multiple PER à partir du Bulletin officiel de la cote",
+    "L’analyse comparative de deux exercices historiques déjà publiés"
+   ],
+   "correct": 0,
+   "explication": "Propager sciemment des rumeurs fausses ou trompeuses susceptibles d’orienter artificiellement le cours relève de l’abus de marché."
+  },
+  {
+   "question": "Quelle distinction sépare le travail d’enquête de la décision de sanction à l’AMF-UMOA ?",
+   "options": [
+    "La Commission des sanctions statue indépendamment des enquêteurs",
+    "Les deux rôles reviennent uniquement au directeur général de la BRVM",
+    "Seules les SGI votent les amendes lors des assemblées générales",
+    "La BCEAO tranche les dossiers en remplaçant les juges civils"
+   ],
+   "correct": 0,
+   "explication": "Pour garantir un procès équitable, les poursuites et l’instruction sont séparées de l’organe indépendant qui prononce les sanctions."
   }
  ],
  "liens": [
@@ -205,5 +283,9 @@
   ],
   "correct": 1,
   "explication": "Une information privilégiée est précise, non encore publique, et susceptible d’influencer sensiblement le cours."
+ },
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-25"
  }
 }
