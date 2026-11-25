@@ -337,8 +337,6 @@
 .lp-bouton:hover:not(:disabled) { background: #096a7d; }
 .lp-bouton:disabled { opacity: 0.55; cursor: not-allowed; }
 .lp-bouton--discret { color: var(--lp-accent); background: transparent; }
-/* Rangée de boutons d'un atelier (ex. « figer le cours » et « revenir »), qui passe à la ligne sur mobile. */
-.lp-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .lp-bouton--discret:hover:not(:disabled) { background: var(--lp-accent-clair); }
 .lp-resultat { margin-top: 1.1rem; }
 .lp-resultat:empty { margin-top: 0; }
@@ -434,3 +432,23 @@
 .lp-saisie-cours td { white-space: nowrap; }
 .lp-graphe--court { height: 200px; }
 .lp-actions { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; }
+
+/* ── Progression de lecture & ancres rapides ── */
+.lp-progress-wrap {
+  position: sticky; top: 3.5rem; z-index: 20;
+  height: 3px; width: 100%; background: var(--lp-trame);
+  border-radius: 999px; overflow: hidden; margin-bottom: 1.5rem;
+}
+.lp-progress-fill { height: 100%; background: var(--lp-accent); transition: width 120ms ease-out; }
+.lp-ancres {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1.35rem;
+}
+.lp-ancre {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border: 1px solid var(--lp-trame); background: #fff; color: var(--lp-texte);
+  border-radius: 999px; padding: 0.28rem 0.7rem; font-size: 0.78rem; font-weight: 500;
+  text-decoration: none; transition: border-color 140ms ease, color 140ms ease;
+}
+.lp-ancre:hover { border-color: var(--lp-accent); color: var(--lp-accent); }
+.lp-ancre--sim { background: var(--lp-accent-clair); border-color: transparent; color: var(--lp-accent); font-weight: 600; }
+.lp-ancre--quiz { background: #eef7f1; border-color: transparent; color: var(--lp-hausse); font-weight: 600; }

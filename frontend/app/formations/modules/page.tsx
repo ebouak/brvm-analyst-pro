@@ -42,7 +42,7 @@ export default async function ModulesPage() {
                   )}
                   <span className="text-[11px] text-faint">{c.nbLecons} leçon{c.nbLecons > 1 ? 's' : ''}</span>
                 </div>
-                <h2 className="mt-2 font-display text-lg text-white transition group-hover:text-accent">{c.titre}</h2>
+                <h2 className="mt-2 font-display text-lg text-ivory transition group-hover:text-accent">{c.titre}</h2>
                 {c.resume && <p className="mt-1 line-clamp-2 text-sm text-muted">{c.resume}</p>}
                 <div className="mt-4">
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">

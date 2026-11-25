@@ -29,7 +29,7 @@ export interface AssembledExam {
 export interface ExamGrade {
   score: number; // 0-100
   passed: boolean;
-  corrige: { id: string; correct: number; explication: string }[];
+  corrige: { id: string; correct: number; bonne_reponse: string; juste: boolean; explication: string }[];
 }
 
 export const PASS_THRESHOLD = 70;
@@ -96,8 +96,10 @@ export function gradeExam(
     if (vus.has(a.id)) continue; // un doublon ne compte pas deux fois
     vus.add(a.id);
     const choixValeur = a.options[a.choix];
-    if (choixValeur === q.options[q.correct]) bonnes++;
-    corrige.push({ id: a.id, correct: q.correct, explication: q.explication });
+    const bonneReponse = q.options[q.correct] ?? '';
+    const juste = choixValeur === bonneReponse;
+    if (juste) bonnes++;
+    corrige.push({ id: a.id, correct: q.correct, bonne_reponse: bonneReponse, juste, explication: q.explication });
   }
   const total = issuedIds ? issuedIds.length : answers.length;
   const score = total > 0 ? Math.round((bonnes / total) * 100) : 0;

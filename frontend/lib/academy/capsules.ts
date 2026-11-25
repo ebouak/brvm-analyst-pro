@@ -48,6 +48,7 @@ export type CapsuleFiltreId =
   | 'intermediaire'
   | 'avance'
   | 'expert'
+  | 'ateliers'
   | 'fondamental'
   | 'technique'
   | 'revenus'
@@ -80,6 +81,7 @@ export interface HubCourseEnriched {
   slug: string;
   titre: string;
   niveau: string | null;
+  format: 'parcours' | 'atelier';
   resume: string | null;
   cover: string | null;
   lessonsCount: number;
@@ -172,6 +174,14 @@ export interface MetadonneesCours {
 const isCertifiant = (niveau: string | null | undefined, slug?: string | null) =>
   Boolean(niveau && ['debutant', 'intermediaire', 'avance', 'expert'].includes(niveau) && (!slug || slug.startsWith('academy-niveau-')));
 
+export function formatCours(slug: string): 'parcours' | 'atelier' {
+  return slug.startsWith('academy-niveau-') ? 'parcours' : 'atelier';
+}
+
+export function estLeconGratuite(slug: string, lessonIdx: number): boolean {
+  return slug === 'academy-niveau-1-initiation' && lessonIdx === 0;
+}
+
 export function extraireMetadonneesCours(
   lessons: readonly LessonLike[],
   now: Date,
@@ -236,6 +246,8 @@ export function extraireMetadonneesCours(
   }
   if (isCertifiant(opts?.niveau, opts?.slug)) {
     capsules.push({ id: 'certifiant', label: 'Certifiant', ton: 'neutre' });
+  } else if (opts?.slug && formatCours(opts.slug) === 'atelier') {
+    capsules.push({ id: 'atelier', label: 'Atelier court', ton: 'neutre' });
   }
 
   return {
@@ -274,6 +286,7 @@ const FILTRES_ORDRE: { id: CapsuleFiltreId; label: string; match: (c: HubCourseE
   { id: 'intermediaire', label: 'Intermédiaire', match: (c) => c.niveau === 'intermediaire' },
   { id: 'avance', label: 'Avancé', match: (c) => c.niveau === 'avance' },
   { id: 'expert', label: 'Expert', match: (c) => c.niveau === 'expert' },
+  { id: 'ateliers', label: 'Ateliers courts', match: (c) => c.format === 'atelier' },
   { id: 'fondamental', label: 'Analyse fondamentale', match: (c) => c.themes.includes('fondamental') },
   { id: 'technique', label: 'Analyse technique', match: (c) => c.themes.includes('technique') },
   { id: 'revenus', label: 'Dividendes & revenus', match: (c) => c.themes.includes('revenus') },
@@ -388,3 +401,116 @@ export function calculerActiviteCalendrier(
     leconsAujourdhui,
   };
 }
+
+export interface FormuleMemo {
+  leconTitre: string;
+  nom: string;
+  expression: string;
+  exemple: string;
+}
+
+export interface PiegeMemo {
+  leconTitre: string;
+  titre: string;
+  detail: string;
+  verifier: string;
+}
+
+export interface FlashcardMemo {
+  id: string;
+  categorie: 'Formule' | 'Lexique' | 'Piège' | 'À retenir';
+  recto: string;
+  verso: string;
+  source: string;
+}
+
+export interface CartesRevision {
+  formules: FormuleMemo[];
+  pieges: PiegeMemo[];
+  flashcards: FlashcardMemo[];
+}
+
+export interface RevisionCourseLike {
+  glossaire?: { terme: string; definition: string }[] | null;
+  lessons: {
+    titre: string;
+    sections: {
+      type: string;
+      titre: string;
+      formules?: { nom: string; expression: string; exemple?: string }[] | null;
+      points?: { titre: string; detail?: string; verifier?: string }[] | null;
+    }[];
+  }[];
+}
+
+export function extraireCartesRevision(content: RevisionCourseLike): CartesRevision {
+  const formules: FormuleMemo[] = [];
+  const pieges: PiegeMemo[] = [];
+  const flashcards: FlashcardMemo[] = [];
+  const seenRectos = new Set<string>();
+
+  const pushCard = (c: Omit<FlashcardMemo, 'id'>) => {
+    const key = `${c.categorie}:${c.recto.trim().toLowerCase()}`;
+    if (!c.recto.trim() || !c.verso.trim() || seenRectos.has(key)) return;
+    seenRectos.add(key);
+    flashcards.push({ id: `fc-${flashcards.length + 1}`, ...c });
+  };
+
+  for (const l of content.lessons) {
+    for (const s of l.sections) {
+      for (const f of s.formules ?? []) {
+        formules.push({
+          leconTitre: l.titre,
+          nom: f.nom,
+          expression: f.expression,
+          exemple: f.exemple ?? '',
+        });
+        pushCard({
+          categorie: 'Formule',
+          recto: f.nom,
+          verso: f.exemple ? `${f.expression}\n\nExemple : ${f.exemple}` : f.expression,
+          source: l.titre,
+        });
+      }
+      if (s.type === 'piege') {
+        for (const p of s.points ?? []) {
+          if (!p.detail) continue;
+          pieges.push({
+            leconTitre: l.titre,
+            titre: p.titre,
+            detail: p.detail,
+            verifier: p.verifier ?? '',
+          });
+          pushCard({
+            categorie: 'Piège',
+            recto: `Piège : ${p.titre}`,
+            verso: p.verifier ? `${p.detail}\n\nÀ vérifier : ${p.verifier}` : p.detail,
+            source: l.titre,
+          });
+        }
+      } else if (s.type === 'retenir') {
+        for (const p of s.points ?? []) {
+          if (!p.detail) continue;
+          pushCard({
+            categorie: 'À retenir',
+            recto: p.titre,
+            verso: p.detail,
+            source: l.titre,
+          });
+        }
+      }
+    }
+  }
+
+  for (const g of content.glossaire ?? []) {
+    pushCard({
+      categorie: 'Lexique',
+      recto: g.terme,
+      verso: g.definition,
+      source: 'Glossaire du cours',
+    });
+  }
+
+  return { formules, pieges, flashcards };
+}
+

@@ -31,8 +31,8 @@ export default function CertificateActions({ niveau, defaultName }: { niveau: st
         <a href={url} className="block text-sm text-accent hover:underline">Voir mon certificat →</a>
         <div className="flex flex-wrap gap-2">
           <a href={linkedin} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#0a66c2] px-4 py-2 text-sm font-semibold text-[#ffffff]">Ajouter à LinkedIn</a>
-          <button type="button" onClick={() => navigator.clipboard.writeText(url)} className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-white">Copier le lien</button>
-          <a href={`https://wa.me/?text=${encodeURIComponent('Mon certificat WESTBOURSE : ' + url)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-white">WhatsApp</a>
+          <button type="button" onClick={() => navigator.clipboard.writeText(url)} className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-ivory">Copier le lien</button>
+          <a href={`https://wa.me/?text=${encodeURIComponent('Mon certificat WESTBOURSE : ' + url)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-ivory">WhatsApp</a>
         </div>
       </div>
     );
@@ -42,7 +42,7 @@ export default function CertificateActions({ niveau, defaultName }: { niveau: st
     <div className="space-y-3">
       <label className="block text-sm text-muted">Nom affiché sur le certificat
         <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80}
-          className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-white" />
+          className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-ivory" />
       </label>
       <label className="flex items-start gap-2 text-xs text-muted">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />

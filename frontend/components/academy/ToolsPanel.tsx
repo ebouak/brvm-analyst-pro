@@ -75,7 +75,7 @@ function DiscussionTab({ courseTitre }: { courseTitre: string }) {
         </Link>
         <Link
           href="/forum"
-          className="rounded-lg border border-border px-3 py-2 text-center text-xs text-muted transition hover:text-white"
+          className="rounded-lg border border-border px-3 py-2 text-center text-xs text-muted transition hover:text-ivory"
         >
           Voir les discussions
         </Link>
@@ -179,7 +179,7 @@ function RessourcesTab({ lesson, content }: { lesson: Lesson; content: CourseCon
           <ul className="space-y-1.5">
             {content.relatedLinks!.map((r) => (
               <li key={r.slug}>
-                <Link href={`/formations/academy/${r.slug}`} className="text-sm text-muted hover:text-white">
+                <Link href={`/formations/academy/${r.slug}`} className="text-sm text-muted hover:text-ivory">
                   {r.label}
                 </Link>
               </li>

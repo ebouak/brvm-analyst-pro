@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Clock,
   Compass,
+  Lock,
   PlayCircle,
   Search,
   Sparkles,
@@ -29,6 +30,7 @@ import {
 } from '@/lib/academy/capsules';
 import { NIVEAUX, NIVEAU_LABEL } from '@/lib/academy/types';
 import { Lecon0Carte } from './Lecon0Carte';
+import QuizPlacement from './QuizPlacement';
 
 type TabId = 'explorer' | 'en_cours' | 'termines' | 'certificats';
 
@@ -48,6 +50,8 @@ interface Props {
   certificats: CertificatEtat[];
   examensReussis: string[];
   complet: boolean;
+  accessibleSlugs?: string[];
+  isLoggedIn?: boolean;
 }
 
 const GOAL_KEY = 'wb_academy_goal';
@@ -76,6 +80,8 @@ export default function AcademyCatalogCoursera({
   certificats,
   examensReussis,
   complet,
+  accessibleSlugs,
+  isLoggedIn = true,
 }: Props) {
   const [tab, setTab] = useState<TabId>('explorer');
   const [filtre, setFiltre] = useState<CapsuleFiltreId>('tous');
@@ -83,7 +89,14 @@ export default function AcademyCatalogCoursera({
   const [showAll, setShowAll] = useState(false);
   const [goal, setGoal] = useState<ObjectifId | null>(null);
   const [goalPickerOpen, setGoalPickerOpen] = useState(false);
+  const [placementOpen, setPlacementOpen] = useState(false);
   const [weeklyGoal, setWeeklyGoal] = useState<number>(3);
+
+  const accessSet = useMemo(
+    () => new Set(accessibleSlugs ?? courses.map((c) => c.slug)),
+    [accessibleSlugs, courses],
+  );
+  const hasAnyAccess = accessSet.size > 0;
 
   useEffect(() => {
     try {
@@ -98,7 +111,7 @@ export default function AcademyCatalogCoursera({
         setWeeklyGoal(savedWeekly);
       }
     } catch {
-      // localStorage indisponible (navigation privée stricte) : état par défaut conservé.
+      // localStorage indisponible : valeurs par défaut conservées.
     }
   }, []);
 
@@ -125,25 +138,30 @@ export default function AcademyCatalogCoursera({
   const filtres = useMemo(() => construireFiltresCapsules(courses), [courses]);
   const recommandes = useMemo(() => recommanderPourObjectif(courses, goal), [courses, goal]);
 
-  const enCoursList = useMemo(() => filtrerCours(courses, { tab: 'en_cours' }), [courses]);
-  const terminesList = useMemo(() => filtrerCours(courses, { tab: 'termines' }), [courses]);
+  const accessibleCourses = useMemo(
+    () => courses.filter((c) => accessSet.has(c.slug)),
+    [courses, accessSet],
+  );
+  const enCoursList = useMemo(() => filtrerCours(accessibleCourses, { tab: 'en_cours' }), [accessibleCourses]);
+  const terminesList = useMemo(() => filtrerCours(accessibleCourses, { tab: 'termines' }), [accessibleCourses]);
 
   const visibleCourses = useMemo(() => {
     if (tab === 'certificats') return [];
-    const list = filtrerCours(courses, { tab, filtre, query });
+    const pool = tab === 'explorer' ? courses : accessibleCourses;
+    const list = filtrerCours(pool, { tab, filtre, query });
     if (goal && tab === 'explorer' && filtre === 'tous' && !query.trim()) {
       return [...list].sort((a, b) => Number(recommandes.has(b.slug)) - Number(recommandes.has(a.slug)));
     }
     return list;
-  }, [courses, tab, filtre, query, goal, recommandes]);
+  }, [courses, accessibleCourses, tab, filtre, query, goal, recommandes]);
 
   const featuredResumeCourse = useMemo(() => {
     if (resumeTarget) {
-      const found = courses.find((c) => c.slug === resumeTarget.slug);
+      const found = accessibleCourses.find((c) => c.slug === resumeTarget.slug);
       if (found) return found;
     }
     return enCoursList[0] ?? null;
-  }, [courses, resumeTarget, enCoursList]);
+  }, [accessibleCourses, resumeTarget, enCoursList]);
 
   const totalStats = useMemo(
     () => ({
@@ -172,39 +190,49 @@ export default function AcademyCatalogCoursera({
 
   return (
     <div className="space-y-8">
-      {/* ── En-tête personnalisé + recherche (type Coursera Mon apprentissage) ── */}
+      {/* ── En-tête personnalisé + recherche + diagnostic ── */}
       <header className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/formations" className="text-sm text-muted transition-colors hover:text-ivory">
             ← Formations
           </Link>
-          <div className="relative w-full sm:w-80">
-            <Search
-              aria-hidden
-              size={16}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                if (tab === 'certificats') setTab('explorer');
-              }}
-              placeholder="Que souhaitez-vous apprendre ?"
-              aria-label="Rechercher un cours ou un module"
-              className="w-full rounded-full border border-border bg-surface py-2 pl-10 pr-9 text-sm text-ivory placeholder:text-faint transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                aria-label="Effacer la recherche"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-faint hover:text-ivory"
-              >
-                <X size={14} />
-              </button>
-            )}
+          <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setPlacementOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3.5 py-2 text-xs font-semibold text-accent-ink transition hover:bg-accent/20"
+            >
+              <Compass size={14} aria-hidden />
+              <span>{placementOpen ? 'Fermer le diagnostic' : 'Trouver mon niveau · 2 min'}</span>
+            </button>
+            <div className="relative flex-1 sm:w-72">
+              <Search
+                aria-hidden
+                size={16}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (tab === 'certificats') setTab('explorer');
+                }}
+                placeholder="Que souhaitez-vous apprendre ?"
+                aria-label="Rechercher un cours ou un module"
+                className="w-full rounded-full border border-border bg-surface py-2 pl-10 pr-9 text-sm text-ivory placeholder:text-faint transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-faint hover:text-ivory"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -241,6 +269,10 @@ export default function AcademyCatalogCoursera({
             </div>
           </div>
         </div>
+
+        {placementOpen && (
+          <QuizPlacement onApplyGoal={chooseGoal} onClose={() => setPlacementOpen(false)} />
+        )}
 
         {/* Bandeau intelligent : capsules d'objectif */}
         {goalPickerOpen && (
@@ -285,14 +317,18 @@ export default function AcademyCatalogCoursera({
         )}
       </header>
 
-      {/* ── Onglets soulignés (Explorer / En cours / Terminés / Certificats) ── */}
+      {/* ── Onglets soulignés ── */}
       <nav aria-label="Vues de l'Academy" className="border-b border-border">
         <div className="-mb-px flex gap-6 overflow-x-auto" role="tablist">
           {(
             [
               ['explorer', 'Explorer', courses.length],
-              ['en_cours', 'En cours', enCoursList.length],
-              ['termines', 'Terminés', terminesList.length],
+              ...(hasAnyAccess
+                ? [
+                    ['en_cours', 'En cours', enCoursList.length] as const,
+                    ['termines', 'Terminés', terminesList.length] as const,
+                  ]
+                : []),
               ['certificats', 'Certificats', certsActifs.length],
             ] as const
           ).map(([id, label, count]) => {
@@ -305,9 +341,7 @@ export default function AcademyCatalogCoursera({
                 aria-selected={active}
                 onClick={() => setTab(id)}
                 className={`flex shrink-0 items-center gap-2 border-b-2 pb-3 pt-1 text-sm font-medium transition ${
-                  active
-                    ? 'border-accent text-ivory'
-                    : 'border-transparent text-muted hover:text-ivory'
+                  active ? 'border-accent text-ivory' : 'border-transparent text-muted hover:text-ivory'
                 }`}
               >
                 <span>{label}</span>
@@ -324,8 +358,39 @@ export default function AcademyCatalogCoursera({
         </div>
       </nav>
 
-      {/* ── Section "Mon apprentissage" : Reprendre + Calendrier d'activité (Explorer si entamé, ou En cours) ── */}
-      {(tab === 'en_cours' || (tab === 'explorer' && featuredResumeCourse && !query.trim())) && (
+      {/* ── Bandeau essai gratuit pour les visiteurs sans accès ── */}
+      {!hasAnyAccess && tab === 'explorer' && !query.trim() && (
+        <section className="grid gap-4 rounded-2xl border border-accent/35 bg-accent/[0.05] p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div>
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-up/15 px-2.5 py-0.5 text-[11px] font-semibold text-up">
+              Essai libre inclus
+            </p>
+            <h2 className="mt-2 font-display text-xl text-ivory">
+              Découvrez la méthode gratuitement : Vidéo d’ouverture + Leçon 1 complète
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Testez un cours complet avec graphiques réels BRVM, simulateur de variation et quiz interactif à 10 questions avant de débloquer les niveaux.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            <Link
+              href="/formations/academy/academy-niveau-1-initiation?lecon=1"
+              className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition hover:bg-gold-2"
+            >
+              Essayer la Leçon 1 gratuite →
+            </Link>
+            <Link
+              href="/formations/academy/lecon-0"
+              className="rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-ivory transition hover:border-accent/40"
+            >
+              Vidéo Leçon 0
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* ── Section "Mon apprentissage" : Reprendre + Calendrier d'activité ── */}
+      {hasAnyAccess && (tab === 'en_cours' || (tab === 'explorer' && featuredResumeCourse && !query.trim())) && (
         <section aria-label="Mon apprentissage" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
           {featuredResumeCourse ? (
             <div className="flex flex-col justify-between rounded-2xl border border-border-strong bg-surface p-5 sm:p-6">
@@ -337,7 +402,8 @@ export default function AcademyCatalogCoursera({
                   </span>
                   {featuredResumeCourse.niveau && (
                     <span className="text-xs text-muted">
-                      {NIVEAU_LABEL[featuredResumeCourse.niveau as keyof typeof NIVEAU_LABEL] ?? featuredResumeCourse.niveau}
+                      {NIVEAU_LABEL[featuredResumeCourse.niveau as keyof typeof NIVEAU_LABEL] ??
+                        featuredResumeCourse.niveau}
                     </span>
                   )}
                 </div>
@@ -408,7 +474,6 @@ export default function AcademyCatalogCoursera({
             </div>
           )}
 
-          {/* Widget Calendrier & objectif hebdomadaire */}
           <CalendrierActiviteCard
             calendrier={calendrier}
             weeklyGoal={weeklyGoal}
@@ -424,7 +489,6 @@ export default function AcademyCatalogCoursera({
           className="rounded-2xl border border-border bg-sunken/70 p-5 sm:p-7"
         >
           <div className="grid gap-7 lg:grid-cols-[240px_minmax(0,1fr)]">
-            {/* Colonne gauche d'accroche factuelle */}
             <aside className="flex flex-col justify-between gap-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-accent-ink">Programme structuré</p>
@@ -463,7 +527,6 @@ export default function AcademyCatalogCoursera({
               </div>
             </aside>
 
-            {/* Zone droite : Capsules filtrantes + Grille de cartes */}
             <div className="min-w-0 space-y-5">
               {/* Barre de capsules filtrantes intelligentes */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrer par capsule">
@@ -514,6 +577,7 @@ export default function AcademyCatalogCoursera({
                         key={course.slug}
                         course={course}
                         recommended={recommandes.has(course.slug)}
+                        unlocked={accessSet.has(course.slug)}
                       />
                     ))}
                   </div>
@@ -535,7 +599,7 @@ export default function AcademyCatalogCoursera({
         </section>
       )}
 
-      {/* ── ONGLET EN COURS / TERMINÉS (grille directe) ── */}
+      {/* ── ONGLET EN COURS / TERMINÉS ── */}
       {(tab === 'en_cours' || tab === 'termines') && (
         <section className="space-y-4">
           {visibleCourses.length === 0 ? (
@@ -560,6 +624,7 @@ export default function AcademyCatalogCoursera({
                   key={course.slug}
                   course={course}
                   recommended={recommandes.has(course.slug)}
+                  unlocked={accessSet.has(course.slug)}
                 />
               ))}
             </div>
@@ -569,100 +634,116 @@ export default function AcademyCatalogCoursera({
 
       {/* ── ONGLET CERTIFICATS ── */}
       {tab === 'certificats' && (
-        <section aria-label="Examens et certificats par niveau" className="grid gap-4 sm:grid-cols-2">
-          {NIVEAUX.map((niv) => {
-            const c = courses.find((x) => x.niveau === niv && x.slug.startsWith('academy-niveau-'));
-            const cert = certsActifs.find((x) => x.niveau === niv);
-            const passed = examensReussis.includes(niv);
-            const lessonsOk = c ? c.progress.pct === 100 : false;
-            return (
-              <div
-                key={niv}
-                className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-5"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent-ink">
-                      <Award size={14} aria-hidden />
-                      {NIVEAU_LABEL[niv]}
-                    </span>
-                    {cert ? (
-                      <span className="rounded-full bg-up/15 px-2.5 py-0.5 text-[11px] font-semibold text-up">
-                        Certificat délivré
+        <section aria-label="Examens et certificats par niveau" className="space-y-4">
+          {!isLoggedIn && (
+            <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted">
+              Chaque niveau certifiant se termine par un examen de 20 questions (seuil 70 %) donnant accès à un certificat
+              public vérifiable et exportable sur LinkedIn.
+            </div>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {NIVEAUX.map((niv) => {
+              const c = courses.find((x) => x.niveau === niv && x.slug.startsWith('academy-niveau-'));
+              const unlocked = c ? accessSet.has(c.slug) : false;
+              const cert = certsActifs.find((x) => x.niveau === niv);
+              const passed = examensReussis.includes(niv);
+              const lessonsOk = unlocked && c ? c.progress.pct === 100 : false;
+              return (
+                <div
+                  key={niv}
+                  className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-5"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent-ink">
+                        <Award size={14} aria-hidden />
+                        {NIVEAU_LABEL[niv]}
                       </span>
-                    ) : passed ? (
-                      <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[11px] font-semibold text-accent-ink">
-                        Examen réussi
-                      </span>
-                    ) : lessonsOk ? (
-                      <span className="rounded-full bg-warn/15 px-2.5 py-0.5 text-[11px] font-semibold text-warn">
-                        Prêt pour l’examen
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-elevated px-2.5 py-0.5 text-[11px] text-faint">
-                        En progression
-                      </span>
+                      {cert ? (
+                        <span className="rounded-full bg-up/15 px-2.5 py-0.5 text-[11px] font-semibold text-up">
+                          Certificat délivré
+                        </span>
+                      ) : passed ? (
+                        <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[11px] font-semibold text-accent-ink">
+                          Examen réussi
+                        </span>
+                      ) : lessonsOk ? (
+                        <span className="rounded-full bg-warn/15 px-2.5 py-0.5 text-[11px] font-semibold text-warn">
+                          Prêt pour l’examen
+                        </span>
+                      ) : unlocked ? (
+                        <span className="rounded-full bg-elevated px-2.5 py-0.5 text-[11px] text-faint">
+                          En progression
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-elevated px-2.5 py-0.5 text-[11px] text-faint">
+                          <Lock size={10} aria-hidden /> Aperçu
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="mt-2 font-display text-lg text-ivory">
+                      {c?.titre ?? `Parcours ${NIVEAU_LABEL[niv]}`}
+                    </h3>
+                    {c && unlocked && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-muted">
+                          <span>Leçons validées</span>
+                          <span className="tabular">
+                            {c.progress.done} / {c.lessonsCount} ({c.progress.pct} %)
+                          </span>
+                        </div>
+                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-border">
+                          <div className="h-full rounded-full bg-accent" style={{ width: `${c.progress.pct}%` }} />
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <h3 className="mt-2 font-display text-lg text-ivory">
-                    {c?.titre ?? `Parcours ${NIVEAU_LABEL[niv]}`}
-                  </h3>
-                  {c && (
-                    <div className="mt-3">
-                      <div className="flex justify-between text-xs text-muted">
-                        <span>Leçons validées</span>
-                        <span className="tabular">
-                          {c.progress.done} / {c.lessonsCount} ({c.progress.pct} %)
-                        </span>
-                      </div>
-                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-border">
-                        <div className="h-full rounded-full bg-accent" style={{ width: `${c.progress.pct}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                <div className="mt-5 flex flex-wrap gap-2 pt-2">
-                  {cert ? (
-                    <Link
-                      href={`/certificat/${cert.id}`}
-                      className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-gold-2"
-                    >
-                      Voir mon certificat →
-                    </Link>
-                  ) : passed ? (
-                    <Link
-                      href={`/formations/academy/certificat?niveau=${niv}`}
-                      className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-gold-2"
-                    >
-                      Générer mon certificat →
-                    </Link>
-                  ) : lessonsOk ? (
-                    <Link
-                      href={`/formations/academy/examen/${niv}`}
-                      className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-semibold text-accent-ink hover:bg-accent/20"
-                    >
-                      Passer l’examen →
-                    </Link>
-                  ) : c ? (
-                    <Link
-                      href={`/formations/academy/${c.slug}?lecon=${c.progress.nextIdx + 1}`}
-                      className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-ivory hover:border-accent/40"
-                    >
-                      Continuer les leçons →
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-faint">Non débloqué dans votre formule</span>
-                  )}
+                  <div className="mt-5 flex flex-wrap gap-2 pt-2">
+                    {cert ? (
+                      <Link
+                        href={`/certificat/${cert.id}`}
+                        className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-gold-2"
+                      >
+                        Voir mon certificat →
+                      </Link>
+                    ) : passed ? (
+                      <Link
+                        href={`/formations/academy/certificat?niveau=${niv}`}
+                        className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-gold-2"
+                      >
+                        Générer mon certificat →
+                      </Link>
+                    ) : lessonsOk ? (
+                      <Link
+                        href={`/formations/academy/examen/${niv}`}
+                        className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-semibold text-accent-ink hover:bg-accent/20"
+                      >
+                        Passer l’examen →
+                      </Link>
+                    ) : c && unlocked ? (
+                      <Link
+                        href={`/formations/academy/${c.slug}?lecon=${c.progress.nextIdx + 1}`}
+                        className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-ivory hover:border-accent/40"
+                      >
+                        Continuer les leçons →
+                      </Link>
+                    ) : c ? (
+                      <Link
+                        href={`/formations/academy/${c.slug}`}
+                        className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-muted hover:text-ivory"
+                      >
+                        Voir le programme →
+                      </Link>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </section>
       )}
 
-      {/* Leçon 0 mise en avant si on est sur Explorer et que la colonne gauche est déjà visible,
-          ou sur Terminés ; Édition intégrale en bas pour les abonnés complets */}
       {complet && (
         <Link
           href="/formations/academy/integrale"
@@ -682,28 +763,28 @@ export default function AcademyCatalogCoursera({
 function CourseraCourseCard({
   course,
   recommended,
+  unlocked,
 }: {
   course: HubCourseEnriched;
   recommended: boolean;
+  unlocked: boolean;
 }) {
+  const freeLesson1 = !unlocked && course.slug === 'academy-niveau-1-initiation';
   const href = `/formations/academy/${course.slug}${
-    course.progress.done > 0 ? `?lecon=${course.progress.nextIdx + 1}` : ''
+    unlocked && course.progress.done > 0 ? `?lecon=${course.progress.nextIdx + 1}` : ''
   }`;
   const visuel = course.niveau ? NIVEAU_VISUEL[course.niveau] : null;
   const nivLabel = course.niveau ? NIVEAU_LABEL[course.niveau as keyof typeof NIVEAU_LABEL] ?? course.niveau : 'Parcours';
 
-  // Priorité aux capsules intelligentes : "Recommandé pour vous" s'ajoute sans dépasser 3 capsules.
   const capsules: { id: string; label: string; ton: 'up' | 'accent' | 'purple' | 'neutre' }[] = [
-    ...(recommended
-      ? [{ id: 'rec', label: 'Recommandé pour vous', ton: 'purple' as const }]
-      : []),
+    ...(freeLesson1 ? [{ id: 'free-l1', label: 'Leçon 1 offerte', ton: 'up' as const }] : []),
+    ...(recommended ? [{ id: 'rec', label: 'Recommandé pour vous', ton: 'purple' as const }] : []),
     ...course.capsules,
   ].slice(0, 3);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition hover:border-accent/50">
       <Link href={href} className="flex flex-1 flex-col">
-        {/* Vignette 16:9 */}
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-elevated">
           {course.cover ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -721,16 +802,16 @@ function CourseraCourseCard({
             >
               <span className="inline-flex w-fit items-center gap-1.5 rounded-md border border-border-strong bg-bg/70 px-2 py-0.5 text-[11px] font-semibold text-ivory">
                 <Compass size={12} aria-hidden className="text-accent-ink" />
-                {visuel?.badge ?? 'Cas pratique'}
+                {visuel?.badge ?? 'Atelier'}
               </span>
               <p className="line-clamp-2 font-display text-sm font-medium text-ivory/90">{course.titre}</p>
             </div>
           )}
 
-          {course.progress.done > 0 && (
+          {unlocked && course.progress.done > 0 ? (
             <span
               className={`tabular absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur ${
-                course.progress.pct >= 100 ? 'bg-up/90 text-bg' : 'bg-bg/85 text-ivory border border-border'
+                course.progress.pct >= 100 ? 'bg-up/90 text-bg' : 'border border-border bg-bg/85 text-ivory'
               }`}
             >
               {course.progress.pct >= 100 ? (
@@ -741,16 +822,30 @@ function CourseraCourseCard({
                 `${course.progress.pct} %`
               )}
             </span>
-          )}
+          ) : !unlocked ? (
+            <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-border bg-bg/85 px-2.5 py-0.5 text-[11px] font-medium text-ivory backdrop-blur">
+              {freeLesson1 ? (
+                <span className="text-up">Essai libre</span>
+              ) : (
+                <>
+                  <Lock size={11} aria-hidden /> Aperçu
+                </>
+              )}
+            </span>
+          ) : null}
         </div>
 
-        {/* Corps */}
         <div className="flex flex-1 flex-col p-4">
-          <div className="flex items-center gap-2 text-xs text-muted">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-border bg-elevated text-[10px] font-bold text-accent-ink">
-              WB
+          <div className="flex items-center justify-between gap-2 text-xs text-muted">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-border bg-elevated text-[10px] font-bold text-accent-ink">
+                WB
+              </span>
+              <span className="truncate font-medium">WESTBOURSE Academy</span>
             </span>
-            <span className="truncate font-medium">WESTBOURSE Academy</span>
+            <span className="shrink-0 text-[11px] text-faint">
+              {course.format === 'parcours' ? 'Parcours' : 'Atelier'}
+            </span>
           </div>
 
           <h3 className="mt-2 line-clamp-2 font-display text-base font-semibold leading-snug text-ivory transition-colors group-hover:text-accent-ink">
@@ -774,7 +869,6 @@ function CourseraCourseCard({
             )}
           </p>
 
-          {/* Capsules intelligentes */}
           {capsules.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {capsules.map((cap) => (
@@ -788,18 +882,23 @@ function CourseraCourseCard({
             </div>
           )}
 
-          {/* Pied aligné */}
           <div className="mt-auto pt-4">
-            <div className="h-1 w-full overflow-hidden rounded-full bg-border">
-              <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${course.progress.pct}%` }} />
-            </div>
+            {unlocked && (
+              <div className="h-1 w-full overflow-hidden rounded-full bg-border">
+                <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${course.progress.pct}%` }} />
+              </div>
+            )}
             <div className="mt-2.5 flex items-center justify-between text-xs">
               <span className="font-semibold text-accent-ink">
-                {course.progress.pct === 0
-                  ? 'Commencer le cours →'
-                  : course.progress.pct >= 100
-                    ? 'Revoir le cours →'
-                    : 'Reprendre →'}
+                {!unlocked
+                  ? freeLesson1
+                    ? 'Essayer la Leçon 1 gratuite →'
+                    : 'Voir le programme →'
+                  : course.progress.pct === 0
+                    ? 'Commencer le cours →'
+                    : course.progress.pct >= 100
+                      ? 'Revoir le cours →'
+                      : 'Reprendre →'}
               </span>
               {course.modulesCount > 1 && (
                 <span className="tabular inline-flex items-center gap-1 text-faint">
@@ -812,7 +911,7 @@ function CourseraCourseCard({
         </div>
       </Link>
 
-      {course.niveau && course.progress.pct === 100 && course.slug.startsWith('academy-niveau-') && (
+      {unlocked && course.niveau && course.progress.pct === 100 && course.slug.startsWith('academy-niveau-') && (
         <div className="border-t border-border/60 bg-elevated/30 px-4 py-2.5">
           <Link
             href={`/formations/academy/examen/${course.niveau}`}

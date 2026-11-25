@@ -9,9 +9,13 @@ import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
 import ApercuCours, { type LeconApercu } from '@/components/academy/ApercuCours';
 import type { Nouveaute } from '@/lib/academy/nouveaute';
+import { estLeconGratuite } from '@/lib/academy/capsules';
 import { produitsActifs } from '@/lib/billing/chariow/catalogue';
+import { jsonLdScript } from '@/lib/jsonLd';
 
 export const dynamic = 'force-dynamic';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 async function getCard(slug: string) {
   const { data } = await getServiceClient()
@@ -23,10 +27,6 @@ async function getCard(slug: string) {
   return data as { titre: string; resume: string | null; published: boolean; niveau: string | null } | null;
 }
 
-/**
- * Ce que l'aperçu montre d'un cours : titres, sous-titres, résumés, modules,
- * durées et titres de sections. Le corps des sections n'est jamais lu ici.
- */
 /** `nouveaute` lue sans confiance (contenu jsonb) : forme exacte ou rien. */
 function nouveauteDe(v: unknown): Nouveaute | null {
   if (!v || typeof v !== 'object') return null;
@@ -35,6 +35,10 @@ function nouveauteDe(v: unknown): Nouveaute | null {
   return { type, depuis };
 }
 
+/**
+ * Ce que l'aperçu montre d'un cours : titres, sous-titres, résumés, modules,
+ * durées, compteurs et titres de sections. Le corps des sections n'est jamais lu ici.
+ */
 async function getContenuApercu(slug: string): Promise<{ intro: string | null; lessons: LeconApercu[] } | null> {
   const { data } = await getServiceClient()
     .from('academy_courses')
@@ -75,13 +79,13 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   return {
     title: card ? `${card.titre} · WestBourse Academy` : 'Cours — WestBourse Academy',
     description: card?.resume ?? undefined,
+    alternates: { canonical: `${SITE_URL}/formations/academy/${params.slug}` },
   };
 }
 
 /**
- * Cours Academy en RENDU NATIF (shell type Coursera). L'iframe historique est
- * abandonnée ; /api/academy/[slug] reste en legacy (rollback) mais n'est plus
- * référencée. Le niveau d'accès vient de feature_flags (`formations`).
+ * Cours Academy en RENDU NATIF (shell type Coursera).
+ * La Leçon 1 du Niveau 1 reste ouverte en essai gratuit interactif pour tous.
  */
 export default async function AcademyCoursePage(
   props: {
@@ -94,27 +98,39 @@ export default async function AcademyCoursePage(
   const card = await getCard(params.slug);
   if (!card) notFound();
 
-  // Abonnement premium OU niveau du cours acheté à l'unité (Chariow).
+  const n = Number.parseInt(searchParams.lecon ?? '1', 10);
+  const requestedIdx = Number.isFinite(n) ? Math.max(0, n - 1) : 0;
+
+  const courseLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: card.titre,
+    description: card.resume ?? card.titre,
+    url: `${SITE_URL}/formations/academy/${params.slug}`,
+    inLanguage: 'fr',
+    provider: { '@type': 'Organization', name: 'WESTBOURSE', url: SITE_URL },
+  };
+
+  // Abonnement premium OU niveau du cours acheté à l'unité (Chariow) OU Leçon 1 du Niveau 1 offerte.
   const gate = await peutSuivreNiveau(card.niveau);
-  if (!gate.allowed) {
+  const freeTrial = !gate.allowed && estLeconGratuite(params.slug, requestedIdx);
+
+  if (!gate.allowed && !freeTrial) {
     const required = gate.acces.abonnement.required;
-    const n = Number.parseInt(searchParams.lecon ?? '1', 10);
     const [content, formations, modules] = await Promise.all([
       getContenuApercu(params.slug),
       produitsActifs('formation'),
       produitsActifs('module'),
     ]);
-    // UNE seule offre : l'achat de la formation. Le bloc Premium ne sert plus
-    // que de secours, quand aucun produit n'est actif au catalogue (sinon le
-    // visiteur tomberait sur une page sans aucune offre).
     const offreAchat = formations.length + modules.length > 0;
     return (
       <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(courseLd) }} />
         <ApercuCours
           titre={card.titre}
           intro={content?.intro ?? null}
           lecons={content?.lessons ?? []}
-          indexDemande={Number.isFinite(n) ? n - 1 : 0}
+          indexDemande={requestedIdx}
           slug={params.slug}
         />
         {offreAchat ? (
@@ -136,9 +152,16 @@ export default async function AcademyCoursePage(
   const [data, videos] = await Promise.all([loadCourseForLearning(params.slug), videosDisponibles(params.slug)]);
   if (!data) notFound();
 
-  // ?lecon=N est 1-indexé côté URL (humain) ; le shell clamp les bornes.
-  const n = Number.parseInt(searchParams.lecon ?? '1', 10);
-  const initialLesson = Number.isFinite(n) ? n - 1 : 0;
-
-  return <AcademyShell data={data} initialLesson={initialLesson} videos={videos} niveau={card.niveau ?? null} />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(courseLd) }} />
+      <AcademyShell
+        data={data}
+        initialLesson={requestedIdx}
+        videos={videos}
+        niveau={card.niveau ?? null}
+        freeTrial={freeTrial}
+      />
+    </>
+  );
 }

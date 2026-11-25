@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import type { Lesson, Section } from '@/lib/academy/types';
 import { CATEGORIE_LABEL, libelleSection, type Categorie } from '@/lib/academy/types';
 import type { PublicExercise } from '@/lib/academy/exercises';
@@ -14,22 +15,6 @@ import Illustration from './lecon/Illustration';
 import type { DonneesSection } from '@/lib/academy/donneesServer';
 import './lecon/lecon.css';
 
-/**
- * Leçon Academy rendue comme un article éditorial sur papier clair (`.lp`,
- * lecon/lecon.css) — spec docs/superpowers/specs/2026-10-20-academy-lecon-editoriale-design.md.
- *
- * Aucune section n'est enfermée dans une boîte : la hiérarchie vient de la
- * typographie, de l'espace et des filets. Les blocs facultatifs (formules,
- * schéma, simulation, frise, points) n'apparaissent que si le contenu les porte :
- * une leçon ancienne s'affiche avec son texte, ses chiffres, son tableau et ses
- * étapes, simplement mieux mis en page.
- */
-
-/**
- * Rôle de la section, montré seulement quand il change la lecture (un piège, un
- * point à retenir, un cas réel), en pastille accolée au titre. Plus de numéro
- * ni de surtitre au-dessus du titre (retirés le 2026-11-05).
- */
 function role(s: Section): string | null {
   if (s.type === 'piege' || s.type === 'retenir' || (s.type === 'cas' && s.reel)) return libelleSection(s);
   return null;
@@ -137,16 +122,44 @@ export default function LessonContent({
   courseId: string;
   lessonIdx: number;
   onExerciseResult: (correct: boolean) => void;
-  /** Exemples réels de cette leçon, par index de section (lus en base au chargement). */
   donnees?: Record<number, DonneesSection | null>;
 }) {
+  const articleRef = useRef<HTMLElement>(null);
+  const [scrollPct, setScrollPct] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const el = articleRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const total = el.offsetHeight - window.innerHeight * 0.75;
+      if (total <= 0) {
+        setScrollPct(100);
+        return;
+      }
+      const passed = -rect.top;
+      setScrollPct(Math.min(100, Math.max(0, Math.round((passed / total) * 100))));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   const charts = [lesson.chart, ...(lesson.charts ?? [])].filter((c): c is NonNullable<typeof c> => Boolean(c));
-  // Quiz en série s'il existe ; sinon la question unique historique.
   const questions = lesson.quiz?.length ? lesson.quiz : lesson.qcm ? [lesson.qcm] : [];
   const badge = badgeNouveaute(lesson.nouveaute, new Date());
+  const showAncres = lesson.sections.length >= 4;
 
   return (
-    <article className="lp">
+    <article ref={articleRef} className="lp">
+      <div className="lp-progress-wrap" aria-hidden="true">
+        <div className="lp-progress-fill" style={{ width: `${scrollPct}%` }} />
+      </div>
+
       <header className="lp-col">
         <div className="lp-meta">
           <span className="lp-categorie">{CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Général'}</span>
@@ -158,9 +171,30 @@ export default function LessonContent({
         <div className="lp-intro">
           <Texte contenu={lesson.resume} />
         </div>
+
+        {showAncres && (
+          <nav aria-label="Plan de la leçon" className="lp-ancres">
+            {lesson.sections.map((s, i) => {
+              const hasSim = Boolean(s.simulation) || s.simulations.length > 0;
+              return (
+                <a
+                  key={i}
+                  href={`#lp-s${i}`}
+                  className={`lp-ancre${hasSim ? ' lp-ancre--sim' : ''}`}
+                >
+                  {s.titre}
+                </a>
+              );
+            })}
+            {questions.length > 0 && (
+              <a href="#lp-quiz-titre" className="lp-ancre lp-ancre--quiz">
+                Quiz · {questions.length} Q
+              </a>
+            )}
+          </nav>
+        )}
       </header>
 
-      {/* L'illustration vient APRÈS le titre : le titre doit être lu en premier. */}
       {lesson.image?.url && (
         <figure className="lp-image lp-large">
           {/* eslint-disable-next-line @next/next/no-img-element */}
