@@ -7,9 +7,11 @@ import {
   CONSIGNES_RAPPEL,
   DUREE_MAX_RAPPEL,
   PREMIERE_PHRASE_RAPPEL,
+  PREMIERE_PHRASE_TEST,
   nettoyerResume,
   parametresAlerte,
   parametresRappel,
+  parametresTest,
 } from './script';
 import { eligibiliteRappel, lireDetailBland, plafondJour, type EtatRappel } from './statut';
 
@@ -184,5 +186,20 @@ describe('éligibilité au rappel', () => {
     expect(plafondJour('3')).toBe(3);
     expect(plafondJour('-1')).toBe(10);
     expect(plafondJour('abc')).toBe(10);
+  });
+});
+
+describe('appel de test (console)', () => {
+  const p = parametresTest();
+  it('s’annonce comme automatisé ET comme un test, sans faux incident', () => {
+    expect(PREMIERE_PHRASE_TEST.startsWith(ANNONCE)).toBe(true);
+    expect(PREMIERE_PHRASE_TEST).toMatch(/appel de test/);
+    expect(PREMIERE_PHRASE_TEST).not.toMatch(/alerte/i);
+  });
+  it('paramètres fixes : français, 1 min, sans enregistrement, sans transfert, sans chiffre', () => {
+    expect(p).toMatchObject({ language: 'fr', max_duration: 1, record: false, wait_for_greeting: true });
+    expect(p.transfer_phone_number).toBeUndefined();
+    expect(PREMIERE_PHRASE_TEST).not.toMatch(/\d/);
+    expect(p.task).not.toMatch(/\d/);
   });
 });

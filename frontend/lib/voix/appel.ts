@@ -5,7 +5,7 @@ import { alerterExploitant } from '@/lib/server/alerteExploitant';
 import { blandConfigure, lancerAppelBland, lireAppelBland } from './bland';
 import { cleFenetre, type TypeAlerte } from './fenetre';
 import { estE164, hacherNumero } from './numero';
-import { parametresAlerte, type ParametresAppel } from './script';
+import { parametresAlerte, parametresTest, type ParametresAppel } from './script';
 import { lireDetailBland, plafondJour, type StatutAppel } from './statut';
 
 /**
@@ -163,4 +163,31 @@ export async function declencherAlerteVocale(type: TypeAlerte, resume: string, m
     return { issue: 'plafond', detail: r.raison };
   }
   return { issue: 'echec', detail: r.statut === 'peut_etre_parti' ? `peut-être parti (${r.raison})` : r.raison };
+}
+
+/** Préfixe des `source_id` d'appels de test : distingue un test d'une vraie alerte. */
+export const PREFIXE_TEST = 'test:';
+
+/**
+ * Appel de TEST vers l'exploitant, lancé à la main depuis /admin/controle.
+ * Même chemin qu'une alerte (empreinte, opposition, plafond du jour, trace
+ * avant l'appel), motif `alerte_exploitant` et `source_id` = `test:<minute>` :
+ * l'index unique des alertes empêche deux tests dans la même minute (double clic).
+ */
+export async function lancerAppelTest(creePar: string, maintenant = new Date()): Promise<ResultatAppel> {
+  const numero = process.env.BLAND_NUMERO_EXPLOITANT?.trim();
+  if (!estE164(numero)) return { ok: false, code: 'configuration', raison: 'BLAND_NUMERO_EXPLOITANT absent ou non E.164.' };
+  let db: Db;
+  try {
+    db = getServiceClient();
+  } catch (e) {
+    return { ok: false, code: 'configuration', raison: (e as Error).message };
+  }
+  return lancerAppel(db, {
+    motif: 'alerte_exploitant',
+    sourceId: `${PREFIXE_TEST}${maintenant.toISOString().slice(0, 16)}`,
+    numero,
+    parametres: parametresTest(),
+    creePar,
+  }, maintenant);
 }

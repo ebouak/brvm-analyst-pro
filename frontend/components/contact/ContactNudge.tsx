@@ -260,6 +260,9 @@ export function ContactNudge() {
                 {status === 'sending' ? 'Envoi…' : 'Par email'}
               </button>
             </div>
+            <Link href="/contact" onClick={remember} className="block text-center text-[11px] text-faint underline underline-offset-2 hover:text-ivory">
+              Tous les moyens de nous joindre
+            </Link>
           </div>
         </>
       )}

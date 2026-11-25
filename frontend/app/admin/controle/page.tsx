@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
-import { requirePermission } from '@/lib/server/rbac';
+import { can, requirePermission } from '@/lib/server/rbac';
+import { AppelTest } from '@/components/admin/controle/AppelTest';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import { BoutonActualiser } from '@/components/admin/controle/BoutonActualiser';
@@ -16,11 +17,12 @@ const DEPOT = 'https://github.com/ebouak/brvm-analyst-pro';
  * UNE page, le plus grave d'abord. Née de la panne e-mail muette de sept
  * semaines (CLAUDE.md §9) : un run vert ne prouve rien, la donnée produite si.
  * Lecture seule : les boutons relisent l'état ou mènent à la preuve, aucun ne
- * relance un traitement en aveugle.
+ * relance un traitement en aveugle. Seule exception, l'« Appel de test » de la
+ * section Téléphone : il ne relance rien, il prouve la chaîne d'alerte vocale.
  * Pas de loading.tsx (règle anti-soft-404) : <Suspense> ici.
  */
 export default async function Page() {
-  await requirePermission('scraping.read');
+  const ctx = await requirePermission('scraping.read');
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
@@ -31,6 +33,20 @@ export default async function Page() {
       <Suspense fallback={<LoadingSkeleton />}>
         <Contenu />
       </Suspense>
+
+      {/* Seule action de la page : elle ne relance aucun traitement, elle prouve la
+          chaîne d'alerte vocale. Payante, donc réservée à settings.write. */}
+      {can(ctx, 'settings.write') && (
+        <section aria-labelledby="dom-telephone" className="space-y-3">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h2 id="dom-telephone" className="font-display text-lg text-ivory">Téléphone</h2>
+            <p className="text-xs text-muted">Appel d&apos;alerte à l&apos;exploitant (Bland).</p>
+          </div>
+          <PremiumPanel className="p-4">
+            <AppelTest />
+          </PremiumPanel>
+        </section>
+      )}
     </div>
   );
 }
