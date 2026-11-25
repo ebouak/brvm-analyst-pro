@@ -74,8 +74,8 @@ export default function ExerciseBlock({
               aria-pressed={picked === i}
               className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition disabled:cursor-default ${
                 picked === i
-                  ? 'border-accent bg-accent/10 text-white'
-                  : 'border-border bg-bg text-muted hover:border-accent/40 hover:text-white'
+                  ? 'border-accent bg-accent/10 text-ivory'
+                  : 'border-border bg-bg text-muted hover:border-accent/40 hover:text-ivory'
               }`}
             >
               <span aria-hidden className="text-xs text-faint">{String.fromCharCode(65 + i)}</span>

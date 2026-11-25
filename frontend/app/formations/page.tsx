@@ -129,30 +129,32 @@ export default async function FormationsPage() {
       {/* Leçon 0 : gratuite, ouverte à tous. Seule image réelle de la page. */}
       <Lecon0Carte />
 
-      {/* Le programme : trois parcours, lus comme une cote. */}
+      {/* Le programme : Academy en premier, puis sessions et modules vidéo. */}
       <section aria-labelledby="h-parcours" className="space-y-3">
         <h2 id="h-parcours" className="font-display text-lg text-ivory">
           Les parcours
         </h2>
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
           <LigneParcours
+            href="/formations/academy"
+            titre="WestBourse Academy"
+            description="Des cours par niveau, avec capsules intelligentes, simulateurs interactifs, cas réels de la BRVM, fiches mémo, quiz et certificats."
+            volume={volumeAcademy}
+          />
+          <LigneParcours
             href="/formations/sessions"
             titre="Sessions en direct, avec un formateur"
             description="En petit groupe, à date fixe, en ligne ou en présentiel. On y travaille des cas réels de la BRVM. L’Academy prépare à ces sessions, et la leçon 0 reste gratuite pour tous."
             volume={volumeSessions}
           />
-          <LigneParcours
-            href="/formations/academy"
-            titre="WestBourse Academy"
-            description="Des cours par niveau, avec définitions, cas réels de la BRVM, pièges fréquents, lexique et points à retenir. Des quiz en chemin, puis un examen et un certificat par niveau. Incluse dans l’abonnement Premium."
-            volume={volumeAcademy}
-          />
-          <LigneParcours
-            href="/formations/modules"
-            titre="Modules vidéo interactifs"
-            description="Des cours en vidéo découpés en chapitres, avec quiz de validation. Votre progression est enregistrée : vous reprenez là où vous vous étiez arrêté."
-            volume={volumeModules}
-          />
+          {modules.length > 0 && (
+            <LigneParcours
+              href="/formations/modules"
+              titre="Modules vidéo interactifs"
+              description="Des cours en vidéo découpés en chapitres, avec quiz de validation. Votre progression est enregistrée : vous reprenez là où vous vous étiez arrêté."
+              volume={volumeModules}
+            />
+          )}
         </ul>
       </section>
 
@@ -188,17 +190,12 @@ export default async function FormationsPage() {
         </section>
       )}
 
-      {/* Catalogue : replays, webinaires, conférences */}
-      <section aria-labelledby="h-catalogue" className="space-y-3">
-        <h2 id="h-catalogue" className="font-display text-lg text-ivory">
-          Replays et conférences
-        </h2>
-        {formations.length === 0 ? (
-          <div className="rounded-xl border border-border bg-surface px-5 py-8 text-center">
-            <p className="text-sm text-muted">Aucune formation à afficher pour l’instant</p>
-            <p className="mt-1 text-xs text-faint">Les replays et conférences publiés apparaîtront ici.</p>
-          </div>
-        ) : (
+      {/* Catalogue : replays, webinaires, conférences (masqué si aucun replay publié) */}
+      {formations.length > 0 && (
+        <section aria-labelledby="h-catalogue" className="space-y-3">
+          <h2 id="h-catalogue" className="font-display text-lg text-ivory">
+            Replays et conférences
+          </h2>
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {formations.map((f) => (
               <li key={f.id}>
@@ -240,8 +237,8 @@ export default async function FormationsPage() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
 
       <p className="text-xs text-faint">
         Les replays et supports sont réservés aux membres Premium.{' '}

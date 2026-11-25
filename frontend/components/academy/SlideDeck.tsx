@@ -345,6 +345,54 @@ function SectionSlide({
           </div>
         )}
 
+        {/* Formules clés */}
+        {s.formules && s.formules.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {s.formules.slice(0, 4).map((f, i) => (
+              <div key={i} className="rounded-lg border p-2.5" style={{ borderColor: '#cfe5ea', background: '#e8f4f7' }}>
+                <p className="text-[11px] font-semibold" style={{ color: NAVY }}>{f.nom}</p>
+                <p className="mt-0.5 font-display text-sm" style={{ color: INK }}>{f.expression}</p>
+                {f.exemple && <p className="mt-0.5 text-[11px]" style={{ color: MUTED }}>{f.exemple}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Points numérotés / critères / pièges */}
+        {s.points && s.points.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
+            {s.points.slice(0, 6).map((pt, i) => (
+              <div
+                key={i}
+                className="rounded-lg border p-2.5"
+                style={{
+                  borderColor: isPiege ? 'rgba(255,255,255,0.18)' : '#e2d8c4',
+                  background: isPiege ? 'rgba(255,255,255,0.05)' : '#fff',
+                }}
+              >
+                <p className="text-xs font-semibold" style={{ color: isPiege ? GOLD : NAVY }}>{pt.titre}</p>
+                {pt.detail && (
+                  <p className="mt-0.5 line-clamp-3 text-[11px] leading-snug" style={{ color: isPiege ? 'rgba(255,255,255,0.8)' : MUTED }}>
+                    {pt.detail}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Encadrés */}
+        {s.encadres && s.encadres.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {s.encadres.slice(0, 2).map((enc, i) => (
+              <div key={i} className="rounded-lg border p-2.5" style={{ borderColor: GOLD, background: 'rgba(212,165,60,0.08)' }}>
+                <p className="text-[11px] font-semibold" style={{ color: isPiege ? GOLD : NAVY }}>{enc.titre}</p>
+                <p className="mt-0.5 line-clamp-2 text-[11px]" style={{ color: isPiege ? 'rgba(255,255,255,0.85)' : INK }}>{enc.texte}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Frise d'étapes */}
         {s.etapes && s.etapes.length > 0 && (
           <div className={`mt-4 grid gap-3`} style={{ gridTemplateColumns: `repeat(${Math.min(s.etapes.length, 5)}, minmax(0, 1fr))` }}>

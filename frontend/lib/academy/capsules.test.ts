@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   calculerActiviteCalendrier,
   construireFiltresCapsules,
+  estLeconGratuite,
   extraireCapsulesLecon,
+  extraireCartesRevision,
   extraireMetadonneesCours,
   filtrerCours,
+  formatCours,
   formatDuree,
   recommanderPourObjectif,
   type HubCourseEnriched,
@@ -17,6 +20,19 @@ describe('formatDuree', () => {
     expect(formatDuree(60)).toBe('1 h');
     expect(formatDuree(135)).toBe('2 h 15');
     expect(formatDuree(125)).toBe('2 h 05');
+  });
+});
+
+describe('estLeconGratuite & formatCours', () => {
+  it('n’ouvre gratuitement que la leçon 1 du niveau 1', () => {
+    expect(estLeconGratuite('academy-niveau-1-initiation', 0)).toBe(true);
+    expect(estLeconGratuite('academy-niveau-1-initiation', 1)).toBe(false);
+    expect(estLeconGratuite('academy-niveau-2-fondamental', 0)).toBe(false);
+  });
+
+  it('distingue parcours certifiant et atelier court', () => {
+    expect(formatCours('academy-niveau-3-technique')).toBe('parcours');
+    expect(formatCours('comprendre-le-per-et-la-valorisation-a-la-brvm')).toBe('atelier');
   });
 });
 
@@ -86,10 +102,44 @@ describe('extraireMetadonneesCours', () => {
   });
 });
 
+describe('extraireCartesRevision', () => {
+  it('extrait formules, pièges, points à retenir et glossaire sans doublons', () => {
+    const rev = extraireCartesRevision({
+      glossaire: [{ terme: 'SGI', definition: 'Intermédiaire agréé' }],
+      lessons: [
+        {
+          titre: 'Leçon 3',
+          sections: [
+            {
+              type: 'definition',
+              titre: 'Formules',
+              formules: [{ nom: 'PER', expression: 'Cours ÷ BPA', exemple: '10 000 ÷ 1 000 = 10' }],
+            },
+            {
+              type: 'piege',
+              titre: 'Erreurs',
+              points: [{ titre: 'Micro-ordre', detail: 'Le minimum de frais pèse lourd.', verifier: 'la grille SGI' }],
+            },
+            {
+              type: 'retenir',
+              titre: 'L’essentiel',
+              points: [{ titre: 'Diversifier', detail: '20 % max par valeur.' }],
+            },
+          ],
+        },
+      ],
+    });
+    expect(rev.formules).toHaveLength(1);
+    expect(rev.pieges).toHaveLength(1);
+    expect(rev.flashcards.map((f) => f.categorie)).toEqual(['Formule', 'Piège', 'À retenir', 'Lexique']);
+  });
+});
+
 describe('filtres, recherche sans accents et recommandations', () => {
   const now = new Date('2026-11-24T12:00:00Z');
   const makeCourse = (p: Partial<HubCourseEnriched> & { id: string; slug: string; titre: string }): HubCourseEnriched => ({
     niveau: 'debutant',
+    format: 'parcours',
     resume: 'Résumé',
     cover: null,
     lessonsCount: 10,
@@ -116,6 +166,7 @@ describe('filtres, recherche sans accents et recommandations', () => {
       slug: 'academy-niveau-1-initiation',
       titre: 'Niveau 1 — Initiation BRVM',
       niveau: 'debutant',
+      format: 'parcours',
       themes: ['revenus', 'cas_reels'],
       badge: { type: 'mis_a_jour', libelle: 'Mis à jour' },
       progress: { done: 4, total: 10, pct: 40, nextIdx: 4 },
@@ -125,9 +176,21 @@ describe('filtres, recherche sans accents et recommandations', () => {
       slug: 'academy-niveau-3-technique',
       titre: 'Niveau 3 — Analyse technique',
       niveau: 'avance',
+      format: 'parcours',
       themes: ['technique', 'cas_reels'],
       moduleTitles: ['Module 1 : Moyennes mobiles et MACD'],
       progress: { done: 10, total: 10, pct: 100, nextIdx: 9 },
+    }),
+    makeCourse({
+      id: '3',
+      slug: 'comprendre-le-per-et-la-valorisation-a-la-brvm',
+      titre: 'Comprendre le PER',
+      niveau: 'intermediaire',
+      format: 'atelier',
+      themes: ['fondamental'],
+      moduleTitles: ['Atelier : Multiples et PER'],
+      simulatorsCount: 0,
+      progress: { done: 0, total: 5, pct: 0, nextIdx: 0 },
     }),
   ];
 
@@ -137,8 +200,8 @@ describe('filtres, recherche sans accents et recommandations', () => {
     expect(ids).toContain('tous');
     expect(ids).toContain('debutant');
     expect(ids).toContain('avance');
+    expect(ids).toContain('ateliers');
     expect(ids).not.toContain('expert');
-    expect(ids).not.toContain('fondamental');
   });
 
   it('filtre par onglet, capsule et requête sans accents', () => {
@@ -146,6 +209,7 @@ describe('filtres, recherche sans accents et recommandations', () => {
     expect(filtrerCours(sample, { tab: 'termines' }).map((c) => c.slug)).toEqual(['academy-niveau-3-technique']);
     expect(filtrerCours(sample, { tab: 'explorer', query: 'analyse' }).map((c) => c.slug)).toEqual(['academy-niveau-3-technique']);
     expect(filtrerCours(sample, { tab: 'explorer', query: 'decouverte' }).map((c) => c.slug)).toEqual(['academy-niveau-1-initiation']);
+    expect(filtrerCours(sample, { tab: 'explorer', filtre: 'ateliers' }).map((c) => c.slug)).toEqual(['comprendre-le-per-et-la-valorisation-a-la-brvm']);
     expect(filtrerCours(sample, { tab: 'explorer', filtre: 'recent' }).map((c) => c.slug)).toEqual(['academy-niveau-1-initiation']);
   });
 
@@ -156,7 +220,6 @@ describe('filtres, recherche sans accents et recommandations', () => {
   });
 
   it('calcule le calendrier d’activité mensuel et les compteurs hebdo/quotidien', () => {
-    // 2026-11-24 est un mardi (dowMon = 1)
     const cal = calculerActiviteCalendrier(
       [
         { completed: true, updated_at: '2026-11-24T10:00:00Z' },
