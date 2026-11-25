@@ -25,3 +25,24 @@ export async function fetchAllRows<T>(
   }
   return tout;
 }
+
+/**
+ * Comme `fetchAllRows`, mais LÈVE si un lot revient en erreur. `fetchAllRows`
+ * confond une erreur avec une table vide : acceptable pour un graphique, pas
+ * pour une liste d'opposition ou un journal anti-doublon, où « illisible »
+ * doit arrêter le traitement au lieu de valoir « personne ».
+ */
+export async function fetchAllRowsOuErreur<T>(
+  construire: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+): Promise<T[]> {
+  const LOT = 1000;
+  const tout: T[] = [];
+  for (let debut = 0; ; debut += LOT) {
+    const { data, error } = await construire(debut, debut + LOT - 1);
+    if (error) throw new Error(error.message);
+    const lot = data ?? [];
+    tout.push(...lot);
+    if (lot.length < LOT) break;
+  }
+  return tout;
+}

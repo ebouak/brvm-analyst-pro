@@ -43,6 +43,59 @@ export interface RelanceSelectionnee {
   joursInactif: number;
 }
 
+/** Jeton d'arrêt posé sur chaque envoi réel (`academy_reminder_logs.jeton_arret`, 0272). */
+const JETON_ARRET = /^[a-f0-9]{48}$/;
+
+export function estJetonArret(t: unknown): t is string {
+  return typeof t === 'string' && JETON_ARRET.test(t);
+}
+
+/**
+ * Statuts qui ouvrent le délai de 14 jours. `envoi` = trace posée avant l'appel
+ * à Resend dont l'issue n'a pas pu être notée : « peut-être parti », donc compté.
+ * `echec` ne compte pas (Resend a répondu non, rien n'est parti). En simulation,
+ * les passages simulés comptent aussi, sinon chaque jour resimulerait les mêmes
+ * personnes ; en réel ils ne comptent pas, sinon la bascule repousserait de
+ * 14 jours le premier vrai rappel.
+ */
+export function statutsCooldown(mode: 'simulation' | 'actif'): string[] {
+  return mode === 'simulation' ? ['simulation', 'envoi', 'envoye'] : ['envoi', 'envoye'];
+}
+
+/**
+ * Vrai si une activité datée `lastActivityAt` tombe dans la fenêtre J+5 → J+45
+ * et qu'aucun rappel n'a eu lieu depuis moins de 14 jours. Sert au tri préalable
+ * de la route (elle ne cherche l'adresse que des personnes concernées) ET à la
+ * sélection : une seule règle.
+ */
+export function dansFenetreDeRelance(
+  lastActivityAt: string,
+  lastReminderAt: string | null,
+  maintenant: Date,
+): boolean {
+  const nowMs = maintenant.getTime();
+  const lastAtMs = Date.parse(lastActivityAt);
+  if (!Number.isFinite(lastAtMs)) return false;
+  const joursInactif = Math.floor((nowMs - lastAtMs) / JOUR_MS);
+  if (joursInactif < DELAI_INACTIVITE_JOURS || joursInactif > FENETRE_MAX_JOURS) return false;
+  if (lastReminderAt) {
+    const lastRemMs = Date.parse(lastReminderAt);
+    if (Number.isFinite(lastRemMs) && nowMs - lastRemMs < COOLDOWN_RELANCE_JOURS * JOUR_MS) return false;
+  }
+  return true;
+}
+
+/** Liens de retrait d'un e-mail : page à bouton, URL « un clic » (RFC 8058), préférences. */
+export function liensArret(siteUrl: string, jeton: string): { page: string; unClic: string; preferences: string } {
+  const base = siteUrl.replace(/\/+$/, '');
+  const t = encodeURIComponent(jeton);
+  return {
+    page: `${base}/academy/rappels/arret?t=${t}`,
+    unClic: `${base}/api/academy/rappels/arret?t=${t}`,
+    preferences: `${base}/parametres/alertes`,
+  };
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -70,17 +123,8 @@ export function selectionnerRelancesAcademy(
     if (c.doneLessons < 1 || c.totalLessons <= c.doneLessons) continue;
 
     const lastAtMs = Date.parse(c.lastActivityAt);
-    if (!Number.isFinite(lastAtMs)) continue;
-
+    if (!dansFenetreDeRelance(c.lastActivityAt, c.lastReminderAt, maintenant)) continue;
     const joursInactif = Math.floor((nowMs - lastAtMs) / JOUR_MS);
-    if (joursInactif < DELAI_INACTIVITE_JOURS || joursInactif > FENETRE_MAX_JOURS) continue;
-
-    if (c.lastReminderAt) {
-      const lastRemMs = Date.parse(c.lastReminderAt);
-      if (Number.isFinite(lastRemMs) && nowMs - lastRemMs < COOLDOWN_RELANCE_JOURS * JOUR_MS) {
-        continue;
-      }
-    }
 
     const remainingLessons = c.totalLessons - c.doneLessons;
     const item: RelanceSelectionnee = {
@@ -114,15 +158,20 @@ export function selectionnerRelancesAcademy(
     .slice(0, Math.max(0, plafond));
 }
 
+/**
+ * Échec fermé : sans jeton d'arrêt valide, l'e-mail n'est pas composé — on
+ * n'écrit jamais à quelqu'un sans lui donner le moyen d'arrêter.
+ */
 export function composerEmailRelanceAcademy(
   cible: RelanceSelectionnee,
-  siteUrl = 'https://www.westbourse.com',
-): { subject: string; text: string; html: string; resumeUrl: string } {
-  const base = siteUrl.replace(/\/+$/, '');
+  options: { jetonArret: string; siteUrl?: string },
+): { subject: string; text: string; html: string; resumeUrl: string; headers: Record<string, string> } {
+  if (!estJetonArret(options.jetonArret)) throw new Error("Jeton d'arrêt invalide : e-mail refusé.");
+  const base = (options.siteUrl ?? 'https://www.westbourse.com').replace(/\/+$/, '');
+  const arret = liensArret(base, options.jetonArret);
   const resumeUrl = `${base}/formations/academy/${encodeURIComponent(cible.courseSlug)}?lecon=${
     cible.nextLessonIdx + 1
   }`;
-  const prefsUrl = `${base}/parametres`;
   const niveauLabel =
     (cible.niveau && NIVEAU_LABEL[cible.niveau as Niveau]) || cible.courseTitre;
 
@@ -149,7 +198,9 @@ export function composerEmailRelanceAcademy(
     `Reprendre directement : ${resumeUrl}`,
     '',
     '— L’équipe WESTBOURSE Academy',
-    `Gérer vos préférences d’e-mails : ${prefsUrl}`,
+    '',
+    `Ne plus recevoir ces rappels : ${arret.page}`,
+    `Toutes vos préférences : ${arret.preferences}`,
   ].join('\n');
 
   const html = `<!doctype html>
@@ -181,11 +232,17 @@ export function composerEmailRelanceAcademy(
     <hr style="border:none;border-top:1px solid #232c3d;margin:20px 0 14px;" />
     <p style="margin:0;font-size:12px;line-height:1.5;color:#7f8ba1;">
       Rappel pédagogique envoyé après ${cible.joursInactif} jours d’inactivité.
-      <a href="${escapeHtml(prefsUrl)}" style="color:#e5c45f;text-decoration:underline;">Gérer mes préférences</a>.
+      <a href="${escapeHtml(arret.page)}" style="color:#e5c45f;text-decoration:underline;">Ne plus recevoir ces rappels</a>
+      · <a href="${escapeHtml(arret.preferences)}" style="color:#e5c45f;text-decoration:underline;">Mes préférences</a>.
     </p>
   </div>
 </body>
 </html>`;
 
-  return { subject, text, html, resumeUrl };
+  const headers = {
+    'List-Unsubscribe': `<${arret.unClic}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
+
+  return { subject, text, html, resumeUrl, headers };
 }

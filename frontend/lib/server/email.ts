@@ -27,7 +27,12 @@ export interface EmailMessage {
   headers?: Record<string, string>;
 }
 /** `id` : identifiant Resend du message envoyé, preuve d'envoi conservée par l'appelant. */
-export interface EmailResult { ok: boolean; sent: number; error?: string; id?: string }
+/**
+ * `incertain` : Resend n'a pas répondu clairement (coupure, délai dépassé, 5xx) —
+ * le message a PU partir. Un appelant anti-doublon doit alors le compter comme
+ * envoyé, pas comme un échec à retenter.
+ */
+export interface EmailResult { ok: boolean; sent: number; error?: string; id?: string; incertain?: boolean }
 
 /**
  * Adresse d'expédition.
@@ -82,11 +87,11 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
       // Un envoi ne doit jamais pendre indéfiniment (cron non surveillé) ; l'échec est journalisé par l'appelant.
       signal: AbortSignal.timeout(15_000),
     });
-    if (!res.ok) return { ok: false, sent: 0, error: `Resend HTTP ${res.status}` };
+    if (!res.ok) return { ok: false, sent: 0, error: `Resend HTTP ${res.status}`, ...(res.status >= 500 ? { incertain: true } : {}) };
     const corps = (await res.json().catch(() => null)) as { id?: unknown } | null;
     return { ok: true, sent: 1, ...(typeof corps?.id === 'string' ? { id: corps.id } : {}) };
   } catch (e) {
-    return { ok: false, sent: 0, error: (e as Error).message };
+    return { ok: false, sent: 0, error: (e as Error).message, incertain: true };
   }
 }
 

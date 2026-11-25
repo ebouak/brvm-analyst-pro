@@ -295,6 +295,22 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Conservation : 7 jours (`purge_rgpd_retention`) ; suppression du compte par cascade.
 - Accès : service_role seul (RLS sans policy). Pas d'export : donnée technique éphémère.
 
+### Rappels de progression Academy (`academy_reminder_logs`, migrations 0271/0272)
+
+- Données : identifiant utilisateur, cours, leçon suivante, nombre de leçons restantes, mode
+  (simulation/réel), statut d'envoi, identifiant Resend, jeton d'arrêt, horodatage. L'adresse
+  e-mail n'est PAS stockée : elle est lue dans `auth.users` au moment de l'envoi.
+- Finalité : rappeler la leçon suivante d'un parcours commencé (J+5 sans activité, au plus un
+  e-mail tous les 14 jours, jamais une fois l'examen du niveau réussi) ; éviter les doublons.
+- Base légale : intérêt légitime (rappel pédagogique, aucune offre commerciale).
+- Retrait : `notification_prefs.academy_relances` (vrai par défaut), décochable dans
+  /parametres/alertes ou depuis chaque e-mail — lien d'arrêt `/academy/rappels/arret` et
+  désabonnement « un clic » RFC 8058 (`POST /api/academy/rappels/arret`). Une opposition CRM
+  (`crm_oppositions`) l'emporte aussi.
+- Conservation : 6 mois (`purge_rgpd_retention`) ; suppression du compte par cascade.
+- Accès : service_role seul (RLS sans policy). Export : `academy_rappels` dans
+  `/api/account/export` (sans jeton ni identifiant Resend).
+
 ### Recherche des sociétés en langage naturel (Jev, migration 0191)
 
 - Données : texte saisi, **jamais conservé** (seule son empreinte SHA-256, 24 h) ; identifiant de compte haché dans `rate_limit_hits`, purgé hors fenêtre (1 h). Une requête contenant une adresse e-mail ou un numéro de téléphone est refusée et n'est jamais envoyée.
@@ -364,7 +380,7 @@ Durées (source : `purge_rgpd_retention()`, migration 0193, et les migrations ci
 `admin_audit_logs`, `notifications_log`, `auth_events`, `payment_webhook_events`, `contact_messages` :
 12 mois ; `crm_actions` : 24 mois ; `crm_signaux`, `dossier_envois`, `*_conversations` (liées),
 `whatsapp_aiguillages` : 90 jours ; conversations WhatsApp sans compte : 30 jours ;
-`academy_exam_sessions` : 7 jours ; cache de recherche : 24 h ; quotas : 30 jours ;
+`academy_exam_sessions` : 7 jours ; `academy_reminder_logs` : 6 mois (0272) ; cache de recherche : 24 h ; quotas : 30 jours ;
 `formation_inscriptions` : 3 ans après la session ; `appels_vocaux` : transcription 30 jours,
 ligne 12 mois (migration 0250). **Non trouvées dans le code** (déclarées
 « à préciser » sur la page publique) : durée de conservation chez PostHog et Sentry, durée
