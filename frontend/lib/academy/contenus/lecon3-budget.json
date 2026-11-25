@@ -558,5 +558,6 @@
     ],
     "correct": 2,
     "explication": "10 × 2 500 = 25 000 FCFA, plus 1 % de frais, soit 250 FCFA : 25 250 FCFA au total."
-  }
+  },
+  "exercice_id": "cout-ordre-du-jour"
 }

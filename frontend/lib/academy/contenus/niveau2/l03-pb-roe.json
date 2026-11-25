@@ -463,5 +463,6 @@
   ],
   "correct": 1,
   "explication": "10 ÷ 50 = 20 %."
- }
+ },
+ "exercice_id": "value-trap-pick"
 }

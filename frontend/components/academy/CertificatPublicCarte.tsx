@@ -11,6 +11,7 @@ export default function CertificatPublicCarte({
   issuedDate,
   competences,
   verifyUrl,
+  qrDataUrl,
 }: {
   id: string;
   displayName: string;
@@ -19,6 +20,7 @@ export default function CertificatPublicCarte({
   issuedDate: string;
   competences: readonly string[];
   verifyUrl: string;
+  qrDataUrl?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -86,11 +88,29 @@ export default function CertificatPublicCarte({
           </div>
         )}
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-faint">
-          <span>Délivré le {issuedDate}</span>
-          <span className="tabular">Réf. {id}</span>
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4 border-t border-border pt-4">
+          <div className="min-w-0 flex-1 space-y-1 text-xs text-faint">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span>Délivré le {issuedDate}</span>
+              <span className="tabular">Réf. {id}</span>
+            </div>
+            <p className="truncate text-[11px] text-faint">Vérification publique : {verifyUrl}</p>
+          </div>
+
+          {qrDataUrl && (
+            <div className="flex shrink-0 flex-col items-center gap-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrDataUrl}
+                alt="QR code de vérification du certificat"
+                width={76}
+                height={76}
+                className="h-[76px] w-[76px] rounded-lg border border-gold/40 bg-[#f5f2eb] p-1"
+              />
+              <span className="text-[10px] font-medium text-faint">Scanner pour vérifier</span>
+            </div>
+          )}
         </div>
-        <p className="mt-1 truncate text-[11px] text-faint">Vérification publique : {verifyUrl}</p>
       </article>
 
       {/* Barre d'actions (masquée à l'impression PDF) */}

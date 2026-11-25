@@ -205,6 +205,72 @@
    ],
    "correct": 1,
    "explication": "Une forte demande ne garantit rien. Le cours dépend ensuite des résultats et du prix payé."
+  },
+  {
+   "question": "Lors d’une introduction réalisée uniquement par augmentation de capital, à qui reviennent les fonds versés par les nouveaux actionnaires ?",
+   "options": [
+    "Aux anciens actionnaires fondateurs qui cèdent leurs parts",
+    "Directement à l’entreprise pour financer ses projets ou sa dette",
+    "Au budget annuel du Dépositaire central et des SGI intermédiaires",
+    "En réserve bloquée non utilisable sur un compte de l’AMF-UMOA"
+   ],
+   "correct": 1,
+   "explication": "L’émission d’actions nouvelles injecte de l’argent frais dans la trésorerie et renforce les fonds propres de la société."
+  },
+  {
+   "question": "Une société compte 8 millions d’actions et en émet 2 millions de nouvelles en bourse. Un actionnaire historique qui ne souscrit pas passe de 10 % du capital à :",
+   "options": [
+    "12,5 %",
+    "10,0 %",
+    "8,0 %",
+    "5,0 %"
+   ],
+   "correct": 2,
+   "explication": "Il détenait 800 000 actions sur 8 M (10 %) ; après émission, il garde 800 000 actions sur 10 M au total, soit 8,0 % (dilution)."
+  },
+  {
+   "question": "Quel engagement durable pèse sur une entreprise dès le premier jour de sa cotation ?",
+   "options": [
+    "Publier régulièrement des comptes audités et faits importants",
+    "Garantir un dividende fixe en croissance chaque trimestre",
+    "Racheter ses propres titres si le cours baisse sous le prix d’offre",
+    "Verser une prime annuelle à la BRVM proportionnelle au cours"
+   ],
+   "correct": 0,
+   "explication": "La transparence périodique et permanente envers l’ensemble du marché devient une obligation continue de la société cotée."
+  },
+  {
+   "question": "Que désigne habituellement une clause d’incessibilité (« lock-up ») signée par les fondateurs à l’occasion d’une IPO ?",
+   "options": [
+    "Un blocage temporaire empêchant les cédants de vendre le reste",
+    "Une garantie de prix plancher offerte par la BRVM pendant un an",
+    "L’obligation faite au public de conserver ses titres dix ans",
+    "L’interdiction de distribuer des dividendes pendant cinq exercices"
+   ],
+   "correct": 0,
+   "explication": "Le lock-up rassure les nouveaux actionnaires en évitant qu’un actionnaire majoritaire n’inonde le marché juste après l’introduction."
+  },
+  {
+   "question": "Quel coût spécifique faut-il intégrer lorsqu’une société prépare une introduction en bourse ?",
+   "options": [
+    "Les honoraires des conseils, des auditeurs et de la SGI chef de file",
+    "Le remboursement anticipé de l’ensemble de ses emprunts bancaires",
+    "Le paiement préalable des dividendes futurs sur cinq années",
+    "Une amende administrative perçue par les concurrents cotés"
+   ],
+   "correct": 0,
+   "explication": "L’audit, le montage juridique, le syndicat de placement et la communication financière représentent un coût initial significatif."
+  },
+  {
+   "question": "Une fois l’action admise sur le marché secondaire, comment évolue son cours par rapport au prix fixe de l’offre publique ?",
+   "options": [
+    "Il se fixe librement selon la confrontation des ordres quotidiens",
+    "Il reste bloqué au prix de souscription durant douze mois complets",
+    "Il progresse mécaniquement du taux d’intérêt directeur de la BCEAO",
+    "Il est recalculé une fois par an par l’AMF-UMOA après l’assemblée"
+   ],
+   "correct": 0,
+   "explication": "Dès la première cotation, le prix résulte uniquement de l’offre et de la demande dans le carnet d’ordres de la BRVM."
   }
  ],
  "liens": [
@@ -233,5 +299,10 @@
   ],
   "correct": 1,
   "explication": "Une OPV porte sur des actions existantes : le produit va aux vendeurs."
+ },
+ "exercice_id": "ecart-ipo-bbgc",
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-25"
  }
 }

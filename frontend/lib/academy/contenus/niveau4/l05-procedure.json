@@ -120,7 +120,15 @@
      "detail": "Après la première cotation, le cours peut passer sous le prix d’offre.",
      "verifier": "La valorisation implicite du prix."
     }
-   ]
+   ],
+   "simulation": {
+    "type": "souscription_ipo",
+    "consigne": "Testez la réduction proportionnelle sur une offre publique sursouscrite à 200 %.",
+    "titres_offerts": 2000000,
+    "prix": 5000,
+    "taux_souscription_pct": 200,
+    "demande": 1000
+   }
   },
   {
    "type": "retenir",
@@ -197,6 +205,61 @@
    ],
    "correct": 1,
    "explication": "Après la cotation, le cours résulte de l’offre et de la demande."
+  },
+  {
+   "question": "Dans le montage d’une introduction en bourse, que signifie un syndicat de placement agissant en « prise ferme » ou « garantie de bonne fin » ?",
+   "options": [
+    "Le syndicat s’engage à souscrire les titres éventuellement invendus",
+    "Les acheteurs particuliers promettent de ne jamais revendre leurs parts",
+    "La BRVM garantit que le cours doublera dès la première séance",
+    "L’État s’engage à racheter l’entreprise en cas de baisse du bénéfice"
+   ],
+   "correct": 0,
+   "explication": "Contrairement au placement pour compte (« best efforts »), l’engagement de garantie sécurise la levée pour l’émetteur."
+  },
+  {
+   "question": "Quelle section d’une note d’information visée mérite en priorité une lecture attentive pour identifier ce qui pourrait fragiliser l’opération ?",
+   "options": [
+    "La rubrique consacrée aux facteurs de risque et à l’usage des fonds",
+    "La page de couverture mentionnant le nom de l’imprimeur officiel",
+    "L’adresse postale des succursales bancaires recevant les bulletins",
+    "Le calendrier des jours fériés bancaires des dix prochains exercices"
+   ],
+   "correct": 0,
+   "explication": "Les facteurs de risque, la méthode de valorisation et la destination précise des capitaux éclairent le profil réel de l’IPO."
+  },
+  {
+   "question": "Que vérifie concrètement le visa apposé par l’AMF-UMOA sur la note d’information ?",
+   "options": [
+    "Que l’information présentée est complète, cohérente et compréhensible",
+    "Que le prix d’introduction retenu est mathématiquement sous-évalué",
+    "Que la société versera à coup sûr un dividende dès l’année suivante",
+    "Que le titre sera automatiquement intégré au BRVM 30 dès le premier jour"
+   ],
+   "correct": 0,
+   "explication": "Le visa porte sur la qualité et la sincérité de l’information divulguée ; il ne constitue jamais une appréciation d’opportunité financière."
+  },
+  {
+   "question": "Pourquoi la période de centralisation des ordres prend-elle plusieurs jours entre la clôture de l’offre et la première cotation ?",
+   "options": [
+    "Pour agréger toutes les demandes des SGI et appliquer les allocations",
+    "Pour laisser le temps aux dirigeants de modifier le prix de l’offre",
+    "Pour verser un premier acompte sur dividende avant même l’ouverture",
+    "Pour convertir l’ensemble des ordres en devises étrangères hors UEMOA"
+   ],
+   "correct": 0,
+   "explication": "Le chef de file consolide les souscriptions du réseau, calcule la réduction éventuelle et transmet les titres attribués au DC/BR."
+  },
+  {
+   "question": "Lorsque votre ordre de souscription est réduit de moitié dans une offre sursouscrite, qu’advient-il de la somme versée en trop à votre SGI ?",
+   "options": [
+    "Le reliquat de trésorerie est restitué sur votre compte espèces",
+    "La différence est conservée par la BRVM à titre de commission fixe",
+    "Le montant est converti automatiquement en actions d’une autre banque",
+    "La somme reste bloquée pendant cinq ans sans produire aucun intérêt"
+   ],
+   "correct": 0,
+   "explication": "Vous ne réglez finalement que les titres effectivement servis ; l’excédent bloqué lors de la souscription vous est débloqué."
   }
  ],
  "liens": [
@@ -225,5 +288,9 @@
   ],
   "correct": 1,
   "explication": "Aucune offre au public ne peut être ouverte avant le visa de l’AMF-UMOA."
+ },
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-25"
  }
 }
