@@ -27,10 +27,10 @@ export const LECON0 = {
   titre: 'Qui fait quoi sur le marché financier de l’UMOA',
   resume:
     'Le régulateur, la Bourse, le dépositaire, les intermédiaires, les émetteurs et les investisseurs : la carte des acteurs en deux minutes.',
-  video: `${DOSSIER}/lecon0-acteurs-umoa-16x9.mp4`,
+  video: `${DOSSIER}/lecon0-acteurs-umoa-16x9-v2.mp4`,
   affiche: `${DOSSIER}/lecon0-acteurs-umoa-16x9-poster.jpg`,
   vignette: `${DOSSIER}/lecon0-acteurs-umoa-16x9.jpg`,
-  duree: '2 min 04',
+  duree: '2 min 05',
 } as const;
 
 export interface Famille {

@@ -357,10 +357,10 @@ function construireOutro() {
     el('circle', { cx: 0, cy: 0, r: 132, fill: C.accent }, photoG);
     el('circle', { cx: 0, cy: 0, r: 125, fill: C.blanc }, photoG);
     el('image', { href: aut.photo, x: -120, y: -120, width: 240, height: 240, preserveAspectRatio: 'xMidYMid slice', 'clip-path': 'url(#photoClip)' }, photoG);
-    const prenomL = lettres(aut.prenom, 840, 520, 54, 400, 2, 'start');
-    const nomLL = lettres(aut.nom.toUpperCase(), 836, 596, 84, 900, -1, 'start');
+    const prenomL = lettres(aut.prenom, 910, 520, 54, 400, 2, 'start');
+    const nomLL = lettres(aut.nom.toUpperCase(), 906, 596, 84, 900, -1, 'start');
     nomL = [...prenomL.map((l) => texte(auteurG, l.ch, l.x, l.y, 54, { w: 400, fill: C.motLogo })), ...nomLL.map((l) => texte(auteurG, l.ch, l.x, l.y, 84, { w: 900, fill: C.motLogo }))];
-    roleE = texte(auteurG, aut.role || '', 842, 652, 28, { w: 600, ls: 3, fill: C.accent });
+    roleE = texte(auteurG, aut.role || '', 912, 652, 28, { w: 600, ls: 3, fill: C.accent });
   }
   // Carte finale.
   const LG = logo(scene, 960, 450, 170);
@@ -424,7 +424,7 @@ function construireOutro() {
     // Auteur : passage rapide.
     if (auteurG) {
       const inP = win(t, T.auteur, T.auteur + 0.45), outP = expoIn(win(t, T.carte - 0.35, T.carte - 0.02));
-      photoG.setAttribute('transform', `translate(${lerp(700, 620, expoOut(inP)).toFixed(1)} 560) scale(${elastique(inP, 0.5, 11).toFixed(4)})`);
+      photoG.setAttribute('transform', `translate(${lerp(770, 690, expoOut(inP)).toFixed(1)} 560) scale(${elastique(inP, 0.5, 11).toFixed(4)})`);
       nomL.forEach((e, j) => {
         const p = win(t, T.auteur + 0.15 + j * 0.022, T.auteur + 0.45 + j * 0.022);
         e.setAttribute('transform', `translate(${((1 - expoOut(p)) * 220).toFixed(1)} 0) skewX(${(-18 * (1 - expoOut(p))).toFixed(2)})`);
