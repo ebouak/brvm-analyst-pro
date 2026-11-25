@@ -102,7 +102,7 @@ export function destinationsPouce(registre: readonly EntreeNav[] = REGISTRE): De
 // ── Où la barre ne s'affiche pas ────────────────────────────────────────────
 
 /** Préfixes rendus sans barre : widgets tiers, console, authentification, pages à un seul geste. */
-const SANS_BARRE = ['/embed', '/admin', '/login', '/signup', '/crm', '/offre'];
+const SANS_BARRE = ['/embed', '/admin', '/login', '/signup', '/crm', '/offre', '/academy/rappels'];
 /** Sous-pages de l'Academy qui ne sont PAS le lecteur de leçon (celui-ci a sa propre barre collante, AcademyShell). */
 const ACADEMY_HORS_LECTEUR = new Set(['examen', 'certificat', 'integrale', 'lecon-0']);
 

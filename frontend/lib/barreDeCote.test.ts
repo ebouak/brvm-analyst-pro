@@ -222,7 +222,7 @@ describe('barre du bas (mobile)', () => {
 
 describe('pages sans barre', () => {
   it('widgets, console, authentification, impression, lecteur de leçon', () => {
-    for (const p of ['/embed/ticker', '/admin', '/admin/qualite', '/login', '/signup', '/crm/opposition', '/offre/dossier',
+    for (const p of ['/embed/ticker', '/admin', '/admin/qualite', '/login', '/signup', '/crm/opposition', '/academy/rappels/arret', '/offre/dossier',
       '/actions/SNTS/print', '/formations/academy/les-bases']) expect(sansBarre(p), p).toBe(true);
   });
   it('partout ailleurs, Dossier et relevé compris (barre masquée à l’impression)', () => {

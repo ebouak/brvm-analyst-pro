@@ -9,6 +9,7 @@ import DossiersPrefs from '@/components/settings/DossiersPrefs';
 import RelevePrefs from '@/components/settings/RelevePrefs';
 import BriefPrefs from '@/components/settings/BriefPrefs';
 import RecapPrefs from '@/components/settings/RecapPrefs';
+import AcademyRelancesPrefs from '@/components/settings/AcademyRelancesPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { limiteAlertesCourante } from '@/lib/server/alertesLimite';
@@ -64,6 +65,10 @@ export default async function AlertesPage() {
       <BriefPrefs userId={user.id} />
 
       <RecapPrefs userId={user.id} />
+
+      {/* Rappels de progression Academy (0272) : cible du lien « Mes préférences »
+          de ces e-mails. Se masque tant que la migration n'est pas appliquée. */}
+      <AcademyRelancesPrefs userId={user.id} />
 
       {gate.allowed && <DossiersPrefs userId={user.id} />}
 

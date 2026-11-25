@@ -48,6 +48,11 @@ export default function ConfidentialitePage() {
           <li>Fourniture du service et gestion du compte : exécution du contrat.</li>
           <li>Envoi de la newsletter : consentement.</li>
           <li>
+            Rappels de progression de l&apos;Academy par e-mail (après 5 jours sans activité sur un parcours
+            commencé, au plus un tous les 14 jours, sans offre commerciale) : intérêt légitime. Vous pouvez les
+            arrêter depuis chaque e-mail ou dans Paramètres → Alertes.
+          </li>
+          <li>
             Réponse aux messages du formulaire de contact : mesures précontractuelles et intérêt
             légitime à répondre à une demande que vous nous adressez.
           </li>
@@ -98,6 +103,7 @@ export default function ConfidentialitePage() {
           <li>Envois de dossiers par e-mail ou messagerie : 90 jours.</li>
           <li>Rappel par l&apos;assistant vocal : transcription de l&apos;appel 30 jours ; durée, issue et coût de l&apos;appel 12 mois ; numéro de téléphone avec le message de contact (12 mois après le dernier échange). Si vous avez dit « stop », nous conservons seulement une empreinte du numéro, pour ne plus l&apos;appeler.</li>
           <li>Relation commerciale : consultations 90 jours, messages de proposition et notes 24 mois ; liste d&apos;opposition : conservée.</li>
+          <li>Journal des rappels de progression de l&apos;Academy : 6 mois.</li>
           <li>Sessions d&apos;examen de l&apos;Academy : 7 jours. Certificats : jusqu&apos;à leur révocation ou la suppression du compte.</li>
           <li>Recherche en langage naturel : empreinte 24 heures ; compteurs de quota 30 jours ; décisions d&apos;aiguillage WhatsApp 90 jours.</li>
           <li>Notifications d&apos;événements de paiement reçues des prestataires : 12 mois.</li>

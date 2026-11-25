@@ -34,3 +34,9 @@ jobs:
           code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
           echo "HTTP $code"; echo "$corps"
           [ "$code" = "200" ] || { echo "::error::Relances Academy : HTTP $code"; exit 1; }
+          # Un 200 ne prouve rien : la route répond 200 même quand des envois
+          # échouent. Seul `ok: true` vaut succès (envois partis ET notés).
+          ok=$(echo "$corps" | jq -r '.ok')
+          [ "$ok" = "true" ] || { echo "::error::Relances Academy : échecs=$(echo "$corps" | jq -r '.echecs') incertains=$(echo "$corps" | jq -r '.incertains // 0')"; exit 1; }
+          reportes=$(echo "$corps" | jq -r '.reportes // 0')
+          [ "$reportes" = "0" ] || echo "::warning::Relances Academy : $reportes relance(s) reportée(s) (budget de temps atteint)."

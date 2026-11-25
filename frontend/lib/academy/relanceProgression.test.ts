@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   composerEmailRelanceAcademy,
+  dansFenetreDeRelance,
+  estJetonArret,
   selectionnerRelancesAcademy,
+  statutsCooldown,
   type CandidatRelanceAcademy,
+  type RelanceSelectionnee,
 } from './relanceProgression';
+
+const JETON = 'a'.repeat(48);
 
 const NOW = new Date('2026-11-25T10:00:00Z');
 
@@ -63,24 +69,60 @@ describe('Academy relances progression J+5 (Lot #6)', () => {
   });
 
   it('compose un e-mail avec lien ?lecon=N, objet adapté et échappement HTML', () => {
-    const mail = composerEmailRelanceAcademy({
-      userId: 'u-1',
-      email: 'a@b.ci',
-      displayName: '<Moussa>',
-      courseSlug: 'academy-niveau-1-initiation',
-      courseTitre: 'Niveau 1',
-      niveau: 'debutant',
-      doneLessons: 10,
-      totalLessons: 11,
-      remainingLessons: 1,
-      nextLessonIdx: 10,
-      nextLessonTitle: 'Leçon 11 & bilan',
-      joursInactif: 7,
-    });
+    const mail = composerEmailRelanceAcademy(cible({ displayName: '<Moussa>', nextLessonTitle: 'Leçon 11 & bilan' }), { jetonArret: JETON });
     expect(mail.resumeUrl).toBe('https://www.westbourse.com/formations/academy/academy-niveau-1-initiation?lecon=11');
     expect(mail.subject).toContain('Plus qu’une leçon');
     expect(mail.html).not.toContain('<Moussa>');
     expect(mail.html).toContain('&lt;Moussa&gt;');
     expect(mail.html).toContain('Leçon 11 &amp; bilan');
   });
+
+  it('porte un retrait en un clic (RFC 8058) et un lien d’arrêt dans le corps', () => {
+    const mail = composerEmailRelanceAcademy(cible(), { jetonArret: JETON, siteUrl: 'https://www.westbourse.com/' });
+    expect(mail.headers['List-Unsubscribe']).toBe(`<https://www.westbourse.com/api/academy/rappels/arret?t=${JETON}>`);
+    expect(mail.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
+    expect(mail.html).toContain(`https://www.westbourse.com/academy/rappels/arret?t=${JETON}`);
+    expect(mail.text).toContain(`Ne plus recevoir ces rappels : https://www.westbourse.com/academy/rappels/arret?t=${JETON}`);
+    expect(mail.text).toContain('https://www.westbourse.com/parametres/alertes');
+  });
+
+  it('refuse de composer sans jeton d’arrêt valide (échec fermé)', () => {
+    for (const j of ['', 'abc', 'A'.repeat(48), `${'a'.repeat(47)}g`]) {
+      expect(() => composerEmailRelanceAcademy(cible(), { jetonArret: j })).toThrow();
+    }
+    expect(estJetonArret(JETON)).toBe(true);
+    expect(estJetonArret(null)).toBe(false);
+  });
+
+  it('délai de 14 jours : « envoi » (peut-être parti) compte, « echec » non ; la simulation ne bloque pas le réel', () => {
+    expect(statutsCooldown('actif')).toEqual(['envoi', 'envoye']);
+    expect(statutsCooldown('simulation')).toEqual(['simulation', 'envoi', 'envoye']);
+  });
+
+  it('une seule règle de fenêtre pour le tri préalable et la sélection', () => {
+    expect(dansFenetreDeRelance('2026-11-18T10:00:00Z', null, NOW)).toBe(true); // J+7
+    expect(dansFenetreDeRelance('2026-11-21T10:00:00Z', null, NOW)).toBe(false); // J+4
+    expect(dansFenetreDeRelance('2026-10-10T10:00:00Z', null, NOW)).toBe(false); // J+46
+    expect(dansFenetreDeRelance('pas une date', null, NOW)).toBe(false);
+    expect(dansFenetreDeRelance('2026-11-18T10:00:00Z', '2026-11-12T10:00:00Z', NOW)).toBe(false); // 13 j
+    expect(dansFenetreDeRelance('2026-11-18T10:00:00Z', '2026-11-11T10:00:00Z', NOW)).toBe(true); // 14 j
+  });
 });
+
+function cible(overrides: Partial<RelanceSelectionnee> = {}): RelanceSelectionnee {
+  return {
+    userId: 'u-1',
+    email: 'a@b.ci',
+    displayName: 'Moussa',
+    courseSlug: 'academy-niveau-1-initiation',
+    courseTitre: 'Niveau 1',
+    niveau: 'debutant',
+    doneLessons: 10,
+    totalLessons: 11,
+    remainingLessons: 1,
+    nextLessonIdx: 10,
+    nextLessonTitle: 'Leçon 11',
+    joursInactif: 7,
+    ...overrides,
+  };
+}

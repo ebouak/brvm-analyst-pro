@@ -229,6 +229,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/paiement/succes', libelle: 'Paiement confirmé', racine: true, statut: 'parcours', raison: 'retour Chariow' },
   { chemin: '/offre/dossier', libelle: 'Dossier offert', racine: true, statut: 'parcours', raison: 'lien d’e-mail de relance' },
   { chemin: '/crm/opposition', libelle: 'Ne plus recevoir de proposition', racine: true, statut: 'parcours', raison: 'lien d’opposition des e-mails' },
+  { chemin: '/academy/rappels/arret', libelle: 'Arrêter les rappels Academy', racine: true, statut: 'parcours', raison: 'lien d’arrêt des rappels de progression' },
   { chemin: '/embed/heatmap', libelle: 'Widget heatmap', racine: true, statut: 'interne', raison: 'widget pour iframe tierce' },
   { chemin: '/embed/ticker', libelle: 'Widget bandeau de cours', racine: true, statut: 'interne', raison: 'widget pour iframe tierce' },
   { chemin: '/embed/valeur/[code]', libelle: 'Widget valeur', racine: true, statut: 'interne', raison: 'widget pour iframe tierce' },

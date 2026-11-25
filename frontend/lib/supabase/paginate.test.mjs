@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { fetchAllRows } from './paginate.ts';
+import { fetchAllRows, fetchAllRowsOuErreur } from './paginate.ts';
 
 // Simule une table de `total` lignes servie par lots de 1000 via .range(from,to).
 function fausseTable(total) {
@@ -39,3 +39,13 @@ assert.deepEqual(await fetchAllRows(vide.construire), []);
 assert.equal(vide.appels.length, 1);
 
 console.log('✓ supabase/paginate OK');
+
+// fetchAllRowsOuErreur : mêmes lots, mais une erreur au 2e lot LÈVE au lieu
+// de rendre 1000 lignes comme si la table s'arrêtait là.
+const strict = fausseTable(2500);
+assert.equal((await fetchAllRowsOuErreur((f, t) => strict.construire(f, t).then((r) => ({ ...r, error: null })))).length, 2500);
+await assert.rejects(
+  fetchAllRowsOuErreur((f) => Promise.resolve(f === 0 ? { data: Array(1000).fill({}), error: null } : { data: null, error: { message: 'coupure' } })),
+  /coupure/,
+);
+console.log('fetchAllRowsOuErreur : ok');

@@ -137,6 +137,17 @@ export async function GET() {
     ? (await sbCrm.from('crm_oppositions').select('source, created_at').eq('email_norm', emailCrm)).data ?? []
     : [];
 
+  // Rappels de progression Academy (0271/0272) : table sans policy, lecture
+  // service_role FILTRÉE sur le compte. Jamais exportés : jeton d'arrêt, resend_id.
+  const academyRappels =
+    (
+      await getServiceClient()
+        .from('academy_reminder_logs')
+        .select('course_slug, next_lesson_idx, remaining_lessons, mode, statut, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+    ).data ?? [];
+
   // Lu à part : table de 0165 ; absente, la lecture renvoie une erreur et
   // l'export reste complet pour le reste.
   const whatsappLiaisons = await supabase.from('whatsapp_liaisons').select('chat_id, telephone, lie_le').eq('user_id', user.id);
@@ -203,6 +214,8 @@ export async function GET() {
     crm_signaux: crmSignaux,
     crm_actions: crmActions,
     crm_opposition: crmOpposition,
+    // Rappels de progression Academy envoyés (ou simulés) à votre adresse.
+    academy_rappels: academyRappels,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
