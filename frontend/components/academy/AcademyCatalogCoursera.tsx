@@ -29,10 +29,12 @@ import {
   type ObjectifId,
 } from '@/lib/academy/capsules';
 import { NIVEAUX, NIVEAU_LABEL } from '@/lib/academy/types';
+import { EMPTY_ACTIVITY_SNAPSHOT, evaluerMissions, type ResumeMissions } from '@/lib/academy/missions';
 import { Lecon0Carte } from './Lecon0Carte';
+import MissionsPratiques from './MissionsPratiques';
 import QuizPlacement from './QuizPlacement';
 
-type TabId = 'explorer' | 'en_cours' | 'termines' | 'certificats';
+type TabId = 'explorer' | 'en_cours' | 'missions' | 'termines' | 'certificats';
 
 export interface CertificatEtat {
   id: string;
@@ -49,6 +51,7 @@ interface Props {
   calendrier: ActiviteCalendrier;
   certificats: CertificatEtat[];
   examensReussis: string[];
+  missions?: ResumeMissions;
   complet: boolean;
   accessibleSlugs?: string[];
   isLoggedIn?: boolean;
@@ -85,10 +88,15 @@ export default function AcademyCatalogCoursera({
   calendrier,
   certificats,
   examensReussis,
+  missions: missionsProp,
   complet,
   accessibleSlugs,
   isLoggedIn = true,
 }: Props) {
+  const missions = useMemo(
+    () => missionsProp ?? evaluerMissions(EMPTY_ACTIVITY_SNAPSHOT),
+    [missionsProp],
+  );
   const [tab, setTab] = useState<TabId>('explorer');
   const [filtre, setFiltre] = useState<CapsuleFiltreId>('tous');
   const [query, setQuery] = useState('');
@@ -152,7 +160,7 @@ export default function AcademyCatalogCoursera({
   const terminesList = useMemo(() => filtrerCours(accessibleCourses, { tab: 'termines' }), [accessibleCourses]);
 
   const visibleCourses = useMemo(() => {
-    if (tab === 'certificats') return [];
+    if (tab === 'certificats' || tab === 'missions') return [];
     const pool = tab === 'explorer' ? courses : accessibleCourses;
     const list = filtrerCours(pool, { tab, filtre, query });
     if (goal && tab === 'explorer' && filtre === 'tous' && !query.trim()) {
@@ -222,7 +230,7 @@ export default function AcademyCatalogCoursera({
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
-                  if (tab === 'certificats') setTab('explorer');
+                  if (tab === 'certificats' || tab === 'missions') setTab('explorer');
                 }}
                 placeholder="Que souhaitez-vous apprendre ?"
                 aria-label="Rechercher un cours ou un module"
@@ -335,6 +343,7 @@ export default function AcademyCatalogCoursera({
                     ['termines', 'Terminés', terminesList.length] as const,
                   ]
                 : []),
+              ['missions', 'Missions pratiques', `${missions.done}/${missions.total}`],
               ['certificats', 'Certificats', certsActifs.length],
             ] as const
           ).map(([id, label, count]) => {
@@ -485,6 +494,48 @@ export default function AcademyCatalogCoursera({
             weeklyGoal={weeklyGoal}
             onCycleWeeklyGoal={cycleWeeklyGoal}
           />
+        </section>
+      )}
+
+      {hasAnyAccess && tab === 'explorer' && !query.trim() && missions.nextMission && (
+        <section
+          aria-label="Prochaine mission pratique"
+          className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:px-5"
+        >
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-full bg-up/15 px-2.5 py-0.5 text-[11px] font-semibold text-up">
+                Apprendre → Pratiquer
+              </span>
+              <span className="tabular font-medium text-muted">
+                {missions.done} / {missions.total} missions validées ({missions.pct} %)
+              </span>
+            </div>
+            <p className="truncate text-sm font-semibold text-ivory">
+              Prochaine action : {missions.nextMission.titre}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <Link
+              href={missions.nextMission.href}
+              className="rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-bg transition hover:bg-gold-2"
+            >
+              {missions.nextMission.cta} →
+            </Link>
+            <button
+              type="button"
+              onClick={() => setTab('missions')}
+              className="rounded-lg border border-border bg-bg px-3.5 py-2 text-xs font-medium text-ivory hover:border-border-strong"
+            >
+              Voir les {missions.total} missions
+            </button>
+          </div>
+        </section>
+      )}
+
+      {tab === 'missions' && (
+        <section aria-label="Missions pratiques de l'Academy">
+          <MissionsPratiques resume={missions} isLoggedIn={isLoggedIn} />
         </section>
       )}
 

@@ -7,6 +7,8 @@ import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import AcademyCatalogCoursera, { type CertificatEtat } from '@/components/academy/AcademyCatalogCoursera';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { NIVEAUX, type CourseContent, type Niveau } from '@/lib/academy/types';
+import { EMPTY_ACTIVITY_SNAPSHOT, evaluerMissions } from '@/lib/academy/missions';
+import { chargerActiviteMissions } from '@/lib/academy/missionsServer';
 import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academy/progressCalc';
 import {
   calculerActiviteCalendrier,
@@ -54,6 +56,7 @@ export default async function AcademyHubPage() {
   let displayName: string | null = null;
   let certificats: CertificatEtat[] = [];
   let examensReussis: string[] = [];
+  let missions = evaluerMissions(EMPTY_ACTIVITY_SNAPSHOT);
 
   if (acces.userId) {
     const [profRes, certRes, examRes] = await Promise.all([
@@ -71,6 +74,7 @@ export default async function AcademyHubPage() {
     displayName = (profRes.data as { display_name?: string | null } | null)?.display_name?.trim() || null;
     certificats = ((certRes.data ?? []) as CertificatEtat[]) || [];
     examensReussis = [...new Set(((examRes.data ?? []) as { niveau: string }[]).map((e) => e.niveau))];
+    missions = evaluerMissions(await chargerActiviteMissions(acces.userId, examensReussis.length));
   }
 
   const progRows = (progRes.data ?? []) as ProgressRowFull[];
@@ -181,6 +185,7 @@ export default async function AcademyHubPage() {
           calendrier={calendrier}
           certificats={certificats}
           examensReussis={examensReussis}
+          missions={missions}
           complet={complet}
           accessibleSlugs={accessibleSlugs}
           isLoggedIn={Boolean(acces.userId)}
