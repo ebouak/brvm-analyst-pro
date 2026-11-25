@@ -29,12 +29,14 @@ export default function AcademyShell({
   videos = [],
   niveau = null,
   freeTrial = false,
+  watermark = null,
 }: {
   data: LearnData;
   initialLesson: number;
   videos?: number[];
   niveau?: string | null;
   freeTrial?: boolean;
+  watermark?: string | null;
 }) {
   const lessons = data.content.lessons;
   const clamp = useCallback(
@@ -285,7 +287,9 @@ export default function AcademyShell({
             </div>
           )}
 
-          {videos.includes(idx + 1) && <LessonVideo key={`video-${idx}`} slug={data.slug} numero={idx + 1} />}
+          {videos.includes(idx + 1) && (
+            <LessonVideo key={`video-${idx}`} slug={data.slug} numero={idx + 1} watermark={watermark} />
+          )}
           <LessonContent
             key={idx}
             lesson={lesson}
