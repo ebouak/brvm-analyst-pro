@@ -10,6 +10,7 @@ import AcademyShell from '@/components/academy/AcademyShell';
 import ApercuCours, { type LeconApercu } from '@/components/academy/ApercuCours';
 import type { Nouveaute } from '@/lib/academy/nouveaute';
 import { estLeconGratuite } from '@/lib/academy/capsules';
+import { filigraneUtilisateur } from '@/lib/academy/videoProtection';
 import { produitsActifs } from '@/lib/billing/chariow/catalogue';
 import { jsonLdScript } from '@/lib/jsonLd';
 
@@ -161,6 +162,7 @@ export default async function AcademyCoursePage(
         videos={videos}
         niveau={card.niveau ?? null}
         freeTrial={freeTrial}
+        watermark={filigraneUtilisateur(gate.acces.userId)}
       />
     </>
   );

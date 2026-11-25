@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import ProtectedVideo from '@/components/academy/ProtectedVideo';
 import { saveLessonProgress } from '@/app/formations/modules/actions';
 import type { CourseDetail, VideoLesson, VideoQuiz } from '@/lib/video/server';
 
@@ -142,7 +143,16 @@ function LessonView({
       <div className="overflow-hidden rounded-xl border border-border bg-black">
         <div className="relative aspect-video">
           {lesson.provider === 'mp4' ? (
-            <video ref={videoRef} src={lesson.video_url} controls className="h-full w-full" onEnded={complete} />
+            <ProtectedVideo
+              videoRef={videoRef}
+              src={lesson.video_url}
+              preload="metadata"
+              wrapperClassName="h-full w-full"
+              className="h-full w-full"
+              ariaLabel={lesson.titre}
+              watermark="WESTBOURSE Academy"
+              onEnded={complete}
+            />
           ) : (
             <iframe
               key={`${lesson.id}:${chapterStart}`}
