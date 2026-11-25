@@ -31,6 +31,7 @@ import {
   selectionnerRelancesAcademy,
   statutsCooldown,
   type CandidatRelanceAcademy,
+  type RelanceSelectionnee,
 } from '@/lib/academy/relanceProgression';
 
 export const runtime = 'nodejs';
@@ -90,6 +91,35 @@ async function adresses(svc: Svc, ids: string[]): Promise<Map<string, string>> {
   return out;
 }
 
+/**
+ * Aperçu (`?apercu=1`) : le gabarit RÉEL, rempli de données FICTIVES, envoyé à la
+ * seule adresse d'exploitation (ALERTS_EMAIL_TO). Rien n'est lu ni écrit en base,
+ * aucun apprenant n'est concerné, quel que soit le mode. Le jeton d'arrêt n'étant
+ * pas enregistré, le lien d'arrêt de l'aperçu affiche « lien plus valide ».
+ */
+async function envoyerApercu(): Promise<NextResponse> {
+  const to = process.env.ALERTS_EMAIL_TO?.trim();
+  if (!to) return NextResponse.json({ ok: false, apercu: true, erreur: 'ALERTS_EMAIL_TO absente' }, { status: 503 });
+  if (isTestSender()) return NextResponse.json({ ok: false, apercu: true, bloque: 'test_sender' }, { status: 503 });
+  const fictif: RelanceSelectionnee = {
+    userId: 'apercu',
+    email: to,
+    displayName: 'Aminata',
+    courseSlug: 'academy-niveau-1-initiation',
+    courseTitre: 'Niveau 1 — Initiation à la BRVM',
+    niveau: 'debutant',
+    doneLessons: 9,
+    totalLessons: 11,
+    remainingLessons: 2,
+    nextLessonIdx: 9,
+    nextLessonTitle: 'Leçon 10 — Investir depuis l’étranger (diaspora)',
+    joursInactif: 6,
+  };
+  const msg = composerEmailRelanceAcademy(fictif, { jetonArret: randomBytes(24).toString('hex'), siteUrl: SITE_URL });
+  const res = await sendEmail({ to, subject: `[Aperçu] ${msg.subject}`, html: msg.html, text: msg.text, headers: msg.headers });
+  return NextResponse.json({ ok: res.ok, apercu: true, id: res.id ?? null, erreur: res.ok ? undefined : res.error }, { status: res.ok ? 200 : 502 });
+}
+
 export async function GET() {
   return NextResponse.json({ error: 'Méthode non autorisée' }, { status: 405, headers: { Allow: 'POST' } });
 }
@@ -98,6 +128,8 @@ export async function POST(req: Request) {
   if (!cronAutorise(req)) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
+
+  if (new URL(req.url).searchParams.get('apercu') === '1') return envoyerApercu();
 
   const mode = lireMode();
   if (mode === 'off') {

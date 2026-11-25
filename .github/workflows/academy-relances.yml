@@ -10,6 +10,11 @@ on:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
+    inputs:
+      apercu:
+        description: "Aperçu : envoie le gabarit, données fictives, à ALERTS_EMAIL_TO seulement (aucun apprenant)"
+        type: boolean
+        default: false
 
 concurrency:
   group: academy-relances
@@ -25,12 +30,13 @@ jobs:
     env:
       SITE: https://www.westbourse.com
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      APERCU: ${{ inputs.apercu && '?apercu=1' || '' }}
     steps:
       - name: Déclencher les relances Academy J+5
         run: |
           set -u
           if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : relances NON exécutées."; exit 1; fi
-          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/academy-relances")
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/academy-relances$APERCU")
           code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
           echo "HTTP $code"; echo "$corps"
           [ "$code" = "200" ] || { echo "::error::Relances Academy : HTTP $code"; exit 1; }
