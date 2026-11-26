@@ -16,6 +16,7 @@ import { urlFichierPublique, type FichierWaha } from '@/lib/whatsapp/waha';
 import { masquerDonneesPersonnelles } from '@/lib/whatsapp/chatbot/chiffres';
 import { repondreChatbot, type DepsChatbot, type IssueChatbot, type MessageLlm, type OptionsChatbot } from '@/lib/whatsapp/chatbot/repondre';
 import { texteQuota, TEXTE_EFFACE, TEXTE_VOCAL_INCOMPRIS, TEXTE_VOCAL_TROP_LONG } from '@/lib/whatsapp/chatbot/textes';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 /**
  * Branchement serveur de l'assistant WhatsApp ouvert à tous (spec 2026-11-04).
@@ -70,7 +71,7 @@ function depsChatbot(chatId: string): DepsChatbot {
         db.from('profiles').select('is_premium, email').eq('id', userId).maybeSingle(),
         db.from('notification_prefs').select('agent_optin').eq('user_id', userId).maybeSingle(),
       ]);
-      profil = { email: (p?.email as string | null) ?? null, isPremium: Boolean(p?.is_premium) };
+      profil = { email: (p?.email as string | null) ?? null, isPremium: await premiumEffectif(userId, Boolean(p?.is_premium)) };
       const premium = profil.isPremium || isAdminEmail(profil.email);
       return { palier: premium ? 'premium' : 'lie', userId, perso: premium && Boolean(prefs?.agent_optin) };
     },

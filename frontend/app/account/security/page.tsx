@@ -5,6 +5,10 @@ import { getAdminContext } from '@/lib/server/rbac';
 import { SectionHeader } from '@/components/ui/premium';
 import { loadAuthEvents } from '@/lib/admin/auditLogs';
 import { MfaPanel } from './MfaPanel';
+import { AppareilsConnectes } from './AppareilsConnectes';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { lireReglages, lireSessionsVivantes } from '@/lib/securite/serveur';
+import { regrouperAppareils, type AppareilConnecte } from '@/lib/securite/appareils';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Sécurité du compte' };
@@ -29,14 +33,32 @@ export default async function SecurityPage() {
   const adminCtx = await getAdminContext();
   const events = await loadAuthEvents(user.id);
 
+  // Appareils connectés : lus côté serveur (auth.sessions n'est pas exposé à
+  // la clé publique). Une lecture impossible masque la section, sans erreur.
+  const { data: jeton } = await supabase.auth.getClaims();
+  const courante = typeof jeton?.claims?.session_id === 'string' ? jeton.claims.session_id : null;
+  let appareils: AppareilConnecte[] | null = null;
+  let plafond: number | null = null;
+  try {
+    const db = getServiceClient();
+    const [sessions, reglages] = await Promise.all([lireSessionsVivantes(db, user.id), lireReglages(db)]);
+    appareils = regrouperAppareils(sessions, courante);
+    const soumis = sessions.some((s) => s.estPremium && !s.exempte);
+    plafond = soumis && reglages.mode === 'actif' ? reglages.plafond : null;
+  } catch {
+    appareils = null;
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-6 py-8">
       <SectionHeader
         title="Sécurité"
-        subtitle="Double authentification et historique de vos connexions."
+        subtitle="Double authentification, appareils connectés et historique de vos connexions."
       />
 
       <MfaPanel mustEnroll={adminCtx !== null} />
+
+      {appareils && <AppareilsConnectes appareils={appareils} plafond={plafond} />}
 
       {/* L'utilisateur doit pouvoir repérer lui-même une connexion qu'il ne
           reconnaît pas — c'est souvent lui, et non nous, qui la remarque. */}

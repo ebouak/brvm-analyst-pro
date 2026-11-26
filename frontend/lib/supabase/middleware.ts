@@ -133,7 +133,13 @@ export async function updateSession(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      if (!profile?.is_premium) {
+      // Premium suspendu depuis /admin/securite (0273) : traité comme non Premium.
+      // Erreur de lecture = pas de suspension (jamais de sanction sur une base illisible).
+      const suspendu = profile?.is_premium
+        ? (await supabase.rpc('premium_suspendu_moi')).data === true
+        : false;
+
+      if (!profile?.is_premium || suspendu) {
         // `from` = page demandée (chemin + query), pour que la porte sache d'où
         // l'on vient et puisse y ramener après l'abonnement.
         return NextResponse.redirect(

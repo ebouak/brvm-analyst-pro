@@ -148,6 +148,17 @@ export async function GET() {
         .order('created_at', { ascending: false })
     ).data ?? [];
 
+  // Sécurité des comptes (0273) : tables sans policy, lecture service_role
+  // FILTRÉE sur le compte. Les signaux et décisions vous concernant relèvent du
+  // droit d'accès ; le motif interne d'une décision et son auteur n'en sont pas.
+  const sbSec = getServiceClient();
+  const [secSessions, secFermetures, secSignaux, secDecisions] = await Promise.all([
+    sbSec.from('securite_sessions').select('user_agent, reseau, pays, premiere_vue, derniere_vue, fermee_at, fermee_par').eq('user_id', user.id).order('derniere_vue', { ascending: false }),
+    sbSec.from('securite_revocations').select('user_agent, derniere_activite, motif, simulee, notifie, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
+    sbSec.from('securite_signaux').select('jour, niveau, raisons').eq('user_id', user.id).order('jour', { ascending: false }),
+    sbSec.from('securite_decisions').select('type, jusqu_au, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
+  ]);
+
   // Lu à part : table de 0165 ; absente, la lecture renvoie une erreur et
   // l'export reste complet pour le reste.
   const whatsappLiaisons = await supabase.from('whatsapp_liaisons').select('chat_id, telephone, lie_le').eq('user_id', user.id);
@@ -216,6 +227,13 @@ export async function GET() {
     crm_opposition: crmOpposition,
     // Rappels de progression Academy envoyés (ou simulés) à votre adresse.
     academy_rappels: academyRappels,
+    // Sécurité des comptes : sessions observées, fermetures, signaux, décisions.
+    securite: {
+      sessions: secSessions.data ?? [],
+      fermetures: secFermetures.data ?? [],
+      signaux: secSignaux.data ?? [],
+      decisions: secDecisions.data ?? [],
+    },
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

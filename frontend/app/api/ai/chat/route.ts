@@ -5,6 +5,7 @@ import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
 import { repondreSansRecommandation } from '@/lib/ai/reponseConforme';
 import { createClient } from '@/lib/supabase/server';
 import { checkFeature } from '@/lib/server/featureGate';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 // Plafonds de saisie : sans eux, un appelant pouvait envoyer un contexte énorme
 // et le faire payer au budget LLM.
@@ -244,7 +245,7 @@ export async function POST(req: NextRequest) {
   const gate = await checkFeature('assistant_ia', {
     id: user.id,
     email: user.email,
-    isPremium: Boolean(profile?.is_premium),
+    isPremium: await premiumEffectif(user.id, Boolean(profile?.is_premium)),
   });
   if (!gate.allowed) {
     return Response.json({ error: gate.reason }, { status: gate.status });

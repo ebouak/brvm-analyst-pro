@@ -7,6 +7,7 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendEmail } from '@/lib/server/email';
 import { individualHtml, textToHtml } from '@/lib/email/templates';
 import { validateUploads } from '@/lib/email/uploads';
+import { fermerToutesSessions } from '@/lib/securite/serveur';
 
 type R = { ok: boolean; message?: string };
 
@@ -196,9 +197,15 @@ export async function updateUserEmail(userId: string, newEmail: string): Promise
 export async function signOutUser(userId: string): Promise<R> {
   const ctx = await requirePermission('users.write');
 
-  const db = getServiceClient();
-  const { error } = await db.auth.admin.signOut(userId, 'global');
-  if (error) return { ok: false, message: error.message };
+  // `auth.admin.signOut` attend le JETON d'une session, pas un identifiant de
+  // compte : l'appel précédent renvoyait toujours une erreur. Les sessions sont
+  // fermées en base, et journalisées (motif admin), par la fonction 0273.
+  let fermees: number;
+  try {
+    fermees = await fermerToutesSessions(userId, 'admin');
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : 'Fermeture impossible.' };
+  }
 
   await recordAudit(ctx, {
     action: 'user.signout_all',
@@ -206,6 +213,7 @@ export async function signOutUser(userId: string): Promise<R> {
     resourceId: userId,
     targetUserId: userId,
     severity: 'warning',
+    metadata: { sessions_fermees: fermees },
   });
 
   return { ok: true };

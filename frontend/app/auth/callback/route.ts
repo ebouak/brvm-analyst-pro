@@ -5,6 +5,7 @@ import { enregistrerPays } from '@/lib/crm/geoServeur';
 import { estNouveauCompte, nextSur, versEcranWhatsapp } from '@/lib/bienvenue/redirection';
 import { estInscriptionRecente, normaliserSrc } from '@/lib/acquisition/suivi';
 import { incrementerAcquisition } from '@/lib/acquisition/compteur';
+import { apresConnexion } from '@/lib/securite/serveur';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -38,6 +39,21 @@ export async function GET(request: Request) {
   // Pays du compte (en-tête Vercel, côté serveur) : best-effort, jamais bloquant.
   // Sans attendre : la redirection ne doit pas dépendre de cette écriture (enregistrerPays ne lève jamais).
   if (user) void enregistrerPays(user.id, request.headers).catch(() => {});
+  // Journal des connexions + plafond d'appareils Premium, après la réponse :
+  // la redirection n'attend pas (apresConnexion ne lève jamais). La session
+  // courante est lue ici, du jeton qui vient d'être émis, et toujours gardée.
+  if (user) {
+    const { data: jeton } = await supabase.auth.getClaims();
+    const sid = jeton?.claims?.session_id;
+    after(() =>
+      apresConnexion({
+        userId: user.id,
+        email: user.email ?? null,
+        sessionId: typeof sid === 'string' ? sid : null,
+        entetes: request.headers,
+      }).then(() => undefined),
+    );
+  }
   // Inscription Google venue d'un lien de campagne (/signup?src=) : comptée, agrégée,
   // seulement pour un compte créé à l'instant (une connexion n'est pas une inscription).
   const src = searchParams.get('src');

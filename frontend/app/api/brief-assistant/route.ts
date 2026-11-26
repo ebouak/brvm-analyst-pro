@@ -4,6 +4,7 @@ import { parametresFournisseur, redacteursDisponibles, type Redacteur } from '@/
 import { TOOL_DEFS, runTool } from '@/lib/briefTools';
 import { checkFeature } from '@/lib/server/featureGate';
 import { briefBodySchema } from '@/lib/server/briefAssistantSchema';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 export const maxDuration = 60;
 
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
   const gate = await checkFeature('assistant_ia', {
     id: user.id,
     email: user.email,
-    isPremium: Boolean(profile?.is_premium),
+    isPremium: await premiumEffectif(user.id, Boolean(profile?.is_premium)),
   });
   if (!gate.allowed) return NextResponse.json({ error: gate.reason }, { status: gate.status });
 

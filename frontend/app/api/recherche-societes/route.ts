@@ -7,6 +7,7 @@ import { reserverBudgetRecherche, stockageSupabase } from '@/lib/server/recherch
 import { classerParJev } from '@/lib/recherche/jev';
 import { hacherIdentifiant, validerRequete } from '@/lib/recherche/normaliser';
 import { rechercher, type DepsRecherche } from '@/lib/recherche/orchestrer';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     },
     eligible: async (u) => {
       const { data: profil } = await supabase.from('profiles').select('is_premium').eq('id', u.id).maybeSingle();
-      const gate = await checkFeature('recherche_ia', { id: u.id, email: u.email, isPremium: Boolean(profil?.is_premium) }, { consume: false });
+      const gate = await checkFeature('recherche_ia', { id: u.id, email: u.email, isPremium: await premiumEffectif(u.id, Boolean(profil?.is_premium)) }, { consume: false });
       return gate.allowed;
     },
     quota: async (u) =>

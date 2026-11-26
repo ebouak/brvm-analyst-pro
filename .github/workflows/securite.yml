@@ -1,0 +1,59 @@
+name: Sécurité des comptes (plafond d'appareils, rapport quotidien)
+
+# Route /api/cron/securite (migration 0273).
+#   chaque heure à :23  -> tache=horaire   : instantané des sessions + plafond Premium
+#   chaque jour 07:05   -> tache=quotidien : signaux du jour + rapport Telegram exploitant
+# Le plafond s'applique d'abord à la connexion ; le passage horaire rattrape une
+# connexion faite hors de nos pages ou un appel perdu. Le mode (actif /
+# simulation / coupé) se règle dans /admin/securite, sans redéploiement.
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+    - cron: '5 7 * * *'
+  workflow_dispatch:
+    inputs:
+      tache:
+        description: 'horaire (plafond) ou quotidien (rapport)'
+        type: choice
+        options: [horaire, quotidien]
+        default: horaire
+      simulation:
+        description: '(horaire) calcule les fermetures sans RIEN fermer ni écrire'
+        type: boolean
+        default: false
+      forcer:
+        description: '(quotidien) renvoie le rapport même s’il est déjà parti aujourd’hui'
+        type: boolean
+        default: false
+
+concurrency:
+  group: securite-comptes
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  securite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://www.westbourse.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      TACHE: ${{ github.event_name == 'workflow_dispatch' && inputs.tache || (github.event.schedule == '5 7 * * *' && 'quotidien' || 'horaire') }}
+      SIMULATION: ${{ inputs.simulation && '&simulation=1' || '' }}
+      FORCER: ${{ inputs.forcer && '&forcer=1' || '' }}
+    steps:
+      - name: Exécuter la tâche
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : tâche NON exécutée."; exit 1; fi
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' \
+            "$SITE/api/cron/securite?tache=$TACHE$SIMULATION$FORCER")
+          code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"; echo "$corps"
+          # Seul `ok: true` vaut succès : un rapport non parti, un e-mail de
+          # fermeture non confirmé ou un garde-fou déclenché doivent se voir.
+          ok=$(echo "$corps" | jq -r '.ok')
+          [ "$code" = "200" ] && [ "$ok" = "true" ] || { echo "::error::Sécurité ($TACHE) : HTTP $code, ok=$ok — $(echo "$corps" | jq -r '.erreur // .plafond.refus // "voir le corps"')"; exit 1; }

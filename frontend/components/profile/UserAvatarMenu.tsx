@@ -52,7 +52,7 @@ export default function UserAvatarMenu({ isAdmin = false }: { isAdmin?: boolean 
   async function logout() {
     // Session du navigateur, puis action serveur (cookies effacés côté serveur,
     // redirection vers /login) : voir BarreDeCote.deconnecter.
-    try { await createClient().auth.signOut(); } catch { /* l'action serveur suit */ }
+    try { await createClient().auth.signOut({ scope: 'local' }); } catch { /* l'action serveur suit */ }
     // Évite d'attribuer la prochaine session (poste partagé) à cette personne.
     void phReset();
     await deconnexionServeur();

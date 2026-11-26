@@ -150,6 +150,9 @@ export default function SignInClient({
           if (!user) return;
           // Pays du compte (segmentation CRM) : l'en-tête est lu côté serveur, best-effort.
           void fetch('/api/crm/geo', { method: 'POST', keepalive: true }).catch(() => {});
+          // Journal des connexions + plafond d'appareils Premium (la session qui
+          // vient de s'ouvrir est toujours gardée). Sans attendre : jamais bloquant.
+          void fetch('/api/securite/connexion', { method: 'POST', keepalive: true }).catch(() => {});
           // Source de campagne : le serveur ne compte que si le compte vient d'être créé.
           if (src) {
             void fetch('/api/acquisition/inscription', {
