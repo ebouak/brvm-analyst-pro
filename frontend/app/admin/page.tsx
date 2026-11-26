@@ -102,13 +102,22 @@ async function loadKpis(): Promise<Kpis> {
     (async () => {
       try {
         const { data, error } = await db
-          .from('scrape_runs')
-          .select('status, started_at, source')
-          .order('created_at', { ascending: false })
+          .from('scraper_runs')
+          .select('status, started_at, scraper_sources(code)')
+          .order('started_at', { ascending: false })
           .limit(1)
           .maybeSingle();
         if (error) throw error;
-        return (data as Kpis['lastRun']) ?? null;
+        if (!data) return null;
+        const row = data as {
+          status: string;
+          started_at: string | null;
+          scraper_sources?: { code?: string | null } | Array<{ code?: string | null }> | null;
+        };
+        const src = Array.isArray(row.scraper_sources)
+          ? row.scraper_sources[0]?.code ?? null
+          : row.scraper_sources?.code ?? null;
+        return { status: row.status, started_at: row.started_at, source: src };
       } catch {
         return null;
       }
@@ -235,14 +244,34 @@ export default async function AdminPage() {
             <ul className="divide-y divide-border/60">
               {[
                 {
-                  href: '/admin/cles-api',
-                  title: 'Clés API',
-                  desc: 'Configurer les fournisseurs IA (DeepSeek, Mistral, Grok).',
+                  href: '/admin/controle',
+                  title: 'Tour de contrôle',
+                  desc: 'Envois, workflows GitHub, scraper et fraîcheur des données.',
                 },
                 {
-                  href: '/admin/import-fondamentaux',
-                  title: 'Import fondamentaux',
-                  desc: 'Lancer l’extraction des états financiers depuis les publications.',
+                  href: '/admin/ops',
+                  title: 'Bot Ops & Canaux',
+                  desc: 'Orchestrateur Telegram, santé LLM/WAHA/Resend et relances.',
+                },
+                {
+                  href: '/admin/controle/boc',
+                  title: 'Écarts BOC',
+                  desc: 'Comparer PER et rendements calculés avec le Bulletin officiel.',
+                },
+                {
+                  href: '/admin/coherence',
+                  title: 'Cohérence des fiches',
+                  desc: 'Anomalies détectées entre notations, sous-scores et comptes.',
+                },
+                {
+                  href: '/admin/calendrier',
+                  title: 'Calendrier fériés BRVM',
+                  desc: 'Déclarer les jours chômés UEMOA pour éviter les fausses alertes.',
+                },
+                {
+                  href: '/admin/settings',
+                  title: 'Paramètres',
+                  desc: 'Escalade vocale, briefing Telegram et état des intégrations.',
                 },
               ].map(({ href, title, desc }) => (
                 <li key={href}>

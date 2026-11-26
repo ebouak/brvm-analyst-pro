@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { isAdminEmail } from '@/lib/server/admin';
+import { requirePermission } from '@/lib/server/rbac';
 import ApiKeysForm from '@/components/admin/ApiKeysForm';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 
@@ -8,18 +6,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Clés API' };
 
 export default async function ClesApiPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  if (!isAdminEmail(user.email)) {
-    return (
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <PremiumPanel className="px-6 py-5">
-          <p className="text-sm text-muted">Accès réservé à l&apos;administrateur.</p>
-        </PremiumPanel>
-      </div>
-    );
-  }
+  await requirePermission('settings.write');
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">

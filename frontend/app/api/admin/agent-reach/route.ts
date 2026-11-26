@@ -1,8 +1,9 @@
-import { requireAdmin } from '@/lib/server/rbac';
+import { requireAdminApi } from '@/lib/server/adminApi';
 
 export async function POST(req: Request) {
   try {
-    await requireAdmin();
+    const g = await requireAdminApi('settings.write');
+    if ('error' in g) return g.error;
 
     const { source, query } = await req.json();
 

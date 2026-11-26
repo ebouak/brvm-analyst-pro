@@ -1,0 +1,51 @@
+name: Ops — Briefings Telegram (matin & clôture)
+
+on:
+  schedule:
+    # Brief fondateur du matin (07:30 UTC lun-ven)
+    - cron: '30 7 * * 1-5'
+    # Contrôle post-séance (17:45 UTC lun-ven)
+    - cron: '45 17 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Type de briefing à envoyer sur Telegram Ops'
+        type: choice
+        options: [matin, cloture]
+        default: matin
+
+concurrency:
+  group: ops-brief
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Envoyer le briefing Telegram Ops
+        env:
+          SITE: https://www.westbourse.com
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TYPE: ${{ inputs.type }}
+          SCHEDULE_EXPR: ${{ github.event.schedule }}
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent."; exit 1; fi
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_TYPE" ]; then
+            TYPE="$INPUT_TYPE"
+          elif [ "$SCHEDULE_EXPR" = "45 17 * * 1-5" ]; then
+            TYPE="cloture"
+          else
+            TYPE="matin"
+          fi
+          r=$(curl -sS -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/ops-brief?type=$TYPE")
+          code=$(echo "$r" | tail -1)
+          corps=$(echo "$r" | head -n -1)
+          echo "Type=$TYPE HTTP=$code"
+          echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::ops-brief HTTP $code"; exit 1; }

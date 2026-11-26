@@ -1,0 +1,36 @@
+name: Ops — Escalade vocale différée
+
+# Vérifie toutes les 5 minutes si un incident critique Telegram Ops
+# n'a pas été pris en charge avant l'expiration du délai de grâce, et
+# déclenche alors l'appel vocal Bland.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: ops-escalade
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  escalade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Traiter les escalades vocales dues
+        env:
+          SITE: https://www.westbourse.com
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent."; exit 1; fi
+          r=$(curl -sS -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/ops-escalade")
+          code=$(echo "$r" | tail -1)
+          corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"
+          echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::ops-escalade HTTP $code"; exit 1; }

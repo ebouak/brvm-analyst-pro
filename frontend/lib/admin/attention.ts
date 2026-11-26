@@ -49,6 +49,11 @@ export async function loadAttention(): Promise<AttentionItem[]> {
     failedLogins,
     disabledFeatures,
     cronJobs,
+    opsIncidentsOpen,
+    disabledWorkflows,
+    coherenceTrompeuses,
+    contactsNew,
+    agregatsOpen,
   ] = await Promise.all([
     safeCount(() =>
       db.from('api_clients').select('*', { count: 'exact', head: true }).eq('statut', 'pending'),
@@ -84,6 +89,28 @@ export async function loadAttention(): Promise<AttentionItem[]> {
       db.from('feature_flags').select('*', { count: 'exact', head: true }).eq('acces', 'disabled'),
     ),
     loadCronHealth(),
+    safeCount(() =>
+      db.from('ops_incidents').select('*', { count: 'exact', head: true }).eq('statut', 'ouvert'),
+    ),
+    safeCount(() =>
+      db
+        .from('ops_workflows')
+        .select('*', { count: 'exact', head: true })
+        .in('etat', ['disabled_inactivity', 'disabled_manually']),
+    ),
+    safeCount(() =>
+      db
+        .from('coherence_anomalies')
+        .select('*', { count: 'exact', head: true })
+        .is('resolue_le', null)
+        .eq('gravite', 'trompeuse'),
+    ),
+    safeCount(() =>
+      db.from('contact_messages').select('*', { count: 'exact', head: true }).eq('statut', 'nouveau'),
+    ),
+    safeCount(() =>
+      db.from('indicateur_relecture').select('*', { count: 'exact', head: true }).eq('statut', 'ouverte'),
+    ),
   ]);
 
   // Expéditeur encore en adresse de test : tout email vers un TIERS (demandeur de
@@ -172,6 +199,56 @@ export async function loadAttention(): Promise<AttentionItem[]> {
       detail: 'Suppression, suspension, révocation ou coupure de fonction.',
       href: '/admin/audit-logs?critical=1',
       cta: 'Vérifier',
+    });
+  }
+
+  if (opsIncidentsOpen > 0) {
+    items.push({
+      level: 'critical',
+      title: `${opsIncidentsOpen} incident${opsIncidentsOpen > 1 ? 's' : ''} Ops ouvert${opsIncidentsOpen > 1 ? 's' : ''}`,
+      detail: 'Incident critique détecté par l’orchestrateur. Prenez en charge ou diagnostiquez avant escalade vocale.',
+      href: '/admin/ops',
+      cta: 'Traiter',
+    });
+  }
+
+  if (disabledWorkflows > 0) {
+    items.push({
+      level: 'critical',
+      title: `${disabledWorkflows} workflow${disabledWorkflows > 1 ? 's' : ''} GitHub désactivé${disabledWorkflows > 1 ? 's' : ''}`,
+      detail: 'Un workflow désactivé (manuellement ou après 60 j d’inactivité) ne produit plus aucune donnée.',
+      href: '/admin/controle',
+      cta: 'Inspecter',
+    });
+  }
+
+  if (coherenceTrompeuses > 0) {
+    items.push({
+      level: 'warning',
+      title: `${coherenceTrompeuses} anomalie${coherenceTrompeuses > 1 ? 's' : ''} de cohérence trompeuse${coherenceTrompeuses > 1 ? 's' : ''}`,
+      detail: 'Notation périmée ou étiquette contredite sur une fiche société.',
+      href: '/admin/coherence',
+      cta: 'Vérifier',
+    });
+  }
+
+  if (contactsNew > 0) {
+    items.push({
+      level: 'warning',
+      title: `${contactsNew} message${contactsNew > 1 ? 's' : ''} de contact sans réponse`,
+      detail: 'En attente de réponse email ou WhatsApp.',
+      href: '/admin/contact',
+      cta: 'Répondre',
+    });
+  }
+
+  if (agregatsOpen > 0) {
+    items.push({
+      level: 'info',
+      title: `${agregatsOpen} agrégat${agregatsOpen > 1 ? 's' : ''} bancaire${agregatsOpen > 1 ? 's' : ''} à relire`,
+      detail: 'Valeurs en attente d’arbitrage avant publication.',
+      href: '/admin/agregats',
+      cta: 'Relire',
     });
   }
 

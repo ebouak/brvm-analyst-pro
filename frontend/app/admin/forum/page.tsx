@@ -1,10 +1,11 @@
 import { SectionHeader } from '@/components/ui/premium';
-import { listOpenReports, setHidden, resolveReport } from '@/lib/forum/admin';
+import { listOpenReports, requireForumPermission, setHidden, resolveReport } from '@/lib/forum/admin';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Modération forum — Admin' };
 
 export default async function AdminForumPage() {
+  await requireForumPermission();
   const reports = await listOpenReports();
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-4">

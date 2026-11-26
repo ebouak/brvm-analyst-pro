@@ -127,6 +127,12 @@ async function Contenu() {
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <BoutonActualiser />
             <a
+              href="/admin/ops"
+              className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/15"
+            >
+              Lancer / diagnostiquer (Ops) →
+            </a>
+            <a
               href={`${DEPOT}/actions/workflows/ops-controle.yml`}
               target="_blank"
               rel="noopener noreferrer"
