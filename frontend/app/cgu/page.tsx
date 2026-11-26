@@ -42,6 +42,26 @@ export default function CguPage() {
           toute activité réalisée depuis celui-ci. Il peut demander la suppression de son
           compte à tout moment.
         </p>
+        <p>
+          Le compte est personnel. Il ne peut être ni partagé, ni prêté, ni cédé, ni mis à la
+          disposition d&apos;un tiers, à titre gratuit comme payant, et les codes de connexion ne
+          doivent être communiqués à personne.
+        </p>
+        <p>
+          Un abonnement Premium peut rester connecté sur trois appareils au plus en même temps.
+          Une connexion sur un appareil supplémentaire ferme la session de l&apos;appareil le moins
+          récemment utilisé ; l&apos;utilisateur en est informé par e-mail et retrouve ses appareils
+          connectés dans la page Sécurité de son compte.
+        </p>
+        <p>
+          Pour protéger les comptes et prévenir les abus, WESTBOURSE observe les appareils, les
+          réseaux et les pays de connexion, dans les conditions décrites par la politique de
+          confidentialité. Lorsqu&apos;un usage paraît contraire au caractère personnel du compte,
+          WESTBOURSE peut, après examen par une personne et information de l&apos;utilisateur,
+          déconnecter les appareils du compte, lui adresser un avertissement, puis suspendre
+          temporairement l&apos;accès Premium. L&apos;utilisateur peut contester toute mesure en
+          répondant au message qui la lui notifie ; la mesure est alors réexaminée.
+        </p>
       </section>
 
       <section>
