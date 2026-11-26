@@ -311,6 +311,29 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Accès : service_role seul (RLS sans policy). Export : `academy_rappels` dans
   `/api/account/export` (sans jeton ni identifiant Resend).
 
+### Sécurité des comptes : plafond d'appareils et détection du partage (migration 0273)
+
+- Données : pour chaque session, navigateur déclaré (user-agent, déjà conservé par Supabase),
+  PRÉFIXE réseau (/24 en IPv4, /48 en IPv6 — l'adresse complète n'est pas recopiée), pays
+  (en-tête Vercel), dates de première et dernière activité ; fermetures de session (motif,
+  e-mail de prévenance) ; signaux quotidiens chiffrés ; décisions d'administration (type,
+  durée, motif interne, auteur). Le journal des connexions (`auth_events`, 0092) enregistre
+  désormais la connexion réussie, avec son pays et sa session.
+- Finalité : sécurité des comptes et prévention du partage d'abonnement et des abus
+  (inscriptions en série, consommation anormale). Aucun outil d'empreinte du navigateur.
+- Base légale : intérêt légitime (considérant 47 : prévention de la fraude) ; exécution du
+  contrat pour le plafond de 3 appareils du Premium, règle annoncée (page Sécurité, CGU).
+- Aucune décision automatisée au sens de l'article 22 : le plafond ferme la session la moins
+  récemment utilisée, toujours la même règle ; avertissement et suspension du Premium sont des
+  décisions humaines, notifiées, contestables par simple réponse.
+- Droits : la page `/account/security` montre les appareils connectés et permet de les fermer ;
+  export `securite` dans `/api/account/export` (sans le motif interne ni l'auteur d'une
+  décision) ; suppression du compte par cascade.
+- Conservation : 6 mois (sessions, fermetures, signaux, rapports), 12 mois (décisions) —
+  `purge_rgpd_retention`. Comptes d'administration et de test : ni évalués ni plafonnés.
+- Accès : service_role seul (RLS sans policy) ; console `/admin/securite` (permission
+  `users.suspend`). Le rapport Telegram quotidien ne contient que des compteurs.
+
 ### Recherche des sociétés en langage naturel (Jev, migration 0191)
 
 - Données : texte saisi, **jamais conservé** (seule son empreinte SHA-256, 24 h) ; identifiant de compte haché dans `rate_limit_hits`, purgé hors fenêtre (1 h). Une requête contenant une adresse e-mail ou un numéro de téléphone est refusée et n'est jamais envoyée.

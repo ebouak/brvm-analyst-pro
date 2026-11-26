@@ -76,7 +76,17 @@ export default function ConfidentialitePage() {
             personnelle ; il peut vous passer un membre de l&apos;équipe si vous le demandez. Pour retirer votre
             accord : dites « stop » pendant l&apos;appel, ou écrivez à support@westbourse.com.
           </li>
-          <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
+          <li>
+            Sécurité des comptes et prévention de la fraude : intérêt légitime. Pour chaque appareil connecté,
+            nous enregistrons le navigateur déclaré, une partie de l&apos;adresse réseau (jamais l&apos;adresse
+            complète), le pays et les heures d&apos;activité, sans aucune empreinte du navigateur. Ils servent à
+            appliquer le plafond de 3 appareils connectés en même temps de l&apos;abonnement Premium (au-delà, le
+            moins récemment utilisé est déconnecté et vous êtes prévenu par e-mail) et à repérer un partage de
+            compte ou une utilisation abusive. Aucune mesure n&apos;est prise sur la seule base d&apos;un calcul :
+            un avertissement ou une suspension est décidé par une personne, vous est notifié et peut être
+            contesté en répondant au message. Vous voyez vos appareils connectés, et pouvez les déconnecter,
+            dans la page Sécurité de votre compte.
+          </li>
         </ul>
       </section>
 
@@ -104,6 +114,7 @@ export default function ConfidentialitePage() {
           <li>Rappel par l&apos;assistant vocal : transcription de l&apos;appel 30 jours ; durée, issue et coût de l&apos;appel 12 mois ; numéro de téléphone avec le message de contact (12 mois après le dernier échange). Si vous avez dit « stop », nous conservons seulement une empreinte du numéro, pour ne plus l&apos;appeler.</li>
           <li>Relation commerciale : consultations 90 jours, messages de proposition et notes 24 mois ; liste d&apos;opposition : conservée.</li>
           <li>Journal des rappels de progression de l&apos;Academy : 6 mois.</li>
+          <li>Sécurité des comptes : appareils observés, sessions fermées et signaux 6 mois ; décisions (avertissement, suspension) 12 mois.</li>
           <li>Sessions d&apos;examen de l&apos;Academy : 7 jours. Certificats : jusqu&apos;à leur révocation ou la suppression du compte.</li>
           <li>Recherche en langage naturel : empreinte 24 heures ; compteurs de quota 30 jours ; décisions d&apos;aiguillage WhatsApp 90 jours.</li>
           <li>Notifications d&apos;événements de paiement reçues des prestataires : 12 mois.</li>

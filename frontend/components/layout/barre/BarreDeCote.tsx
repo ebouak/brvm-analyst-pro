@@ -417,7 +417,7 @@ export default function BarreDeCote({
     // cookies de session côté serveur et redirige vers /login. Sans elle, un
     // cookie survivant faisait passer le middleware pour « connecté » et la
     // déconnexion semblait sans effet (signalé le 2026-11-18).
-    try { await createClient().auth.signOut(); } catch { /* l'action serveur suit */ }
+    try { await createClient().auth.signOut({ scope: 'local' }); } catch { /* l'action serveur suit */ }
     void phReset();
     fermer();
     await logout();

@@ -1851,6 +1851,51 @@ vérifiées en base et en production (compte test).
   la mesure sont listées dans la PR #385.
 
 
+### Ajouts (passage 2026-11-26) — Sécurité des comptes : plafond d'appareils, signaux, rapport Telegram
+
+Migration `0273_securite_comptes.sql`. Décisions de l'exploitant : Premium plafonné à
+**3 appareils**, ACTIF tout de suite ; gratuits sans plafond (détection des inscriptions
+groupées seulement) ; rapport quotidien Telegram. Conseil Fable tenté, indisponible
+(crédits) : relecture adverse faite à la place.
+
+- **Le journal des connexions était aveugle** : `auth_events` (0092) n'avait JAMAIS
+  enregistré une connexion (10 déconnexions en tout), la connexion par code se faisant
+  dans le navigateur. `POST /api/securite/connexion` (appelé par `SignInClient` après le
+  code) et `/auth/callback` (Google, via `after()`) journalisent désormais la connexion
+  (pays, `session_id`, une ligne par session, seulement si la session a < 15 min).
+- **Plafond** (`lib/securite/plafond.ts`, pur, testé) : « appareil » = CRÉNEAU (système +
+  préfixe réseau), pas session — Chrome et le navigateur intégré de Gmail sur le même
+  téléphone comptent pour UN. Le créneau le moins récemment utilisé ferme en entier ; la
+  session qui vient de se connecter n'est JAMAIS fermée ; admins et comptes `qa_e2e`
+  exemptés. Garde-fou : > 40 fermetures ou > 10 récentes en un passage = rien n'est fermé
+  + Telegram. E-mail seulement pour une session utilisée dans les 14 jours.
+- **Fermer une session = supprimer la ligne `auth.sessions`** (`securite_fermer_sessions`,
+  SECURITY DEFINER, service_role, 50 max, journalisée). Le jeton d'accès reste valide
+  jusqu'à 1 h pour le middleware (`getClaims`), mais `getUser()` le refuse aussitôt : les
+  pages et API serveur coupent immédiatement.
+- ⚠️ **`auth.admin.signOut(userId)` ne marche pas** : il attend le JETON d'une session.
+  Le bouton « Déconnecter tous les appareils » de `/admin/users/[id]` renvoyait une erreur
+  depuis toujours ; il passe par `fermerToutesSessions`.
+- **Déconnexion = cet appareil seulement** (`signOut({ scope: 'local' })`) : le défaut
+  `global` fermait TOUS les appareils. « Déconnecter les autres appareils » est sur
+  `/account/security` (section « Appareils connectés », même regroupement que le plafond).
+- **Signaux** (`lib/securite/signaux.ts`, `SEUILS` affichés tels quels) : sièges disputés
+  (fermetures de sessions encore utilisées), appareils distincts, pays, changement de pays
+  < 6 h, usage IA vs médiane Premium, inscriptions même réseau + même user-agent. Aucune
+  sanction automatique (art. 22) ; « légitime » neutralise 90 jours.
+- **Suspension du Premium** = décision `securite_decisions`, lue par `getEntitlements`,
+  par `premiumEffectif` (6 routes IA qui lisent `is_premium` directement) et par le
+  middleware `/premium/*` via `premium_suspendu_moi()` (booléen, auth.uid() seul). Ni
+  `profiles.is_premium` ni la facturation ne sont touchés. Lecture en échec = PAS de
+  suspension. ⚠️ Toute nouvelle route qui lit `is_premium` directement doit passer par
+  `premiumEffectif`, sinon une suspension ne la couvre pas.
+- **Console** `/admin/securite` (+ fiche `[id]`, permission `users.suspend`, mode du
+  plafond `settings.write`) ; motif obligatoire et INTERNE (jamais dans un e-mail).
+- **Cron** `securite.yml` : horaire (:23, instantané + plafond) et 07:05 UTC (signaux +
+  rapport Telegram, compteurs seulement, verrou `securite_rapports`). `ok:false` = rouge.
+- **Non couvert** : téléchargements de dossiers PDF et vidéos Academy (non journalisés) ;
+  échecs de connexion (le code se vérifie dans le navigateur).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

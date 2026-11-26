@@ -2,6 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { utilisateurCourant, profilCourant } from '@/lib/supabase/session';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { premiumSuspendu } from '@/lib/securite/suspension';
 
 /**
  * Résolveur d'accès central — la source unique de vérité pour « qui a droit à quoi ».
@@ -40,6 +41,12 @@ export const getEntitlements = cache(async function getEntitlements(): Promise<E
 
   const isPremium = Boolean(prof?.is_premium);
   if (!isPremium) return { userId: user.id, tier: 'free', isPremium: false, isPro: false };
+
+  // Suspension du Premium décidée depuis /admin/securite (migration 0273) :
+  // ni `profiles.is_premium` ni la facturation ne sont touchés, la décision
+  // s'applique ici et se lève par une décision inverse. Lecture en échec =
+  // pas de suspension (une sanction ne s'applique jamais sur une base illisible).
+  if (await premiumSuspendu(user.id)) return { userId: user.id, tier: 'free', isPremium: false, isPro: false };
 
   // Premium confirmé. On distingue le platinium via l'abonnement actif.
   // En cas de doute (lecture impossible), on retombe sur « premium » — jamais

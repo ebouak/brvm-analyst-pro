@@ -20,6 +20,7 @@ import { detecterRecommandation } from '@/lib/ai/filtreRecommandation';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { lectureIntermediaire } from '@/lib/financials/interim';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 // 300 s : Claude Opus 5.5 réfléchit avant d'écrire un rapport de 2 000 mots.
 export const maxDuration = 300;
@@ -33,7 +34,7 @@ export async function POST(req: Request, props: { params: Promise<{ code: string
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
   const { data: profile } = await supa.from('profiles').select('is_premium').eq('id', user.id).single();
-  const isPremium = Boolean(profile?.is_premium);
+  const isPremium = await premiumEffectif(user.id, Boolean(profile?.is_premium));
 
   // Accès (free/premium/désactivé) piloté depuis /admin/features — SANS consommer
   // de quota ici : le décompte n'a lieu qu'en cas de génération réelle (une

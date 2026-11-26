@@ -14,7 +14,10 @@ export async function logout() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  await supabase.auth.signOut();
+  // « local » : se déconnecter du téléphone ne déconnecte plus l'ordinateur (le
+  // défaut « global » fermait TOUS les appareils). « Déconnecter les autres
+  // appareils » existe sur /account/security.
+  await supabase.auth.signOut({ scope: 'local' });
   await recordAuthEvent({ event: 'sign_out', userId: user?.id ?? null, email: user?.email ?? null });
 
   revalidatePath('/', 'layout');

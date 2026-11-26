@@ -7,6 +7,7 @@ import { encoderEvenement } from '@/lib/analyseIA/flux';
 import { repondreAnalyse } from '@/lib/analyseIA/orchestrer';
 import type { CodeErreur, EvenementFlux, MessageConversation } from '@/lib/analyseIA/types';
 import { depsAnalyse } from '@/lib/server/analyseIA/service';
+import { premiumEffectif } from '@/lib/securite/suspension';
 
 /**
  * « Analyse par IA » de la fiche action. POST { code, messages, exercice? } →
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   // Garde décomptée AVANT tout appel payant (Jev ou LLM), comme /api/ai/chat.
   const { data: profile } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
-  const gate = await checkFeature('assistant_ia', { id: user.id, email: user.email, isPremium: Boolean(profile?.is_premium) });
+  const gate = await checkFeature('assistant_ia', { id: user.id, email: user.email, isPremium: await premiumEffectif(user.id, Boolean(profile?.is_premium)) });
   if (!gate.allowed) return refus(gate.status === 429 ? 'quota' : 'acces', gate.reason, gate.status);
 
   // Mêmes droits que les sections de la fiche : l'assistant ne contourne aucun verrou.

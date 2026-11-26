@@ -14,6 +14,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/controle/boc', label: 'Écarts BOC', permission: 'scraping.read' },
   { href: '/admin/agregats', label: 'Agrégats bancaires à relire', permission: 'scraping.read' },
   { href: '/admin/users', label: 'Utilisateurs', permission: 'users.read' },
+  { href: '/admin/securite', label: 'Sécurité des comptes', permission: 'users.suspend' },
   { href: '/admin/organizations', label: 'Organisations', permission: 'users.read' },
   { href: '/admin/subscriptions', label: 'Abonnements', permission: 'subscriptions.read' },
   { href: '/admin/payments', label: 'Paiements', permission: 'billing.read' },
