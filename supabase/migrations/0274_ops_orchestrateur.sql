@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration 0272 : Orchestrateur Admin Ops & Escalade Telegram -> Voix
+-- Migration 0274 (déposée sous le numéro 0272, déjà pris ; appliquée en production le 2026-11-26) : Orchestrateur Admin Ops & Escalade Telegram -> Voix
 --   - ops_command_runs : trace, confirmations (niveau 1/2) & correlation GitHub
 --   - ops_incidents    : incidents critiques, prise en charge, silencieux & voix
 --   - ops_settings     : reglages operatoires (delai escalade, brief, chat IDs)
