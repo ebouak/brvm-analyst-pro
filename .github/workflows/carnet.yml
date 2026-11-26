@@ -72,6 +72,16 @@ jobs:
             .catch((e) => { console.error(e); process.exit(1); });
           "
 
+      - name: Notifier l'orchestrateur Ops
+        if: always() && secrets.OPS_CALLBACK_SECRET != ''
+        env:
+          OPS_CALLBACK_SECRET: ${{ secrets.OPS_CALLBACK_SECRET }}
+        run: |
+          curl -fsS -X POST "https://www.westbourse.com/api/ops/callback" \
+            -H "Authorization: Bearer ${OPS_CALLBACK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"workflow\":\"carnet.yml\",\"conclusion\":\"${{ job.status }}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" || true
+
   # Calendrier des AG + page « Informations » du même bulletin. Job séparé :
   # une page illisible ici ne doit pas faire perdre le carnet, et inversement.
   informations:

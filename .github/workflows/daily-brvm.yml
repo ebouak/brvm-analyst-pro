@@ -83,3 +83,13 @@ jobs:
               -H 'Content-Type: application/json' \
               -d "{\"text\":\"⚠️ Daily BRVM scrape FAILED at $SCHEDULE_TIME. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
           fi
+
+      - name: Notifier l'orchestrateur Ops
+        if: always() && secrets.OPS_CALLBACK_SECRET != ''
+        env:
+          OPS_CALLBACK_SECRET: ${{ secrets.OPS_CALLBACK_SECRET }}
+        run: |
+          curl -fsS -X POST "https://www.westbourse.com/api/ops/callback" \
+            -H "Authorization: Bearer ${OPS_CALLBACK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"workflow\":\"daily-brvm.yml\",\"conclusion\":\"${{ job.status }}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" || true

@@ -89,3 +89,13 @@ jobs:
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_PHONE_ID: ${{ secrets.WHATSAPP_PHONE_ID }}
         run: npx tsx src/index.ts brief:whatsapp --trigger=cron
+
+      - name: Notifier l'orchestrateur Ops
+        if: always() && secrets.OPS_CALLBACK_SECRET != ''
+        env:
+          OPS_CALLBACK_SECRET: ${{ secrets.OPS_CALLBACK_SECRET }}
+        run: |
+          curl -fsS -X POST "https://www.westbourse.com/api/ops/callback" \
+            -H "Authorization: Bearer ${OPS_CALLBACK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"workflow\":\"daily.yml\",\"conclusion\":\"${{ job.status }}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" || true

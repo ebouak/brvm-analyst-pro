@@ -294,3 +294,13 @@ jobs:
             ${{ github.workspace }}/video-out/texte.txt
           retention-days: 14
           if-no-files-found: warn
+
+      - name: Notifier l'orchestrateur Ops
+        if: always() && secrets.OPS_CALLBACK_SECRET != ''
+        env:
+          OPS_CALLBACK_SECRET: ${{ secrets.OPS_CALLBACK_SECRET }}
+        run: |
+          curl -fsS -X POST "https://www.westbourse.com/api/ops/callback" \
+            -H "Authorization: Bearer ${OPS_CALLBACK_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"workflow\":\"video-seance.yml\",\"conclusion\":\"${{ job.status }}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" || true

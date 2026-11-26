@@ -1,7 +1,8 @@
 'use server';
-import { getServiceClient } from '@/lib/billing/serviceClient';
-import { requirePermission } from '@/lib/server/rbac';
+import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { can, requireAdmin, type AdminContext } from '@/lib/server/rbac';
 
 export interface OpenReport {
   id: string;
@@ -11,8 +12,16 @@ export interface OpenReport {
   created_at: string;
 }
 
+export async function requireForumPermission(): Promise<AdminContext> {
+  const ctx = await requireAdmin();
+  if (!can(ctx, 'forum.manage') && !can(ctx, 'content.write')) {
+    redirect('/admin');
+  }
+  return ctx;
+}
+
 export async function listOpenReports(): Promise<OpenReport[]> {
-  await requirePermission('content.write');
+  await requireForumPermission();
   const admin = getServiceClient();
   const { data } = await admin
     .from('forum_reports')
@@ -27,7 +36,7 @@ export async function setHidden(
   targetId: string,
   hidden: boolean,
 ) {
-  await requirePermission('content.write');
+  await requireForumPermission();
   const admin = getServiceClient();
   const table = targetType === 'topic' ? 'forum_topics' : 'forum_posts';
   await admin.from(table).update({ hidden }).eq('id', targetId);
@@ -36,7 +45,7 @@ export async function setHidden(
 }
 
 export async function resolveReport(id: string) {
-  await requirePermission('content.write');
+  await requireForumPermission();
   const admin = getServiceClient();
   await admin.from('forum_reports').update({ resolved: true }).eq('id', id);
   revalidatePath('/admin/forum');
