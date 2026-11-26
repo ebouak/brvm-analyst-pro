@@ -91,10 +91,13 @@ jobs:
         run: npx tsx src/index.ts brief:whatsapp --trigger=cron
 
       - name: Notifier l'orchestrateur Ops
-        if: always() && secrets.OPS_CALLBACK_SECRET != ''
+        if: always()
         env:
           OPS_CALLBACK_SECRET: ${{ secrets.OPS_CALLBACK_SECRET }}
         run: |
+          # `secrets` est interdit dans un `if:` : GitHub rejette alors le fichier ENTIER
+          # (crons compris). Sans secret, l'étape s'arrête ici, proprement.
+          [ -n "${OPS_CALLBACK_SECRET:-}" ] || exit 0
           curl -fsS -X POST "https://www.westbourse.com/api/ops/callback" \
             -H "Authorization: Bearer ${OPS_CALLBACK_SECRET}" \
             -H "Content-Type: application/json" \
