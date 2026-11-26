@@ -1896,6 +1896,24 @@ groupées seulement) ; rapport quotidien Telegram. Conseil Fable tenté, indispo
 - **Non couvert** : téléchargements de dossiers PDF et vidéos Academy (non journalisés) ;
   échecs de connexion (le code se vérifie dans le navigateur).
 
+### Ajouts (passage 2026-11-26) — Academy : cours IPO BRVM à la place du cas Dangote
+
+Migration `0275_academy_cours_ipo_brvm.sql` **à appliquer** (aucun déploiement
+préalable requis : le contenu n'utilise que des blocs déjà acceptés par le schéma).
+
+- **Nouveau cours** `introduction-en-bourse-ipo-brvm` (7 leçons, 27 questions) :
+  conditions d'admission, 8 étapes, souscription/allocation/frais, PER/P/B/dividende,
+  marché avant et après, quatre IPO réelles (Orange CI, LNB, BIIC, Bridge Bank) et le
+  contre-exemple BGFI Holding (BVMAC). Source : `contenus/autres/<slug>.json`, testé par
+  `ipo-brvm.test.ts` (dont égalité stricte avec la migration).
+- **Le cours Dangote** `ipo-et-processus-brvm-cas-pratique-de-l-introduction-de-dang`
+  est DÉPUBLIÉ, pas supprimé (modèle 0242) : repasser `published` à true le republie.
+- **Choix de l'exploitant** : nouvelle URL ; aucun site tiers cité (faits BRVM, BVMAC,
+  gouvernement du Bénin, dépliant BGFI ; le reste en calcul annoncé) ; pas de partie
+  d'actualité (OPV Coris, périmée dès janvier 2027). Bridge Bank : 67,5 Md = total BRVM
+  des quatre offres (352,13) moins les trois autres. Exemples de valorisation sur une
+  banque FICTIVE. Les cours après IPO sont lus en base (`donnees_reelles` vue `cours`).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
