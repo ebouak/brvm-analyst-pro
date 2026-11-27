@@ -798,13 +798,16 @@ export function calculerEndettement(p: ParamsEndettement): ResultatEndettement {
   const couverture = p.charges_interets > 0 ? p.resultat_operationnel / p.charges_interets : null;
   const alertes: string[] = [];
   if (gearingPct > 100) alertes.push(`Un gearing de ${fmtPct(gearingPct)} : la dette nette dépasse les capitaux propres.`);
-  if (couverture != null && couverture < 3) alertes.push(`Le résultat opérationnel ne couvre les intérêts que ${fmtX(couverture)} fois : une baisse d’activité pèserait vite sur le résultat.`);
+  if (couverture != null && couverture <= 0) alertes.push('Le résultat opérationnel est nul ou négatif : il ne couvre pas du tout les charges d’intérêts.');
+  else if (couverture != null && couverture < 3) alertes.push(`Le résultat opérationnel ne couvre les intérêts que ${fmtX(couverture)} fois : une baisse d’activité pèserait vite sur le résultat.`);
   let lecture = detteNette < 0
     ? `La trésorerie dépasse les dettes financières : l’entreprise est en trésorerie nette de ${nb(-detteNette, 1)}. Le gearing est négatif (${fmtPct(gearingPct)}).`
     : `Dette nette de ${nb(detteNette, 1)}, soit un gearing de ${fmtPct(gearingPct)} des capitaux propres.`;
   lecture += couverture == null
     ? ' Sans charges d’intérêts, la couverture ne se calcule pas.'
-    : ` Le résultat opérationnel couvre ${fmtX(couverture)} fois les charges d’intérêts.`;
+    : couverture <= 0
+      ? ' Le résultat opérationnel, nul ou négatif, ne couvre pas les charges d’intérêts.'
+      : ` Le résultat opérationnel couvre ${fmtX(couverture)} fois les charges d’intérêts.`;
   lecture += ' Ces ratios ne s’appliquent pas à une banque, dont la dette est la matière première.';
   return { detteNette, gearingPct, couverture, lecture, alertes };
 }
@@ -838,7 +841,9 @@ export function calculerRoeMoyen(p: ParamsRoeMoyen): ResultatRoeMoyen {
   let lecture = `ROE sur capitaux propres moyens : ${fmtPct(roeMoyenPct)} ; sur capitaux de clôture : ${fmtPct(roeClotPct)}.`;
   lecture += p.capitaux_fin > p.capitaux_debut
     ? ' Quand les capitaux propres augmentent dans l’année, le ROE de clôture sous-estime le rendement réellement obtenu.'
-    : ' Quand les capitaux propres baissent dans l’année, le ROE de clôture surestime le rendement réellement obtenu.';
+    : p.capitaux_fin < p.capitaux_debut
+      ? ' Quand les capitaux propres baissent dans l’année, le ROE de clôture surestime le rendement réellement obtenu.'
+      : ' Les capitaux propres n’ont pas bougé dans l’année : les deux méthodes donnent le même ROE.';
   if (roaMoyenPct != null) lecture += ` Rapporté à l’actif moyen, le résultat donne un ROA de ${fmtPct(roaMoyenPct, 2)}.`;
   return { roeClotPct, roeMoyenPct, roaMoyenPct, lecture, alertes };
 }

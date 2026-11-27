@@ -109,3 +109,32 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
 
   return { courseId: course.id, slug: course.slug, content: parsed.data, progress, notes: notesMap, exercises, donnees };
 }
+
+/**
+ * Essai gratuit : ne garde le contenu que de la leçon `ouverte`. Les autres
+ * deviennent des coquilles (titre, résumé, module, durée : ce que montre le
+ * sommaire verrouillé), sans sections, quiz, graphiques ni exercice.
+ */
+export function restreindreAEssai(data: LearnData, ouverte: number): LearnData {
+  const lessons = data.content.lessons.map((l, i) =>
+    i === ouverte
+      ? l
+      : {
+          titre: l.titre,
+          categorie: l.categorie,
+          sous_titre: l.sous_titre ?? null,
+          resume: l.resume,
+          module: l.module ?? null,
+          duree_min: l.duree_min ?? null,
+          nouveaute: l.nouveaute ?? null,
+          sections: [],
+          charts: [],
+          liens: [],
+        },
+  ) as LearnData['content']['lessons'];
+  const exercises: LearnData['exercises'] = {};
+  if (data.exercises[ouverte]) exercises[ouverte] = data.exercises[ouverte];
+  const donnees: LearnData['donnees'] = {};
+  if (data.donnees[ouverte]) donnees[ouverte] = data.donnees[ouverte];
+  return { ...data, content: { ...data.content, lessons }, exercises, donnees };
+}

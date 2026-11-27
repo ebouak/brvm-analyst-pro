@@ -103,7 +103,11 @@ export function gradeExam(
   }
   const total = issuedIds ? issuedIds.length : answers.length;
   const score = total > 0 ? Math.round((bonnes / total) * 100) : 0;
-  return { score, passed: score >= PASS_THRESHOLD, corrige };
+  const passed = score >= PASS_THRESHOLD;
+  // Les bonnes réponses ne quittent la base qu'après réussite : tentatives
+  // illimitées + tirage aléatoire, un échec qui les livrerait permettrait de
+  // relever toute la banque en soumettant des copies blanches.
+  return { score, passed, corrige: passed ? corrige : corrige.map((c) => ({ ...c, bonne_reponse: '' })) };
 }
 
 /**
