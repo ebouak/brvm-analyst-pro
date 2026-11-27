@@ -2,7 +2,7 @@ import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { loadCourseForLearning } from '@/lib/academy/learn';
+import { loadCourseForLearning, restreindreAEssai } from '@/lib/academy/learn';
 import { videosDisponibles } from '@/lib/academy/videos';
 import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
@@ -150,8 +150,11 @@ export default async function AcademyCoursePage(
     );
   }
 
-  const [data, videos] = await Promise.all([loadCourseForLearning(params.slug), videosDisponibles(params.slug)]);
-  if (!data) notFound();
+  const [complet, videos] = await Promise.all([loadCourseForLearning(params.slug), videosDisponibles(params.slug)]);
+  if (!complet) notFound();
+  // Essai gratuit : seule la leçon ouverte quitte le serveur. Masquer les
+  // autres côté client ne suffit pas, la charge RSC est lisible par tous.
+  const data = freeTrial ? restreindreAEssai(complet, requestedIdx) : complet;
 
   return (
     <>

@@ -211,7 +211,9 @@ export function buildChartRows(
       croissanceCa: growth(s.revenu_total, prev?.revenu_total),
       croissanceRn: growth(s.resultat_net, prev?.resultat_net),
       tauxImposition: rai != null && rai > 0 && impotsAbs != null ? (impotsAbs / rai) * 100 : null,
-      coutRisquePct: ratio(coutDuRisque, s.revenu_total),
+      // Rapporté au PNB (et non au total des produits bancaires, plus large) :
+    // sans PNB publié, le ratio reste inconnu.
+    coutRisquePct: ratio(coutDuRisque, typeof spec?.pnb === 'number' ? spec.pnb : null),
     };
   });
 }

@@ -35,7 +35,9 @@ function renderChart(ch: Chart): string {
   const plotW = W - padL - padR, plotH = H - padT - padB;
   // Rendu historique à une série : la première série d'un graphique multiple,
   // et un point sans donnée (null) laissé vide, jamais compté à zéro.
-  const vals = ch.series.length > 0 ? ch.series[0]!.valeurs : ch.valeurs;
+  // `series` peut manquer sur un contenu stocké avant son ajout (lu sans zod).
+  const multi = ch.series ?? [];
+  const vals = multi.length > 0 ? multi[0]!.valeurs : ch.valeurs;
   const nums = vals.filter((v): v is number => v != null);
   if (nums.length === 0) return '';
   const n = vals.length;
@@ -76,15 +78,21 @@ function renderChart(ch: Chart): string {
       })
       .join('');
   } else {
-    const pts = vals
-      .map((v, i) => (v == null ? null : `${xCenter(i).toFixed(1)},${yOf(v).toFixed(1)}`))
-      .filter(Boolean)
-      .join(' ');
+    // Une polyligne par plage continue : une année sans donnée reste un trou,
+    // jamais un segment tracé entre ses deux voisines.
+    const plages: string[][] = [[]];
+    vals.forEach((v, i) => {
+      if (v == null) { if (plages[plages.length - 1]!.length) plages.push([]); return; }
+      plages[plages.length - 1]!.push(`${xCenter(i).toFixed(1)},${yOf(v).toFixed(1)}`);
+    });
     const dots = vals
       .map((v, i) => (v == null ? '' : `<circle cx="${xCenter(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}" r="3.5" fill="#56D7FD"/>
         <text x="${xCenter(i).toFixed(1)}" y="${(yOf(v) - 8).toFixed(1)}" text-anchor="middle" fill="#FCFCFC" font-size="10.5" font-family="JetBrains Mono,monospace">${fmt(v)}</text>`))
       .join('');
-    series = `<polyline points="${pts}" fill="none" stroke="#56D7FD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
+    series = plages
+      .filter((p) => p.length > 1)
+      .map((p) => `<polyline points="${p.join(' ')}" fill="none" stroke="#56D7FD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`)
+      .join('') + dots;
   }
 
   return `<div class="chart-wrap">
