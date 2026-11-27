@@ -1,0 +1,191 @@
+{
+  "_": "Leçon 1 complète (Niveau 1 — Comprendre la Bourse BRVM) avec logos réels, sous-titres synchronisés Coursera et médaillon présentateur.",
+  "id": "n1-m1",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 1,
+  "bandeau": "NIVEAU 1 · LEÇON 1 COMPLÈTE · COMPRENDRE LA BRVM",
+  "titre": "Qu’est-ce que la BRVM et comment ça marche ?",
+  "sousTitre": "8 pays · 48 sociétés · carnet d’ordres, liquidité, indices et 3 pièges à éviter",
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "badge": "LEÇON 1 COMPLÈTE · COURS & QUIZ",
+    "question": "Comment acheter une vraie entreprise d’Afrique de l’Ouest ?",
+    "reponse": "Un seul marché réglementé pour huit pays : la Bourse Régionale des Valeurs Mobilières.",
+    "logo": "logos/brvm.png",
+    "presenter": true,
+    "voix": "Comment devenir actionnaire d'une grande entreprise en Afrique de l'Ouest sans tomber dans le hasard ? Tout passe par la BRVM : un marché organisé, commun aux huit pays de l'UEMOA."
+  },
+  "etapes": [
+    {
+      "id": "marche",
+      "badge": "ÉTAPE 01",
+      "shortLabel": "BRVM",
+      "titre": "Un marché commun depuis 1998",
+      "theme": "yellow",
+      "type": "kpis",
+      "logos": [
+        "logos/brvm.png",
+        "logos/amf-umoa.png"
+      ],
+      "kpis": [
+        {
+          "valeur": "8 pays",
+          "label": "Union UEMOA"
+        },
+        {
+          "valeur": "48 sociétés",
+          "label": "Actions cotées"
+        },
+        {
+          "valeur": "14 558 Md",
+          "label": "Capitalisation (FCFA)"
+        }
+      ],
+      "note": "Données au 24 novembre 2026 · Siège à Abidjan · Supervision AMF-UMOA",
+      "voix": "Créée en septembre mille neuf cent quatre-vingt-dix-huit à Abidjan, la BRVM réunit quarante-huit sociétés cotées pour une capitalisation de quatorze mille cinq cent cinquante-huit milliards de francs CFA au vingt-quatre novembre deux mille vingt-six."
+    },
+    {
+      "id": "regles",
+      "badge": "ÉTAPE 02",
+      "shortLabel": "SÉANCE",
+      "titre": "Les règles d’une séance",
+      "theme": "cyan",
+      "type": "points",
+      "logos": [
+        "logos/dcbr.png"
+      ],
+      "flowShape": "coin",
+      "presenter": true,
+      "points": [
+        {
+          "tag": "SGI AGRÉÉE",
+          "texte": "Tout ordre d’achat ou de vente passe par une SGI"
+        },
+        {
+          "tag": "±7,5 %",
+          "texte": "Variation maximale encadrée par séance autour du fixing"
+        },
+        {
+          "tag": "J + 3",
+          "texte": "Règlement espèces et livraison des titres au DC/BR"
+        }
+      ],
+      "voix": "Chaque jour ouvré, vos ordres passent obligatoirement par une S G I agréée. Les prix se forment au carnet d'ordres dans une limite de plus ou moins sept virgule cinq pour cent par séance, et le D C B R livre vos titres en trois jours ouvrés."
+    },
+    {
+      "id": "liquidite",
+      "badge": "ÉTAPE 03",
+      "shortLabel": "LIQUIDITÉ",
+      "titre": "Attention à la concentration",
+      "theme": "pink",
+      "type": "compare",
+      "sousTitre": "Part des capitaux échangés (65 séances · fin 2026)",
+      "flowShape": "sheet",
+      "barres": [
+        {
+          "label": "Top 10 valeurs les plus actives",
+          "pct": 71.9,
+          "valeur": "71,9 %"
+        },
+        {
+          "label": "Sonatel seule (SNTS)",
+          "pct": 40.9,
+          "valeur": "40,9 %",
+          "logo": "logos/sonatel.png"
+        },
+        {
+          "label": "38 autres titres cumulés",
+          "pct": 28.1,
+          "valeur": "28,1 %"
+        }
+      ],
+      "note": "Un titre affiché à 0 % n’a souvent enregistré aucun échange.",
+      "voix": "Particularité essentielle de la BRVM : sur soixante-cinq séances fin deux mille vingt-six, les dix titres les plus échangés ont concentré soixante et onze virgule neuf pour cent des capitaux, dont quarante virgule neuf pour cent pour Sonatel seule."
+    },
+    {
+      "id": "piege",
+      "badge": "ÉTAPE 04",
+      "shortLabel": "VALEUR",
+      "titre": "Ne pas confondre cours et taille",
+      "theme": "green",
+      "type": "compare_duel",
+      "stamp": "PRIX ≠ TAILLE !",
+      "presenter": true,
+      "gauche": {
+        "code": "ETIT",
+        "logo": "logos/ETIT.png",
+        "cours": "52 FCFA / action",
+        "cap": "940,4 Md FCFA",
+        "tag": "Très grand nombre d’actions en circulation"
+      },
+      "droite": {
+        "code": "UNLC",
+        "logo": "logos/UNLC.jpg",
+        "cours": "42 000 FCFA / action",
+        "cap": "385,7 Md FCFA",
+        "tag": "Cours unitaire élevé, capitalisation inférieure"
+      },
+      "note": "Capitalisation = Cours × Nombre d’actions · 24/11/2026",
+      "voix": "Premier piège : un petit prix d'action ne signifie jamais une petite société. Ecobank à cinquante-deux francs pèse neuf cent quarante milliards, plus du double d'Unilever cotée quarante-deux mille francs."
+    },
+    {
+      "id": "indices",
+      "badge": "ÉTAPE 05",
+      "shortLabel": "INDICES",
+      "titre": "Indices et rendement total",
+      "theme": "white",
+      "type": "points",
+      "points": [
+        {
+          "tag": "BRVM C / 30",
+          "texte": "Indices de prix nus : les dividendes n’y entrent pas"
+        },
+        {
+          "tag": "PLUS-VALUE",
+          "texte": "Différence entre prix d’achat et prix de revente"
+        },
+        {
+          "tag": "DIVIDENDE",
+          "texte": "Part des bénéfices votée en assemblée, jamais garantie"
+        }
+      ],
+      "voix": "Autre repère clé : le BRVM Composite et le BRVM trente sont des indices de prix nus, qui n'incluent pas les dividendes. Votre gain réel combine l'évolution du cours et les dividendes versés."
+    },
+    {
+      "id": "demarrer",
+      "badge": "ÉTAPE 06",
+      "shortLabel": "PIÈGES",
+      "titre": "Trois réflexes avant d’acheter",
+      "theme": "yellow",
+      "type": "points",
+      "presenter": true,
+      "points": [
+        {
+          "tag": "AGRÉMENT",
+          "texte": "Fuir tout « placement » promis hors SGI agréée AMF-UMOA"
+        },
+        {
+          "tag": "LIQUIDITÉ",
+          "texte": "Vérifier le volume réel avant de miser sur une petite valeur"
+        },
+        {
+          "tag": "PRATIQUE",
+          "texte": "Passez à l’exercice live et aux 10 questions du quiz"
+        }
+      ],
+      "voix": "Enfin, gardez trois réflexes : passez uniquement par une S G I agréée par l'AMF-UMOA, vérifiez la liquidité du titre avant d'intervenir, et validez maintenant l'exercice en direct et les dix questions du quiz."
+    }
+  ],
+  "fin": {
+    "tag": "PASSER À L’ACTION",
+    "titre": "Leçon 1 · Exercice live & Quiz (10 Q)",
+    "cta": "westbourse.com/formations/academy",
+    "tape": "WESTBOURSE.COM",
+    "presenter": true,
+    "voix": "À vous de jouer dans la leçon un : calculez la capitalisation du jour et testez vos acquis sur westbourse point com."
+  }
+}

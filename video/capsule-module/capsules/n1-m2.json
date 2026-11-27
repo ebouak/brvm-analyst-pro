@@ -1,0 +1,213 @@
+{
+  "_": "Prototype Podcast 2 voix (Journaliste Amina + {auteur.prenom} WESTBOURSE) sur la Leçon 2 : Les 4 acteurs clés du marché BRVM.",
+  "id": "n1-m2",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 2,
+  "format": "podcast",
+  "bandeau": "PODCAST ACADEMY · LEÇON 2 · LES 4 ACTEURS DE LA BRVM",
+  "titre": "Qui protège vraiment votre argent à la BRVM ?",
+  "sousTitre": "BRVM, AMF-UMOA, SGI, DC/BR · Rôles exacts, protection des titres et réflexes anti-arnaques",
+  "intervenants": {
+    "journaliste": {
+      "nom": "Amina · Journaliste",
+      "role": "Podcast WESTBOURSE",
+      "photo": "logos/journaliste.jpg",
+      "voiceId": "O31r762Gb3WFygrEOGh0",
+      "publicOwnerId": "469526c55385b371d11f57b5d59934c753901e36de103c1635671d9abe03e1d8",
+      "fallbackVoiceId": "EXAVITQu4vr4xnSDxMaL"
+    },
+    "expert": {
+      "prenom": "{auteur.prenom}",
+      "nom": "{auteur.nomComplet}",
+      "role": "Fondateur · WESTBOURSE",
+      "photo": "logos/auteur.jpg"
+    }
+  },
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "speaker": "journaliste",
+    "badge": "OUVERTURE · INTERVIEW BRVM",
+    "question": "Qui fait quoi à la BRVM, et qui protège vos actions en cas de problème ?",
+    "reponse": "Dans ce nouvel épisode podcast, {auteur.nomComplet} décortique les 4 piliers officiels du marché.",
+    "logo": "logos/brvm.png",
+    "voix": "Bienvenue sur le podcast WestBourse Academy ! Aujourd'hui, on répond à une question décisive avant votre premier ordre : qui protège vraiment votre argent à la BRVM ?"
+  },
+  "etapes": [
+    {
+      "id": "piliers",
+      "badge": "ÉTAPE 01",
+      "shortLabel": "4 PILIERS",
+      "titre": "Quatre rôles, zéro confusion",
+      "theme": "yellow",
+      "type": "kpis",
+      "logos": [
+        "logos/brvm.png",
+        "logos/amf-umoa.png",
+        "logos/dcbr.png"
+      ],
+      "question": {
+        "badge": "QUESTION 01 / 05",
+        "texte": "Quand j’achète une action à la BRVM, qui fait quoi exactement entre la bourse, ma banque et le régulateur ?",
+        "voix": "Quand j'achète une action à la BRVM, qui fait quoi exactement entre la bourse, les intermédiaires et le régulateur ?"
+      },
+      "kpis": [
+        {
+          "valeur": "4 piliers",
+          "label": "BRVM · AMF · SGI · DC/BR"
+        },
+        {
+          "valeur": "34 SGI",
+          "label": "Agréées dans 7 pays UEMOA"
+        },
+        {
+          "valeur": "J + 3",
+          "label": "Livraison contre paiement"
+        }
+      ],
+      "note": "Séparation stricte : celui qui organise ≠ celui qui contrôle ≠ celui qui garde vos titres",
+      "voix": "Un marché sain sépare quatre rôles : la BRVM organise la cotation, l'AMF-UMOA fait la police, votre S G I exécute vos ordres et le D C B R conserve vos titres jusqu'au règlement à J plus trois."
+    },
+    {
+      "id": "gendarme",
+      "badge": "ÉTAPE 02",
+      "shortLabel": "RÉGULATEUR",
+      "titre": "BRVM et AMF-UMOA : pas le même métier",
+      "theme": "cyan",
+      "type": "points",
+      "logos": [
+        "logos/brvm.png",
+        "logos/amf-umoa.png"
+      ],
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 02 / 05",
+        "texte": "Quand l’AMF-UMOA donne son visa sur une opération, est-ce une garantie de rendement ?",
+        "voix": "Beaucoup confondent la BRVM et l'AMF-UMOA. Et quand l'AMF met son visa sur une opération, est-ce une garantie de gain ?"
+      },
+      "points": [
+        {
+          "tag": "BRVM",
+          "texte": "Société de marché : cotation, indices et Bulletin officiel"
+        },
+        {
+          "tag": "AMF-UMOA",
+          "texte": "Gendarme public : agréments SGI, contrôles et sanctions"
+        },
+        {
+          "tag": "LE VISA",
+          "texte": "Garantit la transparence de l’info — jamais la rentabilité"
+        }
+      ],
+      "voix": "Jamais. Le visa de l'AMF-UMOA garantit uniquement que la note d'information est complète et transparente. Pour gagner ou perdre, la décision et le risque restent toujours les vôtres."
+    },
+    {
+      "id": "protection",
+      "badge": "ÉTAPE 03",
+      "shortLabel": "SÉCURITÉ",
+      "titre": "Vos actions sont protégées au DC/BR",
+      "theme": "green",
+      "type": "points",
+      "logos": [
+        "logos/dcbr.png"
+      ],
+      "flowShape": "coin",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 03 / 05",
+        "texte": "Question directe : si ma SGI fait faillite demain, est-ce que je perds mes actions ?",
+        "voix": "La question que tout le monde se pose : si ma S G I fait faillite demain, est-ce que je perds mes actions ?"
+      },
+      "points": [
+        {
+          "tag": "SÉGRÉGATION",
+          "texte": "Vos titres ne font jamais partie du bilan de la SGI"
+        },
+        {
+          "tag": "COFFRE DC/BR",
+          "texte": "Inscrits à votre nom dans le registre central de l’UEMOA"
+        },
+        {
+          "tag": "TRANSFERT",
+          "texte": "En cas de retrait d’agrément, vos actions migrent vers une autre SGI"
+        }
+      ],
+      "voix": "Pas du tout ! Vos actions n'entrent jamais dans le bilan de votre S G I : elles sont inscrites à votre nom au D C B R. En cas de défaillance, le régulateur transfère vos titres vers une autre S G I agréée."
+    },
+    {
+      "id": "sgi_uemoa",
+      "badge": "ÉTAPE 04",
+      "shortLabel": "34 SGI",
+      "titre": "Où ouvrir un compte dans l’UEMOA ?",
+      "theme": "pink",
+      "type": "compare",
+      "sousTitre": "Répartition des 34 SGI actives · Ouverture à distance possible (KYC)",
+      "flowShape": "sheet",
+      "question": {
+        "badge": "QUESTION 04 / 05",
+        "texte": "Si j’habite au Mali, au Bénin ou dans la diaspora, dois-je ouvrir un compte dans mon pays ?",
+        "voix": "Et si j'habite au Mali, au Bénin ou dans la diaspora, suis-je obligé d'ouvrir mon compte dans mon pays de résidence ?"
+      },
+      "barres": [
+        {
+          "label": "Côte d’Ivoire (17 SGI) — Pôle historique",
+          "pct": 50,
+          "valeur": "17 SGI"
+        },
+        {
+          "label": "Sénégal (6) · Burkina, Mali, Bénin (3 chacun)",
+          "pct": 44.1,
+          "valeur": "15 SGI"
+        },
+        {
+          "label": "Togo (1) · Niger (1) · Guinée-Bissau (zone)",
+          "pct": 5.9,
+          "valeur": "2 SGI"
+        }
+      ],
+      "note": "Annuaire WESTBOURSE 2026 · Dossier KYC + RIB personnel obligatoires",
+      "voix": "Non ! Sur les trente-quatre S G I de l'annuaire, dix-sept sont en Côte d'Ivoire et six au Sénégal, mais vous pouvez ouvrir à distance dans toute l'UEMOA avec votre pièce d'identité et votre RIB."
+    },
+    {
+      "id": "arnaques",
+      "badge": "ÉTAPE 05",
+      "shortLabel": "ANTI-ARNAQUE",
+      "titre": "3 réflexes face aux faux courtiers",
+      "theme": "yellow",
+      "type": "points",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 05 / 05",
+        "texte": "Pour finir : comment repérer en dix secondes une arnaque BRVM sur les réseaux sociaux ?",
+        "voix": "Pour finir, comment repérer en dix secondes un faux courtier ou une arnaque BRVM sur les réseaux sociaux ?"
+      },
+      "points": [
+        {
+          "tag": "PAS DE PROMESSE",
+          "texte": "En bourse, un rendement garanti à 15 % par mois n’existe pas"
+        },
+        {
+          "tag": "AUCUN MOBILE MONEY",
+          "texte": "Ne virez jamais de fonds vers le numéro privé d’un « conseiller »"
+        },
+        {
+          "tag": "LISTE OFFICIELLE",
+          "texte": "Vérifiez l’agrément AMF-UMOA et comparez les 34 SGI sur WestBourse"
+        }
+      ],
+      "voix": "Trois réflexes simples : méfiez-vous de tout rendement garanti, n'envoyez jamais d'argent sur un compte personnel, et vérifiez toujours l'agrément officiel sur le comparateur S G I de WestBourse."
+    }
+  ],
+  "fin": {
+    "speaker": "expert",
+    "tag": "PASSER À L’ACTION",
+    "titre": "Leçon 2 · Simulateur de carnet & Comparateur SGI",
+    "cta": "westbourse.com/comparateur-sgi",
+    "tape": "WESTBOURSE.COM",
+    "presenter": true,
+    "voix": "Merci Amina ! Testez dès maintenant le simulateur de carnet d'ordres et le quiz de la leçon deux sur westbourse point com."
+  }
+}
