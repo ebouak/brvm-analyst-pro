@@ -11,18 +11,20 @@ export default function ToolsPanel({
   content,
   note,
   onSaveNote,
+  onClose,
 }: {
   lesson: Lesson;
   content: CourseContent;
   note: string;
   onSaveNote: (text: string) => Promise<void>;
+  onClose?: () => void;
 }) {
   const [tab, setTab] = useState<Tab>('notes');
 
   return (
     <div className="rounded-xl border border-border bg-surface">
-      <div className="flex border-b border-border/60" role="tablist" aria-label="Outils de la leçon">
-        {([['notes', 'Notes'], ['glossaire', 'Glossaire'], ['ressources', 'Ressources'], ['discussion', 'Discussion']] as const).map(([id, label]) => (
+      <div className="flex items-center border-b border-border/60" role="tablist" aria-label="Outils de la leçon">
+        {([['notes', 'Notes'], ['glossaire', 'Glossaire'], ['ressources', 'Liens'], ['discussion', 'Forum']] as const).map(([id, label]) => (
           <button
             key={id}
             id={`outil-${id}`}
@@ -31,7 +33,7 @@ export default function ToolsPanel({
             aria-selected={tab === id}
             aria-controls="outil-panneau"
             onClick={() => setTab(id)}
-            className={`-mb-px flex-1 border-b-2 px-2 py-2.5 text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+            className={`-mb-px flex-1 border-b-2 px-1.5 py-2 text-[11px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
               tab === id
                 ? 'border-accent font-semibold text-ivory'
                 : 'border-transparent font-medium text-muted hover:text-ivory'
@@ -40,6 +42,17 @@ export default function ToolsPanel({
             {label}
           </button>
         ))}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Replier le panneau d'outils"
+            title="Replier"
+            className="px-2 py-2 text-xs text-muted hover:text-ivory"
+          >
+            ✕
+          </button>
+        )}
       </div>
       {/* Sur grand écran, le panneau est collant : son contenu défile dans la
           hauteur de la fenêtre, pour rester lisible sur un écran bas. */}
@@ -106,7 +119,7 @@ function NotesTab({ initial, onSave }: { initial: string; onSave: (t: string) =>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        rows={8}
+        rows={5}
         placeholder="Vos notes sur cette leçon (privées, sauvegardées automatiquement)…"
         className="w-full resize-y rounded-lg border border-border bg-bg px-3 py-2 text-sm leading-relaxed text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent/40"
       />
