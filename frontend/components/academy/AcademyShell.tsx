@@ -210,10 +210,15 @@ export default function AcademyShell({
           <button
             type="button"
             onClick={() => setShowTools((v) => !v)}
-            className="rounded-lg border border-border px-2.5 py-1 text-xs text-muted hover:text-ivory lg:hidden"
+            className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+              showTools
+                ? 'border-accent bg-accent/15 text-ivory'
+                : 'border-border text-muted hover:border-accent/40 hover:text-ivory'
+            }`}
             aria-expanded={showTools}
+            title="Afficher ou masquer le panneau Notes, Glossaire et Ressources"
           >
-            Outils
+            Notes &amp; outils
           </button>
         </div>
       </header>
@@ -221,7 +226,11 @@ export default function AcademyShell({
       {showDeck && <SlideDeck content={data.content} onClose={() => setShowDeck(false)} />}
       {showRevision && <FicheRevision content={data.content} onClose={() => setShowRevision(false)} />}
 
-      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 lg:grid-cols-[280px_minmax(0,1fr)_300px]">
+      <div
+        className={`mx-auto grid max-w-[1440px] gap-5 px-4 py-6 ${
+          showTools ? 'lg:grid-cols-[256px_minmax(0,1fr)_260px]' : 'lg:grid-cols-[256px_minmax(0,1fr)]'
+        }`}
+      >
         {/* ── Sommaire + Objectif du jour ── */}
         <aside className="space-y-3 lg:sticky lg:top-20 lg:self-start">
           {!freeTrial ? (
@@ -390,16 +399,19 @@ export default function AcademyShell({
           </div>
         </main>
 
-        {/* ── Outils ── */}
-        <aside className={`${showTools ? 'block' : 'hidden'} lg:sticky lg:top-20 lg:block lg:self-start`}>
-          <ToolsPanel
-            key={idx}
-            lesson={lesson}
-            content={data.content}
-            note={data.notes[idx] ?? ''}
-            onSaveNote={onSaveNote}
-          />
-        </aside>
+        {/* ── Outils (repliable sur mobile et ordinateur pour libérer la lecture) ── */}
+        {showTools && (
+          <aside className="lg:sticky lg:top-20 lg:self-start">
+            <ToolsPanel
+              key={idx}
+              lesson={lesson}
+              content={data.content}
+              note={data.notes[idx] ?? ''}
+              onSaveNote={onSaveNote}
+              onClose={() => setShowTools(false)}
+            />
+          </aside>
+        )}
       </div>
     </div>
   );

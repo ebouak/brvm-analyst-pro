@@ -1,7 +1,6 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import {
   analyserPortefeuille,
   fcfa,
@@ -172,144 +171,154 @@ export default function SimulateurDiversification({
           </div>
         </div>
 
-        {/* Partie haute : Curseurs par société & secteur + Graphique circulaire & indicateur de concentration */}
-        <div className="l7-alloc-grid">
-          <div className="l7-alloc-sliders">
-            <div className="l7-subhead">
-              <h4>1. Répartition par société et par secteur</h4>
-              <span className={`l7-total-badge${totalValide ? ' is-valid' : ' is-invalid'}`}>
-                Total : {pct(analyse.totalPct)}
-              </span>
-            </div>
-
-            <div className="l7-lines-list">
-              {lignes.map((l, i) => {
-                const depasseSociete = l.pct > SEUIL_SOCIETE_PCT;
-                return (
-                  <div key={l.nom} className="l7-line-row">
-                    <div className="l7-line-meta">
-                      <span className="l7-dot" style={{ background: PALETTE[i % PALETTE.length] }} aria-hidden="true" />
-                      <label htmlFor={`${id}-rng-${i}`} className="l7-line-name">
-                        {l.nom}
-                      </label>
-                      <select
-                        aria-label={`Secteur de ${l.nom}`}
-                        className="l7-mini-select"
-                        value={l.secteur}
-                        onChange={(e) => modifierSecteur(i, e.target.value)}
-                      >
-                        {SECTEURS_DISPO.map((sec) => (
-                          <option key={sec} value={sec}>
-                            {sec}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="l7-line-control">
-                      <input
-                        id={`${id}-rng-${i}`}
-                        type="range"
-                        min={0}
-                        max={100}
-                        step={5}
-                        value={l.pct}
-                        aria-valuetext={`${l.pct} %, soit ${fcfa((capitalDefaut * l.pct) / 100)}`}
-                        onChange={(e) => modifierPct(i, Number(e.target.value))}
-                      />
-                      <output
-                        htmlFor={`${id}-rng-${i}`}
-                        className={`l7-line-out${depasseSociete ? ' is-alert' : ''}`}
-                      >
-                        <strong>{l.pct} %</strong>
-                        <small>{fcfa((capitalDefaut * l.pct) / 100)}</small>
-                      </output>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {!totalValide && (
-              <div className="l7-inline-fix" role="alert">
-                <span>
-                  {analyse.reste > 0
-                    ? `Il reste ${pct(analyse.reste)} à allouer pour atteindre 100 %.`
-                    : `Vous dépassez 100 % de ${pct(-analyse.reste)}.`}
-                </span>
-                <button type="button" className="l7-link-btn" onClick={reequilibrer100}>
-                  Ramener automatiquement à 100 %
-                </button>
-              </div>
-            )}
+        {/* Partie 1 : Curseurs pleine largeur */}
+        <div className="l7-alloc-sliders">
+          <div className="l7-subhead">
+            <h4>1. Répartition par société et par secteur</h4>
+            <span className={`l7-total-badge${totalValide ? ' is-valid' : ' is-invalid'}`}>
+              Total : {pct(analyse.totalPct)}
+            </span>
           </div>
 
-          {/* Graphique circulaire + indicateurs de concentration */}
-          <div className="l7-alloc-visual">
-            <div className="l7-subhead">
-              <h4>Diagnostic de concentration</h4>
-              <div className="l7-seg-group l7-seg-group--sm" role="group" aria-label="Vue du graphique circulaire">
-                <button
-                  type="button"
-                  className={`l7-seg-btn${vueCamembert === 'secteur' ? ' is-active' : ''}`}
-                  onClick={() => setVueCamembert('secteur')}
-                >
-                  Par secteur
-                </button>
-                <button
-                  type="button"
-                  className={`l7-seg-btn${vueCamembert === 'societe' ? ' is-active' : ''}`}
-                  onClick={() => setVueCamembert('societe')}
-                >
-                  Par société
-                </button>
-              </div>
-            </div>
+          <div className="l7-lines-list">
+            {lignes.map((l, i) => {
+              const depasseSociete = l.pct > SEUIL_SOCIETE_PCT;
+              return (
+                <div key={l.nom} className="l7-line-row">
+                  <div className="l7-line-id">
+                    <span className="l7-dot" style={{ background: PALETTE[i % PALETTE.length] }} aria-hidden="true" />
+                    <label htmlFor={`${id}-rng-${i}`} className="l7-line-name">
+                      {l.nom}
+                    </label>
+                  </div>
+                  <select
+                    aria-label={`Secteur de ${l.nom}`}
+                    className="l7-mini-select"
+                    value={l.secteur}
+                    onChange={(e) => modifierSecteur(i, e.target.value)}
+                  >
+                    {SECTEURS_DISPO.map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="l7-line-slider-wrap">
+                    <input
+                      id={`${id}-rng-${i}`}
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={l.pct}
+                      aria-valuetext={`${l.pct} %, soit ${fcfa((capitalDefaut * l.pct) / 100)}`}
+                      onChange={(e) => modifierPct(i, Number(e.target.value))}
+                    />
+                  </div>
+                  <output
+                    htmlFor={`${id}-rng-${i}`}
+                    className={`l7-line-out${depasseSociete ? ' is-alert' : ''}`}
+                  >
+                    <strong>{l.pct} %</strong>
+                    <small>{fcfa((capitalDefaut * l.pct) / 100)}</small>
+                  </output>
+                </div>
+              );
+            })}
+          </div>
 
+          {!totalValide && (
+            <div className="l7-inline-fix" role="alert">
+              <span>
+                {analyse.reste > 0
+                  ? `Il reste ${pct(analyse.reste)} à allouer pour atteindre 100 %.`
+                  : `Vous dépassez 100 % de ${pct(-analyse.reste)}.`}
+              </span>
+              <button type="button" className="l7-link-btn" onClick={reequilibrer100}>
+                Ramener automatiquement à 100 %
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Partie 2 : Diagnostic visuel (camembert + barres sectorielles côte à côte) */}
+        <div className="l7-alloc-visual">
+          <div className="l7-subhead">
+            <h4>Diagnostic de concentration</h4>
+            <div className="l7-seg-group l7-seg-group--sm" role="group" aria-label="Vue du graphique circulaire">
+              <button
+                type="button"
+                className={`l7-seg-btn${vueCamembert === 'secteur' ? ' is-active' : ''}`}
+                onClick={() => setVueCamembert('secteur')}
+              >
+                Par secteur
+              </button>
+              <button
+                type="button"
+                className={`l7-seg-btn${vueCamembert === 'societe' ? ' is-active' : ''}`}
+                onClick={() => setVueCamembert('societe')}
+              >
+                Par société
+              </button>
+            </div>
+          </div>
+
+          <div className="l7-diag-split">
             <div className="l7-donut-wrap" role="img" aria-label="Répartition circulaire du portefeuille">
               {donneesPie.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={donneesPie}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={52}
-                      outerRadius={82}
-                      paddingAngle={2}
-                      isAnimationActive={false}
-                    >
-                      {donneesPie.map((entry, idx) => (
-                        <Cell key={entry.name} fill={PALETTE[idx % PALETTE.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v: number) => [`${nombre(v, 1)} %`, 'Part']}
-                      contentStyle={{
-                        background: '#fff',
-                        border: '1px solid #e6dfd3',
-                        borderRadius: 10,
-                        fontSize: 12,
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <svg viewBox="0 0 160 160" className="l7-donut-svg">
+                  {(() => {
+                    const totalPie = donneesPie.reduce((acc, d) => acc + d.value, 0) || 1;
+                    const r = 56;
+                    const circ = 2 * Math.PI * r;
+                    let cumul = 0;
+                    return donneesPie.map((entry, idx) => {
+                      const frac = entry.value / totalPie;
+                      const dash = Math.max(0, frac * circ - (donneesPie.length > 1 ? 2 : 0));
+                      const offset = -cumul * circ;
+                      cumul += frac;
+                      return (
+                        <circle
+                          key={entry.name}
+                          cx="80"
+                          cy="80"
+                          r={r}
+                          fill="none"
+                          stroke={PALETTE[idx % PALETTE.length]}
+                          strokeWidth="22"
+                          strokeDasharray={`${dash} ${circ}`}
+                          strokeDashoffset={offset}
+                          transform="rotate(-90 80 80)"
+                        >
+                          <title>{`${entry.name} : ${nombre(entry.value, 1)} %`}</title>
+                        </circle>
+                      );
+                    });
+                  })()}
+                  <text x="80" y="76" textAnchor="middle" className="l7-donut-center-big">
+                    { `${Math.round(analyse.totalPct)} %` }
+                  </text>
+                  <text x="80" y="94" textAnchor="middle" className="l7-donut-center-sub">
+                    {vueCamembert === 'secteur'
+                      ? `${analyse.parSecteur.length} sect.`
+                      : `${lignesActives.length} soc.`}
+                  </text>
+                </svg>
               ) : (
                 <p className="l7-state-msg">Aucune ligne active.</p>
               )}
             </div>
 
-            {/* Barres par secteur avec repère 35 % */}
             <div className="l7-sector-bars">
               {analyse.parSecteur.map((s) => {
                 const haut = s.pct > SEUIL_SECTEUR_PCT;
                 return (
                   <div key={s.secteur} className="l7-sector-bar-row">
                     <div className="l7-sector-bar-top">
-                      <span>{s.secteur}</span>
-                      <strong className={haut ? 'is-alert' : undefined}>
-                        {pct(s.pct)} {haut ? `(> ${SEUIL_SECTEUR_PCT} %)` : ''}
+                      <span className="l7-sector-name">{s.secteur}</span>
+                      <strong className={`l7-sector-val${haut ? ' is-alert' : ''}`}>
+                        {pct(s.pct)}
+                        {haut ? ` (> ${SEUIL_SECTEUR_PCT} %)` : ''}
                       </strong>
                     </div>
                     <div className="l7-sector-track">
@@ -327,35 +336,33 @@ export default function SimulateurDiversification({
                 );
               })}
             </div>
-
-            <dl className="l7-conc-metrics">
-              <div>
-                <dt>Diversification effective</dt>
-                <dd>
-                  {analyse.nombreEffectif > 0 ? `${nombre(analyse.nombreEffectif, 1)} lignes équiv.` : '—'}
-                </dd>
-              </div>
-              <div>
-                <dt>Plus forte société (repère ≤ {SEUIL_SOCIETE_PCT} %)</dt>
-                <dd className={analyse.ligneMax && analyse.ligneMax.pct > SEUIL_SOCIETE_PCT ? 'is-alert' : undefined}>
-                  {analyse.ligneMax ? `${analyse.ligneMax.nom} · ${pct(analyse.ligneMax.pct)}` : '—'}
-                </dd>
-              </div>
-            </dl>
-
-            {analyse.alertes.length > 0 ? (
-              <ul className="l7-alert-list" aria-live="polite">
-                {analyse.alertes.map((al) => (
-                  <li key={al}>{al}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="l7-ok-note">
-                Repères pédagogiques respectés : aucune société ne dépasse {SEUIL_SOCIETE_PCT} % et aucun secteur ne
-                dépasse {SEUIL_SECTEUR_PCT} %.
-              </p>
-            )}
           </div>
+
+          <dl className="l7-conc-metrics">
+            <div>
+              <dt>Diversification effective</dt>
+              <dd>{analyse.nombreEffectif > 0 ? `${nombre(analyse.nombreEffectif, 1)} lignes équivalentes` : '—'}</dd>
+            </div>
+            <div>
+              <dt>Plus forte société (repère ≤ {SEUIL_SOCIETE_PCT} %)</dt>
+              <dd className={analyse.ligneMax && analyse.ligneMax.pct > SEUIL_SOCIETE_PCT ? 'is-alert' : undefined}>
+                {analyse.ligneMax ? `${analyse.ligneMax.nom} · ${pct(analyse.ligneMax.pct)}` : '—'}
+              </dd>
+            </div>
+          </dl>
+
+          {analyse.alertes.length > 0 ? (
+            <ul className="l7-alert-list" aria-live="polite">
+              {analyse.alertes.map((al) => (
+                <li key={al}>{al}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="l7-ok-note">
+              Repères pédagogiques respectés : aucune société ne dépasse {SEUIL_SOCIETE_PCT} % et aucun secteur ne
+              dépasse {SEUIL_SECTEUR_PCT} %.
+            </p>
+          )}
         </div>
 
         {/* Partie basse : Simulation de chocs & comparaison Avant / Après */}

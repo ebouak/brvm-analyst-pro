@@ -83,40 +83,37 @@ export default function Lecon7RisquesExperience({
     <article className="lp l7">
       {/* ── INTRODUCTION ÉDITORIALE PREMIUM ──────────────────────────────── */}
       <header className="l7-hero lp-large">
-        <div className="l7-hero-grid">
-          <div>
-            <div className="l7-hero-meta">
-              <span className="l7-hero-pill">
-                WestBourse Academy · {CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Initiation BRVM'}
-              </span>
-              {lesson.duree_min && <span className="l7-hero-duration">{lesson.duree_min} min d’étude interactive</span>}
-              {badge && <span className={`lp-nouveaute lp-nouveaute--${badge.type}`}>{badge.libelle}</span>}
-            </div>
-
-            <h1 className="l7-hero-title">{lesson.titre}</h1>
-            {lesson.sous_titre && <p className="l7-hero-subtitle">{lesson.sous_titre}</p>}
-
-            <blockquote className="l7-hero-quote">
-              « En Bourse, protéger son capital est aussi important que le faire fructifier. »
-            </blockquote>
-          </div>
-
-          {lesson.image?.url && (
-            <figure className="l7-hero-media">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={lesson.image.url} alt={lesson.image.alt || ''} />
-              {lesson.image.credit && <figcaption>{lesson.image.credit}</figcaption>}
-            </figure>
-          )}
+        <div className="l7-hero-meta">
+          <span className="l7-hero-pill">
+            WestBourse Academy · {CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Initiation BRVM'}
+          </span>
+          {lesson.duree_min && <span className="l7-hero-duration">{lesson.duree_min} min d’étude interactive</span>}
+          {badge && <span className={`lp-nouveaute lp-nouveaute--${badge.type}`}>{badge.libelle}</span>}
         </div>
+
+        <h1 className="l7-hero-title">{lesson.titre}</h1>
+        {lesson.sous_titre && <p className="l7-hero-subtitle">{lesson.sous_titre}</p>}
+
+        <blockquote className="l7-hero-quote">
+          « En Bourse, protéger son capital est aussi important que le faire fructifier. »
+        </blockquote>
+
+        {lesson.image?.url && (
+          <figure className="l7-hero-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lesson.image.url} alt={lesson.image.alt || ''} />
+            {lesson.image.credit && <figcaption>{lesson.image.credit}</figcaption>}
+          </figure>
+        )}
 
         <div className="l7-hero-lead">
           <Texte contenu={lesson.resume} />
         </div>
       </header>
 
-      {/* ── PROGRESSION VISUELLE DES 8 ÉTAPES ───────────────────────────── */}
-      <nav aria-label="Progression des huit étapes de la leçon" className="l7-stepper-nav lp-large">
+      {/* ── SOMMAIRE VISUEL DES 8 ÉTAPES (sans superposition au défilement) ─ */}
+      <nav aria-label="Plan en huit étapes de la leçon" className="l7-stepper-nav lp-large">
+        <p className="l7-stepper-heading">Parcours de la leçon · 8 étapes</p>
         <ol className="l7-stepper-list">
           {ETAPES.map((et, i) => {
             const actif = etapeActive === et.id;
