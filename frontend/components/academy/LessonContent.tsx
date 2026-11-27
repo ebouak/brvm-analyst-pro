@@ -12,6 +12,7 @@ import { badgeNouveaute } from '@/lib/academy/nouveaute';
 import SimulationLecon from './lecon/Simulations';
 import DonneesReelles from './lecon/DonneesReelles';
 import Illustration from './lecon/Illustration';
+import Lecon7RisquesExperience from './lecon/risques/Lecon7RisquesExperience';
 import type { DonneesSection } from '@/lib/academy/donneesServer';
 import './lecon/lecon.css';
 
@@ -128,6 +129,7 @@ export default function LessonContent({
   const [scrollPct, setScrollPct] = useState(0);
 
   useEffect(() => {
+    if (lesson.experience === 'risques') return;
     const update = () => {
       const el = articleRef.current;
       if (!el) return;
@@ -147,7 +149,29 @@ export default function LessonContent({
       window.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, []);
+  }, [lesson.experience]);
+
+  if (lesson.experience === 'risques') {
+    return (
+      <Lecon7RisquesExperience
+        lesson={lesson}
+        quizPassed={quizPassed}
+        onQuizAnswer={onQuizAnswer}
+        exerciseSlot={
+          exercise ? (
+            <ExerciseBlock
+              exercise={exercise}
+              courseId={courseId}
+              lessonIdx={lessonIdx}
+              alreadyPassed={exercicePassed}
+              onResult={onExerciseResult}
+            />
+          ) : undefined
+        }
+        donnees={donnees}
+      />
+    );
+  }
 
   const charts = [lesson.chart, ...(lesson.charts ?? [])].filter((c): c is NonNullable<typeof c> => Boolean(c));
   const questions = lesson.quiz?.length ? lesson.quiz : lesson.qcm ? [lesson.qcm] : [];

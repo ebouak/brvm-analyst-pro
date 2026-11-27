@@ -121,6 +121,8 @@ export const simulationSchema = z.discriminatedUnion('type', [
     type: z.literal('carnet'),
     niveaux: z.array(z.object({ prix: z.number().positive(), quantite: z.number().int().positive() })).min(2).max(8),
     quantite_defaut: z.number().int().positive().max(1_000_000),
+    /** Côté ACHAT du carnet fictif (prix décroissants), facultatif : permet de simuler une vente. */
+    niveaux_achat: z.array(z.object({ prix: z.number().positive(), quantite: z.number().int().positive() })).max(8).optional().default([]),
     /** Valeurs proposées pour le « carnet réel » (Bulletin officiel de la cote). */
     codes: z.array(z.string().regex(/^[A-Z0-9]{3,10}$/)).max(6).optional().default([]),
   }),
@@ -451,6 +453,8 @@ export const qcmSchema = z.object({
   options: z.array(z.string().min(1).max(500)).min(2).max(6),
   correct: z.number().int().min(0),
   explication: z.string().min(1).max(2000),
+  /** Notion travaillée (facultatif) : nourrit la synthèse « à retravailler » du quiz. */
+  notion: z.string().min(1).max(80).optional(),
 });
 
 /**
@@ -586,6 +590,8 @@ export const lessonSchema = z.object({
   exercice_id: z.string().max(60).nullable().optional(),
   // Nom du module — regroupe les leçons dans le sommaire (organisation par niveau).
   module: z.string().max(200).nullable().optional(),
+  /** Expérience de lecture dédiée (2026-11-27). Absente : rendu éditorial standard. */
+  experience: z.enum(['risques']).nullable().optional(),
 });
 
 export const glossaireItemSchema = z.object({

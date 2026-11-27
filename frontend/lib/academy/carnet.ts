@@ -224,3 +224,90 @@ function sansVisibilite(niveauxSansPrix: number, quantite: number): ResultatOrdr
         : 'Aucun titre n’est visible à votre limite. La BRVM ne publie que la meilleure limite : on ne peut pas dire si votre ordre serait servi.',
   };
 }
+
+// ── Vente (simulateur d'ordres de la leçon 7, 2026-11-27) ─────────────────────
+
+export interface OrdreVente {
+  sens: 'vente';
+  quantite: number;
+  limite: LimiteOrdre;
+  condition: ConditionOrdre;
+  validite: ValiditeOrdre;
+}
+
+/**
+ * Exécute un ordre de VENTE contre le côté ACHAT d'un carnet FICTIF, niveaux
+ * parcourus du prix le plus haut au plus bas. Mêmes règles que l'achat (art. 44
+ * à 46) : la limite est ici un prix MINIMAL ; un niveau inférieur n'est jamais
+ * touché. Carnet entièrement connu (pas de profondeur inconnue).
+ */
+export function executerOrdreVente(carnetAchat: NiveauCarnet[], ordre: OrdreVente): ResultatOrdre {
+  if (!Number.isInteger(ordre.quantite) || ordre.quantite <= 0) {
+    return rejet('la quantité doit être un nombre entier de titres, supérieur à zéro.');
+  }
+  if (ordre.limite == null) {
+    return rejet('aucune limite de prix indiquée. Le règlement exige « au mieux » ou un cours limité.');
+  }
+  const plancher = ordre.limite === 'au_mieux' ? 0 : ordre.limite.prix;
+  if (ordre.limite !== 'au_mieux' && !(plancher > 0)) return rejet('le cours limité doit être supérieur à zéro.');
+
+  const niveaux = carnetAchat
+    .filter((n): n is { prix: number; quantite: number } => n.prix != null && n.prix > 0 && n.quantite > 0)
+    .sort((a, b) => b.prix - a.prix);
+  const accessibles = niveaux.filter((n) => n.prix >= plancher);
+  const disponible = accessibles.reduce((s, n) => s + n.quantite, 0);
+  const sort = VALIDITES[ordre.validite].sort;
+  const vide = { lignes: [], quantiteServie: 0, prixMoyen: null, coutTotal: 0, quantiteInconnue: 0, niveauxSansPrix: 0 };
+
+  if (ordre.condition === 'tout_ou_rien' && disponible < ordre.quantite) {
+    return {
+      ...vide,
+      statut: 'non_execute',
+      reliquat: ordre.quantite,
+      explication:
+        `Non exécuté : « tout ou rien » exige ${fmt(ordre.quantite)} titres ; ` +
+        `seulement ${fmt(disponible)} sont demandés à votre limite ou au-dessus. Il ne peut pas être servi partiellement.`,
+    };
+  }
+
+  const lignes: LigneExecution[] = [];
+  let reste = ordre.quantite;
+  for (const n of accessibles) {
+    if (reste <= 0) break;
+    const q = Math.min(reste, n.quantite);
+    lignes.push({ prix: n.prix, quantite: q, montant: n.prix * q });
+    reste -= q;
+  }
+  const servie = ordre.quantite - reste;
+  const produit = lignes.reduce((s, l) => s + l.montant, 0);
+  const prixMoyen = servie > 0 ? arrondi2(produit / servie) : null;
+
+  if (servie === 0) {
+    return {
+      ...vide,
+      statut: 'non_execute',
+      reliquat: ordre.quantite,
+      explication:
+        ordre.limite === 'au_mieux'
+          ? 'Le carnet ne contient aucun acheteur : rien n’est exécuté.'
+          : `Non exécuté : aucun acheteur à ${fmt(plancher)} FCFA ou plus. L’ordre attend (${sort}).`,
+    };
+  }
+  let statut: StatutOrdre;
+  let explication: string;
+  if (reste === 0) {
+    statut = 'execute';
+    explication =
+      `Servi en totalité : ${fmt(servie)} titres vendus à ${fmt(prixMoyen!)} FCFA en moyenne, soit ${fmt(produit)} FCFA` +
+      (lignes.length > 1 ? `, répartis sur ${lignes.length} niveaux de prix.` : '.');
+    if (ordre.limite === 'au_mieux' && lignes.length > 1) {
+      explication += ` Ce prix moyen est inférieur au meilleur prix affiché (${fmt(lignes[0]!.prix)} FCFA).`;
+    }
+  } else {
+    statut = 'partiel';
+    explication =
+      `Servi en partie : ${fmt(servie)} titres sur ${fmt(ordre.quantite)}, à ${fmt(prixMoyen!)} FCFA en moyenne. ` +
+      `Les ${fmt(reste)} titres restants restent au carnet (${sort}).`;
+  }
+  return { statut, lignes, quantiteServie: servie, prixMoyen, coutTotal: produit, reliquat: reste, quantiteInconnue: 0, niveauxSansPrix: 0, explication };
+}
