@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/fiscalite`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/formations`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/formations/academy/lecon-0`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/formations/academy/simulateur-sgi`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/simulateur-budget`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/debutant`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/pricing`, changeFrequency: 'monthly', priority: 0.6 },

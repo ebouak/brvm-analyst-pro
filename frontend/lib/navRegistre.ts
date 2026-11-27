@@ -182,6 +182,7 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/formations/academy/examen/[niveau]', libelle: 'Examen', rubrique: 'apprendre', parent: '/formations/academy', statut: 'parcours', raison: 'examen d’un niveau, depuis le hub et les leçons' },
   { chemin: '/formations/academy/integrale', libelle: 'Édition intégrale', rubrique: 'apprendre', parent: '/formations/academy', statut: 'public', raison: 'toutes les leçons sur une page' },
   { chemin: '/formations/academy/lecon-0', libelle: 'Leçon 0', rubrique: 'apprendre', parent: '/formations/academy', statut: 'public', raison: 'leçon gratuite (SEO)' },
+  { chemin: '/formations/academy/simulateur-sgi', libelle: 'Guide Simulateur SGI', rubrique: 'apprendre', parent: '/formations/academy', statut: 'public', raison: 'cours vidéo gratuit (SEO)' },
   { chemin: '/formations/modules', libelle: 'Modules vidéo', rubrique: 'apprendre', parent: '/formations', statut: 'secondaire', raison: 'lié depuis Formations' },
   { chemin: '/formations/modules/[course]', libelle: 'Module vidéo', rubrique: 'apprendre', parent: '/formations/modules', statut: 'parcours', raison: 'lecteur atteint depuis la liste des modules' },
   { chemin: '/formations/sessions', libelle: 'Formations en direct', rubrique: 'apprendre', parent: '/formations', statut: 'public', raison: 'sessions en direct (SEO)' },
