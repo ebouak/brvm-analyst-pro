@@ -105,7 +105,13 @@
     "contact:rappel": "tsx src/index.ts contact:rappel",
     "whatsapp:sante": "tsx src/index.ts whatsapp:sante",
     "ops:workflows": "tsx src/index.ts ops:workflows",
-    "verify:stockanalysis": "tsx --env-file-if-exists=.env.local src/index.ts verify:stockanalysis"
+    "verify:stockanalysis": "tsx --env-file-if-exists=.env.local src/index.ts verify:stockanalysis",
+    "stress:import-indices": "tsx --env-file-if-exists=.env.local src/index.ts stress:import-indices",
+    "stress:import-macro": "tsx --env-file-if-exists=.env.local src/index.ts stress:import-macro",
+    "stress:crises": "tsx --env-file-if-exists=.env.local src/index.ts stress:crises",
+    "stress:resilience": "tsx --env-file-if-exists=.env.local src/index.ts stress:resilience",
+    "stress:backtest": "tsx --env-file-if-exists=.env.local src/index.ts stress:backtest",
+    "stress:daily": "tsx --env-file-if-exists=.env.local src/index.ts stress:daily"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

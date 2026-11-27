@@ -125,6 +125,12 @@ export const REGISTRE: EntreeNav[] = [
   { chemin: '/notations', libelle: 'Notations financières', rubrique: 'marche', parent: '/fondamentaux', statut: 'secondaire', raison: ONGLET('Fondamentaux') },
   { chemin: '/liquidite', libelle: 'Liquidité', rubrique: 'marche', description: 'Combien coûte une vente', colonne: 2, statut: 'menu' },
   { chemin: '/nervosite', libelle: 'Nervosité du marché', rubrique: 'marche', racine: true, statut: 'public', raison: 'indice WESTBOURSE, lié depuis le tableau de bord (SEO)' },
+  { chemin: '/stress-monitor', libelle: 'Stress Monitor', rubrique: 'marche', description: 'Crises historiques et pression du marché', colonne: 2, statut: 'menu' },
+  { chemin: '/stress-monitor/crises', libelle: 'Crises historiques', rubrique: 'marche', parent: '/stress-monitor', statut: 'public', raison: 'onglet Crises historiques du Stress Monitor (SEO)' },
+  { chemin: '/stress-monitor/methodologie', libelle: 'Méthodologie Stress Monitor', rubrique: 'marche', parent: '/stress-monitor', statut: 'public', raison: 'onglet Méthodologie et données du Stress Monitor (SEO)' },
+  { chemin: '/stress-monitor/valeurs', libelle: 'Analyse des valeurs', rubrique: 'marche', parent: '/stress-monitor', statut: 'secondaire', premium: true, raison: 'onglet Stock Resilience Scanner du Stress Monitor' },
+  { chemin: '/stress-monitor/rebonds', libelle: 'Statistiques de rebond', rubrique: 'marche', parent: '/stress-monitor', statut: 'secondaire', premium: true, raison: 'onglet Historical Backtesting Engine du Stress Monitor' },
+  { chemin: '/stress-monitor/strategies', libelle: 'Scénarios et stratégies', rubrique: 'marche', parent: '/stress-monitor', statut: 'secondaire', premium: true, raison: 'onglet Simulations de stratégies du Stress Monitor' },
   { chemin: '/premium/classements', libelle: 'Palmarès', rubrique: 'marche', description: 'Palmarès par critère', colonne: 2, statut: 'menu', premium: true },
 
   // ── Trouver une idée ───────────────────────────────────────────────────────

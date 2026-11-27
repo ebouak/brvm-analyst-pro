@@ -24,6 +24,8 @@ export const PUBLIC_EXACT = new Set<string>([
   '/qualite-donnees', '/operations-titres',
   // Indice de nervosité WESTBOURSE : donnée de marché dérivée des clôtures (SEO).
   '/nervosite',
+  // Stress Monitor : Vue d'ensemble, Crises historiques et Méthodologie publiques ; sous-sections avancées derrière connexion.
+  '/stress-monitor', '/stress-monitor/crises', '/stress-monitor/methodologie',
   '/crm/opposition',
   // Lien d'arrêt des rappels de progression Academy (0272) : ouvert sans compte.
   '/academy/rappels/arret',

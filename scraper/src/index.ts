@@ -1457,6 +1457,150 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'stress:import-indices': {
+      const { runImportIndices } = await import('./stress/runCrisisEngine.js');
+      const dryRun = rest.includes('--dry-run');
+      const csvPath = rest.find((a) => a.startsWith('--csv='))?.split('=')[1];
+      const indiceCode = rest.find((a) => a.startsWith('--indice='))?.split('=')[1];
+      const fromArg = rest.find((a) => a.startsWith('--from='))?.split('=')[1];
+      const fromYear = fromArg ? parseInt(fromArg, 10) : undefined;
+      const res = await monitored(
+        { code: 'stress-import-indices', label: 'Stress Monitor — import historique indices' },
+        async () => {
+          const r = await runImportIndices({ mock, dryRun, csvPath, indiceCode, fromYear });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : r.status === 'partial' ? 'partial' : 'success',
+              rows_extracted: r.lignesCollectees,
+              rows_upserted: r.lignesInserees,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:import-indices terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'stress:import-macro': {
+      const { runImportMacro } = await import('./stress/runCrisisEngine.js');
+      const dryRun = rest.includes('--dry-run');
+      const res = await monitored(
+        { code: 'stress-import-macro', label: 'Stress Monitor — import macro UEMOA' },
+        async () => {
+          const r = await runImportMacro({ mock, dryRun });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.lignesCollectees,
+              rows_upserted: r.lignesEcrites,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:import-macro terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'stress:crises': {
+      const { runCrisisEngine } = await import('./stress/runCrisisEngine.js');
+      const dryRun = rest.includes('--dry-run');
+      const indiceCode = rest.find((a) => a.startsWith('--indice='))?.split('=')[1];
+      const res = await monitored(
+        { code: 'stress-crises', label: 'Stress Monitor — Historical Crisis Engine' },
+        async () => {
+          const r = await runCrisisEngine({ mock, dryRun, indiceCode });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.episodesDetectes,
+              rows_upserted: r.episodesEcrits,
+              metadata: {
+                indicesAnalyses: r.indicesAnalyses,
+                episodesDetectes: r.episodesDetectes,
+                episodesEcrits: r.episodesEcrits,
+                raison: r.raison,
+              },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:crises terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'stress:resilience': {
+      const { runResilienceScanner } = await import('./stress/runResilienceScanner.js');
+      const dryRun = rest.includes('--dry-run');
+      const res = await monitored(
+        { code: 'stress-resilience', label: 'Stress Monitor — Stock Resilience Scanner' },
+        async () => {
+          const r = await runResilienceScanner({ mock, dryRun });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.nb_valeurs,
+              rows_upserted: r.nb_ecrites,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:resilience terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'stress:backtest': {
+      const { runBacktestEngine } = await import('./stress/runBacktestEngine.js');
+      const dryRun = rest.includes('--dry-run');
+      const indiceCode = rest.find((a) => a.startsWith('--indice='))?.split('=')[1];
+      const fraisRaw = rest.find((a) => a.startsWith('--frais='))?.split('=')[1];
+      const clusteringRaw = rest.find((a) => a.startsWith('--clustering='))?.split('=')[1];
+      const fraisPct = fraisRaw != null && Number.isFinite(Number(fraisRaw)) ? Number(fraisRaw) : undefined;
+      const clusteringJours =
+        clusteringRaw != null && Number.isFinite(Number(clusteringRaw)) ? Number(clusteringRaw) : undefined;
+      const res = await monitored(
+        { code: 'stress-backtest', label: 'Stress Monitor — Historical Backtesting Engine' },
+        async () => {
+          const r = await runBacktestEngine({ mock, dryRun, indiceCode, fraisPct, clusteringJours });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.indices_traites,
+              rows_upserted: r.snapshots_ecrits,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:backtest terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'stress:daily': {
+      const { runStressDaily } = await import('./stress/runStressDaily.js');
+      const dryRun = rest.includes('--dry-run');
+      const maxRaw = rest.find((a) => a.startsWith('--max-seances='))?.split('=')[1];
+      const maxSeances = maxRaw != null && Number.isFinite(Number(maxRaw)) ? Number(maxRaw) : undefined;
+      const res = await monitored(
+        { code: 'stress-daily', label: 'Stress Monitor — Indice quotidien 0-100' },
+        async () => {
+          const r = await runStressDaily({ mock, dryRun, maxSeances });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.lignes_calculees,
+              rows_upserted: r.lignes_ecrites,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      logger.info(res, 'stress:daily terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
     default:
       logger.error(
         { command },
