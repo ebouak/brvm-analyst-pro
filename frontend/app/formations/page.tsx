@@ -7,7 +7,7 @@ import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/serv
 import { listerSessionsAVenir, type SessionPublique } from '@/lib/formations/sessions';
 import { listCourses, type VideoCourseCard } from '@/lib/video/server';
 import { NIVEAUX } from '@/lib/academy/types';
-import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
+import { Lecon0Carte, SimulateurSgiCarte } from '@/components/academy/Lecon0Carte';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
@@ -110,7 +110,10 @@ export default async function FormationsPage() {
               Des repères concrets, des cas réels et des formats pour apprendre à votre rythme.
             </p>
           </header>
-          <Lecon0Carte />
+          <div className="grid gap-3 md:grid-cols-2">
+            <Lecon0Carte />
+            <SimulateurSgiCarte />
+          </div>
           <div className="max-w-4xl">
             <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations" />
           </div>
@@ -188,16 +191,19 @@ export default async function FormationsPage() {
         </div>
       </header>
 
-      {/* Leçon 0 : gratuite, ouverte à tous. Seule image réelle de la page. */}
-      <section aria-labelledby="h-gratuit" className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.48fr)] md:items-stretch">
-        <div className="flex flex-col justify-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-up">Un premier pas, sans frais</p>
-          <h2 id="h-gratuit" className="mt-2 font-display text-2xl text-ivory">Découvrez la méthode WESTBOURSE</h2>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Commencez par une leçon vidéo ouverte à tous, puis choisissez le parcours qui vous convient.
+      {/* Leçon 0 & Guide Simulateur SGI : gratuits, ouverts à tous. */}
+      <section aria-labelledby="h-gratuit" className="space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-up">Premiers pas sans frais</p>
+          <h2 id="h-gratuit" className="mt-1 font-display text-2xl text-ivory">Cours gratuits en accès libre</h2>
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted">
+            Découvrez l’écosystème de la BRVM puis apprenez à comparer les SGI sur le simulateur avec des scénarios réels avant de choisir un parcours.
           </p>
         </div>
-        <Lecon0Carte className="h-full" />
+        <div className="grid gap-3 md:grid-cols-2 md:items-stretch">
+          <Lecon0Carte className="h-full" />
+          <SimulateurSgiCarte className="h-full" />
+        </div>
       </section>
 
       <section aria-labelledby="h-parcours" className="space-y-4">

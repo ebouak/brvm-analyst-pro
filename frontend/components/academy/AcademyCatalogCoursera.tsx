@@ -30,7 +30,7 @@ import {
 } from '@/lib/academy/capsules';
 import { NIVEAUX, NIVEAU_LABEL } from '@/lib/academy/types';
 import { EMPTY_ACTIVITY_SNAPSHOT, evaluerMissions, type ResumeMissions } from '@/lib/academy/missions';
-import { Lecon0Carte } from './Lecon0Carte';
+import { Lecon0Carte, SimulateurSgiCarte } from './Lecon0Carte';
 import MissionsPratiques from './MissionsPratiques';
 import QuizPlacement from './QuizPlacement';
 
@@ -400,6 +400,12 @@ export default function AcademyCatalogCoursera({
             >
               Vidéo Leçon 0
             </Link>
+            <Link
+              href="/formations/academy/simulateur-sgi"
+              className="rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-ivory transition hover:border-accent/40"
+            >
+              Guide Simulateur SGI
+            </Link>
           </div>
         </section>
       )}
@@ -483,8 +489,9 @@ export default function AcademyCatalogCoursera({
                   sauvegardés automatiquement.
                 </p>
               </div>
-              <div className="mt-5">
+              <div className="mt-5 space-y-3">
                 <Lecon0Carte />
+                <SimulateurSgiCarte />
               </div>
             </div>
           )}
@@ -573,14 +580,22 @@ export default function AcademyCatalogCoursera({
 
               <div className="rounded-xl border border-border bg-surface p-3.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-faint">Accès libre</p>
-                <p className="mt-1 text-sm font-medium text-ivory">Leçon 0 · vidéo d’ouverture</p>
-                <p className="mt-0.5 text-xs text-muted">Gratuite et ouverte à tous pour découvrir la méthode.</p>
-                <Link
-                  href="/formations/academy/lecon-0"
-                  className="mt-2.5 inline-flex items-center gap-1 text-xs font-semibold text-accent-ink hover:underline"
-                >
-                  Regarder la leçon 0 →
-                </Link>
+                <p className="mt-1 text-sm font-medium text-ivory">Cours gratuits d’initiation</p>
+                <p className="mt-0.5 text-xs text-muted">Ouverts à tous sans compte pour découvrir la méthode.</p>
+                <div className="mt-2.5 flex flex-col gap-1.5">
+                  <Link
+                    href="/formations/academy/lecon-0"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-accent-ink hover:underline"
+                  >
+                    Regarder la Leçon 0 →
+                  </Link>
+                  <Link
+                    href="/formations/academy/simulateur-sgi"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-up hover:underline"
+                  >
+                    Guide Simulateur SGI (4 min 15) →
+                  </Link>
+                </div>
               </div>
             </aside>
 
