@@ -1,597 +1,622 @@
 {
-  "titre": "Leçon 7 — Les risques : apprendre avant d’investir",
-  "image": {
-    "url": "https://images.pexels.com/photos/128867/coins-currency-investment-insurance-128867.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
-    "alt": "Pile de pièces de monnaie devant une horloge",
-    "credit": "Photo : Pixabay / Pexels"
+ "titre": "Leçon 7 — Les risques : apprendre avant d’investir",
+ "module": "Module 2 — Dividendes et investissement pratique",
+ "experience": "risques",
+ "nouveaute": {
+  "type": "mis_a_jour",
+  "depuis": "2026-11-27"
+ },
+ "image": {
+  "url": "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+  "alt": "Investisseur analysant calmement des documents financiers et des graphiques sur ordinateur",
+  "credit": "Photo : Tima Miroshnichenko / Pexels"
+ },
+ "categorie": "general",
+ "duree_min": 15,
+ "sous_titre": "Anticiper une perte, protéger son capital, passer un ordre selon les règles de la BRVM, et décider calmement quand le marché baisse.",
+ "resume": "Investir en actions, c’est accepter l’incertitude : un cours peut baisser, un dividende peut diminuer, une action peut être difficile à revendre.\nCette leçon apprend à identifier les trois grands risques, à s’en protéger, à choisir le bon ordre de bourse selon les règles de la BRVM, et à réagir avec méthode à une baisse.",
+ "avertissement": "Ceci n’est pas un conseil en investissement. Les actions comportent un risque de perte partielle ou totale du capital. Les dividendes ne sont jamais garantis et les performances passées ne préjugent pas des performances futures. Les seuils et allocations cités sont pédagogiques.",
+ "sections": [
+  {
+   "type": "definition",
+   "titre": "Les trois risques à connaître",
+   "contenu": "Investir à la BRVM expose votre capital à des baisses parfois marquées : sur 52 semaines au 23 novembre 2026, SCRC a reculé de 68,6 % depuis son plus-haut (de 3 920 à 1 230 FCFA), SAFC de 53,4 %, UNLC de 50,9 % et SIVC de 50,2 %.\nCôté liquidité, seules 4 valeurs sur 48 atteignent la classe A au 23 novembre 2026 (SNTS 92/100, SGBC 80, BBGC 79, BOAC 75), contre 20 en classe B, 18 en classe C et 6 en classe D.\nSur une valeur étroite de classe D comme PRSC (17/100), l’écart achat/vente atteint 8,99 %, contre 0,36 % sur BOAC ou 0,75 % sur SNTS.",
+   "points": [
+    {
+     "titre": "Le risque de marché",
+     "detail": "Une crise, une hausse des taux ou une perte de confiance fait baisser de nombreuses actions en même temps, même les plus solides. La diversification ne l’efface pas.",
+     "verifier": "Pourriez-vous supporter une baisse temporaire de 15 à 20 % sans être obligé de vendre ?"
+    },
+    {
+     "titre": "Le risque propre à une entreprise",
+     "detail": "Chiffre d’affaires en baisse, rentabilité dégradée, dette excessive, mauvaise décision, perte d’un marché : une seule société peut chuter de 25 % sur une mauvaise nouvelle.",
+     "verifier": "Les derniers résultats de chaque société que vous détenez."
+    },
+    {
+     "titre": "Le risque de liquidité",
+     "detail": "Une action peut afficher un cours sans qu’il y ait assez d’acheteurs pour vendre vite à ce prix. Il faut alors attendre, fractionner la vente, ou accepter un prix plus bas.",
+     "verifier": "Les volumes échangés, la fréquence des échanges et l’écart entre prix acheteur et vendeur."
+    }
+   ],
+   "graphiques": [
+    {
+     "type": "bar",
+     "titre": "Plus forts reculs réels depuis le plus-haut 52 semaines (%)",
+     "reel": true,
+     "note": "Sources : BRVM (cours de clôture et plus-hauts 52 semaines au 23/11/2026).",
+     "labels": [
+      "SCRC",
+      "SAFC",
+      "UNLC",
+      "SIVC"
+     ],
+     "valeurs": [
+      68.6,
+      53.4,
+      50.9,
+      50.2
+     ]
+    },
+    {
+     "type": "bar",
+     "titre": "Répartition des 48 actions BRVM par classe de liquidité (A à D)",
+     "reel": true,
+     "note": "Sources : Moteur de liquidité WestBourse (données BRVM au 23/11/2026).",
+     "labels": [
+      "Classe A (très liquide)",
+      "Classe B (liquide)",
+      "Classe C (modérée)",
+      "Classe D (étroite)"
+     ],
+     "valeurs": [
+      4,
+      20,
+      18,
+      6
+     ]
+    }
+   ]
   },
-  "categorie": "general",
-  "duree_min": 14,
-  "sous_titre": "Anticiper une perte, protéger son capital, passer un ordre correctement, et décider calmement quand le marché baisse.",
-  "resume": "Investir en actions, c’est accepter l’incertitude : un cours peut baisser, un dividende peut diminuer, une action peut être difficile à revendre. Cette leçon apprend à identifier les trois grands risques, à s’en protéger, à choisir le bon ordre de bourse selon les règles de la BRVM, et à réagir avec méthode à une baisse.",
-  "avertissement": "Ceci n’est pas un conseil en investissement. Les actions comportent un risque de perte partielle ou totale du capital. Les dividendes ne sont jamais garantis et les performances passées ne préjugent pas des performances futures. Les seuils et allocations cités sont pédagogiques.",
-  "sections": [
+  {
+   "type": "cas",
+   "titre": "Le dividende varie : quatre historiques réels",
+   "reel": true,
+   "contenu": "Un dividende dépend des bénéfices, de la trésorerie, des investissements à financer et de la décision de l’assemblée générale. Il n’est jamais garanti.\nExplorez ci-dessous l’historique réel de SONATEL, PALMCI, NESTLÉ CI et SAPH CI lu dans la base WestBourse à l’ouverture de la leçon, puis posez-vous quatre questions.",
+   "donnees_reelles": {
+    "vue": "historique",
+    "codes": [
+     "SNTS",
+     "PALC",
+     "NTLC",
+     "SPHC"
+    ]
+   },
+   "points": [
     {
-      "type": "definition",
-      "titre": "Les trois risques à connaître",
-      "contenu": "Investir à la BRVM expose votre capital à des baisses parfois marquées : une action n’est pas un compte sur livret.\nSur les 52 semaines arrêtées au 23 novembre 2026, plusieurs titres ont reculé fortement depuis leur plus-haut : SCRC (−68,6 %, de 3 920 à 1 230 FCFA), SAFC (−53,4 %), UNLC (−50,9 %) et SIVC (−50,2 %).\nCinq risques principaux doivent être compris et mesurés avant d’engager votre épargne.",
-      "points": [
-        {
-          "titre": "Le risque de marché",
-          "detail": "Une crise, une hausse des taux ou une perte de confiance fait baisser de nombreuses actions en même temps, même les plus solides. La diversification ne l’efface pas.",
-          "verifier": "Pourriez-vous supporter une baisse temporaire de 15 à 20 % sans être obligé de vendre ?"
-        },
-        {
-          "titre": "Le risque propre à une entreprise",
-          "detail": "Chiffre d’affaires en baisse, rentabilité dégradée, dette excessive, mauvaise décision, perte d’un marché : une seule société peut chuter de 25 % sur une mauvaise nouvelle.",
-          "verifier": "Les derniers résultats de chaque société que vous détenez."
-        },
-        {
-          "titre": "Le risque de liquidité",
-          "detail": "Une action peut afficher un cours sans qu’il y ait assez d’acheteurs pour vendre vite à ce prix. Il faut alors attendre, fractionner la vente, ou accepter un prix plus bas.",
-          "verifier": "Les volumes échangés, la fréquence des échanges et l’écart entre prix acheteur et vendeur."
-        }
-      ],
-      "graphiques": [
-        {
-          "type": "bar",
-          "titre": "Plus forts reculs réels depuis le plus-haut 52 semaines (%)",
-          "reel": true,
-          "note": "Sources : BRVM (cours de clôture et plus-hauts 52 semaines au 23/11/2026).",
-          "labels": [
-            "SCRC",
-            "SAFC",
-            "UNLC",
-            "SIVC"
-          ],
-          "valeurs": [
-            68.6,
-            53.4,
-            50.9,
-            50.2
-          ]
-        }
-      ]
+     "titre": "L’entreprise réalise-t-elle des bénéfices réguliers ?"
     },
     {
-      "type": "cas",
-      "titre": "Le dividende varie : quatre historiques réels",
-      "reel": true,
-      "contenu": "Sur un marché étroit comme la BRVM, le risque de liquidité est souvent sous-estimé : vouloir vendre vite peut coûter cher en écart de prix.\nAu 23 novembre 2026, seules 4 valeurs sur 48 sont en classe A de liquidité (SNTS 92/100, SGBC 80, BBGC 79, BOAC 75), 20 en classe B, 18 en classe C et 6 en classe D.\nSur les valeurs les moins liquides de classe D comme PRSC (score 17/100), l’écart entre achat et vente atteint 8,99 %, contre 0,36 % sur BOAC ou 0,75 % sur SNTS.",
-      "donnees_reelles": {
-        "vue": "historique",
-        "codes": [
-          "SNTS",
-          "PALC",
-          "NTLC",
-          "SPHC"
-        ]
-      },
-      "points": [
-        {
-          "titre": "L’entreprise réalise-t-elle des bénéfices réguliers ?"
-        },
-        {
-          "titre": "Sa trésorerie finance-t-elle à la fois son activité et sa distribution ?"
-        },
-        {
-          "titre": "Son endettement reste-t-il maîtrisé ?"
-        },
-        {
-          "titre": "Le dividende est-il soutenable dans les années qui viennent ?",
-          "detail": "Un rendement très élevé peut venir d’un cours qui a fortement baissé : ce n’est pas automatiquement une affaire."
-        }
-      ],
-      "graphiques": [
-        {
-          "type": "bar",
-          "titre": "Répartition des 48 actions BRVM par classe de liquidité (A à D)",
-          "reel": true,
-          "note": "Sources : Moteur de liquidité WestBourse (données BRVM au 23/11/2026).",
-          "labels": [
-            "Classe A (très liquide)",
-            "Classe B (liquide)",
-            "Classe C (modérée)",
-            "Classe D (étroite)"
-          ],
-          "valeurs": [
-            4,
-            20,
-            18,
-            6
-          ]
-        }
-      ]
+     "titre": "Sa trésorerie finance-t-elle à la fois son activité et sa distribution ?"
     },
     {
-      "type": "importance",
-      "titre": "Trois protections, et l’effet de la diversification",
-      "contenu": "La leçon 6 a présenté les deux limites de prix (cours limité et au mieux). Face à un carnet réel peu profond, deux autres paramètres évitent les mauvaises surprises.\nLa durée de validité précise si l’ordre expire en fin de séance (« jour ») ou reste actif jusqu’à exécution ou annulation (« à révocation »).\nLa condition « tout ou rien » impose une exécution complète en une fois, utile pour éviter de multiplier les frais sur de micro-exécutions.",
-      "points": [
-        {
-          "titre": "Diversifier",
-          "detail": "Répartir entre plusieurs sociétés et secteurs. Repères pédagogiques pour un débutant : pas plus de 20 % sur une société, ni plus de 35 % sur un secteur.",
-          "verifier": "Deux sociétés différentes peuvent dépendre de la même matière première ou du même marché."
-        },
-        {
-          "titre": "Investir pour plusieurs années",
-          "detail": "Un portefeuille de 1 000 000 FCFA qui vaut 850 000 FCFA six mois plus tard a perdu 15 % de valeur, même sans vente. Avec un horizon long, on n’est pas forcé de vendre au mauvais moment."
-        },
-        {
-          "titre": "Se former et suivre ses sociétés",
-          "detail": "Chiffre d’affaires, résultat, marge, dette, trésorerie, dividendes, perspectives : un investissement ne s’arrête pas le jour de l’achat."
-        }
-      ],
-      "tableau": {
-        "colonnes": [
-          "Stratégie",
-          "Revenu avant",
-          "Revenu après",
-          "Baisse"
-        ],
-        "lignes": [
-          [
-            "Tout sur une seule valeur",
-            "80 000",
-            "40 000",
-            "−50 %"
-          ],
-          [
-            "Cinq valeurs à parts égales",
-            "80 000",
-            "72 000",
-            "−10 %"
-          ]
-        ],
-        "note": "Exemple pédagogique : cinq lignes de même montant et de même rendement ; une seule divise son dividende par deux. La diversification n’empêche pas les mauvaises nouvelles, elle évite qu’une seule les fasse toutes subir."
-      },
-      "simulations": [
-        {
-          "type": "allocation",
-          "capital": 1000000,
-          "secteurs": [
-            {
-              "nom": "Banques",
-              "pct": 20
-            },
-            {
-              "nom": "Télécoms",
-              "pct": 20
-            },
-            {
-              "nom": "Agro-industrie",
-              "pct": 20
-            },
-            {
-              "nom": "Distribution",
-              "pct": 20
-            },
-            {
-              "nom": "Énergie",
-              "pct": 20
-            }
-          ],
-          "seuil_secteur_pct": 35
-        },
-        {
-          "type": "scenario_baisse",
-          "capital": 1000000,
-          "rendement_pct": 8,
-          "secteurs": [
-            {
-              "nom": "Banques",
-              "pct": 20
-            },
-            {
-              "nom": "Télécoms",
-              "pct": 20
-            },
-            {
-              "nom": "Agro-industrie",
-              "pct": 20
-            },
-            {
-              "nom": "Distribution",
-              "pct": 20
-            },
-            {
-              "nom": "Énergie",
-              "pct": 20
-            }
-          ]
-        }
-      ]
+     "titre": "Son endettement reste-t-il maîtrisé ?"
     },
     {
-      "type": "importance",
-      "titre": "Les ordres de bourse selon les règles de la BRVM",
-      "contenu": "Un ordre mal rédigé peut faire payer trop cher, ou ne jamais s’exécuter. La leçon 6 a présenté les deux limites de prix : au mieux et à cours limité.\nLe règlement général de la BRVM décrit un ordre par trois caractéristiques : sa limite de prix, sa durée de validité, et ce qu’il accepte en cas de réponse partielle.\nSelon la valeur, les ordres sont confrontés au fixing (un cours d’équilibre unique) ou en continu (chaque ordre rencontre aussitôt le carnet).",
-      "tableau": {
-        "colonnes": [
-          "Caractéristique",
-          "Ce que prévoit le règlement",
-          "Ce que cela change pour vous"
-        ],
-        "lignes": [
-          [
-            "Limite de prix",
-            "Au mieux : aucun prix fixé",
-            "L’exécution est favorisée, le prix n’est pas maîtrisé"
-          ],
-          [
-            "Limite de prix",
-            "À cours limité : prix maximal à l’achat, minimal à la vente",
-            "Le prix est maîtrisé, l’exécution n’est pas garantie"
-          ],
-          [
-            "Validité",
-            "Jour : présenté à la seule séance qui suit sa transmission (choix par défaut)",
-            "Non exécuté, il disparaît"
-          ],
-          [
-            "Validité",
-            "Mensuel : jusqu’à la dernière séance du mois",
-            "Il reste en attente plusieurs séances"
-          ],
-          [
-            "Validité",
-            "À exécution : sans date, présenté 3 mois au plus ; ou date limite choisie",
-            "Il peut s’exécuter longtemps après votre décision"
-          ],
-          [
-            "Réponse partielle",
-            "Sans condition : la quantité est un maximum",
-            "Il peut être servi en partie"
-          ],
-          [
-            "Réponse partielle",
-            "Tout ou rien",
-            "Servi en totalité, ou pas du tout"
-          ]
-        ],
-        "note": "Source : règlement général de la BRVM, articles 44 à 46 (version du 1er juillet 2022). Un ordre sans indication de limite est rejeté. D’autres conditions existent sur d’autres marchés (meilleure limite, exécuté ou éliminé) : demandez à votre SGI ce qu’elle propose."
-      }
-    },
-    {
-      "type": "cas",
-      "titre": "Mise en situation : acheter 5 000 actions",
-      "contenu": "Carnet fictif, à but pédagogique. Les vendeurs proposent les quantités ci-dessous. Le cours affiché n’est pas forcément le prix auquel vous achèterez : tout dépend des quantités disponibles en face de vous.",
-      "tableau": {
-        "colonnes": [
-          "Prix vendeur",
-          "Quantité proposée"
-        ],
-        "lignes": [
-          [
-            "3 280 FCFA",
-            "3 500"
-          ],
-          [
-            "3 290 FCFA",
-            "4 500"
-          ],
-          [
-            "3 300 FCFA",
-            "5 500"
-          ]
-        ],
-        "note": "Carnet fictif : les quantités et les prix ne décrivent aucune valeur réelle."
-      },
-      "formules": [
-        {
-          "nom": "Ordre au mieux pour 5 000 titres",
-          "expression": "(3 500 × 3 280 + 1 500 × 3 290) ÷ 5 000",
-          "exemple": "Prix moyen : 3 283 FCFA, au-dessus du meilleur prix affiché"
-        },
-        {
-          "nom": "Ordre à cours limité à 3 270 FCFA",
-          "expression": "Aucun vendeur à 3 270 FCFA ou moins",
-          "exemple": "Rien n’est exécuté : l’ordre attend selon sa validité"
-        },
-        {
-          "nom": "Tout ou rien : 10 000 titres limités à 3 290 FCFA",
-          "expression": "3 500 + 4 500 = 8 000 titres disponibles à ce prix ou moins",
-          "exemple": "Moins que les 10 000 demandés : aucune exécution"
-        }
-      ],
-      "etapes": [
-        {
-          "titre": "Le sens",
-          "detail": "Achat ou vente ?"
-        },
-        {
-          "titre": "La quantité",
-          "detail": "Combien de titres ?"
-        },
-        {
-          "titre": "Le prix",
-          "detail": "Au mieux ou limité, et à quelle limite ?",
-          "cle": true
-        },
-        {
-          "titre": "Le carnet",
-          "detail": "Quelles quantités sont disponibles en face ?"
-        },
-        {
-          "titre": "La validité",
-          "detail": "Jour, mensuel, à exécution ou date limite ?"
-        }
-      ],
-      "etapes_style": "frise",
-      "simulation": {
-        "type": "carnet",
-        "niveaux": [
-          {
-            "prix": 3280,
-            "quantite": 3500
-          },
-          {
-            "prix": 3290,
-            "quantite": 4500
-          },
-          {
-            "prix": 3300,
-            "quantite": 5500
-          }
-        ],
-        "quantite_defaut": 5000,
-        "codes": [
-          "SNTS",
-          "SGBC",
-          "ORAC",
-          "PALC",
-          "SPHC"
-        ]
-      }
-    },
-    {
-      "type": "importance",
-      "titre": "Une action perd 20 % : la méthode en trois étapes",
-      "contenu": "Exemple : achetée 5 000 FCFA, l’action cote 4 000 FCFA quelques semaines plus tard, soit −20 %. Une baisse doit déclencher une analyse, pas une réaction.",
-      "etapes": [
-        {
-          "titre": "Vérifier l’actualité",
-          "detail": "Résultats publiés, changement de direction, perte d’un marché, réduction du dividende : la baisse vient-elle de l’entreprise, ou de tout le marché ?"
-        },
-        {
-          "titre": "Relire les fondamentaux",
-          "detail": "Chiffre d’affaires, résultat net, dette, trésorerie, dividende soutenable, perspectives."
-        },
-        {
-          "titre": "Décider sans précipitation",
-          "detail": "Conserver si les fondamentaux tiennent ; réduire si la ligne pèse trop ou si les perspectives se dégradent ; vendre si les raisons de l’achat ne tiennent plus.",
-          "cle": true
-        }
-      ],
-      "points": [
-        {
-          "titre": "Une baisse n’est pas une affaire automatique",
-          "detail": "Une société dont les comptes se dégradent peut continuer de baisser."
-        }
-      ]
-    },
-    {
-      "type": "piege",
-      "titre": "L’épargne de précaution, et les erreurs qui coûtent cher",
-      "contenu": "Votre première protection est financière : ne placez jamais en Bourse votre épargne de précaution (3 à 6 mois de dépenses essentielles).\nVotre deuxième protection est la diversification : limitez chaque société à 20 % et chaque secteur à 35 % de votre portefeuille.\nVotre troisième protection est la discipline d’exécution : utilisez des ordres à cours limité et consultez le score de liquidité avant d’acheter.",
-      "formules": [
-        {
-          "nom": "Épargne de précaution",
-          "expression": "Dépenses mensuelles essentielles × 3 à 6 mois",
-          "exemple": "250 000 × 6 = 1 500 000 FCFA, à garder hors du portefeuille boursier"
-        }
-      ],
-      "points": [
-        {
-          "titre": "Investir son épargne d’urgence",
-          "detail": "Un imprévu oblige alors à vendre pendant une baisse."
-        },
-        {
-          "titre": "Vendre dans la panique",
-          "detail": "Un cours qui baisse ne dit pas, à lui seul, que l’entreprise s’est affaiblie."
-        },
-        {
-          "titre": "Tout concentrer sur une valeur",
-          "detail": "Un seul problème touche alors une grande partie du capital."
-        },
-        {
-          "titre": "Ignorer la liquidité",
-          "detail": "Un ordre au mieux sur une valeur peu échangée peut s’exécuter à un prix défavorable."
-        },
-        {
-          "titre": "Acheter seulement pour le dividende",
-          "detail": "Un rendement élevé peut cacher des résultats qui se dégradent."
-        },
-        {
-          "titre": "Suivre les rumeurs",
-          "detail": "Décider sur des informations vérifiables : comptes, communiqués officiels, avis de la BRVM."
-        }
-      ]
-    },
-    {
-      "type": "retenir",
-      "titre": "Votre check-list avant le premier achat",
-      "contenu": "Un investisseur discipliné ne prédit pas les baisses : il a une méthode pour les traverser. Si l’une de ces conditions manque, prenez le temps de la remplir avant de passer votre ordre.",
-      "points": [
-        {
-          "titre": "Mon épargne de précaution est constituée",
-          "detail": "Trois à six mois de dépenses essentielles, disponibles."
-        },
-        {
-          "titre": "Mon horizon est long",
-          "detail": "Je peux laisser cet argent investi plusieurs années et accepter les variations."
-        },
-        {
-          "titre": "J’ai vérifié la liquidité de la valeur",
-          "detail": "Volumes, fréquence des échanges, carnet d’ordres."
-        },
-        {
-          "titre": "J’ai étudié l’entreprise",
-          "detail": "Dernier rapport annuel ou dernières publications."
-        },
-        {
-          "titre": "Je sais quel ordre je passe",
-          "detail": "À cours limité si la valeur s’échange peu ; validité choisie, pas subie."
-        },
-        {
-          "titre": "Trois risques, trois protections",
-          "detail": "Marché, entreprise, liquidité ; diversifier, investir longtemps, se former."
-        }
-      ]
+     "titre": "Le dividende est-il soutenable dans les années qui viennent ?",
+     "detail": "Un rendement très élevé peut venir d’un cours qui a fortement baissé : ce n’est pas automatiquement une affaire."
     }
-  ],
-  "charts": [],
-  "quiz": [
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Trois protections, et l’effet de la diversification",
+   "contenu": "Aucun investissement n’est sans risque. Trois principes évitent pourtant les erreurs les plus coûteuses.\nExemple pédagogique : 1 000 000 FCFA rapportant 8 % de dividendes, soit 80 000 FCFA par an. Une société divise son dividende par deux.",
+   "points": [
     {
-      "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
-      "options": [
-        "Parce que les dividendes y sont imposés à la source",
-        "Parce que la bourse est réservée aux résidents ivoiriens",
-        "Parce qu’il faudrait peut-être vendre en pleine baisse",
-        "Parce que les SGI refusent les petits montants"
-      ],
-      "correct": 2,
-      "explication": "Les actions peuvent perdre de la valeur à court terme. Si un imprévu survient, vous pourriez devoir vendre à perte. L’épargne de précaution doit rester disponible, à l’écart des variations de la bourse."
+     "titre": "Diversifier",
+     "detail": "Répartir entre plusieurs sociétés et secteurs. Repères pédagogiques pour un débutant : pas plus de 20 % sur une société, ni plus de 35 % sur un secteur.",
+     "verifier": "Deux sociétés différentes peuvent dépendre de la même matière première ou du même marché."
     },
     {
-      "question": "Votre revenu de dividendes vient à parts égales de cinq sociétés. L’une divise son dividende par deux. De combien baisse votre revenu total ?",
-      "options": [
-        "−50 %",
-        "−20 %",
-        "−10 %",
-        "−5 %"
-      ],
-      "correct": 2,
-      "explication": "Chaque société pèse 20 % du revenu. La moitié de 20 %, c’est 10 % du revenu total."
+     "titre": "Investir pour plusieurs années",
+     "detail": "Un portefeuille de 1 000 000 FCFA qui vaut 850 000 FCFA six mois plus tard a perdu 15 % de valeur, même sans vente. Avec un horizon long, on n’est pas forcé de vendre au mauvais moment."
     },
     {
-      "question": "Quel risque la diversification réduit-elle le plus directement ?",
-      "options": [
-        "Le risque de marché",
-        "Le risque propre à une entreprise",
-        "Le risque de change",
-        "Tous les risques à la fois"
-      ],
-      "correct": 1,
-      "explication": "Répartir entre plusieurs sociétés limite l’effet d’une mauvaise nouvelle sur l’une d’elles. Une baisse générale du marché, elle, touche toutes les lignes."
-    },
-    {
-      "question": "Qu’appelle-t-on le risque de liquidité ?",
-      "options": [
-        "La perte de valeur due à l’inflation chaque année",
-        "La difficulté à vendre sans faire baisser le prix",
-        "La faillite d’une société cotée",
-        "La variation du franc CFA face au dollar"
-      ],
-      "correct": 1,
-      "explication": "Sur une valeur peu échangée, il peut y avoir peu d’acheteurs : il faut alors attendre, ou accepter un prix plus bas."
-    },
-    {
-      "question": "Vos dépenses mensuelles essentielles sont de 200 000 FCFA. Combien prévoir pour six mois d’épargne de précaution ?",
-      "options": [
-        "600 000 FCFA",
-        "1 200 000 FCFA",
-        "2 000 000 FCFA",
-        "200 000 FCFA"
-      ],
-      "correct": 1,
-      "explication": "200 000 × 6 = 1 200 000 FCFA, à garder disponibles et séparés du portefeuille boursier."
-    },
-    {
-      "question": "Vous passez un ordre d’achat à cours limité à 3 270 FCFA ; le vendeur le moins cher demande 3 280 FCFA. Que se passe-t-il ?",
-      "options": [
-        "L’ordre est exécuté tout de suite à 3 280 FCFA",
-        "L’ordre attend un vendeur à 3 270 FCFA ou moins",
-        "L’ordre est exécuté à 3 270 FCFA, quoi qu’il arrive ensuite",
-        "La BRVM rejette l’ordre"
-      ],
-      "correct": 1,
-      "explication": "Un ordre à cours limité ne s’exécute jamais au-delà de sa limite. Il reste en attente pendant sa durée de validité."
-    },
-    {
-      "question": "Que signifie un ordre « tout ou rien » ?",
-      "options": [
-        "Il est exécuté au meilleur prix disponible",
-        "Il ne peut pas être servi partiellement",
-        "Il reste valable trois mois",
-        "Il n’a pas de limite de prix"
-      ],
-      "correct": 1,
-      "explication": "Le règlement général de la BRVM définit l’ordre « tout ou rien » comme un ordre qui ne peut pas être répondu partiellement."
-    },
-    {
-      "question": "Vous ne précisez pas la durée de validité de votre ordre. Comment est-il considéré ?",
-      "options": [
-        "Mensuel, jusqu’à la fin du mois en cours",
-        "Jour : valable une seule séance",
-        "À exécution, valable pendant trois mois",
-        "Annulé avant même d’être transmis"
-      ],
-      "correct": 1,
-      "explication": "Selon le règlement général de la BRVM, un ordre sans indication de validité est réputé « jour »."
-    },
-    {
-      "question": "Combien de valeurs sur les 48 cotées atteignent la classe A de liquidité au 23 novembre 2026 ?",
-      "options": [
-        "4 valeurs",
-        "24 valeurs",
-        "36 valeurs",
-        "Toutes les 48 valeurs"
-      ],
-      "correct": 0,
-      "explication": "Seules 4 valeurs (SNTS, SGBC, BBGC, BOAC) atteignent la classe A, ce qui impose de vérifier la liquidité avant tout ordre important."
-    },
-    {
-      "question": "Pourquoi un écart achat/vente de 8,99 % sur un titre peu liquide pèse-t-il sur votre rendement ?",
-      "options": [
-        "Parce qu’il est remboursé par la SGI",
-        "Parce qu’acheter au prix vendeur puis revendre au prix acheteur coûte d’emblée près de 9 %",
-        "Parce que l’IRVM passe à 8,99 %",
-        "Parce que le dividende est doublé"
-      ],
-      "correct": 1,
-      "explication": "Un spread large agit comme un coût d’entrée/sortie immédiat : il faut plusieurs années de dividende ou de hausse pour le compenser."
-    },
-    {
-      "question": "Quel recul réel a subi SCRC sur 52 semaines au 23 novembre 2026 depuis son plus-haut ?",
-      "options": [
-        "−5 %",
-        "−15 %",
-        "−68,6 %",
-        "0 %"
-      ],
-      "correct": 2,
-      "explication": "SCRC est passée de 3 920 FCFA à 1 230 FCFA (−68,6 %), illustrant qu’une action individuelle peut perdre plus de la moitié de sa valeur."
+     "titre": "Se former et suivre ses sociétés",
+     "detail": "Chiffre d’affaires, résultat, marge, dette, trésorerie, dividendes, perspectives : un investissement ne s’arrête pas le jour de l’achat."
     }
-  ],
-  "qcm": {
-    "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
-    "options": [
-      "Parce que les dividendes y sont imposés à la source",
-      "Parce que la bourse est réservée aux résidents ivoiriens",
-      "Parce qu’il faudrait peut-être vendre en pleine baisse",
-      "Parce que les SGI refusent les petits montants"
+   ],
+   "tableau": {
+    "colonnes": [
+     "Stratégie",
+     "Revenu avant",
+     "Revenu après",
+     "Baisse"
     ],
-    "correct": 2,
-    "explication": "Les actions peuvent perdre de la valeur à court terme. Si un imprévu survient, vous pourriez devoir vendre à perte. L’épargne de précaution doit rester disponible, à l’écart des variations de la bourse."
-  },
-  "liens": [
+    "lignes": [
+     [
+      "Tout sur une seule valeur",
+      "80 000",
+      "40 000",
+      "−50 %"
+     ],
+     [
+      "Cinq valeurs à parts égales",
+      "80 000",
+      "72 000",
+      "−10 %"
+     ]
+    ],
+    "note": "Exemple pédagogique : cinq lignes de même montant et de même rendement ; une seule divise son dividende par deux. La diversification n’empêche pas les mauvaises nouvelles, elle évite qu’une seule les fasse toutes subir."
+   },
+   "simulations": [
     {
-      "label": "Classement de liquidité",
-      "href": "/liquidite"
+     "type": "allocation",
+     "capital": 1000000,
+     "secteurs": [
+      {
+       "nom": "Banques",
+       "pct": 20
+      },
+      {
+       "nom": "Télécoms",
+       "pct": 20
+      },
+      {
+       "nom": "Agro-industrie",
+       "pct": 20
+      },
+      {
+       "nom": "Distribution",
+       "pct": 20
+      },
+      {
+       "nom": "Énergie",
+       "pct": 20
+      }
+     ],
+     "seuil_secteur_pct": 35
     },
     {
-      "label": "Espace dividendes",
-      "href": "/dividendes"
-    },
-    {
-      "label": "Choisir sa SGI",
-      "href": "/comparateur-sgi"
+     "type": "scenario_baisse",
+     "capital": 1000000,
+     "rendement_pct": 8,
+     "secteurs": [
+      {
+       "nom": "Banques",
+       "pct": 20
+      },
+      {
+       "nom": "Télécoms",
+       "pct": 20
+      },
+      {
+       "nom": "Agro-industrie",
+       "pct": 20
+      },
+      {
+       "nom": "Distribution",
+       "pct": 20
+      },
+      {
+       "nom": "Énergie",
+       "pct": 20
+      }
+     ]
     }
-  ],
-  "module": "Module 2 — Dividendes et investissement pratique",
-  "nouveaute": {
-    "type": "mis_a_jour",
-    "depuis": "2026-11-24"
+   ]
+  },
+  {
+   "type": "importance",
+   "titre": "Les ordres de bourse selon les règles de la BRVM",
+   "contenu": "Un ordre mal rédigé peut faire payer trop cher, ou ne jamais s’exécuter. La leçon 6 a présenté les deux limites de prix : au mieux et à cours limité.\nLe règlement général de la BRVM décrit un ordre par trois caractéristiques : sa limite de prix, sa durée de validité, et ce qu’il accepte en cas de réponse partielle.\nSelon la valeur, les ordres sont confrontés au fixing (un cours d’équilibre unique) ou en continu (chaque ordre rencontre aussitôt le carnet).",
+   "tableau": {
+    "colonnes": [
+     "Caractéristique",
+     "Ce que prévoit le règlement",
+     "Ce que cela change pour vous"
+    ],
+    "lignes": [
+     [
+      "Limite de prix",
+      "Au mieux : aucun prix fixé",
+      "L’exécution est favorisée, le prix n’est pas maîtrisé"
+     ],
+     [
+      "Limite de prix",
+      "À cours limité : prix maximal à l’achat, minimal à la vente",
+      "Le prix est maîtrisé, l’exécution n’est pas garantie"
+     ],
+     [
+      "Validité",
+      "Jour : présenté à la seule séance qui suit sa transmission (choix par défaut)",
+      "Non exécuté, il disparaît"
+     ],
+     [
+      "Validité",
+      "Mensuel : jusqu’à la dernière séance du mois",
+      "Il reste en attente plusieurs séances"
+     ],
+     [
+      "Validité",
+      "À exécution : sans date, présenté 3 mois au plus ; ou date limite choisie",
+      "Il peut s’exécuter longtemps après votre décision"
+     ],
+     [
+      "Réponse partielle",
+      "Sans condition : la quantité est un maximum",
+      "Il peut être servi en partie"
+     ],
+     [
+      "Réponse partielle",
+      "Tout ou rien",
+      "Servi en totalité, ou pas du tout"
+     ]
+    ],
+    "note": "Source : règlement général de la BRVM, articles 44 à 46 (version du 1er juillet 2022). Un ordre sans indication de limite est rejeté. D’autres conditions existent sur d’autres marchés (meilleure limite, exécuté ou éliminé) : demandez à votre SGI ce qu’elle propose."
+   }
+  },
+  {
+   "type": "cas",
+   "titre": "Mise en situation : acheter 5 000 actions",
+   "contenu": "Carnet fictif, à but pédagogique. Les vendeurs proposent les quantités ci-dessous. Le cours affiché n’est pas forcément le prix auquel vous achèterez : tout dépend des quantités disponibles en face de vous.",
+   "tableau": {
+    "colonnes": [
+     "Prix vendeur",
+     "Quantité proposée"
+    ],
+    "lignes": [
+     [
+      "3 280 FCFA",
+      "3 500"
+     ],
+     [
+      "3 290 FCFA",
+      "4 500"
+     ],
+     [
+      "3 300 FCFA",
+      "5 500"
+     ]
+    ],
+    "note": "Carnet fictif : les quantités et les prix ne décrivent aucune valeur réelle."
+   },
+   "formules": [
+    {
+     "nom": "Ordre au mieux pour 5 000 titres",
+     "expression": "(3 500 × 3 280 + 1 500 × 3 290) ÷ 5 000",
+     "exemple": "Prix moyen : 3 283 FCFA, au-dessus du meilleur prix affiché"
+    },
+    {
+     "nom": "Ordre à cours limité à 3 270 FCFA",
+     "expression": "Aucun vendeur à 3 270 FCFA ou moins",
+     "exemple": "Rien n’est exécuté : l’ordre attend selon sa validité"
+    },
+    {
+     "nom": "Tout ou rien : 10 000 titres limités à 3 290 FCFA",
+     "expression": "3 500 + 4 500 = 8 000 titres disponibles à ce prix ou moins",
+     "exemple": "Moins que les 10 000 demandés : aucune exécution"
+    }
+   ],
+   "etapes": [
+    {
+     "titre": "Le sens",
+     "detail": "Achat ou vente ?"
+    },
+    {
+     "titre": "La quantité",
+     "detail": "Combien de titres ?"
+    },
+    {
+     "titre": "Le prix",
+     "detail": "Au mieux ou limité, et à quelle limite ?",
+     "cle": true
+    },
+    {
+     "titre": "Le carnet",
+     "detail": "Quelles quantités sont disponibles en face ?"
+    },
+    {
+     "titre": "La validité",
+     "detail": "Jour, mensuel, à exécution ou date limite ?"
+    }
+   ],
+   "etapes_style": "frise",
+   "simulation": {
+    "type": "carnet",
+    "niveaux": [
+     {
+      "prix": 3280,
+      "quantite": 3500
+     },
+     {
+      "prix": 3290,
+      "quantite": 4500
+     },
+     {
+      "prix": 3300,
+      "quantite": 5500
+     }
+    ],
+    "niveaux_achat": [
+     {
+      "prix": 3270,
+      "quantite": 2200
+     },
+     {
+      "prix": 3260,
+      "quantite": 3400
+     },
+     {
+      "prix": 3250,
+      "quantite": 4800
+     }
+    ],
+    "quantite_defaut": 5000,
+    "codes": [
+     "SNTS",
+     "SGBC",
+     "ORAC",
+     "PALC",
+     "SPHC"
+    ]
+   }
+  },
+  {
+   "type": "importance",
+   "titre": "Une action perd 20 % : la méthode en trois étapes",
+   "contenu": "Exemple : achetée 5 000 FCFA, l’action cote 4 000 FCFA quelques semaines plus tard, soit −20 %. Une baisse doit déclencher une analyse, pas une réaction.",
+   "etapes": [
+    {
+     "titre": "Vérifier l’actualité",
+     "detail": "Résultats publiés, changement de direction, perte d’un marché, réduction du dividende : la baisse vient-elle de l’entreprise, ou de tout le marché ?"
+    },
+    {
+     "titre": "Relire les fondamentaux",
+     "detail": "Chiffre d’affaires, résultat net, dette, trésorerie, dividende soutenable, perspectives."
+    },
+    {
+     "titre": "Décider sans précipitation",
+     "detail": "Conserver si les fondamentaux tiennent ; réduire si la ligne pèse trop ou si les perspectives se dégradent ; vendre si les raisons de l’achat ne tiennent plus.",
+     "cle": true
+    }
+   ],
+   "points": [
+    {
+     "titre": "Une baisse n’est pas une affaire automatique",
+     "detail": "Une société dont les comptes se dégradent peut continuer de baisser."
+    }
+   ]
+  },
+  {
+   "type": "piege",
+   "titre": "L’épargne de précaution, et les erreurs qui coûtent cher",
+   "contenu": "Votre première protection est financière : ne placez jamais en Bourse votre épargne de précaution (3 à 6 mois de dépenses essentielles).\nVotre deuxième protection est la diversification : limitez chaque société à 20 % et chaque secteur à 35 % de votre portefeuille.\nVotre troisième protection est la discipline d’exécution : utilisez des ordres à cours limité et consultez le score de liquidité avant d’acheter.",
+   "formules": [
+    {
+     "nom": "Épargne de précaution",
+     "expression": "Dépenses mensuelles essentielles × 3 à 6 mois",
+     "exemple": "250 000 × 6 = 1 500 000 FCFA, à garder hors du portefeuille boursier"
+    }
+   ],
+   "points": [
+    {
+     "titre": "Investir son épargne d’urgence",
+     "detail": "Un imprévu oblige alors à vendre pendant une baisse."
+    },
+    {
+     "titre": "Vendre dans la panique",
+     "detail": "Un cours qui baisse ne dit pas, à lui seul, que l’entreprise s’est affaiblie."
+    },
+    {
+     "titre": "Tout concentrer sur une valeur",
+     "detail": "Un seul problème touche alors une grande partie du capital."
+    },
+    {
+     "titre": "Ignorer la liquidité",
+     "detail": "Un ordre au mieux sur une valeur peu échangée peut s’exécuter à un prix défavorable."
+    },
+    {
+     "titre": "Acheter seulement pour le dividende",
+     "detail": "Un rendement élevé peut cacher des résultats qui se dégradent."
+    },
+    {
+     "titre": "Suivre les rumeurs",
+     "detail": "Décider sur des informations vérifiables : comptes, communiqués officiels, avis de la BRVM."
+    }
+   ]
+  },
+  {
+   "type": "retenir",
+   "titre": "Votre check-list avant le premier achat",
+   "contenu": "Un investisseur discipliné ne prédit pas les baisses : il a une méthode pour les traverser. Si l’une de ces conditions manque, prenez le temps de la remplir avant de passer votre ordre.",
+   "points": [
+    {
+     "titre": "Mon épargne de précaution est constituée",
+     "detail": "Trois à six mois de dépenses essentielles, disponibles."
+    },
+    {
+     "titre": "Mon horizon est long",
+     "detail": "Je peux laisser cet argent investi plusieurs années et accepter les variations."
+    },
+    {
+     "titre": "J’ai vérifié la liquidité de la valeur",
+     "detail": "Volumes, fréquence des échanges, carnet d’ordres."
+    },
+    {
+     "titre": "J’ai étudié l’entreprise",
+     "detail": "Dernier rapport annuel ou dernières publications."
+    },
+    {
+     "titre": "Je sais quel ordre je passe",
+     "detail": "À cours limité si la valeur s’échange peu ; validité choisie, pas subie."
+    },
+    {
+     "titre": "Trois risques, trois protections",
+     "detail": "Marché, entreprise, liquidité ; diversifier, investir longtemps, se former."
+    }
+   ]
   }
+ ],
+ "charts": [],
+ "quiz": [
+  {
+   "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
+   "options": [
+    "Parce que les dividendes y sont imposés à la source",
+    "Parce que la bourse est réservée aux résidents ivoiriens",
+    "Parce qu’il faudrait peut-être vendre en pleine baisse",
+    "Parce que les SGI refusent les petits montants"
+   ],
+   "correct": 2,
+   "notion": "Épargne de précaution",
+   "explication": "Les actions peuvent perdre de la valeur à court terme. Si un imprévu survient, vous pourriez devoir vendre à perte. L’épargne de précaution doit rester disponible, à l’écart des variations de la bourse."
+  },
+  {
+   "question": "Votre revenu de dividendes vient à parts égales de cinq sociétés. L’une divise son dividende par deux. De combien baisse votre revenu total ?",
+   "options": [
+    "−50 %",
+    "−20 %",
+    "−10 %",
+    "−5 %"
+   ],
+   "correct": 2,
+   "notion": "Diversification",
+   "explication": "Chaque société pèse 20 % du revenu. La moitié de 20 %, c’est 10 % du revenu total."
+  },
+  {
+   "question": "Quel risque la diversification réduit-elle le plus directement ?",
+   "options": [
+    "Le risque de marché",
+    "Le risque propre à une entreprise",
+    "Le risque de change",
+    "Tous les risques à la fois"
+   ],
+   "correct": 1,
+   "notion": "Diversification",
+   "explication": "Répartir entre plusieurs sociétés limite l’effet d’une mauvaise nouvelle sur l’une d’elles. Une baisse générale du marché, elle, touche toutes les lignes."
+  },
+  {
+   "question": "Qu’appelle-t-on le risque de liquidité ?",
+   "options": [
+    "La perte de valeur due à l’inflation chaque année",
+    "La difficulté à vendre sans faire baisser le prix",
+    "La faillite d’une société cotée",
+    "La variation du franc CFA face au dollar"
+   ],
+   "correct": 1,
+   "notion": "Liquidité",
+   "explication": "Sur une valeur peu échangée, il peut y avoir peu d’acheteurs : il faut alors attendre, ou accepter un prix plus bas."
+  },
+  {
+   "question": "Vos dépenses mensuelles essentielles sont de 200 000 FCFA. Combien prévoir pour six mois d’épargne de précaution ?",
+   "options": [
+    "600 000 FCFA",
+    "1 200 000 FCFA",
+    "2 000 000 FCFA",
+    "200 000 FCFA"
+   ],
+   "correct": 1,
+   "notion": "Épargne de précaution",
+   "explication": "200 000 × 6 = 1 200 000 FCFA, à garder disponibles et séparés du portefeuille boursier."
+  },
+  {
+   "question": "Vous passez un ordre d’achat à cours limité à 3 270 FCFA ; le vendeur le moins cher demande 3 280 FCFA. Que se passe-t-il ?",
+   "options": [
+    "L’ordre est exécuté tout de suite à 3 280 FCFA",
+    "L’ordre attend un vendeur à 3 270 FCFA ou moins",
+    "L’ordre est exécuté à 3 270 FCFA, quoi qu’il arrive ensuite",
+    "La BRVM rejette l’ordre"
+   ],
+   "correct": 1,
+   "notion": "Passer un ordre",
+   "explication": "Un ordre à cours limité ne s’exécute jamais au-delà de sa limite. Il reste en attente pendant sa durée de validité."
+  },
+  {
+   "question": "Que signifie un ordre « tout ou rien » ?",
+   "options": [
+    "Il est exécuté au meilleur prix disponible",
+    "Il ne peut pas être servi partiellement",
+    "Il reste valable trois mois",
+    "Il n’a pas de limite de prix"
+   ],
+   "correct": 1,
+   "notion": "Règles des ordres BRVM",
+   "explication": "Le règlement général de la BRVM définit l’ordre « tout ou rien » comme un ordre qui ne peut pas être répondu partiellement."
+  },
+  {
+   "question": "Vous ne précisez pas la durée de validité de votre ordre. Comment est-il considéré ?",
+   "options": [
+    "Mensuel, jusqu’à la fin du mois en cours",
+    "Jour : valable une seule séance",
+    "À exécution, valable pendant trois mois",
+    "Annulé avant même d’être transmis"
+   ],
+   "correct": 1,
+   "notion": "Règles des ordres BRVM",
+   "explication": "Selon le règlement général de la BRVM, un ordre sans indication de validité est réputé « jour »."
+  },
+  {
+   "question": "Combien de valeurs sur les 48 cotées atteignent la classe A de liquidité au 23 novembre 2026 ?",
+   "options": [
+    "4 valeurs",
+    "24 valeurs",
+    "36 valeurs",
+    "Toutes les 48 valeurs"
+   ],
+   "correct": 0,
+   "notion": "Liquidité",
+   "explication": "Seules 4 valeurs (SNTS, SGBC, BBGC, BOAC) atteignent la classe A, ce qui impose de vérifier la liquidité avant tout ordre important."
+  },
+  {
+   "question": "Pourquoi un écart achat/vente de 8,99 % sur un titre peu liquide pèse-t-il sur votre rendement ?",
+   "options": [
+    "Parce qu’il est remboursé par la SGI",
+    "Parce qu’acheter au prix vendeur puis revendre au prix acheteur coûte d’emblée près de 9 %",
+    "Parce que l’IRVM passe à 8,99 %",
+    "Parce que le dividende est doublé"
+   ],
+   "correct": 1,
+   "notion": "Liquidité",
+   "explication": "Un spread large agit comme un coût d’entrée/sortie immédiat : il faut plusieurs années de dividende ou de hausse pour le compenser."
+  },
+  {
+   "question": "Quel recul réel a subi SCRC sur 52 semaines au 23 novembre 2026 depuis son plus-haut ?",
+   "options": [
+    "−5 %",
+    "−15 %",
+    "−68,6 %",
+    "0 %"
+   ],
+   "correct": 2,
+   "notion": "Les trois risques",
+   "explication": "SCRC est passée de 3 920 FCFA à 1 230 FCFA (−68,6 %), illustrant qu’une action individuelle peut perdre plus de la moitié de sa valeur."
+  }
+ ],
+ "qcm": {
+  "question": "Pourquoi ne faut-il pas investir son épargne d’urgence en bourse ?",
+  "options": [
+   "Parce que les dividendes y sont imposés à la source",
+   "Parce que la bourse est réservée aux résidents ivoiriens",
+   "Parce qu’il faudrait peut-être vendre en pleine baisse",
+   "Parce que les SGI refusent les petits montants"
+  ],
+  "correct": 2,
+  "notion": "Épargne de précaution",
+  "explication": "Les actions peuvent perdre de la valeur à court terme. Si un imprévu survient, vous pourriez devoir vendre à perte. L’épargne de précaution doit rester disponible, à l’écart des variations de la bourse."
+ },
+ "liens": [
+  {
+   "label": "Classement de liquidité",
+   "href": "/liquidite"
+  },
+  {
+   "label": "Espace dividendes",
+   "href": "/dividendes"
+  },
+  {
+   "label": "Choisir sa SGI",
+   "href": "/comparateur-sgi"
+  }
+ ]
 }

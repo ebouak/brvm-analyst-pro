@@ -84,7 +84,11 @@ export function exemplesRendement(
 export interface HistoriqueValeur {
   code: string;
   nom: string;
-  montants: { exercice: number; montant: number | null; baseNette: boolean }[];
+  /**
+   * `base` : base fiscale telle qu'enregistrée (`net`, `brut`…) ; omise ou `null`
+   * quand aucune n'est renseignée — le montant est alors « de base non vérifiée ».
+   */
+  montants: { exercice: number; montant: number | null; baseNette: boolean; base?: string | null }[];
   /** Exercices avec un dividende positif. */
   versements: number;
   /** Baisses d'un exercice versé au suivant. */
@@ -107,7 +111,9 @@ export function historiqueDividendes(
   for (const code of codes) {
     const montants = exercices.map((exercice) => {
       const d = concernes.find((x) => x.code === code && x.exercice === exercice && x.montant != null && x.montant > 0);
-      return { exercice, montant: d ? (d.montant as number) : null, baseNette: d?.base_fiscale === 'net' };
+      return d
+        ? { exercice, montant: d.montant as number, baseNette: d.base_fiscale === 'net', base: d.base_fiscale }
+        : { exercice, montant: null, baseNette: false };
     });
     const verses = montants.filter((m) => m.montant != null).map((m) => m.montant as number);
     if (verses.length === 0) {
