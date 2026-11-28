@@ -599,13 +599,28 @@ export const glossaireItemSchema = z.object({
   definition: z.string().min(1).max(1000),
 });
 
+/**
+ * Couverture d'un cours : chemin interne servi par `public/` (« /academy/cover-….svg »)
+ * ou URL https. `//hôte` est refusé, un navigateur le lit comme une adresse externe.
+ *
+ * Ne PAS revenir à `z.string().url()` : il rejette les chemins internes, et un
+ * contenu invalide fait renvoyer 404 à `loadCourseForLearning`. Le 2026-11-25,
+ * les couvertures SVG des Niveaux 2 à 4 (#403) ont ainsi fermé ces trois niveaux
+ * à tous leurs acheteurs.
+ */
+export const coverUrlSchema = z
+  .string()
+  .refine((v) => /^\/(?![/\\])\S*$/.test(v) || /^https:\/\/\S+$/i.test(v), {
+    message: 'Chemin interne (/…) ou URL https attendu.',
+  });
+
 export const courseContentSchema = z.object({
   titre: z.string().min(1).max(200),
   niveau: z.enum(NIVEAUX),
   intro: z.string().min(1).max(3000),
   // Visuel de couverture (bannière en tête), défini côté serveur/admin — jamais
   // par le LLM. Stocké dans content pour survivre à la régénération (préservé).
-  coverUrl: z.string().url().nullable().optional(),
+  coverUrl: coverUrlSchema.nullable().optional(),
   // Liens « À lire aussi » vers d'autres cours (navigation pleine page).
   relatedLinks: z
     .array(z.object({ slug: z.string().min(1), label: z.string().min(1).max(120) }))
