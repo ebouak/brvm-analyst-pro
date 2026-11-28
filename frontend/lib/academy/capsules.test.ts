@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   calculerActiviteCalendrier,
   construireFiltresCapsules,
-  estLeconGratuite,
   extraireCapsulesLecon,
   extraireCartesRevision,
   extraireMetadonneesCours,
@@ -23,13 +22,7 @@ describe('formatDuree', () => {
   });
 });
 
-describe('estLeconGratuite & formatCours', () => {
-  it('n’ouvre gratuitement que la leçon 1 du niveau 1', () => {
-    expect(estLeconGratuite('academy-niveau-1-initiation', 0)).toBe(true);
-    expect(estLeconGratuite('academy-niveau-1-initiation', 1)).toBe(false);
-    expect(estLeconGratuite('academy-niveau-2-fondamental', 0)).toBe(false);
-  });
-
+describe('formatCours', () => {
   it('distingue parcours certifiant et atelier court', () => {
     expect(formatCours('academy-niveau-3-technique')).toBe('parcours');
     expect(formatCours('comprendre-le-per-et-la-valorisation-a-la-brvm')).toBe('atelier');

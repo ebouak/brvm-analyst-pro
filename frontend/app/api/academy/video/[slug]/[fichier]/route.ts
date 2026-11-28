@@ -2,14 +2,14 @@
 //
 // Redirige vers une URL signée de courte durée sur le bucket PRIVÉ
 // `academy-videos`, seulement si la personne peut suivre le niveau du cours
-// (ou sur la Leçon 1 gratuite du Niveau 1) ET que la requête provient d'un
+// (ou sur une leçon offerte, voir lib/academy/leconsOffertes.ts) ET que la requête provient d'un
 // lecteur embarqué sur la plateforme (et non d'un onglet direct ou d'un
 // scraper). Le lecteur <video> suit la redirection sans exposer d'URL longue durée.
 import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { BUCKET_VIDEOS, FICHIER_VALIDE, SLUG_VALIDE } from '@/lib/academy/videos';
-import { estLeconGratuite } from '@/lib/academy/capsules';
+import { accesOffert, leconOuverte } from '@/lib/academy/leconsOffertes';
 import { dureeUrlSignee, verifierRequeteVideo } from '@/lib/academy/videoProtection';
 
 export const dynamic = 'force-dynamic';
@@ -35,18 +35,22 @@ export async function GET(
     );
   }
 
+  // FICHIER_VALIDE borne le numéro à 1-99 : l'index du chemin JSON est un entier positif.
+  const numero = Number(match[1]);
   const admin = getServiceClient();
   const { data: cours } = await admin
     .from('academy_courses')
-    .select('niveau')
+    .select(`niveau, titre_lecon:content->lessons->${numero - 1}->>titre`)
     .eq('slug', slug)
     .eq('published', true)
     .maybeSingle();
   if (!cours) return NextResponse.json({ error: 'Cours introuvable.' }, { status: 404, headers: NO_STORE });
 
-  const numero = Number(match[1]);
-  const { allowed } = await peutSuivreNiveau((cours as { niveau: string | null }).niveau);
-  if (!allowed && !estLeconGratuite(slug, numero - 1)) {
+  // L'analyseur de types de supabase-js ne lit pas un chemin JSON à index variable ;
+  // la forme a été vérifiée en lecture réelle (titre exact, ou null hors limites).
+  const { niveau, titre_lecon } = cours as unknown as { niveau: string | null; titre_lecon: string | null };
+  const { allowed, acces } = await peutSuivreNiveau(niveau);
+  if (!allowed && !leconOuverte(accesOffert(slug, titre_lecon), Boolean(acces.userId))) {
     return NextResponse.json({ error: 'Accès réservé.' }, { status: 403, headers: NO_STORE });
   }
 

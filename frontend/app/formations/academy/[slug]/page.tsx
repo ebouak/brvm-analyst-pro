@@ -9,7 +9,7 @@ import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
 import ApercuCours, { type LeconApercu } from '@/components/academy/ApercuCours';
 import type { Nouveaute } from '@/lib/academy/nouveaute';
-import { estLeconGratuite } from '@/lib/academy/capsules';
+import { accesOffert, leconOuverte } from '@/lib/academy/leconsOffertes';
 import { filigraneUtilisateur } from '@/lib/academy/videoProtection';
 import { produitsActifs } from '@/lib/billing/chariow/catalogue';
 import { jsonLdScript } from '@/lib/jsonLd';
@@ -86,7 +86,8 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
 /**
  * Cours Academy en RENDU NATIF (shell type Coursera).
- * La Leçon 1 du Niveau 1 reste ouverte en essai gratuit interactif pour tous.
+ * Les leçons offertes (lib/academy/leconsOffertes.ts) s'ouvrent en essai interactif :
+ * la Leçon 1 du Niveau 1 pour tous, le cas Sonatel du Niveau 2 avec un compte gratuit.
  */
 export default async function AcademyCoursePage(
   props: {
@@ -112,27 +113,31 @@ export default async function AcademyCoursePage(
     provider: { '@type': 'Organization', name: 'WESTBOURSE', url: SITE_URL },
   };
 
-  // Abonnement premium OU niveau du cours acheté à l'unité (Chariow) OU Leçon 1 du Niveau 1 offerte.
+  // Abonnement premium OU niveau du cours acheté à l'unité (Chariow) OU leçon offerte
+  // (lib/academy/leconsOffertes.ts : reconnue à son titre, ouverte à tous ou avec un compte).
   const gate = await peutSuivreNiveau(card.niveau);
-  const freeTrial = !gate.allowed && estLeconGratuite(params.slug, requestedIdx);
+  const connecte = Boolean(gate.acces.userId);
+  const apercu = gate.allowed ? null : await getContenuApercu(params.slug);
+  const offre = apercu ? accesOffert(params.slug, apercu.lessons[requestedIdx]?.titre) : null;
+  const freeTrial = !gate.allowed && leconOuverte(offre, connecte);
 
   if (!gate.allowed && !freeTrial) {
     const required = gate.acces.abonnement.required;
-    const [content, formations, modules] = await Promise.all([
-      getContenuApercu(params.slug),
-      produitsActifs('formation'),
-      produitsActifs('module'),
-    ]);
+    const [formations, modules] = await Promise.all([produitsActifs('formation'), produitsActifs('module')]);
     const offreAchat = formations.length + modules.length > 0;
+    const lecons = apercu?.lessons ?? [];
+    const offertes = lecons.flatMap((l, n) => (accesOffert(params.slug, l.titre) ? [n] : []));
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(courseLd) }} />
         <ApercuCours
           titre={card.titre}
-          intro={content?.intro ?? null}
-          lecons={content?.lessons ?? []}
+          intro={apercu?.intro ?? null}
+          lecons={lecons}
           indexDemande={requestedIdx}
           slug={params.slug}
+          offertes={offertes}
+          invitationCompte={offre === 'compte' ? `/formations/academy/${params.slug}?lecon=${requestedIdx + 1}` : null}
         />
         {offreAchat ? (
           <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:px-6">
@@ -165,6 +170,7 @@ export default async function AcademyCoursePage(
         videos={videos}
         niveau={card.niveau ?? null}
         freeTrial={freeTrial}
+        essaiAvecCompte={freeTrial && offre === 'compte'}
         watermark={filigraneUtilisateur(gate.acces.userId)}
       />
     </>

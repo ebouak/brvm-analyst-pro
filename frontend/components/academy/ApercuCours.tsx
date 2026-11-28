@@ -32,12 +32,18 @@ export default function ApercuCours({
   lecons,
   indexDemande,
   slug,
+  offertes = [],
+  invitationCompte = null,
 }: {
   titre: string;
   intro: string | null;
   lecons: LeconApercu[];
   indexDemande: number;
   slug: string;
+  /** Index des leçons offertes (lib/academy/leconsOffertes.ts), signalées dans le programme. */
+  offertes?: number[];
+  /** Leçon offerte avec un compte, vue sans session : chemin de retour après inscription. */
+  invitationCompte?: string | null;
 }) {
   if (lecons.length === 0) return null;
   const i = Math.min(Math.max(indexDemande, 0), lecons.length - 1);
@@ -95,6 +101,32 @@ export default function ApercuCours({
 
         <p className="mt-4 leading-relaxed text-ivory/90">{l.resume}</p>
       </div>
+
+      {invitationCompte && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-up/35 bg-up/10 p-5">
+          <div className="min-w-0 max-w-xl">
+            <p className="text-sm font-semibold text-up">Cette leçon est offerte</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              Créez un compte gratuit, sans carte bancaire, pour la lire en entier : tout ce que le programme
+              ci-dessous annonce s’ouvre.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            <Link
+              href={`/signup?next=${encodeURIComponent(invitationCompte)}`}
+              className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition hover:bg-gold-2"
+            >
+              Créer mon compte gratuit
+            </Link>
+            <Link
+              href={`/login?next=${encodeURIComponent(invitationCompte)}`}
+              className="rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-ivory transition hover:border-accent/40"
+            >
+              J’ai déjà un compte
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Plan de la leçon demandée */}
       <div className="rounded-2xl border border-border/70 bg-surface/70 p-5">
@@ -169,7 +201,14 @@ export default function ApercuCours({
                               : 'text-muted hover:bg-elevated/50 hover:text-ivory'
                           }`}
                         >
-                          <span className="min-w-0 truncate">{lecon.titre}</span>
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="min-w-0 truncate">{lecon.titre}</span>
+                            {offertes.includes(n) && (
+                              <span className="shrink-0 rounded-full bg-up/15 px-2 py-0.5 text-[11px] font-semibold text-up">
+                                Offerte
+                              </span>
+                            )}
+                          </span>
                           <span className="tabular shrink-0 text-xs text-faint">
                             {lecon.duree_min ? `${lecon.duree_min} min` : ''}
                             {lecon.quizCount ? ` · ${lecon.quizCount} Q` : ''}
