@@ -1,5 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public';
-import { construireBulletin, phraseAmpleur, type Bulletin } from '@/lib/stress/bulletin';
+import { construireBulletin, phraseEtendue, type Bulletin } from '@/lib/stress/bulletin';
 import type { StressDailyRow } from '@/lib/stress/stressIndexTypes';
 
 export interface DonneesThermometre {
@@ -26,7 +26,9 @@ export async function chargerThermometre(): Promise<DonneesThermometre | null> {
     return {
       bulletin: construireBulletin({ actuel, historique: lignes }),
       date: actuel.date_marche,
-      phrase: phraseAmpleur(actuel),
+      // Étendue de la baisse, sans chiffre de recul : la landing ne charge pas la clôture officielle
+      // du Composite, et un recul tiré d'une autre source contredirait la page Stress Monitor.
+      phrase: phraseEtendue(actuel),
       serie: lignes.map((l) => l.stress_index),
     };
   } catch {
