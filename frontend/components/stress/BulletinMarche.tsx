@@ -16,8 +16,8 @@ export function BulletinMarche({ b, dateSeance }: { b: Bulletin; dateSeance: str
         <h2 id="bulletin-titre" className="font-display text-2xl font-semibold text-ivory md:text-3xl">
           {b.verdict}
         </h2>
-        <span className="tabular rounded-full border border-border-strong px-3 py-1 text-sm font-semibold text-ivory">
-          {b.note} / 100 · tension {b.niveau}
+        <span className="rounded-full border border-border-strong px-3 py-1 text-sm font-semibold text-ivory">
+          <span className="tabular">{b.note} / 100</span> · tension {b.niveau}
         </span>
       </div>
 
@@ -66,7 +66,7 @@ export function BulletinMarche({ b, dateSeance }: { b: Bulletin; dateSeance: str
               <details key={f.cle} className="group rounded-lg border border-border bg-sunken p-3 text-sm">
                 <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <span className="block font-medium text-ivory">{f.titre}</span>
-                  <span className="tabular mt-0.5 block text-xs text-muted">{f.mesure}</span>
+                  <span className="mt-0.5 block text-xs text-muted">{f.mesure}</span>
                   <span className="mt-1 block text-xs text-accent-ink group-open:hidden">Voir le détail</span>
                 </summary>
                 <dl className="mt-2 space-y-1 text-xs text-muted">

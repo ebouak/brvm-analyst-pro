@@ -146,17 +146,23 @@ export function StressHistoriqueChart({
               strokeWidth={2}
               dot={false}
             />
-            {reperes.map((r) => (
-              <ReferenceDot
-                key={`${r.date}-${r.libelle}`}
-                x={r.date}
-                y={r.valeur}
-                r={4}
-                fill={theme.accent}
-                stroke={theme.surface}
-                label={{ value: r.libelle, position: 'top', fill: theme.muted, fontSize: 11 }}
-              />
-            ))}
+            {reperes.map((r) => {
+              // Étiquette vers l'intérieur près des bords (sinon coupée), sous le point le plus bas.
+              const ratio = serie.length > 1 ? serie.findIndex((p) => p.date === r.date) / (serie.length - 1) : 0.5;
+              const position =
+                ratio > 0.85 ? 'left' : ratio < 0.15 ? 'right' : r.libelle === 'Point le plus calme' ? 'bottom' : 'top';
+              return (
+                <ReferenceDot
+                  key={`${r.date}-${r.libelle}`}
+                  x={r.date}
+                  y={r.valeur}
+                  r={4}
+                  fill={theme.accent}
+                  stroke={theme.surface}
+                  label={{ value: r.libelle, position, fill: theme.muted, fontSize: 11 }}
+                />
+              );
+            })}
           </AreaChart>
         </ResponsiveContainer>
       </div>
