@@ -156,7 +156,7 @@ export function phraseEtendue(actuel: StressDailyRow): string | null {
 }
 
 /** Les trois composantes de plus forte contribution score × poids (indisponibles ignorées). */
-export function choisirFacteurs(actuel: StressDailyRow): Facteur[] {
+export function choisirFacteurs(actuel: StressDailyRow, composite?: PlusHautComposite | null): Facteur[] {
   const cles = Object.keys(TITRES) as CleComposanteStress[];
   return cles
     .flatMap((cle) => {
@@ -171,7 +171,10 @@ export function choisirFacteurs(actuel: StressDailyRow): Facteur[] {
     .map(({ cle, score, brute, poids }) => ({
       cle,
       titre: TITRES[cle],
-      mesure: mesure(cle, brute),
+      // Le recul affiché suit la source officielle de la phrase d'ampleur quand elle est connue :
+      // un même recul ne doit jamais montrer deux chiffres sur la même page (le 2026-11-27,
+      // l'indice de tension avait été calculé sur une clôture provisoire : 18,63 % contre 18,39 %).
+      mesure: mesure(cle, cle === 'drawdown_composite' && composite ? composite.drawdownPct : brute),
       score,
       poids,
       definition: DEFINITIONS_COMPOSANTES[cle],
@@ -221,7 +224,7 @@ export function construireBulletin(e: EntreeBulletin): Bulletin {
     phrases: [phraseTrajectoire(e), phraseAmpleur(e.actuel, e.composite), phraseEtendue(e.actuel)].filter(
       (p): p is string => Boolean(p),
     ),
-    facteurs: choisirFacteurs(e.actuel),
+    facteurs: choisirFacteurs(e.actuel, e.composite),
     passe: e.criseProche ?? null,
   };
 }

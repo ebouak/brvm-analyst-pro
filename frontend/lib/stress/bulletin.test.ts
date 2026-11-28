@@ -143,6 +143,13 @@ describe('facteurs', () => {
     expect(f[0].titre).toBe('Secteurs en baisse');
   });
 
+  it('le recul affiché suit la source officielle quand elle est connue (jamais deux chiffres)', () => {
+    // Régression du 2026-11-27 : indice calculé sur une clôture provisoire (−18,63 %), officiel −18,39 %.
+    expect(choisirFacteurs(ligne('2026-11-27', 76))[2].mesure).toBe('18,6 % sous le plus haut');
+    const f = choisirFacteurs(ligne('2026-11-27', 76), { drawdownPct: -18.39, dateSommet: '2026-09-11' });
+    expect(f[2].mesure).toBe('18,4 % sous le plus haut');
+  });
+
   it('composantes indisponibles ignorées ; égalité départagée par le poids nominal', () => {
     const f = choisirFacteurs(
       ligne('2026-11-27', 50, {
