@@ -642,3 +642,27 @@ body:has([data-bandeau-cookies]) .vitrine .v-canaux-flottants { bottom: 120px; }
 .vitrine .v-communaute-chiffre { font-size: 34px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
 .vitrine .v-communaute-libelle { font-size: 14px; font-weight: 500; color: rgb(var(--color-muted)); }
 @media (prefers-reduced-motion: reduce) { .vitrine .v-communaute-item { transition: none; } }
+
+/* ── Thermomètre du marché (spec 2026-11-28) ─────────────────────────── */
+.vitrine .v-thermo { display: grid; gap: 14px; margin-top: 28px; max-width: 720px; }
+.vitrine .v-thermo-note { margin: 0; font-size: clamp(56px, 8vw, 96px); font-weight: 600; line-height: 1; letter-spacing: -.05em; }
+.vitrine .v-thermo-sur { font-size: .3em; color: rgb(var(--color-faint)); letter-spacing: 0; margin-left: 4px; }
+.vitrine .v-thermo-jauge { position: relative; height: 10px; border-radius: 999px; background: linear-gradient(90deg, rgb(var(--color-accent) / .12), rgb(var(--color-accent) / .95)); }
+.vitrine .v-thermo-repere { position: absolute; top: -5px; width: 4px; height: 20px; border-radius: 2px; background: rgb(var(--color-ivory)); transform: translateX(-50%); }
+.vitrine .v-thermo-phrase { margin: 0; font-size: 17px; line-height: 1.45; color: rgb(var(--color-muted)); }
+.vitrine .v-thermo-courbe { width: 100%; height: 90px; display: block; }
+.vitrine .v-thermo-courbe polyline { fill: none; stroke: rgb(var(--color-accent)); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.vitrine .v-thermo-lien { justify-self: start; }
+
+/* ── Section « Apprendre » (spec 2026-11-28) ─────────────────────────── */
+.vitrine .v-apprendre { display: grid; gap: 20px; margin-top: 32px; }
+@media (min-width: 900px) { .vitrine .v-apprendre { grid-template-columns: 1.3fr 1fr; align-items: start; } }
+.vitrine .v-apprendre-video { margin: 0; display: grid; gap: 8px; }
+.vitrine .v-apprendre-video video { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: rgb(var(--color-sunken)); }
+.vitrine .v-apprendre-entrees { display: grid; gap: 12px; }
+.vitrine .v-apprendre-entree { display: grid; gap: 2px; padding: 16px 18px; border: 1px solid rgb(var(--color-border-strong)); border-radius: 14px; background: rgb(var(--color-surface)); color: inherit; text-decoration: none; transition: border-color .2s; }
+.vitrine .v-apprendre-entree:hover { border-color: rgb(var(--color-accent-ink)); }
+.vitrine .v-apprendre-titre { font-weight: 600; font-size: 17px; }
+.vitrine .v-apprendre-detail { font-size: 14px; color: rgb(var(--color-up)); }
+.vitrine .v-apprendre-parcours { margin: 24px 0 0; font-size: 15px; line-height: 1.6; color: rgb(var(--color-muted)); }
+.vitrine .v-apprendre-actions { margin-top: 20px; }
