@@ -39,7 +39,9 @@ Ces fichiers restent sur le poste qui fait le rendu ; `.gitignore` les écarte :
   Les storyboards n'écrivent jamais son nom : ils portent `{auteur.prenom}`,
   `{auteur.nomComplet}`, `{auteur.role}`, résolus par `auteur.mjs` (et `voix-edge.py`).
 - `logos/auteur.jpg` : photo de l'auteur.
-- `logos/journaliste.jpg`, `logos/presentatrice-studio.png` : portraits des intervenants.
 
 `render.mjs` refuse de rendre si une photo référencée manque (sinon la vidéo sortirait
 sans visage, sans erreur), et `auteur.mjs` s'arrête si `auteur.json` est absent.
+
+Les portraits des intervenants (`logos/journaliste.jpg`, `logos/presentatrice-studio.png`)
+sont, eux, versionnés : droits confirmés par l'exploitant le 2026-11-28.
