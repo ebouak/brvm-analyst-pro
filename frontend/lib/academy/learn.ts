@@ -1,4 +1,5 @@
 import 'server-only';
+import * as Sentry from '@sentry/nextjs';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createClient } from '@/lib/supabase/server';
 import { courseContentSchema, type CourseContent } from './types';
@@ -65,7 +66,19 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
   if (!course) return null;
 
   const parsed = courseContentSchema.safeParse(await avecLeconLocale(slug, course.content));
-  if (!parsed.success) return null; // contenu corrompu → 404 plutôt qu'un crash
+  if (!parsed.success) {
+    // Contenu corrompu → 404 plutôt qu'un crash, mais JAMAIS en silence : le
+    // 2026-11-25, un champ `coverUrl` rejeté a fermé les Niveaux 2 à 4 à leurs
+    // acheteurs pendant des jours sans laisser aucune trace.
+    const champs = parsed.error.issues.slice(0, 5).map((i) => i.path.join('.') || '(racine)');
+    console.error(`[academy] contenu invalide pour ${slug} : ${champs.join(', ')}`);
+    Sentry.captureMessage(`Academy : contenu de cours invalide (${slug})`, {
+      level: 'error',
+      fingerprint: ['academy-contenu-invalide', slug],
+      extra: { slug, champs },
+    });
+    return null;
+  }
 
   // Lignes utilisateur via la session (RLS owner) — vide si non connecté.
   const db = createClient();
