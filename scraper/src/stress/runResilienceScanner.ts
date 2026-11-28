@@ -224,12 +224,14 @@ export async function runResilienceScanner(
           .order('date_marche', { ascending: true })
           .range(from, to),
       'stress_indices_history',
-    ).catch(() => []),
+    ), // Sans .catch : une lecture en échec fait échouer le run (avant, historique tronqué et run vert).
     lirePage<IncomeInput>(
       (from, to) =>
         sb
           .from('income_statements')
           .select('code, periode, revenu_total, resultat_exploitation, resultat_net, charges_financieres_nettes, lignes_specifiques')
+          .order('code', { ascending: true })
+          .order('periode', { ascending: true })
           .range(from, to),
       'income_statements',
     ),
@@ -238,12 +240,14 @@ export async function runResilienceScanner(
         sb
           .from('balance_sheets')
           .select('code, periode, total_actifs, tresorerie_equivalents, dette_court_terme, dette_long_terme, total_capitaux_propres, lignes_specifiques')
+          .order('code', { ascending: true })
+          .order('periode', { ascending: true })
           .range(from, to),
       'balance_sheets',
     ),
     lirePage<CashFlowInput>(
       (from, to) =>
-        sb.from('cash_flow_statements').select('code, periode, flux_tresorerie_disponible').range(from, to),
+        sb.from('cash_flow_statements').select('code, periode, flux_tresorerie_disponible').order('code').order('periode').range(from, to),
       'cash_flow_statements',
     ),
     lirePage<IndicateurBancaireInput>(

@@ -375,7 +375,7 @@ export async function runCrisisEngine(
           .order('code', { ascending: true })
           .range(from, to),
       TABLE_INDICES_HIST,
-    ).catch(() => []),
+    ), // Sans .catch : une lecture en échec fait échouer le run (avant, historique tronqué et run vert).
     lirePage<NervositeRow>(
       (from, to) =>
         sb.from('brvm_nervosite_daily').select('date_marche, valeur').order('date_marche', { ascending: true }).range(from, to),
@@ -385,7 +385,7 @@ export async function runCrisisEngine(
       (from, to) =>
         sb.from('stress_macro_history').select('indicateur, zone, date_valeur, valeur, unite, source').order('date_valeur', { ascending: true }).range(from, to),
       'stress_macro_history',
-    ).catch(() => [] as MacroRow[]),
+    ), // Sans .catch : une lecture en échec fait échouer le run (avant, historique tronqué et run vert).
     lirePage<EventRow>(
       (from, to) =>
         sb

@@ -1,0 +1,104 @@
+name: Stress Monitor BRVM
+
+# Pourquoi un workflow à part (avis Fable du 2026-11-28, PR #417) : ops_workflows
+# juge la conclusion du RUN entier (scraper/src/ops/workflows.ts). Ajoutées à
+# nervosite.yml, les étapes du Stress Monitor auraient fait compter leurs échecs
+# comme des échecs de BRVM-V, et masqué une vraie panne de l'indice. Dans un même
+# job, l'échec de « crises » aurait aussi sauté « daily » sans laisser de trace
+# dans scraper_runs (une étape sautée n'atteint jamais monitored()).
+#
+# Déclenchement :
+#   - à la fin de « Indice de nervosité BRVM-V » (workflow_run), seulement s'il a
+#     réussi : stress:daily lit la valeur BRVM-V du jour ;
+#   - 08:15 UTC mar-sam, filet si le chaînage ne part pas (sans cron, un workflow
+#     est classé « manuel » et n'a aucun contrôle de retard dans /admin/controle) ;
+#   - à la main.
+# ⚠️ `workflows:` doit reprendre EXACTEMENT le `name:` de nervosite.yml, accent
+#    compris : sinon le chaînage ne part jamais, sans aucune erreur.
+#
+# Trois jobs indépendants : l'échec de l'un n'empêche pas les autres. Chacun
+# échoue (code 1) si son calcul échoue et écrit sa trace dans scraper_runs. Les
+# calculs sont base → base, idempotents (upsert sur clé naturelle), sans appel
+# externe ni import : les imports (stress:import-*) restent manuels.
+# Aucun secret dans une condition `if:` (il rendrait le fichier invalide et ses
+# crons disparaîtraient en silence).
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'cron' }}
+
+on:
+  workflow_run:
+    workflows: ['Indice de nervosité BRVM-V']
+    types: [completed]
+  schedule:
+    - cron: '15 8 * * 2-6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: stress-monitor
+  cancel-in-progress: false
+
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
+jobs:
+  daily:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Stress Monitor — indice quotidien 0-100
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npm run stress:daily
+
+  crises:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Stress Monitor — épisodes de crises
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npm run stress:crises
+
+  resilience:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Stress Monitor — résilience des valeurs
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npm run stress:resilience

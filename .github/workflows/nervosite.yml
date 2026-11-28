@@ -54,31 +54,3 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           LOG_LEVEL: info
         run: npm run nervosite
-
-      # BRVM Market Stress Monitor : calculs purement internes (base -> base),
-      # idempotents, sans appel HTTP externe (les clôtures du jour sont dans
-      # brvm_indices_daily / brvm_actions_daily). Placés après BRVM-V que lit
-      # stress:daily. Aucun secret dans une condition `if:`.
-      - name: Stress Monitor — épisodes de crises
-        working-directory: scraper
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          LOG_LEVEL: info
-        run: npm run stress:crises
-
-      - name: Stress Monitor — résilience des valeurs
-        working-directory: scraper
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          LOG_LEVEL: info
-        run: npm run stress:resilience
-
-      - name: Stress Monitor — indice quotidien 0-100
-        working-directory: scraper
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          LOG_LEVEL: info
-        run: npm run stress:daily

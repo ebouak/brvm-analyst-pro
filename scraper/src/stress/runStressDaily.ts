@@ -98,7 +98,7 @@ export async function runStressDaily(
           .order('date_marche', { ascending: true })
           .range(from, to),
       'stress_indices_history',
-    ).catch(() => []),
+    ), // Sans .catch : une lecture en échec fait échouer le run (avant, historique tronqué et run vert).
     lirePage<NervositeStressInput>(
       (from, to) =>
         sb

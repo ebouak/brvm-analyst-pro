@@ -150,6 +150,7 @@ export async function runBacktestEngine(
             .select('code, date_marche, valeur, variation_pct')
             .in('code', cibles)
             .order('date_marche', { ascending: true })
+            .order('code', { ascending: true }) // tri total : plusieurs indices partagent une date
             .range(from, to),
         'brvm_indices_daily',
       ),
@@ -160,9 +161,10 @@ export async function runBacktestEngine(
             .select('code, date_marche, valeur, variation_pct')
             .in('code', cibles)
             .order('date_marche', { ascending: true })
+            .order('code', { ascending: true }) // tri total : plusieurs indices partagent une date
             .range(from, to),
         'stress_indices_history',
-      ).catch(() => []),
+      ), // Sans .catch : une lecture en échec fait échouer le run (avant, historique tronqué et run vert).
       lirePage<{ code: string; designation: string }>(
         (from, to) => sb.from('brvm_instruments').select('code, designation').eq('type', 'action').range(from, to),
         'brvm_instruments',
@@ -187,11 +189,11 @@ export async function runBacktestEngine(
         'brvm_actions_daily',
       ),
       lirePage<{ code: string; periode: string; resultat_net: number | null }>(
-        (from, to) => sb.from('income_statements').select('code, periode, resultat_net').range(from, to),
+        (from, to) => sb.from('income_statements').select('code, periode, resultat_net').order('code').order('periode').range(from, to),
         'income_statements',
       ),
       lirePage<{ code: string; periode: string; total_capitaux_propres: number | null }>(
-        (from, to) => sb.from('balance_sheets').select('code, periode, total_capitaux_propres').range(from, to),
+        (from, to) => sb.from('balance_sheets').select('code, periode, total_capitaux_propres').order('code').order('periode').range(from, to),
         'balance_sheets',
       ),
       lirePage<{ code: string; exercice: number | null; ex_date: string | null; montant: number; base_fiscale: string | null }>(
