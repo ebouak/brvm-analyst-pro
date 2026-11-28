@@ -44,9 +44,10 @@ prix sur la landing (la section « gratuit / Premium » l'affiche déjà) ; tout
 l'historique affiché, et, si l'épisode en cours est connu, la date et la valeur du plus haut du
 BRVM Composite et la crise historique la plus proche (libellé + score de ressemblance).
 
-Le « plus haut du Composite » est le **sommet de référence de l'épisode en cours** (seuil −10 %,
-moteur des crises). Sans épisode en cours, aucune date n'est citée : la trajectoire se rabat sur
-20 séances et la phrase d'ampleur s'écrit sans date.
+Le « plus haut du Composite » et le recul qui s'y rapporte viennent de la **même source**
+(`indices_actuels` du module des crises : `drawdown_pct` et `date_sommet`), pour qu'une phrase ne
+mélange jamais deux références. Sans cette source (landing), aucune date n'est citée : la trajectoire
+se rabat sur 20 séances et la phrase d'ampleur s'écrit sans date.
 
 Sortie :
 
