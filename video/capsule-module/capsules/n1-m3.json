@@ -1,0 +1,213 @@
+{
+  "_": "Prototype Formule 1 (Salon Podcast animé + écran TV BRVM) sur la Leçon 3 : Combien faut-il pour investir à la BRVM ?",
+  "id": "n1-m3",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 3,
+  "format": "salon",
+  "bandeau": "SALON PODCAST · LEÇON 3 · BUDGET & FRAIS BRVM",
+  "titre": "Combien faut-il pour investir à la BRVM ?",
+  "sousTitre": "48 actions réelles, effet ciseau des frais, budgets 50 K / 250 K / 1 M et piège du petit prix",
+  "intervenants": {
+    "journaliste": {
+      "nom": "Amina · Journaliste",
+      "role": "Podcast WESTBOURSE",
+      "photo": "logos/journaliste.jpg",
+      "voiceId": "O31r762Gb3WFygrEOGh0",
+      "publicOwnerId": "469526c55385b371d11f57b5d59934c753901e36de103c1635671d9abe03e1d8",
+      "fallbackVoiceId": "EXAVITQu4vr4xnSDxMaL"
+    },
+    "expert": {
+      "prenom": "{auteur.prenom}",
+      "nom": "{auteur.nomComplet}",
+      "role": "Fondateur · WESTBOURSE",
+      "photo": "logos/auteur.jpg"
+    }
+  },
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "speaker": "journaliste",
+    "badge": "OUVERTURE · SALON BRVM",
+    "tvTag": "COMBIEN POUR DÉBUTER ?",
+    "question": "Faut-il vraiment un million de francs CFA pour commencer en bourse à la BRVM ?",
+    "reponse": "On fait le point au salon, chiffres réels des 48 actions et grilles SGI à l’appui.",
+    "logo": "logos/brvm.png",
+    "voix": "Bienvenue dans le salon WestBourse Academy ! Faut-il vraiment un million de francs CFA pour débuter à la BRVM ? On fait le point chiffres à l'appui avec {auteur.nomComplet}."
+  },
+  "etapes": [
+    {
+      "id": "ticket",
+      "badge": "ÉTAPE 01",
+      "shortLabel": "TICKET",
+      "tvTag": "1 ACTION · MÉDIANE 4 530 FCFA",
+      "titre": "Aucun minimum légal à la BRVM",
+      "theme": "yellow",
+      "type": "kpis",
+      "logos": [
+        "logos/brvm.png",
+        "logos/amf-umoa.png"
+      ],
+      "question": {
+        "badge": "QUESTION 01 / 05",
+        "texte": "Combien coûte vraiment une action à la BRVM aujourd’hui ? Est-ce réservé aux gros budgets ?",
+        "voix": "Combien coûte vraiment une action à la BRVM aujourd'hui ? Est-ce réservé aux gros budgets ?"
+      },
+      "kpis": [
+        {
+          "valeur": "4 530 FCFA",
+          "label": "Cours médian (48 actions)"
+        },
+        {
+          "valeur": "25 / 48",
+          "label": "Titres sous 5 000 FCFA"
+        },
+        {
+          "valeur": "8 / 22 SGI",
+          "label": "Sans dépôt minimum (0 FCFA)"
+        }
+      ],
+      "note": "Relevé au 24 novembre 2026 · On achète dès 1 action entière (pas de fraction)",
+      "voix": "Non, pas besoin d'un million ! À la BRVM, le minimum légal est d'une seule action. Le cours médian des quarante-huit sociétés est de quatre mille cinq cent trente francs, plus de la moitié coûtent moins de cinq mille francs, et huit S G I n'exigent aucun dépôt minimum."
+    },
+    {
+      "id": "frais",
+      "badge": "ÉTAPE 02",
+      "shortLabel": "FRAIS",
+      "tvTag": "EFFET CISEAU DES FRAIS",
+      "titre": "L’effet ciseau sur les petits ordres",
+      "theme": "pink",
+      "type": "compare",
+      "sousTitre": "Coût aller-retour en % (exemple : taux 1,5 % TTC, minimum 2 500 FCFA/ordre)",
+      "flowShape": "coin",
+      "question": {
+        "badge": "QUESTION 02 / 05",
+        "texte": "Alors on peut acheter pour dix mille francs dès demain, ou y a-t-il un piège avec les frais ?",
+        "voix": "Alors on peut acheter pour dix mille francs dès demain, ou y a-t-il un piège avec les frais ?"
+      },
+      "barres": [
+        {
+          "label": "Ordre de 10 000 FCFA (min 2 500 × 2)",
+          "pct": 50,
+          "valeur": "50,0 % A/R"
+        },
+        {
+          "label": "Ordre de 50 000 FCFA",
+          "pct": 10,
+          "valeur": "10,0 % A/R"
+        },
+        {
+          "label": "Ordre de 200 000 FCFA (plancher effacé)",
+          "pct": 3,
+          "valeur": "3,0 % A/R"
+        }
+      ],
+      "note": "Regrouper son épargne avant d’acheter dilue fortement le minimum de frais",
+      "voix": "Attention justement au minimum de perception par ordre ! Si votre S G I prélève au moins deux mille cinq cents francs par opération, un ordre de dix mille francs subit cinquante pour cent de frais aller-retour, contre seulement trois pour cent dès deux cent mille francs."
+    },
+    {
+      "id": "budgets",
+      "badge": "ÉTAPE 03",
+      "shortLabel": "BUDGETS",
+      "tvTag": "50 K · 250 K · 1 M FCFA",
+      "titre": "Trois budgets concrets pour démarrer",
+      "theme": "cyan",
+      "type": "points",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 03 / 05",
+        "texte": "Concrètement, comment démarrer avec cinquante mille, deux cent cinquante mille ou un million de francs ?",
+        "voix": "Concrètement, comment démarrer avec cinquante mille, deux cent cinquante mille ou un million de francs ?"
+      },
+      "points": [
+        {
+          "tag": "50 000 FCFA",
+          "texte": "2 à 3 valeurs · SGI sans dépôt minimum ni plancher de frais élevé"
+        },
+        {
+          "tag": "250 000 FCFA",
+          "texte": "4 à 5 valeurs sur 3–4 secteurs (~50 000 FCFA par ordre)"
+        },
+        {
+          "tag": "1 000 000 FCFA",
+          "texte": "5 à 8 valeurs · respect facile des plafonds 20 % / 35 %"
+        }
+      ],
+      "voix": "Avec cinquante mille francs, choisissez impérativement une S G I sans dépôt minimum et visez deux ou trois valeurs. À deux cent cinquante mille, vous diversifiez déjà sur quatre à cinq titres. Et dès un million, vous équilibrez facilement cinq à huit lignes."
+    },
+    {
+      "id": "regle_or",
+      "badge": "ÉTAPE 04",
+      "shortLabel": "RÈGLE D’OR",
+      "tvTag": "PRÉCAUTION · RÉGULARITÉ · 20/35 %",
+      "titre": "Discipline avant le premier ordre",
+      "theme": "green",
+      "type": "points",
+      "flowShape": "sheet",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 04 / 05",
+        "texte": "Et quelle est la règle d’or avant d’envoyer son tout premier franc chez une SGI ?",
+        "voix": "Et quelle est la règle d'or avant d'envoyer son tout premier franc chez une S G I ?"
+      },
+      "points": [
+        {
+          "tag": "PRÉCAUTION",
+          "texte": "Garder 3 à 6 mois de dépenses sur un support liquide avant d’investir"
+        },
+        {
+          "tag": "RÉGULARITÉ",
+          "texte": "Alimenter chaque mois (25 000 ou 50 000 FCFA) et grouper ses ordres"
+        },
+        {
+          "tag": "PLAFONDS",
+          "texte": "Ne jamais dépasser 20 % sur une société ni 35 % sur un secteur"
+        }
+      ],
+      "voix": "D'abord, constituez trois à six mois d'épargne de précaution disponible. Ensuite, alimentez régulièrement votre compte chaque mois pour grouper vos ordres, sans jamais dépasser vingt pour cent sur une seule société ni trente-cinq pour cent sur un secteur."
+    },
+    {
+      "id": "piege_prix",
+      "badge": "ÉTAPE 05",
+      "shortLabel": "PIÈGE PRIX",
+      "tvTag": "100 × 500 vs 2 × 25 000 FCFA",
+      "titre": "Petit prix ≠ meilleure affaire",
+      "theme": "yellow",
+      "type": "compare_duel",
+      "stamp": "NOMBRE ≠ GAIN !",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 05 / 05",
+        "texte": "Dernière question : avec cinquante mille francs, vaut-il mieux cent actions à cinq cents francs ou deux à vingt-cinq mille ?",
+        "voix": "Dernière question : avec cinquante mille francs, vaut-il mieux acheter cent actions à cinq cents francs ou deux actions à vingt-cinq mille ?"
+      },
+      "gauche": {
+        "code": "100 ACTIONS",
+        "cours": "500 FCFA / action",
+        "capPrefix": "",
+        "cap": "50 000 FCFA engagés",
+        "tag": "Si le titre monte de +10 % → gain exact : +5 000 FCFA"
+      },
+      "droite": {
+        "code": "2 ACTIONS",
+        "cours": "25 000 FCFA / action",
+        "capPrefix": "",
+        "cap": "50 000 FCFA engagés",
+        "tag": "Si le titre monte de +10 % → gain exact : +5 000 FCFA"
+      },
+      "note": "Exemple pédagogique · Même somme investie et même hausse = gain identique",
+      "voix": "C'est un grand piège ! Acheter cent actions à cinq cents francs ou deux actions à vingt-cinq mille engage exactement cinquante mille francs. Si chaque titre monte de dix pour cent, votre gain est exactement de cinq mille francs dans les deux cas."
+    }
+  ],
+  "fin": {
+    "speaker": "expert",
+    "tag": "PASSER À L’ACTION",
+    "titre": "Leçon 3 · 3 simulateurs de budget & Quiz",
+    "cta": "westbourse.com/formations/academy",
+    "tape": "WESTBOURSE.COM",
+    "presenter": true,
+    "voix": "Merci Amina ! Testez dès maintenant les trois simulateurs de frais, d'épargne mensuelle et le quiz de la leçon trois sur westbourse point com."
+  }
+}

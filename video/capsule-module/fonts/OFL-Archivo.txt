@@ -1,0 +1,8 @@
+Archivo — Copyright 2016 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+Full text: https://openfontlicense.org/open-font-license-official-text/
+
+Fichiers archivo-*.woff2 récupérés depuis Google Fonts (graisses 600 à 900,
+sous-ensembles latin / latin-ext) pour un rendu hors ligne et déterministe
+des capsules vidéo Academy.

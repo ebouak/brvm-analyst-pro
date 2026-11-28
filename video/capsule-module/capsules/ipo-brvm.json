@@ -1,0 +1,251 @@
+{
+  "_": "Cours IPO à la BRVM en format Salon Studio (Amina plein cadre + micro avant-plan + mouvement naturel + voix WESTBOURSE).",
+  "id": "ipo-brvm",
+  "slug": "introduction-en-bourse-ipo-brvm",
+  "numero": 1,
+  "format": "salon",
+  "salonStyle": "studio",
+  "bandeau": "SALON PODCAST · COURS IPO BRVM",
+  "titre": "Comprendre les introductions en bourse (IPO) à la BRVM",
+  "sousTitre": "Vocabulaire, compartiments, process en 8 étapes, 4 IPO réelles (2022–2026), cas Coris Bank CI & contre-exemple BGFI",
+  "intervenants": {
+    "journaliste": {
+      "nom": "Amina · Journaliste",
+      "role": "Podcast WESTBOURSE",
+      "photo": "logos/presentatrice-studio.png",
+      "voiceId": "O31r762Gb3WFygrEOGh0",
+      "publicOwnerId": "469526c55385b371d11f57b5d59934c753901e36de103c1635671d9abe03e1d8",
+      "fallbackVoiceId": "EXAVITQu4vr4xnSDxMaL"
+    },
+    "expert": {
+      "prenom": "{auteur.prenom}",
+      "nom": "{auteur.nomComplet}",
+      "role": "Fondateur · WESTBOURSE",
+      "photo": "logos/auteur.jpg"
+    }
+  },
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "speaker": "journaliste",
+    "badge": "OUVERTURE · SALON BRVM",
+    "tvTag": "IPO BRVM · 4 CAS RÉELS & CORIS",
+    "question": "Comment fonctionne une introduction en bourse à la BRVM, et que regarder avant de souscrire ?",
+    "reponse": "Depuis 2020, seules quatre sociétés ont rejoint la cote. Avec les OPV Coris Bank CI et Bénin dès le 30 novembre 2026, on décortique toute la mécanique.",
+    "logo": "logos/brvm.png",
+    "voix": "Bienvenue dans le salon WestBourse Academy ! Depuis deux mille vingt, seules quatre entreprises sont entrées à la BRVM. À l'heure où Coris Bank Côte d'Ivoire et Coris Bank Bénin lancent leurs O P V, on décrypte ensemble comment fonctionne une I P O !"
+  },
+  "etapes": [
+    {
+      "id": "opv_ak",
+      "badge": "ÉTAPE 01",
+      "shortLabel": "OPV VS CAPITAL",
+      "tvTag": "OPV OU AUGMENTATION DE CAPITAL ?",
+      "titre": "Qui encaisse l’argent d’une IPO ?",
+      "theme": "yellow",
+      "type": "compare_duel",
+      "stamp": "ARGENT ≠ BILAN !",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 01 / 06",
+        "texte": "Première règle clé : quelle différence concrète entre une OPV et une augmentation de capital ?",
+        "voix": "Première règle clé, {auteur.prenom} : quelle différence concrète entre une O P V et une augmentation de capital ?"
+      },
+      "gauche": {
+        "code": "OPV",
+        "cours": "Actions existantes",
+        "capPrefix": "",
+        "cap": "Fonds → Vendeurs",
+        "tag": "Zéro dilution, mais aucun franc neuf au bilan (Orange CI, LNB, BIIC, Bridge Bank, Coris CI)"
+      },
+      "droite": {
+        "code": "AUGM. CAPITAL",
+        "cours": "Actions nouvelles",
+        "capPrefix": "",
+        "cap": "Fonds → Entreprise",
+        "tag": "Dilution des anciens actionnaires, mais fonds propres renforcés (Coris BF 2016)"
+      },
+      "note": "À vérifier dès la page 1 de la note d’information visée par l’AMF-UMOA !",
+      "voix": "Tout se joue sur qui encaisse l'argent ! Dans une O P V, d'anciens actionnaires vendent leurs titres : l'argent va aux vendeurs, pas à la société, comme pour Orange Côte d'Ivoire, la BIIC ou Coris Bank Côte d'Ivoire. Dans une augmentation de capital, la société crée des actions nouvelles et renforce directement ses fonds propres."
+    },
+    {
+      "id": "process",
+      "badge": "ÉTAPE 02",
+      "shortLabel": "8 ÉTAPES SGI",
+      "tvTag": "LE PROCESS EN 8 ÉTAPES · 2 À 4 MOIS",
+      "titre": "Du visa AMF-UMOA à la 1re séance",
+      "theme": "cyan",
+      "type": "points",
+      "logos": [
+        "logos/amf-umoa.png",
+        "logos/brvm.png"
+      ],
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 02 / 06",
+        "texte": "Concrètement, combien de temps dure le parcours et comment un épargnant fait-il pour souscrire ?",
+        "voix": "Concrètement, combien de temps dure tout le processus, et comment un épargnant fait-il pour souscrire ?"
+      },
+      "points": [
+        {
+          "tag": "1 → 4 · VISAS",
+          "texte": "Décision, SGI arrangeur, visa AMF-UMOA de la note et admission BRVM (Prestige, Principal ou Croissance)"
+        },
+        {
+          "tag": "5 → 6 · ORDRE SGI",
+          "texte": "Souscription via toute SGI agréée UEMOA ; attention aux clôtures anticipées (< 24 h sur Bridge Bank)"
+        },
+        {
+          "tag": "7 → 8 · J+ COTATION",
+          "texte": "Allocation (part irréductible puis prorata), livraison DC/BR et 1re séance à ±7,5 % max par jour"
+        }
+      ],
+      "voix": "Entre l'annonce et la première séance, comptez deux à quatre mois : décision, note visée par l'A M F U M O A, puis souscription ouverte dans toute l'U E M O A via n'importe quelle S G I agréée ! Ne traînez jamais : Bridge Bank a bouclé en moins de vingt-quatre heures en juillet deux mille vingt-six."
+    },
+    {
+      "id": "quatre_ipo",
+      "badge": "ÉTAPE 03",
+      "shortLabel": "4 IPO RÉELLES",
+      "tvTag": "COURS AU 25 NOV. 2026 VS PRIX D’IPO",
+      "titre": "Les 4 dernières IPO au 25 nov. 2026",
+      "theme": "green",
+      "type": "compare",
+      "sousTitre": "Écart cours du 25/11/2026 vs prix d’offre (hors dividendes) · LNB : −20,8 %",
+      "flowShape": "coin",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 03 / 06",
+        "texte": "Que sont devenues les quatre IPO lancées depuis 2020 après l’euphorie des premiers jours ?",
+        "voix": "Que sont devenues les quatre I P O lancées depuis deux mille vingt après l'euphorie des premières séances ?"
+      },
+      "barres": [
+        {
+          "label": "Orange CI (ORAC · 9 500 FCFA, déc. 2022)",
+          "pct": 100,
+          "valeur": "+94,7 %"
+        },
+        {
+          "label": "BIIC Bénin (BICB · 5 250 FCFA, avr. 2025)",
+          "pct": 35.2,
+          "valeur": "+33,3 %"
+        },
+        {
+          "label": "Bridge Bank CI (BBGC · 6 750 FCFA, sept. 2026)",
+          "pct": 16.5,
+          "valeur": "+15,6 %"
+        }
+      ],
+      "note": "BRVM 25/11/2026 · LNB : +7,5 % jour J, puis −20,8 % (CA 2025 −3,85 %)",
+      "voix": "Au début, le plafond de plus sept virgule cinq pour cent par séance crée souvent une réservation à la hausse. Mais ensuite, les résultats prennent le relais ! Au vingt-cinq novembre deux mille vingt-six, Orange Côte d'Ivoire gagne quatre-vingt-quatorze virgule sept pour cent hors dividendes, la BIIC trente-trois virgule trois pour cent, alors que la L N B recule de vingt virgule huit pour cent."
+    },
+    {
+      "id": "coris",
+      "badge": "ÉTAPE 04",
+      "shortLabel": "CAS CORIS CI",
+      "tvTag": "FOCUS 26 NOV. 2026 · OPV CORIS BANK CI & BÉNIN",
+      "titre": "Cas pratique : les OPV Coris 2026",
+      "theme": "yellow",
+      "type": "kpis",
+      "logos": [
+        "logos/brvm.png"
+      ],
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 04 / 06",
+        "texte": "Regardons l’actualité du 26 novembre 2026 : que disent les chiffres de Coris Bank CI et Coris Bénin ?",
+        "voix": "Regardons l'actualité de ce vingt-six novembre deux mille vingt-six : que disent les chiffres clés de Coris Bank Côte d'Ivoire et du Bénin ?"
+      },
+      "kpis": [
+        {
+          "valeur": "7 720 FCFA",
+          "label": "Coris Bank CI · 62,74 Md (30 nov.–4 déc.) · Salariés 6 175"
+        },
+        {
+          "valeur": "PER ≈ 12,9",
+          "label": "Valo 315 Md ÷ 24,5 Md RN · P/B ≈ 2,7× · ROE 21,1 %"
+        },
+        {
+          "valeur": "4 700 FCFA",
+          "label": "Coris Bénin · 19,19 Md (7–11 déc.) · Prestige · ROE 16,5 %"
+        }
+      ],
+      "note": "Visa 11/11/2026 · Fonds → Coris Holding (84,6 % → 64,6 %) · 100 titres : +47k à −169k",
+      "voix": "Coris Holding vend vingt pour cent de deux filiales pour quatre-vingt-un milliards de francs C F A ! Sur Coris Bank Côte d'Ivoire à sept mille sept cent vingt francs, la valorisation atteint trois cent quinze milliards, soit un PER d'environ douze virgule neuf et deux virgule sept fois les fonds propres, proche de Bridge Bank mais plus cher que la BIIC."
+    },
+    {
+      "id": "bgfi",
+      "badge": "ÉTAPE 05",
+      "shortLabel": "CONTRE-EXEMPLE",
+      "tvTag": "CONTRE-EXEMPLE BVMAC · BGFI HOLDING",
+      "titre": "Pourquoi BGFI n’a levé que 36 % ?",
+      "theme": "pink",
+      "type": "compare_duel",
+      "stamp": "PRIX ≠ CHERTÉ !",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 05 / 06",
+        "texte": "À l’inverse, que nous apprend l’introduction plus difficile de BGFI Holding en Afrique centrale ?",
+        "voix": "À l'inverse, que nous apprend l'introduction beaucoup plus difficile de B G F I Holding à la B V M A C ?"
+      },
+      "gauche": {
+        "code": "BGFI · BVMAC",
+        "cours": "80 000 FCFA / titre",
+        "capPrefix": "",
+        "cap": "36 % souscrits (45,3 Md)",
+        "tag": "125,9 Md visés, report 3 mois pour litige, fenêtre prolongée au 7 fév. 2026"
+      },
+      "droite": {
+        "code": "LA LEÇON",
+        "cours": "Accès ≠ Cherté",
+        "capPrefix": "",
+        "cap": "4 leçons concrètes",
+        "tag": "Ticket élevé freine les particuliers ; un report révèle la demande ; gouvernance clé"
+      },
+      "note": "Première cotation 7 mai 2026 à 82 000 FCFA (+2,5 %, 607 titres) · Toujours rapporter le cours au PER et au P/B",
+      "voix": "B G F I montre qu'une I P O peut n'être souscrite qu'à trente-six pour cent ! Le ticket de quatre-vingt mille francs l'action a freiné les petits porteurs, un conflit d'actionnaires a causé trois mois de retard, et la prolongation a confirmé une demande trop courte pour la taille de l'offre."
+    },
+    {
+      "id": "reflexes",
+      "badge": "ÉTAPE 06",
+      "shortLabel": "CHECK-LIST",
+      "tvTag": "AVANT DE SOUSCRIRE · 3 RÉFLEXES CLÉS",
+      "titre": "Les vérifications avant toute IPO",
+      "theme": "cyan",
+      "type": "points",
+      "flowShape": "sheet",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 06 / 06",
+        "texte": "Pour conclure, quels réflexes pratiques vérifier avant d’engager son épargne sur une IPO ?",
+        "voix": "Pour conclure, {auteur.prenom}, quels réflexes pratiques faut-il vérifier avant d'engager son épargne sur une I P O ?"
+      },
+      "points": [
+        {
+          "tag": "NOTE & RISQUE",
+          "texte": "Lire la note visée AMF-UMOA : sursouscription ≠ garantie, allocation partielle possible"
+        },
+        {
+          "tag": "MARCHÉ & BANQUES",
+          "texte": "Marché porté (+58 % sept. 2026), plafond ±7,5 %/j et 42,9 % de banques en cote"
+        },
+        {
+          "tag": "FRAIS & IRVM",
+          "texte": "~1,3 % courtage SGI+BRVM par ordre ; IRVM dividendes : 12 % CI (part.) et 5 % Bénin"
+        }
+      ],
+      "voix": "Trois réflexes avant de signer : lisez la note d'information visée par l'A M F U M O A, intégrez la limite de liquidité à plus ou moins sept virgule cinq pour cent ainsi que le poids des banques, et comptez toujours les frais d'environ un virgule trois pour cent et l'impôt IRVM sur vos futurs dividendes !"
+    }
+  ],
+  "fin": {
+    "speaker": "expert",
+    "tag": "À VOUS DE JOUER",
+    "titre": "Cours IPO BRVM · 5 Leçons, Simulateur & Quiz",
+    "cta": "westbourse.com/formations/academy",
+    "tape": "WESTBOURSE.COM",
+    "presenter": true,
+    "voix": "Merci Amina ! Retrouvez les cinq leçons complètes, le simulateur d'allocation sursouscrite et les huit questions du quiz sur westbourse point com. Ceci n'est pas un conseil en investissement !"
+  }
+}

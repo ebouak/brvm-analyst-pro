@@ -1,0 +1,9 @@
+# Photo et identité de l'auteur : fichiers personnels, gardés hors du dépôt public
+# (même règle que ../habillage/.gitignore). Les storyboards portent des marqueurs
+# {auteur.*}, résolus depuis auteur.json (voir auteur.mjs).
+auteur.json
+logos/auteur.*
+# Portraits d'intervenants (photo de banque d'images, portrait généré) : personnes
+# identifiables, droits à confirmer avant toute publication dans le dépôt.
+logos/journaliste.*
+logos/presentatrice-studio.*

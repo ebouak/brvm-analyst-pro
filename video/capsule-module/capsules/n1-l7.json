@@ -1,0 +1,412 @@
+{
+  "_": "Leçon 7 INTÉGRALE (Niveau 1 · Module 2 — Les risques : apprendre avant d’investir) au format exact de la Leçon 1 (canevas néo-brutaliste solo, voix {auteur.nomComplet}, médaillon présentateur, sous-titres synchronisés et 12 tableaux couvrant l’intégralité des 8 étapes sans résumé).",
+  "id": "n1-l7",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 7,
+  "bandeau": "NIVEAU 1 · LEÇON 7 INTÉGRALE · MAÎTRISER LES RISQUES AVANT D’INVESTIR",
+  "titre": "Les risques : apprendre avant d’investir à la BRVM",
+  "sousTitre": "3 risques · 4 historiques de dividendes · diversification · ordres art. 44–46 · carnet 5 000 titres · baisse −20 % & précaution",
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "badge": "LEÇON 7 INTÉGRALE · LES 8 ÉTAPES",
+    "question": "En Bourse, protéger son capital est aussi important que le faire fructifier.",
+    "reponse": "Parcours complet : 3 risques BRVM, dividendes réels, diversification, ordres réglementaires, carnet, −20 % et précaution.",
+    "logo": "logos/brvm.png",
+    "presenter": true,
+    "voix": "En Bourse, protéger son capital est aussi important que le faire fructifier. Bienvenue dans cette leçon sept intégrale de WestBourse Academy : nous allons parcourir ensemble les huit étapes complètes pour identifier les trois grands risques à la BRVM, analyser quatre historiques réels de dividendes, chiffrer la diversification, maîtriser les ordres du règlement général, pratiquer sur un carnet de cinq mille actions, réagir avec méthode face à moins vingt pour cent, et protéger votre épargne de précaution."
+  },
+  "etapes": [
+    {
+      "id": "risques_cours",
+      "badge": "ÉTAPE 1A / 8",
+      "shortLabel": "RISQUES",
+      "titre": "Risque de marché et d’entreprise",
+      "theme": "pink",
+      "type": "compare",
+      "logos": [
+        "logos/SCRC.jpg",
+        "logos/UNLC.jpg"
+      ],
+      "sousTitre": "Plus forts reculs réels depuis le plus-haut 52 semaines (BRVM au 23/11/2026)",
+      "barres": [
+        {
+          "label": "SCRC · Sucrivoire (de 3 920 à 1 230 FCFA)",
+          "pct": 68.6,
+          "valeur": "−68,6 %"
+        },
+        {
+          "label": "SAFC · SAFCA Côte d’Ivoire",
+          "pct": 53.4,
+          "valeur": "−53,4 %"
+        },
+        {
+          "label": "UNLC · Unilever Côte d’Ivoire",
+          "pct": 50.9,
+          "valeur": "−50,9 %"
+        },
+        {
+          "label": "SIVC · Air Liquide Côte d’Ivoire",
+          "pct": 50.2,
+          "valeur": "−50,2 %"
+        }
+      ],
+      "note": "Marché = crise ou taux qui font baisser tout le monde · Entreprise = résultats, marge ou dette dégradés",
+      "voix": "Première étape : distinguer ce qui fait varier votre portefeuille. Le risque de marché provient d'une crise économique ou d'une hausse des taux qui entraîne presque toutes les actions à la baisse en même temps : même la diversification ne l'efface pas. Le risque propre à l'entreprise, lui, frappe une société dont les ventes, la rentabilité ou l'endettement se dégradent. Sur cinquante-deux semaines au vingt-trois novembre deux mille vingt-six à la BRVM, Sucrivoire a ainsi reculé de soixante-huit virgule six pour cent, de trois mille neuf cent vingt à mille deux cent trente francs CFA, SAFCA de cinquante-trois virgule quatre pour cent, Unilever de cinquante virgule neuf pour cent et Air Liquide de cinquante virgule deux pour cent."
+    },
+    {
+      "id": "risque_liquidite",
+      "badge": "ÉTAPE 1B / 8",
+      "shortLabel": "LIQUIDITÉ",
+      "titre": "Le risque de liquidité à la BRVM",
+      "theme": "cyan",
+      "type": "compare",
+      "logos": [
+        "logos/sonatel.png",
+        "logos/BOAC.png"
+      ],
+      "flowShape": "sheet",
+      "presenter": true,
+      "sousTitre": "Répartition réelle des 48 actions cotées par classe de liquidité (23/11/2026)",
+      "barres": [
+        {
+          "label": "Classe A très liquide (SNTS 92, SGBC 80, BBGC 79, BOAC 75)",
+          "pct": 20,
+          "valeur": "4 / 48"
+        },
+        {
+          "label": "Classe B liquide (échanges réguliers)",
+          "pct": 100,
+          "valeur": "20 / 48"
+        },
+        {
+          "label": "Classe C modérée (attention aux gros ordres)",
+          "pct": 90,
+          "valeur": "18 / 48"
+        },
+        {
+          "label": "Classe D étroite (ex. PRSC 17/100 : spread 8,99 %)",
+          "pct": 30,
+          "valeur": "6 / 48"
+        }
+      ],
+      "note": "65 séances fin 2026 : Top 10 = 71,9 % des capitaux (Sonatel 40,9 %) · Spread BOAC 0,36 % vs PRSC 8,99 %",
+      "voix": "Troisième risque décisif à la BRVM : le risque de liquidité, c'est-à-dire la difficulté à revendre rapidement sans faire chuter le prix faute d'acheteurs suffisants. Au vingt-trois novembre deux mille vingt-six, seules quatre sociétés sur quarante-huit atteignent la classe A très liquide : Sonatel avec un score de quatre-vingt-douze sur cent, S G B C I, Bridge Bank et B O A Côte d'Ivoire, contre vingt en classe B, dix-huit en classe C et six en classe D. Sur soixante-cinq séances, Sonatel pèse quarante virgule neuf pour cent des capitaux échangés et le top dix en concentre soixante-et-onze virgule neuf pour cent. Sur un titre étroit comme Tractafric Motors en classe D, l'écart achat-vente atteint huit virgule quatre-vingt-dix-neuf pour cent, contre zéro virgule trente-six pour cent sur B O A Côte d'Ivoire."
+    },
+    {
+      "id": "dividendes_reels",
+      "badge": "ÉTAPE 2A / 8",
+      "shortLabel": "DIVIDENDES",
+      "titre": "4 historiques réels (2021–2025)",
+      "theme": "yellow",
+      "type": "points",
+      "logos": [
+        "logos/sonatel.png",
+        "logos/PALC.jpg"
+      ],
+      "points": [
+        {
+          "tag": "SONATEL",
+          "texte": "140 → 150 → 158 → 166 → 174 FCFA net (2021–2025) : hausse continue, 0 baisse"
+        },
+        {
+          "tag": "PALMCI",
+          "texte": "1 236,34 → 1 214 → 563 → 451 → 441,40 FCFA net (brut 501,60) : 4 replis"
+        },
+        {
+          "tag": "NESTLÉ CI",
+          "texte": "856,80 → 728 → 675 → 722 → 369,60 FCFA net (brut 420) : −49 % en 2025"
+        },
+        {
+          "tag": "SAPH CI",
+          "texte": "365,40 → 294 → 65 FCFA en 2023 (−82 %), puis rebond à 324 et 430,32 net (brut 489)"
+        }
+      ],
+      "note": "Base WestBourse · Avis BRVM 2025 nets IRVM vérifiés ; bases fiscales 2021–2022 historiques non vérifiées",
+      "voix": "Deuxième étape : un dividende n'est jamais garanti, il dépend des bénéfices, de la trésorerie, des investissements à financer et du vote de l'assemblée générale. Observons quatre historiques réels de deux mille vingt-et-un à deux mille vingt-cinq dans la base WestBourse. Sonatel progresse chaque année de cent quarante à cent soixante-quatorze francs nets sans aucune baisse. À l'opposé, Palm C I enregistre quatre replis liés au cycle de l'huile de palme, passant de mille deux cent trente-six francs à quatre cent quarante-et-un francs quarante nets, pour cinq cent un francs soixante bruts. Nestlé Côte d'Ivoire recule de huit cent cinquante-six francs quatre-vingts à trois cent soixante-neuf francs soixante nets. Et S A P H chute à soixante-cinq francs en deux mille vingt-trois avant de rebondir à quatre cent trente francs trente-deux nets en deux mille vingt-cinq."
+    },
+    {
+      "id": "questions_dividende",
+      "badge": "ÉTAPE 2B / 8",
+      "shortLabel": "4 QUESTIONS",
+      "titre": "4 questions avant de viser le dividende",
+      "theme": "white",
+      "type": "points",
+      "logos": [
+        "logos/NTLC.jpg",
+        "logos/SPHC.jpg"
+      ],
+      "presenter": true,
+      "points": [
+        {
+          "tag": "1 · BÉNÉFICES",
+          "texte": "L’entreprise dégage-t-elle des bénéfices réguliers d’un exercice à l’autre ?"
+        },
+        {
+          "tag": "2 · TRÉSORERIE",
+          "texte": "Sa trésorerie finance-t-elle à la fois son outil industriel et sa distribution ?"
+        },
+        {
+          "tag": "3 · DETTE",
+          "texte": "Son endettement reste-t-il maîtrisé sans fragiliser les comptes futurs ?"
+        },
+        {
+          "tag": "4 · SOUTENABLE",
+          "texte": "Un gros rendement affiché vient-il d’un vrai profit ou d’un cours qui a chuté ?"
+        }
+      ],
+      "note": "Piège classique : un rendement apparent de 12 % causé par la chute du cours précède souvent une coupe du coupon",
+      "voix": "Avant d'acheter une action pour son rendement, posez-vous toujours quatre questions précises. Premièrement, l'entreprise réalise-t-elle des bénéfices réguliers ? Deuxièmement, sa trésorerie finance-t-elle à la fois son activité et sa distribution ? Troisièmement, son endettement reste-t-il maîtrisé ? Et quatrièmement, ce dividende est-il soutenable dans les années qui viennent ? Attention au piège classique : un rendement affiché très élevé provient parfois d'un cours qui a déjà fortement chuté, juste avant l'annonce d'une baisse du dividende."
+    },
+    {
+      "id": "trois_protections",
+      "badge": "ÉTAPE 3A / 8",
+      "shortLabel": "PROTECTIONS",
+      "titre": "Les 3 protections de votre portefeuille",
+      "theme": "green",
+      "type": "points",
+      "flowShape": "coin",
+      "points": [
+        {
+          "tag": "20 % / 35 % MAX",
+          "texte": "Diversifier : repères pédagogiques de 20 % max par société et 35 % max par secteur"
+        },
+        {
+          "tag": "HORIZON LONG",
+          "texte": "Investir sur plusieurs années : −15 % à 6 mois (850 K sur 1 M) se traverse sans vendre"
+        },
+        {
+          "tag": "SE FORMER",
+          "texte": "Suivre chiffre d’affaires, résultat net, marge, dette, trésorerie et communiqués"
+        }
+      ],
+      "note": "Vigilance corrélations : deux sociétés différentes peuvent dépendre de la même matière première agricole",
+      "voix": "Troisième étape : aucun placement en actions n'est sans risque, mais trois principes évitent les erreurs les plus coûteuses. Premier principe, diversifier entre plusieurs sociétés et secteurs, avec deux repères pédagogiques pour débuter : pas plus de vingt pour cent sur une société, ni plus de trente-cinq pour cent sur un même secteur, en vérifiant que deux titres ne dépendent pas de la même matière première. Deuxième principe, investir pour plusieurs années : un portefeuille d'un million qui vaut huit cent cinquante mille francs six mois plus tard perd quinze pour cent de valeur, mais un horizon long évite toute vente forcée. Troisième principe, suivre régulièrement les publications de vos sociétés."
+    },
+    {
+      "id": "choc_diversification",
+      "badge": "ÉTAPE 3B / 8",
+      "shortLabel": "1 VS 5 VALEURS",
+      "titre": "1 000 000 FCFA à 8 % : un dividende ÷ 2",
+      "theme": "yellow",
+      "type": "compare_duel",
+      "stamp": "−10 % AU LIEU DE −50 % !",
+      "presenter": true,
+      "gauche": {
+        "code": "1 SEULE VALEUR",
+        "cours": "80 000 → 40 000 FCFA",
+        "capPrefix": "Choc revenu : ",
+        "cap": "−50 % (−40 000 FCFA)",
+        "tag": "Tout le capital sur une seule ligne : la coupe de moitié ampute la moitié de votre revenu annuel"
+      },
+      "droite": {
+        "code": "5 VALEURS ÉGALES",
+        "cours": "80 000 → 72 000 FCFA",
+        "capPrefix": "Choc limité : ",
+        "cap": "−10 % (−8 000 FCFA)",
+        "tag": "5 lignes de 200 000 FCFA (16 000 FCFA chacune) : une ligne tombe à 8 000, les 4 autres tiennent"
+      },
+      "note": "Exemple pédagogique · La diversification amortit le risque d’entreprise, mais ne supprime pas le risque de marché",
+      "voix": "Mesurons l'effet concret de la diversification sur un portefeuille pédagogique d'un million de francs CFA rapportant huit pour cent de dividendes, soit quatre-vingt mille francs par an. Une société divise son dividende par deux. Si tout votre capital est concentré sur cette seule valeur, votre revenu chute immédiatement de quatre-vingt mille à quarante mille francs : moins cinquante pour cent ! En répartissant à parts égales sur cinq valeurs, chaque ligne pèse vingt pour cent, soit seize mille francs de dividende : la division par deux sur une société ne retire que huit mille francs, votre revenu s'établit à soixante-douze mille francs, soit moins dix pour cent seulement. Rappelez-vous toutefois que la diversification ne supprime pas une baisse générale du marché."
+    },
+    {
+      "id": "ordres_prix",
+      "badge": "ÉTAPE 4A / 8",
+      "shortLabel": "ORDRES PRIX",
+      "titre": "Règlement BRVM (art. 44–46) : le prix",
+      "theme": "cyan",
+      "type": "compare_duel",
+      "logos": [
+        "logos/brvm.png",
+        "logos/amf-umoa.png"
+      ],
+      "stamp": "SANS LIMITE = REJETÉ !",
+      "gauche": {
+        "code": "ORDRE AU MIEUX",
+        "cours": "Aucun prix fixé",
+        "capPrefix": "Effet : ",
+        "cap": "Exécution favorisée",
+        "tag": "Prend les quantités disponibles en face, mais le prix payé n’est pas maîtrisé sur un carnet peu fourni"
+      },
+      "droite": {
+        "code": "À COURS LIMITÉ",
+        "cours": "Plafond achat / plancher vente",
+        "capPrefix": "Effet : ",
+        "cap": "Prix 100 % maîtrisé",
+        "tag": "Jamais exécuté à un cours moins favorable que votre limite, mais l’exécution n’est pas garantie"
+      },
+      "note": "Règlement général BRVM (1er juil. 2022) · Confrontation au fixing (cours d’équilibre unique) ou en continu",
+      "voix": "Quatrième étape : passer un ordre selon les articles quarante-quatre à quarante-six du Règlement général de la BRVM, dans sa version du premier juillet deux mille vingt-deux. Selon la valeur, les ordres sont confrontés soit au fixing pour dégager un cours d'équilibre unique, soit en continu où chaque ordre rencontre aussitôt le carnet. Première caractéristique obligatoire : la limite de prix, car un ordre sans indication de limite est rejeté. L'ordre au mieux ne fixe aucun prix : l'exécution est favorisée, mais le prix n'est pas maîtrisé. L'ordre à cours limité fixe un prix maximal à l'achat ou minimal à la vente : votre prix est maîtrisé, même si l'exécution n'est pas garantie."
+    },
+    {
+      "id": "ordres_validite",
+      "badge": "ÉTAPE 4B / 8",
+      "shortLabel": "VALIDITÉ",
+      "titre": "Validité et exécution partielle BRVM",
+      "theme": "white",
+      "type": "points",
+      "flowShape": "sheet",
+      "presenter": true,
+      "points": [
+        {
+          "tag": "JOUR (DÉFAUT)",
+          "texte": "Sans indication de durée, présenté à la seule séance suivante puis disparaît"
+        },
+        {
+          "tag": "MENSUEL",
+          "texte": "Reste en attente au carnet jusqu’à la dernière séance du mois en cours"
+        },
+        {
+          "tag": "À EXÉCUTION",
+          "texte": "Sans date précisée, valable 3 mois au plus ; ou jusqu’à votre date limite choisie"
+        },
+        {
+          "tag": "TOUT OU RIEN",
+          "texte": "Servi en totalité ou pas du tout (par opposition à « sans condition » servi en partie)"
+        }
+      ],
+      "note": "Règlement général BRVM art. 44–46 · Demandez à votre SGI les options proposées sur son interface",
+      "voix": "Deuxième et troisième caractéristiques réglementaires d'un ordre : sa validité et sa condition d'exécution partielle. Si vous ne précisez rien, l'ordre est réputé jour par défaut : présenté à la seule séance qui suit sa transmission, il disparaît s'il n'est pas servi. L'ordre mensuel reste valable jusqu'à la dernière séance du mois, tandis que l'ordre à exécution est présenté pendant trois mois au plus, ou jusqu'à une date limite choisie. Enfin, face à une quantité partielle disponible, un ordre sans condition peut être servi en partie, alors qu'un ordre tout ou rien n'est exécuté qu'en totalité, sinon pas du tout."
+    },
+    {
+      "id": "atelier_5000",
+      "badge": "ÉTAPE 5 / 8",
+      "shortLabel": "5 000 ACTIONS",
+      "titre": "Atelier : acheter 5 000 actions",
+      "theme": "yellow",
+      "type": "points",
+      "flowShape": "coin",
+      "points": [
+        {
+          "tag": "AU MIEUX · 5 000",
+          "texte": "(3 500 × 3 280 + 1 500 × 3 290) ÷ 5 000 = 3 283 FCFA moyen (16 415 000 FCFA)"
+        },
+        {
+          "tag": "LIMITÉ 3 270 FCFA",
+          "texte": "Meilleur vendeur à 3 280 FCFA → 0 titre exécuté, l’ordre attend selon sa validité"
+        },
+        {
+          "tag": "TOUT OU RIEN 10 K",
+          "texte": "Limité à 3 290 FCFA : 3 500 + 4 500 = 8 000 titres dispo (< 10 000) → 0 exécuté"
+        }
+      ],
+      "note": "Carnet fictif (3 500 à 3 280 · 4 500 à 3 290 · 5 500 à 3 300) · Vérifier : Sens → Quantité → Prix → Carnet → Validité",
+      "voix": "Cinquième étape : mettons ces règles en pratique sur un carnet vendeur fictif proposant trois mille cinq cents actions à trois mille deux cent quatre-vingts francs, quatre mille cinq cents à trois mille deux cent quatre-vingt-dix, et cinq mille cinq cents à trois mille trois cents francs. Premier cas : un achat au mieux de cinq mille titres absorbe les trois mille cinq cents titres à trois mille deux cent quatre-vingts plus mille cinq cents titres à trois mille deux cent quatre-vingt-dix, soit seize millions quatre cent quinze mille francs et un prix moyen de trois mille deux cent quatre-vingt-trois francs, supérieur au premier prix affiché ! Deuxième cas : un achat limité à trois mille deux cent soixante-dix francs ne trouve aucun vendeur et reste en attente. Troisième cas : un ordre tout ou rien de dix mille titres limité à trois mille deux cent quatre-vingt-dix francs ne trouve que huit mille titres disponibles : rien n'est exécuté. Avant d'envoyer votre ordre, vérifiez toujours cinq points : le sens, la quantité, la limite de prix, le carnet en face et la validité."
+    },
+    {
+      "id": "baisse_20",
+      "badge": "ÉTAPE 6 / 8",
+      "shortLabel": "BAISSE −20 %",
+      "titre": "Une action perd 20 % : les 3 étapes",
+      "theme": "pink",
+      "type": "points",
+      "presenter": true,
+      "points": [
+        {
+          "tag": "1 · ACTUALITÉ",
+          "texte": "De 5 000 à 4 000 FCFA (−20 %) : problème propre à l’entreprise ou baisse du marché ?"
+        },
+        {
+          "tag": "2 · FONDAMENTAUX",
+          "texte": "Relire chiffre d’affaires, résultat net, dette, trésorerie, dividende et perspectives"
+        },
+        {
+          "tag": "3 · DÉCIDER CALME",
+          "texte": "Conserver si solide · Réduire si trop lourd · Vendre si les raisons d’achat ne tiennent plus"
+        },
+        {
+          "tag": "ASYMÉTRIE",
+          "texte": "Après −20 %, il faut +25 % pour revenir à 5 000 FCFA · Après −50 %, il faut +100 % !"
+        }
+      ],
+      "note": "Une baisse doit déclencher une analyse, pas une panique · Un titre qui chute n’est pas une affaire automatique",
+      "voix": "Sixième étape : achetée cinq mille francs, votre action cote quatre mille francs quelques semaines plus tard, soit moins vingt pour cent. Une baisse doit déclencher une analyse, jamais une réaction émotionnelle. Appliquez la méthode en trois étapes : un, vérifiez l'actualité officielle pour savoir si le repli vient de l'entreprise ou de tout le marché. Deux, relisez les fondamentaux : chiffre d'affaires, résultat net, dette, trésorerie et soutenabilité du dividende. Trois, décidez sans précipitation : conservez si les fondamentaux tiennent, réduisez si la ligne pèse trop lourd, ou vendez si la thèse d'achat est rompue, sans croire qu'une baisse est automatiquement une bonne affaire. Mesurez enfin l'asymétrie des pertes : perdre vingt pour cent impose de regagner vingt-cinq pour cent pour revenir à cinq mille francs, et perdre cinquante pour cent exige cent pour cent de hausse !"
+    },
+    {
+      "id": "precaution_erreurs",
+      "badge": "ÉTAPE 7 / 8",
+      "shortLabel": "PRÉCAUTION",
+      "titre": "Épargne de précaution & 6 erreurs",
+      "theme": "cyan",
+      "type": "grid6",
+      "sousTitre": "Formule : Dépenses essentielles × 3 à 6 mois hors Bourse (ex. 250 000 × 6 = 1 500 000 FCFA)",
+      "items": [
+        {
+          "tag": "1 · URGENCE",
+          "texte": "Investir son épargne de secours et devoir vendre en pleine baisse"
+        },
+        {
+          "tag": "2 · PANIQUE",
+          "texte": "Vendre précipitamment sur un recul de cours sans lire les comptes"
+        },
+        {
+          "tag": "3 · 1 SEUL TITRE",
+          "texte": "Tout concentrer sur une valeur au lieu de plafonner à 20 % / 35 %"
+        },
+        {
+          "tag": "4 · ILLIQUIDITÉ",
+          "texte": "Ignorer le volume et lancer un ordre au mieux sur une classe D"
+        },
+        {
+          "tag": "5 · SEUL COUPON",
+          "texte": "Acheter uniquement pour le dividende malgré des profits en baisse"
+        },
+        {
+          "tag": "6 · RUMEURS",
+          "texte": "Suivre les réseaux au lieu des états financiers et avis BRVM"
+        }
+      ],
+      "note": "Repère pédagogique : gardez 3 mois minimum (750 000 FCFA) à 6 mois recommandés (1 500 000 FCFA) disponibles",
+      "voix": "Septième étape : votre première barrière de sécurité est financière. Ne placez jamais en Bourse votre épargne de précaution, équivalente à trois à six mois de dépenses mensuelles essentielles : par exemple, pour deux cent cinquante mille francs de charges incompressibles par mois, conservez sept cent cinquante mille francs au minimum et idéalement un million cinq cent mille francs disponibles hors du portefeuille boursier. Vous éviterez ainsi les six erreurs qui coûtent le plus cher aux débutants : investir son épargne d'urgence, vendre dans la panique, tout concentrer sur une valeur, ignorer la liquidité avec un ordre au mieux, acheter seulement pour le dividende, ou décider sur de simples rumeurs."
+    },
+    {
+      "id": "checklist",
+      "badge": "ÉTAPE 8 / 8",
+      "shortLabel": "CHECK-LIST",
+      "titre": "Check-list finale avant d’acheter",
+      "theme": "green",
+      "type": "grid6",
+      "presenter": true,
+      "sousTitre": "Un investisseur discipliné ne prédit pas les baisses : il vérifie ces 6 points avant chaque ordre",
+      "items": [
+        {
+          "tag": "FEU VERT 01",
+          "texte": "Mon épargne de précaution (3 à 6 mois) est constituée et séparée"
+        },
+        {
+          "tag": "FEU VERT 02",
+          "texte": "Mon horizon est de plusieurs années, prêt à traverser les cycles"
+        },
+        {
+          "tag": "FEU VERT 03",
+          "texte": "J’ai vérifié la liquidité du titre : classe, volumes et carnet"
+        },
+        {
+          "tag": "FEU VERT 04",
+          "texte": "J’ai étudié le dernier rapport annuel et les publications"
+        },
+        {
+          "tag": "FEU VERT 05",
+          "texte": "Je maîtrise mon ordre : à cours limité et validité choisie"
+        },
+        {
+          "tag": "FEU VERT 06",
+          "texte": "3 risques connus (marché, société, liquidité) · 3 protections"
+        }
+      ],
+      "note": "Ceci n’est pas un conseil en investissement · Les actions comportent un risque de perte partielle ou totale",
+      "voix": "Huitième et dernière étape : validez votre check-list en six points avant tout premier achat. Un, mon épargne de précaution de trois à six mois est constituée et disponible. Deux, mon horizon d'investissement est de plusieurs années. Trois, j'ai vérifié la liquidité, les volumes et le carnet d'ordres de la valeur. Quatre, j'ai étudié le dernier rapport annuel et les résultats publiés. Cinq, je sais exactement quel ordre je passe : à cours limité si le titre s'échange peu, avec une validité choisie et non subie. Six, je garde mon cap : trois risques identifiés, trois protections actives. Rappelez-vous toujours que ceci n'est pas un conseil en investissement."
+    }
+  ],
+  "fin": {
+    "tag": "PASSER À LA PRATIQUE",
+    "titre": "Leçon 7 · 5 Simulateurs interactifs & Quiz (11 Q)",
+    "cta": "westbourse.com/formations/academy",
+    "tape": "CECI N’EST PAS UN CONSEIL EN INVESTISSEMENT",
+    "presenter": true,
+    "voix": "Passez maintenant à l'entraînement pratique dans la leçon sept sur westbourse point com : manipulez le carnet d'ordres BRVM, le simulateur de diversification, le parcours à moins vingt pour cent, le calculateur de précaution et validez les onze questions du quiz !"
+  }
+}

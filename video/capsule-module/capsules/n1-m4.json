@@ -1,0 +1,213 @@
+{
+  "_": "Leçon 4 en format Salon Podcast (Amina + voix WESTBOURSE dynamisée) : Dividende et plus-value : les deux sources de gain.",
+  "id": "n1-m4",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 4,
+  "format": "salon",
+  "bandeau": "SALON PODCAST · LEÇON 4 · DIVIDENDE & PLUS-VALUE",
+  "titre": "Dividende et plus-value : comment gagne-t-on à la BRVM ?",
+  "sousTitre": "Rendement total, détachement réel Filtisac CI (2025), fiscalité IRVM et protection DPS",
+  "intervenants": {
+    "journaliste": {
+      "nom": "Amina · Journaliste",
+      "role": "Podcast WESTBOURSE",
+      "photo": "logos/journaliste.jpg",
+      "voiceId": "O31r762Gb3WFygrEOGh0",
+      "publicOwnerId": "469526c55385b371d11f57b5d59934c753901e36de103c1635671d9abe03e1d8",
+      "fallbackVoiceId": "EXAVITQu4vr4xnSDxMaL"
+    },
+    "expert": {
+      "prenom": "{auteur.prenom}",
+      "nom": "{auteur.nomComplet}",
+      "role": "Fondateur · WESTBOURSE",
+      "photo": "logos/auteur.jpg"
+    }
+  },
+  "presentateur": {
+    "photo": "logos/auteur.jpg",
+    "nom": "{auteur.nomComplet}",
+    "role": "Fondateur · WESTBOURSE"
+  },
+  "hook": {
+    "speaker": "journaliste",
+    "badge": "OUVERTURE · SALON BRVM",
+    "tvTag": "DIVIDENDE + PLUS-VALUE",
+    "question": "Comment gagne-t-on vraiment de l’argent en actions : grâce aux dividendes ou en revendant plus cher ?",
+    "reponse": "Dans ce nouvel épisode au salon, on démontre comment additionner les deux moteurs sans tomber dans les pièges.",
+    "logo": "logos/brvm.png",
+    "voix": "Bienvenue dans le salon WestBourse Academy ! Aujourd'hui, on s'attaque à la question préférée des investisseurs : vaut-il mieux miser sur les dividendes ou sur la plus-value ?"
+  },
+  "etapes": [
+    {
+      "id": "moteurs",
+      "badge": "ÉTAPE 01",
+      "shortLabel": "2 MOTEURS",
+      "tvTag": "RENDEMENT TOTAL = 2 MOTEURS",
+      "titre": "Additionner dividende et plus-value",
+      "theme": "yellow",
+      "type": "kpis",
+      "logos": [
+        "logos/brvm.png"
+      ],
+      "question": {
+        "badge": "QUESTION 01 / 05",
+        "texte": "Concrètement, quelle différence entre dividende, plus-value et rendement total ?",
+        "voix": "Concrètement, {auteur.prenom}, quelle différence entre dividende, plus-value et ce qu'on appelle le rendement total ?"
+      },
+      "kpis": [
+        {
+          "valeur": "Dividende",
+          "label": "Part du bénéfice encaissée en cash"
+        },
+        {
+          "valeur": "Plus-value",
+          "label": "Écart positif gagné à la revente"
+        },
+        {
+          "valeur": "20 % total",
+          "label": "Ex. 8 % dividende + 12 % cours"
+        }
+      ],
+      "note": "Exemple pédagogique sur 1 000 000 FCFA · Dividende jamais garanti · Plus-value latente avant vente",
+      "voix": "Le dividende, c'est du cash qui tombe sur votre compte espèces sans vendre vos actions. La plus-value, c'est le gain entre votre prix d'achat et votre prix de revente. Et le rendement total additionne ces deux moteurs, jamais un seul pris à part !"
+    },
+    {
+      "id": "filtisac",
+      "badge": "ÉTAPE 02",
+      "shortLabel": "DÉTACHEMENT",
+      "tvTag": "FILTISAC CI · 26 SEPT. 2025",
+      "titre": "Le mythe du « dividende gratuit »",
+      "theme": "pink",
+      "type": "compare_duel",
+      "stamp": "PAS DE GAIN GRATUIT !",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 02 / 05",
+        "texte": "Beaucoup veulent acheter la veille du dividende et revendre le lendemain : est-ce vraiment un gain gratuit ?",
+        "voix": "Beaucoup veulent acheter la veille du dividende pour toucher le chèque et revendre le lendemain. Est-ce vraiment gratuit ?"
+      },
+      "gauche": {
+        "code": "25/09/2025",
+        "cours": "3 760 FCFA",
+        "capPrefix": "",
+        "cap": "Veille du détachement",
+        "tag": "Dernier jour pour acheter avec droit au dividende"
+      },
+      "droite": {
+        "code": "26/09/2025",
+        "cours": "2 185 FCFA",
+        "capPrefix": "",
+        "cap": "−41,9 % en 1 séance !",
+        "tag": "Dividende net 1 726,56 FCFA détaché : ajustement immédiat du cours"
+      },
+      "note": "Épisode réel Filtisac CI (FTSC, sept. 2025) · Les frais de courtage restent dus !",
+      "voix": "Surtout pas ! Regardez le cas réel de Filtisac en septembre deux mille vingt-cinq : la veille du détachement, l'action cotait trois mille sept cent soixante francs. Le lendemain, jour du détachement du dividende de mille sept cent vingt-six francs, le cours a ouvert à deux mille cent quatre-vingt-cinq francs, moins quarante-et-un virgule neuf pour cent en une séance !"
+    },
+    {
+      "id": "cinq_ans",
+      "badge": "ÉTAPE 03",
+      "shortLabel": "5 ANS BRVM",
+      "tvTag": "5 ANS DE DIVIDENDES · 2021–2026",
+      "titre": "Dividendes cumulés sur 5 ans (BRVM)",
+      "theme": "green",
+      "type": "compare",
+      "sousTitre": "Dividendes 2021–2025 en % du cours initial de janv. 2021 (hors frais)",
+      "flowShape": "coin",
+      "question": {
+        "badge": "QUESTION 03 / 05",
+        "texte": "Sur cinq ans à la BRVM, quel poids pèsent réellement les dividendes par rapport à la hausse du cours ?",
+        "voix": "Sur cinq ans à la BRVM, quel poids pèsent réellement les dividendes par rapport à la hausse des cours ?"
+      },
+      "barres": [
+        {
+          "label": "Palm CI (PALC · 3 906 FCFA cumulés)",
+          "pct": 100,
+          "valeur": "+177,5 %"
+        },
+        {
+          "label": "SGBCI (SGBC · 7 591 FCFA cumulés)",
+          "pct": 57,
+          "valeur": "+101,2 %"
+        },
+        {
+          "label": "Sonatel (SNTS · 788 FCFA cumulés)",
+          "pct": 34.1,
+          "valeur": "+60,6 %",
+          "logo": "logos/sonatel.png"
+        }
+      ],
+      "note": "Base WESTBOURSE 2021–2026 · UNXC : 0 FCFA (2022–2025) · Passé ≠ avenir",
+      "voix": "À la BRVM, c'est énorme ! De deux mille vingt-et-un à deux mille vingt-six, les dividendes cumulés représentent soixante pour cent du prix initial sur Sonatel, cent un pour cent sur S G B C I et cent soixante-dix-sept pour cent sur Palm C I ! Mais attention, rien n'est automatique : Uniwax a versé zéro franc pendant quatre ans."
+    },
+    {
+      "id": "irvm",
+      "badge": "ÉTAPE 04",
+      "shortLabel": "IMPÔT IRVM",
+      "tvTag": "FISCALITÉ IRVM · ZONE UEMOA",
+      "titre": "L’impôt IRVM retenu à la source",
+      "theme": "cyan",
+      "type": "points",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 04 / 05",
+        "texte": "Côté impôt : combien nous retire-t-on sur chaque dividende, et selon quel pays ?",
+        "voix": "Côté impôts, combien nous retire-t-on automatiquement sur chaque dividende, et selon quel pays ?"
+      },
+      "points": [
+        {
+          "tag": "3 % · 5 % · 7 %",
+          "texte": "Togo (3 %), Bénin (5 %) et Mali (7 %) — taux selon siège de l’émetteur"
+        },
+        {
+          "tag": "SÉNÉGAL 10 %",
+          "texte": "Retenu automatiquement à la source (applicable à Sonatel)"
+        },
+        {
+          "tag": "CI 12 % · BF 12,5 %",
+          "texte": "Côte d’Ivoire 12 % (loi de finances 2025) et Burkina Faso 12,5 %"
+        }
+      ],
+      "voix": "Point crucial : c'est le pays du siège de l'entreprise qui fixe l'impôt IRVM, jamais votre pays de résidence ! C'est trois pour cent au Togo, cinq au Bénin, sept au Mali, dix au Sénégal et douze pour cent en Côte d'Ivoire depuis deux mille vingt-cinq. Votre S G I verse directement le montant net."
+    },
+    {
+      "id": "dps",
+      "badge": "ÉTAPE 05",
+      "shortLabel": "LES DPS",
+      "tvTag": "DPS · PROTÉGER SON CAPITAL",
+      "titre": "Que faire de vos DPS en augmentation ?",
+      "theme": "yellow",
+      "type": "points",
+      "flowShape": "sheet",
+      "presenter": true,
+      "question": {
+        "badge": "QUESTION 05 / 05",
+        "texte": "Dernier point : lors d’une augmentation de capital, ces fameux DPS créent-ils un gain supplémentaire ?",
+        "voix": "Dernier point : lors d'une augmentation de capital, ces fameux D P S créent-ils vraiment un gain en plus ?"
+      },
+      "points": [
+        {
+          "tag": "EXERCER",
+          "texte": "Souscrire les actions nouvelles à prix réduit et garder sa part"
+        },
+        {
+          "tag": "VENDRE",
+          "texte": "Céder ses DPS en bourse pour compenser la baisse technique du cours"
+        },
+        {
+          "tag": "NE RIEN FAIRE",
+          "texte": "Le seul mauvais choix : vos droits non utilisés tombent à 0 FCFA !"
+        }
+      ],
+      "voix": "Jamais de gain gratuit là non plus : le D P S protège simplement contre la dilution ! Vous avez deux bonnes options : soit exercer vos droits pour acheter moins cher, soit les vendre en bourse. La seule erreur fatale, c'est de ne rien faire et de les laisser expirer à zéro !"
+    }
+  ],
+  "fin": {
+    "speaker": "expert",
+    "tag": "PASSER À L’ACTION",
+    "titre": "Leçon 4 · Simulateurs Rendement, IRVM & DPS",
+    "cta": "westbourse.com/formations/academy",
+    "tape": "WESTBOURSE.COM",
+    "presenter": true,
+    "voix": "Merci Amina ! Testez nos trois simulateurs de rendement total, d'IRVM et de D P S ainsi que le quiz de la leçon quatre sur westbourse point com !"
+  }
+}

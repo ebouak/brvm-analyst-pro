@@ -1,0 +1,1666 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>WESTBOURSE Academy · Leçon complète v2</title>
+<link rel="stylesheet" href="fonts/archivo.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #F6F2E7; }
+  svg { display: block; }
+  text { font-family: Archivo, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+</style>
+</head>
+<body>
+<svg id="stage" width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="mb" filterUnits="userSpaceOnUse" x="-240" y="-240" width="2400" height="1560">
+      <feGaussianBlur id="mbBlur" stdDeviation="0 0"/>
+    </filter>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.6" fill="#D5CEBB"/>
+    </pattern>
+    <pattern id="hazY" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#F3CF56"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazC" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#BDEFF6"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazP" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#F39BE6"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <pattern id="hazG" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="28" height="28" fill="#A6EB8C"/><rect width="13" height="28" fill="#141414"/>
+    </pattern>
+    <linearGradient id="bandeau" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6F2E7" stop-opacity="1"/>
+      <stop offset="0.76" stop-color="#F6F2E7" stop-opacity="1"/>
+      <stop offset="1" stop-color="#F6F2E7" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clipPip">
+      <circle cx="1730" cy="790" r="88"/>
+    </clipPath>
+    <clipPath id="clipPodJ">
+      <rect x="166" y="205" width="708" height="340" rx="14"/>
+    </clipPath>
+    <clipPath id="clipPodE">
+      <rect x="1046" y="205" width="708" height="340" rx="14"/>
+    </clipPath>
+    <clipPath id="clipSalJ">
+      <circle cx="385" cy="405" r="144"/>
+    </clipPath>
+    <clipPath id="clipSalE">
+      <circle cx="1535" cy="405" r="144"/>
+    </clipPath>
+    <clipPath id="clipStudioJ">
+      <rect x="76" y="102" width="540" height="498" rx="24"/>
+    </clipPath>
+    <clipPath id="clipStudioE">
+      <rect x="1304" y="102" width="540" height="498" rx="24"/>
+    </clipPath>
+    <linearGradient id="micBodyGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#353B4E"/>
+      <stop offset="0.55" stop-color="#1A1E2B"/>
+      <stop offset="1" stop-color="#0E1018"/>
+    </linearGradient>
+    <linearGradient id="micGrilleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4A5168"/>
+      <stop offset="1" stop-color="#1E2332"/>
+    </linearGradient>
+    <linearGradient id="studioVig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12151E" stop-opacity="0"/>
+      <stop offset="0.72" stop-color="#12151E" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0D1017" stop-opacity="0.72"/>
+    </linearGradient>
+    <radialGradient id="studioHaloJ" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#F39BE6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#F39BE6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="studioHaloE" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#F3CF56" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#F3CF56" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampGlowL" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#F3CF56" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#F3CF56" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampGlowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#BDEFF6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#BDEFF6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tvGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#F3CF56" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#F3CF56" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F6F2E7"/>
+  <g id="shake"><g id="blurWrap"><g id="cam"></g></g></g>
+  <rect id="band" width="1920" height="196" fill="url(#bandeau)"/>
+  <g id="hud"></g>
+  <g id="podcastStage" visibility="hidden"></g>
+  <g id="salonStage" visibility="hidden"><g id="salonCam"></g><g id="salonUi"></g></g>
+  <g id="endcard"></g>
+  <g id="pipPresenter" visibility="hidden"></g>
+  <g id="subtitles" visibility="hidden"></g>
+  <text id="meas" x="-5000" y="-5000" opacity="0"></text>
+</svg>
+
+<script>
+(async () => {
+'use strict';
+const PLAN = window.__PLAN;
+const VX = window.__VOIX;
+if (!PLAN || !VX) {
+  document.body.innerHTML = '<p style="font:24px sans-serif;padding:40px">window.__PLAN / window.__VOIX manquant</p>';
+  return;
+}
+
+try {
+  await Promise.race([
+    Promise.all(['600', '700', '800', '900'].map((w) => document.fonts.load(`${w} 40px Archivo`, 'ÉÀÔÈÇéèêàô'))),
+    new Promise((r) => setTimeout(r, 3500)),
+  ]);
+} catch { /* fallback system-ui */ }
+
+const NS = 'http://www.w3.org/2000/svg';
+const C = {
+  bg: '#F6F2E7', ink: '#141414', pink: '#F39BE6', cyan: '#BDEFF6',
+  green: '#A6EB8C', yellow: '#F3CF56', white: '#FFFFFF', ghost: '#A49D89', cream: '#FFFDF6',
+};
+const THEMES = {
+  yellow: { fill: C.yellow, haz: 'url(#hazY)' },
+  cyan: { fill: C.cyan, haz: 'url(#hazC)' },
+  pink: { fill: C.pink, haz: 'url(#hazP)' },
+  green: { fill: C.green, haz: 'url(#hazG)' },
+  white: { fill: C.white, haz: 'url(#hazY)' },
+};
+const DURATION = VX.duration;
+
+/* ---------- maths & ressorts ---------- */
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const win = (t, a, b) => clamp((t - a) / Math.max(0.001, b - a));
+const expoOut = (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
+const expoInOut = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2);
+const popE = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : 1 - Math.exp(-6 * p) * Math.cos(10.5 * p));
+const dropE = (p) => (p <= 0 ? 0 : p >= 1 ? 1 : 1 - Math.exp(-5 * p) * Math.cos(9 * p));
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+const meas = document.getElementById('meas');
+function measure(s, size, w = 900, ls = 0) {
+  meas.setAttribute('font-size', size);
+  meas.setAttribute('font-weight', w);
+  meas.setAttribute('letter-spacing', ls);
+  meas.textContent = s;
+  return meas.getComputedTextLength();
+}
+
+function text(parent, s, x, y, size, o = {}) {
+  const e = el('text', {
+    x, y, 'font-size': size, 'font-weight': o.w || 900,
+    fill: o.fill || C.ink, 'text-anchor': o.anchor || 'start', 'letter-spacing': o.ls ?? 0,
+  }, parent);
+  if (o.mid) e.setAttribute('dominant-baseline', 'central');
+  e.textContent = s;
+  return e;
+}
+
+function wrapLines(s, maxW, size, w = 800) {
+  const norm = String(s)
+    .replace(/(\d)\s+(?=\d{3}\b)/g, '$1\u00A0')
+    .replace(/\s+([?!%:;»]|FCFA\b)/g, '\u00A0$1')
+    .replace(/(«)\s+/g, '$1\u00A0');
+  const words = norm.split(/[ \t]+/).filter(Boolean);
+  const lines = [];
+  let cur = '';
+  for (const word of words) {
+    const cand = cur ? `${cur} ${word}` : word;
+    if (!cur || measure(cand, size, w) <= maxW) cur = cand;
+    else { lines.push(cur); cur = word; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function multiText(parent, s, x, y, size, maxW, lineH, o = {}) {
+  const lines = wrapLines(s, maxW, size, o.w || 800);
+  lines.forEach((ln, idx) => text(parent, ln, x, y + idx * lineH, size, o));
+  return lines.length;
+}
+
+function card(parent, x, y, w, h, fill, o = {}) {
+  const sh = o.sh ?? 11;
+  el('rect', { x: x + sh, y: y + sh, width: w, height: h, rx: o.r ?? 8, fill: C.ink }, parent);
+  return el('rect', { x, y, width: w, height: h, rx: o.r ?? 8, fill, stroke: C.ink, 'stroke-width': o.sw ?? 5 }, parent);
+}
+
+function pill(parent, s, cx, cy, fill, o = {}) {
+  const size = o.size || 22, ls = o.ls ?? 1.5;
+  const w = measure(s, size, o.w || 800, ls) + 2 * (o.padX || 20), h = o.h || size * 1.85, sh = o.sh ?? 4;
+  el('rect', { x: cx - w / 2 + sh, y: cy - h / 2 + sh, width: w, height: h, rx: h / 2, fill: C.ink }, parent);
+  el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: h / 2, fill, stroke: C.ink, 'stroke-width': o.sw ?? 3.5 }, parent);
+  text(parent, s, cx + ls / 2, cy + 1, size, { w: o.w || 800, anchor: 'middle', ls, mid: true });
+  return { w, h };
+}
+
+function starD(cx, cy, r, n = 5, inner = 0.46) {
+  let d = '';
+  for (let i = 0; i < n * 2; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / n, rr = i % 2 ? r * inner : r;
+    d += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1);
+  }
+  return d + 'Z';
+}
+
+/* ---------- timing & calques ---------- */
+const S = (id) => VX.scenes[id].s;
+const V = (id) => VX.scenes[id].v;
+const E = (id) => VX.scenes[id].e;
+
+const SFX = [];
+const SHAKES = [];
+const BEATS = [];
+
+const cam = document.getElementById('cam');
+const blurWrap = document.getElementById('blurWrap');
+const mbBlur = document.getElementById('mbBlur');
+const hud = document.getElementById('hud');
+const endcard = document.getElementById('endcard');
+const podStage = document.getElementById('podcastStage');
+const salonStage = document.getElementById('salonStage');
+const salonCam = document.getElementById('salonCam');
+const salonUi = document.getElementById('salonUi');
+const pipOverlay = document.getElementById('pipPresenter');
+const subOverlay = document.getElementById('subtitles');
+el('rect', { x: -600, y: -350, width: 6600, height: 3900, fill: 'url(#dots)' }, cam);
+
+const L = {
+  ghost: el('g', {}, cam),
+  lines: el('g', {}, cam),
+  items: el('g', {}, cam),
+  tokens: el('g', {}, cam),
+  top: el('g', {}, cam),
+  bars: [],
+};
+
+const ITEMS = [];
+function item(layer, cx, cy, at, o = {}) {
+  const outer = el('g', {}, layer);
+  const g = el('g', {}, outer);
+  const it = {
+    outer, g, cx, cy, at,
+    kind: o.kind || 'pop', rot: o.rot || 0,
+    out: o.out ?? Infinity, pulses: o.pulses || [],
+    keep: !!o.keep, spin: o.spin || 0,
+    dur: o.dur || (o.kind === 'drop' ? 0.85 : o.kind === 'stamp' ? 0.42 : 0.55),
+  };
+  ITEMS.push(it);
+  const s = o.sfx ?? (it.kind === 'drop' ? 'drop' : it.kind === 'stamp' ? 'stamp' : 'pop');
+  if (s !== 'none') SFX.push({ t: at, type: s, pitch: o.pitch || 1 });
+  if (it.kind === 'drop') SHAKES.push({ t: at + 0.16, amp: 7 });
+  if (it.kind === 'stamp') SHAKES.push({ t: at + 0.18, amp: 10 });
+  return it;
+}
+
+const GHOSTS = [];
+function ghost(x, y, w, h, label, at, until) {
+  const g = el('g', {}, L.ghost);
+  el('rect', { x, y, width: w, height: h, rx: 10, fill: 'none', stroke: C.ghost, 'stroke-width': 5, 'stroke-dasharray': '18 13' }, g);
+  text(g, label, x + w / 2, y + h / 2, Math.min(62, w / 4.5), { anchor: 'middle', fill: C.ghost, mid: true });
+  GHOSTS.push({ g, at, until });
+  SFX.push({ t: at, type: 'tick', pitch: 0.9 });
+}
+
+function logoBadge(x, y, w, h, href, at, rot = 0, o = {}) {
+  const it = item(L.top, x + w / 2, y + h / 2, at, { rot, sfx: o.sfx ?? 'match', pitch: o.pitch || 1, out: o.out ?? Infinity, pulses: o.pulses || [] });
+  el('rect', { x: x + 6, y: y + 6, width: w, height: h, rx: 10, fill: C.ink }, it.g);
+  el('rect', { x, y, width: w, height: h, rx: 10, fill: C.white, stroke: C.ink, 'stroke-width': 4 }, it.g);
+  const pad = o.pad ?? 10;
+  el('image', { href, x: x + pad, y: y + pad, width: w - 2 * pad, height: h - 2 * pad, preserveAspectRatio: 'xMidYMid meet' }, it.g);
+  return it;
+}
+
+const LINES = [];
+function line(d, at, dur = 0.55) {
+  const p = el('path', {
+    d, fill: 'none', stroke: C.ink, 'stroke-width': 6,
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+  }, L.lines);
+  const len = p.getTotalLength();
+  p.setAttribute('stroke-dasharray', `${len} ${len}`);
+  const e = p.getPointAtLength(len), b = p.getPointAtLength(Math.max(0, len - 8));
+  const ang = (Math.atan2(e.y - b.y, e.x - b.x) * 180) / Math.PI;
+  const arrow = el('path', {
+    d: 'M10 0L-16 -15L-16 15Z', fill: C.ink, stroke: C.ink,
+    'stroke-width': 3, 'stroke-linejoin': 'round',
+  }, L.lines);
+  LINES.push({ p, len, at, dur, arrow, ex: e.x, ey: e.y, ang });
+  SFX.push({ t: at, type: 'draw', dur });
+}
+
+function hiddenPath(d) {
+  const p = el('path', { d, fill: 'none', visibility: 'hidden' }, cam);
+  return { p, len: p.getTotalLength() };
+}
+
+function coin(parent) {
+  const g = el('g', {}, parent);
+  el('circle', { cx: 3, cy: 3, r: 17, fill: C.ink }, g);
+  el('circle', { r: 17, fill: C.green, stroke: C.ink, 'stroke-width': 3.5 }, g);
+  el('circle', { r: 8, fill: 'none', stroke: C.ink, 'stroke-width': 2.5 }, g);
+  return g;
+}
+
+function sheet(parent) {
+  const g = el('g', {}, parent);
+  el('rect', { x: -14, y: -18, width: 32, height: 40, rx: 3, fill: C.ink }, g);
+  el('rect', { x: -17, y: -21, width: 32, height: 40, rx: 3, fill: C.yellow, stroke: C.ink, 'stroke-width': 3.5 }, g);
+  el('path', { d: 'M-10 -9H8M-10 0H8M-10 9H2', stroke: C.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+  return g;
+}
+
+const FLOWS = [];
+function flow(d, t0, t1, shape, n = 4, speed = 250) {
+  const hp = hiddenPath(d);
+  const toks = [];
+  for (let i = 0; i < n; i++) toks.push(shape === 'coin' ? coin(L.tokens) : sheet(L.tokens));
+  const f = { p: hp.p, len: hp.len, toks, t0, t1, speed, gap: hp.len / n };
+  FLOWS.push(f);
+  let k = 0;
+  for (let i = 0; i < n && k < 8; i++) {
+    for (let at = t0 + (i * f.gap) / speed; at < t1 && k < 8; at += hp.len / speed, k++) {
+      SFX.push({ t: at, type: shape === 'coin' ? 'coin' : 'paper' });
+    }
+  }
+  return f;
+}
+
+/* ---------- HUD : bandeau haut ---------- */
+el('rect', { x: 48, y: 34, width: 10, height: 82, rx: 3, fill: C.ink }, hud);
+text(hud, PLAN.bandeau, 74, 52, 18, { w: 800, ls: 2.8, fill: '#4A463B' });
+const hudTitle = text(hud, '', 74, 104, 46, { w: 900, ls: -1 });
+const hudSub = text(hud, PLAN.sousTitre, 74, 138, 21, { w: 700, fill: '#4A463B' });
+pill(hud, 'WESTBOURSE ACADEMY', 1738, 68, C.yellow, { size: 18, padX: 20, h: 40 });
+el('rect', { x: 48, y: 158, width: 1824, height: 6, rx: 3, fill: '#DFD8C5' }, hud);
+const progFill = el('rect', { x: 48, y: 158, width: 0, height: 6, rx: 3, fill: C.ink }, hud);
+for (let k = 0; k < PLAN.titre.length; k += 2) SFX.push({ t: 0.06 + (k / PLAN.titre.length) * 0.78, type: 'type' });
+
+/* ---------- Grille en serpentin (support 5, 6 ou N étapes complètes) ---------- */
+const POS_6 = [
+  { x: 120, y: 740, w: 1120, h: 640 },
+  { x: 1460, y: 740, w: 1120, h: 640 },
+  { x: 2800, y: 740, w: 1120, h: 640 },
+  { x: 2800, y: 1580, w: 1120, h: 640 },
+  { x: 1460, y: 1580, w: 1120, h: 640 },
+  { x: 120, y: 1580, w: 1120, h: 640 },
+];
+const GRID_COLS = PLAN.etapes.length <= 6 ? 3 : 4;
+const POS = PLAN.etapes.length <= 5
+  ? POS_6.slice(0, PLAN.etapes.length)
+  : PLAN.etapes.length === 6
+    ? POS_6
+    : PLAN.etapes.map((_, idx) => {
+        const row = Math.floor(idx / GRID_COLS);
+        const cInRow = idx % GRID_COLS;
+        const col = row % 2 === 0 ? cInRow : GRID_COLS - 1 - cInRow;
+        return { x: 120 + col * 1340, y: 740 + row * 840, w: 1120, h: 640 };
+      });
+
+PLAN.etapes.forEach((et, idx) => {
+  const b = POS[idx];
+  ghost(b.x, b.y, b.w, b.h, et.shortLabel || et.badge, 0.35 + idx * Math.min(0.14, 0.9 / Math.max(1, PLAN.etapes.length)), S(et.id) + 0.15);
+});
+
+/* ---------- Accroche ---------- */
+const HK = { x: 1440, y: 50, w: 1160, h: 490 };
+{
+  const at = S('hook') + 0.15;
+  const outHook = S(PLAN.etapes[0].id) + 0.1;
+  const it = item(L.items, HK.x + HK.w / 2, HK.y + HK.h / 2, at, { kind: 'drop', out: outHook });
+  card(it.g, HK.x, HK.y, HK.w, HK.h, C.cream, { sh: 14 });
+  el('rect', { x: HK.x, y: HK.y, width: HK.w, height: 22, fill: 'url(#hazY)' }, it.g);
+  const hkBadgeW = measure(PLAN.hook.badge, 19, 800, 1.5) + 40;
+  pill(it.g, PLAN.hook.badge, Math.max(HK.x + 225, HK.x + 106 + hkBadgeW / 2), HK.y + 84, C.yellow, { size: 19, padX: 20 });
+  if (PLAN.hook.logo) {
+    logoBadge(HK.x + HK.w - 220, HK.y + 38, 174, 96, PLAN.hook.logo, at + 0.45, -4, { pad: 10, out: outHook });
+  }
+  const qSize = wrapLines(PLAN.hook.question, HK.w - 260, 46, 900).length > 3 ? 40 : 46;
+  const qLineH = qSize === 40 ? 48 : 56;
+  const qCount = multiText(it.g, PLAN.hook.question, HK.x + 64, HK.y + 180, qSize, HK.w - 260, qLineH, { w: 900, ls: -1 });
+  const repY = Math.max(HK.y + 356, HK.y + 180 + qCount * qLineH + 14);
+  multiText(it.g, PLAN.hook.reponse, HK.x + 64, repY, 27, HK.w - 128, 36, { w: 700, fill: '#3A372E' });
+
+  const st = item(L.top, HK.x + 60, HK.y + 44, at + 0.65, { spin: 16, sfx: 'tick', out: outHook });
+  el('path', { d: starD(HK.x + 60, HK.y + 44, 34, 5), fill: C.pink, stroke: C.ink, 'stroke-width': 3.5 }, st.g);
+  BEATS.push(+(V('hook') + 1.1).toFixed(2));
+}
+
+const T_ZOOM_ALL = S('fin') + 0.05;
+const T_END = Math.max(T_ZOOM_ALL + 1.55, V('fin') - 0.45);
+const PULSE_STEP = Math.min(0.18, 1.15 / Math.max(1, PLAN.etapes.length));
+
+function drawFooterNote(parent, box, noteText, w = 750) {
+  if (!noteText) return;
+  let sz = 21;
+  while (sz > 16 && measure(noteText, sz, w) > box.w - 112) sz -= 1;
+  text(parent, noteText, box.x + 56, box.y + box.h - 38, sz, { w, fill: '#3E3A30' });
+}
+
+/* ---------- Cartes étapes ---------- */
+const IS_SALON = PLAN.format === 'salon' && Boolean(PLAN.intervenants);
+const IS_STUDIO_SALON = IS_SALON && PLAN.salonStyle === 'studio';
+// Étiquettes des intervenants, tirées du storyboard : l'identité de l'auteur reste
+// hors du dépôt (marqueurs {auteur.*}, voir auteur.mjs), jamais écrite ici.
+const LIBELLE_EXPERT = `${String(PLAN.intervenants?.expert?.prenom || PLAN.intervenants?.expert?.nom || 'Expert').toUpperCase()} · WESTBOURSE`;
+const LIBELLE_JOURNALISTE = String(PLAN.intervenants?.journaliste?.nom || 'Journaliste').toUpperCase();
+const SALON_TAIL_DELAY = IS_SALON ? 1.75 : 0;
+
+PLAN.etapes.forEach((et, idx) => {
+  const box = POS[idx];
+  const th = THEMES[et.theme] || THEMES.white;
+  const tS = S(et.id) + SALON_TAIL_DELAY;
+  const tV = V(et.id) + SALON_TAIL_DELAY;
+  const tE = E(et.id);
+  const span = Math.max(2, tE - tV);
+
+  const it = item(L.items, box.x + box.w / 2, box.y + box.h / 2, tS + 0.15, {
+    kind: 'drop',
+    pulses: [T_ZOOM_ALL + 0.25 + idx * PULSE_STEP],
+  });
+  card(it.g, box.x, box.y, box.w, box.h, th.fill, { sh: 14 });
+  el('rect', { x: box.x, y: box.y, width: box.w, height: 20, fill: th.haz }, it.g);
+
+  const st = item(L.top, box.x + box.w - 28, box.y + 28, tS + 0.45, { spin: idx % 2 ? -14 : 14, sfx: 'tick' });
+  el('path', { d: starD(box.x + box.w - 28, box.y + 28, 30, idx % 2 ? 6 : 5, 0.5), fill: idx % 2 ? C.yellow : C.pink, stroke: C.ink, 'stroke-width': 3.5 }, st.g);
+
+  if (Array.isArray(et.logos)) {
+    et.logos.forEach((lg, li) => {
+      const lw = 152, lh = 82;
+      const lx = box.x + box.w - 190 - li * 168;
+      const ly = box.y + 34;
+      logoBadge(lx, ly, lw, lh, lg, tV + 0.55 + li * 0.55, li % 2 ? -4 : 4, { pad: 8 });
+    });
+  }
+
+  const logoReserve = Array.isArray(et.logos) ? et.logos.length * 170 + 30 : 40;
+  const badgeW = measure(et.badge, 20, 800, 1.5) + 40;
+  const badgeCx = Math.max(box.x + 134, box.x + 48 + badgeW / 2);
+  pill(it.g, et.badge, badgeCx, box.y + 78, C.white, { size: 20, padX: 20 });
+  const titreX = Math.max(box.x + 250, badgeCx + badgeW / 2 + 24);
+  const maxTitreW = Math.max(300, box.w - (titreX - box.x) - logoReserve);
+  let titreSize = 36;
+  while (titreSize > 28 && wrapLines(et.titre, maxTitreW, titreSize, 900).length > 2) titreSize -= 2;
+  const titreLines = wrapLines(et.titre, maxTitreW, titreSize, 900);
+  const titreY = titreLines.length === 1 ? box.y + 90 : box.y + 68;
+  titreLines.forEach((ln, li) => text(it.g, ln, titreX, titreY + li * (titreSize + 6), titreSize, { w: 900, ls: -0.8 }));
+
+  if (et.type === 'kpis') {
+    const colW = (box.w - 112) / et.kpis.length;
+    et.kpis.forEach((kp, j) => {
+      const kx = box.x + 48 + j * (colW + 12);
+      const ky = box.y + 178;
+      const kw = colW - 16;
+      const kh = 270;
+      const kItem = item(L.items, kx + kw / 2, ky + kh / 2, tV + 0.35 + j * (span * 0.25), { kind: 'pop', pitch: 1 + j * 0.08 });
+      card(kItem.g, kx, ky, kw, kh, C.white, { sh: 7, r: 10, sw: 4 });
+      let kFontSize = 46;
+      while (kFontSize > 26 && measure(kp.valeur, kFontSize, 900) > kw - 36) kFontSize -= 2;
+      text(kItem.g, kp.valeur, kx + kw / 2, ky + 114, kFontSize, { w: 900, anchor: 'middle', ls: -0.8 });
+      multiText(kItem.g, kp.label, kx + 24, ky + 190, 23, kw - 48, 30, { w: 700, fill: '#3E3A30' });
+    });
+    drawFooterNote(it.g, box, et.note, 700);
+  } else if (et.type === 'points') {
+    const nPts = et.points.length;
+    const isFour = nPts >= 4;
+    const baseY = isFour ? box.y + 148 : box.y + 162;
+    const stepY = isFour ? 101 : 132;
+    const rowH = isFour ? 86 : 108;
+    const tagSize = isFour ? 16 : 18;
+    const txtSize = isFour ? 22 : 24;
+    const txtLineH = isFour ? 27 : 30;
+    const maxTagW = Math.max(200, ...et.points.map((pt) => measure(pt.tag, tagSize, 800, 1.5) + 38));
+    et.points.forEach((pt, j) => {
+      const py = baseY + j * stepY;
+      const pw = box.w - 96;
+      const pItem = item(L.items, box.x + 48 + pw / 2, py + rowH / 2, tV + 0.3 + j * (span * (0.72 / Math.max(1, nPts))), { kind: 'pop', pitch: 1 + j * 0.05 });
+      card(pItem.g, box.x + 48, py, pw, rowH, C.cream, { sh: 6, r: 10, sw: 4 });
+      const tagCx = box.x + 68 + maxTagW / 2;
+      pill(pItem.g, pt.tag, tagCx, py + rowH / 2, j % 2 === 0 ? C.yellow : C.cyan, { size: tagSize, padX: 16, h: isFour ? 36 : 42 });
+      const txtX = box.x + 68 + maxTagW + 22;
+      const maxTxtW = box.x + 48 + pw - txtX - 22;
+      const ptLines = wrapLines(pt.texte, maxTxtW, txtSize, 800);
+      const ptY = ptLines.length === 1 ? py + rowH / 2 + 8 : py + rowH / 2 - ((ptLines.length - 1) * txtLineH) / 2 + 7;
+      ptLines.forEach((ln, li) => text(pItem.g, ln, txtX, ptY + li * txtLineH, txtSize, { w: 800 }));
+    });
+    drawFooterNote(it.g, box, et.note, 750);
+  } else if (et.type === 'compare') {
+    const nBars = et.barres.length;
+    const isFour = nBars >= 4;
+    if (et.sousTitre) text(it.g, et.sousTitre, box.x + 56, box.y + (isFour ? 142 : 150), isFour ? 22 : 24, { w: 800, fill: '#2D2A22' });
+    const baseY = isFour ? box.y + 168 : box.y + 195;
+    const stepY = isFour ? 96 : 124;
+    const barH = isFour ? 26 : 34;
+    const barColors = [C.yellow, C.green, C.cyan, C.pink];
+    et.barres.forEach((br, j) => {
+      const by = baseY + j * stepY;
+      const bw = br.logo ? box.w - 230 : box.w - 112;
+      const bAt = tV + 0.35 + j * (span * (0.68 / Math.max(1, nBars)));
+      const bItem = item(L.items, box.x + 56 + bw / 2, by + 38, bAt, { kind: 'pop', pitch: 1 + j * 0.05 });
+      text(bItem.g, br.label, box.x + 56, by + 22, isFour ? 21 : 24, { w: 800 });
+      text(bItem.g, br.valeur, box.x + 56 + bw, by + 22, isFour ? 23 : 26, { w: 900, anchor: 'end' });
+      el('rect', { x: box.x + 56, y: by + 34, width: bw, height: barH, rx: 7, fill: C.white, stroke: C.ink, 'stroke-width': 3.5 }, bItem.g);
+      const barRect = el('rect', { x: box.x + 56, y: by + 34, width: 0, height: barH, rx: 7, fill: br.fill || barColors[j % barColors.length], stroke: C.ink, 'stroke-width': 3.5 }, bItem.g);
+      L.bars.push({ el: barRect, targetW: (bw * br.pct) / 100, at: bAt + 0.12 });
+      SFX.push({ t: bAt + 0.12, type: 'zip', dur: 0.55 });
+      if (br.logo) {
+        logoBadge(box.x + 56 + bw + 20, by + 6, 92, 62, br.logo, bAt + 0.22, 4, { pad: 6 });
+      }
+    });
+    drawFooterNote(it.g, box, et.note, 800);
+  } else if (et.type === 'compare_duel') {
+    const halves = [
+      { d: et.gauche, x: box.x + 48, fill: C.white, at: tV + 0.4 },
+      { d: et.droite, x: box.x + 584, fill: C.cream, at: tV + span * 0.42 },
+    ];
+    halves.forEach((h, j) => {
+      const hw = 488, hh = 365, hy = box.y + 162;
+      const dItem = item(L.items, h.x + hw / 2, hy + hh / 2, h.at, { kind: 'pop', pitch: 1 + j * 0.1 });
+      card(dItem.g, h.x, hy, hw, hh, h.fill, { sh: 7, r: 10, sw: 4 });
+      const codeW = measure(h.d.code, 20, 800, 1.5) + 40;
+      pill(dItem.g, h.d.code, Math.max(h.x + 102, h.x + 30 + codeW / 2), hy + 52, j === 0 ? C.yellow : C.pink, { size: 20, padX: 20 });
+      if (h.d.logo) {
+        logoBadge(h.x + hw - 134, hy + 20, 108, 72, h.d.logo, h.at + 0.2, j === 0 ? -4 : 4, { pad: 6 });
+      }
+      let coursSz = 31;
+      while (coursSz > 22 && measure(h.d.cours, coursSz, 900) > hw - 64) coursSz -= 1;
+      text(dItem.g, h.d.cours, h.x + 32, hy + 144, coursSz, { w: 900 });
+      const capTxt = h.d.capPrefix !== undefined ? `${h.d.capPrefix}${h.d.cap}` : `Capitalisation : ${h.d.cap}`;
+      let capSz = 25;
+      while (capSz > 19 && measure(capTxt, capSz, 900) > hw - 64) capSz -= 1;
+      text(dItem.g, capTxt, h.x + 32, hy + 204, capSz, { w: 900, fill: '#141414' });
+      multiText(dItem.g, h.d.tag, h.x + 32, hy + 258, 20, hw - 64, 27, { w: 700, fill: '#4A463B' });
+    });
+    if (et.stamp) {
+      const stAt = tV + span * 0.7;
+      const stIt = item(L.top, box.x + box.w / 2, box.y + 528, stAt, { kind: 'stamp', rot: -5 });
+      pill(stIt.g, et.stamp, box.x + box.w / 2, box.y + 528, C.pink, { size: 22, padX: 26, h: 48, sw: 4 });
+    }
+    drawFooterNote(it.g, box, et.note, 800);
+  } else if (et.type === 'grid6') {
+    if (et.sousTitre) text(it.g, et.sousTitre, box.x + 56, box.y + 142, 21, { w: 800, fill: '#2D2A22' });
+    const cw = 498, ch = 114, gx = 28, gy = 16;
+    const startY = et.sousTitre ? box.y + 164 : box.y + 154;
+    (et.items || []).slice(0, 6).forEach((gi, j) => {
+      const col = j % 2;
+      const row = Math.floor(j / 2);
+      const gxPos = box.x + 48 + col * (cw + gx);
+      const gyPos = startY + row * (ch + gy);
+      const gAt = tV + 0.3 + j * (span * 0.12);
+      const gItem = item(L.items, gxPos + cw / 2, gyPos + ch / 2, gAt, { kind: 'pop', pitch: 1 + j * 0.04 });
+      card(gItem.g, gxPos, gyPos, cw, ch, C.cream, { sh: 5, r: 10, sw: 3.5 });
+      const tw = measure(gi.tag, 15, 800, 1.3) + 28;
+      pill(gItem.g, gi.tag, gxPos + 20 + tw / 2, gyPos + 28, j % 2 === 0 ? C.yellow : C.pink, { size: 15, padX: 14, h: 30, sw: 3 });
+      const lines = wrapLines(gi.texte, cw - 38, 19, 800).slice(0, 2);
+      lines.forEach((ln, li) => text(gItem.g, ln, gxPos + 20, gyPos + 68 + li * 24, 19, { w: 800, fill: C.ink }));
+    });
+    drawFooterNote(it.g, box, et.note, 750);
+  }
+
+  let flowPath = null;
+  if (idx === 0) {
+    flowPath = `M ${HK.x + 280} ${HK.y + HK.h + 10} Q ${HK.x + 60} ${HK.y + HK.h + 110} ${box.x + box.w / 2} ${box.y - 18}`;
+    line(flowPath, tS + 0.05, 0.5);
+  } else {
+    const prev = POS[idx - 1];
+    if (box.y === prev.y && box.x > prev.x) {
+      flowPath = `M ${prev.x + prev.w + 18} ${prev.y + prev.h / 2} L ${box.x - 18} ${box.y + box.h / 2}`;
+      line(flowPath, tS, 0.5);
+    } else if (box.y === prev.y && box.x < prev.x) {
+      flowPath = `M ${prev.x - 18} ${prev.y + prev.h / 2} L ${box.x + box.w + 18} ${box.y + box.h / 2}`;
+      line(flowPath, tS, 0.5);
+    } else {
+      flowPath = `M ${prev.x + prev.w / 2} ${prev.y + prev.h + 18} L ${box.x + box.w / 2} ${box.y - 18}`;
+      line(flowPath, tS, 0.55);
+    }
+  }
+  if (et.flowShape && flowPath) {
+    flow(flowPath, tV + 0.3, Math.min(tE, tV + 4.5), et.flowShape, 3, 220);
+  }
+
+  BEATS.push(+(tV + Math.min(span * 0.85, Math.max(2.6, span - 0.6))).toFixed(2));
+});
+
+/* ---------- Comète lumineuse de récapitulatif ---------- */
+const cometPathD = POS.map((b, i) => `${i === 0 ? 'M' : 'L'} ${b.x + b.w / 2} ${b.y + b.h / 2}`).join(' ');
+const cometBase = el('path', {
+  d: cometPathD, fill: 'none', stroke: C.ink, 'stroke-width': 18,
+  'stroke-linecap': 'round', 'stroke-linejoin': 'round', visibility: 'hidden',
+}, L.lines);
+const comet = el('path', {
+  d: cometPathD, fill: 'none', stroke: C.yellow, 'stroke-width': 9,
+  'stroke-linecap': 'round', 'stroke-linejoin': 'round', visibility: 'hidden',
+}, L.lines);
+const LEN_COMET = comet.getTotalLength();
+SFX.push({ t: T_ZOOM_ALL, type: 'swoosh' });
+PLAN.etapes.forEach((_, k) => SFX.push({ t: T_ZOOM_ALL + 0.25 + k * PULSE_STEP, type: 'note', k }));
+
+/* ---------- Caméra 2D (laisse une marge propre en bas pour sous-titres Coursera & PiP) ---------- */
+function rectFit(x, y, w, h) {
+  const s = Math.min(1680 / w, 710 / h);
+  return { cx: x + w / 2, cy: y + h / 2, s };
+}
+const CAM_KEYS = [{ t: 0, ...rectFit(HK.x - 60, HK.y - 30, HK.w + 120, HK.h + 60) }];
+PLAN.etapes.forEach((et, idx) => {
+  const b = POS[idx];
+  const kt = S(et.id) + SALON_TAIL_DELAY + 0.05;
+  CAM_KEYS.push({ t: kt, ...rectFit(b.x - 60, b.y - 40, b.w + 120, b.h + 80) });
+  SFX.push({ t: kt, type: 'whoosh', dur: 0.85 });
+});
+const POS_MIN_X = Math.min(...POS.map((b) => b.x));
+const POS_MIN_Y = Math.min(...POS.map((b) => b.y));
+const POS_MAX_X = Math.max(...POS.map((b) => b.x + b.w));
+const POS_MAX_Y = Math.max(...POS.map((b) => b.y + b.h));
+CAM_KEYS.push({ t: T_ZOOM_ALL, ...rectFit(POS_MIN_X - 80, POS_MIN_Y - 60, POS_MAX_X - POS_MIN_X + 160, POS_MAX_Y - POS_MIN_Y + 140) });
+
+function cameraAt(t) {
+  let idx = 0;
+  for (let i = 1; i < CAM_KEYS.length; i++) {
+    if (t >= CAM_KEYS[i].t) idx = i;
+    else break;
+  }
+  const curr = CAM_KEYS[idx];
+  if (idx === 0) return curr;
+  const prev = CAM_KEYS[idx - 1];
+  const p = expoInOut(win(t, curr.t, curr.t + 0.9));
+  return { cx: lerp(prev.cx, curr.cx, p), cy: lerp(prev.cy, curr.cy, p), s: lerp(prev.s, curr.s, p) };
+}
+
+/* ---------- Plateau Podcast 2 voix (Journaliste + Expert) ---------- */
+const POD_WINDOWS = [];
+let podEqBars = [];
+let podBadgeTextEl = null;
+let podBadgeBgEl = null;
+let podBadgeShEl = null;
+let podQTextGroup = null;
+let lastPodSid = null;
+
+function setPodcastQuestion(badge, qText) {
+  if (!podQTextGroup || !podBadgeTextEl) return;
+  const bStr = String(badge || 'QUESTION');
+  const bw = measure(bStr, 18, 900, 1.5) + 38;
+  podBadgeShEl.setAttribute('x', 194);
+  podBadgeShEl.setAttribute('width', bw.toFixed(1));
+  podBadgeBgEl.setAttribute('x', 190);
+  podBadgeBgEl.setAttribute('width', bw.toFixed(1));
+  podBadgeTextEl.setAttribute('x', (190 + bw / 2).toFixed(1));
+  podBadgeTextEl.textContent = bStr;
+
+  while (podQTextGroup.firstChild) podQTextGroup.removeChild(podQTextGroup.firstChild);
+  const lines = wrapLines(qText, 1520, 34, 900);
+  const startY = lines.length === 1 ? 842 : lines.length === 2 ? 812 : 792;
+  lines.forEach((ln, li) => {
+    text(podQTextGroup, ln, 190, startY + li * 44, 34, { w: 900, ls: -0.6 });
+  });
+}
+
+if (PLAN.format === 'podcast' && PLAN.intervenants) {
+  const iv = PLAN.intervenants;
+  if (VX.scenes.hook && (VX.scenes.hook.speaker === 'journaliste' || PLAN.hook?.speaker === 'journaliste')) {
+    POD_WINDOWS.push({
+      sid: 'hook',
+      s: VX.scenes.hook.s,
+      v: VX.scenes.hook.v,
+      e: VX.scenes.hook.e,
+      badge: PLAN.hook.badge || 'OUVERTURE',
+      texte: PLAN.hook.question || PLAN.titre,
+    });
+  }
+  PLAN.etapes.forEach((et) => {
+    const qSc = VX.scenes[`${et.id}_q`];
+    if (qSc && et.question) {
+      POD_WINDOWS.push({
+        sid: `${et.id}_q`,
+        s: qSc.s,
+        v: qSc.v,
+        e: qSc.e,
+        badge: et.question.badge || et.badge,
+        texte: et.question.texte,
+      });
+    }
+  });
+  POD_WINDOWS.forEach((w, wi) => {
+    SFX.push({ t: w.s, type: 'pop', pitch: 1.05 });
+    if (wi < 2) BEATS.push(+(w.v + 1.5).toFixed(2));
+  });
+
+  // Fond studio sombre + motif subtil
+  el('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: '#141720' }, podStage);
+  el('rect', { x: 0, y: 0, width: 1920, height: 1080, fill: 'url(#dots)', opacity: '0.16' }, podStage);
+
+  // Barre haute studio : ON AIR à gauche + badge épisode à droite
+  el('rect', { x: 144, y: 74, width: 392, height: 48, rx: 24, fill: C.ink }, podStage);
+  el('rect', { x: 140, y: 70, width: 392, height: 48, rx: 24, fill: '#1E2230', stroke: C.yellow, 'stroke-width': 3 }, podStage);
+  el('circle', { cx: 170, cy: 94, r: 8, fill: '#FF4D6D' }, podStage);
+  text(podStage, 'ON AIR · PODCAST ACADEMY', 190, 95, 17, { w: 900, ls: 1.8, fill: C.cream, mid: true });
+
+  const epPillText = `LEÇON ${PLAN.numero || ''} · FORMAT INTERVIEW`;
+  pill(podStage, epPillText, 1605, 94, C.yellow, { size: 17, padX: 22, h: 44, sw: 3 });
+
+  // Carte gauche : Journaliste active
+  el('rect', { x: 150, y: 185, width: 760, height: 490, rx: 18, fill: C.ink }, podStage);
+  el('rect', { x: 140, y: 175, width: 760, height: 490, rx: 18, fill: '#1E2230', stroke: C.yellow, 'stroke-width': 6 }, podStage);
+  el('image', {
+    href: iv.journaliste.photo,
+    x: 166, y: 205, width: 708, height: 340,
+    preserveAspectRatio: 'xMidYMin slice',
+    'clip-path': 'url(#clipPodJ)',
+  }, podStage);
+  el('rect', { x: 166, y: 205, width: 708, height: 340, rx: 14, fill: 'none', stroke: C.ink, 'stroke-width': 3.5 }, podStage);
+  pill(podStage, 'EN DIRECT', 252, 236, C.pink, { size: 14, padX: 14, h: 30, sw: 2.5 });
+  text(podStage, iv.journaliste.nom.toUpperCase(), 170, 594, 27, { w: 900, fill: C.cream, ls: 0.4 });
+  text(podStage, iv.journaliste.role || 'Podcast WESTBOURSE', 170, 628, 19, { w: 700, fill: '#B5B9C8' });
+
+  // Égaliseur 9 barres sur la carte journaliste
+  el('rect', { x: 744, y: 564, width: 130, height: 76, rx: 12, fill: '#12151E', stroke: C.yellow, 'stroke-width': 2.5 }, podStage);
+  podEqBars = Array.from({ length: 9 }, (_, bi) =>
+    el('rect', { x: 758 + bi * 12, y: 598, width: 7, height: 10, rx: 3.5, fill: C.yellow }, podStage),
+  );
+
+  // Carte droite : Expert à l'écoute
+  el('rect', { x: 1030, y: 185, width: 760, height: 490, rx: 18, fill: C.ink }, podStage);
+  el('rect', { x: 1020, y: 175, width: 760, height: 490, rx: 18, fill: '#1B1F2B', stroke: '#4A5068', 'stroke-width': 5 }, podStage);
+  el('image', {
+    href: iv.expert.photo,
+    x: 1046, y: 205, width: 708, height: 340,
+    preserveAspectRatio: 'xMidYMin slice',
+    'clip-path': 'url(#clipPodE)',
+    opacity: '0.82',
+  }, podStage);
+  el('rect', { x: 1046, y: 205, width: 708, height: 340, rx: 14, fill: 'none', stroke: C.ink, 'stroke-width': 3.5 }, podStage);
+  pill(podStage, 'À L’ÉCOUTE', 1138, 236, C.cyan, { size: 14, padX: 14, h: 30, sw: 2.5 });
+  text(podStage, iv.expert.nom.toUpperCase(), 1050, 594, 27, { w: 900, fill: '#DCE0EC', ls: 0.4 });
+  text(podStage, iv.expert.role || 'Fondateur · WESTBOURSE', 1050, 628, 19, { w: 700, fill: '#8E94A8' });
+
+  // Carte Question néo-brutaliste en bas du plateau
+  card(podStage, 140, 692, 1640, 214, C.cream, { sh: 12, r: 16, sw: 5 });
+  el('rect', { x: 140, y: 692, width: 1640, height: 18, fill: 'url(#hazY)' }, podStage);
+  podBadgeShEl = el('rect', { x: 194, y: 730, width: 220, height: 38, rx: 19, fill: C.ink }, podStage);
+  podBadgeBgEl = el('rect', { x: 190, y: 726, width: 220, height: 38, rx: 19, fill: C.yellow, stroke: C.ink, 'stroke-width': 3 }, podStage);
+  podBadgeTextEl = text(podStage, 'QUESTION', 300, 746, 17, { w: 900, anchor: 'middle', ls: 1.5, mid: true });
+  podQTextGroup = el('g', {}, podStage);
+}
+
+/* ---------- Salon Podcast animé avec écran TV mural (format: 'salon') ---------- */
+const SALON_WINDOWS = [];
+let salHostJ = null, salHostE = null, salRingJ = null, salRingE = null;
+let salEqJ = [], salEqE = [], salTvBars = [];
+let salSteam1 = null, salSteam2 = null;
+let salTvGroup = null;
+let salCardBg = null, salCardStripe = null, salBadgeBg = null, salBadgeSh = null, salBadgeTxt = null, salQGroup = null;
+let lastSalSid = null;
+
+function setSalonOverlayContent(badge, mainText, tvTag, mode) {
+  if (salTvGroup) {
+    while (salTvGroup.firstChild) salTvGroup.removeChild(salTvGroup.firstChild);
+    const lines = wrapLines(tvTag || PLAN.titre, 560, 30, 900);
+    const baseY = IS_STUDIO_SALON ? 270 : 236;
+    const twoLineY = IS_STUDIO_SALON ? 246 : 214;
+    const sy = lines.length === 1 ? baseY : twoLineY;
+    lines.forEach((ln, i) => text(salTvGroup, ln, 960, sy + i * 38, 30, { w: 900, anchor: 'middle', fill: C.cream, ls: -0.4 }));
+    text(salTvGroup, PLAN.bandeau.split('·').slice(1).join('·').trim() || PLAN.titre, 960, IS_STUDIO_SALON ? 334 : 296, 16, { w: 700, anchor: 'middle', fill: '#A8B1C6' });
+  }
+  if (!salQGroup || !salBadgeTxt) return;
+  const isExp = mode === 'expert';
+  salCardBg.setAttribute('fill', isExp ? '#1E2230' : C.cream);
+  salCardBg.setAttribute('stroke', isExp ? C.yellow : C.ink);
+  salCardStripe.setAttribute('fill', isExp ? 'url(#hazC)' : 'url(#hazY)');
+  const bStr = String(badge || (isExp ? 'RÉPONSE · WESTBOURSE' : 'QUESTION'));
+  const bw = measure(bStr, 17, 900, 1.4) + 36;
+  salBadgeSh.setAttribute('x', 214);
+  salBadgeSh.setAttribute('width', bw.toFixed(1));
+  salBadgeBg.setAttribute('x', 210);
+  salBadgeBg.setAttribute('width', bw.toFixed(1));
+  salBadgeBg.setAttribute('fill', isExp ? C.cyan : C.yellow);
+  salBadgeTxt.setAttribute('x', (210 + bw / 2).toFixed(1));
+  salBadgeTxt.textContent = bStr;
+
+  while (salQGroup.firstChild) salQGroup.removeChild(salQGroup.firstChild);
+  const lines = wrapLines(mainText || '', 1480, 31, 900);
+  const startY = lines.length === 1 ? 842 : 816;
+  lines.forEach((ln, li) => {
+    text(salQGroup, ln, 210, startY + li * 40, 31, { w: 900, fill: isExp ? C.cream : C.ink, ls: -0.5 });
+  });
+}
+
+function salonCamSpec(mode) {
+  if (IS_STUDIO_SALON) {
+    if (mode === 'journaliste') return { cx: 615, cy: 372, s: 1.25 };
+    if (mode === 'expert') return { cx: 1305, cy: 372, s: 1.25 };
+    return { cx: 960, cy: 374, s: 1.0 };
+  }
+  if (mode === 'journaliste') return { cx: 560, cy: 405, s: 1.18 };
+  if (mode === 'expert') return { cx: 1360, cy: 405, s: 1.18 };
+  return { cx: 960, cy: 410, s: 1.0 };
+}
+
+function addBroadcastMic(parent, side) {
+  const isLeft = side === 'left';
+  const bx = isLeft ? 634 : 1286;
+  const ex = isLeft ? 566 : 1354;
+  const mx = isLeft ? 484 : 1436;
+  const g = el('g', {}, parent);
+  el('path', { d: `M${bx} 608 L${ex} 534 L${mx + (isLeft ? 20 : -20)} 502`, fill: 'none', stroke: '#0D1018', 'stroke-width': 15, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  el('path', { d: `M${bx} 608 L${ex} 534 L${mx + (isLeft ? 20 : -20)} 502`, fill: 'none', stroke: '#252B3C', 'stroke-width': 11, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  el('path', { d: `M${bx - (isLeft ? 3 : -3)} 604 L${ex} 534 L${mx + (isLeft ? 20 : -20)} 502`, fill: 'none', stroke: '#4A526A', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, g);
+  el('circle', { cx: ex, cy: 534, r: 9, fill: '#2B3245', stroke: '#0D1018', 'stroke-width': 3 }, g);
+  el('circle', { cx: ex, cy: 534, r: 3, fill: C.yellow }, g);
+
+  const head = el('g', { transform: `translate(${mx} 492) ${isLeft ? '' : 'scale(-1 1) '}rotate(-22)` }, g);
+  el('path', { d: 'M-8 14 C-12 24 -42 26 -70 14', fill: 'none', stroke: '#3A4258', 'stroke-width': 3.5, 'stroke-linecap': 'round' }, head);
+  el('rect', { x: -16, y: -14, width: 54, height: 28, rx: 7, fill: 'url(#micBodyGrad)', stroke: '#0D1018', 'stroke-width': 3 }, head);
+  el('circle', { cx: 18, cy: 0, r: 3.2, fill: isLeft ? C.pink : C.yellow }, head);
+  el('rect', { x: -32, y: -14.5, width: 17, height: 29, rx: 3, fill: 'url(#micGrilleGrad)', stroke: '#0D1018', 'stroke-width': 2.5 }, head);
+  el('path', { d: 'M-27 -8 V8 M-23 -10 V10 M-19 -8 V8', stroke: '#12151E', 'stroke-width': 2 }, head);
+  el('rect', { x: -58, y: -15.5, width: 28, height: 31, rx: 13, fill: '#161923', stroke: '#454D66', 'stroke-width': 2.5 }, head);
+  el('ellipse', { cx: -74, cy: -4, rx: 6, ry: 22, fill: '#181C28', 'fill-opacity': '0.68', stroke: '#626C8A', 'stroke-width': 2.5 }, head);
+  el('ellipse', { cx: -74, cy: -4, rx: 3.5, ry: 17, fill: 'none', stroke: '#9BA5C4', 'stroke-opacity': '0.35', 'stroke-width': 1.2 }, head);
+  return g;
+}
+
+if (IS_SALON) {
+  const iv = PLAN.intervenants;
+  if (VX.scenes.hook) {
+    SALON_WINDOWS.push({
+      sid: 'hook',
+      s: VX.scenes.hook.s,
+      v: VX.scenes.hook.v,
+      e: VX.scenes.hook.e,
+      mode: IS_STUDIO_SALON ? 'journaliste' : 'wide',
+      speaker: VX.scenes.hook.speaker || 'journaliste',
+      badge: PLAN.hook.badge || 'SALON ACADEMY',
+      texte: PLAN.hook.question || PLAN.titre,
+      tvTag: PLAN.hook.tvTag || PLAN.titre,
+    });
+  }
+  PLAN.etapes.forEach((et, idx) => {
+    const qSc = VX.scenes[`${et.id}_q`];
+    if (qSc && et.question) {
+      SALON_WINDOWS.push({
+        sid: `${et.id}_q`,
+        s: qSc.s,
+        v: qSc.v,
+        e: qSc.e,
+        mode: 'journaliste',
+        speaker: 'journaliste',
+        badge: et.question.badge || et.badge,
+        texte: et.question.texte,
+        tvTag: et.tvTag || et.titre,
+      });
+    }
+    const rSc = VX.scenes[et.id];
+    if (rSc) {
+      const rEnd = Math.min(rSc.e - 2.0, rSc.v + SALON_TAIL_DELAY);
+      SALON_WINDOWS.push({
+        sid: `${et.id}_sal`,
+        srcSid: et.id,
+        s: rSc.s,
+        v: rSc.v,
+        e: rEnd,
+        mode: 'expert',
+        speaker: 'expert',
+        badge: `${et.badge} · RÉPONSE`,
+        texte: et.titre,
+        tvTag: et.tvTag || et.titre,
+      });
+      if (idx === 0) {
+        BEATS.push(+(rSc.v + 0.85).toFixed(2));
+      }
+    }
+  });
+  SALON_WINDOWS.forEach((w, wi) => {
+    SFX.push({ t: w.s, type: 'pop', pitch: w.mode === 'expert' ? 1.12 : 1.0 });
+    if (wi < 2) BEATS.push(+(w.v + 1.35).toFixed(2));
+  });
+
+  if (IS_STUDIO_SALON) {
+    // Fond studio chaud + tasseaux bois + éclairage cinématographique
+    el('rect', { x: -320, y: -200, width: 2560, height: 1480, fill: '#12151F' }, salonCam);
+    el('rect', { x: -320, y: -200, width: 2560, height: 860, fill: 'url(#dots)', opacity: '0.10' }, salonCam);
+    for (let i = 0; i < 6; i++) {
+      el('rect', { x: 18 + i * 24, y: 50, width: 14, height: 560, rx: 3, fill: i % 2 ? '#453123' : '#332319', opacity: '0.75' }, salonCam);
+      el('rect', { x: 1762 + i * 24, y: 50, width: 14, height: 560, rx: 3, fill: i % 2 ? '#453123' : '#332319', opacity: '0.75' }, salonCam);
+    }
+    el('circle', { cx: 346, cy: 350, r: 360, fill: 'url(#lampGlowL)' }, salonCam);
+    el('circle', { cx: 1574, cy: 350, r: 360, fill: 'url(#lampGlowR)' }, salonCam);
+    el('circle', { cx: 960, cy: 265, r: 360, fill: 'url(#tvGlow)' }, salonCam);
+
+    // Grand écran TV studio au centre
+    el('rect', { x: 656, y: 122, width: 624, height: 340, rx: 18, fill: '#080A0F' }, salonCam);
+    el('rect', { x: 648, y: 114, width: 624, height: 340, rx: 18, fill: '#101420', stroke: '#323A52', 'stroke-width': 7 }, salonCam);
+    el('rect', { x: 668, y: 134, width: 584, height: 34, rx: 8, fill: '#1B2133' }, salonCam);
+    el('circle', { cx: 690, cy: 151, r: 6, fill: '#FF4D6D' }, salonCam);
+    text(salonCam, 'ON AIR · SALON WESTBOURSE', 706, 152, 14, { w: 900, ls: 1.6, fill: C.yellow, mid: true });
+    salTvGroup = el('g', {}, salonCam);
+    salTvBars = Array.from({ length: 13 }, (_, bi) =>
+      el('rect', { x: 856 + bi * 16, y: 398, width: 8, height: 10, rx: 4, fill: C.yellow, opacity: '0.88' }, salonCam),
+    );
+
+    // Table studio centrale + tasses fumantes sous le téléviseur
+    el('rect', { x: 666, y: 540, width: 588, height: 58, rx: 14, fill: '#0E1017' }, salonCam);
+    el('rect', { x: 658, y: 532, width: 588, height: 58, rx: 14, fill: '#6E462D', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    el('rect', { x: 898, y: 516, width: 124, height: 22, rx: 4, fill: C.cream, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    el('rect', { x: 734, y: 506, width: 32, height: 28, rx: 6, fill: C.cream, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    el('rect', { x: 1154, y: 506, width: 32, height: 28, rx: 6, fill: C.yellow, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    salSteam1 = el('path', { d: 'M750 500 Q744 484 752 470', fill: 'none', stroke: '#D9DFEE', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: '0.55' }, salonCam);
+    salSteam2 = el('path', { d: 'M1170 500 Q1176 484 1168 470', fill: 'none', stroke: '#D9DFEE', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: '0.55' }, salonCam);
+
+    // Cadre studio GAUCHE — Amina plein espace + micro studio en avant-plan
+    el('rect', { x: 86, y: 112, width: 540, height: 498, rx: 24, fill: '#080A0F' }, salonCam);
+    el('rect', { x: 76, y: 102, width: 540, height: 498, rx: 24, fill: '#151924' }, salonCam);
+    const jClipWrap = el('g', { 'clip-path': 'url(#clipStudioJ)' }, salonCam);
+    el('rect', { x: 76, y: 102, width: 540, height: 498, fill: 'url(#studioHaloJ)' }, jClipWrap);
+    salHostJ = el('g', {}, jClipWrap);
+    el('image', {
+      href: iv.journaliste.photo,
+      x: 44, y: 74, width: 604, height: 610,
+      preserveAspectRatio: 'xMidYMin slice',
+    }, salHostJ);
+    el('rect', { x: 76, y: 102, width: 540, height: 498, fill: 'url(#studioVig)' }, jClipWrap);
+    // Micro studio broadcast indépendant devant elle (parallaxe réelle quand elle bouge derrière)
+    addBroadcastMic(jClipWrap, 'left');
+    salRingJ = el('rect', { x: 76, y: 102, width: 540, height: 498, rx: 24, fill: 'none', stroke: C.pink, 'stroke-width': 7 }, salonCam);
+    pill(salonCam, 'AMINA · JOURNALISTE', 226, 566, C.pink, { size: 15, padX: 16, h: 34, sw: 3 });
+    el('rect', { x: 486, y: 547, width: 102, height: 38, rx: 11, fill: '#10131C', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+    salEqJ = Array.from({ length: 8 }, (_, bi) =>
+      el('rect', { x: 497 + bi * 10.5, y: 562, width: 6, height: 8, rx: 3, fill: C.pink }, salonCam),
+    );
+
+    // Cadre studio DROIT — l’expert plein espace + micro studio en avant-plan
+    el('rect', { x: 1314, y: 112, width: 540, height: 498, rx: 24, fill: '#080A0F' }, salonCam);
+    el('rect', { x: 1304, y: 102, width: 540, height: 498, rx: 24, fill: '#151924' }, salonCam);
+    const eClipWrap = el('g', { 'clip-path': 'url(#clipStudioE)' }, salonCam);
+    el('rect', { x: 1304, y: 102, width: 540, height: 498, fill: 'url(#studioHaloE)' }, eClipWrap);
+    salHostE = el('g', {}, eClipWrap);
+    el('image', {
+      href: iv.expert.photo,
+      x: 1272, y: 80, width: 604, height: 604,
+      preserveAspectRatio: 'xMidYMin slice',
+    }, salHostE);
+    el('rect', { x: 1304, y: 102, width: 540, height: 498, fill: 'url(#studioVig)' }, eClipWrap);
+    addBroadcastMic(eClipWrap, 'right');
+    salRingE = el('rect', { x: 1304, y: 102, width: 540, height: 498, rx: 24, fill: 'none', stroke: '#4B536A', 'stroke-width': 7 }, salonCam);
+    pill(salonCam, LIBELLE_EXPERT, 1474, 566, C.yellow, { size: 15, padX: 16, h: 34, sw: 3 });
+    el('rect', { x: 1714, y: 547, width: 102, height: 38, rx: 11, fill: '#10131C', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+    salEqE = Array.from({ length: 8 }, (_, bi) =>
+      el('rect', { x: 1725 + bi * 10.5, y: 562, width: 6, height: 8, rx: 3, fill: C.yellow }, salonCam),
+    );
+  } else {
+    // Mur du salon + parquet + tasseaux bois + éclairage chaud
+    el('rect', { x: -300, y: -200, width: 2520, height: 1480, fill: '#151822' }, salonCam);
+    el('rect', { x: -300, y: -200, width: 2520, height: 760, fill: 'url(#dots)', opacity: '0.12' }, salonCam);
+    for (let i = 0; i < 6; i++) {
+      el('rect', { x: 45 + i * 28, y: 40, width: 16, height: 515, rx: 3, fill: i % 2 ? '#4D3728' : '#3B2A1E' }, salonCam);
+      el('rect', { x: 1715 + i * 28, y: 40, width: 16, height: 515, rx: 3, fill: i % 2 ? '#4D3728' : '#3B2A1E' }, salonCam);
+    }
+    el('circle', { cx: 385, cy: 360, r: 340, fill: 'url(#lampGlowL)' }, salonCam);
+    el('circle', { cx: 1535, cy: 360, r: 340, fill: 'url(#lampGlowR)' }, salonCam);
+    el('circle', { cx: 960, cy: 250, r: 380, fill: 'url(#tvGlow)' }, salonCam);
+
+    // Plinthe + sol bois + tapis salon
+    el('rect', { x: -300, y: 550, width: 2520, height: 16, fill: '#0E1017' }, salonCam);
+    el('rect', { x: -300, y: 566, width: 2520, height: 700, fill: '#251D17' }, salonCam);
+    el('ellipse', { cx: 960, cy: 675, rx: 740, ry: 95, fill: '#1E2332', stroke: '#31384D', 'stroke-width': 3 }, salonCam);
+
+    // Plantes décoratives (feuilles douces sur les côtés)
+    [-1, 1].forEach((dir) => {
+      const px = dir < 0 ? 115 : 1805;
+      el('ellipse', { cx: px, cy: 525, rx: 34, ry: 44, fill: '#B6895B', stroke: C.ink, 'stroke-width': 3 }, salonCam);
+      el('path', { d: `M${px} 490 Q${px - 42 * dir} 395 ${px - 62 * dir} 345 Q${px - 10 * dir} 375 ${px} 480 Z`, fill: '#2E6F56', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+      el('path', { d: `M${px} 490 Q${px + 34 * dir} 390 ${px + 54 * dir} 330 Q${px + 10 * dir} 365 ${px} 480 Z`, fill: '#3A896B', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+      el('path', { d: `M${px} 490 Q${px} 365 ${px - 12 * dir} 305 Q${px + 18 * dir} 360 ${px} 480 Z`, fill: '#48A27E', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+    });
+
+    // Grand écran TV mural au centre
+    el('rect', { x: 648, y: 104, width: 640, height: 295, rx: 18, fill: '#090B10' }, salonCam);
+    el('rect', { x: 640, y: 96, width: 640, height: 295, rx: 18, fill: '#101420', stroke: '#2F364B', 'stroke-width': 8 }, salonCam);
+    el('rect', { x: 660, y: 116, width: 600, height: 34, rx: 8, fill: '#1B2133' }, salonCam);
+    el('circle', { cx: 682, cy: 133, r: 6, fill: '#FF4D6D' }, salonCam);
+    text(salonCam, 'ON AIR · SALON WESTBOURSE', 698, 134, 14, { w: 900, ls: 1.6, fill: C.yellow, mid: true });
+    salTvGroup = el('g', {}, salonCam);
+    salTvBars = Array.from({ length: 13 }, (_, bi) =>
+      el('rect', { x: 856 + bi * 16, y: 345, width: 8, height: 10, rx: 4, fill: C.yellow, opacity: '0.85' }, salonCam),
+    );
+
+    // Fauteuil gauche + Amina
+    el('rect', { x: 222, y: 332, width: 326, height: 270, rx: 42, fill: '#9E482C', stroke: C.ink, 'stroke-width': 5 }, salonCam);
+    el('rect', { x: 196, y: 458, width: 64, height: 155, rx: 24, fill: '#B65838', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    el('rect', { x: 510, y: 458, width: 64, height: 155, rx: 24, fill: '#B65838', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    salHostJ = el('g', {}, salonCam);
+    salRingJ = el('circle', { cx: 385, cy: 405, r: 154, fill: '#141720', stroke: C.yellow, 'stroke-width': 8 }, salHostJ);
+    el('image', {
+      href: iv.journaliste.photo,
+      x: 241, y: 261, width: 288, height: 288,
+      preserveAspectRatio: 'xMidYMin slice',
+      'clip-path': 'url(#clipSalJ)',
+    }, salHostJ);
+    el('circle', { cx: 385, cy: 405, r: 144, fill: 'none', stroke: C.ink, 'stroke-width': 4 }, salHostJ);
+    // Bras articulé + micro studio devant Amina
+    el('path', { d: 'M130 620 L250 535 L465 495', fill: 'none', stroke: '#232735', 'stroke-width': 10, 'stroke-linecap': 'round' }, salonCam);
+    el('ellipse', { cx: 472, cy: 486, rx: 16, ry: 22, fill: '#151720', stroke: '#4A5168', 'stroke-width': 3 }, salonCam);
+    pill(salonCam, 'AMINA · JOURNALISTE', 345, 594, C.pink, { size: 15, padX: 16, h: 32, sw: 3 });
+    el('rect', { x: 475, y: 576, width: 78, height: 36, rx: 10, fill: '#12151E', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+    salEqJ = Array.from({ length: 6 }, (_, bi) =>
+      el('rect', { x: 487 + bi * 9.5, y: 590, width: 5.5, height: 8, rx: 2.5, fill: C.pink }, salonCam),
+    );
+
+    // Fauteuil droit + l’expert
+    el('rect', { x: 1372, y: 332, width: 326, height: 270, rx: 42, fill: '#26364A', stroke: C.ink, 'stroke-width': 5 }, salonCam);
+    el('rect', { x: 1346, y: 458, width: 64, height: 155, rx: 24, fill: '#31455E', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    el('rect', { x: 1660, y: 458, width: 64, height: 155, rx: 24, fill: '#31455E', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    salHostE = el('g', {}, salonCam);
+    salRingE = el('circle', { cx: 1535, cy: 405, r: 154, fill: '#141720', stroke: '#4B536A', 'stroke-width': 8 }, salHostE);
+    el('image', {
+      href: iv.expert.photo,
+      x: 1391, y: 261, width: 288, height: 288,
+      preserveAspectRatio: 'xMidYMin slice',
+      'clip-path': 'url(#clipSalE)',
+    }, salHostE);
+    el('circle', { cx: 1535, cy: 405, r: 144, fill: 'none', stroke: C.ink, 'stroke-width': 4 }, salHostE);
+    // Bras articulé + micro studio devant l’expert
+    el('path', { d: 'M1790 620 L1670 535 L1455 495', fill: 'none', stroke: '#232735', 'stroke-width': 10, 'stroke-linecap': 'round' }, salonCam);
+    el('ellipse', { cx: 1448, cy: 486, rx: 16, ry: 22, fill: '#151720', stroke: '#4A5168', 'stroke-width': 3 }, salonCam);
+    pill(salonCam, LIBELLE_EXPERT, 1495, 594, C.yellow, { size: 15, padX: 16, h: 32, sw: 3 });
+    el('rect', { x: 1630, y: 576, width: 78, height: 36, rx: 10, fill: '#12151E', stroke: C.ink, 'stroke-width': 2.5 }, salonCam);
+    salEqE = Array.from({ length: 6 }, (_, bi) =>
+      el('rect', { x: 1642 + bi * 9.5, y: 590, width: 5.5, height: 8, rx: 2.5, fill: C.yellow }, salonCam),
+    );
+
+    // Table basse centrale en bois noyer + tasses fumantes + carnet
+    el('line', { x1: 725, y1: 608, x2: 705, y2: 678, stroke: '#141414', 'stroke-width': 10, 'stroke-linecap': 'round' }, salonCam);
+    el('line', { x1: 1195, y1: 608, x2: 1215, y2: 678, stroke: '#141414', 'stroke-width': 10, 'stroke-linecap': 'round' }, salonCam);
+    el('rect', { x: 690, y: 552, width: 540, height: 64, rx: 14, fill: '#141414' }, salonCam);
+    el('rect', { x: 682, y: 542, width: 540, height: 64, rx: 14, fill: '#7B4F32', stroke: C.ink, 'stroke-width': 4 }, salonCam);
+    el('rect', { x: 890, y: 526, width: 124, height: 22, rx: 4, fill: C.cream, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    el('rect', { x: 760, y: 516, width: 32, height: 28, rx: 6, fill: C.cream, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    el('rect', { x: 1110, y: 516, width: 32, height: 28, rx: 6, fill: C.yellow, stroke: C.ink, 'stroke-width': 3 }, salonCam);
+    salSteam1 = el('path', { d: 'M776 510 Q770 494 778 480', fill: 'none', stroke: '#D9DFEE', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: '0.55' }, salonCam);
+    salSteam2 = el('path', { d: 'M1126 510 Q1132 494 1124 480', fill: 'none', stroke: '#D9DFEE', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: '0.55' }, salonCam);
+  }
+
+  // Overlay fixe du salon (haut + carte question basse)
+  el('rect', { x: 144, y: 34, width: 356, height: 42, rx: 21, fill: C.ink }, salonUi);
+  el('rect', { x: 140, y: 30, width: 356, height: 42, rx: 21, fill: '#1B202E', stroke: C.yellow, 'stroke-width': 3 }, salonUi);
+  el('circle', { cx: 168, cy: 51, r: 7, fill: '#FF4D6D' }, salonUi);
+  text(salonUi, 'SALON PODCAST ACADEMY', 186, 52, 15, { w: 900, ls: 1.6, fill: C.cream, mid: true });
+  pill(salonUi, `LEÇON ${PLAN.numero} · ENTRETIEN`, 1630, 51, C.yellow, { size: 15, padX: 20, h: 40, sw: 3 });
+
+  el('rect', { x: 170, y: 710, width: 1600, height: 196, rx: 16, fill: C.ink }, salonUi);
+  salCardBg = el('rect', { x: 160, y: 700, width: 1600, height: 196, rx: 16, fill: C.cream, stroke: C.ink, 'stroke-width': 5 }, salonUi);
+  salCardStripe = el('rect', { x: 160, y: 700, width: 1600, height: 16, fill: 'url(#hazY)' }, salonUi);
+  salBadgeSh = el('rect', { x: 214, y: 736, width: 220, height: 36, rx: 18, fill: C.ink }, salonUi);
+  salBadgeBg = el('rect', { x: 210, y: 732, width: 220, height: 36, rx: 18, fill: C.yellow, stroke: C.ink, 'stroke-width': 3 }, salonUi);
+  salBadgeTxt = text(salonUi, 'QUESTION', 320, 751, 16, { w: 900, anchor: 'middle', ls: 1.4, mid: true });
+  salQGroup = el('g', {}, salonUi);
+}
+
+/* ---------- Médaillon présentateur réel (PiP) ---------- */
+const PRES_WINDOWS = [];
+if (PLAN.presentateur) {
+  if (PLAN.hook.presenter) PRES_WINDOWS.push([S('hook') + 0.25, E('hook') - 0.1]);
+  PLAN.etapes.forEach((et) => {
+    if (et.presenter) PRES_WINDOWS.push([V(et.id) + SALON_TAIL_DELAY + 0.25, E(et.id) - 0.15]);
+  });
+  if (PLAN.fin.presenter) PRES_WINDOWS.push([T_END + 0.25, DURATION - 0.2]);
+  PRES_WINDOWS.forEach(([a]) => SFX.push({ t: a, type: 'pop', pitch: 1.15 }));
+
+  // Ombre + disque crème + photo réel + bague or + pastille nom + 5 barres égaliseur
+  el('circle', { cx: 1736, cy: 796, r: 96, fill: C.ink }, pipOverlay);
+  el('circle', { cx: 1730, cy: 790, r: 96, fill: C.yellow, stroke: C.ink, 'stroke-width': 5 }, pipOverlay);
+  el('image', {
+    href: PLAN.presentateur.photo,
+    x: 1640, y: 700, width: 180, height: 180,
+    preserveAspectRatio: 'xMidYMid slice',
+    'clip-path': 'url(#clipPip)',
+  }, pipOverlay);
+  el('circle', { cx: 1730, cy: 790, r: 88, fill: 'none', stroke: C.ink, 'stroke-width': 4 }, pipOverlay);
+  pill(pipOverlay, PLAN.presentateur.nom.toUpperCase(), 1730, 896, C.white, { size: 15, padX: 14, h: 32, sw: 3 });
+
+  // Égaliseur vocal en direct (5 barres à gauche du cercle)
+  el('rect', { x: 1584, y: 750, width: 52, height: 80, rx: 10, fill: C.ink }, pipOverlay);
+  el('rect', { x: 1580, y: 746, width: 52, height: 80, rx: 10, fill: C.cream, stroke: C.ink, 'stroke-width': 3 }, pipOverlay);
+  var PIP_BARS = [0, 1, 2, 3, 4].map((bi) =>
+    el('rect', { x: 1589 + bi * 8, y: 786, width: 5, height: 10, rx: 2.5, fill: C.ink }, pipOverlay)
+  );
+}
+
+/* ---------- Sous-titres synchronisés façon Coursera (bandeau bas) ---------- */
+const SUB_CUES = [];
+const MAX_SUB_CHARS = 62;
+for (const sid of VX.ordre) {
+  const sc = VX.scenes[sid];
+  const spk = sc.speaker || (sid.endsWith('_q') ? 'journaliste' : 'expert');
+  const mots = sc.mots;
+  let chunk = [];
+  let len = 0;
+  for (let i = 0; i < mots.length; i++) {
+    const w = mots[i];
+    if (chunk.length > 0 && (len + w.m.length + 1 > MAX_SUB_CHARS || chunk.length >= 10)) {
+      SUB_CUES.push({ start: chunk[0].a - 0.05, end: chunk[chunk.length - 1].b + 0.12, words: chunk, speaker: spk });
+      chunk = [];
+      len = 0;
+    }
+    chunk.push(w);
+    len += w.m.length + 1;
+  }
+  if (chunk.length > 0) {
+    SUB_CUES.push({ start: chunk[0].a - 0.05, end: chunk[chunk.length - 1].b + 0.25, words: chunk, speaker: spk });
+  }
+}
+
+el('rect', { x: 244, y: 952, width: 1440, height: 92, rx: 16, fill: C.ink }, subOverlay);
+const subBox = el('rect', { x: 240, y: 948, width: 1440, height: 92, rx: 16, fill: '#181818', stroke: C.ink, 'stroke-width': 3 }, subOverlay);
+const subSpkBg = PLAN.format === 'podcast' || PLAN.format === 'salon'
+  ? el('rect', { x: 268, y: 928, width: 250, height: 30, rx: 15, fill: C.yellow, stroke: C.ink, 'stroke-width': 2.5 }, subOverlay)
+  : null;
+const subSpkTxt = PLAN.format === 'podcast' || PLAN.format === 'salon'
+  ? text(subOverlay, '', 393, 944, 14, { w: 900, anchor: 'middle', ls: 1.1, mid: true })
+  : null;
+const subTextEl = el('text', {
+  x: 960, y: 997, 'font-size': 28, 'font-weight': 700,
+  fill: C.cream, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+}, subOverlay);
+void subBox;
+
+/* ---------- Écran final ---------- */
+const flood = el('circle', { cx: 960, cy: 540, r: 0, fill: C.yellow }, endcard);
+const endG = el('g', {}, endcard);
+const endPill = el('g', {}, endG);
+card(endPill, 420, 365, 1080, 250, C.cream, { sh: 16, r: 18, sw: 6 });
+const finTitleRawW = measure(PLAN.fin.titre, 52, 900, -1);
+const finTitleSize = finTitleRawW > 980 ? Math.max(32, Math.floor(52 * (980 / finTitleRawW))) : 52;
+text(endPill, PLAN.fin.titre, 960, 466, finTitleSize, { w: 900, anchor: 'middle', ls: -1 });
+text(endPill, PLAN.fin.cta, 960, 548, 34, { w: 800, anchor: 'middle', fill: '#3A372E' });
+
+const endTag = el('g', {}, endG);
+pill(endTag, PLAN.fin.tag, 960, 315, C.pink, { size: 22, padX: 28, h: 48 });
+
+const endTape = el('g', {}, endG);
+const tapeTxt = PLAN.fin.tape || 'WESTBOURSE.COM';
+const tapeW = Math.max(480, measure(tapeTxt, 18, 800, 1.5) + 120);
+el('rect', { x: -tapeW / 2, y: -22, width: tapeW, height: 44, fill: 'url(#hazC)', stroke: C.ink, 'stroke-width': 4 }, endTape);
+pill(endTape, tapeTxt, 0, 0, C.white, { size: 18, padX: 22, h: 38 });
+
+const endStars = [
+  { x: 320, y: 270, r: 28, fill: C.cyan },
+  { x: 1590, y: 260, r: 32, fill: C.green },
+  { x: 350, y: 720, r: 24, fill: C.pink },
+  { x: 1560, y: 710, r: 30, fill: C.white },
+].map((st) => {
+  const g = el('g', {}, endG);
+  el('path', { d: starD(0, 0, st.r), fill: st.fill, stroke: C.ink, 'stroke-width': 3.5 }, g);
+  return { ...st, g };
+});
+
+SFX.push({ t: T_END, type: 'end' });
+BEATS.push(+(T_ZOOM_ALL + 0.65).toFixed(2), +(T_END + 1.4).toFixed(2), +(DURATION - 0.35).toFixed(2));
+BEATS.sort((a, b) => a - b);
+
+const VOIX_WINDOWS = Object.keys(VX.scenes).map((k) => {
+  const sc = VX.scenes[k];
+  return [sc.mots[0].a, sc.mots[sc.mots.length - 1].b];
+});
+
+function isSpeaking(t) {
+  return VOIX_WINDOWS.some(([a, b]) => t >= a && t <= b);
+}
+
+function speechKinematics(t, sid) {
+  const mots = VX.scenes[sid]?.mots;
+  if (!mots || !mots.length) return { energy: 0, pulse: 0, nod: 0 };
+  let pulse = 0;
+  let energy = 0;
+  let nod = 0;
+  for (let i = 0; i < mots.length; i++) {
+    const w = mots[i];
+    if (t >= w.a && t <= w.b) {
+      const p = clamp((t - w.a) / Math.max(0.06, w.b - w.a));
+      pulse = Math.sin(Math.PI * p);
+    }
+    if (t >= w.a - 0.16 && t <= w.b + 0.18) {
+      energy = Math.max(energy, Math.min(1, win(t, w.a - 0.16, w.a + 0.04) * (1 - win(t, w.b + 0.02, w.b + 0.18))));
+    }
+    const prevEnd = i === 0 ? -9 : mots[i - 1].b;
+    if (w.a - prevEnd > 0.18 && t >= w.a - 0.04 && t <= w.a + 0.42) {
+      nod = Math.max(nod, Math.sin(Math.PI * win(t, w.a - 0.04, w.a + 0.42)));
+    }
+  }
+  return { energy, pulse, nod };
+}
+
+/* ---------- Fonction pure seek(t) ---------- */
+function seek(t) {
+  const c = cameraAt(t);
+  const c0 = cameraAt(Math.max(0, t - 0.014));
+  const c1 = cameraAt(Math.min(DURATION, t + 0.014));
+  const vx = (c1.cx - c0.cx) * c.s;
+  const vy = (c1.cy - c0.cy) * c.s;
+  const bx = clamp(Math.abs(vx) * 0.06, 0, 9);
+  const by = clamp(Math.abs(vy) * 0.06, 0, 9);
+  if (bx + by > 0.35) {
+    mbBlur.setAttribute('stdDeviation', `${bx.toFixed(2)} ${by.toFixed(2)}`);
+    blurWrap.setAttribute('filter', 'url(#mb)');
+  } else {
+    blurWrap.removeAttribute('filter');
+  }
+
+  let sx = 0, sy = 0;
+  for (const sh of SHAKES) {
+    if (t >= sh.t && t < sh.t + 0.25) {
+      const k = 1 - (t - sh.t) / 0.25;
+      sx += Math.sin(t * 95) * sh.amp * k;
+      sy += Math.cos(t * 78) * sh.amp * 0.7 * k;
+    }
+  }
+  document.getElementById('shake').setAttribute('transform', `translate(${sx.toFixed(2)} ${sy.toFixed(2)})`);
+  cam.setAttribute('transform', `translate(960 545) scale(${c.s.toFixed(5)}) translate(${(-c.cx).toFixed(2)} ${(-c.cy).toFixed(2)})`);
+
+  const dim = 1 - 0.45 * win(t, T_END, T_END + 0.4);
+  const fullT = PLAN.titre;
+  const typed = Math.floor(clamp(t / 0.85) * fullT.length);
+  hudTitle.textContent = fullT.slice(0, typed);
+  progFill.setAttribute('width', (1824 * clamp(t / DURATION)).toFixed(1));
+  hud.setAttribute('opacity', (1 - win(t, T_END, T_END + 0.35)).toFixed(3));
+  hudSub.setAttribute('opacity', clamp(win(t, 0.2, 0.7)).toFixed(3));
+
+  for (const gh of GHOSTS) {
+    const o = expoOut(win(t, gh.at, gh.at + 0.25)) * (1 - win(t, gh.until, gh.until + 0.2));
+    gh.g.setAttribute('opacity', (o * 0.65).toFixed(3));
+    gh.g.setAttribute('visibility', o > 0.01 ? 'visible' : 'hidden');
+  }
+
+  for (const it of ITEMS) {
+    const p = win(t, it.at, it.at + it.dur);
+    let s = 1, dy = 0, op = 1, rot = it.rot;
+    if (it.kind === 'pop') { s = popE(p); op = clamp(p * 6); rot += 6 * (1 - expoOut(p)); }
+    else if (it.kind === 'drop') { dy = -220 * (1 - dropE(p)); op = clamp(p * 5); }
+    else if (it.kind === 'stamp') { s = lerp(2.4, 1, expoOut(p)); op = clamp(p * 4); }
+    else op = expoOut(p);
+    for (const pt of it.pulses) if (t > pt && t < pt + 0.8) s *= 1 + 0.06 * (1 - dropE(win(t, pt, pt + 0.8)));
+    if (it.spin) rot += it.spin * t;
+    if (Number.isFinite(it.out)) op *= 1 - win(t, it.out, it.out + 0.28);
+    if (!it.keep) op *= dim;
+    if (op <= 0.002 || (it.kind === 'pop' && s <= 0.002)) {
+      it.outer.setAttribute('visibility', 'hidden');
+    } else {
+      it.outer.setAttribute('visibility', 'visible');
+      it.outer.setAttribute('opacity', op.toFixed(3));
+      it.outer.setAttribute('transform', `translate(${it.cx} ${(it.cy + dy).toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-it.cx} ${-it.cy})`);
+    }
+  }
+
+  for (const ln of LINES) {
+    const p = expoOut(win(t, ln.at, ln.at + ln.dur));
+    ln.p.setAttribute('stroke-dashoffset', (ln.len * (1 - p)).toFixed(1));
+    ln.p.setAttribute('visibility', p > 0.01 ? 'visible' : 'hidden');
+    if (ln.arrow) {
+      const a = win(t, ln.at + ln.dur * 0.75, ln.at + ln.dur);
+      ln.arrow.setAttribute('visibility', a > 0.05 ? 'visible' : 'hidden');
+      ln.arrow.setAttribute('transform', `translate(${ln.ex.toFixed(1)} ${ln.ey.toFixed(1)}) rotate(${ln.ang.toFixed(1)}) scale(${popE(a).toFixed(3)})`);
+    }
+  }
+
+  for (const f of FLOWS) {
+    const on = t >= f.t0 && t <= f.t1 + 0.5;
+    f.toks.forEach((e, i) => {
+      const travelled = (t - f.t0) * f.speed - i * f.gap;
+      if (!on || travelled < 0) { e.setAttribute('visibility', 'hidden'); return; }
+      const sDist = travelled % f.len;
+      const pt = f.p.getPointAtLength(sDist);
+      const edge = Math.min(sDist / 45, (f.len - sDist) / 45, 1);
+      const o = edge * (1 - win(t, f.t1, f.t1 + 0.5)) * dim;
+      e.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) scale(${Math.max(0.01, edge).toFixed(3)})`);
+      e.setAttribute('opacity', o.toFixed(3));
+      e.setAttribute('visibility', o > 0.01 ? 'visible' : 'hidden');
+    });
+  }
+
+  for (const br of L.bars) {
+    const p = expoOut(win(t, br.at, br.at + 0.65));
+    br.el.setAttribute('width', (br.targetW * p).toFixed(1));
+  }
+
+  {
+    const p = expoInOut(win(t, T_ZOOM_ALL, T_ZOOM_ALL + 1.1));
+    const da = `${(LEN_COMET * p).toFixed(1)} ${LEN_COMET * 2}`;
+    comet.setAttribute('stroke-dasharray', da);
+    cometBase.setAttribute('stroke-dasharray', da);
+    const o = (p > 0 ? 1 : 0) * dim;
+    comet.setAttribute('opacity', o.toFixed(3));
+    cometBase.setAttribute('opacity', o.toFixed(3));
+    const vis = o > 0.01 ? 'visible' : 'hidden';
+    comet.setAttribute('visibility', vis);
+    cometBase.setAttribute('visibility', vis);
+  }
+
+  if (t <= T_END) {
+    flood.setAttribute('visibility', 'hidden');
+    endG.setAttribute('visibility', 'hidden');
+  } else {
+    const p = expoInOut(win(t, T_END, T_END + 0.75));
+    flood.setAttribute('r', (2300 * p).toFixed(1));
+    flood.setAttribute('visibility', p > 0 ? 'visible' : 'hidden');
+    const sp = popE(win(t, T_END + 0.35, T_END + 0.95));
+    endPill.setAttribute('transform', `translate(960 490) scale(${sp.toFixed(4)}) translate(-960 -490)`);
+    const tg = popE(win(t, T_END + 0.55, T_END + 1.1));
+    endTag.setAttribute('transform', `translate(960 315) rotate(-2) scale(${tg.toFixed(4)}) translate(-960 -315)`);
+    const tp = popE(win(t, T_END + 0.85, T_END + 1.4));
+    endTape.setAttribute('transform', `translate(960 700) rotate(-3) scale(${tp.toFixed(4)})`);
+    endStars.forEach((st, k) => {
+      const s = popE(win(t, T_END + 0.7 + k * 0.1, T_END + 1.25 + k * 0.1));
+      st.g.setAttribute('transform', `translate(${st.x} ${st.y}) rotate(${(t * 18 + k * 42).toFixed(1)}) scale(${s.toFixed(4)})`);
+    });
+    endG.setAttribute('visibility', t > T_END + 0.25 ? 'visible' : 'hidden');
+  }
+
+  // Plateau podcast split-screen (actif pendant les interventions de la journaliste)
+  let podActive = false;
+  if (POD_WINDOWS.length > 0) {
+    const pw = POD_WINDOWS.find((w) => t >= w.s && t <= w.e);
+    if (pw) {
+      podActive = true;
+      const opPod = clamp(win(t, pw.s, pw.s + 0.20) * (1 - win(t, pw.e - 0.18, pw.e)));
+      podStage.setAttribute('visibility', opPod > 0.01 ? 'visible' : 'hidden');
+      podStage.setAttribute('opacity', opPod.toFixed(3));
+      if (pw.sid !== lastPodSid) {
+        lastPodSid = pw.sid;
+        setPodcastQuestion(pw.badge, pw.texte);
+      }
+      const talkingPod = isSpeaking(t);
+      podEqBars.forEach((bar, bi) => {
+        const h = talkingPod ? 10 + 42 * Math.abs(Math.sin(t * (10.5 + bi * 1.9) + bi * 0.9)) : 8;
+        bar.setAttribute('height', h.toFixed(1));
+        bar.setAttribute('y', (602 - h / 2).toFixed(1));
+        bar.setAttribute('fill', talkingPod ? C.pink : C.yellow);
+      });
+    } else {
+      podStage.setAttribute('visibility', 'hidden');
+    }
+  }
+
+  // Salon Podcast animé avec écran TV mural
+  let salActive = false;
+  if (SALON_WINDOWS.length > 0) {
+    const swIdx = SALON_WINDOWS.findIndex((w) => t >= w.s && t <= w.e);
+    if (swIdx >= 0) {
+      salActive = true;
+      const sw = SALON_WINDOWS[swIdx];
+      const opSal = clamp(win(t, sw.s, sw.s + 0.22) * (1 - win(t, sw.e - 0.20, sw.e)));
+      salonStage.setAttribute('visibility', opSal > 0.01 ? 'visible' : 'hidden');
+      salonStage.setAttribute('opacity', opSal.toFixed(3));
+      if (sw.sid !== lastSalSid) {
+        lastSalSid = sw.sid;
+        setSalonOverlayContent(sw.badge, sw.texte, sw.tvTag, sw.mode);
+      }
+      // Caméra dynamique : plan large -> plan Amina -> plan expert
+      const dst = salonCamSpec(sw.mode);
+      const prevMode = swIdx > 0 && Math.abs(sw.s - SALON_WINDOWS[swIdx - 1].e) < 0.6 ? SALON_WINDOWS[swIdx - 1].mode : sw.mode;
+      const src = salonCamSpec(prevMode);
+      const cp = expoInOut(win(t, sw.s, sw.s + 0.65));
+      const drift = sw.mode === 'wide' ? 0.03 * win(t, sw.s, sw.e) : 0;
+      const scx = lerp(src.cx, dst.cx, cp);
+      const scy = lerp(src.cy, dst.cy, cp);
+      const ss = lerp(src.s, dst.s + drift, cp);
+      salonCam.setAttribute('transform', `translate(960 440) scale(${ss.toFixed(4)}) translate(${(-scx).toFixed(2)} ${(-scy).toFixed(2)})`);
+
+      const spkNow = isSpeaking(t);
+      const jTalking = spkNow && sw.speaker === 'journaliste';
+      const eTalking = spkNow && sw.speaker === 'expert';
+
+      if (IS_STUDIO_SALON) {
+        const kin = speechKinematics(t, sw.srcSid || sw.sid);
+        const jTalk = sw.speaker === 'journaliste' ? kin.energy : 0;
+        const jPulse = sw.speaker === 'journaliste' ? kin.pulse : 0;
+        const jNod = sw.speaker === 'journaliste' ? kin.nod : 0;
+        const eTalk = sw.speaker === 'expert' ? kin.energy : 0;
+        const ePulse = sw.speaker === 'expert' ? kin.pulse : 0;
+        const eNod = sw.speaker === 'expert' ? kin.nod : 0;
+
+        // Mouvement organique multi-harmoniques autour du buste (respiration + rythme parole + écoute active)
+        const jBreath = Math.sin(t * 1.65) * 2.4;
+        const jSwayX = Math.sin(t * 0.88 + 0.4) * 3.8 + Math.sin(t * 1.93) * 1.5 * jTalk + Math.sin(t * 2.4) * 2.4 * jTalk;
+        const jListenNod = Math.pow(Math.max(0, Math.sin(t * 2.5 - 0.6)), 3) * 3.2 * eTalk;
+        const jDx = jSwayX;
+        const jDy = jBreath - 3.0 * jTalk + jPulse * 3.4 + jNod * 5.0 + jListenNod;
+        const jRot = Math.sin(t * 0.75) * 0.75 + (Math.sin(t * 2.9) * 1.35 + Math.cos(t * 4.8) * 0.5) * jTalk;
+        const jSc = 1 + 0.004 * Math.sin(t * 1.65) + 0.024 * jTalk + 0.006 * jPulse;
+        salHostJ.setAttribute('transform', `translate(${(346 + jDx).toFixed(2)} ${(610 + jDy).toFixed(2)}) rotate(${jRot.toFixed(2)}) scale(${jSc.toFixed(4)}) translate(-346 -610)`);
+
+        const eBreath = Math.cos(t * 1.52) * 2.2;
+        const eSwayX = Math.cos(t * 0.82 + 1.1) * 3.2 + Math.cos(t * 2.2) * 2.2 * eTalk;
+        const eListenNod = Math.pow(Math.max(0, Math.sin(t * 2.3 + 0.4)), 3) * 2.8 * jTalk;
+        const eDx = eSwayX;
+        const eDy = eBreath - 3.0 * eTalk + ePulse * 3.2 + eNod * 4.5 + eListenNod;
+        const eRot = Math.cos(t * 0.71) * 0.7 + (Math.cos(t * 2.7) * 1.2 + Math.sin(t * 4.5) * 0.45) * eTalk;
+        const eSc = 1 + 0.004 * Math.cos(t * 1.52) + 0.022 * eTalk + 0.005 * ePulse;
+        salHostE.setAttribute('transform', `translate(${(1574 + eDx).toFixed(2)} ${(610 + eDy).toFixed(2)}) rotate(${eRot.toFixed(2)}) scale(${eSc.toFixed(4)}) translate(-1574 -610)`);
+
+        salHostJ.setAttribute('opacity', sw.mode === 'expert' ? '0.80' : '1');
+        salHostE.setAttribute('opacity', sw.mode === 'journaliste' ? '0.80' : '1');
+        salRingJ.setAttribute('stroke', sw.speaker === 'journaliste' ? C.pink : '#4B536A');
+        salRingE.setAttribute('stroke', sw.speaker === 'expert' ? C.yellow : '#4B536A');
+
+        salEqJ.forEach((b, bi) => {
+          const h = jTalking ? 8 + 20 * Math.abs(Math.sin(t * (11 + bi * 2) + bi)) : 5;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (566 - h / 2).toFixed(1));
+        });
+        salEqE.forEach((b, bi) => {
+          const h = eTalking ? 8 + 20 * Math.abs(Math.cos(t * (10 + bi * 2.1) + bi)) : 5;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (566 - h / 2).toFixed(1));
+        });
+        salTvBars.forEach((b, bi) => {
+          const h = spkNow ? 8 + 26 * Math.abs(Math.sin(t * (9 + bi * 1.3) + bi * 0.6)) : 6;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (403 - h / 2).toFixed(1));
+          b.setAttribute('fill', sw.speaker === 'journaliste' ? C.pink : C.yellow);
+        });
+      } else {
+        // Micro-mouvements naturels (respiration + inclinaison rythmée par la parole)
+        const jBob = Math.sin(t * (jTalking ? 7.2 : 2.1)) * (jTalking ? 4.5 : 1.8);
+        const jTilt = jTalking ? Math.sin(t * 4.5) * 1.4 : 0;
+        const eBob = Math.cos(t * (eTalking ? 6.8 : 1.9)) * (eTalking ? 4.5 : 1.8);
+        const eTilt = eTalking ? Math.cos(t * 4.2) * 1.4 : 0;
+        salHostJ.setAttribute('transform', `translate(0 ${jBob.toFixed(2)}) rotate(${jTilt.toFixed(2)} 385 450)`);
+        salHostE.setAttribute('transform', `translate(0 ${eBob.toFixed(2)}) rotate(${eTilt.toFixed(2)} 1535 450)`);
+        salHostJ.setAttribute('opacity', sw.mode === 'expert' ? '0.68' : '1');
+        salHostE.setAttribute('opacity', sw.mode === 'journaliste' ? '0.68' : '1');
+        salRingJ.setAttribute('stroke', sw.speaker === 'journaliste' ? C.pink : '#4B536A');
+        salRingE.setAttribute('stroke', sw.speaker === 'expert' ? C.yellow : '#4B536A');
+
+        salEqJ.forEach((b, bi) => {
+          const h = jTalking ? 8 + 18 * Math.abs(Math.sin(t * (11 + bi * 2) + bi)) : 5;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (594 - h / 2).toFixed(1));
+        });
+        salEqE.forEach((b, bi) => {
+          const h = eTalking ? 8 + 18 * Math.abs(Math.cos(t * (10 + bi * 2.1) + bi)) : 5;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (594 - h / 2).toFixed(1));
+        });
+        salTvBars.forEach((b, bi) => {
+          const h = spkNow ? 8 + 26 * Math.abs(Math.sin(t * (9 + bi * 1.3) + bi * 0.6)) : 6;
+          b.setAttribute('height', h.toFixed(1));
+          b.setAttribute('y', (350 - h / 2).toFixed(1));
+          b.setAttribute('fill', sw.speaker === 'journaliste' ? C.pink : C.yellow);
+        });
+      }
+      const stDx = Math.sin(t * 2.6) * 4;
+      salSteam1.setAttribute('transform', `translate(${stDx.toFixed(1)} ${(-Math.abs(Math.sin(t * 1.8)) * 5).toFixed(1)})`);
+      salSteam2.setAttribute('transform', `translate(${(-stDx).toFixed(1)} ${(-Math.abs(Math.cos(t * 1.7)) * 5).toFixed(1)})`);
+    } else {
+      salonStage.setAttribute('visibility', 'hidden');
+    }
+  }
+
+  // Médaillon présentateur PiP
+  if (PLAN.presentateur) {
+    let pipOp = 0;
+    let pipScale = 0;
+    if (!podActive && !salActive) {
+      for (const [a, b] of PRES_WINDOWS) {
+        if (t >= a && t <= b + 0.3) {
+          const pin = popE(win(t, a, a + 0.45));
+          const pout = 1 - win(t, b, b + 0.28);
+          pipOp = clamp(pout);
+          pipScale = pin * (1 - 0.15 * (1 - pout));
+          break;
+        }
+      }
+    }
+    if (pipOp > 0.01 && pipScale > 0.01) {
+      pipOverlay.setAttribute('visibility', 'visible');
+      pipOverlay.setAttribute('opacity', pipOp.toFixed(3));
+      pipOverlay.setAttribute('transform', `translate(1730 790) scale(${pipScale.toFixed(4)}) translate(-1730 -790)`);
+      const talking = isSpeaking(t);
+      if (typeof PIP_BARS !== 'undefined') {
+        PIP_BARS.forEach((bar, bi) => {
+          const h = talking ? 10 + 38 * Math.abs(Math.sin(t * (11 + bi * 2.3) + bi * 1.1)) : 8;
+          bar.setAttribute('height', h.toFixed(1));
+          bar.setAttribute('y', (786 - h / 2).toFixed(1));
+          bar.setAttribute('fill', talking ? C.pink : '#99927E');
+        });
+      }
+    } else {
+      pipOverlay.setAttribute('visibility', 'hidden');
+    }
+  }
+
+  // Sous-titres synchronisés type Coursera avec mot actif en or / cyan
+  const cue = SUB_CUES.find((c) => t >= c.start && t <= c.end);
+  if (cue) {
+    subOverlay.setAttribute('visibility', 'visible');
+    if (subSpkBg && subSpkTxt) {
+      const isJ = cue.speaker === 'journaliste';
+      const lbl = isJ ? LIBELLE_JOURNALISTE : LIBELLE_EXPERT;
+      const lw = measure(lbl, 14, 900, 1.1) + 28;
+      subSpkBg.setAttribute('fill', isJ ? C.pink : C.yellow);
+      subSpkBg.setAttribute('width', lw.toFixed(1));
+      subSpkTxt.setAttribute('x', (268 + lw / 2).toFixed(1));
+      subSpkTxt.textContent = lbl;
+    }
+    while (subTextEl.firstChild) subTextEl.removeChild(subTextEl.firstChild);
+    const activeFill = cue.speaker === 'journaliste' ? C.cyan : C.yellow;
+    cue.words.forEach((w, wi) => {
+      const ts = el('tspan', {}, subTextEl);
+      const active = t >= w.a - 0.04 && t <= w.b + 0.08;
+      ts.setAttribute('fill', active ? activeFill : C.cream);
+      ts.setAttribute('font-weight', active ? '900' : '700');
+      ts.textContent = (wi > 0 ? ' ' : '') + w.m;
+    });
+  } else {
+    subOverlay.setAttribute('visibility', 'hidden');
+  }
+}
+
+window.seek = seek;
+window.__timeline = { DURATION, BEATS, SFX: SFX.slice().sort((a, b) => a.t - b.t), VOIX: VOIX_WINDOWS, MUSIQUE_FIN: T_END + 0.4 };
+
+/* ---------- Bande-son complète (Fa majeur 104 BPM + 15 SFX + ducking voix) ---------- */
+window.renderAudio = async function renderAudio() {
+  const SR = 48000;
+  const ctx = new OfflineAudioContext(2, Math.ceil(SR * DURATION), SR);
+  const master = ctx.createGain(); master.gain.value = 0.85; master.connect(ctx.destination);
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.2;
+  comp.connect(master);
+  const music = ctx.createGain(); music.connect(comp);
+  const fx = ctx.createGain(); fx.gain.value = 0.76; fx.connect(comp);
+
+  let seed = 20261125;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let x = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+  const noise = ctx.createBuffer(1, SR * 2, SR);
+  const nd = noise.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = rnd() * 2 - 1;
+
+  const env = (g, at, peak, atk, dec) => {
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(peak, at + atk);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + atk + dec);
+  };
+  const pan = (dest, v) => { const p = ctx.createStereoPanner(); p.pan.value = v; p.connect(dest); return p; };
+  function osc(type, f, at, dur, peak, dest, f2, atk = 0.004) {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, at);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + dur * 0.8);
+    const g = ctx.createGain(); env(g, at, peak, atk, dur);
+    o.connect(g); g.connect(dest); o.start(at); o.stop(at + atk + dur + 0.05);
+  }
+  function nz(at, dur, peak, type, f, q, dest, f2) {
+    const n = ctx.createBufferSource(); n.buffer = noise;
+    const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.setValueAtTime(f, at); fl.Q.value = q;
+    if (f2) fl.frequency.exponentialRampToValueAtTime(f2, at + dur);
+    const g = ctx.createGain(); env(g, at, peak, Math.min(0.01, dur / 3), dur);
+    n.connect(fl); fl.connect(g); g.connect(dest);
+    n.start(at, rnd() * 1.5, dur + 0.1);
+  }
+
+  const BEAT = 60 / 104, BAR = BEAT * 4;
+  const midi = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  const CHORDS = [[53, 57, 60, 64], [50, 53, 57, 60], [46, 50, 53, 57], [48, 52, 55, 62]];
+  const ARP = [0, 1, 2, 3, 2, 1, 2, 3];
+  const FIN_MUS = window.__timeline.MUSIQUE_FIN;
+  const plk = ctx.createBiquadFilter(); plk.type = 'lowpass'; plk.frequency.value = 2600; plk.connect(music);
+  const plL = pan(plk, -0.25), plR = pan(plk, 0.25);
+
+  for (let bar = 0; bar * BAR < FIN_MUS; bar++) {
+    const ch = CHORDS[bar % 4], t0 = bar * BAR;
+    [0, 2, 2.5].forEach((bt) => { const at = t0 + bt * BEAT; if (at < FIN_MUS) osc('sine', midi(ch[0] - 12), at, 0.42, 0.22, music); });
+    ARP.forEach((k, i) => {
+      const at = t0 + (i * BEAT) / 2; if (at >= FIN_MUS) return;
+      const f = midi(ch[k] + 12);
+      osc('triangle', f, at, 0.32, 0.075, i % 2 ? plR : plL);
+      osc('sine', f * 2, at, 0.18, 0.02, plk);
+    });
+    [0, 2].forEach((bt) => { const at = t0 + bt * BEAT; if (at < FIN_MUS) osc('sine', 120, at, 0.2, 0.26, music, 45); });
+    for (let i = 0; i < 4; i++) { const at = t0 + (i + 0.5) * BEAT; if (at < FIN_MUS) nz(at, 0.035, 0.03, 'highpass', 7500, 0.7, music); }
+  }
+  [53, 57, 60, 64, 69].forEach((m, i) => osc('triangle', midi(m + 12), FIN_MUS + 0.02 * i, 2.4, 0.06, plk, null, 0.02));
+  osc('sine', midi(41), FIN_MUS, 2.5, 0.24, music);
+
+  music.gain.setValueAtTime(0.0001, 0);
+  music.gain.exponentialRampToValueAtTime(1, 0.5);
+  for (const [a, b] of window.__timeline.VOIX) {
+    music.gain.setValueAtTime(1, Math.max(0.6, a - 0.22));
+    music.gain.linearRampToValueAtTime(0.28, Math.max(0.65, a));
+    music.gain.setValueAtTime(0.28, b + 0.05);
+    music.gain.linearRampToValueAtTime(1, b + 0.38);
+  }
+  music.gain.setValueAtTime(1, DURATION - 1.2);
+  music.gain.linearRampToValueAtTime(0.0001, DURATION - 0.05);
+
+  const NOTE = [72, 74, 76, 79, 81];
+  for (const s of window.__timeline.SFX) {
+    const at = Math.max(0.01, s.t), p = s.pitch || 1;
+    switch (s.type) {
+      case 'pop': osc('sine', 620 * p, at, 0.09, 0.32, fx, 240 * p); nz(at, 0.02, 0.12, 'bandpass', 3800, 1.5, fx); break;
+      case 'tick': osc('sine', 1500 * p, at, 0.05, 0.09, fx, 900 * p); break;
+      case 'drop': nz(at + 0.12, 0.2, 0.32, 'lowpass', 900, 0.8, fx); osc('sine', 130, at + 0.16, 0.32, 0.55, fx, 42); nz(at + 0.17, 0.08, 0.18, 'bandpass', 2200, 1.2, fx); break;
+      case 'type': nz(at, 0.022, 0.12 + rnd() * 0.04, 'bandpass', 2600 + rnd() * 1400, 2.5, fx); osc('square', 180 + rnd() * 40, at, 0.012, 0.025, fx); break;
+      case 'draw': nz(at, s.dur || 0.5, 0.065, 'bandpass', 1400, 1.4, fx, 3400); break;
+      case 'whoosh': nz(at, (s.dur || 0.85) * 0.75, 0.18, 'bandpass', 380, 0.9, fx, 2200); break;
+      case 'zip': nz(at, s.dur || 0.6, 0.11, 'bandpass', 900, 3, fx, 4200); break;
+      case 'swoosh': nz(at, 0.9, 0.28, 'bandpass', 300, 0.8, fx, 3800); break;
+      case 'coin': [2637, 3520, 4186].forEach((f, i) => osc('sine', f * (0.98 + rnd() * 0.04), at + i * 0.004, 0.22 - i * 0.04, 0.05, fx)); break;
+      case 'paper': nz(at, 0.12, 0.09, 'highpass', 2500, 0.7, fx); break;
+      case 'match': osc('sine', 880, at, 0.45, 0.16, fx); osc('sine', 1318.5, at + 0.09, 0.65, 0.14, fx); nz(at, 0.03, 0.2, 'bandpass', 3000, 1.5, fx); break;
+      case 'stamp': osc('sine', 160, at + 0.2, 0.35, 0.7, fx, 40); nz(at + 0.2, 0.12, 0.4, 'lowpass', 1600, 0.7, fx); nz(at + 0.2, 0.05, 0.25, 'bandpass', 3200, 1, fx); break;
+      case 'thud': osc('sine', 110, at, 0.3, 0.45, fx, 38); nz(at, 0.06, 0.2, 'lowpass', 700, 0.7, fx); break;
+      case 'note': osc('triangle', midi(NOTE[s.k % NOTE.length]), at, 0.6, 0.16, fx); osc('sine', midi(NOTE[s.k % NOTE.length] + 12), at, 0.4, 0.05, fx); break;
+      case 'end': [65, 69, 72, 76].forEach((m, i) => osc('sine', midi(m + 12), at + i * 0.05, 1.6, 0.07, fx)); osc('sine', 140, at, 0.4, 0.58, fx, 40); break;
+      default: break;
+    }
+  }
+
+  const buf = await ctx.startRendering();
+  const n = buf.length, ch = [buf.getChannelData(0), buf.getChannelData(1)];
+  const out = new DataView(new ArrayBuffer(44 + n * 4));
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); out.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+  out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true);
+  ws(36, 'data'); out.setUint32(40, n * 4, true);
+  for (let i = 0, o = 44; i < n; i++) for (let c = 0; c < 2; c++, o += 2) out.setInt16(o, Math.max(-1, Math.min(1, ch[c][i])) * 32767, true);
+  const bytes = new Uint8Array(out.buffer);
+  if (typeof window.__pushAudioChunk === 'function') {
+    const CHUNK = 3 * 1024 * 1024;
+    for (let off = 0; off < bytes.length; off += CHUNK) {
+      const slice = bytes.subarray(off, Math.min(bytes.length, off + CHUNK));
+      let cs = '';
+      for (let i = 0; i < slice.length; i += 0x8000) cs += String.fromCharCode.apply(null, slice.subarray(i, i + 0x8000));
+      await window.__pushAudioChunk(btoa(cs));
+    }
+    return 'STREAMED';
+  }
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+seek(0);
+window.__ready = true;
+})().catch((e) => { window.__erreur = String(e && e.stack || e); });
+</script>
+</body>
+</html>

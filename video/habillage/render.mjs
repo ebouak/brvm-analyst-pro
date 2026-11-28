@@ -163,17 +163,27 @@ async function full(seq, sansMusique) {
   console.log(`MP4 → ${final}`);
 }
 
-// Intro + leçon + outro, réencodés ensemble pour le web (bucket limité à 30 Mo).
+// Intro + leçon + outro, réencodés ensemble pour le web (bucket limité à 50 Mo).
 async function assemble(lecon, sortie) {
   const intro = path.join(OUT, 'intro.mp4'), outro = path.join(OUT, 'outro.mp4');
   for (const f of [intro, lecon, outro]) if (!fs.existsSync(f)) throw new Error(`absent : ${f}`);
-  const filtre = '[0:v]fps=60,format=yuv420p[v0];[1:v]fps=60,format=yuv420p[v1];[2:v]fps=60,format=yuv420p[v2];'
+  let durSec = 0;
+  try {
+    const { execFileSync } = await import('node:child_process');
+    durSec = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', lecon]).toString().trim()) || 0;
+  } catch { /* fallback */ }
+  const longFormat = durSec > 300;
+  const outFps = longFormat ? 30 : 60;
+  const crf = longFormat ? '25' : '23';
+  const preset = longFormat ? 'medium' : 'slow';
+  const aBitrate = longFormat ? '128k' : '160k';
+  const filtre = `[0:v]fps=${outFps},format=yuv420p[v0];[1:v]fps=${outFps},format=yuv420p[v1];[2:v]fps=${outFps},format=yuv420p[v2];`
     + '[0:a]aresample=48000,aformat=channel_layouts=stereo[a0];[1:a]aresample=48000,aformat=channel_layouts=stereo[a1];[2:a]aresample=48000,aformat=channel_layouts=stereo[a2];'
     + '[v0][a0][v1][a1][v2][a2]concat=n=3:v=1:a=1[v][a]';
   await ffmpeg(['-i', intro, '-i', lecon, '-i', outro, '-filter_complex', filtre, '-map', '[v]', '-map', '[a]',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '23', '-profile:v', 'high', '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', sortie]).fin;
-  console.log(`assemblé → ${sortie} (${(fs.statSync(sortie).size / 1e6).toFixed(1)} Mo)`);
+    '-c:v', 'libx264', '-preset', preset, '-crf', crf, '-profile:v', 'high', '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac', '-b:a', aBitrate, '-movflags', '+faststart', sortie]).fin;
+  console.log(`assemblé → ${sortie} (${(fs.statSync(sortie).size / 1e6).toFixed(1)} Mo · ${outFps} fps)`);
 }
 
 const [mode, a1, ...rest] = process.argv.slice(2);
