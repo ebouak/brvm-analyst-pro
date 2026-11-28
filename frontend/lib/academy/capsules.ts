@@ -178,9 +178,6 @@ export function formatCours(slug: string): 'parcours' | 'atelier' {
   return slug.startsWith('academy-niveau-') ? 'parcours' : 'atelier';
 }
 
-export function estLeconGratuite(slug: string, lessonIdx: number): boolean {
-  return slug === 'academy-niveau-1-initiation' && lessonIdx === 0;
-}
 
 export function extraireMetadonneesCours(
   lessons: readonly LessonLike[],

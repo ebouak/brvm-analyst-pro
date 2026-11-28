@@ -21,7 +21,8 @@ const DAILY_OPTIONS = [1, 2, 3] as const;
 /**
  * Shell d'apprentissage type Coursera :
  * objectif du jour + modules dépliables à capsules (gauche) · leçon (centre) · outils (droite).
- * Supporte `freeTrial` pour la Leçon 1 du Niveau 1 ouverte à tous.
+ * Supporte `freeTrial` pour une leçon offerte (lib/academy/leconsOffertes.ts) : seule
+ * la leçon `initialLesson` est ouverte, les autres restent verrouillées.
  */
 export default function AcademyShell({
   data,
@@ -29,6 +30,7 @@ export default function AcademyShell({
   videos = [],
   niveau = null,
   freeTrial = false,
+  essaiAvecCompte = false,
   watermark = null,
 }: {
   data: LearnData;
@@ -36,6 +38,8 @@ export default function AcademyShell({
   videos?: number[];
   niveau?: string | null;
   freeTrial?: boolean;
+  /** Leçon offerte aux comptes gratuits (et non à tous). */
+  essaiAvecCompte?: boolean;
   watermark?: string | null;
 }) {
   const lessons = data.content.lessons;
@@ -43,7 +47,10 @@ export default function AcademyShell({
     (i: number) => Math.min(Math.max(0, i), Math.max(0, lessons.length - 1)),
     [lessons.length],
   );
-  const [idx, setIdx] = useState(clamp(initialLesson));
+  const ouverte = clamp(initialLesson);
+  // Lien « débloquer la suite » : la leçon suivante, qui mène à l'aperçu et aux offres.
+  const suite = ouverte + 1 < lessons.length ? ouverte + 2 : 1;
+  const [idx, setIdx] = useState(ouverte);
   const [progress, setProgress] = useState<Record<number, LessonState>>(data.progress);
   const [showTools, setShowTools] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
@@ -89,14 +96,14 @@ export default function AcademyShell({
 
   const goTo = useCallback(
     (i: number) => {
-      if (freeTrial && i > 0) return;
+      if (freeTrial && i !== ouverte) return;
       const n = clamp(i);
       setIdx(n);
       setAutoValidated(false);
       window.history.replaceState(null, '', `?lecon=${n + 1}`);
       window.scrollTo({ top: 0 });
     },
-    [clamp, freeTrial],
+    [clamp, freeTrial, ouverte],
   );
 
   useEffect(() => {
@@ -237,12 +244,14 @@ export default function AcademyShell({
             <ObjectifDuJourCard count={todayCount} target={dailyGoal} onCycleTarget={cycleDailyGoal} />
           ) : (
             <div className="rounded-xl border border-up/35 bg-up/10 p-3.5 text-xs">
-              <p className="font-semibold text-up">Essai libre · Leçon 1 offerte</p>
+              <p className="font-semibold text-up">
+                {essaiAvecCompte ? 'Leçon offerte avec votre compte' : 'Essai libre · Leçon offerte'}
+              </p>
               <p className="mt-1 leading-relaxed text-muted">
-                Manipulez les graphiques réels, le simulateur et le quiz librement.
+                Toute la leçon est ouverte, sans limite de temps.
               </p>
               <Link
-                href={`/formations/academy/${data.slug}?lecon=2`}
+                href={`/formations/academy/${data.slug}?lecon=${suite}`}
                 className="mt-2 inline-block font-semibold text-accent-ink hover:underline"
               >
                 Débloquer les {lessons.length} leçons →
@@ -263,6 +272,7 @@ export default function AcademyShell({
                 goTo={goTo}
                 videos={videos}
                 freeTrial={freeTrial}
+                ouverte={ouverte}
               />
             </div>
           </details>
@@ -275,6 +285,7 @@ export default function AcademyShell({
               goTo={goTo}
               videos={videos}
               freeTrial={freeTrial}
+              ouverte={ouverte}
             />
           </div>
         </aside>
@@ -284,11 +295,13 @@ export default function AcademyShell({
           {freeTrial && (
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/35 bg-accent/[0.06] px-4 py-3 text-xs">
               <span className="text-ivory">
-                <strong className="text-up">Leçon 1 offerte</strong> — accès complet sans abonnement pour tester la
-                méthode WESTBOURSE.
+                <strong className="text-up">
+                  {essaiAvecCompte ? 'Leçon offerte avec votre compte gratuit' : 'Leçon offerte'}
+                </strong>{' '}
+                — accès complet sans abonnement pour tester la méthode WESTBOURSE.
               </span>
               <Link
-                href={`/formations/academy/${data.slug}?lecon=2`}
+                href={`/formations/academy/${data.slug}?lecon=${suite}`}
                 className="font-semibold text-accent-ink hover:underline"
               >
                 Voir les offres du niveau →
@@ -368,10 +381,10 @@ export default function AcademyShell({
 
             {freeTrial ? (
               <Link
-                href={`/formations/academy/${data.slug}?lecon=2`}
+                href={`/formations/academy/${data.slug}?lecon=${suite}`}
                 className="ml-auto rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg transition hover:bg-gold-2"
               >
-                Débloquer la Leçon 2 et la suite →
+                Débloquer la suite du niveau →
               </Link>
             ) : idx + 1 < lessons.length ? (
               <button
@@ -473,6 +486,7 @@ function Sommaire({
   goTo,
   videos,
   freeTrial,
+  ouverte,
 }: {
   slug: string;
   lessons: LearnData['content']['lessons'];
@@ -481,6 +495,8 @@ function Sommaire({
   goTo: (i: number) => void;
   videos: number[];
   freeTrial: boolean;
+  /** Seule leçon ouverte pendant un essai. */
+  ouverte: number;
 }) {
   const maintenant = new Date();
   const hasModules = lessons.some((l) => Boolean(l.module));
@@ -536,7 +552,7 @@ function Sommaire({
                 const badge = badgeNouveaute(l.nouveaute, maintenant);
                 const caps = extraireCapsulesLecon(l as LessonLike, { hasVideo: videos.includes(i + 1) }).slice(0, 3);
                 const current = i === idx;
-                const locked = freeTrial && i > 0;
+                const locked = freeTrial && i !== ouverte;
 
                 const inner = (
                   <>

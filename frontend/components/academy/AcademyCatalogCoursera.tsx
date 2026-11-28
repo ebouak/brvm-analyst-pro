@@ -30,6 +30,7 @@ import {
 } from '@/lib/academy/capsules';
 import { NIVEAUX, NIVEAU_LABEL } from '@/lib/academy/types';
 import { EMPTY_ACTIVITY_SNAPSHOT, evaluerMissions, type ResumeMissions } from '@/lib/academy/missions';
+import { lienOffre, offreDuCours } from '@/lib/academy/leconsOffertes';
 import { Lecon0Carte, SimulateurSgiCarte } from './Lecon0Carte';
 import MissionsPratiques from './MissionsPratiques';
 import QuizPlacement from './QuizPlacement';
@@ -80,6 +81,9 @@ function capsuleStyle(ton: 'up' | 'accent' | 'purple' | 'neutre'): string {
   if (ton === 'purple') return 'bg-purple/15 text-purple border border-purple/25';
   return 'border border-border bg-elevated/60 text-muted';
 }
+
+/** Leçon offerte du Niveau 2 (cas Sonatel), mise en avant dans le bandeau d'essai. */
+const OFFRE_NIVEAU_2 = offreDuCours('academy-niveau-2-fondamental');
 
 export default function AcademyCatalogCoursera({
   courses,
@@ -381,10 +385,11 @@ export default function AcademyCatalogCoursera({
               Essai libre inclus
             </p>
             <h2 className="mt-2 font-display text-xl text-ivory">
-              Découvrez la méthode gratuitement : Vidéo d’ouverture + Leçon 1 complète
+              Découvrez la méthode gratuitement : vidéo d’ouverture, Leçon 1 et un cas réel
             </h2>
             <p className="mt-1 text-sm text-muted">
               Testez un cours complet avec graphiques réels BRVM, simulateur de variation et quiz interactif à 10 questions avant de débloquer les niveaux.
+              Avec un compte gratuit, lisez aussi les vrais comptes 2025 de Sonatel (Niveau 2).
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
@@ -394,6 +399,14 @@ export default function AcademyCatalogCoursera({
             >
               Essayer la Leçon 1 gratuite →
             </Link>
+            {OFFRE_NIVEAU_2 && (
+              <Link
+                href={lienOffre(OFFRE_NIVEAU_2)}
+                className="rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-ivory transition hover:border-accent/40"
+              >
+                Cas Sonatel (Niveau 2)
+              </Link>
+            )}
             <Link
               href="/formations/academy/lecon-0"
               className="rounded-lg border border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-ivory transition hover:border-accent/40"
@@ -841,16 +854,18 @@ function CourseraCourseCard({
   recommended: boolean;
   unlocked: boolean;
 }) {
-  const freeLesson1 = !unlocked && course.slug === 'academy-niveau-1-initiation';
-  const href = `/formations/academy/${course.slug}${
-    unlocked && course.progress.done > 0 ? `?lecon=${course.progress.nextIdx + 1}` : ''
-  }`;
+  const offre = unlocked ? null : offreDuCours(course.slug);
+  const href = offre
+    ? lienOffre(offre)
+    : `/formations/academy/${course.slug}${
+        unlocked && course.progress.done > 0 ? `?lecon=${course.progress.nextIdx + 1}` : ''
+      }`;
   const visuel = course.niveau ? NIVEAU_VISUEL[course.niveau] : null;
   const coverSrc = course.cover ?? DEFAULT_COVER_BY_SLUG[course.slug] ?? null;
   const nivLabel = course.niveau ? NIVEAU_LABEL[course.niveau as keyof typeof NIVEAU_LABEL] ?? course.niveau : 'Parcours';
 
   const capsules: { id: string; label: string; ton: 'up' | 'accent' | 'purple' | 'neutre' }[] = [
-    ...(freeLesson1 ? [{ id: 'free-l1', label: 'Leçon 1 offerte', ton: 'up' as const }] : []),
+    ...(offre ? [{ id: 'offre', label: offre.badge, ton: 'up' as const }] : []),
     ...(recommended ? [{ id: 'rec', label: 'Recommandé pour vous', ton: 'purple' as const }] : []),
     ...course.capsules,
   ].slice(0, 3);
@@ -897,8 +912,8 @@ function CourseraCourseCard({
             </span>
           ) : !unlocked ? (
             <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-border bg-bg/85 px-2.5 py-0.5 text-[11px] font-medium text-ivory backdrop-blur">
-              {freeLesson1 ? (
-                <span className="text-up">Essai libre</span>
+              {offre ? (
+                <span className="text-up">{offre.acces === 'compte' ? 'Offert avec un compte' : 'Essai libre'}</span>
               ) : (
                 <>
                   <Lock size={11} aria-hidden /> Aperçu
@@ -964,8 +979,8 @@ function CourseraCourseCard({
             <div className="mt-2.5 flex items-center justify-between text-xs">
               <span className="font-semibold text-accent-ink">
                 {!unlocked
-                  ? freeLesson1
-                    ? 'Essayer la Leçon 1 gratuite →'
+                  ? offre
+                    ? offre.cta
                     : 'Voir le programme →'
                   : course.progress.pct === 0
                     ? 'Commencer le cours →'
