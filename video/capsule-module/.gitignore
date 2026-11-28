@@ -3,7 +3,5 @@
 # {auteur.*}, résolus depuis auteur.json (voir auteur.mjs).
 auteur.json
 logos/auteur.*
-# Portraits d'intervenants (photo de banque d'images, portrait généré) : personnes
-# identifiables, droits à confirmer avant toute publication dans le dépôt.
-logos/journaliste.*
-logos/presentatrice-studio.*
+# Les portraits des intervenants (logos/journaliste.jpg, logos/presentatrice-studio.png)
+# sont versionnés : droits confirmés par l'exploitant le 2026-11-28.
