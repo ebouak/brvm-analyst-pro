@@ -22,6 +22,10 @@ import { chargerDemosOutils, chargerDecouvrir } from '@/lib/vitrine/outils';
 import { OUTILS, accesOutil, rubriqueOutil, campagnesPub } from '@/lib/vitrine/outilsPur';
 import { CanauxFlottants } from '@/components/vitrine/CanauxFlottants';
 import { AvantPremiereCoris } from '@/components/vitrine/AvantPremiereCoris';
+import { SectionThermometre } from '@/components/vitrine/SectionThermometre';
+import { SectionApprendre } from '@/components/vitrine/SectionApprendre';
+import { chargerThermometre } from '@/lib/vitrine/thermometre';
+import { chargerParcours } from '@/lib/vitrine/apprendre';
 
 /** Fait réel d'une étape de la méthode (null = la donnée manque, l'étape s'affiche sans). */
 interface Fait { libelle: string; valeur: string; detail: string; href?: string; hrefLabel?: string }
@@ -56,7 +60,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const [d, membres, brief, quotaWa, communaute] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), chargerBrief(), quotaWhatsappGratuit(), chargerCommunaute()]);
+  const [d, membres, brief, quotaWa, communaute, thermometre, parcours] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), chargerBrief(), quotaWhatsappGratuit(), chargerCommunaute(), chargerThermometre(), chargerParcours()]);
   const [demos, decouvrir] = await Promise.all([chargerDemosOutils(d), chargerDecouvrir(d)]);
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
@@ -142,6 +146,7 @@ export default async function Landing() {
       <Ouverture o={{ dateLongue: d.dateMarche ? dateLongue(d.dateMarche) : null, enSeance: estEnSeance(new Date()), membres, nbValeurs: d.nbActions || NB_SOCIETES_COTEES }} />
       <AvantPremiereCoris />
       <Indice d={sceneIndice(d.brvmC?.valeur ?? null, d.brvmC?.variation ?? null, d.brvmCSerie)} releve={releveTxt} hausses={d.hausses} stables={d.inchangees} baisses={d.baisses} />
+      <SectionThermometre t={thermometre} />
       <BandeauSeance lignes={motsBandeau(chiffres)} />
       <SectionMosaique cases={cases} releve={releveTxt} />
       <SectionFilm f={film} dateCourte={dateLabel} />
@@ -150,6 +155,7 @@ export default async function Landing() {
       <RailDecouvrir d={decouvrir} />
       <SectionOutils outils={outils} demos={demos} />
       <SectionMethode etapes={etapesMethode} />
+      <SectionApprendre parcours={parcours} />
       <TuilesSeance secteurs={d.secteurs} etat={d.etat} membres={membres} releve={releveTxt} />
       <SectionPublicite campagnes={campagnesPub(d.slides, d.bandeaux)} />
 
