@@ -89,7 +89,10 @@ actuel.
 
 - `lib/vitrine/thermometre.ts` : `chargerThermometre()`, clé publique (`stress_daily_index` est
   lisible anonymement), les 130 dernières séances en une requête ; `null` sur erreur ou table vide.
-  Le texte vient de `construireBulletin` (`reponse`, phrase d'ampleur).
+  Le texte vient de `construireBulletin` (`reponse`) et de `phraseEtendue` : **aucun chiffre de recul**
+  sur la landing, qui ne charge pas la clôture officielle — un recul tiré de `stress_daily_index`
+  peut différer de celui de la page (le 2026-11-27 : 18,63 % sur une clôture provisoire contre
+  18,39 % officiels) et la contredirait.
 - `components/vitrine/SectionThermometre.tsx` (serveur, conventions vitrine : `v-bloc`,
   `v-colonne`, `v-section` + `vitrine-accent`) : « Le marché est-il nerveux ? {réponse} », note du
   jour, jauge, une phrase, courbe SVG, « Séance du {date} » et source, lien « Comprendre la tension du
