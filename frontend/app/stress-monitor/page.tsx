@@ -4,6 +4,9 @@ import { ArrowRight, BookOpen, Download, FileSpreadsheet } from 'lucide-react';
 import { createPublicClient } from '@/lib/supabase/public';
 import { chargerDonneesCrises } from '@/lib/stress/lecture';
 import { chargerStressIndexOverview } from '@/lib/stress/lectureStressIndex';
+import { construireBulletin, DEFINITIONS_COMPOSANTES } from '@/lib/stress/bulletin';
+import { BulletinMarche } from '@/components/stress/BulletinMarche';
+import { InfoTerme } from '@/components/stress/InfoTerme';
 import {
   LIBELLES_COMPOSANTES_STRESS,
   LIBELLES_REGIMES_STRESS,
@@ -42,7 +45,8 @@ export default async function StressMonitorPage() {
   const sb = createPublicClient();
   const [data, stressOverview] = await Promise.all([
     chargerDonneesCrises(sb),
-    chargerStressIndexOverview(sb, 180),
+    // 750 séances ≈ 3 ans : la période « Tout » du graphique, en une requête sous le plafond PostgREST.
+    chargerStressIndexOverview(sb, 750),
   ]);
 
   const brvmc = data.indices_actuels.find((i) => i.code === 'BRVMC') ?? data.indices_actuels[0] ?? null;
@@ -62,6 +66,19 @@ export default async function StressMonitorPage() {
 
   const stressActuel = stressOverview.actuel;
   const obs = stressActuel?.observables_marche ?? null;
+
+  // Textes du haut de page : calculés depuis les données (lib/stress/bulletin.ts), jamais saisis.
+  const bulletin = stressActuel
+    ? construireBulletin({
+        actuel: stressActuel,
+        historique: stressOverview.historique,
+        composite: brvmc ? { drawdownPct: brvmc.drawdown_pct, dateSommet: brvmc.date_sommet } : null,
+        criseProche:
+          enCours && plusSimilaire?.similarite_actuelle != null
+            ? { libelle: plusSimilaire.libelle, ressemblance: plusSimilaire.similarite_actuelle }
+            : null,
+      })
+    : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
@@ -109,6 +126,20 @@ export default async function StressMonitorPage() {
         </div>
       ) : (
         <div className="mt-8 space-y-8">
+          {/* Haut de page (spec 2026-11-28) : bulletin en clair, puis la courbe. */}
+          {bulletin && stressActuel && <BulletinMarche b={bulletin} dateSeance={stressActuel.date_marche} />}
+
+          <div className="rounded-panel border border-border bg-surface p-5">
+            <StressHistoriqueChart historique={stressOverview.historique} dateSommet={brvmc?.date_sommet ?? null} />
+          </div>
+
+          <div className="border-t border-border pt-6">
+            <h2 className="font-display text-xl font-semibold text-ivory">Le détail, pour les initiés</h2>
+            <p className="mt-1 text-xs text-muted">
+              Les mesures complètes, leurs poids et l&apos;historique des épisodes de baisse.
+            </p>
+          </div>
+
           {/* ZONE A — Stress Index 0-100 & décomposition des 6 composantes */}
           <section aria-labelledby="zone-a-titre" className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -198,7 +229,10 @@ export default async function StressMonitorPage() {
                     return (
                       <div key={cle} className="rounded-lg border border-border/70 bg-sunken p-3 text-xs">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium text-ivory">{LIBELLES_COMPOSANTES_STRESS[cle]}</span>
+                          <span className="inline-flex items-center gap-1.5 font-medium text-ivory">
+                            {LIBELLES_COMPOSANTES_STRESS[cle]}
+                            <InfoTerme terme={LIBELLES_COMPOSANTES_STRESS[cle]} definition={DEFINITIONS_COMPOSANTES[cle]} />
+                          </span>
                           <span className="tabular text-faint">
                             poids {fmtNumber((c?.poids_effectif ?? c?.poids_nominal ?? 0) * 100, 0)} %
                           </span>
@@ -231,17 +265,13 @@ export default async function StressMonitorPage() {
             )}
           </section>
 
-          {/* ZONE B — Courbe historique 0-100 & Comparaison à l'épisode historique le plus proche */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="rounded-panel border border-border bg-surface p-5 lg:col-span-2">
-              <StressHistoriqueChart historique={stressOverview.historique} />
-            </div>
-
+          {/* ZONE B — Épisode en cours et crise historique la plus proche (la courbe est montée en tête). */}
+          <div>
             <PremiumPanel className="p-5 flex flex-col justify-between">
               <div>
                 <h2 className="text-base font-semibold text-ivory">Épisode en cours (seuil −10 %)</h2>
                 {enCours ? (
-                  <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                  <dl className="mt-4 grid grid-cols-2 gap-3 text-xs lg:grid-cols-4">
                     <div>
                       <dt className="text-faint">Sommet de référence</dt>
                       <dd className="tabular mt-0.5 font-semibold text-ivory">
